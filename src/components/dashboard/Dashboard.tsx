@@ -5,6 +5,7 @@ import MoodGauge from './MoodGauge';
 import PanasChart from './PanasChart';
 import EmotionWheel from './EmotionWheel';
 import InsightsPanel from './InsightsPanel';
+import DailyMoodChart from './DailyMoodChart';
 import { useStore } from '../../store/useStore';
 
 const Dashboard: React.FC = () => {
@@ -15,7 +16,7 @@ const Dashboard: React.FC = () => {
       <div className="space-y-6">
         <div className="h-16 bg-white/50 rounded-2xl animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="h-80 bg-white/50 rounded-2xl animate-pulse" />
           ))}
         </div>
@@ -68,6 +69,15 @@ const Dashboard: React.FC = () => {
           transition={{ delay: 0.4 }}
         >
           <InsightsPanel />
+        </motion.div>
+
+        {/* Daily Mood Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <DailyMoodChart />
         </motion.div>
       </div>
     </motion.div>

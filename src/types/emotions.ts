@@ -18,12 +18,20 @@ export interface Insight {
   icone: string;
 }
 
+export interface DailyMoodMetric {
+  dia: string;
+  humorMedio: number;
+  emocaoPredominante: string;
+  intensidade: number; // escala 0-10
+}
+
 export interface DashboardData {
   humor_medio: number;
   variacao_anterior: number;
   distribuicao_panas: PANASDistribution;
   emocoes_primarias: Record<string, EmotionData>;
   insights: Insight[];
+  humor_diario: DailyMoodMetric[];
 }
 
 export interface StoreState {

@@ -2,7 +2,7 @@ import type { DashboardData } from '../types/emotions';
 
 export const mockData: Record<string, DashboardData> = {
   semana: {
-    humor_medio: 2.3,
+    humor_medio: 4.5,
     variacao_anterior: 0.8,
     distribuicao_panas: {
       positivas: 65,
@@ -38,6 +38,15 @@ export const mockData: Record<string, DashboardData> = {
         descricao: 'Momentos de medo podem ser trabalhados com técnicas de respiração.',
         icone: '🎯'
       }
+    ],
+    humor_diario: [
+      { dia: '01', humorMedio: 2, emocaoPredominante: 'Alegria', intensidade: 7 },
+      { dia: '02', humorMedio: -1, emocaoPredominante: 'Ansiedade', intensidade: 4 },
+      { dia: '03', humorMedio: 3, emocaoPredominante: 'Entusiasmo', intensidade: 8 },
+      { dia: '04', humorMedio: 0, emocaoPredominante: 'Neutro', intensidade: 2 },
+      { dia: '05', humorMedio: -2, emocaoPredominante: 'Raiva', intensidade: 5 },
+      { dia: '06', humorMedio: 1, emocaoPredominante: 'Serenidade', intensidade: 5 },
+      { dia: '07', humorMedio: 4, emocaoPredominante: 'Orgulho', intensidade: 8 }
     ]
   },
   mes: {
@@ -77,6 +86,15 @@ export const mockData: Record<string, DashboardData> = {
         descricao: 'Tente incluir mais atividades que geram alegria no seu dia.',
         icone: '🌟'
       }
+    ],
+    humor_diario: [
+      { dia: '01', humorMedio: 1, emocaoPredominante: 'Alegria', intensidade: 6 },
+      { dia: '02', humorMedio: -2, emocaoPredominante: 'Stress', intensidade: 5 },
+      { dia: '03', humorMedio: 0, emocaoPredominante: 'Neutro', intensidade: 3 },
+      { dia: '04', humorMedio: 2, emocaoPredominante: 'Esperança', intensidade: 7 },
+      { dia: '05', humorMedio: -1, emocaoPredominante: 'Cansaço', intensidade: 4 },
+      { dia: '06', humorMedio: 3, emocaoPredominante: 'Motivação', intensidade: 8 },
+      { dia: '07', humorMedio: 2, emocaoPredominante: 'Gratidão', intensidade: 6 }
     ]
   },
   trimestre: {
@@ -116,6 +134,15 @@ export const mockData: Record<string, DashboardData> = {
         descricao: 'Que tal definir uma nova meta para o próximo trimestre?',
         icone: '🚀'
       }
+    ],
+    humor_diario: [
+      { dia: '01', humorMedio: 0, emocaoPredominante: 'Neutro', intensidade: 3 },
+      { dia: '02', humorMedio: 2, emocaoPredominante: 'Confiança', intensidade: 6 },
+      { dia: '03', humorMedio: -1, emocaoPredominante: 'Ansiedade', intensidade: 4 },
+      { dia: '04', humorMedio: 1, emocaoPredominante: 'Serenidade', intensidade: 5 },
+      { dia: '05', humorMedio: 3, emocaoPredominante: 'Entusiasmo', intensidade: 7 },
+      { dia: '06', humorMedio: -2, emocaoPredominante: 'Cansaço', intensidade: 5 },
+      { dia: '07', humorMedio: 2, emocaoPredominante: 'Orgulho', intensidade: 6 }
     ]
   }
 };

@@ -11,7 +11,8 @@ const initialDashboardData: DashboardData = {
     neutras: 0
   },
   emocoes_primarias: {},
-  insights: []
+  insights: [],
+  humor_diario: []
 };
 
 const getDashboardData = (period: PeriodType): DashboardData => {
