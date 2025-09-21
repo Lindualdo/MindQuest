@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, BarChart3, TrendingUp } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PeriodType } from '../../types/emotions';
+import type { PeriodType } from '../../types/emotions';
 import Card from '../ui/Card';
 
 const PeriodSelector: React.FC = () => {

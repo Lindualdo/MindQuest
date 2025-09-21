@@ -1,4 +1,4 @@
-import { DashboardData } from '../types/emotions';
+import type { DashboardData } from '../types/emotions';
 
 export const mockData: Record<string, DashboardData> = {
   semana: {

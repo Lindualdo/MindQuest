@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { StoreState, PeriodType, DashboardData } from '../types/emotions';
+import type { StoreState, PeriodType, DashboardData } from '../types/emotions';
 import { mockData } from '../data/mockData';
 
 const initialDashboardData: DashboardData = {
@@ -14,10 +14,14 @@ const initialDashboardData: DashboardData = {
   insights: []
 };
 
+const getDashboardData = (period: PeriodType): DashboardData => {
+  return mockData?.[period] ?? initialDashboardData;
+};
+
 export const useStore = create<StoreState>((set) => ({
   isLoading: false,
   currentPeriod: 'semana',
-  dashboardData: mockData.semana,
+  dashboardData: getDashboardData('semana'),
 
   setPeriod: (period: PeriodType) => {
     set({ currentPeriod: period });
@@ -29,7 +33,7 @@ export const useStore = create<StoreState>((set) => ({
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const data = mockData[period] || initialDashboardData;
+    const data = getDashboardData(period);
     set({
       dashboardData: data,
       isLoading: false
