@@ -1,157 +1,174 @@
+/**
+ * ARQUIVO: src/components/dashboard/MoodGauge.tsx
+ * AÇÃO: SUBSTITUIR o arquivo existente
+ * 
+ * MoodGauge baseado na Especificação v1.1
+ * Gauge central (-5 a +5) com indicação de tendência semanal
+ */
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
-const GAUGE_SIZE = 220;
-const GAUGE_HEIGHT = 140;
+const GAUGE_SIZE = 240;
 const GAUGE_RADIUS = 90;
-const GAUGE_STROKE = 18;
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const GAUGE_STROKE = 14;
 
 const MoodGauge: React.FC = () => {
   const { dashboardData } = useStore();
-  const { humor_medio, variacao_anterior } = dashboardData;
+  const { mood_gauge } = dashboardData;
 
-  const gradientId = React.useId();
-  const normalized = clamp((humor_medio + 5) / 10, 0, 1);
+  // Normalizar valor de -5 a +5 para 0 a 1
+  const normalized = (mood_gauge.nivel_atual + 5) / 10;
   const circumference = Math.PI * GAUGE_RADIUS;
   const strokeDasharray = `${circumference} ${circumference}`;
   const strokeDashoffset = circumference - normalized * circumference;
+  
+  // Rotação da agulha (-90° a +90°)
   const pointerRotation = normalized * 180 - 90;
-  const deltaIsPositive = variacao_anterior >= 0;
-  const TrendIcon = deltaIsPositive ? TrendingUp : TrendingDown;
+  
+  // Determinar cor baseada no nível
+  const getGaugeColor = (nivel: number) => {
+    if (nivel >= 3) return '#10B981'; // Verde
+    if (nivel >= 1) return '#F59E0B'; // Amarelo
+    if (nivel >= -1) return '#6B7280'; // Cinza
+    if (nivel >= -3) return '#F97316'; // Laranja
+    return '#EF4444'; // Vermelho
+  };
 
-  const moodInfo = React.useMemo(() => {
-    if (humor_medio >= 3) {
-      return {
-        level: 'Excelente',
-        badgeBg: 'rgba(34,197,94,0.12)',
-        badgeColor: 'rgba(22,163,74,1)',
-      };
-    }
-    if (humor_medio >= 1) {
-      return {
-        level: 'Bom',
-        badgeBg: 'rgba(16,185,129,0.14)',
-        badgeColor: 'rgba(5,150,105,1)',
-      };
-    }
-    if (humor_medio >= -1) {
-      return {
-        level: 'Neutro',
-        badgeBg: 'rgba(234,179,8,0.12)',
-        badgeColor: 'rgba(202,138,4,1)',
-      };
-    }
-    if (humor_medio >= -3) {
-      return {
-        level: 'Baixo',
-        badgeBg: 'rgba(249,115,22,0.12)',
-        badgeColor: 'rgba(234,88,12,1)',
-      };
-    }
-    return {
-      level: 'Crítico',
-      badgeBg: 'rgba(248,113,113,0.14)',
-      badgeColor: 'rgba(220,38,38,1)',
-    };
-  }, [humor_medio]);
+  const gaugeColor = getGaugeColor(mood_gauge.nivel_atual);
+  
+  // Componente da tendência
+  const TrendIcon = mood_gauge.tendencia_semanal > 0 ? TrendingUp : 
+                   mood_gauge.tendencia_semanal < 0 ? TrendingDown : Minus;
+  
+  const trendColor = mood_gauge.tendencia_semanal > 0 ? 'text-green-600' : 
+                    mood_gauge.tendencia_semanal < 0 ? 'text-red-600' : 'text-gray-500';
 
   return (
-    <Card className="relative overflow-hidden text-center">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/90 via-white to-blue-50/40" />
-
-      <div className="relative flex flex-col items-center gap-6">
-        <h3 className="text-xl font-semibold text-gray-800">Nível de Humor</h3>
-
-        <div
-          className="relative"
-          style={{ width: GAUGE_SIZE, height: GAUGE_HEIGHT }}
-        >
-          <svg
-            className="absolute inset-0"
-            viewBox={`0 0 ${GAUGE_SIZE} ${GAUGE_HEIGHT}`}
-            fill="none"
-          >
-            <defs>
-              <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ef4444" />
-                <stop offset="30%" stopColor="#f97316" />
-                <stop offset="55%" stopColor="#eab308" />
-                <stop offset="80%" stopColor="#22c55e" />
-                <stop offset="100%" stopColor="#10b981" />
-              </linearGradient>
-            </defs>
-
-            <path
-              d={`M ${GAUGE_SIZE / 2 - GAUGE_RADIUS} ${GAUGE_RADIUS + 20} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE / 2 + GAUGE_RADIUS} ${GAUGE_RADIUS + 20}`}
-              stroke="#e5e7eb"
-              strokeWidth={GAUGE_STROKE}
-              strokeLinecap="round"
-            />
-
-            <motion.path
-              d={`M ${GAUGE_SIZE / 2 - GAUGE_RADIUS} ${GAUGE_RADIUS + 20} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE / 2 + GAUGE_RADIUS} ${GAUGE_RADIUS + 20}`}
-              stroke={`url(#${gradientId})`}
-              strokeWidth={GAUGE_STROKE}
-              strokeLinecap="round"
-              strokeDasharray={strokeDasharray}
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset }}
-              transition={{ duration: 1.6, ease: 'easeOut' }}
-            />
-          </svg>
-
-          <div className="absolute inset-0 flex items-end justify-center pb-6">
-            <motion.div
-              className="w-1.5 rounded-full bg-slate-600 shadow-sm"
-              style={{ height: GAUGE_RADIUS - 18, transformOrigin: 'bottom center' }}
-              initial={{ rotate: -90 }}
-              animate={{ rotate: pointerRotation }}
-              transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-            />
-          </div>
-
-          <div className="absolute inset-x-8 bottom-2 flex justify-between text-xs font-medium text-gray-400">
-            <span>-5</span>
-            <span>0</span>
-            <span>+5</span>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.4 }}
-          className="space-y-3"
-        >
-          <div className="text-4xl font-bold text-gray-900">
-            {humor_medio > 0 ? '+' : ''}{humor_medio.toFixed(1)}
-          </div>
-
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold shadow-sm"
-            style={{ backgroundColor: moodInfo.badgeBg, color: moodInfo.badgeColor }}
-          >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: moodInfo.badgeColor }}
-            />
-            Level: {moodInfo.level}
-          </div>
-        </motion.div>
-
-        <div className="flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-gray-600 shadow-inner">
-          <TrendIcon className={deltaIsPositive ? 'text-emerald-500' : 'text-rose-500'} size={18} />
-          <span className={deltaIsPositive ? 'text-emerald-600' : 'text-rose-600'}>
-            {deltaIsPositive ? '+' : ''}{variacao_anterior.toFixed(1)} XP
-          </span>
-          <span className="text-gray-500">vs período anterior</span>
-        </div>
+    <Card className="text-center">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">MoodGauge</h3>
+        <div className="text-2xl">{mood_gauge.emoji_atual}</div>
       </div>
+
+      {/* Gauge SVG */}
+      <div className="relative flex justify-center items-center mb-6">
+        <svg width={GAUGE_SIZE} height={GAUGE_SIZE * 0.6} className="overflow-visible">
+          {/* Background arc */}
+          <path
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            fill="none"
+            stroke="#E5E7EB"
+            strokeWidth={GAUGE_STROKE}
+            strokeLinecap="round"
+          />
+          
+          {/* Progress arc */}
+          <motion.path
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            fill="none"
+            stroke={gaugeColor}
+            strokeWidth={GAUGE_STROKE}
+            strokeLinecap="round"
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset={strokeDashoffset}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+          />
+          
+          {/* Pointer */}
+          <motion.g
+            initial={{ rotate: -90 }}
+            animate={{ rotate: pointerRotation }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            style={{ transformOrigin: `${GAUGE_SIZE/2}px ${GAUGE_SIZE/2}px` }}
+          >
+            <circle
+              cx={GAUGE_SIZE/2}
+              cy={GAUGE_SIZE/2}
+              r={8}
+              fill={gaugeColor}
+              className="drop-shadow-sm"
+            />
+            <line
+              x1={GAUGE_SIZE/2}
+              y1={GAUGE_SIZE/2}
+              x2={GAUGE_SIZE/2}
+              y2={GAUGE_SIZE/2 - GAUGE_RADIUS + 15}
+              stroke={gaugeColor}
+              strokeWidth={4}
+              strokeLinecap="round"
+              className="drop-shadow-sm"
+            />
+          </motion.g>
+          
+          {/* Scale markers */}
+          {[-5, -2.5, 0, 2.5, 5].map((value, index) => {
+            const angle = (value + 5) / 10 * 180 - 90;
+            const radian = (angle * Math.PI) / 180;
+            const x1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 25) * Math.cos(radian);
+            const y1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 25) * Math.sin(radian);
+            const x2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.cos(radian);
+            const y2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.sin(radian);
+            
+            return (
+              <g key={index}>
+                <line
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke="#6B7280"
+                  strokeWidth={2}
+                />
+                <text
+                  x={GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.cos(radian)}
+                  y={GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.sin(radian)}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  className="text-xs fill-gray-600 font-medium"
+                >
+                  {value > 0 ? `+${value}` : value}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Valor atual */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="mb-4"
+      >
+        <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
+          {mood_gauge.nivel_atual > 0 ? '+' : ''}{mood_gauge.nivel_atual.toFixed(1)}
+        </div>
+        <div className="text-sm text-gray-600 mt-1">Nível atual</div>
+      </motion.div>
+
+      {/* Tendência semanal */}
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl"
+      >
+        <TrendIcon className={`${trendColor}`} size={20} />
+        <div className="text-sm">
+          <span className="font-medium text-gray-700">Tendência:</span>
+          <span className={`ml-1 font-semibold ${trendColor}`}>
+            {mood_gauge.tendencia_semanal > 0 ? '+' : ''}
+            {mood_gauge.tendencia_semanal.toFixed(1)} esta semana
+          </span>
+        </div>
+      </motion.div>
     </Card>
   );
 };
