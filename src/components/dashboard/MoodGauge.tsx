@@ -19,9 +19,11 @@ const GAUGE_STROKE = 16;
 const MoodGauge: React.FC = () => {
   const { dashboardData } = useStore();
   const { mood_gauge } = dashboardData;
+  const gradientId = React.useId();
 
-  // Normalizar valor de -5 a +5 para 0 a 1
-  const normalized = (mood_gauge.nivel_atual + 5) / 10;
+  // Normalizar valor de -5 a +5 para 0 a 1 e evitar extrapolações na escala
+  const clampedNivel = Math.max(-5, Math.min(5, mood_gauge.nivel_atual));
+  const normalized = (clampedNivel + 5) / 10;
   const circumference = Math.PI * GAUGE_RADIUS;
   const strokeDasharray = `${circumference} ${circumference}`;
   const strokeDashoffset = circumference - normalized * circumference;
@@ -38,7 +40,7 @@ const MoodGauge: React.FC = () => {
     return '#EF4444'; // Vermelho
   };
 
-  const gaugeColor = getGaugeColor(mood_gauge.nivel_atual);
+  const gaugeColor = getGaugeColor(clampedNivel);
   
   // Componente da tendência
   const TrendIcon = mood_gauge.tendencia_semanal > 0 ? TrendingUp : 
@@ -59,7 +61,7 @@ const MoodGauge: React.FC = () => {
         <svg width={GAUGE_SIZE} height={GAUGE_SIZE * 0.6} className="overflow-visible">
           {/* Background arc - semicírculo completo */}
           <path
-            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 0 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
             stroke="#E5E7EB"
             strokeWidth={GAUGE_STROKE}
@@ -68,16 +70,16 @@ const MoodGauge: React.FC = () => {
           
           {/* Progress arc com gradiente */}
           <defs>
-            <linearGradient id={`gaugeGradient-${mood_gauge.nivel_atual}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={mood_gauge.nivel_atual < 0 ? "#EF4444" : "#10B981"} />
+            <linearGradient id={`mood-gauge-gradient-${gradientId}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={clampedNivel < 0 ? "#EF4444" : "#10B981"} />
               <stop offset="100%" stopColor={gaugeColor} />
             </linearGradient>
           </defs>
           
           <motion.path
-            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 0 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
-            stroke={`url(#gaugeGradient-${mood_gauge.nivel_atual})`}
+            stroke={`url(#mood-gauge-gradient-${gradientId})`}
             strokeWidth={GAUGE_STROKE}
             strokeLinecap="round"
             strokeDasharray={strokeDasharray}
@@ -130,7 +132,7 @@ const MoodGauge: React.FC = () => {
           {/* Scale markers - ajustado para melhor distribuição */}
           {[-5, -2.5, 0, 2.5, 5].map((value, index) => {
             const angle = (value + 5) / 10 * 180 - 90;
-            const radian = (angle * Math.PI) / 180;
+            const radian = ((angle - 90) * Math.PI) / 180;
             
             // Ajustar posições para melhor visualização
             const markerRadius = GAUGE_RADIUS - 15;
@@ -172,7 +174,7 @@ const MoodGauge: React.FC = () => {
                       const subValue = value + offset;
                       if (subValue >= -5 && subValue <= 5 && subValue !== 0 && subValue !== 2.5 && subValue !== -2.5) {
                         const subAngle = (subValue + 5) / 10 * 180 - 90;
-                        const subRadian = (subAngle * Math.PI) / 180;
+                        const subRadian = ((subAngle - 90) * Math.PI) / 180;
                         const subX1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.cos(subRadian);
                         const subY1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.sin(subRadian);
                         const subX2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.cos(subRadian);
@@ -208,7 +210,7 @@ const MoodGauge: React.FC = () => {
         className="mb-4"
       >
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
-          {mood_gauge.nivel_atual > 0 ? '+' : ''}{mood_gauge.nivel_atual.toFixed(1)}
+          {clampedNivel > 0 ? '+' : ''}{clampedNivel.toFixed(1)}
         </div>
         <div className="text-sm text-gray-600 mt-1">Nível atual</div>
       </motion.div>
