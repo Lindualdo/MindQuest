@@ -6,7 +6,16 @@
  * Inclui perfis Big Five, check-ins personalizados e sistema de gamificação
  */
 
-import { DashboardData, PlutchikEmotion, CheckinDiario, DistribuicaoPanas, Gamificacao, Insight, AlertaPreventivo, PerfilDetectado } from '../types/emotions';
+import type {
+  DashboardData,
+  PlutchikEmotion,
+  CheckinDiario,
+  DistribuicaoPanas,
+  Gamificacao,
+  Insight,
+  AlertaPreventivo,
+  PerfilDetectado
+} from '../types/emotions';
 
 // Emoções de Plutchik - 8 primárias
 const rodaEmocoesPadrao: PlutchikEmotion[] = [

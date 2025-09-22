@@ -7,7 +7,7 @@
  */
 
 import { create } from 'zustand';
-import { StoreState, DashboardData } from '../types/emotions';
+import type { StoreState, DashboardData } from '../types/emotions';
 import { mockDashboardData } from '../data/mockData';
 
 const useStore = create<StoreState>((set, get) => ({
