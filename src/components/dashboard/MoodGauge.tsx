@@ -61,7 +61,7 @@ const MoodGauge: React.FC = () => {
         <svg width={GAUGE_SIZE} height={GAUGE_SIZE * 0.6} className="overflow-visible">
           {/* Background arc - semicírculo completo */}
           <path
-            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 0 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
             stroke="#E5E7EB"
             strokeWidth={GAUGE_STROKE}
@@ -77,7 +77,7 @@ const MoodGauge: React.FC = () => {
           </defs>
           
           <motion.path
-            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 0 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
+            d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
             stroke={`url(#mood-gauge-gradient-${gradientId})`}
             strokeWidth={GAUGE_STROKE}
