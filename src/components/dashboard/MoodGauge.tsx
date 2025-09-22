@@ -12,9 +12,9 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
-const GAUGE_SIZE = 240;
-const GAUGE_RADIUS = 90;
-const GAUGE_STROKE = 14;
+const GAUGE_SIZE = 280;
+const GAUGE_RADIUS = 100;
+const GAUGE_STROKE = 16;
 
 const MoodGauge: React.FC = () => {
   const { dashboardData } = useStore();
@@ -57,7 +57,7 @@ const MoodGauge: React.FC = () => {
       {/* Gauge SVG */}
       <div className="relative flex justify-center items-center mb-6">
         <svg width={GAUGE_SIZE} height={GAUGE_SIZE * 0.6} className="overflow-visible">
-          {/* Background arc */}
+          {/* Background arc - semicírculo completo */}
           <path
             d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
@@ -66,74 +66,134 @@ const MoodGauge: React.FC = () => {
             strokeLinecap="round"
           />
           
-          {/* Progress arc */}
+          {/* Progress arc com gradiente */}
+          <defs>
+            <linearGradient id={`gaugeGradient-${mood_gauge.nivel_atual}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={mood_gauge.nivel_atual < 0 ? "#EF4444" : "#10B981"} />
+              <stop offset="100%" stopColor={gaugeColor} />
+            </linearGradient>
+          </defs>
+          
           <motion.path
             d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
-            stroke={gaugeColor}
+            stroke={`url(#gaugeGradient-${mood_gauge.nivel_atual})`}
             strokeWidth={GAUGE_STROKE}
             strokeLinecap="round"
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            transition={{ duration: 2, ease: "easeOut" }}
           />
           
-          {/* Pointer */}
+          {/* Pointer melhorado */}
           <motion.g
             initial={{ rotate: -90 }}
             animate={{ rotate: pointerRotation }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            transition={{ duration: 2, ease: "easeOut" }}
             style={{ transformOrigin: `${GAUGE_SIZE/2}px ${GAUGE_SIZE/2}px` }}
           >
+            {/* Base do pointer */}
             <circle
               cx={GAUGE_SIZE/2}
               cy={GAUGE_SIZE/2}
-              r={8}
-              fill={gaugeColor}
-              className="drop-shadow-sm"
+              r={10}
+              fill="white"
+              stroke={gaugeColor}
+              strokeWidth={3}
+              className="drop-shadow-md"
             />
+            
+            {/* Linha do pointer */}
             <line
               x1={GAUGE_SIZE/2}
               y1={GAUGE_SIZE/2}
               x2={GAUGE_SIZE/2}
-              y2={GAUGE_SIZE/2 - GAUGE_RADIUS + 15}
+              y2={GAUGE_SIZE/2 - GAUGE_RADIUS + 20}
               stroke={gaugeColor}
               strokeWidth={4}
               strokeLinecap="round"
               className="drop-shadow-sm"
             />
+            
+            {/* Ponta do pointer */}
+            <circle
+              cx={GAUGE_SIZE/2}
+              cy={GAUGE_SIZE/2 - GAUGE_RADIUS + 20}
+              r={4}
+              fill={gaugeColor}
+              className="drop-shadow-sm"
+            />
           </motion.g>
           
-          {/* Scale markers */}
+          {/* Scale markers - ajustado para melhor distribuição */}
           {[-5, -2.5, 0, 2.5, 5].map((value, index) => {
             const angle = (value + 5) / 10 * 180 - 90;
             const radian = (angle * Math.PI) / 180;
-            const x1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 25) * Math.cos(radian);
-            const y1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 25) * Math.sin(radian);
-            const x2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.cos(radian);
-            const y2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.sin(radian);
+            
+            // Ajustar posições para melhor visualização
+            const markerRadius = GAUGE_RADIUS - 15;
+            const labelRadius = GAUGE_RADIUS - 30;
+            
+            const x1 = GAUGE_SIZE/2 + markerRadius * Math.cos(radian);
+            const y1 = GAUGE_SIZE/2 + markerRadius * Math.sin(radian);
+            const x2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.cos(radian);
+            const y2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.sin(radian);
             
             return (
               <g key={index}>
+                {/* Marcador */}
                 <line
                   x1={x1}
                   y1={y1}
                   x2={x2}
                   y2={y2}
                   stroke="#6B7280"
-                  strokeWidth={2}
+                  strokeWidth={value === 0 ? 3 : 2}
+                  strokeLinecap="round"
                 />
+                
+                {/* Label do valor */}
                 <text
-                  x={GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.cos(radian)}
-                  y={GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.sin(radian)}
+                  x={GAUGE_SIZE/2 + labelRadius * Math.cos(radian)}
+                  y={GAUGE_SIZE/2 + labelRadius * Math.sin(radian)}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="text-xs fill-gray-600 font-medium"
+                  className={`text-xs font-medium ${value === 0 ? 'fill-gray-800' : 'fill-gray-600'}`}
                 >
                   {value > 0 ? `+${value}` : value}
                 </text>
+                
+                {/* Marcadores menores entre os principais */}
+                {value < 5 && (
+                  <g>
+                    {[-1.25, 1.25].map((offset) => {
+                      const subValue = value + offset;
+                      if (subValue >= -5 && subValue <= 5 && subValue !== 0 && subValue !== 2.5 && subValue !== -2.5) {
+                        const subAngle = (subValue + 5) / 10 * 180 - 90;
+                        const subRadian = (subAngle * Math.PI) / 180;
+                        const subX1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.cos(subRadian);
+                        const subY1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.sin(subRadian);
+                        const subX2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.cos(subRadian);
+                        const subY2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.sin(subRadian);
+                        
+                        return (
+                          <line
+                            key={offset}
+                            x1={subX1}
+                            y1={subY1}
+                            x2={subX2}
+                            y2={subY2}
+                            stroke="#9CA3AF"
+                            strokeWidth={1}
+                          />
+                        );
+                      }
+                      return null;
+                    })}
+                  </g>
+                )}
               </g>
             );
           })}
