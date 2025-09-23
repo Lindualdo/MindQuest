@@ -302,8 +302,8 @@ const alertasBackground: AlertaPreventivo[] = [
 // Dashboard Data completo para v1.1
 export const mockDashboardData: DashboardData = {
   usuario: {
-    nome: 'Sofia',
-    nome_preferencia: 'Sofi',
+    nome: 'Lindualdo',
+    nome_preferencia: 'Aldo',
     cronotipo_detectado: 'matutino',
     perfil_detectado: perfilDetectado
   },
