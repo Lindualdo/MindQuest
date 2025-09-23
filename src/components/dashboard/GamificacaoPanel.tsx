@@ -65,113 +65,119 @@ const GamificacaoPanel: React.FC = () => {
         <h3 className="text-xl font-semibold text-gray-800">Gamificação</h3>
       </div>
 
-      {/* XP e Nível */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Star className="text-purple-600" size={20} />
-            <span className="font-semibold text-gray-800">Nível {gamificacao.nivel_atual}</span>
-          </div>
-          <div className="text-sm text-gray-600">
-            {gamificacao.xp_total} XP
-          </div>
-        </div>
-        
-        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(progressoNivel, 100)}%` }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          />
-        </div>
-        
-        <div className="text-xs text-gray-500 mt-1 text-center">
-          {xpParaProximoNivel} XP para o próximo nível
-        </div>
-      </div>
-
-      {/* Streak */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl mb-6"
-      >
-        <Flame className="text-orange-600" size={24} />
-        <div className="text-center">
-          <div className="text-2xl font-bold text-orange-600">
-            {gamificacao.streak_checkins_dias}
-          </div>
-          <div className="text-sm text-gray-600">conversas seguidas</div>
-        </div>
-      </motion.div>
-
-      {/* Quest Diária */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-xl">
-        <div className="flex items-center gap-2 mb-3">
-          <Target className="text-blue-600" size={20} />
-          <span className="font-semibold text-gray-800">Quest Diária</span>
-          <div className={`w-3 h-3 rounded-full ${getQuestStatusColor(gamificacao.quest_diaria_status)}`} />
-        </div>
-        
-        <div className="text-sm text-gray-700 mb-3">
-          {gamificacao.quest_diaria_descricao}
-        </div>
-        
-        <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-          <motion.div
-            className="h-full bg-blue-600 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${gamificacao.quest_diaria_progresso}%` }}
-            transition={{ duration: 1, delay: 0.5 }}
-          />
-        </div>
-        
-        <div className="text-xs text-blue-600 mt-2 text-center">
-          {gamificacao.quest_diaria_progresso}% completa
-        </div>
-      </div>
-
-      {/* Conquistas */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Award className="text-yellow-600" size={20} />
-          <span className="font-semibold text-gray-800">Conquistas Recentes</span>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3">
-          {gamificacao.conquistas_desbloqueadas.slice(-4).map((conquistaId, index) => {
-            const conquista = conquistasMap[conquistaId];
-            if (!conquista) return null;
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-6">
+          {/* XP e Nível */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Star className="text-purple-600" size={20} />
+                <span className="font-semibold text-gray-800">Nível {gamificacao.nivel_atual}</span>
+              </div>
+              <div className="text-sm text-gray-600">
+                {gamificacao.xp_total} XP
+              </div>
+            </div>
             
-            return (
+            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
               <motion.div
-                key={conquistaId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 + 0.8 }}
-                className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors cursor-pointer"
-              >
-                <div className="text-center">
-                  <div className="text-xl mb-1">{conquista.icon}</div>
-                  <div className="text-xs font-semibold text-gray-800 mb-1">
-                    {conquista.nome}
-                  </div>
-                  <div className="text-xs text-gray-600 leading-tight">
-                    {conquista.descricao}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(progressoNivel, 100)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              />
+            </div>
+            
+            <div className="text-xs text-gray-500 mt-1 text-center">
+              {xpParaProximoNivel} XP para o próximo nível
+            </div>
+          </div>
+
+          {/* Quest Diária */}
+          <div className="p-4 bg-blue-50 rounded-xl">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="text-blue-600" size={20} />
+              <span className="font-semibold text-gray-800">Quest Diária</span>
+              <div className={`w-3 h-3 rounded-full ${getQuestStatusColor(gamificacao.quest_diaria_status)}`} />
+            </div>
+            
+            <div className="text-sm text-gray-700 mb-3">
+              {gamificacao.quest_diaria_descricao}
+            </div>
+            
+            <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="h-full bg-blue-600 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${gamificacao.quest_diaria_progresso}%` }}
+                transition={{ duration: 1, delay: 0.5 }}
+              />
+            </div>
+            
+            <div className="text-xs text-blue-600 mt-2 text-center">
+              {gamificacao.quest_diaria_progresso}% completa
+            </div>
+          </div>
         </div>
-        
-        {/* Contador total de conquistas */}
-        <div className="text-center mt-4 p-2 bg-gray-50 rounded-lg">
-          <span className="text-sm text-gray-600">
-            <strong>{gamificacao.conquistas_desbloqueadas.length}</strong> conquistas desbloqueadas
-          </span>
+
+        <div className="space-y-6">
+          {/* Streak */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl"
+          >
+            <Flame className="text-orange-600" size={24} />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {gamificacao.streak_checkins_dias}
+              </div>
+              <div className="text-sm text-gray-600">conversas seguidas</div>
+            </div>
+          </motion.div>
+
+          {/* Conquistas */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Award className="text-yellow-600" size={20} />
+              <span className="font-semibold text-gray-800">Conquistas Recentes</span>
+            </div>
+            
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+              {gamificacao.conquistas_desbloqueadas.slice(-4).map((conquistaId, index) => {
+                const conquista = conquistasMap[conquistaId];
+                if (!conquista) return null;
+                
+                return (
+                  <motion.div
+                    key={conquistaId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 + 0.8 }}
+                    className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors cursor-pointer"
+                  >
+                    <div className="text-center">
+                      <div className="text-xl mb-1">{conquista.icon}</div>
+                      <div className="text-xs font-semibold text-gray-800 mb-1">
+                        {conquista.nome}
+                      </div>
+                      <div className="text-xs text-gray-600 leading-tight">
+                        {conquista.descricao}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+            {/* Contador total de conquistas */}
+            <div className="text-center mt-4 p-2 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">
+                <strong>{gamificacao.conquistas_desbloqueadas.length}</strong> conquistas desbloqueadas
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
