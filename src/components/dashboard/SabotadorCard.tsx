@@ -17,12 +17,12 @@ const SabotadorCard: React.FC = () => {
   const { padrao_principal: principal } = sabotadores;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="space-y-5"
+        className="flex flex-col gap-5 h-full"
       >
         <div>
           <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
@@ -58,7 +58,7 @@ const SabotadorCard: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 mt-auto">
           <p className="text-sm font-semibold text-purple-700 flex items-center gap-2">
             ✨ Contramedida sugerida
           </p>

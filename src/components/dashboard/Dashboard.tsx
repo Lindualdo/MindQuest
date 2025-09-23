@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
         
         {/* Humor atual */}
         <motion.div

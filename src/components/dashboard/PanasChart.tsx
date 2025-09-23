@@ -50,7 +50,7 @@ const PanasChart: React.FC = () => {
   const progressoMeta = (distribuicao_panas.positivas / distribuicao_panas.meta_positividade) * 100;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-800">Meus Sentimentos</h3>
         <div className="text-sm text-gray-500">
@@ -148,7 +148,7 @@ const PanasChart: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2 }}
-        className="mt-4 text-center"
+        className="mt-auto text-center"
       >
         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
           ${distribuicao_panas.status_meta === 'atingida' ? 'bg-green-100 text-green-800' :
