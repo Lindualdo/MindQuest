@@ -52,43 +52,43 @@ function App() {
               </div>
 
               {/* Saudação personalizada */}
-              <div className="flex items-start justify-between gap-3 text-sm font-medium text-gray-800 sm:flex-col sm:items-end sm:text-right">
+              <div className="flex items-center justify-between gap-3 text-sm font-medium text-gray-800 sm:flex-row sm:items-center sm:text-right">
                 <span>Olá, {usuario.nome_preferencia}! 👋</span>
-              </div>
 
-              {/* Botões de ação */}
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors disabled:opacity-50"
-                  title="Atualizar dados"
-                >
-                  <RefreshCw 
-                    className={`text-gray-600 ${isLoading ? 'animate-spin' : ''}`} 
-                    size={18} 
-                  />
-                </motion.button>
+                {/* Botões de ação */}
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleRefresh}
+                    disabled={isLoading}
+                    className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors disabled:opacity-50"
+                    title="Atualizar dados"
+                  >
+                    <RefreshCw 
+                      className={`text-gray-600 ${isLoading ? 'animate-spin' : ''}`} 
+                      size={18} 
+                    />
+                  </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors"
-                  title="Configurações"
-                >
-                  <Settings className="text-gray-600" size={18} />
-                </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors"
+                    title="Configurações"
+                  >
+                    <Settings className="text-gray-600" size={18} />
+                  </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors"
-                  title="Perfil do usuário"
-                >
-                  <User className="text-gray-600" size={18} />
-                </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors"
+                    title="Perfil do usuário"
+                  >
+                    <User className="text-gray-600" size={18} />
+                  </motion.button>
+                </div>
               </div>
             </div>
           </div>
