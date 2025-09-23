@@ -39,7 +39,7 @@ function App() {
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   MindQuest
                 </h1>
-                <p className="text-xs text-gray-500">v1.1 - Dashboard Emocional</p>
+                <p className="text-xs text-gray-500">v1.1 - Mente clara, resultados reais</p>
               </div>
             </div>
 

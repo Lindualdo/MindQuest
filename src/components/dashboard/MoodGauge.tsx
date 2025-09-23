@@ -52,7 +52,7 @@ const MoodGauge: React.FC = () => {
   return (
     <Card className="text-center">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">MoodGauge</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Humor</h3>
         <div className="text-2xl">{mood_gauge.emoji_atual}</div>
       </div>
 

@@ -15,6 +15,7 @@ import PanasChart from './PanasChart';
 import EmotionWheel from './EmotionWheel';
 import InsightsPanel from './InsightsPanel';
 import GamificacaoPanel from './GamificacaoPanel';
+import SabotadorCard from './SabotadorCard';
 import { useStore } from '../../store/useStore';
 
 const Dashboard: React.FC = () => {
@@ -51,10 +52,10 @@ const Dashboard: React.FC = () => {
         <PeriodSelector />
       </motion.div>
 
-      {/* Dashboard Grid - Layout conforme especificação ASCII */}
+      {/* Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* Linha 1: MoodGauge (destaque) + Check-ins Histórico */}
+        {/* Humor atual */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -64,45 +65,57 @@ const Dashboard: React.FC = () => {
           <MoodGauge />
         </motion.div>
 
+        {/* Roda emocional */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-2"
-        >
-          <CheckInsHistorico />
-        </motion.div>
-
-        {/* Linha 2: Roda de Emoções + Sistema de Gamificação */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
           className="lg:col-span-1"
         >
           <EmotionWheel />
         </motion.div>
 
+        {/* Sentimentos (PANAS) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-1"
+        >
+          <PanasChart />
+        </motion.div>
+
+        {/* Histórico de conversas */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-1"
+          className="lg:col-span-2"
         >
-          <GamificacaoPanel />
+          <CheckInsHistorico />
         </motion.div>
 
-        {/* Linha 2 continuação: PANAS Chart */}
+        {/* Sabotador principal */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.45 }}
+          className="lg:col-span-1"
+        >
+          <SabotadorCard />
+        </motion.div>
+
+        {/* Gamificação */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
           className="lg:col-span-1"
         >
-          <PanasChart />
+          <GamificacaoPanel />
         </motion.div>
 
-        {/* Linha 3: Insights Panel (largura completa) */}
+        {/* Insights */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

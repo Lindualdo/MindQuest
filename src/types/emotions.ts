@@ -75,6 +75,18 @@ export interface Gamificacao {
   proximo_nivel_xp: number;
 }
 
+// Sabotadores internos
+export interface SabotadorPadrao {
+  id: string;
+  nome: string;
+  emoji: string;
+  apelido: string;
+  detectado_em: number;
+  total_conversas: number;
+  insight_contexto: string;
+  contramedida: string;
+}
+
 // Tipos de insights
 export type TipoInsight = 'padrao' | 'melhoria' | 'positivo' | 'alerta';
 
@@ -124,6 +136,10 @@ export interface DashboardData {
   distribuicao_panas: DistribuicaoPanas;
   
   gamificacao: Gamificacao;
+  
+  sabotadores: {
+    padrao_principal: SabotadorPadrao;
+  };
   
   insights: Insight[];
   

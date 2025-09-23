@@ -25,12 +25,12 @@ const GamificacaoPanel: React.FC = () => {
     'primeira_semana': {
       icon: '🎯',
       nome: 'Primeira Semana',
-      descricao: 'Completou a primeira semana de check-ins'
+      descricao: 'Completou a primeira semana de conversas diárias'
     },
     'streak_7_dias': {
       icon: '🔥',
       nome: 'Streak de Fogo',
-      descricao: '7 dias consecutivos de check-ins'
+      descricao: '7 dias consecutivos de conversas'
     },
     'explorador_emocoes': {
       icon: '🌈',
@@ -45,7 +45,7 @@ const GamificacaoPanel: React.FC = () => {
     'reflexao_profunda': {
       icon: '🧠',
       nome: 'Reflexão Profunda',
-      descricao: 'Adicionou observações em 10 check-ins'
+      descricao: 'Adicionou observações em 10 conversas'
     }
   };
 
@@ -103,7 +103,7 @@ const GamificacaoPanel: React.FC = () => {
           <div className="text-2xl font-bold text-orange-600">
             {gamificacao.streak_checkins_dias}
           </div>
-          <div className="text-sm text-gray-600">dias seguidos</div>
+          <div className="text-sm text-gray-600">conversas seguidas</div>
         </div>
       </motion.div>
 

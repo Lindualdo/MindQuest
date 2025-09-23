@@ -19,7 +19,7 @@ const PanasChart: React.FC = () => {
   const categories = [
     {
       key: 'positivas',
-      label: 'Afetos Positivos',
+      label: 'Positivos',
       value: distribuicao_panas.positivas,
       color: 'bg-green-500',
       icon: Smile,
@@ -28,7 +28,7 @@ const PanasChart: React.FC = () => {
     },
     {
       key: 'negativas',
-      label: 'Afetos Negativos',
+      label: 'Desafiador',
       value: distribuicao_panas.negativas,
       color: 'bg-red-500',
       icon: Frown,
@@ -37,7 +37,7 @@ const PanasChart: React.FC = () => {
     },
     {
       key: 'neutras',
-      label: 'Estado Neutro',
+      label: 'Neutro/Calmo',
       value: distribuicao_panas.neutras,
       color: 'bg-gray-400',
       icon: Minus,
@@ -52,9 +52,9 @@ const PanasChart: React.FC = () => {
   return (
     <Card>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">PANAS Chart</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Meus Sentimentos</h3>
         <div className="text-sm text-gray-500">
-          Afetos {dashboardData.metricas_periodo.periodo_selecionado}
+          Sentimento {dashboardData.metricas_periodo.periodo_selecionado}
         </div>
       </div>
 

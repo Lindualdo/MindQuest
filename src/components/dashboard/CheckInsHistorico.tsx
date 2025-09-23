@@ -46,7 +46,7 @@ const CheckInsHistorico: React.FC = () => {
     <Card>
       <div className="flex items-center gap-2 mb-6">
         <Calendar className="text-blue-600" size={24} />
-        <h3 className="text-xl font-semibold text-gray-800">Check-ins (7d)</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Conversas diárias (7d)</h3>
       </div>
 
       {/* Grid dos dias */}
@@ -102,7 +102,7 @@ const CheckInsHistorico: React.FC = () => {
           <div className="text-2xl font-bold text-green-600">
             {checkins_historico.filter(c => c.status_resposta === 'respondido').length}
           </div>
-          <div className="text-xs text-gray-600">Respondidos</div>
+          <div className="text-xs text-gray-600">Conversas respondidas</div>
         </div>
         
         <div className="text-center">
@@ -111,14 +111,14 @@ const CheckInsHistorico: React.FC = () => {
               c.status_resposta === 'respondido' ? acc + c.humor_autoavaliado : acc, 0
             ) / checkins_historico.filter(c => c.status_resposta === 'respondido').length || 0}
           </div>
-          <div className="text-xs text-gray-600">Média</div>
+          <div className="text-xs text-gray-600">Humor médio</div>
         </div>
         
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-600">
             {dashboardData.gamificacao.streak_checkins_dias}
           </div>
-          <div className="text-xs text-gray-600">Streak</div>
+          <div className="text-xs text-gray-600">Sequência ativa</div>
         </div>
       </div>
 
@@ -134,7 +134,7 @@ const CheckInsHistorico: React.FC = () => {
             <MessageCircle className="text-blue-600 mt-1" size={16} />
             <div className="flex-1">
               <div className="text-sm font-medium text-gray-800 mb-1">
-                Último check-in
+                Última Conversa
               </div>
               <div className="text-xs text-gray-600 mb-2 flex items-center gap-2">
                 <Clock size={12} />

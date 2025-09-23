@@ -3,7 +3,7 @@
  * AÇÃO: SUBSTITUIR o arquivo existente
  * 
  * Dados mockados baseados na Especificação v1.1
- * Inclui perfis Big Five, check-ins personalizados e sistema de gamificação
+ * Inclui perfis Big Five, conversas personalizadas e sistema de gamificação
  */
 
 import type {
@@ -14,7 +14,8 @@ import type {
   Gamificacao,
   Insight,
   AlertaPreventivo,
-  PerfilDetectado
+  PerfilDetectado,
+  SabotadorPadrao
 } from '../types/emotions';
 
 // Emoções de Plutchik - 8 primárias
@@ -101,7 +102,7 @@ const perfilDetectado: PerfilDetectado = {
   }
 };
 
-// Check-ins dos últimos 7 dias
+// Conversas dos últimos 7 dias
 const checkinsHistorico: CheckinDiario[] = [
   {
     id_checkin: 'ci_001',
@@ -224,8 +225,20 @@ const gamificacao: Gamificacao = {
   ],
   quest_diaria_status: 'parcial',
   quest_diaria_progresso: 67,
-  quest_diaria_descricao: 'Complete seu check-in e faça uma reflexão sobre sua energia hoje',
+  quest_diaria_descricao: 'Complete sua conversa diária e faça uma reflexão sobre sua energia hoje',
   proximo_nivel_xp: 1500
+};
+
+// Sabotador principal
+const sabotadorPrincipal: SabotadorPadrao = {
+  id: 'critico',
+  nome: 'Crítico',
+  emoji: '🎭',
+  apelido: 'Sr. Exigente',
+  detectado_em: 4,
+  total_conversas: 7,
+  insight_contexto: 'Seu Sr. Exigente apareceu principalmente em contextos de trabalho esta semana.',
+  contramedida: 'Relembrar conquistas, mesmo que pequenas, e praticar autocompaixão por 3 minutos.'
 };
 
 // Insights inteligentes baseados no perfil
@@ -234,7 +247,7 @@ const insights: Insight[] = [
     id: 'insight_001',
     tipo: 'positivo',
     titulo: 'Consistência Incrível!',
-    descricao: 'Você completou check-ins por 12 dias seguidos. Seu perfil disciplinado está se destacando!',
+    descricao: 'Você manteve conversas diárias por 12 dias seguidos. Seu perfil disciplinado está se destacando!',
     icone: '🏆',
     data_criacao: '2025-09-22',
     prioridade: 'alta',
@@ -244,7 +257,7 @@ const insights: Insight[] = [
     id: 'insight_002',
     tipo: 'padrao',
     titulo: 'Pico de Energia Matinal',
-    descricao: 'Detectamos que você responde aos check-ins mais rapidamente pela manhã. Seu cronotipo matutino está bem definido.',
+    descricao: 'Detectamos que você responde às conversas mais rapidamente pela manhã. Seu cronotipo matutino está bem definido.',
     icone: '🌅',
     data_criacao: '2025-09-21',
     prioridade: 'media',
@@ -264,7 +277,7 @@ const insights: Insight[] = [
     id: 'insight_004',
     tipo: 'melhoria',
     titulo: 'Oportunidade de Reflexão',
-    descricao: 'Que tal adicionar mais detalhes em seus check-ins? Suas respostas estruturadas ajudam nosso sistema a entender melhor seu padrão.',
+    descricao: 'Que tal adicionar mais detalhes em suas conversas? Suas respostas detalhadas vão ajudar você se conhecer melhor.',
     icone: '💭',
     data_criacao: '2025-09-19',
     prioridade: 'baixa',
@@ -309,6 +322,10 @@ export const mockDashboardData: DashboardData = {
   distribuicao_panas: distribuicaoPanas,
   
   gamificacao: gamificacao,
+  
+  sabotadores: {
+    padrao_principal: sabotadorPrincipal
+  },
   
   insights: insights,
   
