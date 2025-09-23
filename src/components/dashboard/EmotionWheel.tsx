@@ -111,6 +111,14 @@ const EmotionWheel: React.FC = () => {
                 >
                   {emocao.nome}
                 </text>
+                <text
+                  x={x}
+                  y={y + emotionRadius + 32}
+                  textAnchor="middle"
+                  className="text-xs fill-gray-500 pointer-events-none"
+                >
+                  {emocao.intensidade}%
+                </text>
               </motion.g>
             );
           })}
