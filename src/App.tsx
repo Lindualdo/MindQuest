@@ -28,8 +28,8 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card border-b border-white/20 sticky top-0 z-50"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:h-16">
             {/* Logo e Nome */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
@@ -44,28 +44,20 @@ function App() {
             </div>
 
             {/* Informações do usuário */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               {/* Perfil detectado (sutil) */}
               <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span>Perfil: {usuario.perfil_detectado.perfil_primario}</span>
-                <span className="text-xs text-gray-400">
-                  ({usuario.perfil_detectado.confiabilidade_geral}% confiança)
-                </span>
               </div>
 
               {/* Saudação personalizada */}
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-800">
-                  Olá, {usuario.nome_preferencia}! 👋
-                </div>
-                <div className="text-xs text-gray-500">
-                  Cronotipo: {usuario.cronotipo_detectado}
-                </div>
+              <div className="flex items-start justify-between gap-3 text-sm font-medium text-gray-800 sm:flex-col sm:items-end sm:text-right">
+                <span>Olá, {usuario.nome_preferencia}! 👋</span>
               </div>
 
               {/* Botões de ação */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-start sm:self-auto">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -104,7 +96,7 @@ function App() {
       </motion.header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-24 sm:pt-14">
         <Dashboard />
       </main>
 
