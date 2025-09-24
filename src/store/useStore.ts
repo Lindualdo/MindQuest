@@ -1,94 +1,155 @@
 /**
  * ARQUIVO: src/store/useStore.ts
- * AÇÃO: SUBSTITUIR o arquivo existente
+ * AÇÃO: SUBSTITUIR arquivo existente
  * 
- * Store global baseado na Especificação v1.1
- * Gerenciamento de estado com Zustand
+ * Store com importações corretas - VERSÃO FINAL
  */
 
 import { create } from 'zustand';
 import type { StoreState, DashboardData } from '../types/emotions';
-import { mockDashboardData } from '../data/mockData';
 
-const useStore = create<StoreState>((set, get) => ({
+// Importações corretas dos serviços usando sintaxe named export
+import { apiService } from '../services/apiService';
+import { authService } from '../services/authService';
+import { dataAdapter } from '../utils/dataAdapter';
+
+interface ExtendedStoreState extends StoreState {
+  // Estados adicionais para API
+  error: string | null;
+  isAuthenticated: boolean;
+  lastUpdated: string;
+  
+  // Actions adicionais
+  setError: (error: string | null) => void;
+  setAuthenticated: (auth: boolean) => void;
+  initializeAuth: () => Promise<boolean>;
+  loadDashboardData: () => Promise<void>;
+}
+
+const useStore = create<ExtendedStoreState>((set, get) => ({
   // Estado inicial
-  dashboardData: mockDashboardData,
+  dashboardData: {} as DashboardData,
   isLoading: false,
+  error: null,
+  isAuthenticated: false,
   periodo: 'semana',
-  ultimaAtualizacao: new Date().toISOString(),
+  ultimaAtualizacao: '',
+  lastUpdated: '',
 
-  // Actions
-  setPeriodo: (periodo) => {
-    set({ isLoading: true });
-    
-    // Simula chamada à API com delay
-    setTimeout(() => {
-      const { dashboardData } = get();
-      
-      // Atualiza dados baseados no período selecionado
-      const updatedData: DashboardData = {
-        ...dashboardData,
-        metricas_periodo: {
-          ...dashboardData.metricas_periodo,
-          periodo_selecionado: periodo,
-          // Simula dados diferentes por período
-          data_inicio: periodo === 'semana' ? '2025-09-16' : 
-                      periodo === 'mes' ? '2025-08-22' : '2025-06-22',
-          data_fim: '2025-09-22',
-          total_checkins: periodo === 'semana' ? 7 : 
-                         periodo === 'mes' ? 30 : 90,
-          taxa_resposta: periodo === 'semana' ? 85.7 : 
-                        periodo === 'mes' ? 78.3 : 82.1,
-          humor_medio: periodo === 'semana' ? 7.5 : 
-                      periodo === 'mes' ? 6.8 : 7.2
-        }
-      };
-
-      set({
-        periodo,
-        dashboardData: updatedData,
-        isLoading: false,
-        ultimaAtualizacao: new Date().toISOString()
-      });
-    }, 800);
+  // Actions básicas
+  setError: (error) => {
+    set({ error, isLoading: false });
   },
 
-  updateDashboardData: (data) => {
-    const { dashboardData } = get();
-    set({
-      dashboardData: { ...dashboardData, ...data },
-      ultimaAtualizacao: new Date().toISOString()
-    });
+  setAuthenticated: (auth) => {
+    set({ isAuthenticated: auth });
   },
 
   setLoading: (loading) => {
     set({ isLoading: loading });
   },
 
-  refreshData: async () => {
-    set({ isLoading: true });
+  /**
+   * Inicializa autenticação
+   */
+  initializeAuth: async (): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const token = authService.extractTokenFromUrl() || authService.getToken();
+      
+      if (!token) {
+        set({ 
+          isLoading: false, 
+          error: 'Token de acesso não encontrado',
+          isAuthenticated: false
+        });
+        return false;
+      }
+
+      const validation = await authService.validateToken(token);
+      
+      if (!validation.success) {
+        set({ 
+          isLoading: false, 
+          error: validation.error || 'Token inválido',
+          isAuthenticated: false
+        });
+        return false;
+      }
+
+      set({ 
+        isLoading: false, 
+        error: null,
+        isAuthenticated: true
+      });
+      
+      await get().loadDashboardData();
+      return true;
+
+    } catch (error) {
+      console.error('Erro na inicialização da autenticação:', error);
+      set({ 
+        isLoading: false, 
+        error: 'Erro ao conectar com o servidor',
+        isAuthenticated: false
+      });
+      return false;
+    }
+  },
+
+  /**
+   * Carrega dados do dashboard da API
+   */
+  loadDashboardData: async (): Promise<void> => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const apiData = await apiService.getDashboardData();
+      
+      if (!apiData) {
+        throw new Error('Nenhum dado retornado pela API');
+      }
+
+      const dashboardData = dataAdapter.convertApiToDashboard(apiData);
+      
+      set({
+        dashboardData,
+        isLoading: false,
+        error: null,
+        ultimaAtualizacao: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Erro ao carregar dados'
+      });
+    }
+  },
+
+  /**
+   * Atualiza período selecionado
+   */
+  setPeriodo: (periodo) => {
+    set({ isLoading: true, periodo });
     
-    // Simula refresh dos dados
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const { dashboardData } = get();
-        
-        // Simula pequenas mudanças nos dados
+    setTimeout(() => {
+      const { dashboardData } = get();
+      
+      if (dashboardData && dashboardData.metricas_periodo) {
         const updatedData: DashboardData = {
           ...dashboardData,
-          mood_gauge: {
-            ...dashboardData.mood_gauge,
-            nivel_atual: Math.max(-5, Math.min(5, 
-              dashboardData.mood_gauge.nivel_atual + (Math.random() - 0.5) * 0.5
-            )),
-            tendencia_semanal: Math.random() * 2 - 1
-          },
-          gamificacao: {
-            ...dashboardData.gamificacao,
-            xp_total: dashboardData.gamificacao.xp_total + Math.floor(Math.random() * 50),
-            quest_diaria_progresso: Math.min(100, 
-              dashboardData.gamificacao.quest_diaria_progresso + Math.floor(Math.random() * 20)
-            )
+          metricas_periodo: {
+            ...dashboardData.metricas_periodo,
+            periodo_selecionado: periodo,
+            data_inicio: periodo === 'semana' ? 
+              new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
+              periodo === 'mes' ? 
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
+              new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           }
         };
 
@@ -97,11 +158,75 @@ const useStore = create<StoreState>((set, get) => ({
           isLoading: false,
           ultimaAtualizacao: new Date().toISOString()
         });
-        
-        resolve(undefined);
-      }, 1200);
+      } else {
+        set({ isLoading: false });
+      }
+    }, 800);
+  },
+
+  /**
+   * Atualiza dados do dashboard (merge parcial)
+   */
+  updateDashboardData: (data) => {
+    const { dashboardData } = get();
+    set({
+      dashboardData: { ...dashboardData, ...data },
+      ultimaAtualizacao: new Date().toISOString()
     });
+  },
+
+  /**
+   * Refresh completo dos dados
+   */
+  refreshData: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      await get().loadDashboardData();
+    } catch (error) {
+      console.error('Erro no refresh:', error);
+      set({
+        isLoading: false,
+        error: 'Erro ao atualizar dados'
+      });
+    }
   }
 }));
 
+// Hook customizado para verificar autenticação
+export const useAuth = () => {
+  const { isAuthenticated, isLoading, error, initializeAuth } = useStore();
+  
+  return {
+    isAuthenticated,
+    isLoading,
+    error,
+    initializeAuth
+  };
+};
+
+// Hook customizado para dados do dashboard
+export const useDashboard = () => {
+  const { 
+    dashboardData, 
+    isLoading, 
+    error, 
+    refreshData, 
+    setPeriodo, 
+    periodo,
+    ultimaAtualizacao 
+  } = useStore();
+  
+  return {
+    dashboardData,
+    isLoading,
+    error,
+    refreshData,
+    setPeriodo,
+    periodo,
+    ultimaAtualizacao
+  };
+};
+
 export { useStore };
+export default useStore;
