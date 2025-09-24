@@ -273,7 +273,7 @@ class DataAdapter {
         id: 'insight_welcome',
         tipo: 'melhoria',
         titulo: 'Bem-vindo ao MindQuest!',
-        descricao: 'Comece sua jornada fazendo seu primeiro check-in diário via WhatsApp.',
+        descricao: 'Comece sua jornada fazendo sua primeira conversa, quanto mais informações você fornecer, mais rápido irá se conhecermelhor será nossa ajuda.',
         icone: '👋',
         data_criacao: new Date().toISOString(),
         prioridade: 'alta',

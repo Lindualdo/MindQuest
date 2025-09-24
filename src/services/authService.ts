@@ -95,11 +95,11 @@ class AuthService {
   private buildValidateUrl(token: string): string {
     const encoded = encodeURIComponent(token);
 
-    if (typeof window !== 'undefined' && window.location.origin.includes('localhost')) {
-      return `https://metodovoar-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
+    if (typeof window !== 'undefined') {
+      return `/api/auth/validate?token=${encoded}`;
     }
 
-    return `/api/auth/validate?token=${encoded}`;
+    return `https://metodovoar-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
   }
 
   public async validateToken(token?: string): Promise<AuthResponse> {

@@ -79,12 +79,9 @@ class ApiService {
    */
   private resolveUrl(endpoint: string): string {
     if (typeof window !== 'undefined') {
-      if (window.location.origin.includes('localhost')) {
-        return `${this.remoteBaseUrl}${endpoint}`;
-      }
       return `/api${endpoint}`;
     }
-    return `/api${endpoint}`;
+    return `${this.remoteBaseUrl}${endpoint}`;
   }
 
   private async makeRequest(
