@@ -63,7 +63,7 @@ interface DashboardApiResponse {
 
 class ApiService {
   private static instance: ApiService;
-  private baseUrl = 'https://metodovoar-n8n.cloudfy.live/webhook-test';
+  private remoteBaseUrl = 'https://metodovoar-n8n.cloudfy.live/webhook-test';
 
   private constructor() {}
 
@@ -77,12 +77,22 @@ class ApiService {
   /**
    * Executa uma requisição HTTP genérica
    */
+  private resolveUrl(endpoint: string): string {
+    if (typeof window !== 'undefined') {
+      if (window.location.origin.includes('localhost')) {
+        return `${this.remoteBaseUrl}${endpoint}`;
+      }
+      return `/api${endpoint}`;
+    }
+    return `/api${endpoint}`;
+  }
+
   private async makeRequest(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse> {
     try {
-      const url = `${this.baseUrl}${endpoint}`;
+      const url = this.resolveUrl(endpoint);
       const method = (options.method || 'GET').toUpperCase();
 
       const defaultHeaders = method === 'GET'
@@ -184,14 +194,14 @@ class ApiService {
    * Configura nova base URL (útil para testes/desenvolvimento)
    */
   public setBaseUrl(url: string): void {
-    this.baseUrl = url;
+    this.remoteBaseUrl = url;
   }
 
   /**
    * Obtém a base URL atual
    */
   public getBaseUrl(): string {
-    return this.baseUrl;
+    return this.remoteBaseUrl;
   }
 }
 

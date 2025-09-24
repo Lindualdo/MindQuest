@@ -92,6 +92,16 @@ class AuthService {
   /**
    * Valida token com a API N8N
    */
+  private buildValidateUrl(token: string): string {
+    const encoded = encodeURIComponent(token);
+
+    if (typeof window !== 'undefined' && window.location.origin.includes('localhost')) {
+      return `https://metodovoar-n8n.cloudfy.live/webhook-test/auth/validate?token=${encoded}`;
+    }
+
+    return `/api/auth/validate?token=${encoded}`;
+  }
+
   public async validateToken(token?: string): Promise<AuthResponse> {
     const tokenToValidate = token || this.getToken();
     
@@ -103,14 +113,7 @@ class AuthService {
     }
 
     try {
-      const API_URL = 'https://metodovoar-n8n.cloudfy.live/webhook-test/auth/validate';
-      
-      const response = await fetch(`${API_URL}?token=${tokenToValidate}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(this.buildValidateUrl(tokenToValidate));
 
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
