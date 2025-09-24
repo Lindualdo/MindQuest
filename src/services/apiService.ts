@@ -78,20 +78,25 @@ class ApiService {
    * Executa uma requisição HTTP genérica
    */
   private async makeRequest(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
-      
-      const defaultOptions: RequestInit = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
+      const method = (options.method || 'GET').toUpperCase();
 
-      const response = await fetch(url, { ...defaultOptions, ...options });
+      const defaultHeaders = method === 'GET'
+        ? {}
+        : { 'Content-Type': 'application/json' };
+
+      const response = await fetch(url, {
+        ...options,
+        method,
+        headers: {
+          ...defaultHeaders,
+          ...(options.headers || {}),
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
