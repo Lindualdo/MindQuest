@@ -121,14 +121,17 @@ class ApiService {
     const endpoint = `/auth/validate?token=${encodeURIComponent(token)}`;
     const result = await this.makeRequest(endpoint);
     
-    if (result.success && result.response?.response) {
+    if (result.success && result.response?.success) {
       return {
         success: true,
-        response: result.response.response
+        response: result.response as DashboardApiResponse
       };
     }
-    
-    return result;
+
+    return {
+      success: false,
+      error: result.error || result.response?.error || 'Falha na validação do token'
+    };
   }
 
   /**
@@ -143,11 +146,11 @@ class ApiService {
 
     const result = await this.validateTokenAndGetData(token);
     
-    if (!result.success) {
+    if (!result.success || !result.response) {
       throw new Error(result.error || 'Falha ao obter dados');
     }
 
-    return result.response as DashboardApiResponse;
+    return result.response;
   }
 
   /**

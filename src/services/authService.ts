@@ -118,28 +118,21 @@ class AuthService {
 
       const data = await response.json();
 
-      if (data.response && data.response.success) {
-        // Token válido
+      if (data.success) {
         this.setToken(tokenToValidate);
         this.isAuthenticated = true;
-        this.userData = data.response;
-        
+        this.userData = data;
+
         return {
           success: true,
-          user: {
-            id: data.response.user.id,
-            nome: data.response.user.nome,
-            nome_preferencia: data.response.user.nome_preferencia,
-            status_onboarding: data.response.user.status_onboarding
-          }
-        };
-      } else {
-        // Token inválido
-        return {
-          success: false,
-          error: data.response?.error || 'Token inválido ou expirado'
+          user: data.user
         };
       }
+
+      return {
+        success: false,
+        error: data.error || 'Token inválido ou expirado'
+      };
 
     } catch (error) {
       console.error('Erro ao validar token:', error);

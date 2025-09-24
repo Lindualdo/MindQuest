@@ -18,6 +18,7 @@ import type {
 
 // Interface da API N8N (conforme retorno real)
 interface ApiData {
+  success?: boolean;
   user: {
     id: string;
     nome: string;
