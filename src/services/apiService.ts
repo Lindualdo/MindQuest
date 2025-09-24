@@ -63,7 +63,7 @@ interface DashboardApiResponse {
 
 class ApiService {
   private static instance: ApiService;
-  private remoteBaseUrl = 'https://metodovoar-n8n.cloudfy.live/webhook-test';
+  private remoteBaseUrl = 'https://metodovoar-n8n.cloudfy.live/webhook';
 
   private constructor() {}
 
@@ -99,13 +99,17 @@ class ApiService {
         ? {}
         : { 'Content-Type': 'application/json' };
 
+      const headers: HeadersInit | undefined = method === 'GET'
+        ? options.headers as HeadersInit | undefined
+        : {
+            'Content-Type': 'application/json',
+            ...((options.headers as Record<string, string>) || {}),
+          };
+
       const response = await fetch(url, {
         ...options,
         method,
-        headers: {
-          ...defaultHeaders,
-          ...(options.headers || {}),
-        },
+        headers,
       });
 
       if (!response.ok) {

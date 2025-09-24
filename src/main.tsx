@@ -19,7 +19,7 @@ const isDevelopment = import.meta.env.DEV;
 if (isDevelopment) {
   console.log('🚀 MindQuest v1.1 iniciando...');
   console.log('🔗 Modo:', isDevelopment ? 'Desenvolvimento' : 'Produção');
-  console.log('🌐 API Base:', 'https://metodovoar-n8n.cloudfy.live/webhook-test');
+  console.log('🌐 API Base:', 'https://metodovoar-n8n.cloudfy.live/webhook');
 }
 
 // Renderização principal

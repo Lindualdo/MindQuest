@@ -96,7 +96,7 @@ class AuthService {
     const encoded = encodeURIComponent(token);
 
     if (typeof window !== 'undefined' && window.location.origin.includes('localhost')) {
-      return `https://metodovoar-n8n.cloudfy.live/webhook-test/auth/validate?token=${encoded}`;
+      return `https://metodovoar-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
     }
 
     return `/api/auth/validate?token=${encoded}`;
