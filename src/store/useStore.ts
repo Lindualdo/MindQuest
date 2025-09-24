@@ -2,13 +2,13 @@
  * ARQUIVO: src/store/useStore.ts
  * AÇÃO: SUBSTITUIR arquivo existente
  * 
- * Store com importações corretas - VERSÃO FINAL
+ * Store corrigido com todas as importações e tipos
  */
 
 import { create } from 'zustand';
 import type { StoreState, DashboardData } from '../types/emotions';
 
-// Importações corretas dos serviços usando sintaxe named export
+// Importações dos serviços (usando sintaxe compatível)
 import { apiService } from '../services/apiService';
 import { authService } from '../services/authService';
 import { dataAdapter } from '../utils/dataAdapter';

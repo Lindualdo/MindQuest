@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, AlertTriangle, RefreshCw } from 'lucide-react';
-import { useAuth } from '../store/useStore';
+import { useAuth } from '../../store/useStore';
 
 interface AuthGuardProps {
   children: React.ReactNode;

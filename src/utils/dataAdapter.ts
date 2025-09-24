@@ -108,35 +108,29 @@ class DataAdapter {
 
     // CORREÇÃO: Perfil secundário pode ser null
     const mapearPerfilSecundario = (perfil: string | null) => {
-      if (!perfil) return null;
+      if (!perfil) return undefined;
       switch (perfil.toLowerCase()) {
         case 'perfeccionista': return 'perfeccionista';
         case 'disciplinado': return 'disciplinado';
         case 'desorganizado': return 'desorganizado';
         case 'depressivo': return 'depressivo';
-        default: return null;
+        default: return undefined;
       }
     };
 
     return {
       perfil_primario: mapearPerfilPrimario(perfilPrimario),
       perfil_secundario: mapearPerfilSecundario(perfilSecundario),
-      confiabilidade: confiabilidade || 0,
+      confiabilidade_geral: confiabilidade ?? 0,
       metodo_deteccao: perfilPrimario ? 'onboarding' : 'checkin',
       big_five_scores: {
         openness: this.parseNumber(bigFive.openness) || 0,
         conscientiousness: this.parseNumber(bigFive.conscientiousness) || 0,
         extraversion: this.parseNumber(bigFive.extraversion) || 0,
         agreeableness: this.parseNumber(bigFive.agreeableness) || 0,
-        neuroticism: this.parseNumber(bigFive.neuroticism) || 0
-      },
-      descricao_comportamental: perfilPrimario ? 
-        'Perfil baseado nas interações e análises comportamentais.' :
-        'Perfil ainda sendo construído através das interações diárias.',
-      tendencias_identificadas: perfilPrimario ? 
-        ['Consistência em check-ins', 'Padrões emocionais estáveis'] :
-        ['Novo usuário', 'Em processo de descoberta'],
-      data_ultima_atualizacao: new Date().toISOString()
+        neuroticism: this.parseNumber(bigFive.neuroticism) || 0,
+        confiabilidade: confiabilidade ?? 0
+      }
     };
   }
 
