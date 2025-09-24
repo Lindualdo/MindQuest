@@ -159,9 +159,22 @@ const InsightsPanel: React.FC = () => {
                   </div>
                   
                   {/* Descrição */}
-                  <p className="text-gray-600 text-sm leading-relaxed mb-3">
+                  <p className="text-gray-600 text-sm leading-relaxed mb-3 whitespace-pre-line">
                     {insight.descricao}
                   </p>
+
+                  {insight.cta && (
+                    <div className="mb-3">
+                      <a
+                        href={insight.cta.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                      >
+                        {insight.cta.label}
+                      </a>
+                    </div>
+                  )}
                   
                   {/* Footer */}
                   <div className="flex items-center justify-between text-xs">

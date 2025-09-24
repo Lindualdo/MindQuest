@@ -133,7 +133,6 @@ const Dashboard: React.FC = () => {
         transition={{ delay: 1 }}
         className="text-center text-xs text-gray-400 py-4"
       >
-        MindQuest v1.1 - Mente clara, resultados reais.
       </motion.div>
     </motion.div>
   );

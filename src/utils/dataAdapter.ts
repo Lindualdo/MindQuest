@@ -95,15 +95,15 @@ class DataAdapter {
     const perfilSecundario = this.parseNullString<string>(bigFive.perfil_secundario);
     const confiabilidade = this.parseNumber(bigFive.confiabilidade);
     
-    // CORREÇÃO: Retornar tipo exato sem null para perfil_primario
+    // Retorna "descobrindo" até que um perfil seja identificado
     const mapearPerfilPrimario = (perfil: string | null) => {
-      if (!perfil) return 'disciplinado';
+      if (!perfil) return 'descobrindo';
       switch (perfil.toLowerCase()) {
         case 'perfeccionista': return 'perfeccionista';
         case 'disciplinado': return 'disciplinado';
         case 'desorganizado': return 'desorganizado';
         case 'depressivo': return 'depressivo';
-        default: return 'disciplinado';
+        default: return 'descobrindo';
       }
     };
 
@@ -271,13 +271,17 @@ class DataAdapter {
     if (checkins === 0) {
       insights.push({
         id: 'insight_welcome',
-        tipo: 'melhoria',
-        titulo: 'Bem-vindo ao MindQuest!',
-        descricao: 'Comece sua jornada fazendo sua primeira conversa, quanto mais informações você fornecer, mais rápido irá se conhecermelhor será nossa ajuda.',
+        tipo: 'positivo',
+        titulo: '💬 Bem-vindo ao MindQuest! 👋',
+        descricao: 'Sua jornada começa aqui. Quanto mais compartilhar sobre você, melhor serão seus resultados.\n\nMente clara, resultados reais.',
         icone: '👋',
         data_criacao: new Date().toISOString(),
         prioridade: 'alta',
-        categoria: 'cognitivo'
+        categoria: 'cognitivo',
+        cta: {
+          label: 'Comece agora',
+          url: 'https://wa.me/351928413957?text=Ola!%20Quero%20comecar%20minha%20jornada%20no%20MindQuest'
+        }
       });
     }
 

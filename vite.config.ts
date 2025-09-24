@@ -9,6 +9,17 @@ export default defineConfig({
       '/api': {
         target: 'https://metodovoar-n8n.cloudfy.live',
         changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/webhook'),
+      },
+    },
+  },
+  preview: {
+    proxy: {
+      '/api': {
+        target: 'https://metodovoar-n8n.cloudfy.live',
+        changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/webhook'),
       },
     },

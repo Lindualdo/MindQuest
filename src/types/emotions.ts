@@ -26,7 +26,7 @@ export interface BigFiveScores {
 }
 
 // Perfis específicos detectados
-export type PerfilEspecifico = 'perfeccionista' | 'disciplinado' | 'desorganizado' | 'depressivo';
+export type PerfilEspecifico = 'descobrindo' | 'perfeccionista' | 'disciplinado' | 'desorganizado' | 'depressivo';
 
 export interface PerfilDetectado {
   perfil_primario: PerfilEspecifico;
@@ -99,6 +99,10 @@ export interface Insight {
   data_criacao: string;
   prioridade: 'baixa' | 'media' | 'alta';
   categoria: 'comportamental' | 'emocional' | 'social' | 'cognitivo';
+  cta?: {
+    label: string;
+    url: string;
+  };
 }
 
 // Alertas preventivos (background system)
