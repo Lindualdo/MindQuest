@@ -221,6 +221,11 @@ class DataAdapter {
     const emoji = this.parseNullString<string>(sabotador.emoji);
     const apelidoPersonalizado = this.parseNullString<string>(sabotador.apelido_personalizado);
     const totalDeteccoes = this.parseNumber(sabotador.total_deteccoes);
+    const contextoPrincipal = this.parseNullString<string>(sabotador.contexto_principal);
+    const insightAtual = this.parseNullString<string>(sabotador.insight_atual);
+    const contramedidaAtiva = this.parseNullString<string>(sabotador.contramedida_ativa);
+    const intensidadeMedia = this.parseNumber(sabotador.intensidade_media);
+    const totalConversas = this.parseNumber(sabotador.total_conversas);
     
     if (!id || !nome) {
       return {
@@ -241,9 +246,11 @@ class DataAdapter {
       emoji: emoji || '🤔',
       apelido: apelidoPersonalizado || 'Sem nome',
       detectado_em: totalDeteccoes || 0,
-      total_conversas: 7,
-      insight_contexto: 'Padrão identificado nas conversas recentes.',
-      contramedida: 'Continue monitorando e aplicando as técnicas sugeridas.'
+      total_conversas: totalConversas || 1,
+      insight_contexto: insightAtual || 'Continue conversando para identificarmos seus padrões.',
+      contramedida: contramedidaAtiva || 'Aplicar técnica de auto-observação e focar em soluções.',
+      contexto_principal: contextoPrincipal || 'contexto não identificado',
+      intensidade_media: intensidadeMedia || undefined
     };
   }
 

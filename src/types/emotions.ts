@@ -85,6 +85,8 @@ export interface SabotadorPadrao {
   total_conversas: number;
   insight_contexto: string;
   contramedida: string;
+  contexto_principal?: string;
+  intensidade_media?: number;
 }
 
 // Tipos de insights

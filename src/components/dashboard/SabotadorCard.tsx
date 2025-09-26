@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { MapPin, Activity } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
@@ -41,9 +42,38 @@ const SabotadorCard: React.FC = () => {
           </div>
         </div>
 
-        <div className="text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-xl p-4">
-          Detectado em <strong className="text-gray-800">{principal.detectado_em}</strong> de{' '}
-          <strong className="text-gray-800">{principal.total_conversas}</strong> conversas
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-xl p-4">
+            <div>
+              <p className="text-xs uppercase text-gray-500">Ocorrências</p>
+              <p className="text-lg font-semibold text-gray-800">{principal.detectado_em}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs uppercase text-gray-500">Total conversas</p>
+              <p className="text-lg font-semibold text-gray-800">{principal.total_conversas}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="p-3 bg-white border border-gray-100 rounded-xl flex items-start gap-2">
+              <MapPin size={16} className="text-purple-500 mt-1" />
+              <div>
+                <p className="text-xs uppercase text-gray-500">Contexto principal</p>
+                <p className="font-medium text-gray-800">
+                  {principal.contexto_principal || 'Ainda observando'}
+                </p>
+              </div>
+            </div>
+            <div className="p-3 bg-white border border-gray-100 rounded-xl flex items-start gap-2">
+              <Activity size={16} className="text-purple-500 mt-1" />
+              <div>
+                <p className="text-xs uppercase text-gray-500">Intensidade média</p>
+                <p className="font-medium text-gray-800">
+                  {principal.intensidade_media ?? '—'}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
