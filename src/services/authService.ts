@@ -99,7 +99,7 @@ class AuthService {
       return `/api/auth/validate?token=${encoded}`;
     }
 
-    return `https://metodovoar-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
+    return `https://mindquestr-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
   }
 
   public async validateToken(token?: string): Promise<AuthResponse> {

@@ -1,4 +1,4 @@
-const REMOTE_ENDPOINT = 'https://metodovoar-n8n.cloudfy.live/webhook/auth/validate';
+const REMOTE_ENDPOINT = 'https://mindquestr-n8n.cloudfy.live/webhook/auth/validate';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

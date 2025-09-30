@@ -63,7 +63,7 @@ interface DashboardApiResponse {
 
 class ApiService {
   private static instance: ApiService;
-  private remoteBaseUrl = 'https://metodovoar-n8n.cloudfy.live/webhook';
+  private remoteBaseUrl = 'https://mindquestr-n8n.cloudfy.live/webhook';
 
   private constructor() {}
 

@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://metodovoar-n8n.cloudfy.live',
+        target: 'https://mindquestr-n8n.cloudfy.live',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/webhook'),
@@ -17,7 +17,7 @@ export default defineConfig({
   preview: {
     proxy: {
       '/api': {
-        target: 'https://metodovoar-n8n.cloudfy.live',
+        target: 'https://mindquestr-n8n.cloudfy.live',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/webhook'),
