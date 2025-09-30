@@ -60,7 +60,7 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = 'https://mindquestr.com.br';
+    window.location.href = 'https://mindquest.com.br';
   };
 
   render() {
