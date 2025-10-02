@@ -111,8 +111,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         throw new Error('Nenhum dado retornado pela API');
       }
 
-      const dashboardData = dataAdapter.convertApiToDashboard(apiData);
-      
+     const dashboardData = dataAdapter.convertApiToDashboard(apiData);
       set({
         dashboardData,
         isLoading: false,
