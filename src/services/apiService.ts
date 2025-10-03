@@ -15,7 +15,7 @@ interface ApiResponse {
 }
 
 interface DashboardApiResponse {
-  success: boolean;
+  success?: boolean;
   user: {
     id: string;
     nome: string;
@@ -38,10 +38,11 @@ interface DashboardApiResponse {
   gamificacao: {
     xp_total: string | null;
     nivel_atual: string | null;
-    streak_checkins_dias: string | null;
+    streak_conversas_dias: string | null;
     conquistas_desbloqueadas: string | null;
     quest_diaria_status: string | null;
     quest_diaria_progresso: string | null;
+    quest_diaria_descricao?: string | null;
   };
   sabotador: {
     id: string | null;
@@ -49,15 +50,59 @@ interface DashboardApiResponse {
     emoji: string | null;
     apelido_personalizado: string | null;
     total_deteccoes: string | null;
+    contexto_principal?: string | null;
+    insight_atual?: string | null;
+    contramedida_ativa?: string | null;
+    intensidade_media?: string | null;
+    total_conversas?: string | null;
   };
   metricas_semana: {
-    checkins_total: string;
-    checkins_respondidos: string;
+    conversas_total: string;
+    conversas_completas: string;
     humor_medio: string | null;
+    energia_media: string | null;
+    qualidade_media_interacao: string | null;
     ultima_emocao: string | null;
-    ultimo_checkin_data: string | null;
-    ultimo_checkin_emoji: string | null;
+    ultima_conversa_data: string | null;
+    ultimo_conversa_emoji: string | null;
   };
+  distribuicao_emocoes: {
+    alegria: number;
+    confianca: number;
+    medo: number;
+    surpresa: number;
+    tristeza: number;
+    nojo: number;
+    raiva: number;
+    expectativa: number;
+  };
+  panas: {
+    positivas: number | string;
+    negativas: number | string;
+    neutras: number | string;
+    total: number | string;
+    percentual_positivas: number | string;
+    percentual_negativas: number | string;
+    percentual_neutras: number | string;
+  };
+  historico_diario: Array<{
+    data: string;
+    humor: number | string;
+    emocao: string;
+    emoji: string;
+    energia: number | string;
+    qualidade: number | string;
+  }>;
+  insights: Array<{
+    id: string;
+    tipo: string;
+    categoria: string;
+    titulo: string;
+    descricao: string;
+    icone: string;
+    prioridade: string;
+    data_criacao: string;
+  }>;
   timestamp: string;
 }
 
@@ -82,6 +127,46 @@ class ApiService {
       return `/api${endpoint}`;
     }
     return `${this.remoteBaseUrl}${endpoint}`;
+  }
+
+  private extractDashboardPayload(payload: unknown): DashboardApiResponse | null {
+    if (!payload) {
+      return null;
+    }
+
+    if (Array.isArray(payload)) {
+      for (const item of payload) {
+        const extracted = this.extractDashboardPayload(item);
+        if (extracted) {
+          return extracted;
+        }
+      }
+      return null;
+    }
+
+    if (typeof payload === 'object') {
+      const obj = payload as Record<string, unknown>;
+
+      if (obj.success === true && obj.user) {
+        return obj as DashboardApiResponse;
+      }
+
+      if (obj.response !== undefined) {
+        const fromResponse = this.extractDashboardPayload(obj.response);
+        if (fromResponse) {
+          return fromResponse;
+        }
+      }
+
+      if (obj.data !== undefined) {
+        const fromData = this.extractDashboardPayload(obj.data);
+        if (fromData) {
+          return fromData;
+        }
+      }
+    }
+
+    return null;
   }
 
   private async makeRequest(
@@ -137,16 +222,18 @@ class ApiService {
     const endpoint = `/auth/validate?token=${encodeURIComponent(token)}`;
     const result = await this.makeRequest(endpoint);
     
-    if (result.success && result.response?.success) {
+    const dashboardPayload = this.extractDashboardPayload(result.response);
+
+    if (result.success && dashboardPayload) {
       return {
         success: true,
-        response: result.response as DashboardApiResponse
+        response: dashboardPayload
       };
     }
 
     return {
       success: false,
-      error: result.error || result.response?.error || 'Falha na validação do token'
+      error: result.error || (dashboardPayload === null ? 'Formato de resposta desconhecido' : 'Falha na validação do token')
     };
   }
 

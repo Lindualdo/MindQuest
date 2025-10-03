@@ -26,7 +26,7 @@ const MoodGauge: React.FC = () => {
   const normalized = (clampedNivel + 5) / 10;
   const circumference = Math.PI * GAUGE_RADIUS;
   const strokeDasharray = `${circumference} ${circumference}`;
-  const strokeDashoffset = circumference - normalized * circumference;
+  const strokeDashoffset = 0;
   
   // Rotação da agulha (-90° a +90°)
   const pointerRotation = normalized * 180 - 90;
@@ -71,8 +71,9 @@ const MoodGauge: React.FC = () => {
           {/* Progress arc com gradiente */}
           <defs>
             <linearGradient id={`mood-gauge-gradient-${gradientId}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={clampedNivel < 0 ? "#EF4444" : "#10B981"} />
-              <stop offset="100%" stopColor={gaugeColor} />
+              <stop offset="0%" stopColor="#EF4444" />
+              <stop offset="50%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#10B981" />
             </linearGradient>
           </defs>
           
@@ -84,9 +85,9 @@ const MoodGauge: React.FC = () => {
             strokeLinecap="round"
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset }}
-            transition={{ duration: 2, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           />
           
           {/* Pointer melhorado */}
