@@ -934,11 +934,13 @@ class DataAdapter {
       humorBlock?.ultima_conversa?.data
     ) || this.parseNullString<string>(metricas.ultima_conversa_data) || defaults.metricas_semana.ultima_conversa_data;
 
-    let tendencia = this.parseNumber(humorBlock?.tendencia_vs_periodo_anterior);
+    let tendencia = this.parseNumber(humorBlock?.diferenca_percentual ?? humorBlock?.tendencia_vs_periodo_anterior);
     if (tendencia === null) {
-      if (nivelAtual >= 7) tendencia = 1;
-      else if (nivelAtual <= 4) tendencia = -1;
-      else tendencia = 0;
+      if (humorMedio && humorMedio !== 0) {
+        tendencia = Number((((nivelAtual - humorMedio) / humorMedio) * 100).toFixed(1));
+      } else {
+        tendencia = 0;
+      }
     }
 
     const periodoTipoRaw = this.parseNullString<string>(humorBlock?.periodo?.tipo);
