@@ -16,6 +16,25 @@ import type {
 
 interface ApiData {
   success?: boolean;
+  humor?: {
+    periodo?: {
+      tipo?: string | null;
+      inicio?: string | null;
+      fim?: string | null;
+    };
+    humor_atual?: string | number | null;
+    humor_medio?: string | number | null;
+    energia_media?: string | number | null;
+    qualidade_media?: string | number | null;
+    conversas_total?: string | number | null;
+    ultima_conversa?: {
+      data?: string | null;
+      hora?: string | null;
+      emoji?: string | null;
+      emocao?: string | null;
+    } | null;
+    tendencia_vs_periodo_anterior?: string | number | null;
+  };
   user: {
     id: string;
     nome: string;
@@ -570,6 +589,7 @@ class DataAdapter {
 
     return {
       success: 'success' in safeData ? safeData.success : defaults.success,
+      humor: safeData.humor,
       user: {
         ...defaults.user,
         ...(safeData.user || {})
@@ -876,11 +896,82 @@ class DataAdapter {
     };
   }
 
+  private resolveHumorMetrics(apiData: ApiData) {
+    const defaults = this.getDefaultApiData();
+    const metricas = apiData.metricas_semana ?? defaults.metricas_semana;
+    const humorBlock = apiData.humor;
+
+    const parsedHumorAtual = humorBlock
+      ? this.parseNumber(humorBlock.humor_atual ?? humorBlock.humor_medio)
+      : null;
+    const metricasHumor = this.parseNumber(metricas.humor_medio);
+    const nivelAtual = parsedHumorAtual ?? metricasHumor ?? 0;
+
+    const humorMedio = humorBlock
+      ? this.parseNumber(humorBlock.humor_medio ?? humorBlock.humor_atual) ?? nivelAtual
+      : metricasHumor ?? nivelAtual;
+
+    const energiaMedia = humorBlock
+      ? this.parseNumber(humorBlock.energia_media)
+      : null;
+    const qualidadeMedia = humorBlock
+      ? this.parseNumber(humorBlock.qualidade_media)
+      : null;
+
+    const conversasTotal = humorBlock
+      ? this.parseNumber(humorBlock.conversas_total)
+      : null;
+
+    const ultimaConversaEmoji = this.parseNullString<string>(
+      humorBlock?.ultima_conversa?.emoji
+    ) || this.parseNullString<string>(metricas.ultimo_conversa_emoji) || '😐';
+
+    const ultimaConversaEmocao = this.parseNullString<string>(
+      humorBlock?.ultima_conversa?.emocao
+    ) || this.parseNullString<string>(metricas.ultima_emocao) || 'neutral';
+
+    const ultimaConversaData = this.parseNullString<string>(
+      humorBlock?.ultima_conversa?.data
+    ) || this.parseNullString<string>(metricas.ultima_conversa_data) || defaults.metricas_semana.ultima_conversa_data;
+
+    let tendencia = this.parseNumber(humorBlock?.tendencia_vs_periodo_anterior);
+    if (tendencia === null) {
+      if (nivelAtual >= 7) tendencia = 1;
+      else if (nivelAtual <= 4) tendencia = -1;
+      else tendencia = 0;
+    }
+
+    const periodoTipoRaw = this.parseNullString<string>(humorBlock?.periodo?.tipo);
+    const periodoTipo: 'semana' | 'mes' | 'trimestre' = periodoTipoRaw === 'mes' || periodoTipoRaw === 'trimestre' ? periodoTipoRaw : 'semana';
+    const defaultRangeStart = (() => {
+      const days = periodoTipo === 'mes' ? 30 : periodoTipo === 'trimestre' ? 90 : 7;
+      return new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    })();
+    const periodoInicio = this.parseNullString<string>(humorBlock?.periodo?.inicio) || defaultRangeStart;
+    const periodoFim = this.parseNullString<string>(humorBlock?.periodo?.fim) || new Date().toISOString().split('T')[0];
+
+    return {
+      nivelAtual,
+      humorMedio,
+      energiaMedia: energiaMedia ?? this.parseNumber(metricas.energia_media) ?? null,
+      qualidadeMedia: qualidadeMedia ?? this.parseNumber(metricas.qualidade_media_interacao) ?? null,
+      conversasTotal: conversasTotal ?? this.parseNumber(metricas.conversas_total) ?? 0,
+      conversasCompletas: this.parseNumber(metricas.conversas_completas) ?? 0,
+      ultimaConversaEmoji,
+      ultimaConversaEmocao,
+      ultimaConversaData,
+      tendencia,
+      periodoTipo,
+      periodoInicio,
+      periodoFim,
+    };
+  }
+
   public convertApiToDashboard(rawApiPayload: ApiPayload): DashboardData {
     const apiData = this.normalizeApiPayload(rawApiPayload);
     const perfilDetectado = this.generatePerfilDetectado(apiData);
     const metricas = apiData.metricas_semana;
-    const humorMedio = this.parseNumber(metricas.humor_medio);
+    const humorMetrics = this.resolveHumorMetrics(apiData);
     const cronotipoRaw = this.parseNullString<string>(apiData.user.cronotipo_detectado);
 
     let cronotipo: 'matutino' | 'vespertino' | 'noturno' = 'matutino';
@@ -896,16 +987,16 @@ class DataAdapter {
       },
       
       mood_gauge: {
-        nivel_atual: humorMedio ?? 0,
-        emoji_atual: this.parseNullString<string>(metricas.ultimo_conversa_emoji) || '😐',
-        tendencia_semanal: humorMedio ? (humorMedio >= 7 ? 1 : humorMedio <= 4 ? -1 : 0) : 0,
+        nivel_atual: humorMetrics.nivelAtual,
+        emoji_atual: humorMetrics.ultimaConversaEmoji,
+        tendencia_semanal: humorMetrics.tendencia,
         cor_indicador: (() => {
-          if (humorMedio === null || humorMedio === undefined) {
+          if (humorMetrics.nivelAtual === null || humorMetrics.nivelAtual === undefined) {
             return '#6B7280';
           }
-          if (humorMedio >= 8) return '#10B981'; // Verde para humor alto
-          if (humorMedio >= 6) return '#F59E0B'; // Amarelo para neutro/regular
-          if (humorMedio >= 4) return '#F97316'; // Laranja para baixo
+          if (humorMetrics.nivelAtual >= 8) return '#10B981';
+          if (humorMetrics.nivelAtual >= 6) return '#F59E0B';
+          if (humorMetrics.nivelAtual >= 4) return '#F97316';
           return '#EF4444'; // Vermelho para muito baixo
         })()
       },
@@ -923,18 +1014,18 @@ class DataAdapter {
       alertas_background: [],
       
       metricas_periodo: {
-        periodo_selecionado: 'semana',
-        data_inicio: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        data_fim: new Date().toISOString().split('T')[0],
-        total_checkins: this.parseNumber(metricas.conversas_total) || 0,
+        periodo_selecionado: humorMetrics.periodoTipo,
+        data_inicio: humorMetrics.periodoInicio,
+        data_fim: humorMetrics.periodoFim,
+        total_checkins: humorMetrics.conversasTotal,
         taxa_resposta: (() => {
-          const total = this.parseNumber(metricas.conversas_total);
+          const total = humorMetrics.conversasTotal;
           const completas = this.parseNumber(metricas.conversas_completas);
           if (!total || total === 0) return 0;
           return (completas! / total) * 100;
         })(),
-        humor_medio: humorMedio || 5,
-        emocao_dominante: this.parseNullString<string>(metricas.ultima_emocao) || 'neutral'
+        humor_medio: humorMetrics.humorMedio || 5,
+        emocao_dominante: humorMetrics.ultimaConversaEmocao
       }
     };
 

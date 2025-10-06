@@ -129,7 +129,7 @@ export interface DashboardData {
   };
   
   mood_gauge: {
-    nivel_atual: number; // -5 a +5
+    nivel_atual: number; // escala 0-10 representando o humor atual
     emoji_atual: string;
     tendencia_semanal: number; // diferença da semana anterior
     cor_indicador: string;
