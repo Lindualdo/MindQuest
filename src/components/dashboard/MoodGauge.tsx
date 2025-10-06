@@ -21,9 +21,9 @@ const MoodGauge: React.FC = () => {
   const { mood_gauge } = dashboardData;
   const gradientId = React.useId();
 
-  // Normalizar valor de -5 a +5 para 0 a 1 e evitar extrapolações na escala
-  const clampedNivel = Math.max(-5, Math.min(5, mood_gauge.nivel_atual));
-  const normalized = (clampedNivel + 5) / 10;
+  // Normalizar valor de 0 a 10 para 0 a 1 e evitar extrapolações na escala
+  const clampedNivel = Math.max(0, Math.min(10, mood_gauge.nivel_atual));
+  const normalized = clampedNivel / 10;
   const circumference = Math.PI * GAUGE_RADIUS;
   const strokeDasharray = `${circumference} ${circumference}`;
   const strokeDashoffset = 0;
@@ -33,11 +33,10 @@ const MoodGauge: React.FC = () => {
   
   // Determinar cor baseada no nível
   const getGaugeColor = (nivel: number) => {
-    if (nivel >= 3) return '#10B981'; // Verde
-    if (nivel >= 1) return '#F59E0B'; // Amarelo
-    if (nivel >= -1) return '#6B7280'; // Cinza
-    if (nivel >= -3) return '#F97316'; // Laranja
-    return '#EF4444'; // Vermelho
+    if (nivel >= 8) return '#10B981'; // Verde alto
+    if (nivel >= 6) return '#F59E0B'; // Amarelo moderado
+    if (nivel >= 4) return '#F97316'; // Laranja atenção
+    return '#EF4444'; // Vermelho crítico
   };
 
   const gaugeColor = getGaugeColor(clampedNivel);
@@ -131,8 +130,8 @@ const MoodGauge: React.FC = () => {
           </motion.g>
           
           {/* Scale markers - ajustado para melhor distribuição */}
-          {[-5, -2.5, 0, 2.5, 5].map((value, index) => {
-            const angle = (value + 5) / 10 * 180 - 90;
+          {[0, 2.5, 5, 7.5, 10].map((value, index) => {
+            const angle = (value / 10) * 180 - 90;
             const radian = ((angle - 90) * Math.PI) / 180;
             
             // Ajustar posições para melhor visualização
@@ -163,18 +162,18 @@ const MoodGauge: React.FC = () => {
                   y={GAUGE_SIZE/2 + labelRadius * Math.sin(radian)}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className={`text-xs font-medium ${value === 0 ? 'fill-gray-800' : 'fill-gray-600'}`}
+                  className={`text-xs font-medium ${value === 5 ? 'fill-gray-800' : 'fill-gray-600'}`}
                 >
-                  {value > 0 ? `+${value}` : value}
+                  {value}
                 </text>
-                
+
                 {/* Marcadores menores entre os principais */}
-                {value < 5 && (
+                {value < 10 && (
                   <g>
                     {[-1.25, 1.25].map((offset) => {
                       const subValue = value + offset;
-                      if (subValue >= -5 && subValue <= 5 && subValue !== 0 && subValue !== 2.5 && subValue !== -2.5) {
-                        const subAngle = (subValue + 5) / 10 * 180 - 90;
+                      if (subValue >= 0 && subValue <= 10 && ![0, 2.5, 5, 7.5, 10].includes(Number(subValue.toFixed(2)))) {
+                        const subAngle = (subValue / 10) * 180 - 90;
                         const subRadian = ((subAngle - 90) * Math.PI) / 180;
                         const subX1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.cos(subRadian);
                         const subY1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 12) * Math.sin(subRadian);
@@ -211,7 +210,7 @@ const MoodGauge: React.FC = () => {
         className="mb-4"
       >
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
-          {clampedNivel > 0 ? '+' : ''}{clampedNivel.toFixed(1)}
+          {clampedNivel.toFixed(1)}
         </div>
         <div className="text-sm text-gray-600 mt-1">Nível atual</div>
       </motion.div>

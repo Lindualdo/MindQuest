@@ -896,16 +896,16 @@ class DataAdapter {
       },
       
       mood_gauge: {
-        nivel_atual: humorMedio ? (humorMedio - 5) : 0,
+        nivel_atual: humorMedio ?? 0,
         emoji_atual: this.parseNullString<string>(metricas.ultimo_conversa_emoji) || '😐',
-        tendencia_semanal: humorMedio ? (humorMedio > 6 ? 1 : humorMedio < 4 ? -1 : 0) : 0,
+        tendencia_semanal: humorMedio ? (humorMedio >= 7 ? 1 : humorMedio <= 4 ? -1 : 0) : 0,
         cor_indicador: (() => {
           if (humorMedio === null || humorMedio === undefined) {
             return '#6B7280';
           }
-          if (humorMedio >= 7) return '#10B981'; // Verde para humor alto
-          if (humorMedio >= 5) return '#F59E0B'; // Amarelo para neutro/regular
-          if (humorMedio >= 3) return '#F97316'; // Laranja para baixo
+          if (humorMedio >= 8) return '#10B981'; // Verde para humor alto
+          if (humorMedio >= 6) return '#F59E0B'; // Amarelo para neutro/regular
+          if (humorMedio >= 4) return '#F97316'; // Laranja para baixo
           return '#EF4444'; // Vermelho para muito baixo
         })()
       },
