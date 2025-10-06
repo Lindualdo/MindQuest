@@ -280,9 +280,276 @@ class DataAdapter {
         const nestedResult = this.unwrapApiPayload(obj.result as ApiPayload);
         if (nestedResult) return nestedResult;
       }
+
+      const converted = this.convertAuthPayload(obj);
+      if (converted) {
+        return converted;
+      }
     }
 
     return null;
+  }
+
+  private convertAuthPayload(payload: Record<string, unknown>): Partial<ApiData> | null {
+    if (Array.isArray(payload.data)) {
+      const entries = payload.data as Array<Record<string, unknown>>;
+      let aggregated: Partial<ApiData> | null = null;
+
+      const mergePartial = (
+        base: Partial<ApiData> | null,
+        addition: Partial<ApiData> | null
+      ): Partial<ApiData> | null => {
+        if (!addition) return base;
+        if (!base) return addition;
+
+        const mergeRecord = <T extends Record<string, unknown> | undefined>(
+          target: T,
+          source: T
+        ): T => {
+          if (!source) return target;
+          if (!target) return source;
+          return { ...target, ...source } as T;
+        };
+
+        return {
+          success: addition.success ?? base.success,
+          user: mergeRecord(base.user, addition.user),
+          perfil_big_five: mergeRecord(base.perfil_big_five, addition.perfil_big_five),
+          gamificacao: mergeRecord(base.gamificacao, addition.gamificacao),
+          sabotador: mergeRecord(base.sabotador, addition.sabotador),
+          metricas_semana: mergeRecord(base.metricas_semana, addition.metricas_semana),
+          distribuicao_emocoes: mergeRecord(base.distribuicao_emocoes, addition.distribuicao_emocoes),
+          panas: mergeRecord(base.panas, addition.panas),
+          historico_diario: addition.historico_diario ?? base.historico_diario,
+          insights: addition.insights ?? base.insights,
+          timestamp: addition.timestamp ?? base.timestamp
+        };
+      };
+
+      for (const entry of entries) {
+        if (!entry || typeof entry !== 'object') {
+          continue;
+        }
+        const converted = this.convertAuthPayload(entry as Record<string, unknown>);
+        aggregated = mergePartial(aggregated, converted);
+      }
+
+      return aggregated;
+    }
+
+    const hasKnownKeys = [
+      'Perfil_BigFive',
+      'Sabotador',
+      'Gameficacao',
+      'Gamificacao',
+      'Metricas_Semana',
+      'Distribuicao_Emocoes',
+      'Analise_PANAS',
+      'Historico_Diario',
+      'Insights'
+    ].some((key) => Object.prototype.hasOwnProperty.call(payload, key));
+
+    if (!hasKnownKeys) {
+      return null;
+    }
+
+    const safeJsonParse = <T>(value: unknown): T | null => {
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value) as T;
+        } catch (error) {
+          console.warn('[DataAdapter] Falha ao parsear JSON dinâmico:', error);
+          return null;
+        }
+      }
+
+      if (value && typeof value === 'object') {
+        return value as T;
+      }
+
+      return null;
+    };
+
+    const perfil = safeJsonParse<Record<string, unknown>>(payload.Perfil_BigFive);
+    const gamificacaoBlock = safeJsonParse<Record<string, unknown>>(payload.Gameficacao ?? payload.Gamificacao);
+    const sabotadorBlock = safeJsonParse<Record<string, unknown>>(payload.Sabotador);
+    const metricasBlock = safeJsonParse<Record<string, unknown>>(payload.Metricas_Semana);
+    const distribuicaoBlock = safeJsonParse<Record<string, unknown>>(payload.Distribuicao_Emocoes);
+    const panasBlock = safeJsonParse<Record<string, unknown>>(payload.Analise_PANAS);
+    const historicoWrapper = safeJsonParse<Record<string, unknown>>(payload.Historico_Diario);
+    const insightsWrapper = safeJsonParse<Record<string, unknown>>(payload.Insights);
+
+    const historicoArray = safeJsonParse<Array<Record<string, unknown>>>(historicoWrapper?.historico ?? historicoWrapper);
+    const insightsArray = safeJsonParse<Array<Record<string, unknown>>>(insightsWrapper?.insights_lista ?? insightsWrapper);
+
+    const distribuicaoRaw = safeJsonParse<Record<string, number | string>>(distribuicaoBlock?.emocoes_contagem ?? distribuicaoBlock);
+
+    const userId = (perfil?.usuario_id ?? gamificacaoBlock?.usuario_id) as string | undefined;
+
+    const partialUser: Partial<ApiData['user']> = {};
+    if (userId) {
+      partialUser.id = this.parseNullString<string>(userId) ?? undefined;
+    }
+
+    const perfilBigFive: Partial<ApiData['perfil_big_five']> = {};
+    if (perfil) {
+      const setPerfilValue = (key: keyof ApiData['perfil_big_five'], value: unknown) => {
+        const parsed = this.parseNullString<string>(value as string | null | undefined);
+        if (parsed !== null && parsed !== undefined) {
+          perfilBigFive[key] = parsed;
+        }
+      };
+
+      setPerfilValue('openness', perfil.openness);
+      setPerfilValue('conscientiousness', perfil.conscientiousness);
+      setPerfilValue('extraversion', perfil.extraversion);
+      setPerfilValue('agreeableness', perfil.agreeableness);
+      setPerfilValue('neuroticism', perfil.neuroticism);
+      setPerfilValue('confiabilidade', perfil.confiabilidade);
+      setPerfilValue('perfil_primario', perfil.perfil_primario);
+      setPerfilValue('perfil_secundario', perfil.perfil_secundario);
+    }
+
+    const gamificacao: Partial<ApiData['gamificacao']> = {};
+    if (gamificacaoBlock) {
+      const setGamificacaoValue = (key: keyof ApiData['gamificacao'], value: unknown) => {
+        const parsed = this.parseNullString<string>(value as string | null | undefined);
+        if (parsed !== null && parsed !== undefined) {
+          gamificacao[key] = parsed;
+        }
+      };
+
+      setGamificacaoValue('xp_total', gamificacaoBlock.xp_total);
+      setGamificacaoValue('nivel_atual', gamificacaoBlock.nivel_atual);
+      setGamificacaoValue('streak_conversas_dias', gamificacaoBlock.streak_conversas_dias);
+      setGamificacaoValue('conquistas_desbloqueadas', gamificacaoBlock.conquistas_desbloqueadas);
+      setGamificacaoValue('quest_diaria_status', gamificacaoBlock.quest_diaria_status);
+      setGamificacaoValue('quest_diaria_progresso', gamificacaoBlock.quest_diaria_progresso);
+      setGamificacaoValue('quest_diaria_descricao', gamificacaoBlock.quest_diaria_descricao);
+    }
+
+    const sabotador: Partial<ApiData['sabotador']> = {};
+    if (sabotadorBlock) {
+      const setSabotadorValue = (key: keyof ApiData['sabotador'], value: unknown) => {
+        const parsed = this.parseNullString<string>(value as string | null | undefined);
+        if (parsed !== null && parsed !== undefined) {
+          sabotador[key] = parsed;
+        }
+      };
+
+      setSabotadorValue('id', sabotadorBlock.sabotador_id ?? sabotadorBlock.id);
+      setSabotadorValue('nome', sabotadorBlock.nome);
+      setSabotadorValue('emoji', sabotadorBlock.emoji);
+      setSabotadorValue('apelido_personalizado', sabotadorBlock.apelido_personalizado ?? sabotadorBlock.apelido);
+      setSabotadorValue('total_deteccoes', sabotadorBlock.total_deteccoes);
+      setSabotadorValue('contexto_principal', sabotadorBlock.contexto_principal);
+      setSabotadorValue('insight_atual', sabotadorBlock.insight_atual);
+      setSabotadorValue('contramedida_ativa', sabotadorBlock.contramedida_ativa);
+      setSabotadorValue('intensidade_media', sabotadorBlock.intensidade_media);
+      setSabotadorValue('total_conversas', sabotadorBlock.total_conversas ?? sabotadorBlock.totalConversas);
+    }
+
+    const metricas: Partial<ApiData['metricas_semana']> = {};
+    if (metricasBlock) {
+      const setMetricasValue = (key: keyof ApiData['metricas_semana'], value: unknown) => {
+        const parsed = this.parseNullString<string>(value as string | null | undefined);
+        if (parsed !== null && parsed !== undefined) {
+          metricas[key] = parsed;
+        }
+      };
+
+      setMetricasValue('conversas_total', metricasBlock.conversas_total);
+      setMetricasValue('conversas_completas', metricasBlock.conversas_completas);
+      setMetricasValue('humor_medio', metricasBlock.humor_medio);
+      setMetricasValue('energia_media', metricasBlock.energia_media);
+      setMetricasValue(
+        'qualidade_media_interacao',
+        metricasBlock.qualidade_media_interacao ?? metricasBlock.qualidade_media
+      );
+      setMetricasValue('ultima_emocao', metricasBlock.ultima_emocao);
+      setMetricasValue('ultima_conversa_data', metricasBlock.ultima_conversa_data);
+      setMetricasValue('ultimo_conversa_emoji', metricasBlock.ultimo_conversa_emoji ?? metricasBlock.ultimo_emoji);
+    }
+
+    const distribuicao: Partial<ApiData['distribuicao_emocoes']> = {};
+    if (distribuicaoRaw) {
+      for (const key of Object.keys(distribuicaoRaw)) {
+        const normalizedKey = key.toLowerCase();
+        if (normalizedKey in this.getDefaultApiData().distribuicao_emocoes) {
+          const targetKey = normalizedKey as keyof ApiData['distribuicao_emocoes'];
+          const value = distribuicaoRaw[key];
+          const parsedValue = typeof value === 'number' ? value : Number(value);
+          distribuicao[targetKey] = Number.isFinite(parsedValue) ? parsedValue : 0;
+        }
+      }
+    }
+
+    const panas: Partial<ApiData['panas']> = {};
+    if (panasBlock) {
+      for (const key of Object.keys(panasBlock)) {
+        const value = panasBlock[key];
+        const parsedValue = typeof value === 'number' ? value : Number(value);
+        if (Number.isFinite(parsedValue)) {
+          (panas as Record<string, number>)[key] = parsedValue;
+        }
+      }
+    }
+
+    const parseNullableNumber = (value: unknown): number | null => {
+      if (
+        typeof value === 'number' ||
+        typeof value === 'string' ||
+        value === null ||
+        value === undefined
+      ) {
+        return this.parseNumber(value as string | number | null | undefined);
+      }
+      return null;
+    };
+
+    const historicoDiario = Array.isArray(historicoArray)
+      ? historicoArray.map((entry) => ({
+          data: this.parseNullString<string>(entry.data as string | null | undefined) || undefined,
+          humor: parseNullableNumber(entry.humor),
+          emocao: this.parseNullString<string>(entry.emocao as string | null | undefined) || undefined,
+          emoji: this.parseNullString<string>(entry.emoji as string | null | undefined) || undefined,
+          energia: parseNullableNumber(entry.energia),
+          qualidade: parseNullableNumber(entry.qualidade)
+        }))
+      : undefined;
+
+    const insights = Array.isArray(insightsArray)
+      ? insightsArray.map((insight) => ({
+          id: this.parseNullString<string>(insight.id as string | null | undefined) || undefined,
+          tipo: this.parseNullString<string>(insight.tipo as string | null | undefined) || undefined,
+          categoria: this.parseNullString<string>(insight.categoria as string | null | undefined) || undefined,
+          titulo: this.parseNullString<string>(insight.titulo as string | null | undefined) || undefined,
+          descricao: this.parseNullString<string>(insight.descricao as string | null | undefined) || undefined,
+          icone: this.parseNullString<string>(insight.icone as string | null | undefined) || undefined,
+          prioridade: this.parseNullString<string>(insight.prioridade as string | null | undefined) || undefined,
+          data_criacao: this.parseNullString<string>(insight.data_criacao as string | null | undefined) || undefined
+        }))
+      : undefined;
+
+    const partialUserData = partialUser.id
+      ? { ...this.getDefaultApiData().user, ...partialUser }
+      : undefined;
+
+    const partialData: Partial<ApiData> = {
+      success: true,
+      user: partialUserData,
+      perfil_big_five: Object.keys(perfilBigFive).length > 0 ? (perfilBigFive as ApiData['perfil_big_five']) : undefined,
+      gamificacao: Object.keys(gamificacao).length > 0 ? (gamificacao as ApiData['gamificacao']) : undefined,
+      sabotador: Object.keys(sabotador).length > 0 ? (sabotador as ApiData['sabotador']) : undefined,
+      metricas_semana: Object.keys(metricas).length > 0 ? (metricas as ApiData['metricas_semana']) : undefined,
+      distribuicao_emocoes: Object.keys(distribuicao).length > 0 ? (distribuicao as ApiData['distribuicao_emocoes']) : undefined,
+      panas: Object.keys(panas).length > 0 ? (panas as ApiData['panas']) : undefined,
+      historico_diario: historicoDiario,
+      insights: insights,
+      timestamp: new Date().toISOString()
+    };
+
+    return partialData;
   }
 
   private mergeWithDefaults(data: Partial<ApiData> | null): ApiData {
