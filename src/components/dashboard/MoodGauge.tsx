@@ -87,10 +87,10 @@ const MoodGauge: React.FC = () => {
               <Info size={16} />
             </button>
             {showInfo && (
-              <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-64 p-3 bg-white rounded-lg shadow-lg text-xs text-gray-600 z-20">
-                <p className="font-semibold text-gray-700 mb-1">Como interpretar</p>
+              <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-72 p-4 bg-white rounded-xl shadow-xl text-xs text-gray-600 z-20">
+                <p className="font-semibold text-gray-700 mb-1">Como ler o gauge</p>
                 <p>
-                  O valor principal mostra o humor detectado na conversa mais recente. A tendência compara esse valor com a média da última semana para indicar progresso ou queda.
+                  Humor atual = última conversa. Tendência = diferença vs. média dos últimos 7 dias. Use para saber se você está melhor, igual ou abaixo do padrão semanal.
                 </p>
               </div>
             )}

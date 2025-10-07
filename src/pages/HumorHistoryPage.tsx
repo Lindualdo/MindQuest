@@ -83,7 +83,7 @@ const HumorHistoryPage: React.FC = () => {
     }).sort((a, b) => a.timestamp - b.timestamp);
   }, [humorHistorico]);
 
-  const infoLabel = `Humor atual reflete a última conversa analisada. A linha mostra as variações registradas no período selecionado. A média semanal continua visível no painel principal.`;
+  const infoLabel = `Cada ponto registra uma leitura de humor/energia (geralmente por conversa). Use o gráfico para observar oscilações no período e a lista para ver justificativas e conversas associadas.`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6">
