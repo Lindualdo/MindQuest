@@ -54,6 +54,51 @@ export interface CheckinDiario {
   emoji_dia: string;
 }
 
+export interface HumorHistoricoSeriePoint {
+  data: string;
+  hora?: string | null;
+  timestamp?: string | null;
+  humor?: number | null;
+  pico_dia?: number | null;
+  humor_medio?: number | null;
+  energia?: number | null;
+  emoji?: string | null;
+  emocao?: string | null;
+  chat_id?: string | null;
+}
+
+export interface HumorHistoricoDetalhe {
+  data: string;
+  hora: string | null;
+  humor: number;
+  energia: number;
+  variacao_humor?: string | null;
+  variacao_energia?: string | null;
+  periodo_dia?: string | null;
+  justificativa?: string | null;
+  confianca?: number | null;
+  conversa?: {
+    id: string | null;
+    horario_inicio?: string | null;
+    horario_fim?: string | null;
+    emocao?: string | null;
+    intensidade_emocao?: number | null;
+    humor_autoavaliado?: number | null;
+    qualidade_interacao?: number | null;
+    emoji?: string | null;
+    observacoes?: string | null;
+  } | null;
+}
+
+export interface HumorHistoricoPayload {
+  periodo: {
+    inicio: string;
+    fim: string;
+  };
+  serie: HumorHistoricoSeriePoint[];
+  detalhes: HumorHistoricoDetalhe[];
+}
+
 // Distribuição PANAS
 export interface DistribuicaoPanas {
   positivas: number;
@@ -122,6 +167,7 @@ export interface AlertaPreventivo {
 // Dashboard Data - estrutura principal
 export interface DashboardData {
   usuario: {
+    id: string;
     nome: string;
     nome_preferencia: string;
     cronotipo_detectado: 'matutino' | 'vespertino' | 'noturno';
@@ -168,12 +214,19 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
+  view: 'dashboard' | 'humorHistorico';
+  humorHistorico: HumorHistoricoPayload | null;
+  humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
+  humorHistoricoLoading: boolean;
+  humorHistoricoError: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
+  setView: (view: 'dashboard' | 'humorHistorico') => void;
+  loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil

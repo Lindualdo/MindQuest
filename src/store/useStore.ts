@@ -35,6 +35,11 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   periodo: 'semana',
   ultimaAtualizacao: '',
   lastUpdated: '',
+  view: 'dashboard',
+  humorHistorico: null,
+  humorHistoricoPeriodo: null,
+  humorHistoricoLoading: false,
+  humorHistoricoError: null,
 
   // Actions básicas
   setError: (error) => {
@@ -47,6 +52,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
 
   setLoading: (loading) => {
     set({ isLoading: loading });
+  },
+
+  setView: (view) => {
+    set({ view });
   },
 
   /**
@@ -189,6 +198,47 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         error: 'Erro ao atualizar dados'
       });
     }
+  },
+
+  loadHumorHistorico: async (options) => {
+    const { dashboardData } = get();
+    let userId = dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      console.warn('[HumorHistorico] usuário indisponível, abortando');
+      return;
+    }
+
+    try {
+      console.log('[HumorHistorico] carregando', { userId, options });
+      set({ humorHistoricoLoading: true, humorHistoricoError: null });
+      const payload = await apiService.getHumorHistorico(
+        userId,
+        options?.inicio,
+        options?.fim
+      );
+      console.log('[HumorHistorico] sucesso', payload);
+
+      set({
+        humorHistorico: payload,
+        humorHistoricoPeriodo: payload.periodo,
+        humorHistoricoLoading: false,
+        humorHistoricoError: null
+      });
+    } catch (error) {
+      console.error('Erro ao carregar histórico de humor:', error);
+      set({
+        humorHistoricoLoading: false,
+        humorHistoricoError: error instanceof Error ? error.message : 'Erro ao carregar histórico'
+      });
+    }
   }
 }));
 
@@ -213,7 +263,13 @@ export const useDashboard = () => {
     refreshData, 
     setPeriodo, 
     periodo,
-    ultimaAtualizacao 
+    ultimaAtualizacao,
+    view,
+    setView,
+    humorHistorico,
+    humorHistoricoLoading,
+    humorHistoricoError,
+    loadHumorHistorico
   } = useStore();
   
   return {
@@ -223,7 +279,13 @@ export const useDashboard = () => {
     refreshData,
     setPeriodo,
     periodo,
-    ultimaAtualizacao
+    ultimaAtualizacao,
+    view,
+    setView,
+    humorHistorico,
+    humorHistoricoLoading,
+    humorHistoricoError,
+    loadHumorHistorico
   };
 };
 

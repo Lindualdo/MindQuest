@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { TrendingUp, TrendingDown, Minus, Info, Clock } from 'lucide-react';
+import useStore from '../../store/useStore';
 import Card from '../ui/Card';
 
 const GAUGE_SIZE = 280;
@@ -17,9 +17,10 @@ const GAUGE_RADIUS = 100;
 const GAUGE_STROKE = 16;
 
 const MoodGauge: React.FC = () => {
-  const { dashboardData } = useStore();
+  const { dashboardData, setView, loadHumorHistorico } = useStore();
   const { mood_gauge } = dashboardData;
   const gradientId = React.useId();
+  const [showInfo, setShowInfo] = React.useState(false);
 
   // Normalizar valor de 0 a 10 para 0 a 1 e evitar extrapolações na escala
   const clampedNivel = Math.max(0, Math.min(10, mood_gauge.nivel_atual));
@@ -42,17 +43,67 @@ const MoodGauge: React.FC = () => {
   const gaugeColor = getGaugeColor(clampedNivel);
   
   // Componente da tendência
-  const TrendIcon = mood_gauge.tendencia_semanal > 0 ? TrendingUp : 
-                   mood_gauge.tendencia_semanal < 0 ? TrendingDown : Minus;
+  const tendenciaValor = mood_gauge.tendencia_semanal ?? 0;
+  const TrendIcon = tendenciaValor > 0 ? TrendingUp : 
+                   tendenciaValor < 0 ? TrendingDown : Minus;
   
-  const trendColor = mood_gauge.tendencia_semanal > 0 ? 'text-green-600' : 
-                    mood_gauge.tendencia_semanal < 0 ? 'text-red-600' : 'text-gray-500';
+  const trendColor = tendenciaValor > 0 ? 'text-green-600' : 
+                    tendenciaValor < 0 ? 'text-red-600' : 'text-gray-500';
+
+  const trendLabel = `${tendenciaValor > 0 ? '+' : ''}${tendenciaValor.toFixed(1)}%`;
+
+  const handleOpenHistory = async () => {
+    console.log('[MoodGauge] abrindo histórico');
+    setView('humorHistorico');
+
+    const currentState = typeof useStore.getState === 'function' ? useStore.getState() : null;
+    const userId = currentState?.dashboardData?.usuario?.id;
+
+    if (!userId) {
+      console.warn('[MoodGauge] usuário não encontrado ao abrir histórico', currentState?.dashboardData);
+      return;
+    }
+
+    try {
+      console.log('[MoodGauge] requisitando histórico para', userId);
+      await loadHumorHistorico();
+    } catch (error) {
+      console.error('Erro ao carregar histórico de humor:', error);
+    }
+  };
 
   return (
     <Card className="text-center">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-gray-800">Humor</h3>
-        <div className="text-2xl">{mood_gauge.emoji_atual}</div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowInfo((prev) => !prev)}
+              className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+              aria-label="Informações sobre o indicador de humor"
+            >
+              <Info size={16} />
+            </button>
+            {showInfo && (
+              <div className="absolute right-0 mt-2 w-64 p-3 bg-white rounded-lg shadow-lg text-xs text-gray-600 z-10">
+                <p className="font-semibold text-gray-700 mb-1">Como interpretar</p>
+                <p>
+                  O valor principal mostra o humor detectado na conversa mais recente. A tendência compara esse valor com a média da última semana para indicar progresso ou queda.
+                </p>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleOpenHistory}
+            className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition"
+            type="button"
+          >
+            <Clock size={14} /> Histórico
+          </button>
+          <div className="text-2xl">{mood_gauge.emoji_atual}</div>
+        </div>
       </div>
 
       {/* Gauge SVG */}
@@ -226,8 +277,7 @@ const MoodGauge: React.FC = () => {
         <div className="text-sm">
           <span className="font-medium text-gray-700">Tendência:</span>
           <span className={`ml-1 font-semibold ${trendColor}`}>
-            {mood_gauge.tendencia_semanal > 0 ? '+' : ''}
-            {mood_gauge.tendencia_semanal.toFixed(1)} esta semana
+            {trendLabel} esta semana
           </span>
         </div>
       </motion.div>

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { Brain, RefreshCw, AlertCircle } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
+import HumorHistoryPage from './pages/HumorHistoryPage';
 import { useDashboard } from './store/useStore';
 
 function App() {
@@ -18,7 +19,8 @@ function App() {
     refreshData, 
     isLoading, 
     error,
-    ultimaAtualizacao 
+    ultimaAtualizacao,
+    view
   } = useDashboard();
 
   const handleRefresh = async () => {
@@ -63,6 +65,14 @@ function App() {
             </div>
           </motion.div>
         </div>
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'humorHistorico') {
+    return (
+      <AuthGuard>
+        <HumorHistoryPage />
       </AuthGuard>
     );
   }

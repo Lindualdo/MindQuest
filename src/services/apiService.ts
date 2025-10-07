@@ -7,6 +7,7 @@
  */
 
 import { authService } from './authService';
+import type { HumorHistoricoPayload } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -169,12 +170,48 @@ class ApiService {
     return null;
   }
 
+  private extractHumorHistoricoPayload(payload: unknown): HumorHistoricoPayload | null {
+    if (!payload) {
+      return null;
+    }
+
+    if (Array.isArray(payload)) {
+      for (const item of payload) {
+        const extracted = this.extractHumorHistoricoPayload(item);
+        if (extracted) {
+          return extracted;
+        }
+      }
+      return null;
+    }
+
+    if (typeof payload === 'object') {
+      const obj = payload as Record<string, unknown>;
+      if (obj.historico_humor) {
+        return obj.historico_humor as HumorHistoricoPayload;
+      }
+
+      if (obj.response !== undefined) {
+        const nested = this.extractHumorHistoricoPayload(obj.response);
+        if (nested) return nested;
+      }
+
+      if (obj.data !== undefined) {
+        const nestedData = this.extractHumorHistoricoPayload(obj.data);
+        if (nestedData) return nestedData;
+      }
+    }
+
+    return null;
+  }
+
   private async makeRequest(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    forceRemote = false
   ): Promise<ApiResponse> {
     try {
-      const url = this.resolveUrl(endpoint);
+      const url = forceRemote ? `${this.remoteBaseUrl}${endpoint}` : this.resolveUrl(endpoint);
       const method = (options.method || 'GET').toUpperCase();
 
       const defaultHeaders = method === 'GET'
@@ -220,7 +257,7 @@ class ApiService {
    */
   public async validateTokenAndGetData(token: string): Promise<ApiResponse> {
     const endpoint = `/auth/validate?token=${encodeURIComponent(token)}`;
-    const result = await this.makeRequest(endpoint);
+    const result = await this.makeRequest(endpoint, undefined, true);
     
     const dashboardPayload = this.extractDashboardPayload(result.response);
 
@@ -262,6 +299,39 @@ class ApiService {
   public async refreshDashboardData(): Promise<DashboardApiResponse | null> {
     // Por enquanto, mesmo endpoint. Futuramente pode ter endpoint específico
     return this.getDashboardData();
+  }
+
+  public async getHumorHistorico(
+    userId: string,
+    inicio?: string,
+    fim?: string
+  ): Promise<HumorHistoricoPayload> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const params = new URLSearchParams({ user_id: userId });
+    if (inicio) {
+      params.set('data_inicio', inicio);
+    }
+    if (fim) {
+      params.set('data_fim', fim);
+    }
+
+    const endpoint = `/humor-historico?${params.toString()}`;
+    console.info('[API] requisitando histórico de humor:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar histórico de humor');
+    }
+
+    const payload = this.extractHumorHistoricoPayload(result.response);
+    if (!payload) {
+      throw new Error('Formato inesperado no histórico de humor');
+    }
+
+    return payload;
   }
 
   /**

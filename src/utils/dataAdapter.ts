@@ -982,6 +982,7 @@ class DataAdapter {
 
     const dashboardData: DashboardData = {
       usuario: {
+        id: apiData.user.id,
         nome: apiData.user.nome,
         nome_preferencia: apiData.user.nome_preferencia,
         cronotipo_detectado: cronotipo,
