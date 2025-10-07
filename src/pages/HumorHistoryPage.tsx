@@ -112,6 +112,34 @@ const HumorHistoryPage: React.FC = () => {
           </div>
 
           <div className="p-6 space-y-6">
+            {dashboardData?.mood_gauge && (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 text-sm">
+                <div className="p-3 bg-blue-50 rounded-xl text-center">
+                  <p className="text-xs uppercase text-blue-600 font-semibold">Humor atual</p>
+                  <p className="text-lg font-bold text-blue-700">{dashboardData.mood_gauge.nivel_atual.toFixed(1)}</p>
+                </div>
+                <div className="p-3 bg-amber-50 rounded-xl text-center">
+                  <p className="text-xs uppercase text-amber-600 font-semibold">Tendência</p>
+                  <p className={`text-lg font-bold ${dashboardData.mood_gauge.tendencia_semanal >= 0 ? 'text-amber-700' : 'text-red-600'}`}>
+                    {dashboardData.mood_gauge.tendencia_semanal > 0 ? '+' : ''}{dashboardData.mood_gauge.tendencia_semanal.toFixed(1)}%
+                  </p>
+                </div>
+                {humorHistorico?.serie && humorHistorico.serie.length > 0 && (
+                  <div className="p-3 bg-green-50 rounded-xl text-center">
+                    <p className="text-xs uppercase text-green-600 font-semibold">Primeiro registro</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {Number((humorHistorico.serie[0] as any).humor ?? 0).toFixed(1)}
+                    </p>
+                  </div>
+                )}
+                {humorHistorico?.serie && humorHistorico.serie.length > 0 && (
+                  <div className="p-3 bg-purple-50 rounded-xl text-center">
+                    <p className="text-xs uppercase text-purple-600 font-semibold">Registros</p>
+                    <p className="text-lg font-bold text-purple-700">{humorHistorico.serie.length}</p>
+                  </div>
+                )}
+              </div>
+            )}
             {humorHistoricoLoading && (
               <div className="text-center text-sm text-gray-500">Carregando histórico…</div>
             )}
@@ -129,7 +157,7 @@ const HumorHistoryPage: React.FC = () => {
             )}
 
             {!humorHistoricoLoading && !humorHistoricoError && chartData.length > 0 && (
-              <div className="h-64">
+              <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
