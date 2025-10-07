@@ -1,0 +1,13 @@
+
+{
+  "distribuicao_emocoes": {
+	"alegria": 85,
+	"confianca": 230,
+	"medo": 60,
+	"surpresa": 0,
+	"tristeza": 135,
+	"nojo": 0,
+	"raiva": 0,
+	"expectativa": 125
+  }
+}

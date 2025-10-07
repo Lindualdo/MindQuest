@@ -148,7 +148,7 @@ class ApiService {
     if (typeof payload === 'object') {
       const obj = payload as Record<string, unknown>;
 
-      if (obj.success === true && obj.user) {
+      if (obj.success === true && (obj.user || obj.roda_emocoes || obj.distribuicao_emocoes)) {
         return obj as DashboardApiResponse;
       }
 

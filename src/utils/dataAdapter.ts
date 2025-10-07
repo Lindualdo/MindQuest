@@ -95,6 +95,16 @@ interface ApiData {
     raiva: number;
     expectativa: number;
   };
+  roda_emocoes?: {
+    alegria: number;
+    confianca: number;
+    medo: number;
+    surpresa: number;
+    tristeza: number;
+    nojo: number;
+    raiva: number;
+    expectativa: number;
+  };
   panas: {
     positivas: number;
     negativas: number;
@@ -363,6 +373,7 @@ class DataAdapter {
       'Gamificacao',
       'Metricas_Semana',
       'Distribuicao_Emocoes',
+      'roda_emocoes',
       'Analise_PANAS',
       'Historico_Diario',
       'Insights'
@@ -394,6 +405,11 @@ class DataAdapter {
     const sabotadorBlock = safeJsonParse<Record<string, unknown>>(payload.Sabotador);
     const metricasBlock = safeJsonParse<Record<string, unknown>>(payload.Metricas_Semana);
     const distribuicaoBlock = safeJsonParse<Record<string, unknown>>(payload.Distribuicao_Emocoes);
+    const rodaEmocoesBlock = payload.roda_emocoes
+      ? payload.roda_emocoes as Record<string, unknown>
+      : payload.Roda_Emocoes
+        ? payload.Roda_Emocoes as Record<string, unknown>
+        : safeJsonParse<Record<string, unknown>>(payload.roda_emocoes);
     const panasBlock = safeJsonParse<Record<string, unknown>>(payload.Analise_PANAS);
     const historicoWrapper = safeJsonParse<Record<string, unknown>>(payload.Historico_Diario);
     const insightsWrapper = safeJsonParse<Record<string, unknown>>(payload.Insights);
@@ -490,13 +506,15 @@ class DataAdapter {
       setMetricasValue('ultimo_conversa_emoji', metricasBlock.ultimo_conversa_emoji ?? metricasBlock.ultimo_emoji);
     }
 
+    const distribuicaoRawFinal = rodaEmocoesBlock || distribuicaoRaw;
+
     const distribuicao: Partial<ApiData['distribuicao_emocoes']> = {};
-    if (distribuicaoRaw) {
-      for (const key of Object.keys(distribuicaoRaw)) {
+    if (distribuicaoRawFinal) {
+      for (const key of Object.keys(distribuicaoRawFinal)) {
         const normalizedKey = key.toLowerCase();
         if (normalizedKey in this.getDefaultApiData().distribuicao_emocoes) {
           const targetKey = normalizedKey as keyof ApiData['distribuicao_emocoes'];
-          const value = distribuicaoRaw[key];
+          const value = distribuicaoRawFinal[key];
           const parsedValue = typeof value === 'number' ? value : Number(value);
           distribuicao[targetKey] = Number.isFinite(parsedValue) ? parsedValue : 0;
         }
@@ -574,6 +592,10 @@ class DataAdapter {
   private mergeWithDefaults(data: Partial<ApiData> | null): ApiData {
     const defaults = this.getDefaultApiData();
     const safeData = data ?? {};
+
+    if (!safeData.distribuicao_emocoes && safeData.roda_emocoes) {
+      safeData.distribuicao_emocoes = safeData.roda_emocoes as ApiData['distribuicao_emocoes'];
+    }
 
     const historico = Array.isArray(safeData.historico_diario) ? safeData.historico_diario : [];
     const historicoDefaults = {
