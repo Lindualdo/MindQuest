@@ -91,7 +91,7 @@ interface ApiData {
     medo: number;
     surpresa: number;
     tristeza: number;
-    nojo: number;
+    angustia: number;
     raiva: number;
     expectativa: number;
   };
@@ -101,7 +101,7 @@ interface ApiData {
     medo: number;
     surpresa: number;
     tristeza: number;
-    nojo: number;
+    angustia: number;
     raiva: number;
     expectativa: number;
   };
@@ -240,7 +240,7 @@ class DataAdapter {
         medo: 0,
         surpresa: 0,
         tristeza: 0,
-        nojo: 0,
+        angustia: 0,
         raiva: 0,
         expectativa: 0
       },
@@ -725,7 +725,7 @@ class DataAdapter {
         { id: 'fear', nome: 'Medo', intensidade: 0, cor: '#FF6347', emoji: '😨', categoria: 'primaria' },
         { id: 'surprise', nome: 'Surpresa', intensidade: 0, cor: '#FF69B4', emoji: '😲', categoria: 'primaria' },
         { id: 'sadness', nome: 'Tristeza', intensidade: 0, cor: '#4169E1', emoji: '😢', categoria: 'primaria' },
-        { id: 'disgust', nome: 'Nojo', intensidade: 0, cor: '#8B4513', emoji: '🤢', categoria: 'primaria' },
+        { id: 'anguish', nome: 'Angústia', intensidade: 0, cor: '#8B4513', emoji: '😣', categoria: 'primaria' },
         { id: 'anger', nome: 'Raiva', intensidade: 0, cor: '#DC143C', emoji: '😠', categoria: 'primaria' },
         { id: 'anticipation', nome: 'Expectativa', intensidade: 0, cor: '#FFA500', emoji: '🤔', categoria: 'primaria' }
       ];
@@ -737,7 +737,7 @@ class DataAdapter {
       { id: 'fear', nome: 'Medo', intensidade: Math.round((emocoes.medo / total) * 100), cor: '#FF6347', emoji: '😨', categoria: 'primaria' },
       { id: 'surprise', nome: 'Surpresa', intensidade: Math.round((emocoes.surpresa / total) * 100), cor: '#FF69B4', emoji: '😲', categoria: 'primaria' },
       { id: 'sadness', nome: 'Tristeza', intensidade: Math.round((emocoes.tristeza / total) * 100), cor: '#4169E1', emoji: '😢', categoria: 'primaria' },
-      { id: 'disgust', nome: 'Nojo', intensidade: Math.round((emocoes.nojo / total) * 100), cor: '#8B4513', emoji: '🤢', categoria: 'primaria' },
+      { id: 'anguish', nome: 'Angústia', intensidade: Math.round((emocoes.angustia / total) * 100), cor: '#8B4513', emoji: '😣', categoria: 'primaria' },
       { id: 'anger', nome: 'Raiva', intensidade: Math.round((emocoes.raiva / total) * 100), cor: '#DC143C', emoji: '😠', categoria: 'primaria' },
       { id: 'anticipation', nome: 'Expectativa', intensidade: Math.round((emocoes.expectativa / total) * 100), cor: '#FFA500', emoji: '🤔', categoria: 'primaria' }
     ];

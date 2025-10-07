@@ -61,10 +61,10 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     categoria: 'primaria'
   },
   {
-    id: 'disgust',
-    nome: 'Nojo',
+    id: 'anguish',
+    nome: 'Angústia',
     cor: '#8B4513',
-    emoji: '🤢',
+    emoji: '😣',
     intensidade: 15,
     categoria: 'primaria'
   },

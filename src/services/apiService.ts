@@ -73,7 +73,7 @@ interface DashboardApiResponse {
     medo: number;
     surpresa: number;
     tristeza: number;
-    nojo: number;
+    angustia: number;
     raiva: number;
     expectativa: number;
   };
