@@ -34,13 +34,13 @@
         "perfil_secundario": "perfeccionista"
       },
       "gamificacao": {
-        "xp_total": null,
-        "nivel_atual": null,
-        "streak_conversas_dias": null,
-        "conquistas_desbloqueadas": null,
-        "quest_diaria_status": null,
-        "quest_diaria_progresso": null,
-        "quest_diaria_descricao": null
+        "xp_total": "320",
+        "nivel_atual": "2",
+        "streak_conversas_dias": "7",
+        "conquistas_desbloqueadas": "[\"primeira_conversa\",\"explorador_emocional\",\"streak_7_dias\",\"nivel_2\"]",
+        "quest_diaria_status": "completa",
+        "quest_diaria_progresso": "100",
+        "quest_diaria_descricao": "Complete sua conversa diária e reflita sobre suas emoções"
       },
       "sabotador": {
         "id": "inquieto",
@@ -85,7 +85,7 @@
           "humor": 0,
           "energia": 0,
           "qualidade": 8,
-          "ultima_hora": "00:00"
+          "ultima_hora": "10:47"
         },
         {
           "data": "2025-10-07",
@@ -124,7 +124,7 @@
           "humor": 7,
           "energia": 7,
           "qualidade": 8,
-          "ultima_hora": "00:00"
+          "ultima_hora": "20:09"
         },
         {
           "data": "2025-10-04",
@@ -150,7 +150,7 @@
           "humor": 7,
           "energia": 7,
           "qualidade": 8,
-          "ultima_hora": "00:00"
+          "ultima_hora": "17:47"
         },
         {
           "data": "2025-10-02",
@@ -163,7 +163,7 @@
           "humor": 6,
           "energia": 6,
           "qualidade": 8,
-          "ultima_hora": "00:00"
+          "ultima_hora": "08:11"
         }
       ],
       "historico_resumo": {
@@ -171,7 +171,7 @@
         "humor_medio": 6.6,
         "sequencia_ativa": 1,
         "ultima_conversa_data": "2025-10-08",
-        "ultima_conversa_hora": "00:00:00",
+        "ultima_conversa_hora": "10:47:13",
         "periodo_inicio": "2025-10-02",
         "periodo_fim": "2025-10-08"
       },
@@ -277,7 +277,7 @@
           "data_criacao": "2025-10-02T17:38:28.938518"
         }
       ],
-      "timestamp": "2025-10-08T16:56:57.075Z"
+      "timestamp": "2025-10-08T19:35:09.421Z"
     }
   }
 ]
