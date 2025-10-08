@@ -89,11 +89,10 @@ const CheckInsHistorico: React.FC = () => {
         Boolean(checkin && checkin.status_resposta === 'respondido')
     );
   const totalRespondidos = checkinsRespondidos.length;
-  const humorMedio = totalRespondidos > 0
-    ? checkinsRespondidos.reduce((acc, checkin) => acc + checkin.humor_autoavaliado, 0) / totalRespondidos
-    : 0;
-  const humorMedioFormatado = totalRespondidos > 0
-    ? Number(humorMedio).toFixed(2)
+
+  const humorMedioValor = dashboardData.metricas_periodo?.humor_medio;
+  const humorMedioFormatado = typeof humorMedioValor === 'number'
+    ? humorMedioValor.toFixed(2)
     : '0.00';
 
   const getStatusColor = (status: string) => {
@@ -170,7 +169,7 @@ const CheckInsHistorico: React.FC = () => {
           <div className="text-2xl font-bold text-green-600">
             {totalRespondidos}
           </div>
-          <div className="text-xs text-gray-600">Conversas respondidas</div>
+          <div className="text-xs text-gray-600">Dias com conversas</div>
         </div>
         
         <div className="text-center">

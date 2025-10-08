@@ -916,13 +916,15 @@ class DataAdapter {
         ? item.tem_conversa
         : conversas > 0;
 
+      const hasConversa = temConversaFlag && conversas > 0;
+
       let status: 'respondido' | 'perdido' | 'pendente';
-      if (!temConversaFlag || conversas <= 0) {
-        status = 'perdido';
-      } else if (!humor || humor <= 0) {
+      if (temConversaFlag && conversas > 0) {
+        status = 'respondido';
+      } else if (temConversaFlag) {
         status = 'pendente';
       } else {
-        status = 'respondido';
+        status = 'perdido';
       }
 
       const ultimaHora = typeof item.ultima_hora === 'string' && item.ultima_hora.trim() !== ''
@@ -934,6 +936,7 @@ class DataAdapter {
         if (status === 'pendente') return '⏳';
         return '😴';
       })();
+      const emojiDia = hasConversa ? (item.emoji || emojiFallback) : '';
 
       return {
         id_checkin: `checkin_${item.data || fallbackDate}`,
@@ -946,7 +949,7 @@ class DataAdapter {
         energia_detectada: energia,
         qualidade_interacao: qualidade,
         status_resposta: status,
-        emoji_dia: item.emoji || emojiFallback
+        emoji_dia: emojiDia
       };
     });
   }
@@ -1061,14 +1064,14 @@ class DataAdapter {
       ? this.parseNumber(humorBlock.humor_atual ?? humorBlock.humor_medio)
       : null;
     const metricasHumor = this.parseNumber(metricas.humor_medio);
-    const resumoHumor = typeof resumo?.humor_medio === 'number'
-      ? resumo.humor_medio
-      : this.parseNumber((resumo as any)?.humor_medio);
-    const nivelAtual = parsedHumorAtual ?? metricasHumor ?? resumoHumor ?? 0;
+    const humorResumoRaw = resumo?.humor_medio;
+    const resumoHumor = typeof humorResumoRaw === 'number'
+      ? humorResumoRaw
+      : this.parseNumber(humorResumoRaw as string | number | null | undefined);
+    const preferedHumorMedio = resumoHumor ?? metricasHumor ?? parsedHumorAtual;
+    const nivelAtual = parsedHumorAtual ?? preferedHumorMedio ?? 0;
 
-    const humorMedio = humorBlock
-      ? this.parseNumber(humorBlock.humor_medio ?? humorBlock.humor_atual) ?? nivelAtual
-      : metricasHumor ?? (typeof resumoHumor === 'number' ? resumoHumor : nivelAtual);
+    const humorMedio = preferedHumorMedio ?? nivelAtual;
 
     const energiaMedia = humorBlock
       ? this.parseNumber(humorBlock.energia_media)
