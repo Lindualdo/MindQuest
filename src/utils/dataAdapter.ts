@@ -116,12 +116,26 @@ interface ApiData {
   };
   historico_diario: Array<{
     data: string;
+    label?: string | null;
+    tem_conversa?: boolean | null;
+    conversas?: number | null;
     humor: number;
-    emocao: string;
-    emoji: string;
+    emocao: string | null;
+    emocao_id?: string | null;
+    emoji: string | null;
     energia: number;
     qualidade: number;
+    ultima_hora?: string | null;
   }>;
+  historico_resumo?: {
+    total_conversas?: string | number | null;
+    humor_medio?: string | number | null;
+    sequencia_ativa?: string | number | null;
+    ultima_conversa_data?: string | null;
+    ultima_conversa_hora?: string | null;
+    periodo_inicio?: string | null;
+    periodo_fim?: string | null;
+  };
   insights: Array<{
     id: string;
     tipo: string;
@@ -182,6 +196,7 @@ class DataAdapter {
 
   private getDefaultApiData(): ApiData {
     const today = new Date().toISOString();
+    const todayDate = today.split('T')[0];
     return {
       success: false,
       user: {
@@ -254,6 +269,15 @@ class DataAdapter {
         percentual_neutras: 0
       },
       historico_diario: [],
+      historico_resumo: {
+        total_conversas: 0,
+        humor_medio: 0,
+        sequencia_ativa: 0,
+        ultima_conversa_data: null,
+        ultima_conversa_hora: null,
+        periodo_inicio: todayDate,
+        periodo_fim: todayDate
+      },
       insights: [],
       timestamp: today
     };
@@ -544,14 +568,38 @@ class DataAdapter {
       return null;
     };
 
+    const parseOptionalBoolean = (value: unknown): boolean | null => {
+      if (typeof value === 'boolean') {
+        return value;
+      }
+      if (typeof value === 'number') {
+        if (value === 1) return true;
+        if (value === 0) return false;
+      }
+      if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        if (['true', '1', 'sim', 'yes'].includes(normalized)) return true;
+        if (['false', '0', 'nao', 'não', 'no'].includes(normalized)) return false;
+      }
+      return null;
+    };
+
     const historicoDiario = Array.isArray(historicoArray)
       ? historicoArray.map((entry) => ({
           data: this.parseNullString<string>(entry.data as string | null | undefined) || undefined,
+          label: this.parseNullString<string>(entry.label as string | null | undefined) || undefined,
+          tem_conversa: (() => {
+            const parsed = parseOptionalBoolean(entry.tem_conversa ?? entry.temConversa ?? entry.checkin_realizado);
+            return parsed === null ? undefined : parsed;
+          })(),
+          conversas: parseNullableNumber(entry.conversas),
           humor: parseNullableNumber(entry.humor),
           emocao: this.parseNullString<string>(entry.emocao as string | null | undefined) || undefined,
+          emocao_id: this.parseNullString<string>(entry.emocao_id as string | null | undefined) || undefined,
           emoji: this.parseNullString<string>(entry.emoji as string | null | undefined) || undefined,
           energia: parseNullableNumber(entry.energia),
-          qualidade: parseNullableNumber(entry.qualidade)
+          qualidade: parseNullableNumber(entry.qualidade),
+          ultima_hora: this.parseNullString<string>(entry.ultima_hora as string | null | undefined) || undefined
         }))
       : undefined;
 
@@ -568,6 +616,19 @@ class DataAdapter {
         }))
       : undefined;
 
+    const historicoResumoBlock = safeJsonParse<Record<string, unknown>>(payload.Historico_Resumo ?? payload.historico_resumo);
+    const historicoResumo = historicoResumoBlock
+      ? {
+          total_conversas: this.parseNumber(historicoResumoBlock.total_conversas as string | number | null | undefined),
+          humor_medio: this.parseNumber(historicoResumoBlock.humor_medio as string | number | null | undefined),
+          sequencia_ativa: this.parseNumber(historicoResumoBlock.sequencia_ativa as string | number | null | undefined),
+          ultima_conversa_data: this.parseNullString<string>(historicoResumoBlock.ultima_conversa_data as string | null | undefined),
+          ultima_conversa_hora: this.parseNullString<string>(historicoResumoBlock.ultima_conversa_hora as string | null | undefined),
+          periodo_inicio: this.parseNullString<string>(historicoResumoBlock.periodo_inicio as string | null | undefined),
+          periodo_fim: this.parseNullString<string>(historicoResumoBlock.periodo_fim as string | null | undefined)
+        }
+      : undefined;
+
     const partialUserData = partialUser.id
       ? { ...this.getDefaultApiData().user, ...partialUser }
       : undefined;
@@ -582,6 +643,7 @@ class DataAdapter {
       distribuicao_emocoes: Object.keys(distribuicao).length > 0 ? (distribuicao as ApiData['distribuicao_emocoes']) : undefined,
       panas: Object.keys(panas).length > 0 ? (panas as ApiData['panas']) : undefined,
       historico_diario: historicoDiario,
+      historico_resumo: historicoResumo,
       insights: insights,
       timestamp: new Date().toISOString()
     };
@@ -600,11 +662,16 @@ class DataAdapter {
     const historico = Array.isArray(safeData.historico_diario) ? safeData.historico_diario : [];
     const historicoDefaults = {
       data: defaults.timestamp.split('T')[0],
+      label: null as string | null,
+      tem_conversa: false,
+      conversas: 0,
       humor: 5,
       emocao: 'neutro',
+      emocao_id: null as string | null,
       emoji: '😐',
       energia: 5,
-      qualidade: 5
+      qualidade: 5,
+      ultima_hora: null as string | null
     };
 
     const insights = Array.isArray(safeData.insights) ? safeData.insights : [];
@@ -642,12 +709,51 @@ class DataAdapter {
       },
       historico_diario: historico.map((item) => ({
         data: item?.data || historicoDefaults.data,
+        label: (item as any)?.label ?? historicoDefaults.label,
+        tem_conversa: (() => {
+          const raw = (item as any)?.tem_conversa;
+          if (typeof raw === 'boolean') return raw;
+          if (typeof raw === 'number') return raw > 0;
+          if (typeof raw === 'string') {
+            const normalized = raw.trim().toLowerCase();
+            if (['true', '1', 'sim', 'yes'].includes(normalized)) return true;
+            if (['false', '0', 'nao', 'não', 'no'].includes(normalized)) return false;
+          }
+          return historicoDefaults.tem_conversa;
+        })(),
+        conversas: (() => {
+          const value = (item as any)?.conversas;
+          if (typeof value === 'number') return value;
+          if (typeof value === 'string') {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : historicoDefaults.conversas;
+          }
+          return historicoDefaults.conversas;
+        })(),
         humor: typeof item?.humor === 'number' ? item.humor : Number(item?.humor) || historicoDefaults.humor,
         emocao: item?.emocao || historicoDefaults.emocao,
+        emocao_id: (item as any)?.emocao_id ?? historicoDefaults.emocao_id,
         emoji: item?.emoji || historicoDefaults.emoji,
         energia: typeof item?.energia === 'number' ? item.energia : Number(item?.energia) || historicoDefaults.energia,
-        qualidade: typeof item?.qualidade === 'number' ? item.qualidade : Number(item?.qualidade) || historicoDefaults.qualidade
+        qualidade: typeof item?.qualidade === 'number' ? item.qualidade : Number(item?.qualidade) || historicoDefaults.qualidade,
+        ultima_hora: (item as any)?.ultima_hora ?? historicoDefaults.ultima_hora
       })),
+      historico_resumo: (() => {
+        const resumo = safeData.historico_resumo || {};
+        const ensureNumber = (value: unknown, fallback: number) => {
+          const parsed = this.parseNumber(value as string | number | null | undefined);
+          return parsed !== null ? parsed : fallback;
+        };
+        return {
+          total_conversas: ensureNumber((resumo as any).total_conversas, Number(defaults.historico_resumo.total_conversas) || 0),
+          humor_medio: ensureNumber((resumo as any).humor_medio, Number(defaults.historico_resumo.humor_medio) || 0),
+          sequencia_ativa: ensureNumber((resumo as any).sequencia_ativa, Number(defaults.historico_resumo.sequencia_ativa) || 0),
+          ultima_conversa_data: this.parseNullString<string>((resumo as any).ultima_conversa_data) || defaults.historico_resumo.ultima_conversa_data,
+          ultima_conversa_hora: this.parseNullString<string>((resumo as any).ultima_conversa_hora) || defaults.historico_resumo.ultima_conversa_hora,
+          periodo_inicio: this.parseNullString<string>((resumo as any).periodo_inicio) || defaults.historico_resumo.periodo_inicio,
+          periodo_fim: this.parseNullString<string>((resumo as any).periodo_fim) || defaults.historico_resumo.periodo_fim
+        };
+      })(),
       insights: insights.map((insight) => ({
         id: insight?.id || `insight_${Math.random().toString(36).slice(2, 8)}`,
         tipo: (insight?.tipo as Insight['tipo']) || 'padrao',
@@ -798,22 +904,49 @@ class DataAdapter {
     
     return historico.map((item, index) => {
       const fallbackDate = new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const humor = typeof item.humor === 'number' ? item.humor : Number(item.humor) || 5;
-      const energia = typeof item.energia === 'number' ? item.energia : Number(item.energia) || 5;
-      const qualidade = typeof item.qualidade === 'number' ? item.qualidade : Number(item.qualidade) || 5;
+      const humorRaw = typeof item.humor === 'number' ? item.humor : Number(item.humor);
+      const humor = Number.isFinite(humorRaw) ? humorRaw : 0;
+      const energiaRaw = typeof item.energia === 'number' ? item.energia : Number(item.energia);
+      const energia = Number.isFinite(energiaRaw) ? energiaRaw : 0;
+      const qualidadeRaw = typeof item.qualidade === 'number' ? item.qualidade : Number(item.qualidade);
+      const qualidade = Number.isFinite(qualidadeRaw) ? qualidadeRaw : 0;
+
+      const conversas = typeof item.conversas === 'number' ? item.conversas : Number(item.conversas) || 0;
+      const temConversaFlag = typeof item.tem_conversa === 'boolean'
+        ? item.tem_conversa
+        : conversas > 0;
+
+      let status: 'respondido' | 'perdido' | 'pendente';
+      if (!temConversaFlag || conversas <= 0) {
+        status = 'perdido';
+      } else if (!humor || humor <= 0) {
+        status = 'pendente';
+      } else {
+        status = 'respondido';
+      }
+
+      const ultimaHora = typeof item.ultima_hora === 'string' && item.ultima_hora.trim() !== ''
+        ? item.ultima_hora
+        : null;
+
+      const emojiFallback = (() => {
+        if (status === 'respondido') return '😊';
+        if (status === 'pendente') return '⏳';
+        return '😴';
+      })();
 
       return {
         id_checkin: `checkin_${item.data || fallbackDate}`,
         data_checkin: item.data || fallbackDate,
         horario_envio: '09:00',
-        horario_resposta: '09:15',
-        humor_autoavaliado: humor,
-        emocao_primaria_detectada: item.emocao || 'neutro',
+        horario_resposta: status === 'respondido' ? (ultimaHora || '09:15') : (ultimaHora || '--:--'),
+        humor_autoavaliado: status === 'respondido' ? humor : 0,
+        emocao_primaria_detectada: item.emocao || item.emocao_id || 'neutro',
         intensidade_emocao: 7,
         energia_detectada: energia,
         qualidade_interacao: qualidade,
-        status_resposta: 'respondido',
-        emoji_dia: item.emoji || '😐'
+        status_resposta: status,
+        emoji_dia: item.emoji || emojiFallback
       };
     });
   }
@@ -922,16 +1055,20 @@ class DataAdapter {
     const defaults = this.getDefaultApiData();
     const metricas = apiData.metricas_semana ?? defaults.metricas_semana;
     const humorBlock = apiData.humor;
+    const resumo = apiData.historico_resumo ?? defaults.historico_resumo;
 
     const parsedHumorAtual = humorBlock
       ? this.parseNumber(humorBlock.humor_atual ?? humorBlock.humor_medio)
       : null;
     const metricasHumor = this.parseNumber(metricas.humor_medio);
-    const nivelAtual = parsedHumorAtual ?? metricasHumor ?? 0;
+    const resumoHumor = typeof resumo?.humor_medio === 'number'
+      ? resumo.humor_medio
+      : this.parseNumber((resumo as any)?.humor_medio);
+    const nivelAtual = parsedHumorAtual ?? metricasHumor ?? resumoHumor ?? 0;
 
     const humorMedio = humorBlock
       ? this.parseNumber(humorBlock.humor_medio ?? humorBlock.humor_atual) ?? nivelAtual
-      : metricasHumor ?? nivelAtual;
+      : metricasHumor ?? (typeof resumoHumor === 'number' ? resumoHumor : nivelAtual);
 
     const energiaMedia = humorBlock
       ? this.parseNumber(humorBlock.energia_media)
@@ -943,6 +1080,9 @@ class DataAdapter {
     const conversasTotal = humorBlock
       ? this.parseNumber(humorBlock.conversas_total)
       : null;
+    const resumoTotalConversas = typeof resumo?.total_conversas === 'number'
+      ? resumo.total_conversas
+      : this.parseNumber((resumo as any)?.total_conversas);
 
     const ultimaConversaEmoji = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.emoji
@@ -954,7 +1094,7 @@ class DataAdapter {
 
     const ultimaConversaData = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.data
-    ) || this.parseNullString<string>(metricas.ultima_conversa_data) || defaults.metricas_semana.ultima_conversa_data;
+    ) || this.parseNullString<string>(metricas.ultima_conversa_data) || resumo?.ultima_conversa_data || defaults.metricas_semana.ultima_conversa_data;
 
     let tendencia = this.parseNumber(humorBlock?.diferenca_percentual ?? humorBlock?.tendencia_vs_periodo_anterior);
     if (tendencia === null) {
@@ -971,15 +1111,15 @@ class DataAdapter {
       const days = periodoTipo === 'mes' ? 30 : periodoTipo === 'trimestre' ? 90 : 7;
       return new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     })();
-    const periodoInicio = this.parseNullString<string>(humorBlock?.periodo?.inicio) || defaultRangeStart;
-    const periodoFim = this.parseNullString<string>(humorBlock?.periodo?.fim) || new Date().toISOString().split('T')[0];
+    const periodoInicio = this.parseNullString<string>(humorBlock?.periodo?.inicio) || resumo?.periodo_inicio || defaultRangeStart;
+    const periodoFim = this.parseNullString<string>(humorBlock?.periodo?.fim) || resumo?.periodo_fim || new Date().toISOString().split('T')[0];
 
     return {
       nivelAtual,
       humorMedio,
       energiaMedia: energiaMedia ?? this.parseNumber(metricas.energia_media) ?? null,
       qualidadeMedia: qualidadeMedia ?? this.parseNumber(metricas.qualidade_media_interacao) ?? null,
-      conversasTotal: conversasTotal ?? this.parseNumber(metricas.conversas_total) ?? 0,
+      conversasTotal: conversasTotal ?? this.parseNumber(metricas.conversas_total) ?? (typeof resumoTotalConversas === 'number' ? resumoTotalConversas : 0),
       conversasCompletas: this.parseNumber(metricas.conversas_completas) ?? 0,
       ultimaConversaEmoji,
       ultimaConversaEmocao,

@@ -1,0 +1,293 @@
+[
+  {
+    "response": {
+      "success": true,
+      "humor": {
+        "humor_atual": 7,
+        "humor_medio": 6.5,
+        "diferenca_percentual": 7.7,
+        "conversas_total": 4,
+        "ultima_conversa": {
+          "data": "2025-10-05T00:00:00.000Z",
+          "hora": "13:00:50.848796",
+          "emoji": null,
+          "emocao": null
+        }
+      },
+      "user": {
+        "id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+        "nome": "Aldo Santos",
+        "nome_preferencia": "Aldo",
+        "whatsapp_numero": "351932786582",
+        "cronotipo_detectado": "matutino",
+        "status_onboarding": "completo",
+        "criado_em": "2025-10-01T22:24:14.594Z"
+      },
+      "perfil_big_five": {
+        "openness": "72",
+        "conscientiousness": "88",
+        "extraversion": "55",
+        "agreeableness": "75",
+        "neuroticism": "68",
+        "confiabilidade": "82",
+        "perfil_primario": "disciplinado",
+        "perfil_secundario": "perfeccionista"
+      },
+      "gamificacao": {
+        "xp_total": null,
+        "nivel_atual": null,
+        "streak_conversas_dias": null,
+        "conquistas_desbloqueadas": null,
+        "quest_diaria_status": null,
+        "quest_diaria_progresso": null,
+        "quest_diaria_descricao": null
+      },
+      "sabotador": {
+        "id": "inquieto",
+        "nome": "Inquieto",
+        "emoji": "⚡",
+        "apelido_personalizado": "Sr. Ansioso",
+        "total_deteccoes": "3",
+        "contexto_principal": "relacionamentos",
+        "insight_atual": "O sabotador Inquieto se manifesta na dificuldade de manter foco constante, alternando entre hiperfoco e distração, o que prejudica a produtividade e a conclusão de tarefas.",
+        "contramedida_ativa": "Usar técnicas de Pomodoro para melhorar o foco e gerenciar melhor o tempo.",
+        "intensidade_media": "60",
+        "total_conversas": "6"
+      },
+      "metricas_semana": {
+        "conversas_total": "4",
+        "conversas_completas": "4",
+        "humor_medio": null,
+        "energia_media": null,
+        "qualidade_media_interacao": null,
+        "ultima_emocao": null,
+        "ultima_conversa_data": null,
+        "ultimo_conversa_emoji": null
+      },
+      "roda_emocoes": {
+        "alegria": 85,
+        "confianca": 230,
+        "medo": 60,
+        "surpresa": 0,
+        "tristeza": 135,
+        "angustia": 0,
+        "raiva": 0,
+        "expectativa": 125
+      },
+      "panas": {
+        "positivas": 5,
+        "negativas": 3,
+        "neutras": 0,
+        "total": 8,
+        "percentual_positivas": 62.5,
+        "percentual_negativas": 37.5,
+        "percentual_neutras": 0
+      },
+      "historico_diario": [
+        {
+          "data": "2025-10-08",
+          "label": "08/10",
+          "tem_conversa": true,
+          "conversas": 1,
+          "emocao": null,
+          "emocao_id": null,
+          "emoji": null,
+          "humor": 0,
+          "energia": 0,
+          "qualidade": 8,
+          "ultima_hora": "00:00"
+        },
+        {
+          "data": "2025-10-07",
+          "label": "07/10",
+          "tem_conversa": false,
+          "conversas": 0,
+          "emocao": null,
+          "emocao_id": null,
+          "emoji": null,
+          "humor": 0,
+          "energia": 0,
+          "qualidade": 0,
+          "ultima_hora": null
+        },
+        {
+          "data": "2025-10-06",
+          "label": "06/10",
+          "tem_conversa": false,
+          "conversas": 0,
+          "emocao": null,
+          "emocao_id": null,
+          "emoji": null,
+          "humor": 0,
+          "energia": 0,
+          "qualidade": 0,
+          "ultima_hora": null
+        },
+        {
+          "data": "2025-10-05",
+          "label": "05/10",
+          "tem_conversa": true,
+          "conversas": 1,
+          "emocao": null,
+          "emocao_id": null,
+          "emoji": null,
+          "humor": 7,
+          "energia": 7,
+          "qualidade": 8,
+          "ultima_hora": "00:00"
+        },
+        {
+          "data": "2025-10-04",
+          "label": "04/10",
+          "tem_conversa": false,
+          "conversas": 0,
+          "emocao": null,
+          "emocao_id": null,
+          "emoji": null,
+          "humor": 0,
+          "energia": 0,
+          "qualidade": 0,
+          "ultima_hora": null
+        },
+        {
+          "data": "2025-10-03",
+          "label": "03/10",
+          "tem_conversa": true,
+          "conversas": 2,
+          "emocao": "Alegria",
+          "emocao_id": "joy",
+          "emoji": "😊",
+          "humor": 7,
+          "energia": 7,
+          "qualidade": 8,
+          "ultima_hora": "00:00"
+        },
+        {
+          "data": "2025-10-02",
+          "label": "02/10",
+          "tem_conversa": true,
+          "conversas": 2,
+          "emocao": "Tristeza",
+          "emocao_id": "sadness",
+          "emoji": "😢",
+          "humor": 6,
+          "energia": 6,
+          "qualidade": 8,
+          "ultima_hora": "00:00"
+        }
+      ],
+      "historico_resumo": {
+        "total_conversas": 6,
+        "humor_medio": 6.6,
+        "sequencia_ativa": 1,
+        "ultima_conversa_data": "2025-10-08",
+        "ultima_conversa_hora": "00:00:00",
+        "periodo_inicio": "2025-10-02",
+        "periodo_fim": "2025-10-08"
+      },
+      "insights": [
+        {
+          "id": "2c54e113-1074-4b0e-86ee-c7ceb0883a74",
+          "tipo": "padrao",
+          "categoria": "emocional",
+          "titulo": "Padrão de Solidão Identificado",
+          "descricao": "Você mencionou sentir solidão mesmo mantendo suporte social ativo (coach, terapeuta, família). Esse padrão apareceu em ambas as conversas e foi um fator importante no término do casamento anterior.",
+          "icone": "🔍",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "942240c7-b0b8-43b6-946b-4646e481ac30",
+          "tipo": "positivo",
+          "categoria": "social",
+          "titulo": "Vínculo Paterno Forte",
+          "descricao": "Você mantém contato frequente e significativo com seus filhos mesmo à distância. Eles são uma fonte importante de motivação e sentido de propósito.",
+          "icone": "👨‍👦‍👦",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "f598deb6-1b3b-4073-823d-39d25d610595",
+          "tipo": "alerta",
+          "categoria": "cognitivo",
+          "titulo": "Autocrítica Intensa Detectada",
+          "descricao": "Sabotador Crítico ativo: você demonstrou dúvida sobre seu próprio valor e capacidade de ser amado. Frases como \"ela não gostava mais de mim\" indicam autocrítica prejudicial.",
+          "icone": "🎭",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "35c37689-033e-48de-b85a-8acb71589122",
+          "tipo": "alerta",
+          "categoria": "emocional",
+          "titulo": "Padrão: Isolamento em Datas Significativas",
+          "descricao": "Você passou os últimos 2 anos sozinho em datas importantes (Ano Novo). Isso intensifica sentimentos de solidão e foi mencionado como \"os piores da minha vida\".",
+          "icone": "📅",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "9a7f99b4-bda8-4092-96ec-e2881ca0a754",
+          "tipo": "melhoria",
+          "categoria": "emocional",
+          "titulo": "Processamento de Rejeição",
+          "descricao": "A recusa da ex-mulher em passar o Ano Novo juntos reativou sentimentos antigos de desprezo e rejeição do casamento. Esse padrão merece atenção terapêutica.",
+          "icone": "💔",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "002b6577-d673-4243-9c19-797a72ec7ac2",
+          "tipo": "alerta",
+          "categoria": "emocional",
+          "titulo": "Gatilhos Emocionais Fortes",
+          "descricao": "Fotos e memórias da ex-mulher desencadeiam episódios intensos de tristeza e angústia. Dias produtivos podem ser seguidos por colapsos emocionais ao enfrentar essas lembranças.",
+          "icone": "⚠️",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "0701540b-253b-4d77-9d8f-5037d111c570",
+          "tipo": "positivo",
+          "categoria": "comportamental",
+          "titulo": "Resiliência Admirável",
+          "descricao": "Você demonstra grande resiliência ao buscar ativamente ajuda profissional (coach e terapeuta) e manter projetos pessoais estruturados. Isso mostra autocuidado e proatividade.",
+          "icone": "💪",
+          "prioridade": "media",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "301320af-0141-4407-b570-d5ed629617fc",
+          "tipo": "melhoria",
+          "categoria": "social",
+          "titulo": "Desafio: Novos Vínculos Afetivos",
+          "descricao": "Detectamos desânimo significativo para iniciar novos relacionamentos devido ao receio de não alcançar o mesmo nível de intimidade e profundidade do relacionamento anterior.",
+          "icone": "💭",
+          "prioridade": "media",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "22472cf7-a439-4ab4-bcfb-023bcf5effa5",
+          "tipo": "padrao",
+          "categoria": "comportamental",
+          "titulo": "Ciclo de Produtividade e Tristeza",
+          "descricao": "Padrão identificado: dias começam produtivos (caminhada, trabalho, autocuidado) mas terminam com episódios de tristeza. Foco excessivo em trabalho pode ser mecanismo de enfrentamento.",
+          "icone": "🔄",
+          "prioridade": "media",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        },
+        {
+          "id": "264c4940-de24-4ffc-9fd8-b31e48bc7c61",
+          "tipo": "positivo",
+          "categoria": "comportamental",
+          "titulo": "Excelente Capacidade de Organização",
+          "descricao": "Seu perfil disciplinado se destaca: você estrutura trabalho em sprints, planeja objetivos e mantém rotinas saudáveis. Essa é uma força significativa.",
+          "icone": "📊",
+          "prioridade": "media",
+          "data_criacao": "2025-10-02T17:38:28.938518"
+        }
+      ],
+      "timestamp": "2025-10-08T13:56:40.156Z"
+    }
+  }
+]

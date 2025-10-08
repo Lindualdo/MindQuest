@@ -16,13 +16,85 @@ const CheckInsHistorico: React.FC = () => {
   const { dashboardData } = useStore();
   const { checkins_historico } = dashboardData;
 
-  // Mapear dias da semana
-  const diasSemana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-  
-  // Garantir que temos 7 dias (preencher com vazios se necessário)
-  const ultimosSeteDias = Array(7).fill(null).map((_, index) => {
-    return checkins_historico[index] || null;
+  const diasSemanaExtenso = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  const parseDate = (value?: string | null) => {
+    if (!value) return null;
+    const parts = value.split('-');
+    if (parts.length !== 3) return null;
+    const [year, month, day] = parts.map(Number);
+    if (
+      Number.isNaN(year) ||
+      Number.isNaN(month) ||
+      Number.isNaN(day)
+    ) {
+      return null;
+    }
+    return new Date(year, month - 1, day);
+  };
+
+  const formatDateKey = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateDisplay = (date: Date) => {
+    return `${date.getDate()}/${date.getMonth() + 1}`;
+  };
+
+  const checkinsPorData = new Map<string, typeof checkins_historico[number]>();
+  checkins_historico.forEach((checkin) => {
+    if (checkin?.data_checkin) {
+      checkinsPorData.set(checkin.data_checkin, checkin);
+    }
   });
+
+  const dataMaisRecente = (() => {
+    if (checkins_historico.length === 0) {
+      return new Date();
+    }
+    let referencia = parseDate(checkins_historico[0].data_checkin) ?? new Date();
+    for (const checkin of checkins_historico) {
+      const parsed = parseDate(checkin.data_checkin);
+      if (parsed && parsed > referencia) {
+        referencia = parsed;
+      }
+    }
+    return referencia;
+  })();
+
+  const ultimosSeteDias = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(dataMaisRecente);
+    date.setDate(dataMaisRecente.getDate() - (6 - index));
+    const dateKey = formatDateKey(date);
+    const checkin = checkinsPorData.get(dateKey) || null;
+    const diaSemana = diasSemanaExtenso[date.getDay()];
+    const dataFormatada = formatDateDisplay(date);
+    const label = diaSemana;
+    const dataLabel = `${index === 6 ? 'hoje ' : ''}(${dataFormatada})`;
+    return {
+      date,
+      label,
+      dataLabel,
+      checkin
+    };
+  });
+
+  const checkinsRespondidos = ultimosSeteDias
+    .map((dia) => dia.checkin)
+    .filter(
+      (checkin): checkin is typeof checkins_historico[number] =>
+        Boolean(checkin && checkin.status_resposta === 'respondido')
+    );
+  const totalRespondidos = checkinsRespondidos.length;
+  const humorMedio = totalRespondidos > 0
+    ? checkinsRespondidos.reduce((acc, checkin) => acc + checkin.humor_autoavaliado, 0) / totalRespondidos
+    : 0;
+  const humorMedioFormatado = totalRespondidos > 0
+    ? Number(humorMedio).toFixed(2)
+    : '0.00';
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -51,7 +123,7 @@ const CheckInsHistorico: React.FC = () => {
 
       {/* Grid dos dias */}
       <div className="grid grid-cols-7 gap-2 mb-6">
-        {ultimosSeteDias.map((checkin, index) => (
+        {ultimosSeteDias.map(({ checkin, label, dataLabel }, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
@@ -59,11 +131,6 @@ const CheckInsHistorico: React.FC = () => {
             transition={{ delay: index * 0.1 }}
             className="text-center"
           >
-            {/* Dia da semana */}
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              {diasSemana[index]}
-            </div>
-            
             {/* Status do check-in */}
             <div className={`
               w-12 h-12 mx-auto rounded-xl border-2 flex items-center justify-center
@@ -86,12 +153,13 @@ const CheckInsHistorico: React.FC = () => {
               )}
             </div>
             
-            {/* Score de humor */}
-            {checkin && checkin.status_resposta === 'respondido' && (
-              <div className="text-xs font-semibold text-gray-600 mt-1">
-                {checkin.humor_autoavaliado}/10
-              </div>
-            )}
+            {/* Dia e data */}
+            <div className="text-xs font-semibold text-gray-600 mt-2">
+              {label.toLowerCase()}
+            </div>
+            <div className="text-xs text-gray-500">
+              {dataLabel}
+            </div>
           </motion.div>
         ))}
       </div>
@@ -100,16 +168,14 @@ const CheckInsHistorico: React.FC = () => {
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">
-            {checkins_historico.filter(c => c.status_resposta === 'respondido').length}
+            {totalRespondidos}
           </div>
           <div className="text-xs text-gray-600">Conversas respondidas</div>
         </div>
         
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">
-            {checkins_historico.reduce((acc, c) => 
-              c.status_resposta === 'respondido' ? acc + c.humor_autoavaliado : acc, 0
-            ) / checkins_historico.filter(c => c.status_resposta === 'respondido').length || 0}
+            {humorMedioFormatado}
           </div>
           <div className="text-xs text-gray-600">Humor médio</div>
         </div>
