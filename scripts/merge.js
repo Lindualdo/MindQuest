@@ -67,15 +67,27 @@ const user = {
 };
 
 // Gamificação
-const gamificacaoRow = findRow(row => 'xp_total' in row && 'nivel_atual' in row);
+const gamificacaoRow = findRow(row => {
+  if (!row || typeof row !== 'object') return false;
+  if ('gamificacao' in row && row.gamificacao) return true;
+  return ('xp_total' in row && 'nivel_atual' in row);
+});
+const gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};
+
 const gamificacao = {
-  xp_total: normalizeString(gamificacaoRow?.xp_total),
-  nivel_atual: normalizeString(gamificacaoRow?.nivel_atual),
-  streak_conversas_dias: normalizeString(gamificacaoRow?.streak_conversas_dias),
-  conquistas_desbloqueadas: normalizeString(gamificacaoRow?.conquistas_desbloqueadas),
-  quest_diaria_status: normalizeString(gamificacaoRow?.quest_diaria_status),
-  quest_diaria_progresso: normalizeString(gamificacaoRow?.quest_diaria_progresso),
-  quest_diaria_descricao: normalizeString(gamificacaoRow?.quest_diaria_descricao),
+  xp_total: normalizeString(gamificacaoSource?.xp_total),
+  nivel_atual: normalizeString(gamificacaoSource?.nivel_atual),
+  streak_conversas_dias: normalizeString(gamificacaoSource?.streak_conversas_dias),
+  conquistas_desbloqueadas: (() => {
+    const conquistas = gamificacaoSource?.conquistas_desbloqueadas;
+    if (Array.isArray(conquistas)) {
+      return JSON.stringify(conquistas);
+    }
+    return normalizeString(conquistas);
+  })(),
+  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status),
+  quest_diaria_progresso: normalizeString(gamificacaoSource?.quest_diaria_progresso),
+  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao),
 };
 
 // Sabotador
