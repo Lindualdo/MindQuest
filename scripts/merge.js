@@ -1,10 +1,14 @@
 const items = $input.all();
+
+
 const rows = items.map(item => {
   const json = item.json || {};
   if (json.jsonb_build_object) return json.jsonb_build_object;
   if (json.json_build_object) return json.json_build_object;
   return json;
 });
+
+
 
 function findRow(predicate) {
   return rows.find(predicate) ?? {};
@@ -89,21 +93,6 @@ const sabotador = {
   total_conversas: normalizeString(sabotadorRow.total_conversas ?? sabotadorRow.totalConversas),
 };
 
-// Métricas semanais
-const metricasRow = findRow(row => 'conversas_total' in row || 'humor_medio' in row);
-const metricasSemana = {
-  conversas_total: normalizeString(metricasRow.conversas_total, '0'),
-  conversas_completas: normalizeString(metricasRow.conversas_completas ?? metricasRow.conversas_total, '0'),
-  humor_medio: normalizeString(metricasRow.humor_medio),
-  energia_media: normalizeString(metricasRow.energia_media),
-  qualidade_media_interacao: normalizeString(
-    metricasRow.qualidade_media_interacao ?? metricasRow.qualidade_media
-  ),
-  ultima_emocao: normalizeString(metricasRow.ultima_emocao),
-  ultima_conversa_data: normalizeString(metricasRow.ultima_conversa_data),
-  ultimo_conversa_emoji: normalizeString(metricasRow.ultimo_conversa_emoji ?? metricasRow.ultimo_emoji),
-};
-
 // Humor
 const humorRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'humor_atual'));
 const humor = {
@@ -114,8 +103,8 @@ const humor = {
   ultima_conversa: {
     data: normalizeString(humorRow.ultima_data),
     hora: normalizeString(humorRow.ultima_hora),
-    emoji: normalizeString(metricasSemana.ultimo_conversa_emoji),
-    emocao: normalizeString(metricasSemana.ultima_emocao),
+    emoji: normalizeString(humorRow.ultima_emoji),
+    emocao: normalizeString(humorRow.ultima_emocao),
   }
 };
 
@@ -206,7 +195,6 @@ return [
         perfil_big_five: perfilBigFive,
         gamificacao,
         sabotador,
-        metricas_semana: metricasSemana,
         roda_emocoes: distribuicaoEmocoes,
         panas,
         historico_diario: historicoDiario,

@@ -57,16 +57,6 @@ interface DashboardApiResponse {
     intensidade_media?: string | null;
     total_conversas?: string | null;
   };
-  metricas_semana: {
-    conversas_total: string;
-    conversas_completas: string;
-    humor_medio: string | null;
-    energia_media: string | null;
-    qualidade_media_interacao: string | null;
-    ultima_emocao: string | null;
-    ultima_conversa_data: string | null;
-    ultimo_conversa_emoji: string | null;
-  };
   distribuicao_emocoes: {
     alegria: number;
     confianca: number;

@@ -54,16 +54,6 @@
         "intensidade_media": "60",
         "total_conversas": "6"
       },
-      "metricas_semana": {
-        "conversas_total": "4",
-        "conversas_completas": "4",
-        "humor_medio": null,
-        "energia_media": null,
-        "qualidade_media_interacao": null,
-        "ultima_emocao": null,
-        "ultima_conversa_data": null,
-        "ultimo_conversa_emoji": null
-      },
       "roda_emocoes": {
         "alegria": 85,
         "confianca": 230,
@@ -287,7 +277,7 @@
           "data_criacao": "2025-10-02T17:38:28.938518"
         }
       ],
-      "timestamp": "2025-10-08T13:56:40.156Z"
+      "timestamp": "2025-10-08T16:56:57.075Z"
     }
   }
 ]

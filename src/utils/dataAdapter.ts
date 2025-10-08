@@ -27,6 +27,7 @@ interface ApiData {
     energia_media?: string | number | null;
     qualidade_media?: string | number | null;
     conversas_total?: string | number | null;
+    diferenca_percentual?: string | number | null;
     ultima_conversa?: {
       data?: string | null;
       hora?: string | null;
@@ -75,16 +76,6 @@ interface ApiData {
     intensidade_media: string | null;
     total_conversas: string | null;
   };
-  metricas_semana: {
-    conversas_total: string;
-    conversas_completas: string;
-    humor_medio: string | null;
-    energia_media: string | null;
-    qualidade_media_interacao: string | null;
-    ultima_emocao: string | null;
-    ultima_conversa_data: string | null;
-    ultimo_conversa_emoji: string | null;
-  };
   distribuicao_emocoes: {
     alegria: number;
     confianca: number;
@@ -127,7 +118,7 @@ interface ApiData {
     qualidade: number;
     ultima_hora?: string | null;
   }>;
-  historico_resumo?: {
+  historico_resumo: {
     total_conversas?: string | number | null;
     humor_medio?: string | number | null;
     sequencia_ativa?: string | number | null;
@@ -238,16 +229,6 @@ class DataAdapter {
         contramedida_ativa: null,
         intensidade_media: null,
         total_conversas: null
-      },
-      metricas_semana: {
-        conversas_total: '0',
-        conversas_completas: '0',
-        humor_medio: null,
-        energia_media: null,
-        qualidade_media_interacao: null,
-        ultima_emocao: null,
-        ultima_conversa_data: null,
-        ultimo_conversa_emoji: null
       },
       distribuicao_emocoes: {
         alegria: 0,
@@ -370,7 +351,6 @@ class DataAdapter {
           perfil_big_five: mergeRecord(base.perfil_big_five, addition.perfil_big_five),
           gamificacao: mergeRecord(base.gamificacao, addition.gamificacao),
           sabotador: mergeRecord(base.sabotador, addition.sabotador),
-          metricas_semana: mergeRecord(base.metricas_semana, addition.metricas_semana),
           distribuicao_emocoes: mergeRecord(base.distribuicao_emocoes, addition.distribuicao_emocoes),
           panas: mergeRecord(base.panas, addition.panas),
           historico_diario: addition.historico_diario ?? base.historico_diario,
@@ -395,7 +375,6 @@ class DataAdapter {
       'Sabotador',
       'Gameficacao',
       'Gamificacao',
-      'Metricas_Semana',
       'Distribuicao_Emocoes',
       'roda_emocoes',
       'Analise_PANAS',
@@ -427,7 +406,6 @@ class DataAdapter {
     const perfil = safeJsonParse<Record<string, unknown>>(payload.Perfil_BigFive);
     const gamificacaoBlock = safeJsonParse<Record<string, unknown>>(payload.Gameficacao ?? payload.Gamificacao);
     const sabotadorBlock = safeJsonParse<Record<string, unknown>>(payload.Sabotador);
-    const metricasBlock = safeJsonParse<Record<string, unknown>>(payload.Metricas_Semana);
     const distribuicaoBlock = safeJsonParse<Record<string, unknown>>(payload.Distribuicao_Emocoes);
     const rodaEmocoesBlock = payload.roda_emocoes
       ? payload.roda_emocoes as Record<string, unknown>
@@ -508,28 +486,6 @@ class DataAdapter {
       setSabotadorValue('total_conversas', sabotadorBlock.total_conversas ?? sabotadorBlock.totalConversas);
     }
 
-    const metricas: Partial<ApiData['metricas_semana']> = {};
-    if (metricasBlock) {
-      const setMetricasValue = (key: keyof ApiData['metricas_semana'], value: unknown) => {
-        const parsed = this.parseNullString<string>(value as string | null | undefined);
-        if (parsed !== null && parsed !== undefined) {
-          metricas[key] = parsed;
-        }
-      };
-
-      setMetricasValue('conversas_total', metricasBlock.conversas_total);
-      setMetricasValue('conversas_completas', metricasBlock.conversas_completas);
-      setMetricasValue('humor_medio', metricasBlock.humor_medio);
-      setMetricasValue('energia_media', metricasBlock.energia_media);
-      setMetricasValue(
-        'qualidade_media_interacao',
-        metricasBlock.qualidade_media_interacao ?? metricasBlock.qualidade_media
-      );
-      setMetricasValue('ultima_emocao', metricasBlock.ultima_emocao);
-      setMetricasValue('ultima_conversa_data', metricasBlock.ultima_conversa_data);
-      setMetricasValue('ultimo_conversa_emoji', metricasBlock.ultimo_conversa_emoji ?? metricasBlock.ultimo_emoji);
-    }
-
     const distribuicaoRawFinal = rodaEmocoesBlock || distribuicaoRaw;
 
     const distribuicao: Partial<ApiData['distribuicao_emocoes']> = {};
@@ -584,44 +540,46 @@ class DataAdapter {
       return null;
     };
 
+    const hojeIso = new Date().toISOString().split('T')[0];
     const historicoDiario = Array.isArray(historicoArray)
       ? historicoArray.map((entry) => ({
-          data: this.parseNullString<string>(entry.data as string | null | undefined) || undefined,
-          label: this.parseNullString<string>(entry.label as string | null | undefined) || undefined,
+          data: this.parseNullString<string>(entry.data as string | null | undefined) || hojeIso,
+          label: this.parseNullString<string>(entry.label as string | null | undefined) || null,
           tem_conversa: (() => {
             const parsed = parseOptionalBoolean(entry.tem_conversa ?? entry.temConversa ?? entry.checkin_realizado);
             return parsed === null ? undefined : parsed;
           })(),
           conversas: parseNullableNumber(entry.conversas),
           humor: parseNullableNumber(entry.humor),
-          emocao: this.parseNullString<string>(entry.emocao as string | null | undefined) || undefined,
-          emocao_id: this.parseNullString<string>(entry.emocao_id as string | null | undefined) || undefined,
-          emoji: this.parseNullString<string>(entry.emoji as string | null | undefined) || undefined,
+          emocao: this.parseNullString<string>(entry.emocao as string | null | undefined) || null,
+          emocao_id: this.parseNullString<string>(entry.emocao_id as string | null | undefined) || null,
+          emoji: this.parseNullString<string>(entry.emoji as string | null | undefined) || null,
           energia: parseNullableNumber(entry.energia),
           qualidade: parseNullableNumber(entry.qualidade),
-          ultima_hora: this.parseNullString<string>(entry.ultima_hora as string | null | undefined) || undefined
+          ultima_hora: this.parseNullString<string>(entry.ultima_hora as string | null | undefined) || null
         }))
       : undefined;
 
+    const nowIso = new Date().toISOString();
     const insights = Array.isArray(insightsArray)
-      ? insightsArray.map((insight) => ({
-          id: this.parseNullString<string>(insight.id as string | null | undefined) || undefined,
-          tipo: this.parseNullString<string>(insight.tipo as string | null | undefined) || undefined,
-          categoria: this.parseNullString<string>(insight.categoria as string | null | undefined) || undefined,
-          titulo: this.parseNullString<string>(insight.titulo as string | null | undefined) || undefined,
-          descricao: this.parseNullString<string>(insight.descricao as string | null | undefined) || undefined,
-          icone: this.parseNullString<string>(insight.icone as string | null | undefined) || undefined,
-          prioridade: this.parseNullString<string>(insight.prioridade as string | null | undefined) || undefined,
-          data_criacao: this.parseNullString<string>(insight.data_criacao as string | null | undefined) || undefined
+      ? insightsArray.map((insight, index) => ({
+          id: this.parseNullString<string>(insight.id as string | null | undefined) ?? `insight_${index}`,
+          tipo: this.parseNullString<string>(insight.tipo as string | null | undefined) ?? 'padrao',
+          categoria: this.parseNullString<string>(insight.categoria as string | null | undefined) ?? 'emocional',
+          titulo: this.parseNullString<string>(insight.titulo as string | null | undefined) ?? 'Insight em processamento',
+          descricao: this.parseNullString<string>(insight.descricao as string | null | undefined) ?? 'Estamos analisando seus dados para gerar um insight personalizado.',
+          icone: this.parseNullString<string>(insight.icone as string | null | undefined) ?? '💡',
+          prioridade: this.parseNullString<string>(insight.prioridade as string | null | undefined) ?? 'media',
+          data_criacao: this.parseNullString<string>(insight.data_criacao as string | null | undefined) ?? nowIso
         }))
       : undefined;
 
     const historicoResumoBlock = safeJsonParse<Record<string, unknown>>(payload.Historico_Resumo ?? payload.historico_resumo);
     const historicoResumo = historicoResumoBlock
       ? {
-          total_conversas: this.parseNumber(historicoResumoBlock.total_conversas as string | number | null | undefined),
-          humor_medio: this.parseNumber(historicoResumoBlock.humor_medio as string | number | null | undefined),
-          sequencia_ativa: this.parseNumber(historicoResumoBlock.sequencia_ativa as string | number | null | undefined),
+          total_conversas: this.parseNumber(historicoResumoBlock.total_conversas as string | number | null | undefined) ?? 0,
+          humor_medio: this.parseNumber(historicoResumoBlock.humor_medio as string | number | null | undefined) ?? 0,
+          sequencia_ativa: this.parseNumber(historicoResumoBlock.sequencia_ativa as string | number | null | undefined) ?? 0,
           ultima_conversa_data: this.parseNullString<string>(historicoResumoBlock.ultima_conversa_data as string | null | undefined),
           ultima_conversa_hora: this.parseNullString<string>(historicoResumoBlock.ultima_conversa_hora as string | null | undefined),
           periodo_inicio: this.parseNullString<string>(historicoResumoBlock.periodo_inicio as string | null | undefined),
@@ -639,10 +597,8 @@ class DataAdapter {
       perfil_big_five: Object.keys(perfilBigFive).length > 0 ? (perfilBigFive as ApiData['perfil_big_five']) : undefined,
       gamificacao: Object.keys(gamificacao).length > 0 ? (gamificacao as ApiData['gamificacao']) : undefined,
       sabotador: Object.keys(sabotador).length > 0 ? (sabotador as ApiData['sabotador']) : undefined,
-      metricas_semana: Object.keys(metricas).length > 0 ? (metricas as ApiData['metricas_semana']) : undefined,
       distribuicao_emocoes: Object.keys(distribuicao).length > 0 ? (distribuicao as ApiData['distribuicao_emocoes']) : undefined,
       panas: Object.keys(panas).length > 0 ? (panas as ApiData['panas']) : undefined,
-      historico_diario: historicoDiario,
       historico_resumo: historicoResumo,
       insights: insights,
       timestamp: new Date().toISOString()
@@ -694,10 +650,6 @@ class DataAdapter {
       sabotador: {
         ...defaults.sabotador,
         ...(safeData.sabotador || {})
-      },
-      metricas_semana: {
-        ...defaults.metricas_semana,
-        ...(safeData.metricas_semana || {})
       },
       distribuicao_emocoes: {
         ...defaults.distribuicao_emocoes,
@@ -1056,14 +1008,13 @@ class DataAdapter {
 
   private resolveHumorMetrics(apiData: ApiData) {
     const defaults = this.getDefaultApiData();
-    const metricas = apiData.metricas_semana ?? defaults.metricas_semana;
     const humorBlock = apiData.humor;
     const resumo = apiData.historico_resumo ?? defaults.historico_resumo;
 
     const parsedHumorAtual = humorBlock
       ? this.parseNumber(humorBlock.humor_atual ?? humorBlock.humor_medio)
       : null;
-    const metricasHumor = this.parseNumber(metricas.humor_medio);
+    const metricasHumor = null;
     const humorResumoRaw = resumo?.humor_medio;
     const resumoHumor = typeof humorResumoRaw === 'number'
       ? humorResumoRaw
@@ -1089,15 +1040,15 @@ class DataAdapter {
 
     const ultimaConversaEmoji = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.emoji
-    ) || this.parseNullString<string>(metricas.ultimo_conversa_emoji) || '😐';
+    ) || '😐';
 
     const ultimaConversaEmocao = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.emocao
-    ) || this.parseNullString<string>(metricas.ultima_emocao) || 'neutral';
+    ) || 'neutral';
 
     const ultimaConversaData = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.data
-    ) || this.parseNullString<string>(metricas.ultima_conversa_data) || resumo?.ultima_conversa_data || defaults.metricas_semana.ultima_conversa_data;
+    ) || resumo?.ultima_conversa_data || null;
 
     let tendencia = this.parseNumber(humorBlock?.diferenca_percentual ?? humorBlock?.tendencia_vs_periodo_anterior);
     if (tendencia === null) {
@@ -1120,10 +1071,10 @@ class DataAdapter {
     return {
       nivelAtual,
       humorMedio,
-      energiaMedia: energiaMedia ?? this.parseNumber(metricas.energia_media) ?? null,
-      qualidadeMedia: qualidadeMedia ?? this.parseNumber(metricas.qualidade_media_interacao) ?? null,
-      conversasTotal: conversasTotal ?? this.parseNumber(metricas.conversas_total) ?? (typeof resumoTotalConversas === 'number' ? resumoTotalConversas : 0),
-      conversasCompletas: this.parseNumber(metricas.conversas_completas) ?? 0,
+      energiaMedia: energiaMedia ?? null,
+      qualidadeMedia: qualidadeMedia ?? null,
+      conversasTotal: conversasTotal ?? (typeof resumoTotalConversas === 'number' ? resumoTotalConversas : 0),
+      conversasCompletas: typeof resumoTotalConversas === 'number' ? resumoTotalConversas : 0,
       ultimaConversaEmoji,
       ultimaConversaEmocao,
       ultimaConversaData,
@@ -1137,7 +1088,6 @@ class DataAdapter {
   public convertApiToDashboard(rawApiPayload: ApiPayload): DashboardData {
     const apiData = this.normalizeApiPayload(rawApiPayload);
     const perfilDetectado = this.generatePerfilDetectado(apiData);
-    const metricas = apiData.metricas_semana;
     const humorMetrics = this.resolveHumorMetrics(apiData);
     const cronotipoRaw = this.parseNullString<string>(apiData.user.cronotipo_detectado);
 
@@ -1188,9 +1138,9 @@ class DataAdapter {
         total_checkins: humorMetrics.conversasTotal,
         taxa_resposta: (() => {
           const total = humorMetrics.conversasTotal;
-          const completas = this.parseNumber(metricas.conversas_completas);
+          const completas = humorMetrics.conversasCompletas;
           if (!total || total === 0) return 0;
-          return (completas! / total) * 100;
+          return (completas / total) * 100;
         })(),
         humor_medio: humorMetrics.humorMedio || 5,
         emocao_dominante: humorMetrics.ultimaConversaEmocao
