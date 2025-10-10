@@ -152,6 +152,25 @@ export interface Insight {
   };
 }
 
+export interface InsightResource {
+  nome: string;
+  tipo: string;
+  descricao: string;
+  aplicacao_pratica: string;
+}
+
+export interface InsightDetail extends Insight {
+  usuario_id: string;
+  ativo: boolean;
+  chat_id?: string | null;
+  resumo_situacao?: string;
+  feedback_positivo?: string;
+  feedback_desenvolvimento?: string;
+  feedback_motivacional?: string;
+  recursos_sugeridos?: InsightResource[];
+  baseado_em?: string[];
+}
+
 // Alertas preventivos (background system)
 export interface AlertaPreventivo {
   id: string;
@@ -214,19 +233,25 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
   humorHistoricoError: string | null;
+  selectedInsightId: string | null;
+  insightDetail: InsightDetail | null;
+  insightDetailLoading: boolean;
+  insightDetailError: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
+  openInsightDetail: (insightId: string) => Promise<void>;
+  closeInsightDetail: () => void;
 }
 
 // Configurações personalizadas por perfil

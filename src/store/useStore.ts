@@ -40,6 +40,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   humorHistoricoPeriodo: null,
   humorHistoricoLoading: false,
   humorHistoricoError: null,
+  selectedInsightId: null,
+  insightDetail: null,
+  insightDetailLoading: false,
+  insightDetailError: null,
 
   // Actions básicas
   setError: (error) => {
@@ -240,6 +244,51 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       });
     }
   }
+
+  ,
+
+  openInsightDetail: async (insightId) => {
+    const { dashboardData } = get();
+    const userId = dashboardData?.usuario?.id;
+
+    if (!userId) {
+      console.warn('[openInsightDetail] usuário indisponível');
+      return;
+    }
+
+    set({
+      view: 'insightDetail',
+      selectedInsightId: insightId,
+      insightDetailLoading: true,
+      insightDetailError: null
+    });
+
+    try {
+      const detail = await apiService.getInsightDetail(userId, insightId);
+      set({
+        insightDetail: detail,
+        insightDetailLoading: false,
+        insightDetailError: null
+      });
+    } catch (error) {
+      console.error('Erro ao carregar insight detalhado:', error);
+      set({
+        insightDetailLoading: false,
+        insightDetailError: error instanceof Error ? error.message : 'Erro ao carregar insight',
+        insightDetail: null
+      });
+    }
+  },
+
+  closeInsightDetail: () => {
+    set({
+      view: 'dashboard',
+      selectedInsightId: null,
+      insightDetail: null,
+      insightDetailError: null,
+      insightDetailLoading: false
+    });
+  }
 }));
 
 // Hook customizado para verificar autenticação
@@ -269,7 +318,13 @@ export const useDashboard = () => {
     humorHistorico,
     humorHistoricoLoading,
     humorHistoricoError,
-    loadHumorHistorico
+    loadHumorHistorico,
+    openInsightDetail,
+    closeInsightDetail,
+    selectedInsightId,
+    insightDetail,
+    insightDetailLoading,
+    insightDetailError
   } = useStore();
   
   return {
@@ -285,7 +340,13 @@ export const useDashboard = () => {
     humorHistorico,
     humorHistoricoLoading,
     humorHistoricoError,
-    loadHumorHistorico
+    loadHumorHistorico,
+    openInsightDetail,
+    closeInsightDetail,
+    selectedInsightId,
+    insightDetail,
+    insightDetailLoading,
+    insightDetailError
   };
 };
 

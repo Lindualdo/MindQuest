@@ -7,7 +7,7 @@
  */
 
 import { authService } from './authService';
-import type { HumorHistoricoPayload } from '../types/emotions';
+import type { HumorHistoricoPayload, InsightDetail } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -322,6 +322,43 @@ class ApiService {
     }
 
     return payload;
+  }
+
+  public async getInsightDetail(
+    userId: string,
+    insightId: string
+  ): Promise<InsightDetail> {
+    if (!userId || !insightId) {
+      throw new Error('Parâmetros inválidos para carregar insight');
+    }
+
+    const params = new URLSearchParams({
+      user_id: userId,
+      insight_id: insightId
+    });
+
+    const endpoint = `/insights?${params.toString()}`;
+    console.info('[API] requisitando insight detalhado:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar detalhe do insight');
+    }
+
+    let detail: unknown = result.response;
+
+    if (Array.isArray(detail)) {
+      detail = detail[0];
+    } else if (detail && typeof detail === 'object' && 'data' in (detail as Record<string, unknown>)) {
+      const nested = (detail as Record<string, unknown>).data;
+      detail = Array.isArray(nested) ? nested[0] : nested;
+    }
+
+    if (!detail || typeof detail !== 'object') {
+      throw new Error('Insight não encontrado ou formato inesperado');
+    }
+
+    return detail as InsightDetail;
   }
 
   /**

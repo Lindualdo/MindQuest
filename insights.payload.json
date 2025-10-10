@@ -1,0 +1,323 @@
+[
+  {
+    "id": "e4b335c8-dd25-421f-a563-cd202a06a8e0",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "positivo",
+    "categoria": "emocional",
+    "titulo": "Manutenção da Calma e Racionalidade em Situações de Estresse",
+    "descricao": "Aldo demonstra uma capacidade sólida de manter a calma e agir racionalmente diante de perdas financeiras e oscilações do mercado, mesmo quando impactado emocionalmente.",
+    "icone": "🧘‍♂️",
+    "prioridade": "alta",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:08:21.962Z",
+    "chat_id": "00497364-b5a5-4254-9253-d4f01a3150f0",
+    "resumo_situacao": "Aldo demonstra uma capacidade sólida de manter a calma e agir racionalmente diante de perdas financeiras e oscilações do mercado, mesmo quando impactado emocionalmente.",
+    "feedback_positivo": "Você tem uma força notável em manter a calma e agir racionalmente, o que é essencial para decisões financeiras sensatas.",
+    "feedback_desenvolvimento": "Continue atento para não subestimar o impacto emocional dessas situações, pois a pressão constante pode afetar seu bem-estar a longo prazo.",
+    "feedback_motivacional": "Sua abordagem racional é um grande diferencial; siga fortalecendo essa habilidade para enfrentar futuros desafios com ainda mais confiança.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Técnicas de Respiração e Mindfulness",
+        "tipo": "tecnica",
+        "descricao": "Práticas para reduzir ansiedade e manter o foco em momentos de estresse.",
+        "aplicacao_pratica": "Utilize exercícios de respiração profunda e mindfulness quando receber alertas de mercado para acalmar a mente antes de tomar decisões."
+      },
+      {
+        "nome": "Livro 'Inteligência Emocional' de Daniel Goleman",
+        "tipo": "leitura",
+        "descricao": "Explora como a inteligência emocional pode ser desenvolvida para melhorar a tomada de decisão e o controle emocional.",
+        "aplicacao_pratica": "Aplique os conceitos para reconhecer e gerenciar melhor suas emoções diante das oscilações do mercado."
+      }
+    ],
+    "baseado_em": [
+      "manutenção da calma e racionalidade diante de perdas",
+      "reconhecimento da importância do controle emocional"
+    ]
+  },
+  {
+    "id": "6d71d2f5-45f2-473e-9b7c-c6cdb27dfe47",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "padrao",
+    "categoria": "cognitivo",
+    "titulo": "Foco no Controle do que Está Sob Sua Ação",
+    "descricao": "Aldo desenvolveu uma filosofia clara de focar suas decisões apenas no que está sob seu controle, o que ajuda a preservar sua estabilidade emocional e racionalidade.",
+    "icone": "🎯",
+    "prioridade": "alta",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:08:21.962Z",
+    "chat_id": "00497364-b5a5-4254-9253-d4f01a3150f0",
+    "resumo_situacao": "Aldo desenvolveu uma filosofia clara de focar suas decisões apenas no que está sob seu controle, o que ajuda a preservar sua estabilidade emocional e racionalidade.",
+    "feedback_positivo": "Sua clareza sobre o que pode controlar é um ponto forte que ajuda a manter a disciplina e o foco.",
+    "feedback_desenvolvimento": "É importante monitorar se essa filosofia não leva a uma aceitação passiva de situações que poderiam ser melhoradas com outras estratégias.",
+    "feedback_motivacional": "Continue fortalecendo essa abordagem, buscando sempre equilibrar controle e adaptação para otimizar seus resultados.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Modelo de Controle Interno e Externo",
+        "tipo": "conceito",
+        "descricao": "Conceito que ajuda a distinguir entre o que está sob seu controle e o que não está.",
+        "aplicacao_pratica": "Use esse modelo para reforçar sua filosofia e identificar áreas onde pode agir proativamente."
+      },
+      {
+        "nome": "Jornal de Controle",
+        "tipo": "pratica",
+        "descricao": "Registro diário para anotar decisões tomadas sobre o que está sob seu controle e reflexões sobre resultados.",
+        "aplicacao_pratica": "Registre suas ações e sentimentos para fortalecer a consciência do controle e ajustar estratégias."
+      }
+    ],
+    "baseado_em": [
+      "filosofia pessoal de agir sobre o que está no controle",
+      "foco em decisões racionais"
+    ]
+  },
+  {
+    "id": "eeccda56-2b57-4601-94cd-14ecc124f01e",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "melhoria",
+    "categoria": "emocional",
+    "titulo": "Gerenciamento do Impacto Emocional das Perdas Financeiras",
+    "descricao": "Aldo sente tristeza e decepção com perdas financeiras, emoções naturais que podem afetar seu bem-estar se não forem bem gerenciadas.",
+    "icone": "💔",
+    "prioridade": "media",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:08:21.962Z",
+    "chat_id": "00497364-b5a5-4254-9253-d4f01a3150f0",
+    "resumo_situacao": "Aldo sente tristeza e decepção com perdas financeiras, emoções naturais que podem afetar seu bem-estar se não forem bem gerenciadas.",
+    "feedback_positivo": "Você reconhece e aceita seus sentimentos negativos, o que é fundamental para o equilíbrio emocional.",
+    "feedback_desenvolvimento": "Procure estratégias específicas para lidar com essas emoções para evitar que elas impactem seu desempenho e saúde mental.",
+    "feedback_motivacional": "Com práticas adequadas, você pode transformar essas emoções em aprendizado e resiliência para o futuro.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Técnicas de Reestruturação Cognitiva",
+        "tipo": "tecnica",
+        "descricao": "Métodos para identificar e modificar pensamentos negativos relacionados a perdas.",
+        "aplicacao_pratica": "Use essas técnicas para reduzir o impacto emocional das perdas e manter uma perspectiva equilibrada."
+      },
+      {
+        "nome": "Diário Emocional",
+        "tipo": "reflexao",
+        "descricao": "Registro das emoções e gatilhos para aumentar a autoconsciência e identificar padrões.",
+        "aplicacao_pratica": "Anote seus sentimentos após eventos de perda para entender melhor suas reações e desenvolver estratégias de enfrentamento."
+      }
+    ],
+    "baseado_em": [
+      "sentimentos de tristeza e decepção com perdas financeiras",
+      "reconhecimento da importância de manter a calma"
+    ]
+  },
+  {
+    "id": "58738a9a-a74f-438c-8c59-4f3b5cdfa593",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "positivo",
+    "categoria": "emocional",
+    "titulo": "Equilíbrio entre produtividade e bem-estar emocional",
+    "descricao": "Aldo demonstra um estado emocional equilibrado, com momentos frequentes de alegria e satisfação relacionados ao progresso no trabalho e ao cuidado financeiro.",
+    "icone": "😊",
+    "prioridade": "media",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:16:25.702Z",
+    "chat_id": "0d24adcb-d873-4c7a-a2d7-a46304572724",
+    "resumo_situacao": "Aldo demonstra um estado emocional equilibrado, com momentos frequentes de alegria e satisfação relacionados ao progresso no trabalho e ao cuidado financeiro.",
+    "feedback_positivo": "Você tem uma habilidade notável de encontrar alegria e leveza mesmo em dias produtivos, o que é essencial para manter a motivação.",
+    "feedback_desenvolvimento": "Continue observando como esses momentos de felicidade influenciam outras áreas da sua vida para fortalecer ainda mais seu equilíbrio emocional.",
+    "feedback_motivacional": "Mantenha esse foco no prazer associado ao progresso, pois ele é um combustível poderoso para seu crescimento pessoal e profissional.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Diário de Gratidão",
+        "tipo": "pratica",
+        "descricao": "Registrar diariamente momentos positivos e conquistas para reforçar o bem-estar emocional.",
+        "aplicacao_pratica": "Reserve 5 minutos ao final do dia para anotar três coisas que te deixaram feliz ou satisfeito."
+      },
+      {
+        "nome": "Mindfulness",
+        "tipo": "tecnica",
+        "descricao": "Prática de atenção plena para aumentar a consciência dos momentos de alegria e reduzir o estresse.",
+        "aplicacao_pratica": "Dedique 10 minutos diários para exercícios de respiração e foco no presente, especialmente ao perceber emoções positivas."
+      }
+    ],
+    "baseado_em": [
+      "momentos de cantar e dançar alegres",
+      "sentimento de felicidade e leveza no dia produtivo",
+      "relação positiva entre progresso no app e bem-estar"
+    ]
+  },
+  {
+    "id": "5908d5f4-66f7-4203-93ae-bcf516870212",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "padrao",
+    "categoria": "emocional",
+    "titulo": "Gestão cuidadosa do risco financeiro como fonte de segurança",
+    "descricao": "Aldo mantém uma postura disciplinada e cuidadosa na gestão financeira, focando em minimizar riscos para recuperar perdas e alcançar estabilidade.",
+    "icone": "💼",
+    "prioridade": "alta",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:16:25.702Z",
+    "chat_id": "0d24adcb-d873-4c7a-a2d7-a46304572724",
+    "resumo_situacao": "Aldo mantém uma postura disciplinada e cuidadosa na gestão financeira, focando em minimizar riscos para recuperar perdas e alcançar estabilidade.",
+    "feedback_positivo": "Sua atenção rigorosa à gestão de riscos financeiros demonstra responsabilidade e comprometimento com suas metas.",
+    "feedback_desenvolvimento": "É importante monitorar o impacto emocional dessa vigilância constante para evitar ansiedade ou desgaste excessivo.",
+    "feedback_motivacional": "Continue com essa disciplina, mas permita-se momentos para relaxar e renovar suas energias, mantendo o equilíbrio emocional.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Gestão de Risco Financeiro",
+        "tipo": "conceito",
+        "descricao": "Entendimento dos princípios para proteger investimentos e evitar perdas desnecessárias.",
+        "aplicacao_pratica": "Estude estratégias básicas de diversificação e controle de riscos para aplicar no seu planejamento financeiro."
+      },
+      {
+        "nome": "Técnicas de Relaxamento",
+        "tipo": "tecnica",
+        "descricao": "Métodos para reduzir o estresse e a ansiedade relacionados à pressão financeira.",
+        "aplicacao_pratica": "Pratique exercícios de respiração profunda ou meditação guiada quando sentir tensão sobre finanças."
+      }
+    ],
+    "baseado_em": [
+      "cuidado máximo com risco financeiro",
+      "meta de recuperar perdas financeiras",
+      "postura disciplinada e focada"
+    ]
+  },
+  {
+    "id": "9bc19901-e2c2-4334-8bb7-67e67608008f",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "melhoria",
+    "categoria": "social",
+    "titulo": "Busca ativa por relacionamento significativo",
+    "descricao": "Aldo expressa o desejo de encontrar um relacionamento que traga empolgação e continuidade, mostrando atenção à dimensão afetiva da vida.",
+    "icone": "❤️",
+    "prioridade": "media",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:16:25.702Z",
+    "chat_id": "0d24adcb-d873-4c7a-a2d7-a46304572724",
+    "resumo_situacao": "Aldo expressa o desejo de encontrar um relacionamento que traga empolgação e continuidade, mostrando atenção à dimensão afetiva da vida.",
+    "feedback_positivo": "Você demonstra clareza e sinceridade sobre o que deseja em um relacionamento, o que é fundamental para construir conexões autênticas.",
+    "feedback_desenvolvimento": "Considere explorar formas de ampliar seu círculo social e oportunidades de conhecer pessoas com interesses alinhados.",
+    "feedback_motivacional": "Mantenha a esperança e a abertura para novas experiências, pois isso aumentará suas chances de encontrar um parceiro compatível.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Networking Social",
+        "tipo": "pratica",
+        "descricao": "Atividades para ampliar seu círculo social e conhecer pessoas novas.",
+        "aplicacao_pratica": "Participe de eventos, grupos ou cursos que estejam alinhados com seus interesses pessoais e profissionais."
+      },
+      {
+        "nome": "Autoavaliação de Relacionamentos",
+        "tipo": "reflexao",
+        "descricao": "Refletir sobre o que valoriza em um parceiro e em um relacionamento saudável.",
+        "aplicacao_pratica": "Liste características importantes para você e revise periodicamente para manter clareza nas suas escolhas."
+      }
+    ],
+    "baseado_em": [
+      "meta de encontrar relacionamento empolgante",
+      "atenção à dimensão afetiva",
+      "clareza sobre desejos pessoais"
+    ]
+  },
+  {
+    "id": "2af8a55a-6ebf-489f-823f-1ec924ec6164",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "padrao",
+    "categoria": "emocional",
+    "titulo": "Oscilação entre aventura e preocupação",
+    "descricao": "Aldo experimenta momentos intensos de aventura e liberdade emocional, mas também sente preocupações sobre os limites e consequências dessas experiências.",
+    "icone": "🔄",
+    "prioridade": "alta",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:21:30.245Z",
+    "chat_id": "29829131-f79e-4c9f-9b3d-411ace52508a",
+    "resumo_situacao": "Aldo experimenta momentos intensos de aventura e liberdade emocional, mas também sente preocupações sobre os limites e consequências dessas experiências.",
+    "feedback_positivo": "Você demonstra coragem ao se permitir novas experiências e valorizar momentos de descontração, o que é fundamental para seu crescimento pessoal.",
+    "feedback_desenvolvimento": "É importante observar como essa busca por aventura pode gerar preocupações que impactam seu equilíbrio emocional, exigindo atenção para não perder o controle.",
+    "feedback_motivacional": "Continue explorando essas sensações com consciência, buscando equilibrar emoção e reflexão para fortalecer seu bem-estar emocional.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Diário emocional",
+        "tipo": "tecnica",
+        "descricao": "Registrar suas emoções e pensamentos após experiências intensas para identificar padrões e gatilhos.",
+        "aplicacao_pratica": "Anote diariamente suas sensações após momentos de aventura para entender melhor o impacto emocional e ajustar suas escolhas."
+      },
+      {
+        "nome": "Análise de limites pessoais",
+        "tipo": "reflexao",
+        "descricao": "Refletir sobre seus limites e o que considera aceitável em suas experiências para manter o equilíbrio emocional.",
+        "aplicacao_pratica": "Liste o que é confortável e desconfortável para você em situações novas e use isso como guia para decisões futuras."
+      }
+    ],
+    "baseado_em": [
+      "sensação de aventura e adrenalina com preocupação",
+      "relato do encontro com Suzana e medo do proibido",
+      "busca por equilíbrio emocional"
+    ]
+  },
+  {
+    "id": "e5f22107-4abf-4cbb-80ce-ffa603a5649c",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "melhoria",
+    "categoria": "cognitivo",
+    "titulo": "Estratégias para avaliação de relacionamentos",
+    "descricao": "Aldo ainda não definiu estratégias claras para avaliar seu novo relacionamento, deixando as coisas acontecerem de forma natural, mas deseja organizar melhor esse processo.",
+    "icone": "🧠",
+    "prioridade": "alta",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:21:30.245Z",
+    "chat_id": "29829131-f79e-4c9f-9b3d-411ace52508a",
+    "resumo_situacao": "Aldo ainda não definiu estratégias claras para avaliar seu novo relacionamento, deixando as coisas acontecerem de forma natural, mas deseja organizar melhor esse processo.",
+    "feedback_positivo": "Você demonstra uma postura consciente ao querer refletir sobre o relacionamento e alinhar suas expectativas com seus objetivos pessoais.",
+    "feedback_desenvolvimento": "A falta de uma estratégia estruturada pode dificultar decisões mais alinhadas e claras sobre o futuro do relacionamento.",
+    "feedback_motivacional": "Com pequenas ferramentas de avaliação, você pode ganhar mais clareza e segurança para decidir os próximos passos com autenticidade.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Lista de critérios pessoais",
+        "tipo": "tecnica",
+        "descricao": "Definir quais valores, comportamentos e objetivos são importantes para você em um relacionamento.",
+        "aplicacao_pratica": "Crie uma lista com o que espera e valoriza em um parceiro e na relação para usar como referência em suas reflexões."
+      },
+      {
+        "nome": "Revisão semanal",
+        "tipo": "pratica",
+        "descricao": "Reservar um momento semanal para refletir sobre como o relacionamento está alinhado com seus critérios e sentimentos.",
+        "aplicacao_pratica": "Agende um horário para avaliar suas emoções e percepções sobre o relacionamento, ajustando expectativas conforme necessário."
+      }
+    ],
+    "baseado_em": [
+      "expressão de incerteza sobre estratégias",
+      "desejo de organização para decisões afetivas",
+      "relato de avaliação do relacionamento com Suzana"
+    ]
+  },
+  {
+    "id": "ec3063e4-3759-43c7-9aca-a9d58ee1c47e",
+    "usuario_id": "8bc57788-8534-45a9-98be-39dc81ef4e6a",
+    "tipo": "positivo",
+    "categoria": "emocional",
+    "titulo": "Valorização de momentos de conexão e alegria",
+    "descricao": "Aldo valoriza profundamente os momentos de alegria, conexão e diversão que vive, especialmente no final de semana com Suzana, que trouxe felicidade e descontração.",
+    "icone": "😊",
+    "prioridade": "media",
+    "ativo": true,
+    "criado_em": "2025-10-09T16:21:30.245Z",
+    "chat_id": "29829131-f79e-4c9f-9b3d-411ace52508a",
+    "resumo_situacao": "Aldo valoriza profundamente os momentos de alegria, conexão e diversão que vive, especialmente no final de semana com Suzana, que trouxe felicidade e descontração.",
+    "feedback_positivo": "Sua capacidade de aproveitar e reconhecer momentos positivos é uma força que contribui para seu bem-estar emocional.",
+    "feedback_desenvolvimento": "Embora valorize esses momentos, é importante equilibrar a intensidade dessas experiências com reflexão para evitar decisões impulsivas.",
+    "feedback_motivacional": "Continue cultivando esses momentos de alegria enquanto mantém a atenção para alinhar suas escolhas com seus valores pessoais.",
+    "recursos_sugeridos": [
+      {
+        "nome": "Mindfulness",
+        "tipo": "conceito",
+        "descricao": "Prática de atenção plena para estar presente e aproveitar o momento sem julgamentos.",
+        "aplicacao_pratica": "Durante momentos de diversão, pratique focar totalmente na experiência para aumentar a satisfação e consciência emocional."
+      },
+      {
+        "nome": "Gratidão diária",
+        "tipo": "tecnica",
+        "descricao": "Registrar diariamente aspectos positivos vividos para fortalecer a percepção de bem-estar.",
+        "aplicacao_pratica": "Anote três coisas boas que aconteceram no dia para reforçar a valorização dos momentos felizes."
+      }
+    ],
+    "baseado_em": [
+      "relato do final de semana com Suzana",
+      "expressão de felicidade e descontração",
+      "valorização da conexão e diversão"
+    ]
+  }
+]

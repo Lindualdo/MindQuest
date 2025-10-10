@@ -12,11 +12,11 @@ import {
   Lightbulb, Target, Trophy, AlertTriangle, 
   TrendingUp, Brain, Heart, Users, Zap 
 } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
 
 const InsightsPanel: React.FC = () => {
-  const { dashboardData } = useStore();
+  const { dashboardData, openInsightDetail } = useDashboard();
   const { insights } = dashboardData;
 
   const getInsightIcon = (tipo: string, categoria: string) => {
@@ -134,6 +134,7 @@ const InsightsPanel: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
+              onClick={() => openInsightDetail(insight.id)}
               className={`
                 relative p-4 rounded-xl border-l-4 ${styles.bgColor} ${styles.borderColor}
                 hover:shadow-md transition-all duration-200 cursor-pointer

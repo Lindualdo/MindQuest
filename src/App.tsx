@@ -11,6 +11,7 @@ import { Brain, RefreshCw, AlertCircle } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/HumorHistoryPage';
+import InsightDetailPage from './pages/InsightDetailPage';
 import { useDashboard } from './store/useStore';
 
 function App() {
@@ -65,6 +66,14 @@ function App() {
             </div>
           </motion.div>
         </div>
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'insightDetail') {
+    return (
+      <AuthGuard>
+        <InsightDetailPage />
       </AuthGuard>
     );
   }
