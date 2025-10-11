@@ -10,7 +10,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Lightbulb, Target, Trophy, AlertTriangle, 
-  TrendingUp, Brain, Heart, Users, Zap 
+  TrendingUp, Brain, Heart, Users, Zap, ChevronRight 
 } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
@@ -200,6 +200,11 @@ const InsightsPanel: React.FC = () => {
                         })}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <span>Ver detalhes</span>
+                    <ChevronRight size={14} />
                   </div>
                 </div>
               </div>
