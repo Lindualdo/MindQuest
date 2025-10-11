@@ -4,12 +4,12 @@
       "success": true,
       "humor": {
         "humor_atual": 7,
-        "humor_medio": 6.5,
-        "diferenca_percentual": 7.7,
-        "conversas_total": 4,
+        "humor_medio": 6.8,
+        "diferenca_percentual": 2.9,
+        "conversas_total": 5,
         "ultima_conversa": {
-          "data": "2025-10-05T00:00:00.000Z",
-          "hora": "13:00:50.848796",
+          "data": "2025-10-10T00:00:00.000Z",
+          "hora": "09:35:36.201248",
           "emoji": null,
           "emocao": null
         }
@@ -34,250 +34,258 @@
         "perfil_secundario": "perfeccionista"
       },
       "gamificacao": {
-        "xp_total": "320",
-        "nivel_atual": "2",
-        "streak_conversas_dias": "7",
-        "conquistas_desbloqueadas": "[\"primeira_conversa\",\"explorador_emocional\",\"streak_7_dias\",\"nivel_2\"]",
-        "quest_diaria_status": "completa",
-        "quest_diaria_progresso": "100",
-        "quest_diaria_descricao": "Complete sua conversa diária e reflita sobre suas emoções"
+        "xp_total": null,
+        "nivel_atual": null,
+        "streak_conversas_dias": null,
+        "conquistas_desbloqueadas": null,
+        "quest_diaria_status": null,
+        "quest_diaria_progresso": null,
+        "quest_diaria_descricao": null
       },
       "sabotador": {
-        "id": "inquieto",
-        "nome": "Inquieto",
-        "emoji": "⚡",
-        "apelido_personalizado": "Sr. Ansioso",
+        "id": "hipervigilante",
+        "nome": "Hipervigilante",
+        "emoji": "👀",
+        "apelido_personalizado": "Sentinela Cauteloso",
         "total_deteccoes": "3",
         "contexto_principal": "relacionamentos",
-        "insight_atual": "O sabotador Inquieto se manifesta na dificuldade de manter foco constante, alternando entre hiperfoco e distração, o que prejudica a produtividade e a conclusão de tarefas.",
-        "contramedida_ativa": "Usar técnicas de Pomodoro para melhorar o foco e gerenciar melhor o tempo.",
-        "intensidade_media": "60",
-        "total_conversas": "6"
+        "insight_atual": "O sabotador Hipervigilante se manifesta na preocupação excessiva e antecipação de rejeição nos relacionamentos, gerando insegurança e ansiedade que podem afetar a confiança e a iniciativa social.",
+        "contramedida_ativa": "Praticar técnicas de respiração e mindfulness para reduzir a ansiedade e o medo antecipatório.",
+        "intensidade_media": "65",
+        "total_conversas": "5"
       },
       "roda_emocoes": {
-        "alegria": 85,
-        "confianca": 230,
-        "medo": 60,
+        "alegria": 205,
+        "confianca": 350,
+        "medo": 195,
         "surpresa": 0,
-        "tristeza": 135,
+        "tristeza": 150,
         "angustia": 0,
         "raiva": 0,
-        "expectativa": 125
+        "expectativa": 325
       },
       "panas": {
-        "positivas": 5,
-        "negativas": 3,
+        "positivas": 10,
+        "negativas": 5,
         "neutras": 0,
-        "total": 8,
-        "percentual_positivas": 62.5,
-        "percentual_negativas": 37.5,
+        "total": 15,
+        "percentual_positivas": 66.7,
+        "percentual_negativas": 33.3,
         "percentual_neutras": 0
       },
       "historico_diario": [
         {
-          "data": "2025-10-08",
-          "label": "08/10",
-          "tem_conversa": true,
-          "conversas": 1,
-          "emocao": null,
-          "emocao_id": null,
-          "emoji": null,
-          "humor": 0,
-          "energia": 0,
-          "qualidade": 8,
-          "ultima_hora": "10:47"
-        },
-        {
-          "data": "2025-10-07",
-          "label": "07/10",
+          "data": "2025-10-04",
+          "label": "04/10",
           "tem_conversa": false,
-          "conversas": 0,
-          "emocao": null,
-          "emocao_id": null,
           "emoji": null,
-          "humor": 0,
-          "energia": 0,
-          "qualidade": 0,
-          "ultima_hora": null
-        },
-        {
-          "data": "2025-10-06",
-          "label": "06/10",
-          "tem_conversa": false,
-          "conversas": 0,
-          "emocao": null,
-          "emocao_id": null,
-          "emoji": null,
-          "humor": 0,
-          "energia": 0,
-          "qualidade": 0,
-          "ultima_hora": null
+          "humor": null
         },
         {
           "data": "2025-10-05",
           "label": "05/10",
           "tem_conversa": true,
-          "conversas": 1,
-          "emocao": null,
-          "emocao_id": null,
           "emoji": null,
-          "humor": 7,
-          "energia": 7,
-          "qualidade": 8,
-          "ultima_hora": "20:09"
+          "humor": 7
         },
         {
-          "data": "2025-10-04",
-          "label": "04/10",
+          "data": "2025-10-06",
+          "label": "06/10",
           "tem_conversa": false,
-          "conversas": 0,
-          "emocao": null,
-          "emocao_id": null,
           "emoji": null,
-          "humor": 0,
-          "energia": 0,
-          "qualidade": 0,
-          "ultima_hora": null
+          "humor": null
         },
         {
-          "data": "2025-10-03",
-          "label": "03/10",
-          "tem_conversa": true,
-          "conversas": 2,
-          "emocao": "Alegria",
-          "emocao_id": "joy",
-          "emoji": "😊",
-          "humor": 7,
-          "energia": 7,
-          "qualidade": 8,
-          "ultima_hora": "17:47"
+          "data": "2025-10-07",
+          "label": "07/10",
+          "tem_conversa": false,
+          "emoji": null,
+          "humor": null
         },
         {
-          "data": "2025-10-02",
-          "label": "02/10",
+          "data": "2025-10-08",
+          "label": "08/10",
           "tem_conversa": true,
-          "conversas": 2,
-          "emocao": "Tristeza",
-          "emocao_id": "sadness",
-          "emoji": "😢",
-          "humor": 6,
-          "energia": 6,
-          "qualidade": 8,
-          "ultima_hora": "08:11"
+          "emoji": "🤔",
+          "humor": 7
+        },
+        {
+          "data": "2025-10-09",
+          "label": "09/10",
+          "tem_conversa": true,
+          "emoji": "🤗",
+          "humor": 6.5
+        },
+        {
+          "data": "2025-10-10",
+          "label": "10/10",
+          "tem_conversa": true,
+          "emoji": "🤗",
+          "humor": 7
         }
       ],
       "historico_resumo": {
-        "total_conversas": 6,
-        "humor_medio": 6.6,
-        "sequencia_ativa": 1,
-        "ultima_conversa_data": "2025-10-08",
-        "ultima_conversa_hora": "10:47:13",
-        "periodo_inicio": "2025-10-02",
-        "periodo_fim": "2025-10-08"
+        "total_conversas": 4,
+        "humor_medio": 6.8,
+        "sequencia_ativa": 3,
+        "ultima_conversa_data": "2025-10-10",
+        "ultima_conversa_hora": "09:35:30",
+        "periodo_inicio": "2025-10-04",
+        "periodo_fim": "2025-10-10"
       },
       "insights": [
         {
-          "id": "2c54e113-1074-4b0e-86ee-c7ceb0883a74",
+          "id": "3e220181-0c5b-4f1f-ba93-49f04b7f7b46",
           "tipo": "padrao",
           "categoria": "emocional",
-          "titulo": "Padrão de Solidão Identificado",
-          "descricao": "Você mencionou sentir solidão mesmo mantendo suporte social ativo (coach, terapeuta, família). Esse padrão apareceu em ambas as conversas e foi um fator importante no término do casamento anterior.",
-          "icone": "🔍",
+          "titulo": "Gerenciamento do impacto emocional das prioridades",
+          "descricao": "Aldo está focando nas áreas que mais afetam sua saúde emocional, especialmente finanças e solidão, que influenciam diretamente seu equilíbrio psicológico e emocional.",
+          "icone": "🔄",
           "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
+          "data_criacao": "2025-10-10T09:35:47.576Z"
         },
         {
-          "id": "942240c7-b0b8-43b6-946b-4646e481ac30",
-          "tipo": "positivo",
-          "categoria": "social",
-          "titulo": "Vínculo Paterno Forte",
-          "descricao": "Você mantém contato frequente e significativo com seus filhos mesmo à distância. Eles são uma fonte importante de motivação e sentido de propósito.",
-          "icone": "👨‍👦‍👦",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
-        },
-        {
-          "id": "f598deb6-1b3b-4073-823d-39d25d610595",
-          "tipo": "alerta",
-          "categoria": "cognitivo",
-          "titulo": "Autocrítica Intensa Detectada",
-          "descricao": "Sabotador Crítico ativo: você demonstrou dúvida sobre seu próprio valor e capacidade de ser amado. Frases como \"ela não gostava mais de mim\" indicam autocrítica prejudicial.",
-          "icone": "🎭",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
-        },
-        {
-          "id": "35c37689-033e-48de-b85a-8acb71589122",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Padrão: Isolamento em Datas Significativas",
-          "descricao": "Você passou os últimos 2 anos sozinho em datas importantes (Ano Novo). Isso intensifica sentimentos de solidão e foi mencionado como \"os piores da minha vida\".",
-          "icone": "📅",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
-        },
-        {
-          "id": "9a7f99b4-bda8-4092-96ec-e2881ca0a754",
+          "id": "e64cbd49-29ec-41b1-970b-b8c238558b80",
           "tipo": "melhoria",
           "categoria": "emocional",
-          "titulo": "Processamento de Rejeição",
-          "descricao": "A recusa da ex-mulher em passar o Ano Novo juntos reativou sentimentos antigos de desprezo e rejeição do casamento. Esse padrão merece atenção terapêutica.",
-          "icone": "💔",
+          "titulo": "Manutenção do Equilíbrio entre Áreas da Vida",
+          "descricao": "Aldo reconhece que o equilíbrio entre diferentes áreas da vida é delicado e que dificuldades em uma área podem impactar negativamente as outras, mas atualmente mantém um estado intermediário que permite evolução gradual.",
+          "icone": "⚖️",
           "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
+          "data_criacao": "2025-10-09T17:09:52.608Z"
         },
         {
-          "id": "002b6577-d673-4243-9c19-797a72ec7ac2",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Gatilhos Emocionais Fortes",
-          "descricao": "Fotos e memórias da ex-mulher desencadeiam episódios intensos de tristeza e angústia. Dias produtivos podem ser seguidos por colapsos emocionais ao enfrentar essas lembranças.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-02T17:38:28.938518"
-        },
-        {
-          "id": "0701540b-253b-4d77-9d8f-5037d111c570",
+          "id": "0f509760-07cb-42e1-879d-34bfe096c766",
           "tipo": "positivo",
+          "categoria": "emocional",
+          "titulo": "Resiliência e Controle Emocional em Situações de Crise",
+          "descricao": "Aldo demonstrou resiliência e controle emocional ao agir com calma e rapidez durante uma queda significativa no mercado financeiro, mantendo a serenidade e tomando decisões estratégicas que minimizaram prejuízos.",
+          "icone": "🧘‍♂️",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T17:09:52.608Z"
+        },
+        {
+          "id": "2af8a55a-6ebf-489f-823f-1ec924ec6164",
+          "tipo": "padrao",
+          "categoria": "emocional",
+          "titulo": "Oscilação entre aventura e preocupação",
+          "descricao": "Aldo experimenta momentos intensos de aventura e liberdade emocional, mas também sente preocupações sobre os limites e consequências dessas experiências.",
+          "icone": "🔄",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T16:21:30.245Z"
+        },
+        {
+          "id": "e5f22107-4abf-4cbb-80ce-ffa603a5649c",
+          "tipo": "melhoria",
+          "categoria": "cognitivo",
+          "titulo": "Estratégias para avaliação de relacionamentos",
+          "descricao": "Aldo ainda não definiu estratégias claras para avaliar seu novo relacionamento, deixando as coisas acontecerem de forma natural, mas deseja organizar melhor esse processo.",
+          "icone": "🧠",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T16:21:30.245Z"
+        },
+        {
+          "id": "5908d5f4-66f7-4203-93ae-bcf516870212",
+          "tipo": "padrao",
+          "categoria": "emocional",
+          "titulo": "Gestão cuidadosa do risco financeiro como fonte de segurança",
+          "descricao": "Aldo mantém uma postura disciplinada e cuidadosa na gestão financeira, focando em minimizar riscos para recuperar perdas e alcançar estabilidade.",
+          "icone": "💼",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T16:16:25.702Z"
+        },
+        {
+          "id": "e4b335c8-dd25-421f-a563-cd202a06a8e0",
+          "tipo": "positivo",
+          "categoria": "emocional",
+          "titulo": "Manutenção da Calma e Racionalidade em Situações de Estresse",
+          "descricao": "Aldo demonstra uma capacidade sólida de manter a calma e agir racionalmente diante de perdas financeiras e oscilações do mercado, mesmo quando impactado emocionalmente.",
+          "icone": "🧘‍♂️",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T16:08:21.962Z"
+        },
+        {
+          "id": "6d71d2f5-45f2-473e-9b7c-c6cdb27dfe47",
+          "tipo": "padrao",
+          "categoria": "cognitivo",
+          "titulo": "Foco no Controle do que Está Sob Sua Ação",
+          "descricao": "Aldo desenvolveu uma filosofia clara de focar suas decisões apenas no que está sob seu controle, o que ajuda a preservar sua estabilidade emocional e racionalidade.",
+          "icone": "🎯",
+          "prioridade": "alta",
+          "data_criacao": "2025-10-09T16:08:21.962Z"
+        },
+        {
+          "id": "9336564f-536f-4fc1-8cec-190428cfd9d7",
+          "tipo": "melhoria",
+          "categoria": "social",
+          "titulo": "Equilíbrio entre trabalho, projetos e relacionamentos",
+          "descricao": "Aldo está dedicando tempo aos seus projetos pessoais e negócios, mas também reconhece a necessidade de reorganizar suas ideias para iniciar um novo relacionamento e lidar com a solidão.",
+          "icone": "⚖️",
+          "prioridade": "media",
+          "data_criacao": "2025-10-10T09:35:47.576Z"
+        },
+        {
+          "id": "547bd1cb-24ca-4784-9b63-4ee2d657d455",
+          "tipo": "padrao",
+          "categoria": "cognitivo",
+          "titulo": "Reorganização das ideias para múltiplas áreas de vida",
+          "descricao": "Aldo está focando em cinco áreas principais da vida (saúde, espiritualidade, profissional, financeiro e relacionamentos), buscando equilíbrio, mas sente impacto emocional quando alguma área está abalada.",
+          "icone": "🧠",
+          "prioridade": "media",
+          "data_criacao": "2025-10-10T09:35:47.576Z"
+        },
+        {
+          "id": "10a1338b-e8b2-4b2f-aa77-ba219d07362d",
+          "tipo": "melhoria",
           "categoria": "comportamental",
-          "titulo": "Resiliência Admirável",
-          "descricao": "Você demonstra grande resiliência ao buscar ativamente ajuda profissional (coach e terapeuta) e manter projetos pessoais estruturados. Isso mostra autocuidado e proatividade.",
+          "titulo": "Fortalecimento dos Hábitos de Autocuidado",
+          "descricao": "Aldo mantém hábitos estruturados de autocuidado como atividade física, alimentação, sono e manter a mente ocupada, além de usar o autoconhecimento para monitorar emoções e gatilhos.",
           "icone": "💪",
           "prioridade": "media",
-          "data_criacao": "2025-10-02T17:38:28.938518"
+          "data_criacao": "2025-10-09T17:09:52.608Z"
         },
         {
-          "id": "301320af-0141-4407-b570-d5ed629617fc",
+          "id": "ec3063e4-3759-43c7-9aca-a9d58ee1c47e",
+          "tipo": "positivo",
+          "categoria": "emocional",
+          "titulo": "Valorização de momentos de conexão e alegria",
+          "descricao": "Aldo valoriza profundamente os momentos de alegria, conexão e diversão que vive, especialmente no final de semana com Suzana, que trouxe felicidade e descontração.",
+          "icone": "😊",
+          "prioridade": "media",
+          "data_criacao": "2025-10-09T16:21:30.245Z"
+        },
+        {
+          "id": "58738a9a-a74f-438c-8c59-4f3b5cdfa593",
+          "tipo": "positivo",
+          "categoria": "emocional",
+          "titulo": "Equilíbrio entre produtividade e bem-estar emocional",
+          "descricao": "Aldo demonstra um estado emocional equilibrado, com momentos frequentes de alegria e satisfação relacionados ao progresso no trabalho e ao cuidado financeiro.",
+          "icone": "😊",
+          "prioridade": "media",
+          "data_criacao": "2025-10-09T16:16:25.702Z"
+        },
+        {
+          "id": "9bc19901-e2c2-4334-8bb7-67e67608008f",
           "tipo": "melhoria",
           "categoria": "social",
-          "titulo": "Desafio: Novos Vínculos Afetivos",
-          "descricao": "Detectamos desânimo significativo para iniciar novos relacionamentos devido ao receio de não alcançar o mesmo nível de intimidade e profundidade do relacionamento anterior.",
-          "icone": "💭",
+          "titulo": "Busca ativa por relacionamento significativo",
+          "descricao": "Aldo expressa o desejo de encontrar um relacionamento que traga empolgação e continuidade, mostrando atenção à dimensão afetiva da vida.",
+          "icone": "❤️",
           "prioridade": "media",
-          "data_criacao": "2025-10-02T17:38:28.938518"
+          "data_criacao": "2025-10-09T16:16:25.702Z"
         },
         {
-          "id": "22472cf7-a439-4ab4-bcfb-023bcf5effa5",
-          "tipo": "padrao",
-          "categoria": "comportamental",
-          "titulo": "Ciclo de Produtividade e Tristeza",
-          "descricao": "Padrão identificado: dias começam produtivos (caminhada, trabalho, autocuidado) mas terminam com episódios de tristeza. Foco excessivo em trabalho pode ser mecanismo de enfrentamento.",
-          "icone": "🔄",
+          "id": "eeccda56-2b57-4601-94cd-14ecc124f01e",
+          "tipo": "melhoria",
+          "categoria": "emocional",
+          "titulo": "Gerenciamento do Impacto Emocional das Perdas Financeiras",
+          "descricao": "Aldo sente tristeza e decepção com perdas financeiras, emoções naturais que podem afetar seu bem-estar se não forem bem gerenciadas.",
+          "icone": "💔",
           "prioridade": "media",
-          "data_criacao": "2025-10-02T17:38:28.938518"
-        },
-        {
-          "id": "264c4940-de24-4ffc-9fd8-b31e48bc7c61",
-          "tipo": "positivo",
-          "categoria": "comportamental",
-          "titulo": "Excelente Capacidade de Organização",
-          "descricao": "Seu perfil disciplinado se destaca: você estrutura trabalho em sprints, planeja objetivos e mantém rotinas saudáveis. Essa é uma força significativa.",
-          "icone": "📊",
-          "prioridade": "media",
-          "data_criacao": "2025-10-02T17:38:28.938518"
+          "data_criacao": "2025-10-09T16:08:21.962Z"
         }
       ],
-      "timestamp": "2025-10-08T19:35:09.421Z"
+      "timestamp": "2025-10-11T14:48:39.244Z"
     }
   }
 ]

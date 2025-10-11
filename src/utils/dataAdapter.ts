@@ -934,10 +934,19 @@ class DataAdapter {
     }));
   }
 
-  private convertGamificacao(gamificacao: ApiData['gamificacao']): Gamificacao {
+  private convertGamificacao(
+    gamificacao: ApiData['gamificacao'],
+    historicoResumo?: ApiData['historico_resumo']
+  ): Gamificacao {
     const xpTotal = this.parseNumber(gamificacao.xp_total) || 0;
     const nivelAtual = this.parseNumber(gamificacao.nivel_atual) || 1;
-    const streakDias = this.parseNumber(gamificacao.streak_conversas_dias) || 0;
+    const streakGamificacao = this.parseNumber(gamificacao.streak_conversas_dias);
+    const sequenciaHistorico = historicoResumo
+      ? this.parseNumber(historicoResumo.sequencia_ativa)
+      : null;
+    const streakDias =
+      (streakGamificacao !== null && streakGamificacao > 0 ? streakGamificacao : null) ??
+      (sequenciaHistorico !== null ? sequenciaHistorico : 0);
     const questStatusRaw = this.parseNullString<string>(gamificacao.quest_diaria_status);
     
     let questStatus: 'pendente' | 'parcial' | 'completa' = 'pendente';
@@ -1122,7 +1131,7 @@ class DataAdapter {
       checkins_historico: this.processHistoricoDiario(apiData),
       roda_emocoes: this.processDistribuicaoEmocoes(apiData),
       distribuicao_panas: this.processPanas(apiData),
-      gamificacao: this.convertGamificacao(apiData.gamificacao),
+      gamificacao: this.convertGamificacao(apiData.gamificacao, apiData.historico_resumo),
       
       sabotadores: {
         padrao_principal: this.convertSabotador(apiData.sabotador)

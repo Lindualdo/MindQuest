@@ -83,7 +83,6 @@ export interface HumorHistoricoDetalhe {
     horario_fim?: string | null;
     emocao?: string | null;
     intensidade_emocao?: number | null;
-    humor_autoavaliado?: number | null;
     qualidade_interacao?: number | null;
     emoji?: string | null;
     observacoes?: string | null;

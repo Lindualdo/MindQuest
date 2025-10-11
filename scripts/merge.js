@@ -154,26 +154,89 @@ const panas = {
   percentual_neutras: parseNullableNumber(panasRow.percentual_neutras) ?? 0,
 };
 
-// Histórico (novo JSON)
-const historicoNodeRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'historico_diario'));
-const historicoDiarioSource = historicoNodeRow.historico_diario ?? [];
-const historicoDiario = Array.isArray(historicoDiarioSource)
-  ? historicoDiarioSource.map(entry => ({
-      data: normalizeString(entry.data),
-      label: normalizeString(entry.label),
-      tem_conversa: Boolean(entry.tem_conversa),
-      conversas: parseNullableNumber(entry.conversas) ?? 0,
-      emocao: normalizeString(entry.emocao),
-      emocao_id: normalizeString(entry.emocao_id),
-      emoji: normalizeString(entry.emoji),
-      humor: parseNullableNumber(entry.humor),
-      energia: parseNullableNumber(entry.energia),
-      qualidade: parseNullableNumber(entry.qualidade),
-      ultima_hora: normalizeString(entry.ultima_hora)
-    }))
-  : [];
+// Histórico
+const historicoAggregateRow = rows.find(
+  (row) =>
+    row &&
+    typeof row === 'object' &&
+    row.jsonb_build_object &&
+    typeof row.jsonb_build_object === 'object' &&
+    row.jsonb_build_object.historico_diario
+);
 
-const historicoResumo = historicoNodeRow.resumo || {
+const historicoRawRows = rows.filter(
+  (row) =>
+    row &&
+    typeof row === 'object' &&
+    'data' in row &&
+    (
+      'humor_medio' in row ||
+      'energia_media' in row ||
+      'justificativa_humor' in row ||
+      'chat_id' in row
+    )
+);
+
+const toDateKey = (value) => {
+  const raw = normalizeString(value);
+  if (!raw) return null;
+  if (raw.includes('T')) return raw.slice(0, 10);
+  return raw;
+};
+
+const toLabel = (dateKey) => {
+  if (!dateKey) return null;
+  const parts = dateKey.split('-');
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}`;
+  }
+  try {
+    const parsed = new Date(dateKey);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+  } catch (_) {
+    // ignore
+  }
+  return dateKey;
+};
+
+const parseHora = (value) => {
+  const time = normalizeString(value);
+  if (!time) return null;
+  return time.length > 8 ? time.slice(0, 8) : time;
+};
+
+const createHistoricoEntry = (dateKey) => ({
+  data: dateKey,
+  label: toLabel(dateKey),
+  tem_conversa: false,
+  conversas: 0,
+  emoji: null,
+  humor: null,
+  ultima_hora: null,
+  _humorSum: 0,
+  _humorWeight: 0,
+});
+
+const historicoDataMap = new Map();
+
+const getOrCreateHistoricoEntry = (dateKey) => {
+  if (!historicoDataMap.has(dateKey)) {
+    historicoDataMap.set(dateKey, createHistoricoEntry(dateKey));
+  }
+  return historicoDataMap.get(dateKey);
+};
+
+const updateUltimaHora = (entry, hora) => {
+  if (!hora) return;
+  if (!entry.ultima_hora || entry.ultima_hora < hora) {
+    entry.ultima_hora = hora;
+  }
+};
+
+let historicoResumo = {
   total_conversas: 0,
   humor_medio: 0,
   sequencia_ativa: 0,
@@ -183,19 +246,215 @@ const historicoResumo = historicoNodeRow.resumo || {
   periodo_fim: null
 };
 
-// Insights
-const insightsRow = findRow(row => 'insights_lista' in row || 'insights' in row);
-const insightsSource = insightsRow.insights_lista ?? insightsRow.insights ?? [];
-const insights = parseJsonSafe(insightsSource, []).map(insight => ({
-  id: normalizeString(insight.id) ?? undefined,
-  tipo: normalizeString(insight.tipo) ?? undefined,
-  categoria: normalizeString(insight.categoria) ?? undefined,
-  titulo: normalizeString(insight.titulo) ?? undefined,
-  descricao: normalizeString(insight.descricao) ?? undefined,
-  icone: normalizeString(insight.icone) ?? undefined,
-  prioridade: normalizeString(insight.prioridade) ?? undefined,
-  data_criacao: normalizeString(insight.data_criacao) ?? undefined,
-}));
+if (historicoAggregateRow?.jsonb_build_object?.historico_diario) {
+  for (const item of historicoAggregateRow.jsonb_build_object.historico_diario) {
+    const dateKey = toDateKey(item.data);
+    if (!dateKey) continue;
+    const entry = getOrCreateHistoricoEntry(dateKey);
+    entry.label = normalizeString(item.label) ?? entry.label;
+
+    const conversasParsed = parseNullableNumber(item.conversas);
+    if (Number.isFinite(conversasParsed) && conversasParsed > 0) {
+      entry.conversas = conversasParsed;
+      entry.tem_conversa = true;
+    } else if (typeof item.tem_conversa === 'boolean') {
+      entry.tem_conversa = item.tem_conversa;
+    }
+
+    const emoji = normalizeString(item.emoji);
+    if (emoji) entry.emoji = emoji;
+
+    const humorValue = parseNullableNumber(item.humor);
+    if (Number.isFinite(humorValue)) {
+      entry.humor = humorValue;
+      entry._humorSum = humorValue;
+      entry._humorWeight = 1;
+    }
+
+    updateUltimaHora(entry, parseHora(item.ultima_hora));
+  }
+
+  if (historicoAggregateRow.jsonb_build_object.resumo) {
+    const resumoDb = historicoAggregateRow.jsonb_build_object.resumo;
+    historicoResumo = {
+      total_conversas: parseNullableNumber(resumoDb.total_conversas) ?? 0,
+      humor_medio: parseNullableNumber(resumoDb.humor_medio) ?? 0,
+      sequencia_ativa: parseNullableNumber(resumoDb.sequencia_ativa) ?? 0,
+      ultima_conversa_data: normalizeString(resumoDb.ultima_conversa_data),
+      ultima_conversa_hora: normalizeString(resumoDb.ultima_conversa_hora),
+      periodo_inicio: normalizeString(resumoDb.periodo_inicio),
+      periodo_fim: normalizeString(resumoDb.periodo_fim)
+    };
+  }
+} else if (historicoRawRows.length > 0) {
+  for (const row of historicoRawRows) {
+    const dateKey = toDateKey(row.data);
+    if (!dateKey) continue;
+
+    const entry = getOrCreateHistoricoEntry(dateKey);
+
+    const explicitConversas = parseNullableNumber(row.conversas ?? row.total_conversas ?? row.qtd_conversas);
+    const statusNormalized = normalizeString(row.status)?.toLowerCase();
+    const hasChat = Boolean(normalizeString(row.chat_id));
+    let conversas = Number.isFinite(explicitConversas) && explicitConversas > 0 ? explicitConversas : 0;
+    if (conversas === 0 && (hasChat || statusNormalized === 'completa')) {
+      conversas = 1;
+    }
+
+    entry.conversas += conversas;
+    if (entry.conversas > 0 || conversas > 0) {
+      entry.tem_conversa = true;
+    }
+
+    const humorValue = parseNullableNumber(row.humor_medio);
+    if (Number.isFinite(humorValue)) {
+      const weight = conversas > 0 ? conversas : 1;
+      entry._humorSum += humorValue * weight;
+      entry._humorWeight += weight;
+    }
+
+    const emoji = normalizeString(row.emoji);
+    if (emoji) entry.emoji = emoji;
+
+    updateUltimaHora(entry, parseHora(row.horario_fim ?? row.horario_inicio ?? row.ultima_hora));
+  }
+}
+
+for (const entry of historicoDataMap.values()) {
+  if (entry._humorWeight > 0) {
+    entry.humor = entry._humorSum / entry._humorWeight;
+  }
+  if (!Number.isFinite(entry.humor)) {
+    entry.humor = null;
+  }
+  delete entry._humorSum;
+  delete entry._humorWeight;
+}
+
+const shiftDate = (dateKey, offset) => {
+  const key = toDateKey(dateKey);
+  if (!key) return null;
+  const base = new Date(`${key}T00:00:00Z`);
+  if (Number.isNaN(base.getTime())) return null;
+  base.setUTCDate(base.getUTCDate() + offset);
+  return base.toISOString().slice(0, 10);
+};
+
+const sortedKeys = Array.from(historicoDataMap.keys()).sort((a, b) => {
+  const timeA = a ? new Date(a).getTime() : 0;
+  const timeB = b ? new Date(b).getTime() : 0;
+  return timeA - timeB;
+});
+
+let lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKeys.length - 1];
+if (!lastDateKey) {
+  lastDateKey = new Date().toISOString().slice(0, 10);
+}
+const todayKey = new Date().toISOString().slice(0, 10);
+if (lastDateKey < todayKey) {
+  lastDateKey = todayKey;
+}
+
+const windowSize = 7;
+const windowRawEntries = [];
+for (let offset = windowSize - 1; offset >= 0; offset -= 1) {
+  const dateKey = shiftDate(lastDateKey, -offset);
+  if (!dateKey) continue;
+  const sourceEntry = historicoDataMap.get(dateKey);
+  const conversasCount = Number.isFinite(sourceEntry?.conversas)
+    ? Number(sourceEntry.conversas)
+    : (sourceEntry?.tem_conversa ? 1 : 0);
+  const temConversa = Boolean(sourceEntry?.tem_conversa) || conversasCount > 0;
+
+  windowRawEntries.push({
+    data: dateKey,
+    label: toLabel(dateKey),
+    tem_conversa: temConversa,
+    conversas: conversasCount,
+    emoji: normalizeString(sourceEntry?.emoji),
+    humor: Number.isFinite(sourceEntry?.humor) ? sourceEntry.humor : null,
+    ultima_hora: normalizeString(sourceEntry?.ultima_hora)
+  });
+}
+
+const diasComConversas = windowRawEntries.filter((entry) => entry.conversas > 0 || entry.tem_conversa).length;
+
+let ultimaConversaData = historicoResumo.ultima_conversa_data;
+let ultimaConversaHora = historicoResumo.ultima_conversa_hora;
+for (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {
+  const entry = windowRawEntries[i];
+  if (!entry.tem_conversa) continue;
+  ultimaConversaData = entry.data;
+  if (entry.ultima_hora) {
+    ultimaConversaHora = entry.ultima_hora;
+  }
+  break;
+}
+
+let sequenciaAtiva = 0;
+let streakIniciado = false;
+for (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {
+  const entry = windowRawEntries[i];
+  if (!entry.tem_conversa) {
+    if (!streakIniciado) {
+      continue;
+    }
+    break;
+  }
+  streakIniciado = true;
+  sequenciaAtiva += 1;
+}
+
+const periodoInicio = windowRawEntries[0]?.data ?? historicoResumo.periodo_inicio ?? null;
+const periodoFim = windowRawEntries[windowRawEntries.length - 1]?.data ?? historicoResumo.periodo_fim ?? null;
+
+const humorMedioGlobal = parseNullableNumber(humor.humor_medio);
+historicoResumo = {
+  total_conversas: diasComConversas,
+  humor_medio: humorMedioGlobal ?? historicoResumo.humor_medio ?? 0,
+  sequencia_ativa: sequenciaAtiva,
+  ultima_conversa_data: ultimaConversaData ?? null,
+  ultima_conversa_hora: ultimaConversaHora ?? null,
+  periodo_inicio: periodoInicio,
+  periodo_fim: periodoFim
+};
+
+const historicoDiario = windowRawEntries
+  .slice()
+  .reverse()
+  .map((entry) => ({
+    data: entry.data,
+    label: entry.label,
+    tem_conversa: entry.tem_conversa,
+    conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,
+    emoji: entry.emoji ?? null,
+    humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,
+    ultima_hora: entry.ultima_hora ?? null
+  }));
+
+
+// Insights - AJUSTE CORRETO
+const insightsRows = rows.filter(row => 
+  row && typeof row === 'object' && (
+    'id' in row && 
+    'tipo' in row && 
+    'categoria' in row && 
+    'titulo' in row
+  )
+);
+
+const insights = insightsRows.length > 0 
+? insightsRows.map(insight => ({
+    id: normalizeString(insight.id) ?? undefined,
+    tipo: normalizeString(insight.tipo) ?? undefined,
+    categoria: normalizeString(insight.categoria) ?? undefined,
+    titulo: normalizeString(insight.titulo) ?? undefined,
+    descricao: normalizeString(insight.descricao) ?? undefined,
+    icone: normalizeString(insight.icone) ?? undefined,
+    prioridade: normalizeString(insight.prioridade) ?? undefined,
+    data_criacao: normalizeString(insight.data_criacao) ?? undefined,
+  }))
+: [];
 
 return [
   {
