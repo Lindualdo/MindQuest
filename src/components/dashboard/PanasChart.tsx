@@ -8,13 +8,14 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Smile, Frown, Minus, Target, TrendingUp } from 'lucide-react';
+import { Smile, Frown, Minus, Target, TrendingUp, Info } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
 const PanasChart: React.FC = () => {
   const { dashboardData } = useStore();
   const { distribuicao_panas } = dashboardData;
+  const [showInfo, setShowInfo] = React.useState(false);
 
   const categories = [
     {
@@ -50,14 +51,30 @@ const PanasChart: React.FC = () => {
   const progressoMeta = (distribuicao_panas.positivas / distribuicao_panas.meta_positividade) * 100;
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col overflow-visible">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Meus Sentimentos</h3>
-        <div className="text-sm text-gray-500">
-          Sentimento {dashboardData.metricas_periodo.periodo_selecionado}
+        <div>
+          <h3 className="text-xl font-semibold text-gray-800">Meus Sentimentos</h3>
+          <p className="text-sm text-gray-500">Sentimentos da semana</p>
+        </div>
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="Informações sobre o painel de sentimentos"
+            className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+            onClick={() => setShowInfo((prev) => !prev)}
+          >
+            <Info size={16} />
+          </button>
+          {showInfo && (
+            <div className="absolute right-0 mt-3 w-64 rounded-xl bg-white p-4 text-xs text-gray-600 shadow-2xl z-30">
+              <p><strong>Descubra:</strong> qual tipo de sentimento predominou nos últimos 7 dias.</p>
+              <p className="mt-1"><strong>Cálculo:</strong> baseado na intensidade das emoções detectadas.</p>
+              <p className="mt-1"><strong>Modelo:</strong> PANAS.</p>
+            </div>
+          )}
         </div>
       </div>
-
       {/* Barras de distribuição */}
       <div className="space-y-4 mb-6">
         {categories.map((category, index) => (

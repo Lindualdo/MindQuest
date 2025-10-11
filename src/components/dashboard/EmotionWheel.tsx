@@ -15,6 +15,7 @@ import Card from '../ui/Card';
 const EmotionWheel: React.FC = () => {
   const { dashboardData } = useStore();
   const { roda_emocoes } = dashboardData;
+  const [showInfo, setShowInfo] = React.useState(false);
 
   // Configuração da roda
   const centerX = 160;
@@ -27,11 +28,22 @@ const EmotionWheel: React.FC = () => {
       <div className="flex items-center gap-2 mb-6">
         <Brain className="text-purple-600" size={24} />
         <h3 className="text-xl font-semibold text-gray-800">Roda Emocional</h3>
-        <div className="ml-auto group relative">
-          <Info className="text-gray-400 hover:text-gray-600 cursor-help" size={16} />
-          <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            Baseado no modelo de Plutchik - 8 emoções primárias
-          </div>
+        <div className="ml-auto relative">
+          <button
+            type="button"
+            aria-label="Informações sobre a roda de emoções"
+            className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+            onClick={() => setShowInfo((prev) => !prev)}
+          >
+            <Info size={16} />
+          </button>
+          {showInfo && (
+            <div className="absolute right-0 mt-3 w-64 rounded-xl bg-white p-4 text-xs text-gray-600 shadow-xl">
+              <p><strong>Emoções:</strong> análise das conversas da semana.</p>
+              <p className="mt-1"><strong>Percentual:</strong> média de intensidade dos últimos 7 dias.</p>
+              <p className="mt-1"><strong>Base:</strong> 8 emoções fundamentais (Plutchik simplificado).</p>
+            </div>
+          )}
         </div>
       </div>
 
