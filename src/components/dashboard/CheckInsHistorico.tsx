@@ -181,7 +181,7 @@ const CheckInsHistorico: React.FC = () => {
         
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-600">
-            {dashboardData.gamificacao.streak_checkins_dias}
+            {dashboardData.gamificacao.streak_conversas_dias}
           </div>
           <div className="text-xs text-gray-600">Sequência ativa</div>
         </div>

@@ -13,6 +13,7 @@ import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/HumorHistoryPage';
 import InsightDetailPage from './pages/InsightDetailPage';
 import { useDashboard } from './store/useStore';
+import ConquistasPage from './pages/ConquistasPage';
 
 function App() {
   const { 
@@ -82,6 +83,14 @@ function App() {
     return (
       <AuthGuard>
         <HumorHistoryPage />
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'conquistas') {
+    return (
+      <AuthGuard>
+        <ConquistasPage />
       </AuthGuard>
     );
   }

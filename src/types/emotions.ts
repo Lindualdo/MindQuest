@@ -108,15 +108,38 @@ export interface DistribuicaoPanas {
 }
 
 // Sistema de Gamificação
+export interface GamificacaoConquista {
+  id: string;
+  nome: string;
+  emoji: string;
+  xp_bonus: number;
+  categoria: string;
+  desbloqueada_em: string;
+}
+
 export interface Gamificacao {
   xp_total: number;
+  xp_proximo_nivel: number;
   nivel_atual: number;
-  streak_checkins_dias: number;
-  conquistas_desbloqueadas: string[];
+  titulo_nivel: string;
+  streak_conversas_dias: number;
+  streak_protecao_usada: boolean;
+  streak_protecao_resetada_em: string | null;
+  ultima_conversa_data: string | null;
+  melhor_streak: number;
   quest_diaria_status: 'pendente' | 'parcial' | 'completa';
   quest_diaria_progresso: number; // 0-100
   quest_diaria_descricao: string;
-  proximo_nivel_xp: number;
+  quest_diaria_data: string | null;
+  quest_streak_dias: number;
+  conquistas_desbloqueadas: GamificacaoConquista[];
+  total_conversas: number;
+  total_reflexoes: number;
+  total_xp_ganho_hoje: number;
+  ultima_conquista_id: string | null;
+  ultima_conquista_data: string | null;
+  ultima_atualizacao: string | null;
+  criado_em: string | null;
 }
 
 // Sabotadores internos
@@ -232,7 +255,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -247,7 +270,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;

@@ -33,6 +33,21 @@ function parseNullableNumber(value) {
   return Number.isFinite(num) ? num : null;
 }
 
+function parseNullableBoolean(value) {
+  if (value === undefined || value === null || value === '' || value === 'null') return null;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1') return true;
+    if (normalized === 'false' || normalized === '0') return false;
+  }
+  return null;
+}
+
 function normalizeString(value, fallback = null) {
   if (value === undefined || value === null) return fallback;
   if (typeof value !== 'string') return String(value);
@@ -75,19 +90,34 @@ const gamificacaoRow = findRow(row => {
 const gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};
 
 const gamificacao = {
-  xp_total: normalizeString(gamificacaoSource?.xp_total),
-  nivel_atual: normalizeString(gamificacaoSource?.nivel_atual),
-  streak_conversas_dias: normalizeString(gamificacaoSource?.streak_conversas_dias),
+  xp_total: parseNullableNumber(gamificacaoSource?.xp_total) ?? 0,
+  xp_proximo_nivel: parseNullableNumber(gamificacaoSource?.xp_proximo_nivel) ?? 400,
+  nivel_atual: parseNullableNumber(gamificacaoSource?.nivel_atual) ?? 1,
+  titulo_nivel: normalizeString(gamificacaoSource?.titulo_nivel, 'Nível 1'),
+  streak_conversas_dias: parseNullableNumber(gamificacaoSource?.streak_conversas_dias) ?? 0,
+  streak_protecao_usada: parseNullableBoolean(gamificacaoSource?.streak_protecao_usada) ?? false,
+  streak_protecao_resetada_em: normalizeString(gamificacaoSource?.streak_protecao_resetada_em),
+  ultima_conversa_data: normalizeString(gamificacaoSource?.ultima_conversa_data),
+  melhor_streak: parseNullableNumber(gamificacaoSource?.melhor_streak) ?? 0,
+  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status, 'pendente'),
+  quest_diaria_progresso: parseNullableNumber(gamificacaoSource?.quest_diaria_progresso) ?? 0,
+  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao, 'Complete sua conversa diária'),
+  quest_diaria_data: normalizeString(gamificacaoSource?.quest_diaria_data),
+  quest_streak_dias: parseNullableNumber(gamificacaoSource?.quest_streak_dias) ?? 0,
   conquistas_desbloqueadas: (() => {
     const conquistas = gamificacaoSource?.conquistas_desbloqueadas;
-    if (Array.isArray(conquistas)) {
-      return JSON.stringify(conquistas);
-    }
-    return normalizeString(conquistas);
+    if (Array.isArray(conquistas)) return conquistas;
+    const parsed = parseJsonSafe(conquistas, null);
+    if (Array.isArray(parsed)) return parsed;
+    return [];
   })(),
-  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status),
-  quest_diaria_progresso: normalizeString(gamificacaoSource?.quest_diaria_progresso),
-  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao),
+  total_conversas: parseNullableNumber(gamificacaoSource?.total_conversas) ?? 0,
+  total_reflexoes: parseNullableNumber(gamificacaoSource?.total_reflexoes) ?? 0,
+  total_xp_ganho_hoje: parseNullableNumber(gamificacaoSource?.total_xp_ganho_hoje) ?? 0,
+  ultima_conquista_id: normalizeString(gamificacaoSource?.ultima_conquista_id),
+  ultima_conquista_data: normalizeString(gamificacaoSource?.ultima_conquista_data),
+  ultima_atualizacao: normalizeString(gamificacaoSource?.ultima_atualizacao ?? gamificacaoSource?.atualizado_em),
+  criado_em: normalizeString(gamificacaoSource?.criado_em),
 };
 
 // Sabotador
@@ -350,10 +380,6 @@ let lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKey
 if (!lastDateKey) {
   lastDateKey = new Date().toISOString().slice(0, 10);
 }
-const todayKey = new Date().toISOString().slice(0, 10);
-if (lastDateKey < todayKey) {
-  lastDateKey = todayKey;
-}
 
 const windowSize = 7;
 const windowRawEntries = [];
@@ -392,16 +418,9 @@ for (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {
 }
 
 let sequenciaAtiva = 0;
-let streakIniciado = false;
 for (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {
   const entry = windowRawEntries[i];
-  if (!entry.tem_conversa) {
-    if (!streakIniciado) {
-      continue;
-    }
-    break;
-  }
-  streakIniciado = true;
+  if (!entry.tem_conversa) break;
   sequenciaAtiva += 1;
 }
 
@@ -419,18 +438,15 @@ historicoResumo = {
   periodo_fim: periodoFim
 };
 
-const historicoDiario = windowRawEntries
-  .slice()
-  .reverse()
-  .map((entry) => ({
-    data: entry.data,
-    label: entry.label,
-    tem_conversa: entry.tem_conversa,
-    conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,
-    emoji: entry.emoji ?? null,
-    humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,
-    ultima_hora: entry.ultima_hora ?? null
-  }));
+const historicoDiario = windowRawEntries.map((entry) => ({
+  data: entry.data,
+  label: entry.label,
+  tem_conversa: entry.tem_conversa,
+  conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,
+  emoji: entry.emoji ?? null,
+  humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,
+  ultima_hora: entry.ultima_hora ?? null
+}));
 
 
 // Insights - AJUSTE CORRETO

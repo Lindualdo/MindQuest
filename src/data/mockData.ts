@@ -214,19 +214,68 @@ const distribuicaoPanas: DistribuicaoPanas = {
 // Sistema de gamificação
 const gamificacao: Gamificacao = {
   xp_total: 1240,
+  xp_proximo_nivel: 1500,
   nivel_atual: 8,
-  streak_checkins_dias: 12,
-  conquistas_desbloqueadas: [
-    'primeira_semana',
-    'streak_7_dias',
-    'explorador_emocoes',
-    'consistencia_bronze',
-    'reflexao_profunda'
-  ],
+  titulo_nivel: 'Nível 8',
+  streak_conversas_dias: 12,
+  streak_protecao_usada: false,
+  streak_protecao_resetada_em: null,
+  ultima_conversa_data: '2025-10-10',
+  melhor_streak: 15,
   quest_diaria_status: 'parcial',
   quest_diaria_progresso: 67,
   quest_diaria_descricao: 'Complete sua conversa diária e faça uma reflexão sobre sua energia hoje',
-  proximo_nivel_xp: 1500
+  quest_diaria_data: '2025-10-11',
+  quest_streak_dias: 3,
+  conquistas_desbloqueadas: [
+    {
+      id: 'primeira_semana',
+      nome: 'Primeira Semana',
+      emoji: '🎯',
+      xp_bonus: 50,
+      categoria: 'primeiros_passos',
+      desbloqueada_em: '2025-09-18T10:00:00Z'
+    },
+    {
+      id: 'streak_7_dias',
+      nome: 'Streak de Fogo',
+      emoji: '🔥',
+      xp_bonus: 100,
+      categoria: 'consistencia',
+      desbloqueada_em: '2025-09-25T10:00:00Z'
+    },
+    {
+      id: 'explorador_emocoes',
+      nome: 'Explorador Emocional',
+      emoji: '🌈',
+      xp_bonus: 80,
+      categoria: 'emocional',
+      desbloqueada_em: '2025-10-02T10:00:00Z'
+    },
+    {
+      id: 'consistencia_bronze',
+      nome: 'Consistência Bronze',
+      emoji: '🥉',
+      xp_bonus: 120,
+      categoria: 'consistencia',
+      desbloqueada_em: '2025-10-06T10:00:00Z'
+    },
+    {
+      id: 'reflexao_profunda',
+      nome: 'Reflexão Profunda',
+      emoji: '🧠',
+      xp_bonus: 150,
+      categoria: 'reflexao',
+      desbloqueada_em: '2025-10-10T08:30:00Z'
+    }
+  ],
+  total_conversas: 42,
+  total_reflexoes: 18,
+  total_xp_ganho_hoje: 120,
+  ultima_conquista_id: 'reflexao_profunda',
+  ultima_conquista_data: '2025-10-10T08:30:00Z',
+  ultima_atualizacao: '2025-10-11T09:30:00Z',
+  criado_em: '2025-07-01T12:00:00Z'
 };
 
 // Sabotador principal

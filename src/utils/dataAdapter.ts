@@ -56,13 +56,28 @@ interface ApiData {
     perfil_secundario: string | null;
   };
   gamificacao: {
-    xp_total: string | null;
-    nivel_atual: string | null;
-    streak_conversas_dias: string | null;
-    conquistas_desbloqueadas: string | null;
+    xp_total: string | number | null;
+    xp_proximo_nivel: string | number | null;
+    nivel_atual: string | number | null;
+    titulo_nivel: string | null;
+    streak_conversas_dias: string | number | null;
+    streak_protecao_usada: string | boolean | null;
+    streak_protecao_resetada_em: string | null;
+    ultima_conversa_data: string | null;
+    melhor_streak: string | number | null;
     quest_diaria_status: string | null;
-    quest_diaria_progresso: string | null;
+    quest_diaria_progresso: string | number | null;
     quest_diaria_descricao: string | null;
+    quest_diaria_data: string | null;
+    quest_streak_dias: string | number | null;
+    conquistas_desbloqueadas: string | Array<Record<string, unknown>> | null;
+    total_conversas: string | number | null;
+    total_reflexoes: string | number | null;
+    total_xp_ganho_hoje: string | number | null;
+    ultima_conquista_id: string | null;
+    ultima_conquista_data: string | null;
+    ultima_atualizacao: string | null;
+    criado_em: string | null;
   };
   sabotador: {
     id: string | null;
@@ -211,12 +226,27 @@ class DataAdapter {
       },
       gamificacao: {
         xp_total: null,
+        xp_proximo_nivel: null,
         nivel_atual: null,
+        titulo_nivel: null,
         streak_conversas_dias: null,
         conquistas_desbloqueadas: null,
         quest_diaria_status: null,
         quest_diaria_progresso: null,
-        quest_diaria_descricao: null
+        quest_diaria_descricao: null,
+        quest_diaria_data: null,
+        quest_streak_dias: null,
+        streak_protecao_usada: null,
+        streak_protecao_resetada_em: null,
+        ultima_conversa_data: null,
+        melhor_streak: null,
+        total_conversas: null,
+        total_reflexoes: null,
+        total_xp_ganho_hoje: null,
+        ultima_conquista_id: null,
+        ultima_conquista_data: null,
+        ultima_atualizacao: null,
+        criado_em: null
       },
       sabotador: {
         id: null,
@@ -450,19 +480,47 @@ class DataAdapter {
     const gamificacao: Partial<ApiData['gamificacao']> = {};
     if (gamificacaoBlock) {
       const setGamificacaoValue = (key: keyof ApiData['gamificacao'], value: unknown) => {
+        if (value === undefined) return;
+        if (Array.isArray(value)) {
+          gamificacao[key] = value as any;
+          return;
+        }
+        if (typeof value === 'object' && value !== null && key === 'conquistas_desbloqueadas') {
+          gamificacao[key] = value as any;
+          return;
+        }
+        if (typeof value === 'boolean') {
+          gamificacao[key] = value as any;
+          return;
+        }
         const parsed = this.parseNullString<string>(value as string | null | undefined);
         if (parsed !== null && parsed !== undefined) {
-          gamificacao[key] = parsed;
+          gamificacao[key] = parsed as any;
         }
       };
 
       setGamificacaoValue('xp_total', gamificacaoBlock.xp_total);
+      setGamificacaoValue('xp_proximo_nivel', gamificacaoBlock.xp_proximo_nivel);
       setGamificacaoValue('nivel_atual', gamificacaoBlock.nivel_atual);
+      setGamificacaoValue('titulo_nivel', gamificacaoBlock.titulo_nivel);
       setGamificacaoValue('streak_conversas_dias', gamificacaoBlock.streak_conversas_dias);
+      setGamificacaoValue('streak_protecao_usada', gamificacaoBlock.streak_protecao_usada);
+      setGamificacaoValue('streak_protecao_resetada_em', gamificacaoBlock.streak_protecao_resetada_em);
+      setGamificacaoValue('ultima_conversa_data', gamificacaoBlock.ultima_conversa_data);
+      setGamificacaoValue('melhor_streak', gamificacaoBlock.melhor_streak);
       setGamificacaoValue('conquistas_desbloqueadas', gamificacaoBlock.conquistas_desbloqueadas);
       setGamificacaoValue('quest_diaria_status', gamificacaoBlock.quest_diaria_status);
       setGamificacaoValue('quest_diaria_progresso', gamificacaoBlock.quest_diaria_progresso);
       setGamificacaoValue('quest_diaria_descricao', gamificacaoBlock.quest_diaria_descricao);
+      setGamificacaoValue('quest_diaria_data', gamificacaoBlock.quest_diaria_data);
+      setGamificacaoValue('quest_streak_dias', gamificacaoBlock.quest_streak_dias);
+      setGamificacaoValue('total_conversas', gamificacaoBlock.total_conversas);
+      setGamificacaoValue('total_reflexoes', gamificacaoBlock.total_reflexoes);
+      setGamificacaoValue('total_xp_ganho_hoje', gamificacaoBlock.total_xp_ganho_hoje);
+      setGamificacaoValue('ultima_conquista_id', gamificacaoBlock.ultima_conquista_id);
+      setGamificacaoValue('ultima_conquista_data', gamificacaoBlock.ultima_conquista_data);
+      setGamificacaoValue('ultima_atualizacao', gamificacaoBlock.ultima_atualizacao);
+      setGamificacaoValue('criado_em', gamificacaoBlock.criado_em);
     }
 
     const sabotador: Partial<ApiData['sabotador']> = {};
@@ -938,41 +996,120 @@ class DataAdapter {
     gamificacao: ApiData['gamificacao'],
     historicoResumo?: ApiData['historico_resumo']
   ): Gamificacao {
-    const xpTotal = this.parseNumber(gamificacao.xp_total) || 0;
-    const nivelAtual = this.parseNumber(gamificacao.nivel_atual) || 1;
+    const toBoolean = (value: string | boolean | null | undefined): boolean => {
+      if (typeof value === 'boolean') return value;
+      const normalized = this.parseNullString<string>(value as string | null | undefined);
+      if (!normalized) return false;
+      const truthy = ['true', '1', 'sim', 'yes', 'y', 't'];
+      return truthy.includes(normalized.toLowerCase());
+    };
+
+    const clamp = (value: number, min = 0, max = 100): number => {
+      if (!Number.isFinite(value)) return min;
+      return Math.min(Math.max(value, min), max);
+    };
+
+    const xpTotal = this.parseNumber(gamificacao.xp_total) ?? 0;
+    const nivelAtual = this.parseNumber(gamificacao.nivel_atual) ?? 1;
+    const xpProximoNivelParsed = this.parseNumber(gamificacao.xp_proximo_nivel);
+    const xpProximoNivel =
+      xpProximoNivelParsed !== null && xpProximoNivelParsed > 0
+        ? xpProximoNivelParsed
+        : xpTotal > 0
+          ? xpTotal + 400
+          : 400;
+
     const streakGamificacao = this.parseNumber(gamificacao.streak_conversas_dias);
     const sequenciaHistorico = historicoResumo
       ? this.parseNumber(historicoResumo.sequencia_ativa)
       : null;
     const streakDias =
-      (streakGamificacao !== null && streakGamificacao > 0 ? streakGamificacao : null) ??
+      (streakGamificacao !== null && streakGamificacao >= 0 ? streakGamificacao : null) ??
       (sequenciaHistorico !== null ? sequenciaHistorico : 0);
+
     const questStatusRaw = this.parseNullString<string>(gamificacao.quest_diaria_status);
-    
     let questStatus: 'pendente' | 'parcial' | 'completa' = 'pendente';
     if (questStatusRaw === 'parcial') questStatus = 'parcial';
     else if (questStatusRaw === 'completa') questStatus = 'completa';
-    
-    let conquistas: string[] = [];
-    try {
-      const conquistasStr = this.parseNullString<string>(gamificacao.conquistas_desbloqueadas);
+
+    const parseConquistaEntry = (entry: unknown) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const data = entry as Record<string, unknown>;
+      const id = this.parseNullString<string>(data.id as string | null | undefined);
+      const nome = this.parseNullString<string>(data.nome as string | null | undefined) ?? 'Conquista';
+      if (!id) return null;
+      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🏆';
+      const xpBonus = this.parseNumber(data.xp_bonus) ?? 0;
+      const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
+      const desbloqueadaEm = this.parseNullString<string>(data.desbloqueada_em as string | null | undefined) ?? '';
+      return {
+        id,
+        nome,
+        emoji,
+        xp_bonus: xpBonus,
+        categoria,
+        desbloqueada_em: desbloqueadaEm
+      };
+    };
+
+    let conquistas: Gamificacao['conquistas_desbloqueadas'] = [];
+    if (Array.isArray(gamificacao.conquistas_desbloqueadas)) {
+      conquistas = gamificacao.conquistas_desbloqueadas
+        .map(parseConquistaEntry)
+        .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => item !== null);
+    } else {
+      const conquistasStr = this.parseNullString<string>(gamificacao.conquistas_desbloqueadas as string | null | undefined);
       if (conquistasStr) {
-        conquistas = JSON.parse(conquistasStr);
+        try {
+          const parsed = JSON.parse(conquistasStr);
+          if (Array.isArray(parsed)) {
+            conquistas = parsed
+              .map(parseConquistaEntry)
+              .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => item !== null);
+          }
+        } catch (error) {
+          console.error('Erro ao parsear conquistas:', error);
+        }
       }
-    } catch (e) {
-      console.error('Erro ao parsear conquistas:', e);
-      conquistas = [];
     }
-    
+
+    const melhorStreak = this.parseNumber(gamificacao.melhor_streak);
+    const questProgresso = clamp(this.parseNumber(gamificacao.quest_diaria_progresso) ?? 0);
+    const questDescricao = this.parseNullString<string>(gamificacao.quest_diaria_descricao) ?? 'Complete sua conversa diária';
+    const questData = this.parseNullString<string>(gamificacao.quest_diaria_data);
+    const questStreakDias = this.parseNumber(gamificacao.quest_streak_dias) ?? 0;
+    const ultimaConquistaData = this.parseNullString<string>(gamificacao.ultima_conquista_data);
+    const ultimaAtualizacao = this.parseNullString<string>(gamificacao.ultima_atualizacao);
+    const criadoEm = this.parseNullString<string>(gamificacao.criado_em);
+    const ultimaConversaData = this.parseNullString<string>(gamificacao.ultima_conversa_data);
+    const streakProtecaoReset = this.parseNullString<string>(gamificacao.streak_protecao_resetada_em);
+    const totalConversas = this.parseNumber(gamificacao.total_conversas) ?? 0;
+    const totalReflexoes = this.parseNumber(gamificacao.total_reflexoes) ?? 0;
+    const totalXpHoje = this.parseNumber(gamificacao.total_xp_ganho_hoje) ?? 0;
+
     return {
       xp_total: xpTotal,
+      xp_proximo_nivel: xpProximoNivel,
       nivel_atual: nivelAtual,
-      streak_checkins_dias: streakDias,
+      titulo_nivel: this.parseNullString<string>(gamificacao.titulo_nivel) ?? `Nível ${nivelAtual}`,
+      streak_conversas_dias: streakDias,
+      streak_protecao_usada: toBoolean(gamificacao.streak_protecao_usada),
+      streak_protecao_resetada_em: streakProtecaoReset,
+      ultima_conversa_data: ultimaConversaData,
+      melhor_streak: melhorStreak ?? streakDias,
       conquistas_desbloqueadas: conquistas,
       quest_diaria_status: questStatus,
-      quest_diaria_progresso: this.parseNumber(gamificacao.quest_diaria_progresso) || 0,
-      quest_diaria_descricao: gamificacao.quest_diaria_descricao || 'Complete sua conversa diária',
-      proximo_nivel_xp: (nivelAtual + 1) * 200
+      quest_diaria_progresso: questProgresso,
+      quest_diaria_descricao: questDescricao,
+      quest_diaria_data: questData,
+      quest_streak_dias: questStreakDias,
+      total_conversas: totalConversas,
+      total_reflexoes: totalReflexoes,
+      total_xp_ganho_hoje: totalXpHoje,
+      ultima_conquista_id: this.parseNullString<string>(gamificacao.ultima_conquista_id),
+      ultima_conquista_data: ultimaConquistaData,
+      ultima_atualizacao: ultimaAtualizacao,
+      criado_em: criadoEm
     };
   }
 

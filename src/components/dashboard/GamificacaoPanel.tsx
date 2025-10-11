@@ -6,48 +6,33 @@
  * XP, níveis, streaks, conquistas e quest diária
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Zap, Target, Star, Flame, Award } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { Trophy, Target, Star, Flame, Award, ArrowRight } from 'lucide-react';
+import { useDashboard } from '../../store/useStore';
+import type { GamificacaoConquista } from '../../types/emotions';
 import Card from '../ui/Card';
 
 const GamificacaoPanel: React.FC = () => {
-  const { dashboardData } = useStore();
+  const { dashboardData, setView } = useDashboard();
   const { gamificacao } = dashboardData;
 
   // Calcular progresso para próximo nível
-  const xpParaProximoNivel = gamificacao.proximo_nivel_xp - gamificacao.xp_total;
-  const progressoNivel = (gamificacao.xp_total / gamificacao.proximo_nivel_xp) * 100;
+  const xpTarget = Math.max(gamificacao.xp_proximo_nivel, gamificacao.xp_total || 0, 1);
+  const xpParaProximoNivel = Math.max(xpTarget - gamificacao.xp_total, 0);
+  const progressoNivel = (gamificacao.xp_total / xpTarget) * 100;
 
-  // Mapear conquistas para ícones
-  const conquistasMap: Record<string, { icon: string; nome: string; descricao: string }> = {
-    'primeira_semana': {
-      icon: '🎯',
-      nome: 'Primeira Semana',
-      descricao: 'Completou a primeira semana de conversas diárias'
-    },
-    'streak_7_dias': {
-      icon: '🔥',
-      nome: 'Streak de Fogo',
-      descricao: '7 dias consecutivos de conversas'
-    },
-    'explorador_emocoes': {
-      icon: '🌈',
-      nome: 'Explorador Emocional',
-      descricao: 'Identificou todas as 8 emoções primárias'
-    },
-    'consistencia_bronze': {
-      icon: '🥉',
-      nome: 'Consistência Bronze',
-      descricao: '30 dias de monitoramento'
-    },
-    'reflexao_profunda': {
-      icon: '🧠',
-      nome: 'Reflexão Profunda',
-      descricao: 'Adicionou observações em 10 conversas'
-    }
-  };
+  const conquistasRecentes = useMemo(() => {
+    const ordenar = (entradaA: GamificacaoConquista, entradaB: GamificacaoConquista) => {
+      const dataA = entradaA.desbloqueada_em ? new Date(entradaA.desbloqueada_em).getTime() : 0;
+      const dataB = entradaB.desbloqueada_em ? new Date(entradaB.desbloqueada_em).getTime() : 0;
+      return dataB - dataA;
+    };
+
+    return [...(gamificacao.conquistas_desbloqueadas || [])]
+      .sort(ordenar)
+      .slice(0, 4);
+  }, [gamificacao.conquistas_desbloqueadas]);
 
   const getQuestStatusColor = (status: string) => {
     switch (status) {
@@ -70,9 +55,11 @@ const GamificacaoPanel: React.FC = () => {
           {/* XP e Nível */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Star className="text-purple-600" size={20} />
-                <span className="font-semibold text-gray-800">Nível {gamificacao.nivel_atual}</span>
+                <span className="font-semibold text-gray-800">
+                  {gamificacao.titulo_nivel || `Nível ${gamificacao.nivel_atual}`}
+                </span>
               </div>
               <div className="text-sm text-gray-600">
                 {gamificacao.xp_total} XP
@@ -131,7 +118,7 @@ const GamificacaoPanel: React.FC = () => {
             <Flame className="text-orange-600" size={24} />
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">
-                {gamificacao.streak_checkins_dias}
+                {gamificacao.streak_conversas_dias}
               </div>
               <div className="text-sm text-gray-600">conversas seguidas</div>
             </div>
@@ -139,37 +126,50 @@ const GamificacaoPanel: React.FC = () => {
 
           {/* Conquistas */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Award className="text-yellow-600" size={20} />
-              <span className="font-semibold text-gray-800">Conquistas Recentes</span>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <Award className="text-yellow-600" size={20} />
+                <span className="font-semibold text-gray-800">Conquistas Recentes</span>
+              </div>
+              {gamificacao.conquistas_desbloqueadas.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setView('conquistas')}
+                  className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  Ver todas
+                  <ArrowRight size={14} />
+                </button>
+              )}
             </div>
             
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-              {gamificacao.conquistas_desbloqueadas.slice(-4).map((conquistaId, index) => {
-                const conquista = conquistasMap[conquistaId];
-                if (!conquista) return null;
-                
-                return (
+            {gamificacao.conquistas_desbloqueadas.length === 0 ? (
+              <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 text-center">
+                Nenhuma conquista desbloqueada ainda. Complete a quest diária para começar!
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                {conquistasRecentes.map((conquista, index) => (
                   <motion.div
-                    key={conquistaId}
+                    key={conquista.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 + 0.8 }}
-                    className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors cursor-pointer"
+                    transition={{ delay: index * 0.1 + 0.6 }}
+                    className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors"
                   >
-                    <div className="text-center">
-                      <div className="text-xl mb-1">{conquista.icon}</div>
-                      <div className="text-xs font-semibold text-gray-800 mb-1">
+                    <div className="text-center space-y-1">
+                      <div className="text-xl">{conquista.emoji || '🏆'}</div>
+                      <div className="text-xs font-semibold text-gray-800">
                         {conquista.nome}
                       </div>
-                      <div className="text-xs text-gray-600 leading-tight">
-                        {conquista.descricao}
+                      <div className="text-[11px] text-gray-600">
+                        +{conquista.xp_bonus} XP • {conquista.desbloqueada_em ? new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR') : 'Data pendente'}
                       </div>
                     </div>
                   </motion.div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
             
             {/* Contador total de conquistas */}
             <div className="text-center mt-4 p-2 bg-gray-50 rounded-lg">

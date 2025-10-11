@@ -37,13 +37,28 @@ interface DashboardApiResponse {
     perfil_secundario: string | null;
   };
   gamificacao: {
-    xp_total: string | null;
-    nivel_atual: string | null;
-    streak_conversas_dias: string | null;
-    conquistas_desbloqueadas: string | null;
+    xp_total: number | string | null;
+    xp_proximo_nivel: number | string | null;
+    nivel_atual: number | string | null;
+    titulo_nivel?: string | null;
+    streak_conversas_dias: number | string | null;
+    streak_protecao_usada?: boolean | string | null;
+    streak_protecao_resetada_em?: string | null;
+    ultima_conversa_data?: string | null;
+    melhor_streak?: number | string | null;
     quest_diaria_status: string | null;
-    quest_diaria_progresso: string | null;
+    quest_diaria_progresso: number | string | null;
     quest_diaria_descricao?: string | null;
+    quest_diaria_data?: string | null;
+    quest_streak_dias?: number | string | null;
+    conquistas_desbloqueadas?: Array<Record<string, unknown>> | string | null;
+    total_conversas?: number | string | null;
+    total_reflexoes?: number | string | null;
+    total_xp_ganho_hoje?: number | string | null;
+    ultima_conquista_id?: string | null;
+    ultima_conquista_data?: string | null;
+    ultima_atualizacao?: string | null;
+    criado_em?: string | null;
   };
   sabotador: {
     id: string | null;
