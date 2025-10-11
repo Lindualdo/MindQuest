@@ -14,6 +14,7 @@ import HumorHistoryPage from './pages/HumorHistoryPage';
 import InsightDetailPage from './pages/InsightDetailPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/ConquistasPage';
+import SabotadorDetailPage from './pages/SabotadorDetailPage';
 
 function App() {
   const { 
@@ -91,6 +92,14 @@ function App() {
     return (
       <AuthGuard>
         <ConquistasPage />
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'sabotadorDetail') {
+    return (
+      <AuthGuard>
+        <SabotadorDetailPage />
       </AuthGuard>
     );
   }

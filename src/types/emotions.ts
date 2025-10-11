@@ -156,6 +156,25 @@ export interface SabotadorPadrao {
   intensidade_media?: number;
 }
 
+export interface SabotadorCatalogoEntry {
+  id: string;
+  nome: string;
+  emoji: string;
+  resumo: string;
+  descricao: string;
+  caracteristicas: string[];
+  pensamentosTipicos: string[];
+  sentimentosComuns: string[];
+  mentirasParaJustificar: string[];
+  impacto: {
+    emSi: string[];
+    nosOutros: string[];
+  };
+  funcaoOriginal: string;
+  estrategiasAntidoto: string[];
+  contextosTipicos?: string[];
+}
+
 // Tipos de insights
 export type TipoInsight = 'padrao' | 'melhoria' | 'positivo' | 'alerta';
 
@@ -255,7 +274,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -264,16 +283,18 @@ export interface StoreState {
   insightDetail: InsightDetail | null;
   insightDetailLoading: boolean;
   insightDetailError: string | null;
+  selectedSabotadorId: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
+  openSabotadorDetail: (sabotadorId?: string) => void;
 }
 
 // Configurações personalizadas por perfil

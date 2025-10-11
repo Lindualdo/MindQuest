@@ -18,12 +18,14 @@ interface ExtendedStoreState extends StoreState {
   error: string | null;
   isAuthenticated: boolean;
   lastUpdated: string;
+  selectedSabotadorId: string | null;
   
   // Actions adicionais
   setError: (error: string | null) => void;
   setAuthenticated: (auth: boolean) => void;
   initializeAuth: () => Promise<boolean>;
   loadDashboardData: () => Promise<void>;
+  openSabotadorDetail: (sabotadorId?: string) => void;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -44,6 +46,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   insightDetail: null,
   insightDetailLoading: false,
   insightDetailError: null,
+  selectedSabotadorId: null,
 
   // Actions básicas
   setError: (error) => {
@@ -288,6 +291,22 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       insightDetailError: null,
       insightDetailLoading: false
     });
+  },
+
+  openSabotadorDetail: (sabotadorId) => {
+    const { dashboardData } = get();
+    const fallbackId = dashboardData?.sabotadores?.padrao_principal?.id ?? null;
+
+    if (!sabotadorId && !fallbackId) {
+      console.warn('[openSabotadorDetail] sabotador indisponível');
+      set({ view: 'dashboard' });
+      return;
+    }
+
+    set({
+      selectedSabotadorId: sabotadorId ?? fallbackId,
+      view: 'sabotadorDetail'
+    });
   }
 }));
 
@@ -325,6 +344,9 @@ export const useDashboard = () => {
     insightDetail,
     insightDetailLoading,
     insightDetailError
+  ,
+    selectedSabotadorId,
+    openSabotadorDetail
   } = useStore();
   
   return {
@@ -346,7 +368,9 @@ export const useDashboard = () => {
     selectedInsightId,
     insightDetail,
     insightDetailLoading,
-    insightDetailError
+    insightDetailError,
+    selectedSabotadorId,
+    openSabotadorDetail
   };
 };
 

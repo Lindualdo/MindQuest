@@ -9,13 +9,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Activity } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
 
 const SabotadorCard: React.FC = () => {
-  const { dashboardData } = useStore();
-  const { sabotadores } = dashboardData;
-  const { padrao_principal: principal } = sabotadores;
+  const { dashboardData, openSabotadorDetail } = useDashboard();
+  const principal = dashboardData?.sabotadores?.padrao_principal;
+
+  if (!principal) {
+    return (
+      <Card className="flex h-full items-center justify-center text-sm text-gray-500">
+        Dados de sabotadores indisponíveis.
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -96,6 +103,14 @@ const SabotadorCard: React.FC = () => {
             {principal.contramedida}
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => openSabotadorDetail(principal.id)}
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-purple-200 bg-white px-4 py-2 text-sm font-semibold text-purple-700 transition-all hover:border-purple-300 hover:bg-purple-50"
+        >
+          Conhecer detalhes do sabotador
+        </button>
       </motion.div>
     </Card>
   );
