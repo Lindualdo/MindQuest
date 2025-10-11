@@ -189,7 +189,7 @@ const InsightDetailPage: React.FC = () => {
               Insight MindQuest
             </p>
             <h1 className="text-lg font-semibold text-slate-800">
-              Detalhes do insight
+              Aprendizados
             </h1>
           </div>
         </div>

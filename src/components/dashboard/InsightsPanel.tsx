@@ -117,7 +117,7 @@ const InsightsPanel: React.FC = () => {
     <Card>
       <div className="flex items-center gap-2 mb-6">
         <Lightbulb className="text-yellow-600" size={24} />
-        <h3 className="text-xl font-semibold text-gray-800">Insights Inteligentes</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Aprendizados</h3>
         <div className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
           {insights.length} insights
         </div>
