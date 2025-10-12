@@ -6,7 +6,7 @@
  * Sistema inteligente com categorização por tipo e prioridade
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Lightbulb, Target, Trophy, AlertTriangle, 
@@ -18,6 +18,49 @@ import Card from '../ui/Card';
 const InsightsPanel: React.FC = () => {
   const { dashboardData, openInsightDetail } = useDashboard();
   const { insights } = dashboardData;
+
+  const determineInitialFilters = (list: typeof insights) => {
+    if (!Array.isArray(list) || list.length === 0) {
+      return { tipo: 'todos' as const, prioridade: 'todas' as const };
+    }
+
+    const preferenceOrder: Array<{
+      tipo: 'todos' | 'padrao' | 'melhoria' | 'positivo' | 'alerta';
+      prioridade: 'todas' | 'alta' | 'media' | 'baixa';
+    }> = [
+      { tipo: 'alerta', prioridade: 'alta' },
+      { tipo: 'alerta', prioridade: 'media' },
+      { tipo: 'alerta', prioridade: 'baixa' },
+      { tipo: 'melhoria', prioridade: 'alta' },
+      { tipo: 'padrao', prioridade: 'alta' },
+      { tipo: 'positivo', prioridade: 'alta' },
+      { tipo: 'todos', prioridade: 'alta' },
+      { tipo: 'todos', prioridade: 'media' },
+      { tipo: 'todos', prioridade: 'baixa' },
+      { tipo: 'todos', prioridade: 'todas' }
+    ];
+
+    for (const combo of preferenceOrder) {
+      const matches = list.some((insight) => {
+        const tipoMatches = combo.tipo === 'todos' ? true : insight.tipo === combo.tipo;
+        const prioridadeMatches = combo.prioridade === 'todas' ? true : insight.prioridade === combo.prioridade;
+        return tipoMatches && prioridadeMatches;
+      });
+
+      if (matches) {
+        return combo;
+      }
+    }
+
+    return { tipo: 'todos' as const, prioridade: 'todas' as const };
+  };
+
+  const initialFilters = determineInitialFilters(insights);
+
+  const [categoriaFiltro, setCategoriaFiltro] = useState<'todos' | string>('todos');
+  const [tipoFiltro, setTipoFiltro] = useState<'todos' | 'padrao' | 'melhoria' | 'positivo' | 'alerta'>(() => initialFilters.tipo);
+  const [prioridadeFiltro, setPrioridadeFiltro] = useState<'todas' | 'alta' | 'media' | 'baixa'>(() => initialFilters.prioridade);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
 
   const getInsightIcon = (tipo: string, categoria: string) => {
     // Priorizar por tipo primeiro
@@ -100,18 +143,162 @@ const InsightsPanel: React.FC = () => {
     }
   };
 
-  // Ordenar insights por prioridade e data
-  const insightsOrdenados = [...insights].sort((a, b) => {
-    const prioridadeOrder = { 'alta': 3, 'media': 2, 'baixa': 1 };
-    const prioridadeA = prioridadeOrder[a.prioridade as keyof typeof prioridadeOrder] || 0;
-    const prioridadeB = prioridadeOrder[b.prioridade as keyof typeof prioridadeOrder] || 0;
-    
-    if (prioridadeA !== prioridadeB) {
-      return prioridadeB - prioridadeA;
+  const insightsOrdenados = useMemo(() => {
+    const prioridadeOrder = { alta: 3, media: 2, baixa: 1 };
+    return [...insights].sort((a, b) => {
+      const prioridadeA = prioridadeOrder[a.prioridade as keyof typeof prioridadeOrder] || 0;
+      const prioridadeB = prioridadeOrder[b.prioridade as keyof typeof prioridadeOrder] || 0;
+
+      if (prioridadeA !== prioridadeB) {
+        return prioridadeB - prioridadeA;
+      }
+
+      return new Date(b.data_criacao).getTime() - new Date(a.data_criacao).getTime();
+    });
+  }, [insights]);
+
+  const insightsFiltrados = useMemo(() => {
+    return insightsOrdenados.filter((insight) => {
+      const categoriaOk = categoriaFiltro === 'todos' || insight.categoria === categoriaFiltro;
+      const tipoOk = tipoFiltro === 'todos' || insight.tipo === tipoFiltro;
+      const prioridadeOk = prioridadeFiltro === 'todas' || insight.prioridade === prioridadeFiltro;
+      return categoriaOk && tipoOk && prioridadeOk;
+    });
+  }, [categoriaFiltro, tipoFiltro, prioridadeFiltro, insightsOrdenados]);
+
+  useEffect(() => {
+    if (!insights.length) {
+      if (tipoFiltro !== 'todos') {
+        setTipoFiltro('todos');
+      }
+      if (prioridadeFiltro !== 'todas') {
+        setPrioridadeFiltro('todas');
+      }
+      if (categoriaFiltro !== 'todos') {
+        setCategoriaFiltro('todos');
+      }
+      if (userHasInteracted) {
+        setUserHasInteracted(false);
+      }
+      return;
     }
-    
-    return new Date(b.data_criacao).getTime() - new Date(a.data_criacao).getTime();
-  });
+
+    const best = determineInitialFilters(insights);
+
+    if (!userHasInteracted) {
+      if (tipoFiltro !== best.tipo) {
+        setTipoFiltro(best.tipo);
+      }
+      if (prioridadeFiltro !== best.prioridade) {
+        setPrioridadeFiltro(best.prioridade);
+      }
+      return;
+    }
+
+    if (insightsFiltrados.length === 0) {
+      if (
+        tipoFiltro !== best.tipo ||
+        prioridadeFiltro !== best.prioridade ||
+        categoriaFiltro !== 'todos'
+      ) {
+        setTipoFiltro(best.tipo);
+        setPrioridadeFiltro(best.prioridade);
+        setCategoriaFiltro('todos');
+      }
+    }
+  }, [
+    insights,
+    insightsFiltrados.length,
+    categoriaFiltro,
+    tipoFiltro,
+    prioridadeFiltro,
+    userHasInteracted
+  ]);
+
+  const categoriaResumo = useMemo(() => {
+    const counts = insights.reduce<Record<string, number>>((acc, insight) => {
+      const categoria = insight.categoria || 'indefinido';
+      acc[categoria] = (acc[categoria] || 0) + 1;
+      return acc;
+    }, {});
+
+    const orderedCategorias = ['comportamental', 'emocional', 'social', 'cognitivo'];
+
+    const ordered = orderedCategorias
+      .filter((categoria) => counts[categoria])
+      .map((categoria) => ({
+        key: categoria,
+        total: counts[categoria],
+        label: getCategoriaLabel(categoria)
+      }));
+
+    const extras = Object.keys(counts)
+      .filter((categoria) => !orderedCategorias.includes(categoria))
+      .map((categoria) => ({
+        key: categoria,
+        total: counts[categoria],
+        label: getCategoriaLabel(categoria)
+      }));
+
+    return [...ordered, ...extras];
+  }, [insights]);
+
+  const resumoOptions = useMemo(
+    () => [
+      {
+        key: 'todos',
+        total: insights.length,
+        label: '🔄 Todos'
+      },
+      ...categoriaResumo
+    ],
+    [categoriaResumo, insights.length]
+  );
+
+  const tipoOptions = useMemo(() => [
+    { key: 'todos', label: 'Todos', highlight: 'bg-gray-800 text-white', icon: '📚' },
+    { key: 'alerta', label: 'Alertas', highlight: 'bg-rose-600 text-white', icon: '⚠️' },
+    { key: 'melhoria', label: 'Melhorias', highlight: 'bg-orange-500 text-white', icon: '🎯' },
+    { key: 'padrao', label: 'Padrões', highlight: 'bg-blue-600 text-white', icon: '💡' },
+    { key: 'positivo', label: 'Positivos', highlight: 'bg-green-600 text-white', icon: '🏆' }
+  ] as const, []);
+
+  const prioridadeOptions = useMemo(() => [
+    { key: 'todas', label: 'Todas', highlight: 'bg-gray-800 text-white', icon: '✨' },
+    { key: 'alta', label: 'Alta', highlight: 'bg-red-600 text-white', icon: '🔥' },
+    { key: 'media', label: 'Média', highlight: 'bg-yellow-500 text-white', icon: '⚡' },
+    { key: 'baixa', label: 'Baixa', highlight: 'bg-emerald-600 text-white', icon: '💚' }
+  ] as const, []);
+
+  const handleTipoFiltroChange = (
+    value: 'todos' | 'padrao' | 'melhoria' | 'positivo' | 'alerta'
+  ) => {
+    setTipoFiltro(value);
+    setUserHasInteracted(true);
+  };
+
+  const handlePrioridadeFiltroChange = (
+    value: 'todas' | 'alta' | 'media' | 'baixa'
+  ) => {
+    setPrioridadeFiltro(value);
+    setUserHasInteracted(true);
+  };
+
+  const handleCategoriaFiltroChange = (value: 'todos' | string) => {
+    setCategoriaFiltro(value);
+    setUserHasInteracted(true);
+  };
+
+  const handleResetFiltros = () => {
+    const best = determineInitialFilters(insights);
+    setTipoFiltro(best.tipo);
+    setPrioridadeFiltro(best.prioridade);
+    setCategoriaFiltro('todos');
+    setUserHasInteracted(false);
+  };
+
+  const hasActiveFilters =
+    categoriaFiltro !== 'todos' || tipoFiltro !== 'todos' || prioridadeFiltro !== 'todas';
 
   return (
     <Card>
@@ -119,12 +306,73 @@ const InsightsPanel: React.FC = () => {
         <Lightbulb className="text-yellow-600" size={24} />
         <h3 className="text-xl font-semibold text-gray-800">Aprendizados</h3>
         <div className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-          {insights.length} insights
+          {!hasActiveFilters
+            ? `${insights.length} insights`
+            : `${insightsFiltrados.length}/${insights.length} insights`}
+        </div>
+      </div>
+
+      <div className="space-y-3 mb-6">
+        <div className="flex flex-wrap gap-2">
+          {tipoOptions.map(({ key, label, highlight, icon }) => {
+            const isActive = tipoFiltro === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleTipoFiltroChange(key)}
+                className={`
+                  inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all
+                  ${isActive ? `${highlight} border-transparent shadow-lg shadow-black/10` : 'bg-white text-gray-600 border-gray-200 hover:border-blue-200'}
+                `}
+                aria-pressed={isActive}
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Prioridade
+          </span>
+          {prioridadeOptions.map(({ key, label, highlight, icon }) => {
+            const isActive = prioridadeFiltro === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handlePrioridadeFiltroChange(key)}
+                className={`
+                  inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all
+                  ${isActive ? `${highlight} border-transparent shadow-lg shadow-black/10` : 'bg-white text-gray-600 border-gray-200 hover:border-blue-200'}
+                `}
+                aria-pressed={isActive}
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="space-y-4 max-h-96 overflow-y-auto">
-        {insightsOrdenados.map((insight, index) => {
+        {insightsFiltrados.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 space-y-3">
+            <p>Nenhum insight corresponde a esse filtro no momento.</p>
+            <button
+              type="button"
+              onClick={handleResetFiltros}
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+            >
+              Ver principais
+            </button>
+          </div>
+        ) : (
+          insightsFiltrados.map((insight, index) => {
           const Icon = getInsightIcon(insight.tipo, insight.categoria);
           const styles = getInsightStyle(insight.tipo, insight.prioridade);
 
@@ -210,7 +458,8 @@ const InsightsPanel: React.FC = () => {
               </div>
             </motion.div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Footer com estatísticas */}
@@ -220,21 +469,29 @@ const InsightsPanel: React.FC = () => {
         transition={{ delay: 0.8 }}
         className="mt-6 pt-4 border-t border-gray-100"
       >
-        <div className="grid grid-cols-4 gap-2 text-center">
-          {['positivo', 'melhoria', 'padrao', 'alerta'].map((tipo) => {
-            const count = insights.filter(i => i.tipo === tipo).length;
-            const emoji = tipo === 'positivo' ? '🏆' : 
-                         tipo === 'melhoria' ? '🎯' :
-                         tipo === 'padrao' ? '💡' : '⚠️';
-            
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          {resumoOptions.map(({ key, total, label }) => {
+            const isActive = categoriaFiltro === key;
             return (
-              <div key={tipo} className="p-2 bg-gray-50 rounded-lg">
-                <div className="text-lg font-bold text-gray-800">{count}</div>
-                <div className="text-xs text-gray-600 flex items-center justify-center gap-1">
-                  <span>{emoji}</span>
-                  <span className="capitalize">{tipo}</span>
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleCategoriaFiltroChange(key)}
+                className={`
+                  w-full rounded-xl border px-3 py-3 text-left text-sm transition-all
+                  ${isActive
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20'
+                    : 'bg-gray-50 text-gray-600 border-transparent hover:bg-blue-50'}
+                `}
+                aria-pressed={isActive}
+              >
+                <div className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                  {total}
                 </div>
-              </div>
+                <div className={`mt-1 text-xs font-semibold uppercase tracking-wide ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                  {label}
+                </div>
+              </button>
             );
           })}
         </div>
