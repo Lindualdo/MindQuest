@@ -37,14 +37,13 @@ const SabotadorCard: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-              Padrão principal
+              Sabotador mais ativo
             </span>
             <div className="mt-2 flex items-center gap-3">
               <span className="text-3xl" aria-hidden>
                 {principal.emoji}
               </span>
               <div>
-                <p className="text-sm text-gray-500 uppercase">Sabotador mais ativo</p>
                 <p className="text-2xl font-bold text-gray-800">
                   {principal.nome.toUpperCase()}
                 </p>
