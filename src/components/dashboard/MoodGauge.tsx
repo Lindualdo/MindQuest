@@ -74,9 +74,17 @@ const MoodGauge: React.FC = () => {
 
   return (
     <Card className="text-center">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="text-2xl">{mood_gauge.emoji_atual}</div>
         <h3 className="text-xl font-semibold text-gray-800">Humor</h3>
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            onClick={handleOpenHistory}
+            className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition"
+            type="button"
+          >
+            <Clock size={14} /> Histórico
+          </button>
           <div className="relative">
             <button
               type="button"
@@ -87,21 +95,13 @@ const MoodGauge: React.FC = () => {
               <Info size={16} />
             </button>
             {showInfo && (
-              <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-72 p-4 bg-white rounded-xl shadow-xl text-xs text-gray-600 z-20">
+              <div className="absolute right-0 mt-3 w-72 p-4 bg-white rounded-xl shadow-xl text-xs text-gray-600 z-20">
                 <p className="font-semibold text-gray-700 mb-1">Como ler o gauge</p>
                 <p><strong>Nível:</strong> humor da última conversa (0-10).</p>
                 <p className="mt-2"><strong>Tendência:</strong> compara com sua média dos últimos 7 dias.</p>
               </div>
             )}
           </div>
-          <button
-            onClick={handleOpenHistory}
-            className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition"
-            type="button"
-          >
-            <Clock size={14} /> Histórico
-          </button>
-          <div className="text-2xl">{mood_gauge.emoji_atual}</div>
         </div>
       </div>
 
