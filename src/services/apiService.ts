@@ -7,7 +7,7 @@
  */
 
 import { authService } from './authService';
-import type { HumorHistoricoPayload, InsightDetail } from '../types/emotions';
+import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -210,6 +210,172 @@ class ApiService {
     return null;
   }
 
+  private normalizeResumoConversa(entry: unknown): ResumoConversasPayload['conversas'][number] | null {
+    if (!entry) {
+      return null;
+    }
+
+    if (typeof entry === 'string') {
+      return { resumo_conversa: entry };
+    }
+
+    if (typeof entry !== 'object') {
+      return null;
+    }
+
+    const obj = entry as Record<string, unknown>;
+
+    const textoFonte =
+      obj.resumo_conversa ??
+      obj.resumo ??
+      obj.resumo_texto ??
+      obj.texto ??
+      obj.descricao ??
+      obj.mensagem ??
+      '';
+
+    const resumoTexto = typeof textoFonte === 'string'
+      ? textoFonte
+      : textoFonte !== null && textoFonte !== undefined
+        ? JSON.stringify(textoFonte)
+        : '';
+
+    if (!resumoTexto) {
+      return null;
+    }
+
+    const dataPossiveis = [
+      obj.data_conversa,
+      obj.data,
+      obj.data_inicio,
+      obj.data_fim,
+      obj.data_registro,
+      obj.criado_em,
+      obj.atualizado_em,
+      obj.timestamp
+    ];
+
+    const dataConversa = dataPossiveis.find((valor) => typeof valor === 'string' && valor.trim()) as string | undefined;
+
+    const normalized: ResumoConversasPayload['conversas'][number] = {
+      resumo_conversa: resumoTexto,
+      data_conversa: dataConversa ?? null
+    };
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined && key !== 'resumo_conversa') {
+        normalized[key] = value;
+      }
+    }
+
+    return normalized;
+  }
+
+  private extractResumoConversasPayload(payload: unknown): ResumoConversasPayload | null {
+    if (!payload) {
+      return null;
+    }
+
+    const conversas: ResumoConversasPayload['conversas'] = [];
+    let extras: Record<string, unknown> | undefined;
+
+    const mergeExtras = (candidate?: Record<string, unknown>) => {
+      if (!candidate) return;
+      extras = { ...(extras ?? {}), ...candidate };
+    };
+
+    const processValue = (value: unknown) => {
+      if (!value) {
+        return;
+      }
+
+      const normalized = this.normalizeResumoConversa(value);
+      if (normalized) {
+        conversas.push(normalized);
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach(processValue);
+        return;
+      }
+
+      if (typeof value === 'object') {
+        processObject(value as Record<string, unknown>);
+      }
+    };
+
+    const processObject = (obj: Record<string, unknown>) => {
+      if (!obj) return;
+
+      const keysWithArrays = ['resumo_conversas', 'conversas', 'resumos', 'historico', 'itens', 'items'];
+
+      for (const key of keysWithArrays) {
+        if (Array.isArray(obj[key])) {
+          obj[key]?.forEach(processValue);
+        }
+      }
+
+      const nestedKeys = ['response', 'data', 'payload', 'resultado', 'result'];
+      for (const key of nestedKeys) {
+        if (obj[key] !== undefined) {
+          processValue(obj[key]);
+        }
+      }
+
+      if ('extras' in obj && typeof obj.extras === 'object' && obj.extras !== null && !Array.isArray(obj.extras)) {
+        mergeExtras(obj.extras as Record<string, unknown>);
+      }
+
+      const ignoredKeys = new Set([...keysWithArrays, ...nestedKeys, 'extras', 'success']);
+      const leftovers: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (ignoredKeys.has(key)) {
+          continue;
+        }
+        if (value === undefined) {
+          continue;
+        }
+        if (Array.isArray(value)) {
+          const beforeCount = conversas.length;
+          processValue(value);
+          if (conversas.length !== beforeCount) {
+            continue;
+          }
+          leftovers[key] = value;
+          continue;
+        }
+
+        if (value !== null && typeof value === 'object') {
+          const beforeCount = conversas.length;
+          processValue(value);
+          if (conversas.length !== beforeCount) {
+            continue;
+          }
+          leftovers[key] = value;
+          continue;
+        }
+
+        leftovers[key] = value;
+      }
+
+      if (Object.keys(leftovers).length > 0) {
+        mergeExtras(leftovers);
+      }
+    };
+
+    processValue(payload);
+
+    if (conversas.length === 0) {
+      return null;
+    }
+
+    return {
+      conversas,
+      extras
+    };
+  }
+
   private async makeRequest(
     endpoint: string,
     options: RequestInit = {},
@@ -334,6 +500,30 @@ class ApiService {
     const payload = this.extractHumorHistoricoPayload(result.response);
     if (!payload) {
       throw new Error('Formato inesperado no histórico de humor');
+    }
+
+    return payload;
+  }
+
+  public async getResumoConversas(
+    userId: string
+  ): Promise<ResumoConversasPayload> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const params = new URLSearchParams({ user_id: userId });
+    const endpoint = `/resumo_conversas?${params.toString()}`;
+    console.info('[API] requisitando resumo de conversas:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar resumo das conversas');
+    }
+
+    const payload = this.extractResumoConversasPayload(result.response);
+    if (!payload) {
+      throw new Error('Formato inesperado no resumo das conversas');
     }
 
     return payload;

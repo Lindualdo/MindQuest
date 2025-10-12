@@ -212,6 +212,17 @@ export interface InsightDetail extends Insight {
   baseado_em?: string[];
 }
 
+export interface ResumoConversa {
+  resumo_conversa: string;
+  data_conversa?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ResumoConversasPayload {
+  conversas: ResumoConversa[];
+  extras?: Record<string, unknown>;
+}
+
 // Alertas preventivos (background system)
 export interface AlertaPreventivo {
   id: string;
@@ -274,7 +285,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -284,17 +295,23 @@ export interface StoreState {
   insightDetailLoading: boolean;
   insightDetailError: string | null;
   selectedSabotadorId: string | null;
+  resumoConversas: ResumoConversasPayload | null;
+  resumoConversasLoading: boolean;
+  resumoConversasError: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
   openSabotadorDetail: (sabotadorId?: string) => void;
+  openResumoConversas: () => Promise<void>;
+  closeResumoConversas: () => void;
+  loadResumoConversas: () => Promise<void>;
 }
 
 // Configurações personalizadas por perfil

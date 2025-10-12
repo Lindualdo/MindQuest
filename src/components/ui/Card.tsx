@@ -7,13 +7,15 @@ interface CardProps {
   className?: string;
   hover?: boolean;
   glow?: boolean;
+  onClick?: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
   children,
   className,
   hover = true,
-  glow = false
+  glow = false,
+  onClick
 }) => {
   return (
     <motion.div
@@ -21,9 +23,11 @@ const Card: React.FC<CardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={hover ? { scale: 1.02, y: -4 } : {}}
+      onClick={onClick}
       className={clsx(
         'glass-card rounded-2xl p-6 transition-all duration-300',
-        hover && 'hover:shadow-2xl cursor-pointer',
+        hover && 'hover:shadow-2xl',
+        (hover || onClick) && 'cursor-pointer',
         glow && 'ring-2 ring-blue-500/20 shadow-blue-500/25',
         className
       )}

@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MessageCircle, X } from 'lucide-react';
+import { Calendar, Clock, FileText, MessageCircle } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
 const CheckInsHistorico: React.FC = () => {
-  const { dashboardData } = useStore();
+  const { dashboardData, openResumoConversas } = useStore();
   const { checkins_historico } = dashboardData;
 
   const diasSemanaExtenso = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -115,9 +115,20 @@ const CheckInsHistorico: React.FC = () => {
 
   return (
     <Card>
-      <div className="flex items-center gap-2 mb-6">
-        <Calendar className="text-blue-600" size={24} />
-        <h3 className="text-xl font-semibold text-gray-800">Conversas diárias (7d)</h3>
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="text-blue-600" size={24} />
+          <h3 className="text-xl font-semibold text-gray-800">Conversas diárias (7d)</h3>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => openResumoConversas().catch(() => null)}
+          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+        >
+          <FileText size={14} />
+          Resumo das conversa
+        </button>
       </div>
 
       {/* Grid dos dias */}

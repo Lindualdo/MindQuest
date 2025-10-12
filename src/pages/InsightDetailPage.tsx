@@ -193,7 +193,7 @@ const InsightDetailPage: React.FC = () => {
             </h1>
           </div>
         </div>
-      </header>
+      </header> 
 
       <main className="max-w-4xl mx-auto px-4 pt-6">
         <motion.section

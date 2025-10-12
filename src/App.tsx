@@ -15,6 +15,7 @@ import InsightDetailPage from './pages/InsightDetailPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/ConquistasPage';
 import SabotadorDetailPage from './pages/SabotadorDetailPage';
+import ResumoConversasPage from './pages/ResumoConversasPage';
 
 function App() {
   const { 
@@ -100,6 +101,14 @@ function App() {
     return (
       <AuthGuard>
         <SabotadorDetailPage />
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'resumoConversas') {
+    return (
+      <AuthGuard>
+        <ResumoConversasPage />
       </AuthGuard>
     );
   }

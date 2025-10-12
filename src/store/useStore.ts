@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import type { StoreState, DashboardData } from '../types/emotions';
+import type { StoreState, DashboardData, ResumoConversasPayload } from '../types/emotions';
 
 // Importações dos serviços (usando sintaxe compatível)
 import { apiService } from '../services/apiService';
@@ -47,6 +47,9 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   insightDetailLoading: false,
   insightDetailError: null,
   selectedSabotadorId: null,
+  resumoConversas: null,
+  resumoConversasLoading: false,
+  resumoConversasError: null,
 
   // Actions básicas
   setError: (error) => {
@@ -307,6 +310,61 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       selectedSabotadorId: sabotadorId ?? fallbackId,
       view: 'sabotadorDetail'
     });
+  },
+
+  loadResumoConversas: async () => {
+    const { dashboardData } = get();
+    let userId = dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      console.warn('[ResumoConversas] usuário indisponível, abortando');
+      set({
+        resumoConversasLoading: false,
+        resumoConversasError: 'Usuário não encontrado'
+      });
+      return;
+    }
+
+    try {
+      console.log('[ResumoConversas] carregando', { userId });
+      set({
+        resumoConversasLoading: true,
+        resumoConversasError: null
+      });
+      const resumo: ResumoConversasPayload = await apiService.getResumoConversas(userId);
+      set({
+        resumoConversas: resumo,
+        resumoConversasLoading: false,
+        resumoConversasError: null
+      });
+    } catch (error) {
+      console.error('Erro ao carregar resumo das conversas:', error);
+      set({
+        resumoConversasLoading: false,
+        resumoConversasError: error instanceof Error ? error.message : 'Erro ao carregar resumo das conversas'
+      });
+    }
+  },
+
+  openResumoConversas: async () => {
+    set({
+      view: 'resumoConversas',
+      resumoConversasError: null
+    });
+    await get().loadResumoConversas();
+  },
+
+  closeResumoConversas: () => {
+    set({
+      view: 'dashboard'
+    });
   }
 }));
 
@@ -346,7 +404,13 @@ export const useDashboard = () => {
     insightDetailError
   ,
     selectedSabotadorId,
-    openSabotadorDetail
+    openSabotadorDetail,
+    resumoConversas,
+    resumoConversasLoading,
+    resumoConversasError,
+    openResumoConversas,
+    closeResumoConversas,
+    loadResumoConversas
   } = useStore();
   
   return {
@@ -370,7 +434,13 @@ export const useDashboard = () => {
     insightDetailLoading,
     insightDetailError,
     selectedSabotadorId,
-    openSabotadorDetail
+    openSabotadorDetail,
+    resumoConversas,
+    resumoConversasLoading,
+    resumoConversasError,
+    openResumoConversas,
+    closeResumoConversas,
+    loadResumoConversas
   };
 };
 
