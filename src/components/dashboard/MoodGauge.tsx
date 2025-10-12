@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus, Info, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Info, Clock, Smile } from 'lucide-react';
 import useStore from '../../store/useStore';
 import Card from '../ui/Card';
 
@@ -75,7 +75,7 @@ const MoodGauge: React.FC = () => {
   return (
     <Card className="text-center">
       <div className="flex items-center gap-3 mb-6">
-        <div className="text-2xl">{mood_gauge.emoji_atual}</div>
+        <Smile className="text-blue-600" size={24} />
         <h3 className="text-xl font-semibold text-gray-800">Humor</h3>
         <div className="ml-auto flex items-center gap-3">
           <button
@@ -259,6 +259,7 @@ const MoodGauge: React.FC = () => {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mb-4"
       >
+        <div className="text-3xl mb-1">{mood_gauge.emoji_atual}</div>
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
           {clampedNivel.toFixed(1)}
         </div>
