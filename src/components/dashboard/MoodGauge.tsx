@@ -259,7 +259,7 @@ const MoodGauge: React.FC = () => {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mb-4"
       >
-        <div className="text-3xl mb-1">{mood_gauge.emoji_atual}</div>
+        {/* Emoji removido conforme novo padrão */}
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
           {clampedNivel.toFixed(1)}
         </div>

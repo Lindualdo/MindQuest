@@ -91,18 +91,13 @@ const SabotadorCard: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
               Sabotador mais ativo
             </span>
-            <div className="mt-2 flex items-center gap-3">
-              <span className="text-3xl" aria-hidden>
-                {principal.emoji}
-              </span>
-              <div>
-                <p className="text-2xl font-bold text-gray-800">
-                  {principal.nome.toUpperCase()}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Apelido interno: <span className="font-semibold text-gray-600">{principal.apelido}</span>
-                </p>
-              </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold text-gray-800">
+                {principal.nome.toUpperCase()}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Apelido interno: <span className="font-semibold text-gray-600">{principal.apelido}</span>
+              </p>
             </div>
           </div>
         </div>
