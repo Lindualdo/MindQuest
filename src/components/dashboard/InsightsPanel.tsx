@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Lightbulb, Target, Trophy, AlertTriangle, 
-  TrendingUp, Brain, Heart, Users, Zap, ChevronRight 
+  TrendingUp, Brain, Heart, Users, Zap, ChevronRight, Microscope 
 } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
@@ -18,6 +18,7 @@ import Card from '../ui/Card';
 const InsightsPanel: React.FC = () => {
   const { dashboardData, openInsightDetail } = useDashboard();
   const { insights } = dashboardData;
+  type InsightItem = typeof insights[number];
 
   const determineInitialFilters = (list: typeof insights) => {
     if (!Array.isArray(list) || list.length === 0) {
@@ -61,6 +62,8 @@ const InsightsPanel: React.FC = () => {
   const [tipoFiltro, setTipoFiltro] = useState<'todos' | 'padrao' | 'melhoria' | 'positivo' | 'alerta'>(() => initialFilters.tipo);
   const [prioridadeFiltro, setPrioridadeFiltro] = useState<'todas' | 'alta' | 'media' | 'baixa'>(() => initialFilters.prioridade);
   const [userHasInteracted, setUserHasInteracted] = useState(false);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [showAdvancedInline, setShowAdvancedInline] = useState(false);
 
   const getInsightIcon = (tipo: string, categoria: string) => {
     // Priorizar por tipo primeiro
@@ -263,12 +266,24 @@ const InsightsPanel: React.FC = () => {
     { key: 'positivo', label: 'Positivos', highlight: 'bg-green-600 text-white', icon: '🏆' }
   ] as const, []);
 
+  const quickTipoOptions = useMemo(
+    () => [
+      { key: 'alerta', label: 'Alertas', emoji: '⚠️' },
+      { key: 'melhoria', label: 'Melhorias', emoji: '🎯' },
+      { key: 'positivo', label: 'Positivos', emoji: '🏆' },
+      { key: 'todos', label: 'Todos', emoji: '🔄' }
+    ] as const,
+    []
+  );
+
   const prioridadeOptions = useMemo(() => [
     { key: 'todas', label: 'Todas', highlight: 'bg-gray-800 text-white', icon: '✨' },
     { key: 'alta', label: 'Alta', highlight: 'bg-red-600 text-white', icon: '🔥' },
     { key: 'media', label: 'Média', highlight: 'bg-yellow-500 text-white', icon: '⚡' },
     { key: 'baixa', label: 'Baixa', highlight: 'bg-emerald-600 text-white', icon: '💚' }
   ] as const, []);
+
+  const prioridadeCycleOrder: Array<typeof prioridadeOptions[number]['key']> = ['todas', 'alta', 'media', 'baixa'];
 
   const handleTipoFiltroChange = (
     value: 'todos' | 'padrao' | 'melhoria' | 'positivo' | 'alerta'
@@ -281,6 +296,13 @@ const InsightsPanel: React.FC = () => {
     value: 'todas' | 'alta' | 'media' | 'baixa'
   ) => {
     setPrioridadeFiltro(value);
+    setUserHasInteracted(true);
+  };
+
+  const handlePrioridadeCycle = () => {
+    const currentIndex = prioridadeCycleOrder.indexOf(prioridadeFiltro);
+    const next = prioridadeCycleOrder[(currentIndex + 1) % prioridadeCycleOrder.length];
+    setPrioridadeFiltro(next);
     setUserHasInteracted(true);
   };
 
@@ -300,19 +322,128 @@ const InsightsPanel: React.FC = () => {
   const hasActiveFilters =
     categoriaFiltro !== 'todos' || tipoFiltro !== 'todos' || prioridadeFiltro !== 'todas';
 
-  return (
-    <Card>
-      <div className="flex items-center gap-2 mb-6">
-        <Lightbulb className="text-yellow-600" size={24} />
-        <h3 className="text-xl font-semibold text-gray-800">Aprendizados</h3>
-        <div className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-          {!hasActiveFilters
-            ? `${insights.length} insights`
-            : `${insightsFiltrados.length}/${insights.length} insights`}
-        </div>
-      </div>
+  const tipoSummaryLabel =
+    tipoOptions.find(({ key }) => key === tipoFiltro)?.label || 'Todos';
+  const prioridadeSummaryLabel =
+    prioridadeOptions.find(({ key }) => key === prioridadeFiltro)?.label || 'Todas';
+  const categoriaSummaryLabel =
+    categoriaFiltro === 'todos' ? null : getCategoriaLabel(categoriaFiltro);
 
-      <div className="space-y-3 mb-6">
+  const summaryParts = [
+    tipoSummaryLabel,
+    `Prioridade ${prioridadeSummaryLabel}`
+  ];
+  if (categoriaSummaryLabel) summaryParts.push(categoriaSummaryLabel);
+
+  const summaryText = summaryParts.join(' · ');
+
+  const insightEmFoco = insightsFiltrados[0] ?? null;
+  const demaisInsights = insightEmFoco ? insightsFiltrados.slice(1) : insightsFiltrados;
+
+  const prioridadeOptionInfo = prioridadeOptions.find(({ key }) => key === prioridadeFiltro);
+  const prioridadeCycleLabel = prioridadeOptionInfo?.label ?? 'Todas';
+  const prioridadeCycleIcon = prioridadeOptionInfo?.icon ?? '✨';
+
+  const renderInsightCard = (
+    insight: InsightItem,
+    index: number,
+    variant: 'focus' | 'list' = 'list'
+  ) => {
+    const Icon = getInsightIcon(insight.tipo, insight.categoria);
+    const styles = getInsightStyle(insight.tipo, insight.prioridade);
+    const isFocus = variant === 'focus';
+
+    const baseClasses = `
+      relative rounded-2xl border-l-4 ${styles.bgColor} ${styles.borderColor}
+      hover:shadow-md transition-all duration-200 cursor-pointer group
+      ${isFocus ? 'p-5' : 'p-4 hover:scale-[1.02]'}
+    `;
+
+    return (
+      <motion.div
+        key={`${variant}-${insight.id}`}
+        initial={{ opacity: 0, x: isFocus ? 0 : -20, y: isFocus ? 10 : 0 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        onClick={() => openInsightDetail(insight.id)}
+        className={baseClasses}
+      >
+        <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${styles.priorityIndicator}`} />
+
+        <div className="flex items-start gap-3">
+          <div className={`p-2 rounded-lg bg-white/80 ${styles.iconColor} group-hover:scale-110 transition-transform`}>
+            <Icon size={20} />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h4 className="font-semibold text-gray-800 truncate">
+                {insight.titulo}
+              </h4>
+              <span className="text-xl flex-shrink-0">{insight.icone}</span>
+            </div>
+
+            <p className="text-gray-600 text-sm leading-relaxed mb-3 whitespace-pre-line">
+              {insight.descricao}
+            </p>
+
+            {insight.cta && (
+              <div className="mb-3">
+                <a
+                  href={insight.cta.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  {insight.cta.label}
+                </a>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500 bg-white/60 px-2 py-1 rounded-full">
+                {getCategoriaLabel(insight.categoria)}
+              </span>
+
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium
+                  ${insight.prioridade === 'alta' ? 'bg-red-100 text-red-700' :
+                    insight.prioridade === 'media' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-green-100 text-green-700'}`}
+                >
+                  {insight.prioridade === 'alta' ? '🔥 Alta' :
+                    insight.prioridade === 'media' ? '⚡ Média' : '💚 Baixa'}
+                </span>
+
+                <span className="text-gray-400">
+                  {new Date(insight.data_criacao).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit'
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-80 group-hover:opacity-100 transition-opacity">
+              <span>Ver detalhes</span>
+              <ChevronRight size={14} />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderFilterControls = (variant: 'inline' | 'sheet' = 'inline') => {
+    const containerClass = variant === 'inline' ? 'space-y-3' : 'space-y-4';
+    const gridClasses =
+      variant === 'inline'
+        ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2'
+        : 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+
+    return (
+      <div className={containerClass}>
         <div className="flex flex-wrap gap-2">
           {tipoOptions.map(({ key, label, highlight, icon }) => {
             const isActive = tipoFiltro === key;
@@ -357,146 +488,234 @@ const InsightsPanel: React.FC = () => {
             );
           })}
         </div>
+
+        {variant === 'inline' ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mt-6 pt-4 border-t border-gray-100"
+          >
+            <div className={gridClasses}>
+              {resumoOptions.map(({ key, total, label }) => {
+                const isActive = categoriaFiltro === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleCategoriaFiltroChange(key)}
+                    className={`
+                      w-full rounded-xl border px-3 py-3 text-left text-sm transition-all
+                      ${isActive
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20'
+                        : 'bg-gray-50 text-gray-600 border-transparent hover:bg-blue-50'}
+                    `}
+                    aria-pressed={isActive}
+                  >
+                    <div className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                      {total}
+                    </div>
+                    <div className={`mt-1 text-xs font-semibold uppercase tracking-wide ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                      {label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        ) : (
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+              Categorias
+            </p>
+            <div className={gridClasses}>
+              {resumoOptions.map(({ key, total, label }) => {
+                const isActive = categoriaFiltro === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleCategoriaFiltroChange(key)}
+                    className={`
+                      w-full rounded-xl border px-3 py-3 text-left text-sm transition-all
+                      ${isActive
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20'
+                        : 'bg-gray-50 text-gray-600 border-transparent hover:bg-blue-50'}
+                    `}
+                    aria-pressed={isActive}
+                  >
+                    <div className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'}`}>
+                      {total}
+                    </div>
+                    <div className={`mt-1 text-xs font-semibold uppercase tracking-wide ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                      {label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <Card>
+      <div className="flex items-center gap-2 mb-6">
+        <Microscope className="text-blue-600" size={24} />
+        <h3 className="text-xl font-semibold text-gray-800">Análise</h3>
+        <div className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+          {!hasActiveFilters
+            ? `${insights.length} insights`
+            : `${insightsFiltrados.length}/${insights.length} insights`}
+        </div>
       </div>
 
-      <div className="space-y-4 max-h-96 overflow-y-auto">
-        {insightsFiltrados.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 space-y-3">
-            <p>Nenhum insight corresponde a esse filtro no momento.</p>
+      <div className="mb-4 flex flex-col gap-3">
+        <div className="md:hidden">
+          <div className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50/40 px-3 py-2">
+            <div className="flex-1 pr-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                Filtros ativos
+              </p>
+              <p className="text-sm font-medium text-gray-700">{summaryText}</p>
+            </div>
             <button
               type="button"
-              onClick={handleResetFiltros}
-              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+              onClick={() => setIsFilterSheetOpen(true)}
+              className="rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
             >
-              Ver principais
+              Ajustar
             </button>
           </div>
-        ) : (
-          insightsFiltrados.map((insight, index) => {
-          const Icon = getInsightIcon(insight.tipo, insight.categoria);
-          const styles = getInsightStyle(insight.tipo, insight.prioridade);
+        </div>
 
-          return (
-            <motion.div
-              key={insight.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => openInsightDetail(insight.id)}
-              className={`
-                relative p-4 rounded-xl border-l-4 ${styles.bgColor} ${styles.borderColor}
-                hover:shadow-md transition-all duration-200 cursor-pointer
-                hover:scale-[1.02] group
-              `}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="inline-flex items-center rounded-full bg-blue-50 p-1 shadow-inner overflow-x-auto">
+            {quickTipoOptions.map(({ key, label, emoji }) => {
+              const isActive = tipoFiltro === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleTipoFiltroChange(key)}
+                  className={`
+                    whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition
+                    ${isActive ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-500/70 hover:text-blue-600'}
+                  `}
+                >
+                  <span className="mr-1">{emoji}</span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrioridadeCycle}
+              className="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs font-semibold text-yellow-700 shadow-sm hover:bg-yellow-100 transition"
             >
-              {/* Indicador de prioridade */}
-              <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${styles.priorityIndicator}`} />
-              
-              <div className="flex items-start gap-3">
-                {/* Ícone */}
-                <div className={`p-2 rounded-lg bg-white/80 ${styles.iconColor} group-hover:scale-110 transition-transform`}>
-                  <Icon size={20} />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  {/* Cabeçalho */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-semibold text-gray-800 truncate">
-                      {insight.titulo}
-                    </h4>
-                    <span className="text-xl flex-shrink-0">{insight.icone}</span>
-                  </div>
-                  
-                  {/* Descrição */}
-                  <p className="text-gray-600 text-sm leading-relaxed mb-3 whitespace-pre-line">
-                    {insight.descricao}
-                  </p>
+              {prioridadeCycleIcon} Prioridade: {prioridadeCycleLabel}
+            </button>
+            <button
+              type="button"
+              className="hidden md:inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
+              onClick={() => setShowAdvancedInline((prev) => !prev)}
+            >
+              {showAdvancedInline ? 'Ocultar filtros avançados' : 'Filtros avançados'}
+            </button>
+            <button
+              type="button"
+              className="hidden md:inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
+              onClick={() => setIsFilterSheetOpen(true)}
+            >
+              Painel completo
+            </button>
+          </div>
+        </div>
 
-                  {insight.cta && (
-                    <div className="mb-3">
-                      <a
-                        href={insight.cta.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-                      >
-                        {insight.cta.label}
-                      </a>
-                    </div>
-                  )}
-                  
-                  {/* Footer */}
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500 bg-white/60 px-2 py-1 rounded-full">
-                      {getCategoriaLabel(insight.categoria)}
-                    </span>
-                    
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium
-                        ${insight.prioridade === 'alta' ? 'bg-red-100 text-red-700' :
-                          insight.prioridade === 'media' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-green-100 text-green-700'}`}
-                      >
-                        {insight.prioridade === 'alta' ? '🔥 Alta' :
-                         insight.prioridade === 'media' ? '⚡ Média' : '💚 Baixa'}
-                      </span>
-                      
-                      <span className="text-gray-400">
-                        {new Date(insight.data_criacao).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit'
-                        })}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span>Ver detalhes</span>
-                    <ChevronRight size={14} />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })
+        {showAdvancedInline && (
+          <div className="hidden md:block">
+            {renderFilterControls('inline')}
+          </div>
         )}
       </div>
 
-      {/* Footer com estatísticas */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="mt-6 pt-4 border-t border-gray-100"
-      >
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {resumoOptions.map(({ key, total, label }) => {
-            const isActive = categoriaFiltro === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => handleCategoriaFiltroChange(key)}
-                className={`
-                  w-full rounded-xl border px-3 py-3 text-left text-sm transition-all
-                  ${isActive
-                    ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20'
-                    : 'bg-gray-50 text-gray-600 border-transparent hover:bg-blue-50'}
-                `}
-                aria-pressed={isActive}
-              >
-                <div className={`text-lg font-bold ${isActive ? 'text-white' : 'text-gray-800'}`}>
-                  {total}
-                </div>
-                <div className={`mt-1 text-xs font-semibold uppercase tracking-wide ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
-                  {label}
-                </div>
-              </button>
-            );
-          })}
+      {insightEmFoco && (
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue-500 mb-2">
+            Insight em foco
+          </p>
+          {renderInsightCard(insightEmFoco, 0, 'focus')}
         </div>
-      </motion.div>
-    </Card>
+      )}
+
+      <div className="space-y-4 max-h-96 overflow-y-auto">
+        {demaisInsights.length === 0 ? (
+          !insightEmFoco && (
+            <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 space-y-3">
+              <p>Nenhum insight corresponde a esse filtro no momento.</p>
+              <button
+                type="button"
+                onClick={handleResetFiltros}
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+              >
+                Ver principais
+              </button>
+            </div>
+          )
+        ) : (
+          demaisInsights.map((insight, index) => renderInsightCard(insight, index, 'list'))
+        )}
+      </div>
+
+      </Card>
+
+      {isFilterSheetOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsFilterSheetOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="relative z-50 w-full rounded-t-3xl bg-white p-5 shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-base font-semibold text-gray-800">Ajustar filtros</h4>
+              <button
+                type="button"
+                onClick={() => setIsFilterSheetOpen(false)}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Fechar
+              </button>
+            </div>
+
+            {renderFilterControls('sheet')}
+
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={handleResetFiltros}
+                className="flex-1 rounded-full border border-gray-300 bg-gray-100 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-200 transition"
+              >
+                Limpar filtros
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFilterSheetOpen(false)}
+                className="flex-1 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
