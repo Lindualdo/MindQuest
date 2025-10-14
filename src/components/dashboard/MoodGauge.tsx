@@ -50,7 +50,13 @@ const MoodGauge: React.FC = () => {
   const trendColor = tendenciaValor > 0 ? 'text-green-600' : 
                     tendenciaValor < 0 ? 'text-red-600' : 'text-gray-500';
 
-  const trendLabel = `${tendenciaValor > 0 ? '+' : ''}${tendenciaValor.toFixed(1)}%`;
+  const tendenciaAbsoluta = Math.abs(tendenciaValor).toFixed(1);
+  const tendenciaMensagem =
+    tendenciaValor > 0
+      ? `${tendenciaAbsoluta}% acima da média semanal`
+      : tendenciaValor < 0
+        ? `${tendenciaAbsoluta}% abaixo da média semanal`
+        : 'Igual à média semanal';
 
   const handleOpenHistory = async () => {
     console.log('[MoodGauge] abrindo histórico');
@@ -275,9 +281,8 @@ const MoodGauge: React.FC = () => {
       >
         <TrendIcon className={`${trendColor}`} size={20} />
         <div className="text-sm">
-          <span className="font-medium text-gray-700">Tendência:</span>
           <span className={`ml-1 font-semibold ${trendColor}`}>
-            {trendLabel} esta semana
+            {tendenciaMensagem}
           </span>
         </div>
       </motion.div>
