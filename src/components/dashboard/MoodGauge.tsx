@@ -50,13 +50,12 @@ const MoodGauge: React.FC = () => {
   const trendColor = tendenciaValor > 0 ? 'text-green-600' : 
                     tendenciaValor < 0 ? 'text-red-600' : 'text-gray-500';
 
-  const tendenciaAbsoluta = Math.abs(tendenciaValor).toFixed(1);
   const tendenciaMensagem =
     tendenciaValor > 0
-      ? `${tendenciaAbsoluta}% acima da média semanal`
+      ? 'Humor atual acima da média'
       : tendenciaValor < 0
-        ? `${tendenciaAbsoluta}% abaixo da média semanal`
-        : 'Igual à média semanal';
+        ? 'Humor atual abaixo da média'
+        : 'Humor atual estável';
 
   const handleOpenHistory = async () => {
     console.log('[MoodGauge] abrindo histórico');
@@ -112,9 +111,18 @@ const MoodGauge: React.FC = () => {
       </div>
 
       {/* Gauge SVG */}
-      <div className="relative flex justify-center items-center mb-6">
-        <svg width={GAUGE_SIZE} height={GAUGE_SIZE * 0.6} className="overflow-visible">
-          {/* Background arc - semicírculo completo */}
+      <div className="relative mb-6 mx-auto" style={{ width: GAUGE_SIZE, height: GAUGE_SIZE / 2 + 40 }}>
+        <svg width={GAUGE_SIZE} height={GAUGE_SIZE / 2 + 40} viewBox={`0 0 ${GAUGE_SIZE} ${GAUGE_SIZE / 2 + 40}`}>
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#EF4444" />
+              <stop offset="33%" stopColor="#F97316" />
+              <stop offset="66%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#10B981" />
+            </linearGradient>
+          </defs>
+
+          {/* Arco de fundo */}
           <path
             d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
@@ -122,48 +130,28 @@ const MoodGauge: React.FC = () => {
             strokeWidth={GAUGE_STROKE}
             strokeLinecap="round"
           />
-          
-          {/* Progress arc com gradiente */}
-          <defs>
-            <linearGradient id={`mood-gauge-gradient-${gradientId}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#EF4444" />
-              <stop offset="50%" stopColor="#F59E0B" />
-              <stop offset="100%" stopColor="#10B981" />
-            </linearGradient>
-          </defs>
-          
+
+          {/* Arco colorido */}
           <motion.path
             d={`M ${GAUGE_SIZE/2 - GAUGE_RADIUS} ${GAUGE_SIZE/2} A ${GAUGE_RADIUS} ${GAUGE_RADIUS} 0 0 1 ${GAUGE_SIZE/2 + GAUGE_RADIUS} ${GAUGE_SIZE/2}`}
             fill="none"
-            stroke={`url(#mood-gauge-gradient-${gradientId})`}
+            stroke={`url(#${gradientId})`}
             strokeWidth={GAUGE_STROKE}
             strokeLinecap="round"
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
           />
-          
-          {/* Pointer melhorado */}
+
+          {/* Agulha */}
           <motion.g
             initial={{ rotate: -90 }}
             animate={{ rotate: pointerRotation }}
-            transition={{ duration: 2, ease: "easeOut" }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
             style={{ transformOrigin: `${GAUGE_SIZE/2}px ${GAUGE_SIZE/2}px` }}
           >
-            {/* Base do pointer */}
-            <circle
-              cx={GAUGE_SIZE/2}
-              cy={GAUGE_SIZE/2}
-              r={10}
-              fill="white"
-              stroke={gaugeColor}
-              strokeWidth={3}
-              className="drop-shadow-md"
-            />
-            
-            {/* Linha do pointer */}
             <line
               x1={GAUGE_SIZE/2}
               y1={GAUGE_SIZE/2}
@@ -172,53 +160,44 @@ const MoodGauge: React.FC = () => {
               stroke={gaugeColor}
               strokeWidth={4}
               strokeLinecap="round"
-              className="drop-shadow-sm"
             />
-            
-            {/* Ponta do pointer */}
             <circle
               cx={GAUGE_SIZE/2}
-              cy={GAUGE_SIZE/2 - GAUGE_RADIUS + 20}
-              r={4}
+              cy={GAUGE_SIZE/2}
+              r={8}
               fill={gaugeColor}
-              className="drop-shadow-sm"
             />
           </motion.g>
-          
-          {/* Scale markers - ajustado para melhor distribuição */}
-          {[0, 2.5, 5, 7.5, 10].map((value, index) => {
+
+          {/* Marcadores de escala */}
+          {[0, 2.5, 5, 7.5, 10].map((value) => {
             const angle = (value / 10) * 180 - 90;
             const radian = ((angle - 90) * Math.PI) / 180;
+            const x1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 20) * Math.cos(radian);
+            const y1 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 20) * Math.sin(radian);
+            const x2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.cos(radian);
+            const y2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 10) * Math.sin(radian);
             
-            // Ajustar posições para melhor visualização
-            const markerRadius = GAUGE_RADIUS - 15;
-            const labelRadius = GAUGE_RADIUS - 30;
-            
-            const x1 = GAUGE_SIZE/2 + markerRadius * Math.cos(radian);
-            const y1 = GAUGE_SIZE/2 + markerRadius * Math.sin(radian);
-            const x2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.cos(radian);
-            const y2 = GAUGE_SIZE/2 + (GAUGE_RADIUS - 5) * Math.sin(radian);
-            
+            const labelX = GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.cos(radian);
+            const labelY = GAUGE_SIZE/2 + (GAUGE_RADIUS - 35) * Math.sin(radian);
+
             return (
-              <g key={index}>
-                {/* Marcador */}
+              <g key={value}>
                 <line
                   x1={x1}
                   y1={y1}
                   x2={x2}
                   y2={y2}
                   stroke="#6B7280"
-                  strokeWidth={value === 0 ? 3 : 2}
-                  strokeLinecap="round"
+                  strokeWidth={2}
                 />
-                
-                {/* Label do valor */}
                 <text
-                  x={GAUGE_SIZE/2 + labelRadius * Math.cos(radian)}
-                  y={GAUGE_SIZE/2 + labelRadius * Math.sin(radian)}
+                  x={labelX}
+                  y={labelY}
                   textAnchor="middle"
-                  dominantBaseline="central"
-                  className={`text-xs font-medium ${value === 5 ? 'fill-gray-800' : 'fill-gray-600'}`}
+                  dominantBaseline="middle"
+                  fontSize={12}
+                  className={`${value === clampedNivel ? 'font-bold fill-gray-800' : 'fill-gray-600'}`}
                 >
                   {value}
                 </text>
@@ -272,16 +251,15 @@ const MoodGauge: React.FC = () => {
         <div className="text-sm text-gray-600 mt-1">Nível atual</div>
       </motion.div>
 
-      {/* Tendência semanal */}
+      {/* Tendência semanal - SEM ÍCONE */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl"
       >
-        <TrendIcon className={`${trendColor}`} size={20} />
         <div className="text-sm">
-          <span className={`ml-1 font-semibold ${trendColor}`}>
+          <span className={`font-semibold ${trendColor}`}>
             {tendenciaMensagem}
           </span>
         </div>
