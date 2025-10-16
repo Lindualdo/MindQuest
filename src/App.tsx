@@ -35,7 +35,13 @@ function App() {
     await refreshData();
   };
 
-  if (currentPath === '/faq' || currentPath.startsWith('/faq/')) {
+  const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
+
+  if (sanitizedPath === '/faq') {
+    return <FaqPage />;
+  }
+
+  if (sanitizedPath.startsWith('/faq/')) {
     return <FaqPage />;
   }
 

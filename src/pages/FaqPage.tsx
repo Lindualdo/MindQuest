@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Brain,
@@ -6,8 +6,7 @@ import {
   Sparkles,
   BarChart3,
   Headset,
-  HelpCircle,
-  MessageCircle
+  HelpCircle
 } from 'lucide-react';
 
 const faqSections = [
@@ -98,6 +97,38 @@ const faqSections = [
 ];
 
 const FaqPage: React.FC = () => {
+  useEffect(() => {
+    const head = document.head;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css';
+    head.appendChild(link);
+
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.textContent = `
+      import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+      if (!window.__mindquestFaqChatLoaded) {
+        window.__mindquestFaqChatLoaded = true;
+        createChat({
+          webhookUrl: 'https://mindquest-n8n.cloudfy.live/webhook/283c840c-33e8-4d81-a331-81dc1a8cec7c/chat'
+        });
+      }
+    `;
+    document.body.appendChild(script);
+
+    return () => {
+      if (link.parentNode === head) {
+        head.removeChild(link);
+      }
+      if (script.parentNode === document.body) {
+        document.body.removeChild(script);
+      }
+      (window as typeof window & { __mindquestFaqChatLoaded?: boolean }).__mindquestFaqChatLoaded = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50">
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
@@ -127,22 +158,10 @@ const FaqPage: React.FC = () => {
                   você encontre rapidamente o que precisa, mesmo sem estar logado na plataforma.
                 </p>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <a
-                    href="/"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition"
-                  >
-                    <Brain size={18} />
-                    Acessar MindQuest
-                  </a>
-                  <a
-                    href="mailto:suporte@lifeflow.com.br"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-blue-200 text-blue-700 font-semibold hover:bg-blue-50 transition"
-                  >
-                    <Headset size={18} />
-                    Falar com suporte
-                  </a>
-                </div>
+                <p className="text-sm text-blue-700 flex items-center gap-2 bg-blue-50/80 border border-blue-100 rounded-xl px-4 py-3">
+                  <HelpCircle size={18} />
+                  Precisa de ajuda? Abra o balão vermelho no canto da tela para conversar com o suporte.
+                </p>
               </div>
 
               <motion.div
@@ -204,25 +223,14 @@ const FaqPage: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="mt-12 bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl shadow-lg p-8 md:p-10"
           >
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Precisa de algo mais personalizado?
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  Nossa equipe de especialistas está pronta para ajudar com dúvidas estratégicas, integração de dados
-                  ou personalizações avançadas do MindQuest. Envie uma mensagem e retornamos o contato rapidamente.
-                </p>
-              </div>
-              <a
-                href="https://wa.me/5500000000000"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-green-500 text-white font-semibold shadow-lg shadow-green-500/30 hover:bg-green-600 transition"
-              >
-                <MessageCircle size={18} />
-                Falar pelo WhatsApp
-              </a>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Suporte quando você precisar
+              </h2>
+              <p className="text-gray-600 leading-relaxed">
+                O agente virtual está disponível diretamente nesta página. Clique no balão vermelho para pedir ajuda sobre acesso,
+                onboarding ou uso das funcionalidades. Se necessário, ele encaminha você para o time humano.
+              </p>
             </div>
           </motion.section>
         </div>
@@ -231,9 +239,6 @@ const FaqPage: React.FC = () => {
       <footer className="relative z-10 border-t border-white/50 bg-white/70 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-500">
           <span>© {new Date().getFullYear()} MindQuest • Uma solução LifeFlow</span>
-          <a href="/" className="text-blue-600 hover:text-blue-700 font-medium">
-            Voltar para o dashboard
-          </a>
         </div>
       </footer>
     </div>
