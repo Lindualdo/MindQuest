@@ -100,6 +100,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       const token = authService.extractTokenFromUrl() || authService.getToken();
       
       if (!token) {
+        authService.clearStoredToken();
         set({ 
           isLoading: false, 
           error: 'Token de acesso não encontrado',
@@ -111,6 +112,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       const validation = await authService.validateToken(token);
       
       if (!validation.success) {
+        authService.clearStoredToken();
         set({ 
           isLoading: false, 
           error: validation.error || 'Token inválido',

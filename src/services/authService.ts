@@ -22,6 +22,9 @@ class AuthService {
   private token: string | null = null;
   private isAuthenticated: boolean = false;
   private userData: any = null;
+  private readonly TOKEN_KEY = 'mindquest_token';
+  private readonly TOKEN_EXP_KEY = 'mindquest_token_expiration';
+  private readonly TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
   private constructor() {}
 
@@ -49,6 +52,52 @@ class AuthService {
     return token;
   }
 
+  private getStoredToken(): string | null {
+    try {
+      const storedToken = localStorage.getItem(this.TOKEN_KEY);
+      if (!storedToken) {
+        return null;
+      }
+
+      const rawExpiration = localStorage.getItem(this.TOKEN_EXP_KEY);
+      if (!rawExpiration) {
+        this.clearStoredToken();
+        return null;
+      }
+
+      const expiresAt = Number(rawExpiration);
+      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+        this.clearStoredToken();
+        return null;
+      }
+
+      return storedToken;
+    } catch (error) {
+      console.error('Erro ao acessar token no localStorage:', error);
+      return null;
+    }
+  }
+
+  private persistToken(token: string): void {
+    try {
+      localStorage.setItem(this.TOKEN_KEY, token);
+      const expiresAt = Date.now() + this.TOKEN_TTL_MS;
+      localStorage.setItem(this.TOKEN_EXP_KEY, String(expiresAt));
+    } catch (error) {
+      console.error('Erro ao armazenar token:', error);
+    }
+  }
+
+  public clearStoredToken(): void {
+    try {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.TOKEN_EXP_KEY);
+    } catch (error) {
+      console.error('Erro ao limpar token armazenado:', error);
+    }
+    this.token = null;
+  }
+
   /**
    * Obtém token do localStorage ou URL
    */
@@ -58,7 +107,7 @@ class AuthService {
     }
     
     // Verifica localStorage
-    const storedToken = localStorage.getItem('mindquest_token');
+    const storedToken = this.getStoredToken();
     if (storedToken) {
       this.token = storedToken;
       return storedToken;
@@ -73,17 +122,16 @@ class AuthService {
    */
   public setToken(token: string): void {
     this.token = token;
-    localStorage.setItem('mindquest_token', token);
+    this.persistToken(token);
   }
 
   /**
    * Remove token e limpa autenticação
    */
   public logout(): void {
-    this.token = null;
+    this.clearStoredToken();
     this.isAuthenticated = false;
     this.userData = null;
-    localStorage.removeItem('mindquest_token');
     
     // Redireciona para página de erro/login
     window.location.href = '/auth-error';

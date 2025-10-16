@@ -17,6 +17,7 @@ import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/ConquistasPage';
 import SabotadorDetailPage from './pages/SabotadorDetailPage';
 import ResumoConversasPage from './pages/ResumoConversasPage';
+import FaqPage from './pages/FaqPage';
 
 function App() {
   const { 
@@ -28,9 +29,19 @@ function App() {
     view
   } = useDashboard();
 
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : '';
+
   const handleRefresh = async () => {
     await refreshData();
   };
+
+  if (currentPath === '/faq' || currentPath.startsWith('/faq/')) {
+    return (
+      <AuthGuard>
+        <FaqPage />
+      </AuthGuard>
+    );
+  }
 
   // Se há erro nos dados (não confundir com erro de auth)
   if (error && !isLoading) {
@@ -214,8 +225,13 @@ function App() {
         >
           <div className="max-w-7xl mx-auto px-4">
             <p>MindQuest v1.1 - Mente clara, resultados reais.</p>
-            <p className="mt-1">
-              Dados atualizados em tempo real via API segura.
+            <p className="mt-2">
+              <a
+                href="/faq"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Acessar FAQ
+              </a>
             </p>
           </div>
         </motion.footer>
