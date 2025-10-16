@@ -119,19 +119,12 @@ const HumorHistoryPage: React.FC = () => {
                   <p className="text-lg font-bold text-blue-700">{dashboardData.mood_gauge.nivel_atual.toFixed(1)}</p>
                 </div>
                 <div className="p-3 bg-amber-50 rounded-xl text-center">
-                  <p className="text-xs uppercase text-amber-600 font-semibold">Tendência</p>
-                  <p className={`text-lg font-bold ${dashboardData.mood_gauge.tendencia_semanal >= 0 ? 'text-amber-700' : 'text-red-600'}`}>
-                    {dashboardData.mood_gauge.tendencia_semanal > 0 ? '+' : ''}{dashboardData.mood_gauge.tendencia_semanal.toFixed(1)}%
+                  <p className="text-xs uppercase text-amber-600 font-semibold">Humor médio</p>
+                  <p className="text-lg font-bold text-amber-700">
+                    {Number(dashboardData.metricas_periodo?.humor_medio ?? 0).toFixed(1)}
                   </p>
                 </div>
-                {humorHistorico?.serie && humorHistorico.serie.length > 0 && (
-                  <div className="p-3 bg-green-50 rounded-xl text-center">
-                    <p className="text-xs uppercase text-green-600 font-semibold">Primeiro registro</p>
-                    <p className="text-lg font-bold text-green-700">
-                      {Number((humorHistorico.serie[0] as any).humor ?? 0).toFixed(1)}
-                    </p>
-                  </div>
-                )}
+                {/* Campo 'Primeiro registro' removido */}
                 {humorHistorico?.serie && humorHistorico.serie.length > 0 && (
                   <div className="p-3 bg-purple-50 rounded-xl text-center">
                     <p className="text-xs uppercase text-purple-600 font-semibold">Registros</p>

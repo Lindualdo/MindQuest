@@ -90,10 +90,8 @@ const CheckInsHistorico: React.FC = () => {
     );
   const totalRespondidos = checkinsRespondidos.length;
 
-  const humorMedioValor = dashboardData.metricas_periodo?.humor_medio;
-  const humorMedioFormatado = typeof humorMedioValor === 'number'
-    ? humorMedioValor.toFixed(2)
-    : '0.00';
+  // Total de conversas no período (quando disponível)
+  const totalConversas = dashboardData.metricas_periodo?.total_checkins ?? checkins_historico.length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -185,16 +183,16 @@ const CheckInsHistorico: React.FC = () => {
         
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">
-            {humorMedioFormatado}
+            {totalConversas}
           </div>
-          <div className="text-xs text-gray-600">Humor médio</div>
+          <div className="text-xs text-gray-600">Total conversas</div>
         </div>
         
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-600">
             {dashboardData.gamificacao.streak_conversas_dias}
           </div>
-          <div className="text-xs text-gray-600">Sequência ativa</div>
+          <div className="text-xs text-gray-600">Dias seguidos</div>
         </div>
       </div>
 

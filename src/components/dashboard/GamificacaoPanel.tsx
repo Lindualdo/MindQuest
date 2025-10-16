@@ -120,7 +120,7 @@ const GamificacaoPanel: React.FC = () => {
               <div className="text-2xl font-bold text-orange-600">
                 {gamificacao.streak_conversas_dias}
               </div>
-              <div className="text-sm text-gray-600">conversas seguidas</div>
+              <div className="text-sm text-gray-600">Dias seguidos</div>
             </div>
           </motion.div>
 

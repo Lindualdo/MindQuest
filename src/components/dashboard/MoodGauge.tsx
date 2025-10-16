@@ -42,20 +42,8 @@ const MoodGauge: React.FC = () => {
 
   const gaugeColor = getGaugeColor(clampedNivel);
   
-  // Componente da tendência
-  const tendenciaValor = mood_gauge.tendencia_semanal ?? 0;
-  const TrendIcon = tendenciaValor > 0 ? TrendingUp : 
-                   tendenciaValor < 0 ? TrendingDown : Minus;
-  
-  const trendColor = tendenciaValor > 0 ? 'text-green-600' : 
-                    tendenciaValor < 0 ? 'text-red-600' : 'text-gray-500';
-
-  const tendenciaMensagem =
-    tendenciaValor > 0
-      ? 'Humor atual acima da média'
-      : tendenciaValor < 0
-        ? 'Humor atual abaixo da média'
-        : 'Humor atual estável';
+  // Humor médio do período para exibição
+  const humorMedio = dashboardData.metricas_periodo?.humor_medio ?? null;
 
   const handleOpenHistory = async () => {
     console.log('[MoodGauge] abrindo histórico');
@@ -251,16 +239,17 @@ const MoodGauge: React.FC = () => {
         <div className="text-sm text-gray-600 mt-1">Humor atual</div>
       </motion.div>
 
-      {/* Tendência semanal - SEM ÍCONE */}
+      {/* Humor Médio */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl"
       >
-        <div className="text-sm">
-          <span className={`font-semibold ${trendColor}`}>
-            {tendenciaMensagem}
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Humor Médio: </span>
+          <span className="font-bold text-gray-900">
+            {typeof humorMedio === 'number' ? humorMedio.toFixed(1) : '--'}
           </span>
         </div>
       </motion.div>
