@@ -36,11 +36,7 @@ function App() {
   };
 
   if (currentPath === '/faq' || currentPath.startsWith('/faq/')) {
-    return (
-      <AuthGuard>
-        <FaqPage />
-      </AuthGuard>
-    );
+    return <FaqPage />;
   }
 
   // Se há erro nos dados (não confundir com erro de auth)
