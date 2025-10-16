@@ -102,8 +102,8 @@ const MoodGauge: React.FC = () => {
             {showInfo && (
               <div className="absolute right-0 mt-3 w-72 p-4 bg-white rounded-xl shadow-xl text-xs text-gray-600 z-20">
                 <p className="font-semibold text-gray-700 mb-1">Como ler o gauge</p>
-                <p><strong>Nível:</strong> humor da última conversa (0-10).</p>
-                <p className="mt-2"><strong>Tendência:</strong> compara com sua média dos últimos 7 dias.</p>
+                <p><strong>Humor Atual:</strong> humor última conversa (0-10).</p>
+                <p className="mt-2"><strong>Média</strong> Seu humor nos últimos 7 dias.</p>
               </div>
             )}
           </div>
@@ -248,7 +248,7 @@ const MoodGauge: React.FC = () => {
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
           {clampedNivel.toFixed(1)}
         </div>
-        <div className="text-sm text-gray-600 mt-1">Nível atual</div>
+        <div className="text-sm text-gray-600 mt-1">Humor atual</div>
       </motion.div>
 
       {/* Tendência semanal - SEM ÍCONE */}
