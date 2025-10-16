@@ -529,6 +529,20 @@ class ApiService {
     return payload;
   }
 
+  // Conversa completa por chat_id
+  public async getFullChat(chatId: string): Promise<any> {
+    if (!chatId) throw new Error('chat_id inválido');
+    const endpoint = `/full_chat?chat_id=${encodeURIComponent(chatId)}`;
+    console.info('[API] requisitando conversa completa:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar conversa completa');
+    }
+    const data = Array.isArray(result.response) ? result.response[0] : result.response;
+    if (!data) throw new Error('Conversa não encontrada');
+    return data;
+  }
+
   public async getInsightDetail(
     userId: string,
     insightId: string

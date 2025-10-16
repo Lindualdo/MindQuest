@@ -298,6 +298,11 @@ export interface StoreState {
   resumoConversas: ResumoConversasPayload | null;
   resumoConversasLoading: boolean;
   resumoConversasError: string | null;
+  // full chat detail
+  selectedChatId: string | null;
+  fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
+  fullChatLoading: boolean;
+  fullChatError: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;

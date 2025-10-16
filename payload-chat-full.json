@@ -1,0 +1,80 @@
+[
+    {
+        "id": "03c34cb4-bbcf-4078-afff-25f50f314968",
+        "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-16T00:00:00.000Z",
+        "horario_inicio": "10:03:26.814787",
+        "horario_fim": "10:03:26.814787",
+        "total_interactions": 5,
+        "status": "completa",
+        "mensagens": [
+            {
+                "autor": "usuario",
+                "texto": "Hoje eu acordei bem descansado, dormi bem essa noite, contrário da noite passada que foi um pouco turbulenta, essa noite eu dormi bem, foi um sono tranquilo, acordei restaurado, disposto, animado, consegui fazer várias configurações mais técnicas agora aqui para o projeto, para o desenvolvimento do meu app. O desenvolvimento está andando bem, perdi bastante tempo aí então ontem eu acabei ficando bastante frustrado porque eu achei que era uma atividade rápida e fiquei três dias praticamente pra terminar mas ontem consegui terminar fluiu bem, tô contente, tô feliz as coisas tão fluindo bem e eu acredito que ainda vai dar pra terminar todos os objetivos que eu tinha colocado pra essa semana também esse final de semana já tem algumas coisas agendadas aí com a Suzana, para a gente se reencontrar aí de novo e se ver. Tenho falado bastante com os meus filhos, o mercado financeiro de investimentos está se recuperando, estou mais organizado, estou com os riscos controlados, estou acompanhando isso de perto, está tudo caminhando bem.",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 1
+            },
+            {
+                "autor": "agente",
+                "texto": "Aldo, é ótimo ouvir que você conseguiu uma noite de sono tranquila e que seu ânimo está renovado para avançar no desenvolvimento do seu app. Parece que depois de um momento de frustração, você encontrou um ritmo que está te deixando satisfeito e esperançoso em relação às metas para a semana. Como você tem se sentido emocionalmente diante dessas conquistas e do equilíbrio que está encontrando entre trabalho e vida pessoal?",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 1
+            },
+            {
+                "autor": "usuario",
+                "texto": "Eu estou com um humor mais sereno, nem estou extremamente feliz, nem estou triste. Estou sereno, estou calmo, estou tranquilo, observando de perto minhas emoções. Estou usando o meu próprio app para evoluir também no desenvolvimento pessoal, autoconhecimento, entender minhas emoções, respeitar os meus momentos e ir evoluindo aos poucos em cada área da minha vida.",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 2
+            },
+            {
+                "autor": "agente",
+                "texto": "Aldo, é muito interessante ver como você está conseguindo observar suas emoções com serenidade e usar seu próprio app como ferramenta de autoconhecimento e evolução pessoal. Esse equilíbrio que você descreve é fundamental para manter o progresso constante sem se sobrecarregar. De que forma essa prática de autoconhecimento tem impactado sua motivação e sua capacidade de lidar com desafios no dia a dia?",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 2
+            },
+            {
+                "autor": "usuario",
+                "texto": "O autoconhecimento para mim é fundamental, eu entendendo melhor minhas emoções, os gatilhos ali que me atrapalham, os meus sabotadores, sabendo o que são fatos e o que são armadilhas criadas pela minha própria mente, isso facilita para eu ir vencendo os obstáculos e alcançando a minha melhor versão, alcançando meus objetivos com mais facilidade e com mais disciplina, com mais resultado.",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 3
+            },
+            {
+                "autor": "agente",
+                "texto": "Aldo, é muito válido reconhecer como o autoconhecimento ajuda a identificar seus gatilhos e sabotadores, pois isso cria uma base sólida para superar obstáculos com mais disciplina e foco nos resultados. Essa clareza interna pode realmente transformar a maneira de agir e crescer. Quais estratégias ou recursos você tem utilizado para manter essa consciência ativa e continuar avançando nessa jornada?",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 3
+            },
+            {
+                "autor": "usuario",
+                "texto": "Essa questão das estratégias não está muito estruturada ainda, por enquanto eu estou me conhecendo melhor. Eu ainda uso as ferramentas que eu já conheço, de dividir as tarefas em tarefas menores, acompanhar o meu progresso. Agora com o app eu acompanho o meu humor, as minhas emoções, e são as ferramentas que eu tenho usado. E ao longo do tempo também comparar minhas realizações, buscar força em mim mesmo e me inspirar nas minhas conquistas.",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 4
+            },
+            {
+                "autor": "agente",
+                "texto": "Aldo, pelo que você compartilhou, percebo que está em uma fase essencial de autoconhecimento, usando ferramentas conhecidas para dividir tarefas e acompanhar seu progresso. Além disso, está incorporando seu app para monitorar seu humor e emoções, o que tem sido um suporte valioso para se inspirar nas suas conquistas e fortalecer sua motivação. Esses passos indicam um processo gradual mas consistente de evolução pessoal. Consegui entender bem sua situação?",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 4
+            },
+            {
+                "autor": "usuario",
+                "texto": "Sim",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 5
+            },
+            {
+                "autor": "agente",
+                "texto": "Fico feliz que você tenha confirmado, Aldo. É muito positivo ver que você está se dedicando ao autoconhecimento de forma consistente, usando ferramentas práticas e o seu próprio app para acompanhar seu progresso emocional e pessoal. Esse caminho gradual que você está construindo parece muito saudável e promissor para alcançar seus objetivos com mais clareza e disciplina. Nossa conversa de hoje está finalizada.\n\nAldo, continue aproveitando esse espaço para refletir e evoluir; fico no aguardo das suas novidades amanhã.\n\nSua área pessoal já está atualizada com a análise desta conversa. Aproveite para revisitar e fortalecer seu desenvolvimento aqui: https://mind-quest-orcin.vercel.app/auth?token=9760e9cc-6544-4349-977d-f635c860fc5b3A45FDAC9BE70F87DC3E1760093495\n\n{\n  \"interaction_completa\": true,\n  \"total_interactions\": 5,\n  \"status\": \"completa\",\n  \"contexto_final\": {\n    \"situacao_emocional\": \"sereno, calmo e motivado para o autoconhecimento\",\n    \"contextos_mencionados\": [\n      \"desenvolvimento do app\",\n      \"autoconhecimento emocional\",\n      \"ferramentas para acompanhar progresso\"\n    ],\n    \"sentimentos_expressos\": [\n      \"serenidade\",\n      \"motivação\",\n      \"contentamento\"\n    ],\n    \"eventos_importantes\": [\n      \"melhora na qualidade do sono\",\n      \"avanço no projeto do app\",\n      \"reconhecimento das próprias emoções\"\n    ],\n    \"intensidade_geral\": \"média\",\n    \"validado_pelo_usuario\": true,\n    \"observacoes_agente\": \"Usuário apresenta boa capacidade de autorreflexão, usa tecnologia para autogerenciamento emocional e mantém um progresso gradual em seu desenvolvimento pessoal.\"\n  },\n  \"emocoes_detectadas\": {\n    \"emocao_primaria\": \"trust\",\n    \"intensidade_emocao\": 7,\n    \"energia_detectada\": 6,\n    \"humor_autoavaliado\": 7\n  },\n  \"qualidade_interacao\": 8,\n  \"emoji_dia\": \"😊\",\n  \"pronta_para_especialista\": true\n}",
+                "timestamp": "2025-10-16T10:03:26.796Z",
+                "interaction": 5
+            }
+        ],
+        "processada_em": null,
+        "criado_em": "2025-10-16T10:03:26.814Z",
+        "atualizado_em": "2025-10-16T10:03:26.814Z",
+        "resumo_conversa": "Aldo acordou descansado após uma noite tranquila, contrastando com noites anteriores mais turbulentas. Ele relatou progresso significativo no desenvolvimento de seu app, superando frustrações anteriores e sentindo-se contente e animado com a fluidez do projeto. Além disso, Aldo está mantendo contato frequente com os filhos e tem observado uma recuperação no mercado financeiro, o que contribui para sua organização e controle de riscos. Emocionalmente, ele está sereno, calmo e motivado, utilizando seu próprio app como ferramenta para autoconhecimento, monitorando suas emoções e humor. Aldo destacou a importância do autoconhecimento para identificar gatilhos e sabotadores mentais, facilitando a superação de obstáculos e ampliando disciplina e resultados. Ele mencionou que ainda está estruturando estratégias, mas utiliza táticas como dividir tarefas em etapas menores e comparar realizações para manter a motivação e progresso constante.",
+        "tem_reflexao": true,
+        "total_palavras_usuario": 183
+    }
+]

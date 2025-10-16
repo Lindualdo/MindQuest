@@ -11,6 +11,7 @@ import { Brain, RefreshCw, AlertCircle } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/HumorHistoryPage';
+import FullChatPage from './pages/FullChatPage';
 import InsightDetailPage from './pages/InsightDetailPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/ConquistasPage';
@@ -109,6 +110,14 @@ function App() {
     return (
       <AuthGuard>
         <ResumoConversasPage />
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'fullChatDetail') {
+    return (
+      <AuthGuard>
+        <FullChatPage />
       </AuthGuard>
     );
   }

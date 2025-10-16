@@ -64,7 +64,8 @@ const ResumoConversasPage: React.FC = () => {
     resumoConversasLoading,
     resumoConversasError,
     loadResumoConversas,
-    closeResumoConversas
+    closeResumoConversas,
+    openFullChat
   } = useDashboard();
 
   useEffect(() => {
@@ -107,7 +108,8 @@ const ResumoConversasPage: React.FC = () => {
         indice: totalConversas - index,
         dataFormatada,
         paragraphs,
-        extras
+        extras: extras.filter((e) => e.key !== 'id' && e.key !== 'chat_id'),
+        chatId: rawId ? String(rawId) : null
       };
     });
   }, [resumoConversas]);
@@ -191,13 +193,13 @@ const ResumoConversasPage: React.FC = () => {
 
                     {conversa.paragraphs.length > 0 && (
                       <div className="space-y-3">
-                        {conversa.paragraphs.map((paragraph, index) => (
-                          <p key={index} className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
-                    )}
+                    {conversa.paragraphs.map((paragraph, index) => (
+                      <p key={index} className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                )}
 
                     {conversa.extras.length > 0 && (
                       <div className="space-y-3 border-t border-white/50 pt-3">
@@ -266,6 +268,22 @@ const ResumoConversasPage: React.FC = () => {
                         })}
                       </div>
                     )}
+                    {/* Link para conversa completa se existir chat_id nos extras */}
+                    {(() => {
+                      const chatId = conversa.chatId;
+                      if (!chatId) return null;
+                      return (
+                        <div className="pt-2">
+                          <button
+                            type="button"
+                            onClick={() => openFullChat(chatId)}
+                            className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                          >
+                            Ver conversa completa
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>

@@ -26,6 +26,9 @@ interface ExtendedStoreState extends StoreState {
   initializeAuth: () => Promise<boolean>;
   loadDashboardData: () => Promise<void>;
   openSabotadorDetail: (sabotadorId?: string) => void;
+  // Full chat detail
+  openFullChat: (chatId: string) => Promise<void>;
+  closeFullChat: () => void;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -50,10 +53,29 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   resumoConversas: null,
   resumoConversasLoading: false,
   resumoConversasError: null,
+  // full chat
+  selectedChatId: null,
+  fullChatDetail: null,
+  fullChatLoading: false,
+  fullChatError: null,
 
   // Actions básicas
   setError: (error) => {
     set({ error, isLoading: false });
+  },
+
+  openFullChat: async (chatId) => {
+    set({ view: 'fullChatDetail', selectedChatId: chatId, fullChatLoading: true, fullChatError: null });
+    try {
+      const data = await apiService.getFullChat(chatId);
+      set({ fullChatDetail: data, fullChatLoading: false });
+    } catch (error) {
+      set({ fullChatLoading: false, fullChatError: error instanceof Error ? error.message : 'Erro ao carregar conversa' });
+    }
+  },
+
+  closeFullChat: () => {
+    set({ view: 'resumoConversas', selectedChatId: null, fullChatDetail: null, fullChatError: null });
   },
 
   setAuthenticated: (auth) => {
@@ -410,7 +432,14 @@ export const useDashboard = () => {
     resumoConversasError,
     openResumoConversas,
     closeResumoConversas,
-    loadResumoConversas
+    loadResumoConversas,
+    // full chat
+    openFullChat,
+    closeFullChat,
+    selectedChatId,
+    fullChatDetail,
+    fullChatLoading,
+    fullChatError
   } = useStore();
   
   return {
@@ -440,7 +469,13 @@ export const useDashboard = () => {
     resumoConversasError,
     openResumoConversas,
     closeResumoConversas,
-    loadResumoConversas
+    loadResumoConversas,
+    openFullChat,
+    closeFullChat,
+    selectedChatId,
+    fullChatDetail,
+    fullChatLoading,
+    fullChatError
   };
 };
 
