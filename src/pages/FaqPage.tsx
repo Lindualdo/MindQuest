@@ -105,6 +105,30 @@ const FaqPage: React.FC = () => {
     link.href = 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css';
     head.appendChild(link);
 
+    const themeStyle = document.createElement('style');
+    themeStyle.setAttribute('data-origin', 'mindquest-chat-theme');
+    themeStyle.textContent = `
+      :root {
+        --chat--color--primary: #4f46e5;
+        --chat--color--primary-shade-50: #4338ca;
+        --chat--color--primary--shade-100: #3730a3;
+        --chat--color--secondary: #38bdf8;
+        --chat--color-secondary-shade-50: #0ea5e9;
+        --chat--toggle--background: #4f46e5;
+        --chat--toggle--hover--background: #4338ca;
+        --chat--toggle--active--background: #3730a3;
+        --chat--header--background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+        --chat--header--color: #f8fafc;
+        --chat--button--background: #4f46e5;
+        --chat--button--hover--background: #4338ca;
+        --chat--message--user--background: #4f46e5;
+        --chat--message--user--color: #ffffff;
+        --chat--input--send--button--color: #4f46e5;
+        --chat--input--send--button--color-hover: #4338ca;
+      }
+    `;
+    head.appendChild(themeStyle);
+
     const script = document.createElement('script');
     script.type = 'module';
     script.textContent = `
@@ -112,7 +136,30 @@ const FaqPage: React.FC = () => {
       if (!window.__mindquestFaqChatLoaded) {
         window.__mindquestFaqChatLoaded = true;
         createChat({
-          webhookUrl: 'https://mindquest-n8n.cloudfy.live/webhook/283c840c-33e8-4d81-a331-81dc1a8cec7c/chat'
+          webhookUrl: 'https://mindquest-n8n.cloudfy.live/webhook/283c840c-33e8-4d81-a331-81dc1a8cec7c/chat',
+          defaultLanguage: 'pt-BR',
+          initialMessages: [
+            'Olá! 👋',
+            'Eu sou a Ária, assistente virtual do MindQuest. Como posso ajudar você hoje?'
+          ],
+          i18n: {
+            'pt-BR': {
+              title: 'Olá! 👋',
+              subtitle: 'Converse com o suporte MindQuest e tire suas dúvidas em poucos minutos.',
+              footer: '',
+              getStarted: 'Iniciar conversa',
+              inputPlaceholder: 'Digite sua pergunta...',
+              closeButtonTooltip: 'Fechar chat'
+            },
+            'en': {
+              title: 'MindQuest Support',
+              subtitle: 'Let us know how we can help.',
+              footer: '',
+              getStarted: 'Start conversation',
+              inputPlaceholder: 'Type your question...',
+              closeButtonTooltip: 'Close chat'
+            }
+          }
         });
       }
     `;
@@ -121,6 +168,9 @@ const FaqPage: React.FC = () => {
     return () => {
       if (link.parentNode === head) {
         head.removeChild(link);
+      }
+      if (themeStyle.parentNode === head) {
+        head.removeChild(themeStyle);
       }
       if (script.parentNode === document.body) {
         document.body.removeChild(script);
@@ -160,7 +210,7 @@ const FaqPage: React.FC = () => {
 
                 <p className="text-sm text-blue-700 flex items-center gap-2 bg-blue-50/80 border border-blue-100 rounded-xl px-4 py-3">
                   <HelpCircle size={18} />
-                  Precisa de ajuda? Abra o balão vermelho no canto da tela para conversar com o suporte.
+                  Precisa de ajuda? Abra o balão roxo no canto da tela para conversar com o suporte.
                 </p>
               </div>
 
@@ -228,7 +278,7 @@ const FaqPage: React.FC = () => {
                 Suporte quando você precisar
               </h2>
               <p className="text-gray-600 leading-relaxed">
-                O agente virtual está disponível diretamente nesta página. Clique no balão vermelho para pedir ajuda sobre acesso,
+                O agente virtual está disponível diretamente nesta página. Clique no balão roxo para pedir ajuda sobre acesso,
                 onboarding ou uso das funcionalidades. Se necessário, ele encaminha você para o time humano.
               </p>
             </div>
