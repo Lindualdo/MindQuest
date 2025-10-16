@@ -239,19 +239,28 @@ const MoodGauge: React.FC = () => {
         <div className="text-sm text-gray-600 mt-1">Humor atual</div>
       </motion.div>
 
-      {/* Humor Médio */}
+      {/* Humor Médio com tendência */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         className="flex items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl"
       >
-        <div className="text-sm text-gray-700">
-          <span className="font-semibold">Humor Médio: </span>
-          <span className="font-bold text-gray-900">
-            {typeof humorMedio === 'number' ? humorMedio.toFixed(1) : '--'}
-          </span>
-        </div>
+        {(() => {
+          const tendencia = dashboardData?.mood_gauge?.tendencia_semanal ?? 0;
+          const isUp = tendencia > 0;
+          const isDown = tendencia < 0;
+          const colorClass = isUp ? 'text-green-700' : isDown ? 'text-red-700' : 'text-gray-700';
+          const Icon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
+          const medio = typeof humorMedio === 'number' ? humorMedio.toFixed(1) : '--';
+          return (
+            <div className={`flex items-center gap-2 text-sm ${colorClass}`}>
+              <Icon size={16} />
+              <span className="font-semibold">Humor Médio: </span>
+              <span className="font-bold">{medio}</span>
+            </div>
+          );
+        })()}
       </motion.div>
     </Card>
   );
