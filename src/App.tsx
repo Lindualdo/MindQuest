@@ -17,7 +17,7 @@ import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/ConquistasPage';
 import SabotadorDetailPage from './pages/SabotadorDetailPage';
 import ResumoConversasPage from './pages/ResumoConversasPage';
-import FaqPage from './pages/FaqPage';
+import HomePage from './pages/HomePage';
 
 function App() {
   const { 
@@ -37,12 +37,13 @@ function App() {
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
 
-  if (sanitizedPath === '/faq') {
-    return <FaqPage />;
-  }
-
-  if (sanitizedPath.startsWith('/faq/')) {
-    return <FaqPage />;
+  if (
+    sanitizedPath === '/' ||
+    sanitizedPath === '/home' ||
+    sanitizedPath === '/faq' ||
+    sanitizedPath.startsWith('/faq/')
+  ) {
+    return <HomePage />;
   }
 
   // Se há erro nos dados (não confundir com erro de auth)
@@ -229,10 +230,10 @@ function App() {
             <p>MindQuest v1.1 - Mente clara, resultados reais.</p>
             <p className="mt-2">
               <a
-                href="/faq"
+                href="/"
                 className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
-                Acessar FAQ
+                Acessar Home
               </a>
             </p>
           </div>

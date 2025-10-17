@@ -150,7 +150,7 @@ const faqItems: FaqItem[] = [
   {
     question: 'Como inicio meu cadastro?',
     answer:
-      'Fale com o Assietnte do MindQuest no WhatsApp +351 928 413 957. Enviamos um link seguro com token para ativar o dashboard em poucos minutos.',
+      'Fale com o assistente do MindQuest no WhatsApp +351 928 413 957. Enviamos um link seguro com token para ativar o dashboard em poucos minutos.',
     cta: {
       label: 'Iniciar cadastro pelo WhatsApp',
       href: WHATSAPP_LINK
@@ -191,27 +191,31 @@ const faqItems: FaqItem[] = [
 const processSteps = [
   {
     label: 'Pensamentos',
+    description: 'Pensamentos moldam sentimentos.',
     bgClass: 'bg-[#dbeafe]',
     textClass: 'text-slate-800 font-medium'
   },
   {
     label: 'Sentimentos',
+    description: 'Sentimentos impulsionam ações.',
     bgClass: 'bg-[#e0e7ff]',
     textClass: 'text-slate-800 font-medium'
   },
   {
     label: 'Ações',
+    description: 'Ações constroem resultados.',
     bgClass: 'bg-[#f3e8ff]',
     textClass: 'text-purple-600 font-semibold'
   },
   {
     label: 'Resultados',
+    description: 'Resultados fazem você feliz e mudam crenças, reprogramando sua mente.',
     bgClass: 'bg-[#ede9fe]',
     textClass: 'text-slate-900 font-semibold'
   }
 ];
 
-const FaqPage: React.FC = () => {
+const HomePage: React.FC = () => {
   useEffect(() => {
     const head = document.head;
 
@@ -334,7 +338,7 @@ const FaqPage: React.FC = () => {
             transition={{ duration: 0.7 }}
             className="bg-white/85 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 md:p-12"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+            <div className="flex flex-col gap-10">
               <div className="space-y-6 max-w-2xl">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
@@ -353,25 +357,54 @@ const FaqPage: React.FC = () => {
                 <div className="space-y-6">
                   <div className="space-y-4">
                     <p className="text-xl font-bold text-gray-900">Tudo começa na mente.</p>
-                    <div className="relative">
-                      <div className="flex flex-wrap items-center gap-3 text-sm font-semibold">
+                    <div className="space-y-3">
+                      <div className="grid gap-3 sm:hidden">
                         {processSteps.map((step, index) => (
-                          <div key={step.label} className="flex items-center gap-3">
-                            <div
-                              className={`px-4 py-2 rounded-full ${step.bgClass} shadow-sm border border-white/70 ${step.textClass}`}
-                            >
-                              {step.label}
+                          <div
+                            key={step.label}
+                            className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm shadow-slate-200"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-100/80 via-indigo-100/70 to-purple-100/60 text-sm font-semibold text-blue-700">
+                                {index + 1}
+                              </span>
+                              <span
+                                className={`inline-flex items-center justify-center rounded-xl px-3 py-1 shadow-sm shadow-white/40 ${step.bgClass} ${step.textClass}`}
+                              >
+                                {step.label}
+                              </span>
                             </div>
-                            {index !== processSteps.length - 1 && (
-                              <ChevronRight className="text-gray-300" size={18} />
-                            )}
+                            <p className="mt-2 pl-12 text-xs leading-relaxed text-gray-600">{step.description}</p>
                           </div>
                         ))}
                       </div>
+
+                      <div className="hidden sm:flex items-center gap-5">
+                        {processSteps.map((step, index) => (
+                          <React.Fragment key={step.label}>
+                            <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/60 bg-white/80 px-5 py-5 shadow-sm shadow-blue-100/60">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 text-sm font-semibold text-blue-700">
+                                0{index + 1}
+                              </span>
+                              <span
+                                className={`inline-flex items-center justify-center px-5 py-2 rounded-xl border border-white/70 shadow-sm ${step.bgClass} ${step.textClass}`}
+                              >
+                                {step.label}
+                              </span>
+                              <p className="text-center text-xs leading-relaxed text-gray-500">
+                                {step.description}
+                              </p>
+                            </div>
+                            {index !== processSteps.length - 1 ? (
+                              <div className="flex h-12 w-14 items-center justify-center">
+                                <ChevronRight className="text-gray-300" size={18} />
+                              </div>
+                            ) : null}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-base text-gray-600">
-                      Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados.
-                    </p>
+                   
                     <p className="text-base text-gray-700">
                       Com MindQuest, você otimiza esse ciclo despetando seu potencial e realizando mais
                     </p>
@@ -389,23 +422,6 @@ const FaqPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="relative mx-auto lg:mx-0 lg:self-start"
-              >
-                <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br from-blue-500 via-blue-400 to-purple-500 flex items-center justify-center shadow-xl shadow-purple-300/40">
-                  <Brain className="text-white" size={96} />
-                </div>
-                <div className="absolute -bottom-5 -right-4 bg-white/90 backdrop-blur-lg border border-white/50 shadow-lg rounded-2xl px-4 py-3">
-                  <div className="text-sm font-semibold text-gray-800">MindQuest • Dashboard Vivo</div>
-                  <div className="text-xs text-gray-500">
-                    Clareza emocional, mentor digital e resultados mensuráveis
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
         </header>
@@ -556,25 +572,36 @@ const FaqPage: React.FC = () => {
                 quando sentir necessidade de mentoria ativa.
               </p>
             </div>
-            <div className="overflow-hidden rounded-3xl border border-white/50 shadow-xl bg-white/85 backdrop-blur-xl">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                  <tr>
-                    <th className="px-6 py-4 text-left font-semibold">Recurso</th>
-                    <th className="px-6 py-4 text-center font-semibold">Free</th>
-                    <th className="px-6 py-4 text-center font-semibold">Premium</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {comparisonRows.map((row) => (
-                    <tr key={row.feature} className="bg-white/70">
-                      <td className="px-6 py-4 font-semibold text-gray-900">{row.feature}</td>
-                      <td className="px-6 py-4 text-gray-600 text-center">{row.free}</td>
-                      <td className="px-6 py-4 text-gray-700 text-center font-medium">{row.premium}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              {comparisonRows.map((row) => (
+                <div
+                  key={row.feature}
+                  className="rounded-3xl border border-white/60 bg-white/90 p-5 shadow-lg shadow-indigo-100/60 backdrop-blur"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-indigo-500">
+                      Recurso
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+                      {row.feature}
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-indigo-50 bg-indigo-50/50 p-4">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                        Free
+                      </span>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">{row.free}</p>
+                    </div>
+                    <div className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 via-indigo-50 to-white p-4 shadow-sm shadow-purple-100/50">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-semibold text-white">
+                        Premium
+                      </span>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-700">{row.premium}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -582,7 +609,7 @@ const FaqPage: React.FC = () => {
             <div className="space-y-4">
               <h2 className="text-3xl font-bold">Pronto para sentir a diferença na primeira semana?</h2>
               <p className="text-indigo-100 leading-relaxed max-w-3xl">
-                Entre agora em uma experiência guiada, com um assistente de IA treinado para desenvolver sua inteligência emocional de forma personalizada.
+                 Entre agora em uma experiência guiada, com um assistente de IA treinado para desenvolver sua inteligência emocional de forma personalizada.
 Ative seu MindQuest e comece a ver os resultados em poucos minutos.
               </p>
             </div>
@@ -596,14 +623,6 @@ Ative seu MindQuest e comece a ver os resultados em poucos minutos.
                 <Users size={18} />
                 Iniciar cadastro pelo WhatsApp
               </a>
-              <button
-                type="button"
-                onClick={handleOpenChat}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-white/40 text-white font-semibold bg-white/10 hover:bg-white/20 transition"
-              >
-                <MessageSquare size={18} />
-                Conversar com a Ária agora
-              </button>
             </div>
             <p className="text-sm text-indigo-100 flex items-center gap-2">
               <ShieldCheck size={16} />
@@ -658,16 +677,6 @@ Ative seu MindQuest e comece a ver os resultados em poucos minutos.
               ))}
             </div>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleOpenChat}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow-lg hover:bg-blue-700 transition"
-              >
-                <Sparkles size={16} />
-                Abrir chat e falar com a Ária agora
-              </button>
-            </div>
           </section>
         </main>
 
@@ -685,7 +694,7 @@ Ative seu MindQuest e comece a ver os resultados em poucos minutos.
               </a>
             </span>
             <span className="text-gray-400">
-              Balão roxo no canto: suporte instantâneo
+              Balão roxo: suporte instantâneo
             </span>
           </div>
         </footer>
@@ -694,4 +703,4 @@ Ative seu MindQuest e comece a ver os resultados em poucos minutos.
   );
 };
 
-export default FaqPage;
+export default HomePage;
