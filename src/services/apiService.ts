@@ -382,7 +382,8 @@ class ApiService {
     forceRemote = false
   ): Promise<ApiResponse> {
     try {
-      const url = forceRemote ? `${this.remoteBaseUrl}${endpoint}` : this.resolveUrl(endpoint);
+      const shouldUseRemote = forceRemote && typeof window === 'undefined';
+      const url = shouldUseRemote ? `${this.remoteBaseUrl}${endpoint}` : this.resolveUrl(endpoint);
       const method = (options.method || 'GET').toUpperCase();
 
       const defaultHeaders = method === 'GET'

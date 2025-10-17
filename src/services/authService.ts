@@ -138,6 +138,26 @@ class AuthService {
   }
 
   /**
+   * Verifica rapidamente se existe um token disponível (URL ou storage)
+   */
+  public hasTokenAvailable(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    if (this.token) {
+      return true;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('token')) {
+      return true;
+    }
+
+    return Boolean(this.getStoredToken());
+  }
+
+  /**
    * Valida token com a API N8N
    */
   private buildValidateUrl(token: string): string {

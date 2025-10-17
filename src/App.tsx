@@ -37,8 +37,8 @@ function App() {
   };
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
-  const tokenInContext = typeof window !== 'undefined' ? authService.getToken() : null;
-  const hasAccessToken = Boolean(tokenInContext);
+  const hasAccessToken =
+    typeof window !== 'undefined' ? authService.hasTokenAvailable() : false;
   const isHomePath = sanitizedPath === '/' || sanitizedPath === '/home';
   const isLegacyFaqPath = sanitizedPath === '/faq' || sanitizedPath.startsWith('/faq/');
 
