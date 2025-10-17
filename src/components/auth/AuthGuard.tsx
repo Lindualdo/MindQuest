@@ -30,6 +30,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     checkAuth();
   }, [initializeAuth, authChecked]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const currentPath = window.location.pathname.toLowerCase();
+    if (isAuthenticated && currentPath === '/auth') {
+      window.history.replaceState({}, document.title, '/');
+    }
+  }, [isAuthenticated]);
+
   // Loading inicial
   if (isLoading || !authChecked) {
     return (

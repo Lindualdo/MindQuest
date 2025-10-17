@@ -37,10 +37,20 @@ function App() {
   };
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
+  const searchParams =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const hasAccessToken =
     typeof window !== 'undefined' ? authService.hasTokenAvailable() : false;
+  const forceHomeView =
+    (searchParams && searchParams.get('public') === '1') ||
+    sanitizedPath === '/landing' ||
+    sanitizedPath === '/home-preview';
   const isHomePath = sanitizedPath === '/' || sanitizedPath === '/home';
   const isLegacyFaqPath = sanitizedPath === '/faq' || sanitizedPath.startsWith('/faq/');
+
+  if (forceHomeView) {
+    return <HomePage />;
+  }
 
   if ((isHomePath || isLegacyFaqPath) && !hasAccessToken) {
     return <HomePage />;
@@ -230,7 +240,7 @@ function App() {
             <p>MindQuest v1.1 - Mente clara, resultados reais.</p>
             <p className="mt-2">
               <a
-                href="/"
+                href="/?public=1"
                 className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 Acessar Home
