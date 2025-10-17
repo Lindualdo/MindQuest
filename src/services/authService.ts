@@ -160,14 +160,12 @@ class AuthService {
   /**
    * Valida token com a API N8N
    */
-  private buildValidateUrl(token: string): string {
-    const encoded = encodeURIComponent(token);
-
+  private buildValidateUrl(): string {
     if (typeof window !== 'undefined') {
-      return `/api/auth/validate?token=${encoded}`;
+      return '/api/auth/validate';
     }
 
-    return `https://mindquest-n8n.cloudfy.live/webhook/auth/validate?token=${encoded}`;
+    return 'https://mindquest-n8n.cloudfy.live/webhook/auth/validate';
   }
 
   public async validateToken(token?: string): Promise<AuthResponse> {
@@ -181,10 +179,17 @@ class AuthService {
     }
 
     try {
-      const response = await fetch(this.buildValidateUrl(tokenToValidate));
+      const response = await fetch(this.buildValidateUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token: tokenToValidate })
+      });
 
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP Error: ${response.status}${errorText ? ` - ${errorText}` : ''}`);
       }
 
       const data = await response.json();
@@ -209,7 +214,7 @@ class AuthService {
       console.error('Erro ao validar token:', error);
       return {
         success: false,
-        error: 'Erro de conexão com o servidor'
+        error: error instanceof Error ? error.message : 'Erro de conexão com o servidor'
       };
     }
   }

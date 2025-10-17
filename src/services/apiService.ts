@@ -403,15 +403,31 @@ class ApiService {
         headers,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+      const contentType = response.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      let payload: unknown = null;
+
+      try {
+        payload = isJson ? await response.json() : await response.text();
+      } catch (parseError) {
+        console.error(`Erro ao interpretar resposta de ${endpoint}:`, parseError);
       }
 
-      const data = await response.json();
-      
+      if (!response.ok) {
+        return {
+          success: false,
+          error:
+            (typeof payload === 'string' && payload) ||
+            (typeof payload === 'object' && payload && 'error' in (payload as Record<string, unknown>)
+              ? String((payload as Record<string, unknown>).error)
+              : `HTTP Error: ${response.status}`),
+          response: payload
+        };
+      }
+
       return {
         success: true,
-        response: data
+        response: payload
       };
 
     } catch (error) {
@@ -428,8 +444,18 @@ class ApiService {
    * Valida token e obtém dados do dashboard
    */
   public async validateTokenAndGetData(token: string): Promise<ApiResponse> {
-    const endpoint = `/auth/validate?token=${encodeURIComponent(token)}`;
-    const result = await this.makeRequest(endpoint, undefined, true);
+    const endpoint = '/auth/validate';
+    const result = await this.makeRequest(
+      endpoint,
+      {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      },
+      true
+    );
     
     const dashboardPayload = this.extractDashboardPayload(result.response);
 
