@@ -18,6 +18,7 @@ import ConquistasPage from './pages/ConquistasPage';
 import SabotadorDetailPage from './pages/SabotadorDetailPage';
 import ResumoConversasPage from './pages/ResumoConversasPage';
 import HomePage from './pages/HomePage';
+import { authService } from './services/authService';
 
 function App() {
   const { 
@@ -36,13 +37,12 @@ function App() {
   };
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
+  const tokenInContext = typeof window !== 'undefined' ? authService.getToken() : null;
+  const hasAccessToken = Boolean(tokenInContext);
+  const isHomePath = sanitizedPath === '/' || sanitizedPath === '/home';
+  const isLegacyFaqPath = sanitizedPath === '/faq' || sanitizedPath.startsWith('/faq/');
 
-  if (
-    sanitizedPath === '/' ||
-    sanitizedPath === '/home' ||
-    sanitizedPath === '/faq' ||
-    sanitizedPath.startsWith('/faq/')
-  ) {
+  if ((isHomePath || isLegacyFaqPath) && !hasAccessToken) {
     return <HomePage />;
   }
 
