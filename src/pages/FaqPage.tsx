@@ -673,7 +673,17 @@ const FaqPage: React.FC = () => {
 
         <footer className="relative border-t border-white/50 bg-white/80 backdrop-blur-lg">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-gray-500">
-            <span>© {new Date().getFullYear()} MindQuest • Powered by LifeFlow</span>
+            <span>
+              © {new Date().getFullYear()} MindQuest • Powered by{' '}
+              <a
+                href="https://automateai.pt"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:text-blue-700"
+              >
+                automateai.pt
+              </a>
+            </span>
             <span className="text-gray-400">
               Balão roxo no canto = suporte instantâneo. WhatsApp: +351 928 413 957
             </span>
