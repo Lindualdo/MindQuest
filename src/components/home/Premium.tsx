@@ -6,17 +6,17 @@ const premiumFeatures = [
   {
     icon: MessageCircle,
     title: 'Conversas ativas com a IA',
-    description: 'Converse em tempo real com respostas personalizadas e foco no que importa agora.'
+    description: 'Converse em tempo real a qualquer hora do dia com a versão evoluida de sua mente.'
   },
   {
     icon: Map,
     title: 'Jornadas personalizadas',
-    description: 'Playbooks inteligentes, missões dinâmicas e acompanhamento contínuo.'
+    description: 'Seu assistente irá te guiar nas jornadas e juntos vocês selebrarão cada conquista.'
   },
   {
     icon: Users,
     title: 'Suporte estratégico',
-    description: 'Contato direto com especialistas para construir planos de ação e acelerar resultados.'
+    description: 'Uma equipe de IAs treinadas no que tem de mais moderno na neurociência para destravar todo seu potencial'
   },
   {
     icon: BellRing,
@@ -48,8 +48,7 @@ const Premium: React.FC = () => {
             <br />e mentor sempre presente
           </h2>
           <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-            No Premium, você desbloqueia interações ativas com a IA, histórico completo e acompanhamento humano dedicado.
-            É como ter um painel estratégico monitorando cada passo da sua evolução.
+            No Premium, você desbloqueia interações ativas com a IA, histórico completo, informções mais detalhadas e um mentor 24 hs por dia. Uma versão evoluida de sua mente te guiando
           </p>
         </div>
 

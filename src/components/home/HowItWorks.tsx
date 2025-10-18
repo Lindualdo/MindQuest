@@ -17,14 +17,14 @@ const steps = [
   {
     number: '3',
     icon: CheckCircle,
-    title: 'Valide seu insight',
-    description: 'Ajuste o resumo gerado até que ele reflita exatamente a sua visão.'
+    title: 'Valide a conversa',
+    description: 'Ao final da sessão, a IA fará uma siíntese para sua validação. Ajuste se achar necessário'
   },
   {
     number: '4',
     icon: RefreshCw,
     title: 'Veja o painel atualizar',
-    description: 'O dashboard registra métricas, insights e recomendações automaticamente.'
+    description: 'O dashboard registra seu diário de conversas, métricas, insights e recomendações automaticamente.'
   }
 ];
 

@@ -14,11 +14,11 @@ const comparisonData = [
   },
   {
     feature: 'Conversas com a IA',
-    free: 'Registro das interações (sem diálogo ativo)',
-    premium: 'Até 5 sessões diárias com 5 interações cada e respostas em tempo real'
+    free: 'Registro diário. Uma conversa por dia',
+    premium: 'Até 5 sessões diárias'
   },
   {
-    feature: 'Histórico de dados',
+    feature: 'Histórico das conversas',
     free: 'Visualização dos últimos 7 dias',
     premium: 'Histórico completo com linha do tempo interativa'
   },
@@ -30,7 +30,7 @@ const comparisonData = [
   {
     feature: 'Mentoria e suporte',
     free: 'Assistente virtual via FAQ',
-    premium: 'Mentor dedicado, jornadas assistidas e suporte humano prioritário'
+    premium: 'Mentor dedicado, jornadas assistidas e suporte prioritário'
   },
   {
     feature: 'Notificações e lembretes',
@@ -86,7 +86,7 @@ const Comparison: React.FC = () => (
           <div className="rounded-2xl border border-primary/20 bg-card p-6 text-center shadow-sm">
             <div className="text-lg font-bold text-primary">Free</div>
             <p className="mt-2 text-sm text-muted-foreground">
-              Cadastre-se pelo WhatsApp, diga seu nome e comece na hora. Dashboard com histórico dos últimos 7 dias.
+              Converse com sua mente pelo WhatsApp e veja seu progresso em um painel interativo. Cadastre-se grátis - apenas seu nome e começe já 
             </p>
             <a
               href={WHATSAPP_URL}

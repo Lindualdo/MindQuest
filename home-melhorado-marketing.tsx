@@ -3,7 +3,7 @@ import { useEffect } from "react";
 /** WhatsApp */
 const WHATSAPP_NUMBER = "351928413957";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Oi! Quero começar meu MindQuest (versão gratuita). Meu nome é:"
+  "Oi! Quero começar meu MindQuest (versão gratuita)."
 )}`;
 
 export default function Index() {

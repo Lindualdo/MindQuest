@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
     {
       number: '04',
       title: 'Resultados',
-      description: 'Resultados fazem você feliz e mudam crenças, reprogramando sua mente.',
+      description: 'Resultados fazem você feliz, mudam crenças e expande sua mente',
       accent: 'accent' as const
     }
   ];
