@@ -18,19 +18,24 @@ const comparisonData = [
     premium: 'Até 5 sessões diárias'
   },
   {
+    feature: 'Dashboard de progresso',
+    free: 'Humor, energia, insights, roda das emoções, sabotadores, gamificação, histórico das conversa e recomendações personalizadas',
+    premium: 'Tudo do free + métricas avançadas, análises detalhadas e mentor 24 hs por dia para organizar, definir prioridades e te guiar nas ações.'
+  },
+  {
     feature: 'Histórico das conversas',
     free: 'Visualização dos últimos 7 dias',
     premium: 'Histórico completo com linha do tempo interativa'
   },
   {
     feature: 'Resumos e transcrições',
-    free: 'Resumos automáticos e transcrição de áudio inclusos',
-    premium: 'Resumos + mentoria ativa com direcionamentos focados'
+    free: 'Transcrição de áudio e síntese das conversas',
+    premium: 'Tudo do free + conversa completa com a IA + audio '
   },
   {
     feature: 'Mentoria e suporte',
-    free: 'Assistente virtual via FAQ',
-    premium: 'Mentor dedicado, jornadas assistidas e suporte prioritário'
+    free: 'Suporte através de assistente virtual',
+    premium: 'Assistente de IA interativo pelo WhatsApp atuando como mentor dedicado 24 hs por dia + suporte prioritário'
   },
   {
     feature: 'Notificações e lembretes',

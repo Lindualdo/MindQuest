@@ -24,6 +24,17 @@ const features = [
   }
 ];
 
+const dashboardImages = [
+  { src: new URL('../../img/humor.jpeg', import.meta.url).href, label: 'Visão geral de humor e energia' },
+  { src: new URL('../../img/gameficacao.jpeg', import.meta.url).href, label: 'Gamificação e conquistas' },
+  { src: new URL('../../img/historico-conversas.png', import.meta.url).href, label: 'Histórico de conversas' },
+  { src: new URL('../../img/insight.png', import.meta.url).href, label: 'Lista de insights' },
+  { src: new URL('../../img/insight-detalhes.png', import.meta.url).href, label: 'Detalhe do insight' },
+  { src: new URL('../../img/roda-emocoes.png', import.meta.url).href, label: 'Roda das emoções' },
+  { src: new URL('../../img/sabotadores.png', import.meta.url).href, label: 'Sabotadores ativos' },
+  { src: new URL('../../img/humor-historico.jpeg', import.meta.url).href, label: 'Histórico de humor' }
+];
+
 const Dashboard: React.FC = () => (
   <section className="bg-muted/30 py-24">
     <div className="container mx-auto px-4">
@@ -57,8 +68,29 @@ const Dashboard: React.FC = () => (
         })}
       </div>
 
-      <div className="mx-auto mt-10 grid h-56 max-w-5xl place-items-center rounded-3xl border border-dashed border-slate-300 text-sm text-muted-foreground">
-        Prévia do Dashboard
+      <div className="mx-auto mt-12 max-w-6xl overflow-x-auto">
+        <div className="flex gap-6">
+          {dashboardImages.map(({ src, label }, index) => (
+            <figure
+              key={src}
+              className="relative w-[260px] flex-shrink-0 sm:w-[320px] md:w-[360px]"
+            >
+              <div className="rounded-[32px] border border-white/40 bg-white/90 p-3 shadow-xl">
+                <img
+                  src={src}
+                  alt={label || `Prévia do dashboard ${index + 1}`}
+                  className="h-auto w-full rounded-[24px] border border-slate-200 object-cover"
+                  loading="lazy"
+                />
+              </div>
+              {label && (
+                <figcaption className="mt-2 text-center text-xs text-muted-foreground">
+                  {label}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
       </div>
     </div>
   </section>
