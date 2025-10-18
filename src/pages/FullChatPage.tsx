@@ -17,25 +17,40 @@ const FullChatPage: React.FC = () => {
   const mensagens: Array<any> = mensagensOrig.length > 0 ? mensagensOrig.slice(0, -1) : mensagensOrig;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6">
-      <div className="max-w-3xl mx-auto space-y-4">
-        <button onClick={closeFullChat} className="flex items-center gap-2 text-sm font-semibold text-blue-600">
-          <ArrowLeft size={18} /> Voltar
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-10">
+      <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4">
+          <button
+            onClick={closeFullChat}
+            className="rounded-xl bg-white p-2 shadow transition-all hover:shadow-md"
+            aria-label="Voltar para o dashboard"
+          >
+            <ArrowLeft size={18} className="text-slate-600" />
+          </button>
+          <div>
+            <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest</p>
+            <h1 className="text-lg font-semibold text-slate-800">Conversa completa</h1>
+          </div>
+        </div>
+      </header>
 
+      <main className="mx-auto max-w-3xl px-4 pt-6">
         <Card className="!p-0 overflow-hidden" hover={false}>
-          <div className="p-6 border-b border-white/40 flex items-start gap-3">
+          <div className="flex items-start gap-3 border-b border-white/40 bg-white/70 p-6">
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-800">
                 <MessageCircle className="text-blue-600" size={20} /> Conversa completa
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {conversa?.data_conversa ? new Date(conversa.data_conversa).toLocaleString() : 'Data indisponível'} • {conversa?.emoji_dia || ''}
+              <p className="mt-1 text-sm text-gray-600">
+                {conversa?.data_conversa
+                  ? new Date(conversa.data_conversa).toLocaleString()
+                  : 'Data indisponível'}{' '}
+                • {conversa?.emoji_dia || ''}
               </p>
             </div>
           </div>
 
-          <div className="p-6 space-y-4">
+          <div className="space-y-4 p-6">
             {fullChatLoading && (
               <div className="text-center text-sm text-gray-500">Carregando conversa…</div>
             )}
@@ -64,7 +79,7 @@ const FullChatPage: React.FC = () => {
             )}
           </div>
         </Card>
-      </div>
+      </main>
     </div>
   );
 };

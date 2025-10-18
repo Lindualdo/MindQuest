@@ -9,9 +9,7 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
   return (
     <Card className="!p-0 overflow-hidden">
       <div className="border-b border-white/40 bg-white/70 px-5 py-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
-          {title}
-        </h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600">{title}</h3>
       </div>
       <div className="p-5">
         <ul className="space-y-2 text-sm text-gray-700">
@@ -28,50 +26,69 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
 };
 
 const SabotadorDetailPage: React.FC = () => {
-  const {
-    dashboardData,
-    setView,
-    selectedSabotadorId,
-  } = useDashboard();
+  const { dashboardData, setView, selectedSabotadorId } = useDashboard();
 
-  const sabotadorId = selectedSabotadorId ?? dashboardData?.sabotadores?.padrao_principal?.id ?? '';
+  const sabotadorId =
+    selectedSabotadorId ?? dashboardData?.sabotadores?.padrao_principal?.id ?? '';
   const sabotador = useMemo(() => getSabotadorById(sabotadorId), [sabotadorId]);
+  const overview = sabotadoresCatalogo.overview;
+
+  const handleBack = () => setView('dashboard');
 
   if (!sabotador) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6">
-        <div className="mx-auto max-w-3xl space-y-4">
-          <button
-            onClick={() => setView('dashboard')}
-            className="flex items-center gap-2 text-sm font-semibold text-blue-600"
-            type="button"
-          >
-            <ArrowLeft size={18} /> Voltar
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-10">
+        <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
+          <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-4">
+            <button
+              onClick={handleBack}
+              className="rounded-xl bg-white p-2 shadow transition-all hover:shadow-md"
+              aria-label="Voltar para o dashboard"
+              type="button"
+            >
+              <ArrowLeft size={18} className="text-slate-600" />
+            </button>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest</p>
+              <h1 className="text-lg font-semibold text-slate-800">Sabotador</h1>
+            </div>
+          </div>
+        </header>
 
+        <main className="mx-auto max-w-3xl px-4 pt-6">
           <Card>
             <p className="text-sm text-gray-600">
-              Não encontramos informações adicionais sobre este sabotador. Volte ao dashboard e tente novamente.
+              Não encontramos informações adicionais sobre este sabotador. Volte ao dashboard e
+              tente novamente.
             </p>
           </Card>
-        </div>
+        </main>
       </div>
     );
   }
 
-  const overview = sabotadoresCatalogo.overview;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-6">
-      <div className="mx-auto flex max-w-4xl flex-col gap-5">
-        <button
-          onClick={() => setView('dashboard')}
-          className="flex items-center gap-2 text-sm font-semibold text-blue-600"
-          type="button"
-        >
-          <ArrowLeft size={18} /> Voltar
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-12">
+      <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
+        <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-4">
+          <button
+            onClick={handleBack}
+            className="rounded-xl bg-white p-2 shadow transition-all hover:shadow-md"
+            aria-label="Voltar para o dashboard"
+            type="button"
+          >
+            <ArrowLeft size={18} className="text-slate-600" />
+          </button>
+          <div>
+            <p className="text-xs uppercase tracking-widest text-slate-400">{overview.titulo}</p>
+            <h1 className="text-lg font-semibold text-slate-800">
+              {sabotador.emoji} {sabotador.nome}
+            </h1>
+          </div>
+        </div>
+      </header>
 
+      <main className="mx-auto flex max-w-4xl flex-col gap-5 px-4 pt-6">
         <Card className="!p-0 overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/40 bg-white/80 px-6 py-5">
             <div>
@@ -92,16 +109,22 @@ const SabotadorDetailPage: React.FC = () => {
               <div className="flex items-start gap-3 rounded-xl border border-purple-100 bg-purple-50/60 p-4">
                 <Lightbulb className="mt-1 text-purple-600" size={18} />
                 <div>
-                  <p className="text-xs uppercase text-purple-600 font-semibold">Descrição essencial</p>
-                  <p className="mt-1 text-sm text-purple-700 leading-relaxed">{sabotador.descricao}</p>
+                  <p className="text-xs font-semibold uppercase text-purple-600">
+                    Descrição essencial
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-purple-700">
+                    {sabotador.descricao}
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
                 <Compass className="mt-1 text-blue-600" size={18} />
                 <div>
-                  <p className="text-xs uppercase text-blue-600 font-semibold">Função original</p>
-                  <p className="mt-1 text-sm text-blue-700 leading-relaxed">{sabotador.funcaoOriginal}</p>
+                  <p className="text-xs font-semibold uppercase text-blue-600">Função original</p>
+                  <p className="mt-1 text-sm leading-relaxed text-blue-700">
+                    {sabotador.funcaoOriginal}
+                  </p>
                 </div>
               </div>
             </div>
@@ -111,9 +134,7 @@ const SabotadorDetailPage: React.FC = () => {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Conceito rápido
                 </h3>
-                <p className="mt-2 text-sm text-gray-700 leading-relaxed">
-                  {overview.descricao}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-700">{overview.descricao}</p>
                 <ul className="mt-3 space-y-2 text-sm text-gray-600">
                   {overview.origem.map((item) => (
                     <li key={item} className="flex items-start gap-2">
@@ -196,11 +217,13 @@ const SabotadorDetailPage: React.FC = () => {
               </div>
               {sabotador.contextosTipicos && (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-gray-500">Contextos onde costuma aparecer</p>
+                  <p className="text-xs font-semibold uppercase text-gray-500">
+                    Contextos onde costuma aparecer
+                  </p>
                   <ul className="mt-2 space-y-2">
                     {sabotador.contextosTipicos.map((item) => (
                       <li key={item} className="flex items-start gap-2">
-                        <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-slate-300" />
+                        <span className="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full bg-gray-300" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -210,7 +233,7 @@ const SabotadorDetailPage: React.FC = () => {
             </div>
           </Card>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
