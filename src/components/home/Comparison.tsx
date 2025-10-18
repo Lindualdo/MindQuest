@@ -1,5 +1,5 @@
 import React from 'react';
-import { WHATSAPP_URL } from '@/constants/whatsapp';
+import { WHATSAPP_URL, WHATSAPP_PREMIUM_URL } from '@/constants/whatsapp';
 
 const comparisonData = [
   {
@@ -102,7 +102,7 @@ const Comparison: React.FC = () => (
               Conversas ativas, histórico completo, jornadas personalizadas e automações inteligentes. Em breve.
             </p>
             <a
-              href={WHATSAPP_URL}
+              href={WHATSAPP_PREMIUM_URL}
               className="mt-4 inline-flex items-center justify-center rounded-full border border-accent px-6 py-3 text-sm font-semibold text-accent transition hover:bg-accent/10"
             >
               Quero ser avisado

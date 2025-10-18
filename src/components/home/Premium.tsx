@@ -1,6 +1,6 @@
 import React from 'react';
 import { Crown, MessageCircle, Map, Users, BellRing } from 'lucide-react';
-import { WHATSAPP_URL } from '@/constants/whatsapp';
+import { WHATSAPP_PREMIUM_URL } from '@/constants/whatsapp';
 
 const premiumFeatures = [
   {
@@ -11,12 +11,12 @@ const premiumFeatures = [
   {
     icon: Map,
     title: 'Jornadas personalizadas',
-    description: 'Seu assistente irá te guiar nas jornadas e juntos vocês selebrarão cada conquista.'
+    description: 'Seu assistente irá te guiar nas jornadas e juntos vocês celebrarão cada conquista.'
   },
   {
     icon: Users,
     title: 'Suporte estratégico',
-    description: 'Uma equipe de IAs treinadas no que tem de mais moderno na neurociência para destravar todo seu potencial'
+    description: 'IAs guiadas pelos avanços da neurociência, para ajudar você a pensar melhor, agir com confiança e liberar todo o seu potencial.'
   },
   {
     icon: BellRing,
@@ -28,7 +28,7 @@ const premiumFeatures = [
 const Premium: React.FC = () => {
   const handleOpenWhatsApp = () => {
     if (typeof window !== 'undefined') {
-      window.open(WHATSAPP_URL, '_blank', 'noopener');
+      window.open(WHATSAPP_PREMIUM_URL, '_blank', 'noopener');
     }
   };
 

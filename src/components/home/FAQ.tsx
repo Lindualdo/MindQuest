@@ -27,17 +27,17 @@ const faqs = [
   {
     question: 'O que acontece depois que eu envio minha primeira mensagem no WhatsApp?',
     answer:
-      'O assistente faz perguntas simples para entender seu momento, gera um resumo com seus principais pontos e atualiza automaticamente seu dashboard. Ao final, seu token é renovado.'
+      'O assistente faz perguntas guiadas para entender seu momento, gera um resumo com seus principais pontos e atualiza automaticamente seu dashboard. Ao final, seu token é renovado.'
   },
   {
     question: 'Preciso pagar algo para começar?',
     answer:
-      'Não. Você começa na versão Free, com cadastro pelo WhatsApp e acesso ao dashboard com histórico dos últimos 7 dias.'
+      'Não. Você começa na versão Free, com cadastro pelo WhatsApp e acesso ao dashboard completo podendo ver seu histórico das ultimas 7 conversas'
   },
   {
     question: 'E se eu não souber o que dizer na conversa?',
     answer:
-      'Tudo bem. Envie um “oi” — o assistente inicia com perguntas curtas e objetivas. Você pode responder por texto ou áudio.'
+      'Tudo bem. diga isso ao assistente e deixe ele te conduzir . Você pode responder por texto ou áudio. Se preferir já pode falar sobre você na primeira interação'
   },
   {
     question: 'O MindQuest é um app, um site ou um assistente virtual?',
@@ -57,7 +57,7 @@ const faqs = [
   {
     question: 'Qual a diferença para apps de meditação ou produtividade?',
     answer:
-      'Em vez de listas de tarefas ou meditações genéricas, o MindQuest converte sua conversa em dados emocionais e recomendações personalizadas. Não é terapia; é um sistema de auto-gestão com conforto mental.'
+      'Em vez de listas de tarefas ou meditações genéricas, o MindQuest converte sua conversa em dados estruturados e recomendações personalizadas. Não é terapia; é um sistema de desenvolvimento pessoal e produtividade que prioriza o conforto mental.'
   },
   {
     question: 'Posso pausar meu progresso e continuar depois?',
@@ -72,7 +72,7 @@ const faqs = [
   {
     question: 'Posso usar o MindQuest para desempenho no trabalho ou em relacionamentos?',
     answer:
-      'Sim. O assistente adapta as recomendações ao seu contexto — como foco no trabalho, decisões pessoais e hábitos que sustentam seus objetivos.'
+      'Sim. O assistente adapta as recomendações ao seu contexto — organizando tudo nas 5 principais áreas da vida; financeira, relacionamentos, saúde, carreira e espiritualidade te ajudando a equilibrar todas elas.'
   }
 ];
 
