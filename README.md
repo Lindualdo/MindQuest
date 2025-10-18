@@ -41,6 +41,12 @@ npm run typecheck
 npm run lint
 ```
 
+## ⚙️ Configuração da API
+
+- Copie `.env.example` para `.env` e ajuste conforme necessário.
+- `VITE_API_BASE_URL` define a URL base para os webhooks do MindQuest (padrão aponta para o ambiente de produção).
+- Se preferir utilizar o proxy `/api` do Vite durante o desenvolvimento, defina `VITE_API_USE_PROXY=true`. Em produção mantenha `false` (ou remova) para que o app fale diretamente com a API remota.
+
 ## 📁 Estrutura
 
 ```

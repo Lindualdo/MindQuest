@@ -115,8 +115,32 @@ interface DashboardApiResponse {
 class ApiService {
   private static instance: ApiService;
   private remoteBaseUrl = 'https://mindquest-n8n.cloudfy.live/webhook';
+  private useProxyPaths = false;
 
-  private constructor() {}
+  private constructor() {
+    let env: Record<string, unknown> | undefined;
+    try {
+      if (typeof import.meta !== 'undefined' && import.meta.env) {
+        env = import.meta.env as Record<string, unknown>;
+      }
+    } catch (_) {
+      env = undefined;
+    }
+
+    const baseFromEnv = typeof env?.VITE_API_BASE_URL === 'string'
+      ? (env.VITE_API_BASE_URL as string).trim()
+      : undefined;
+
+    if (baseFromEnv) {
+      this.remoteBaseUrl = baseFromEnv.replace(/\/$/, '');
+    }
+
+    if (typeof env?.VITE_API_USE_PROXY === 'string') {
+      this.useProxyPaths = String(env.VITE_API_USE_PROXY).toLowerCase() === 'true';
+    } else {
+      this.useProxyPaths = Boolean(env?.DEV) && !baseFromEnv;
+    }
+  }
 
   public static getInstance(): ApiService {
     if (!ApiService.instance) {
@@ -128,10 +152,15 @@ class ApiService {
   /**
    * Executa uma requisição HTTP genérica
    */
-  private resolveUrl(endpoint: string): string {
-    if (typeof window !== 'undefined') {
+  private resolveUrl(endpoint: string, forceRemote = false): string {
+    if (forceRemote) {
+      return `${this.remoteBaseUrl}${endpoint}`;
+    }
+
+    if (this.useProxyPaths && typeof window !== 'undefined') {
       return `/api${endpoint}`;
     }
+
     return `${this.remoteBaseUrl}${endpoint}`;
   }
 
@@ -382,8 +411,7 @@ class ApiService {
     forceRemote = false
   ): Promise<ApiResponse> {
     try {
-      const shouldUseRemote = forceRemote && typeof window === 'undefined';
-      const url = shouldUseRemote ? `${this.remoteBaseUrl}${endpoint}` : this.resolveUrl(endpoint);
+      const url = this.resolveUrl(endpoint, forceRemote);
       const method = (options.method || 'GET').toUpperCase();
 
       const defaultHeaders = method === 'GET'
@@ -625,7 +653,11 @@ class ApiService {
    * Configura nova base URL (útil para testes/desenvolvimento)
    */
   public setBaseUrl(url: string): void {
-    this.remoteBaseUrl = url;
+    if (!url) {
+      return;
+    }
+    this.remoteBaseUrl = url.replace(/\/$/, '');
+    this.useProxyPaths = false;
   }
 
   /**
