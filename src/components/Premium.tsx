@@ -1,28 +1,34 @@
 import React from 'react';
-import { Crown, MessageCircle, Map, Users } from 'lucide-react';
+import { Crown, MessageCircle, Map, Users, BellRing } from 'lucide-react';
+import { WHATSAPP_URL } from '@/constants/whatsapp';
 
 const premiumFeatures = [
   {
     icon: MessageCircle,
-    title: 'Mentoria ativa 24/7',
-    description: "Converse livremente com o assistente e mantenha um 'auto-gestor' emocional ao seu lado."
+    title: 'Conversas ativas com a IA',
+    description: 'Converse em tempo real com respostas personalizadas e foco no que importa agora.'
   },
   {
     icon: Map,
     title: 'Jornadas personalizadas',
-    description: 'Playbooks inteligentes que se adaptam aos seus objetivos e estilo de vida.'
+    description: 'Playbooks inteligentes, missões dinâmicas e acompanhamento contínuo.'
   },
   {
     icon: Users,
     title: 'Suporte estratégico',
     description: 'Contato direto com especialistas para construir planos de ação e acelerar resultados.'
+  },
+  {
+    icon: BellRing,
+    title: 'Automação de lembretes',
+    description: 'Checkpoints estratégicos, alertas e reforços para manter o ritmo diário.'
   }
 ];
 
 const Premium: React.FC = () => {
   const handleOpenWhatsApp = () => {
     if (typeof window !== 'undefined') {
-      window.open('https://wa.me/351928413957', '_blank', 'noopener');
+      window.open(WHATSAPP_URL, '_blank', 'noopener');
     }
   };
 
@@ -47,7 +53,7 @@ const Premium: React.FC = () => {
           </p>
         </div>
 
-        <div className="mb-12 grid gap-8 md:grid-cols-3">
+        <div className="mb-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {premiumFeatures.map((feature) => {
             const Icon = feature.icon;
             return (

@@ -1,12 +1,38 @@
 import React from 'react';
 import { Brain, ChevronRight, Users } from 'lucide-react';
-
-const WHATSAPP_LINK = 'https://wa.me/351928413957';
+import { WHATSAPP_URL } from '@/constants/whatsapp';
 
 const Hero: React.FC = () => {
+  const flowSteps = [
+    {
+      number: '01',
+      title: 'Pensamentos',
+      description: 'Pensamentos moldam sentimentos.',
+      accent: 'primary' as const
+    },
+    {
+      number: '02',
+      title: 'Sentimentos',
+      description: 'Sentimentos impulsionam ações.',
+      accent: 'primary' as const
+    },
+    {
+      number: '03',
+      title: 'Ações',
+      description: 'Ações constroem resultados.',
+      accent: 'accent' as const
+    },
+    {
+      number: '04',
+      title: 'Resultados',
+      description: 'Resultados fazem você feliz e mudam crenças, reprogramando sua mente.',
+      accent: 'accent' as const
+    }
+  ];
+
   const handleOpenWhatsApp = () => {
     if (typeof window !== 'undefined') {
-      window.open(WHATSAPP_LINK, '_blank', 'noopener');
+      window.open(WHATSAPP_URL, '_blank', 'noopener');
     }
   };
 
@@ -34,17 +60,12 @@ const Hero: React.FC = () => {
           </p>
         </div>
 
-        <h1 className="mb-12 text-center text-3xl font-bold text-foreground md:mb-16 md:text-5xl lg:text-6xl">
+        <h1 className="mb-6 text-center text-3xl font-bold text-foreground md:text-5xl lg:text-6xl">
           Tudo começa na mente.
         </h1>
 
-        <div className="mx-auto mb-12 hidden max-w-6xl items-center justify-center gap-4 lg:flex">
-          {[
-            { number: '01', title: 'Pensamentos', description: 'Pensamentos moldam sentimentos.', accent: 'primary' },
-            { number: '02', title: 'Sentimentos', description: 'Sentimentos impulsionam ações.', accent: 'primary' },
-            { number: '03', title: 'Ações', description: 'Ações constroem resultados.', accent: 'accent' },
-            { number: '04', title: 'Resultados', description: 'Resultados fazem você feliz e mudam crenças, reprogramando sua mente.', accent: 'accent' },
-          ].map((step, index) => (
+        <div className="mx-auto mb-12 mt-12 hidden max-w-6xl items-center justify-center gap-4 lg:flex">
+          {flowSteps.map((step, index) => (
             <React.Fragment key={step.number}>
               <div className="relative flex-1">
                 <div className="flex flex-col items-center">
@@ -75,12 +96,7 @@ const Hero: React.FC = () => {
         </div>
 
         <div className="mx-auto mb-12 grid max-w-2xl gap-6 lg:hidden md:grid-cols-2">
-          {[
-            { number: '01', title: 'Pensamentos', description: 'Pensamentos moldam sentimentos.', accent: 'primary' },
-            { number: '02', title: 'Sentimentos', description: 'Sentimentos impulsionam ações.', accent: 'primary' },
-            { number: '03', title: 'Ações', description: 'Ações constroem resultados.', accent: 'accent' },
-            { number: '04', title: 'Resultados', description: 'Resultados fazem você feliz e mudam crenças, reprogramando sua mente.', accent: 'accent' },
-          ].map((step) => (
+          {flowSteps.map((step) => (
             <div key={step.number} className="relative">
               <div
                 className={`absolute -top-3 -left-3 z-10 flex h-12 w-12 items-center justify-center rounded-full font-bold ${
@@ -103,21 +119,32 @@ const Hero: React.FC = () => {
           ))}
         </div>
 
-        <p className="mx-auto mb-8 max-w-3xl text-center text-lg text-muted-foreground md:text-xl">
-          Com MindQuest, você otimiza esse ciclo despertando seu potencial e realizando mais
+        <p className="mx-auto max-w-3xl text-center text-lg text-muted-foreground md:text-xl">
+          Com MindQuest, você otimiza esse ciclo despertando seu potencial e realizando mais.
         </p>
 
-        <div className="flex justify-center">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <button
             type="button"
             onClick={handleOpenWhatsApp}
             className="group inline-flex items-center rounded-full bg-gradient-to-r from-primary to-accent px-10 py-7 text-lg font-semibold text-white shadow-xl transition-all duration-300 hover:opacity-90 hover:shadow-2xl"
           >
             <Users className="mr-2 h-5 w-5" />
-            Iniciar experiência agora
+            Começar agora no WhatsApp
             <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </button>
+          <a
+            href="#como-funciona"
+            className="rounded-full border border-primary/40 px-6 py-3 text-sm font-semibold text-primary transition-all hover:border-primary hover:text-primary"
+          >
+            Como funciona
+          </a>
         </div>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Segurança: acesso por <strong>token</strong> renovado a cada sessão e conversas protegidas. Sem login e sem
+          senha.
+        </p>
       </div>
     </section>
   );

@@ -1,6 +1,17 @@
 import React from 'react';
+import { WHATSAPP_URL } from '@/constants/whatsapp';
 
 const comparisonData = [
+  {
+    feature: 'Investimento',
+    free: '€0 — versão gratuita',
+    premium: 'Em breve'
+  },
+  {
+    feature: 'Cadastro',
+    free: 'Pelo WhatsApp, informando apenas o nome',
+    premium: 'O mesmo fluxo, com ativação do plano Premium'
+  },
   {
     feature: 'Conversas com a IA',
     free: 'Registro das interações (sem diálogo ativo)',
@@ -25,6 +36,11 @@ const comparisonData = [
     feature: 'Notificações e lembretes',
     free: 'Configuração básica',
     premium: 'Automação avançada de lembretes e checkpoints estratégicos'
+  },
+  {
+    feature: 'Disponibilidade',
+    free: 'Acesso imediato pelo WhatsApp',
+    premium: 'Cadastre-se para ser avisado no lançamento'
   }
 ];
 
@@ -65,6 +81,34 @@ const Comparison: React.FC = () => (
             </div>
           </div>
         ))}
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-primary/20 bg-card p-6 text-center shadow-sm">
+            <div className="text-lg font-bold text-primary">Free</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Cadastre-se pelo WhatsApp, diga seu nome e comece na hora. Dashboard com histórico dos últimos 7 dias.
+            </p>
+            <a
+              href={WHATSAPP_URL}
+              className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Começar grátis
+            </a>
+          </div>
+
+          <div className="rounded-2xl border border-accent/20 bg-card p-6 text-center shadow-sm">
+            <div className="text-lg font-bold text-accent">Premium</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Conversas ativas, histórico completo, jornadas personalizadas e automações inteligentes. Em breve.
+            </p>
+            <a
+              href={WHATSAPP_URL}
+              className="mt-4 inline-flex items-center justify-center rounded-full border border-accent px-6 py-3 text-sm font-semibold text-accent transition hover:bg-accent/10"
+            >
+              Quero ser avisado
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </section>

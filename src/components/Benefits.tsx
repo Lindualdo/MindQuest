@@ -22,6 +22,14 @@ const benefits = [
 const Benefits: React.FC = () => (
   <section className="bg-background py-24">
     <div className="container mx-auto px-4">
+      <div className="mb-10 max-w-3xl">
+        <h2 className="text-3xl font-bold text-foreground md:text-4xl">
+          Um painel que transforma emoção em estratégia
+        </h2>
+        <p className="mt-3 text-base text-muted-foreground md:text-lg">
+          Cada conversa alimenta seu dashboard com evolução, conquistas e próximos passos — tudo em um só lugar.
+        </p>
+      </div>
       <div className="grid gap-8 md:grid-cols-3">
         {benefits.map((benefit) => {
           const Icon = benefit.icon;

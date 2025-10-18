@@ -28,16 +28,10 @@ const Dashboard: React.FC = () => (
   <section className="bg-muted/30 py-24">
     <div className="container mx-auto px-4">
       <div className="mb-16 text-center">
-        <h2 className="mb-6 text-4xl font-bold text-foreground md:text-5xl">
-          Um painel vivo que traduz
-          <br />
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            emoções em estratégia
-          </span>
-        </h2>
+        <h2 className="mb-4 text-4xl font-bold text-foreground md:text-5xl">Seu painel de progresso</h2>
         <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-          O dashboard MindQuest organiza tudo o que você precisa para tomar decisões com confiança.
-          Ele mostra evolução, conquistas, pontos de atenção e próximos passos — tudo em um só lugar.
+          Humor, energia, roda emocional, sabotador ativo, gamificação, histórico e insights — tudo organizado para
+          decisões mais claras.
         </p>
       </div>
 
@@ -61,6 +55,10 @@ const Dashboard: React.FC = () => (
             </div>
           );
         })}
+      </div>
+
+      <div className="mx-auto mt-10 grid h-56 max-w-5xl place-items-center rounded-3xl border border-dashed border-slate-300 text-sm text-muted-foreground">
+        Prévia do Dashboard
       </div>
     </div>
   </section>

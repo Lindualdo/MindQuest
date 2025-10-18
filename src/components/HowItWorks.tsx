@@ -5,26 +5,26 @@ const steps = [
   {
     number: '1',
     icon: MessageSquareText,
-    title: 'Conte o que está acontecendo',
-    description: 'Envie texto ou áudio pelo WhatsApp. Quanto mais contexto, maior a precisão do MindQuest.'
+    title: 'Diga o que está acontecendo',
+    description: 'Envie uma mensagem no WhatsApp. Não há formulário: apenas o seu nome para começar.'
   },
   {
     number: '2',
     icon: Brain,
     title: 'Receba perguntas poderosas',
-    description: 'A IA conduz a reflexão com técnicas de TCC e coaching, aprofundando o entendimento real do momento.'
+    description: 'A IA conduz uma reflexão leve e objetiva para entender seu momento.'
   },
   {
     number: '3',
     icon: CheckCircle,
-    title: 'Valide o insight gerado',
-    description: 'O assistente entrega um resumo estruturado. Ajuste o que for preciso para que tudo reflita fielmente sua visão.'
+    title: 'Valide seu insight',
+    description: 'Ajuste o resumo gerado até que ele reflita exatamente a sua visão.'
   },
   {
     number: '4',
     icon: RefreshCw,
-    title: 'Finalize com um novo token',
-    description: 'Conversa encerrada, token renovado e dashboard atualizado automaticamente com métricas e recomendações.'
+    title: 'Veja o painel atualizar',
+    description: 'O dashboard registra métricas, insights e recomendações automaticamente.'
   }
 ];
 
@@ -37,7 +37,7 @@ const HowItWorks: React.FC = () => (
           <br />que alimentam o MindQuest
         </h2>
         <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-          Cada diálogo gera dados, insights e recomendações. O processo foi desenhado para ser leve, acolhedor e altamente efetivo.
+          O MindQuest conversa com você pelo WhatsApp. Cada conversa gera dados, insights e recomendações. O processo foi desenhado para ser leve, acolhedor e altamente efetivo.
         </p>
       </div>
 

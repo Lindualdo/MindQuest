@@ -1,10 +1,11 @@
 import React from 'react';
 import { ArrowRight, Shield } from 'lucide-react';
+import { WHATSAPP_URL } from '@/constants/whatsapp';
 
 const CTA: React.FC = () => {
   const handleOpenWhatsApp = () => {
     if (typeof window !== 'undefined') {
-      window.open('https://wa.me/351928413957', '_blank', 'noopener');
+      window.open(WHATSAPP_URL, '_blank', 'noopener');
     }
   };
 
@@ -20,8 +21,7 @@ const CTA: React.FC = () => {
           </h2>
 
           <p className="mb-10 text-xl text-white/90 leading-relaxed">
-            Entre agora em uma experiência guiada, com um assistente de IA treinado para desenvolver sua inteligência emocional de forma personalizada.
-            Ative seu MindQuest e comece a ver os resultados em poucos minutos.
+            Cadastre-se no WhatsApp, descubra seu primeiro insight em minutos e veja seu painel ganhar vida com métricas emocionais, recomendações e missões personalizadas.
           </p>
 
           <button
@@ -36,7 +36,7 @@ const CTA: React.FC = () => {
           <div className="mt-10 flex items-center justify-center gap-2 text-white/80">
             <Shield className="h-5 w-5" />
             <p className="text-sm">
-              Segurança garantida: tokens renovados a cada sessão, conversas criptografadas e gestão de acesso centralizada
+              Acesso por token renovado a cada sessão. Sem login e sem senha.
             </p>
           </div>
         </div>

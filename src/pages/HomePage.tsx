@@ -10,11 +10,13 @@ import CTA from "@/components/CTA";
 
 const HomePage = () => {
   useEffect(() => {
-    document.title = "MindQuest - Inteligência Emocional Assistida por IA";
-    
+    document.title = "MindQuest — Produtividade com conforto mental";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Transforme dispersão em clareza estratégica com um assistente de IA que converte suas emoções em dados visuais e ações práticas personalizadas.');
+      metaDescription.setAttribute(
+        'content',
+        'Converse com sua mente pelo WhatsApp e veja seu progresso em um painel interativo. Cadastre-se grátis — só diga seu nome. Clareza emocional em minutos, sem login e sem senha.'
+      );
     }
   }, []);
 
