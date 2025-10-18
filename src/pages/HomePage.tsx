@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import Hero from "@/components/Hero";
-import Benefits from "@/components/Benefits";
-import Dashboard from "@/components/Dashboard";
-import Premium from "@/components/Premium";
-import HowItWorks from "@/components/HowItWorks";
-import Comparison from "@/components/Comparison";
-import FAQ from "@/components/FAQ";
-import CTA from "@/components/CTA";
+import Hero from "@/components/home/Hero";
+import Benefits from "@/components/home/Benefits";
+import Dashboard from "@/components/home/Dashboard";
+import Premium from "@/components/home/Premium";
+import HowItWorks from "@/components/home/HowItWorks";
+import Comparison from "@/components/home/Comparison";
+import FAQ from "@/components/home/FAQ";
+import CTA from "@/components/home/CTA";
 
 const HomePage = () => {
   useEffect(() => {

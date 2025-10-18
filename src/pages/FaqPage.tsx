@@ -91,7 +91,7 @@ const conversationSteps = [
     icon: Activity
   },
   {
-    title: 'Valide o insight gerado',
+    title: 'Valide a conversa',
     description:
       'O assistente entrega um resumo estruturado. Ajuste o que for preciso para que tudo reflita fielmente sua visão.',
     icon: ClipboardCheck
