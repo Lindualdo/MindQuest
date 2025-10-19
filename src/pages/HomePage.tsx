@@ -8,6 +8,8 @@ import HowItWorks from "@/components/home/HowItWorks";
 import Comparison from "@/components/home/Comparison";
 import FAQ from "@/components/home/FAQ";
 import CTA from "@/components/home/CTA";
+import Partners from "@/components/home/Partners";
+import Footer from "@/components/home/Footer";
 
 const HomePage = () => {
   useEffect(() => {
@@ -32,6 +34,8 @@ const HomePage = () => {
       <Comparison />
       <FAQ />
       <CTA />
+      <Partners />
+      <Footer />
     </main>
   );
 };
