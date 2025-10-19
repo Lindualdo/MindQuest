@@ -5,17 +5,17 @@ const benefits = [
   {
     icon: Brain,
     title: 'Clareza emocional instantânea',
-    description: 'Transforme sentimentos dispersos em métricas visuais que orientam suas próximas ações.'
+    description: 'Visualize como está se sentindo em segundos com métricas visuais que orientam suas próximas ações.'
   },
   {
     icon: Target,
-    title: 'Diagnóstico profundo',
-    description: 'Identifique sabotadores, padrões ocultos e gatilhos que travam sua evolução.'
+    title: 'Descoberta de padrões',
+    description: 'Identifique gatilhos, tendências e pontos cegos que limitam sua evolução.'
   },
   {
     icon: TrendingUp,
     title: 'Plano em movimento',
-    description: 'Receba orientações diárias e missões personalizadas para manter seu progresso constante.'
+    description: 'Transforme cada insight em pequenas ações diárias guiadas pelo seu assistente.'
   }
 ];
 

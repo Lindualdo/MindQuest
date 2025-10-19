@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Hero from "@/components/home/Hero";
 import Benefits from "@/components/home/Benefits";
 import Dashboard from "@/components/home/Dashboard";
+import Credibility from "@/components/home/Credibility";
 import Premium from "@/components/home/Premium";
 import HowItWorks from "@/components/home/HowItWorks";
 import Comparison from "@/components/home/Comparison";
@@ -25,6 +26,7 @@ const HomePage = () => {
       <Hero />
       <Benefits />
       <Dashboard />
+      <Credibility /> 
       <Premium />
       <HowItWorks />
       <Comparison />

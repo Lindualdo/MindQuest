@@ -73,6 +73,16 @@ const faqs = [
     question: 'Posso usar o MindQuest para desempenho no trabalho ou em relacionamentos?',
     answer:
       'Sim. O assistente adapta as recomendações ao seu contexto — organizando tudo nas 5 principais áreas da vida; financeira, relacionamentos, saúde, carreira e espiritualidade te ajudando a equilibrar todas elas.'
+  },
+  {
+    question: 'Posso exportar meus dados ou histórico?',
+    answer:
+      'Sim. Você poderá solicitar exportação direta do dashboard com segurança e controle total.'
+  },
+  {
+    question: 'Posso cancelar meu cadastro a qualquer momento?',
+    answer:
+      'Sim. Você pode cancelar seu cadastro direto pelo dashboard ou solicitando pelo suporte'
   }
 ];
 

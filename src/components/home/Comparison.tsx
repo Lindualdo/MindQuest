@@ -35,12 +35,12 @@ const comparisonData = [
   {
     feature: 'Mentoria e suporte',
     free: 'Suporte através de assistente virtual',
-    premium: 'Assistente de IA interativo pelo WhatsApp atuando como mentor dedicado 24 hs por dia + suporte prioritário'
+    premium: 'Assistente de IA sempre diposnível  + suporte prioritário'
   },
   {
-    feature: 'Notificações e lembretes',
+    feature: 'Automação e lembretes',
     free: 'Configuração básica',
-    premium: 'Automação avançada de lembretes e checkpoints estratégicos'
+    premium: 'Checkpoints inteligentes e rotinas automáticas'
   },
   {
     feature: 'Disponibilidade',

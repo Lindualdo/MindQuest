@@ -21,7 +21,7 @@ const CTA: React.FC = () => {
           </h2>
 
           <p className="mb-10 text-xl text-white/90 leading-relaxed">
-            Cadastre-se no WhatsApp, descubra seu primeiro insight em minutos e veja seu painel ganhar vida com métricas emocionais, recomendações e missões personalizadas.
+          Comece agora pelo WhatsApp e veja seu primeiro insight em menos de 5 minutos.
           </p>
 
           <button

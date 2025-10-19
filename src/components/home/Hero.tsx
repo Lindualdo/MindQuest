@@ -120,7 +120,10 @@ const Hero: React.FC = () => {
         </div>
 
         <p className="mx-auto max-w-3xl text-center text-lg text-muted-foreground md:text-xl">
-          Com MindQuest, você otimiza esse ciclo despertando seu potencial e realizando mais.
+          <span className="font-semibold text-primary">MindQuest</span> é sua{' '}
+          <span className="font-semibold text-primary">IA pessoal no WhatsApp</span> que transforma emoções em foco e
+          clareza para agir. Converse agora e veja sua evolução ganhar vida no{' '}
+          <span className="font-semibold text-primary">Dashboard em tempo real</span>.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

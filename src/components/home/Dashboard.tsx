@@ -41,8 +41,7 @@ const Dashboard: React.FC = () => (
       <div className="mb-16 text-center">
         <h2 className="mb-4 text-4xl font-bold text-foreground md:text-5xl">Seu painel de progresso</h2>
         <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-          Humor, energia, roda das emoções, sabotador ativo, conquistas, gamificação, histórico de conversas, arquétipos (perfil), insights, tecnicas e reflexões — tudo organizado para
-          decisões mais claras e acelerar seu desenvolvimento pessoal.
+          Seu painel mostra seu humor, energia e progresso em tempo real. Gráficos inteligentes traduzem emoções, conquistas e padrões comportamentais para você agir com confiança.
         </p>
       </div>
 
