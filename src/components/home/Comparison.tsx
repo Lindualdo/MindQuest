@@ -5,7 +5,7 @@ const comparisonData = [
   {
     feature: 'Investimento',
     free: '€0 — versão gratuita',
-    premium: 'Em breve'
+    premium: 'Em breve, para alguns clientes selecionados'
   },
   {
     feature: 'Cadastro',
@@ -30,7 +30,7 @@ const comparisonData = [
   {
     feature: 'Resumos e transcrições',
     free: 'Transcrição de áudio e síntese das conversas',
-    premium: 'Tudo do free + conversa completa com a IA + audio '
+    premium: 'Tudo do free + conversa completa + audio '
   },
   {
     feature: 'Mentoria e suporte',
