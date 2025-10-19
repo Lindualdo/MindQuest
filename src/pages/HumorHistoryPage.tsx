@@ -33,24 +33,55 @@ const HumorHistoryPage: React.FC = () => {
     }
   }, [userId, humorHistorico, humorHistoricoLoading, loadHumorHistorico]);
 
-  const chartData = useMemo(() => {
-    const parseDateTime = (dateValue: unknown, horaValue: unknown): number => {
-      if (!dateValue) return 0;
-      try {
-        const dateString =
-          typeof dateValue === 'string' ? dateValue.replace(/"/g, '') : String(dateValue);
-        const timeString = horaValue ? String(horaValue).replace(/"/g, '') : null;
-        const isoCandidate = timeString ? `${dateString}T${timeString}` : dateString;
-        const parsed = new Date(isoCandidate);
-        if (!Number.isNaN(parsed.getTime())) {
-          return parsed.getTime();
-        }
-        const fallback = new Date(dateString);
-        return Number.isNaN(fallback.getTime()) ? 0 : fallback.getTime();
-      } catch (_) {
-        return 0;
+  const parseDateTime = (dateValue: unknown, horaValue: unknown): number => {
+    if (!dateValue) return 0;
+    try {
+      const dateString =
+        typeof dateValue === 'string' ? dateValue.replace(/"/g, '') : String(dateValue);
+      const timeString = horaValue ? String(horaValue).replace(/"/g, '') : null;
+      const isoCandidate = timeString ? `${dateString}T${timeString}` : dateString;
+      const parsed = new Date(isoCandidate);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.getTime();
       }
-    };
+      const fallback = new Date(dateString);
+      return Number.isNaN(fallback.getTime()) ? 0 : fallback.getTime();
+    } catch (_) {
+      return 0;
+    }
+  };
+
+  const formatLabel = (dateValue: unknown, horaValue: unknown, fallbackIndex: number): string => {
+    if (!dateValue) {
+      return `Registro ${fallbackIndex}`;
+    }
+    try {
+      const base = format(new Date(String(dateValue)), 'dd/MM/yyyy');
+      if (horaValue) {
+        const time = String(horaValue).slice(0, 5);
+        return `${base} ${time}`;
+      }
+      return base;
+    } catch (error) {
+      return String(dateValue);
+    }
+  };
+
+  const normalizeJustificativa = (value: unknown): string => {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+      try {
+        return JSON.parse(trimmed);
+      } catch (_) {
+        return trimmed.slice(1, -1);
+      }
+    }
+    return trimmed;
+  };
+
+  const chartData = useMemo(() => {
 
     const source =
       humorHistorico?.detalhes && humorHistorico.detalhes.length > 0
@@ -62,11 +93,7 @@ const HumorHistoryPage: React.FC = () => {
         const dateValue = (entry as Record<string, unknown>).data ?? null;
         const horaValue = (entry as Record<string, unknown>).hora ?? null;
         const timestamp = parseDateTime(dateValue, horaValue);
-        const dateLabel = dateValue
-          ? `${format(new Date(String(dateValue)), 'dd/MM')}${
-              horaValue ? ` ${String(horaValue).slice(0, 5)}` : ''
-            }`
-          : `#${index + 1}`;
+        const dateLabel = formatLabel(dateValue, horaValue, index + 1);
         const humorValue = Number(
           (entry as Record<string, unknown>).humor ??
             (entry as Record<string, unknown>).pico_dia ??
@@ -98,6 +125,37 @@ const HumorHistoryPage: React.FC = () => {
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp);
+  }, [humorHistorico]);
+
+  const detailsData = useMemo(() => {
+    if (!humorHistorico?.detalhes || humorHistorico.detalhes.length === 0) {
+      return [];
+    }
+
+    return humorHistorico.detalhes
+      .map((entry, index) => {
+        const timestamp = parseDateTime(entry.data, entry.hora);
+        const label = formatLabel(entry.data, entry.hora, index + 1);
+        const justification = normalizeJustificativa(entry.justificativa);
+        const insights = Array.isArray(entry.insights) ? entry.insights : [];
+
+        return {
+          key: `${timestamp || index}-${index}`,
+          label,
+          humor: Number(entry.humor ?? entry.pico_dia ?? entry.humor_medio ?? 0),
+          energia: Number(entry.energia ?? entry.energia_media ?? 0),
+          emoji: entry.emoji ?? entry.conversa?.emoji ?? null,
+          emotion: entry.emocao ?? entry.conversa?.emocao ?? null,
+          justification,
+          conversationEmoji: entry.conversa?.emoji ?? null,
+          conversationEmotion: entry.conversa?.emocao ?? null,
+          conversationId: entry.conversa?.id ?? null,
+          insights,
+          timestamp,
+          raw: entry
+        };
+      })
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   }, [humorHistorico]);
 
   const infoLabel =
@@ -231,60 +289,58 @@ const HumorHistoryPage: React.FC = () => {
 
             {!humorHistoricoLoading &&
               !humorHistoricoError &&
-              humorHistorico?.detalhes &&
-              humorHistorico.detalhes.length > 0 && (
+              detailsData.length > 0 && (
                 <div className="space-y-4 border-t border-gray-100 pt-4">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
                     Detalhes por registro
                   </h3>
-                  {humorHistorico.detalhes.map((entry, index) => (
-                    <div
-                      key={index}
-                      className="rounded-xl border border-gray-100 bg-white/70 p-4 shadow-sm transition-shadow hover:shadow-md"
-                    >
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {entry.data
-                              ? format(new Date(entry.data), 'dd/MM/yyyy HH:mm')
-                              : `Registro ${index + 1}`}
-                            {entry.emoji && <span className="ml-2 text-lg">{entry.emoji}</span>}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Humor:{' '}
-                            <span className="font-semibold text-blue-600">
-                              {Number(
-                                entry.humor ?? entry.pico_dia ?? entry.humor_medio ?? 0
-                              ).toFixed(1)}
-                            </span>{' '}
-                            • Energia:{' '}
-                            <span className="font-semibold text-amber-600">
-                              {Number(entry.energia ?? entry.energia_media ?? 0).toFixed(1)}
+                  {detailsData.map((detail) => (
+                      <div
+                        key={detail.key}
+                        className="rounded-xl border border-gray-100 bg-white/70 p-4 shadow-sm transition-shadow hover:shadow-md"
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800">
+                              {detail.label}
+                              {detail.emoji && <span className="ml-2 text-lg">{detail.emoji}</span>}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Humor:{' '}
+                              <span className="font-semibold text-blue-600">
+                                {detail.humor.toFixed(1)}
+                              </span>{' '}
+                              • Energia:{' '}
+                              <span className="font-semibold text-amber-600">{detail.energia.toFixed(1)}</span>
+                            </p>
+                          </div>
+                          {detail.emotion && (
+                            <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+                              Emoção: {detail.emotion}
                             </span>
-                          </p>
+                          )}
                         </div>
-                        {entry.emocao && (
-                          <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-                            Emoção: {entry.emocao}
-                          </span>
+                        {detail.justification && (
+                          <div className="mt-3 border-t border-gray-100 pt-3 text-xs leading-relaxed text-gray-600">
+                            <span className="font-semibold text-gray-700">Justificativa:</span> {detail.justification}
+                          </div>
+                        )}
+                        {detail.insights.length > 0 && (
+                          <div className="mt-3 space-y-2 text-xs text-gray-600">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                              Insights relacionados
+                            </p>
+                            {detail.insights.map((insight: unknown, idx: number) => (
+                              <div
+                                key={idx}
+                                className="rounded-lg border border-gray-100 bg-white/80 p-2 leading-relaxed"
+                              >
+                                {typeof insight === 'string' ? insight : JSON.stringify(insight)}
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      {entry.insights && Array.isArray(entry.insights) && entry.insights.length > 0 && (
-                        <div className="mt-3 space-y-2 text-xs text-gray-600">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                            Insights relacionados
-                          </p>
-                          {entry.insights.map((insight: unknown, idx: number) => (
-                            <div
-                              key={idx}
-                              className="rounded-lg border border-gray-100 bg-white/80 p-2 leading-relaxed"
-                            >
-                              {typeof insight === 'string' ? insight : JSON.stringify(insight)}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
                   ))}
                 </div>
               )}

@@ -1,0 +1,211 @@
+[
+  {
+    "historico_humor": {
+      "serie": [
+        {
+          "data": "2025-10-13",
+          "emoji": "🤔",
+          "emocao": "Expectativa",
+          "pico_dia": 7,
+          "humor_medio": 7,
+          "energia_media": 7
+        },
+        {
+          "data": "2025-10-14",
+          "emoji": "😊",
+          "emocao": "Alegria",
+          "pico_dia": 7,
+          "humor_medio": 6.5,
+          "energia_media": 6
+        },
+        {
+          "data": "2025-10-14",
+          "emoji": "🤔",
+          "emocao": "Expectativa",
+          "pico_dia": 7,
+          "humor_medio": 6.5,
+          "energia_media": 6
+        },
+        {
+          "data": "2025-10-15",
+          "emoji": "🤗",
+          "emocao": "Confiança",
+          "pico_dia": 6,
+          "humor_medio": 6,
+          "energia_media": 5
+        },
+        {
+          "data": "2025-10-16",
+          "emoji": null,
+          "emocao": null,
+          "pico_dia": 7,
+          "humor_medio": 7,
+          "energia_media": 7
+        },
+        {
+          "data": "2025-10-17",
+          "emoji": "😨",
+          "emocao": "Medo",
+          "pico_dia": 7,
+          "humor_medio": 7,
+          "energia_media": 6
+        },
+        {
+          "data": "2025-10-18",
+          "emoji": "🤗",
+          "emocao": "Confiança",
+          "pico_dia": 8,
+          "humor_medio": 8,
+          "energia_media": 7
+        },
+        {
+          "data": "2025-10-19",
+          "emoji": "🤔",
+          "emocao": "Expectativa",
+          "pico_dia": 7,
+          "humor_medio": 7,
+          "energia_media": 7
+        }
+      ],
+      "periodo": {
+        "fim": "2025-10-19T00:00:00",
+        "inicio": "2025-10-13"
+      },
+      "detalhes": [
+        {
+          "data": "2025-10-19",
+          "hora": "13:42:07.49318",
+          "humor": 7,
+          "energia": 7,
+          "conversa": {
+            "id": "debdd38e-cd87-4298-bfcc-84a3e962c972",
+            "emoji": "🤔",
+            "emocao": "Expectativa",
+            "horario_fim": "13:41:27.151353",
+            "horario_inicio": "13:41:27.151353",
+            "intensidade_emocao": 75
+          },
+          "confianca": 90,
+          "periodo_dia": "nao_identificado",
+          "justificativa": "\"Aldo demonstra um humor oscilante, influenciado pela volatilidade do Bitcoin e resultados do app, com momentos de esperança e realização, mas também de ansiedade e cansaço emocional devido às perdas.\"",
+          "variacao_humor": "oscilatoria",
+          "variacao_energia": "oscilatoria"
+        },
+        {
+          "data": "2025-10-18",
+          "hora": "09:49:18.738234",
+          "humor": 8,
+          "energia": 7,
+          "conversa": {
+            "id": "5074f881-bfd6-4f03-a744-a779a178d079",
+            "emoji": "🤗",
+            "emocao": "Confiança",
+            "horario_fim": "09:49:10.014651",
+            "horario_inicio": "09:49:10.014651",
+            "intensidade_emocao": 75
+          },
+          "confianca": 90,
+          "periodo_dia": "manha",
+          "justificativa": "\"Aldo expressa um humor positivo e esperançoso, destacando motivação, serenidade e autoconhecimento, apesar dos desafios financeiros e pessoais. Ele demonstra confiança e resiliência, o que sustenta um humor elevado, porém realista.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "estavel"
+        },
+        {
+          "data": "2025-10-17",
+          "hora": "14:55:26.039896",
+          "humor": 7,
+          "energia": 6,
+          "conversa": {
+            "id": "e4c79420-87ec-4f45-8f24-c1f00399d25f",
+            "emoji": "😨",
+            "emocao": "Medo",
+            "horario_fim": "14:55:14.264152",
+            "horario_inicio": "14:55:14.264152",
+            "intensidade_emocao": 85
+          },
+          "confianca": 90,
+          "periodo_dia": "manha/tarde",
+          "justificativa": "\"Aldo demonstra um humor misto, com sentimentos de otimismo e esperança, mas também preocupação e medo financeiro, refletindo um estado emocional equilibrado porém tenso.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "estavel"
+        },
+        {
+          "data": "2025-10-16",
+          "hora": "10:03:38.520894",
+          "humor": 7,
+          "energia": 7,
+          "conversa": {
+            "id": "03c34cb4-bbcf-4078-afff-25f50f314968",
+            "emoji": null,
+            "emocao": null,
+            "horario_fim": "10:03:26.814787",
+            "horario_inicio": "10:03:26.814787",
+            "intensidade_emocao": null
+          },
+          "confianca": 90,
+          "periodo_dia": "manha",
+          "justificativa": "\"Aldo expressa um humor sereno, calmo e motivado, sem extremos de felicidade ou tristeza, refletindo um estado emocional equilibrado e positivo moderado.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "estavel"
+        },
+        {
+          "data": "2025-10-15",
+          "hora": "23:18:49.96776",
+          "humor": 6,
+          "energia": 5,
+          "conversa": {
+            "id": "63f98b68-8887-47ac-a8ee-fedf14f97342",
+            "emoji": "🤗",
+            "emocao": "Confiança",
+            "horario_fim": "23:18:02.7395",
+            "horario_inicio": "23:18:02.7395",
+            "intensidade_emocao": 60
+          },
+          "confianca": 90,
+          "periodo_dia": "tarde",
+          "justificativa": "\"Aldo expressa um humor neutro, reconhecendo cansaço e improdutividade, mas sem tristeza ou angústia, mostrando aceitação e esperança para o próximo dia.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "estavel"
+        },
+        {
+          "data": "2025-10-14",
+          "hora": "10:07:06.082529",
+          "humor": 7,
+          "energia": 7,
+          "conversa": {
+            "id": "91ee2879-cdd4-4e95-846a-607e32b7421e",
+            "emoji": "🤔",
+            "emocao": "Expectativa",
+            "horario_fim": "10:06:51.7873",
+            "horario_inicio": "10:06:51.7873",
+            "intensidade_emocao": 80
+          },
+          "confianca": 90,
+          "periodo_dia": "manha",
+          "justificativa": "\"Aldo demonstra um humor equilibrado, com sentimentos de serenidade, determinação e motivação, apesar de reconhecer desafios e momentos de desânimo pontuais. Ele mantém uma postura positiva e focada na superação.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "ascendente"
+        },
+        {
+          "data": "2025-10-13",
+          "hora": "09:15:02.101484",
+          "humor": 7,
+          "energia": 7,
+          "conversa": {
+            "id": "f86384d3-c4a9-41c5-9f61-2d74c89bfb35",
+            "emoji": "🤔",
+            "emocao": "Expectativa",
+            "horario_fim": "09:14:51.632969",
+            "horario_inicio": "09:14:51.632969",
+            "intensidade_emocao": 70
+          },
+          "confianca": 90,
+          "periodo_dia": "manha",
+          "justificativa": "\"Aldo expressa um humor sereno, otimista e motivado, com uma visão positiva sobre seu trabalho, relações pessoais e finanças, apesar de reconhecer desafios e imperfeições.\"",
+          "variacao_humor": "estavel",
+          "variacao_energia": "estavel"
+        }
+      ]
+    }
+  }
+]
