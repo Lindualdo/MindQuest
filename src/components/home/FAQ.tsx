@@ -83,6 +83,11 @@ const faqs = [
     question: 'Posso cancelar meu cadastro a qualquer momento?',
     answer:
       'Sim. Você pode cancelar seu cadastro direto pelo dashboard ou solicitando pelo suporte'
+  },
+  {
+    question: 'Posso falr com minha IA pessoal direto no dashboard?',
+    answer:
+      'Sim. na versão Premium Você pode falar pelo WhatsApp ou peo Dashboard'
   }
 ];
 

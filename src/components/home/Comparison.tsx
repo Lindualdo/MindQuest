@@ -13,9 +13,9 @@ const comparisonData = [
     premium: 'O mesmo fluxo, com ativação do plano Premium'
   },
   {
-    feature: 'Conversas com a IA',
-    free: 'Registro diário. Uma conversa por dia',
-    premium: 'Até 5 sessões diárias'
+    feature: 'Conversa guiada com sua IA pessoal',
+    free: 'uma conversa por dia pelo WhatsApp',
+    premium: 'Até 5 sessões diárias, e pode conversar também pelo Dashboard'
   },
   {
     feature: 'Dashboard de progresso',
