@@ -26,13 +26,14 @@ const features = [
 
 const dashboardImages = [
   { src: new URL('../../img/humor.jpeg', import.meta.url).href, label: 'Visão geral de humor e energia' },
+  { src: new URL('../../img/humor-historico.jpeg', import.meta.url).href, label: 'Histórico de humor' },
   { src: new URL('../../img/gameficacao.jpeg', import.meta.url).href, label: 'Gamificação e conquistas' },
   { src: new URL('../../img/historico-conversas.png', import.meta.url).href, label: 'Histórico de conversas' },
   { src: new URL('../../img/insight.png', import.meta.url).href, label: 'Lista de insights' },
   { src: new URL('../../img/insight-detalhes.png', import.meta.url).href, label: 'Detalhe do insight' },
   { src: new URL('../../img/roda-emocoes.png', import.meta.url).href, label: 'Roda das emoções' },
-  { src: new URL('../../img/sabotadores.png', import.meta.url).href, label: 'Sabotadores ativos' },
-  { src: new URL('../../img/humor-historico.jpeg', import.meta.url).href, label: 'Histórico de humor' }
+  { src: new URL('../../img/sabotadores.png', import.meta.url).href, label: 'Sabotadores ativos' }
+ 
 ];
 
 const Dashboard: React.FC = () => (

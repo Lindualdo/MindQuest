@@ -1,6 +1,6 @@
 import React from 'react';
 import { Crown, MessageCircle, Map, Users, BellRing } from 'lucide-react';
-import { WHATSAPP_PREMIUM_URL } from '@/constants/whatsapp';
+import { WHATSAPP_URL } from '@/constants/whatsapp';
 
 const premiumFeatures = [
   {
@@ -28,7 +28,7 @@ const premiumFeatures = [
 const Premium: React.FC = () => {
   const handleOpenWhatsApp = () => {
     if (typeof window !== 'undefined') {
-      window.open(WHATSAPP_PREMIUM_URL, '_blank', 'noopener');
+      window.open(WHATSAPP_URL, '_blank', 'noopener');
     }
   };
 

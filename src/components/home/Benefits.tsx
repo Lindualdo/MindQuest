@@ -27,7 +27,10 @@ const Benefits: React.FC = () => (
           Um painel que transforma emoção em estratégia
         </h2>
         <p className="mt-3 text-base text-muted-foreground md:text-lg">
-          Cada conversa alimenta seu dashboard com evolução, conquistas e próximos passos — tudo em um só lugar.
+          Você conversa com sua{' '}
+          <span className="font-semibold text-primary">IA pessoal pelo WhatsApp</span> e o MindQuest alimenta seu {' '}
+          <span className="font-semibold text-primary">dashboard com evolução</span>, conquistas e próximos passos —
+          tudo em um só lugar.
         </p>
       </div>
       <div className="grid gap-8 md:grid-cols-3">
