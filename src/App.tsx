@@ -22,6 +22,16 @@ import PanasDetailPage from './pages/PanasDetailPage';
 import LpStartPage from './pages/LpStartPage';
 import PremiumLandingPage from './pages/PremiumLandingPage';
 
+declare global {
+  interface Window {
+    __MINDQUEST_ROUTING__?: {
+      currentPath: string;
+      sanitizedPath: string;
+      normalizedPath: string;
+    };
+  }
+}
+
 const NotFound: React.FC<{ message?: string }> = ({ message }) => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 flex items-center justify-center px-4">
     <motion.div
@@ -62,6 +72,14 @@ function App() {
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
   const normalizedPath = sanitizedPath.replace(/\.html$/, '');
+
+  if (typeof window !== 'undefined') {
+    // Debug routing issues in production
+    window.__MINDQUEST_ROUTING__ = { currentPath, sanitizedPath, normalizedPath };
+    if (import.meta.env.PROD) {
+      console.debug('[MindQuest][routing]', { currentPath, sanitizedPath, normalizedPath });
+    }
+  }
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const forceHomeView = searchParams?.get('public') === '1';
