@@ -56,7 +56,7 @@ const Hero: React.FC = () => {
 
         <div className="mb-6 text-center md:mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary md:text-base">
-            Produtividade com bem estar mental
+            Seu diário de conversa que fala com você
           </p>
         </div>
 

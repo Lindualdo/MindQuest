@@ -57,7 +57,7 @@ const faqs = [
   {
     question: 'Qual a diferença para apps de meditação ou produtividade?',
     answer:
-      'Em vez de listas de tarefas ou meditações genéricas, o MindQuest converte sua conversa em dados estruturados e recomendações personalizadas. Não é terapia; é um sistema de desenvolvimento pessoal e produtividade que prioriza o conforto mental.'
+      'Em vez de listas de tarefas ou meditações genéricas, o MindQuest converte sua conversa em dados estruturados e recomendações personalizadas. Não é terapia; é um sistema de desenvolvimento pessoal.'
   },
   {
     question: 'Posso pausar meu progresso e continuar depois?',

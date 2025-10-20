@@ -19,6 +19,7 @@ import SabotadorDetailPage from './pages/SabotadorDetailPage';
 import ResumoConversasPage from './pages/ResumoConversasPage';
 import HomePage from './pages/HomePage';
 import PanasDetailPage from './pages/PanasDetailPage';
+import LpStartPage from './pages/LpStartPage';
 import { authService } from './services/authService';
 
 function App() {
@@ -48,6 +49,11 @@ function App() {
     sanitizedPath === '/home-preview';
   const isHomePath = sanitizedPath === '/' || sanitizedPath === '/home';
   const isLegacyFaqPath = sanitizedPath === '/faq' || sanitizedPath.startsWith('/faq/');
+  const isLpStart = sanitizedPath === '/lp-start';
+
+  if (isLpStart) {
+    return <LpStartPage />;
+  }
 
   if (forceHomeView) {
     return <HomePage />;
