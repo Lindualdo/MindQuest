@@ -20,7 +20,29 @@ import ResumoConversasPage from './pages/ResumoConversasPage';
 import HomePage from './pages/HomePage';
 import PanasDetailPage from './pages/PanasDetailPage';
 import LpStartPage from './pages/LpStartPage';
-import { authService } from './services/authService';
+import PremiumLandingPage from './pages/PremiumLandingPage';
+
+const NotFound: React.FC<{ message?: string }> = ({ message }) => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 flex items-center justify-center px-4">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-lg w-full rounded-3xl bg-white p-8 shadow-xl border border-slate-200 text-center space-y-4"
+    >
+      <h1 className="text-2xl font-bold text-slate-800">Página não encontrada</h1>
+      <p className="text-slate-600">
+        {message ??
+          'Esta rota não está disponível. Verifique o endereço ou acesse o painel pelo domínio principal.'}
+      </p>
+      <a
+        href="/"
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-purple-600"
+      >
+        Ir para o painel
+      </a>
+    </motion.div>
+  </div>
+);
 
 function App() {
   const { 
@@ -41,26 +63,33 @@ function App() {
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const hasAccessToken =
-    typeof window !== 'undefined' ? authService.hasTokenAvailable() : false;
-  const forceHomeView =
-    (searchParams && searchParams.get('public') === '1') ||
-    sanitizedPath === '/landing' ||
-    sanitizedPath === '/home-preview';
-  const isHomePath = sanitizedPath === '/' || sanitizedPath === '/home';
-  const isLegacyFaqPath = sanitizedPath === '/faq' || sanitizedPath.startsWith('/faq/');
-  const isLpStart = sanitizedPath === '/lp-start';
+  const forceHomeView = searchParams?.get('public') === '1';
 
-  if (isLpStart) {
+  const isBlogHome =
+    sanitizedPath === '/blog' ||
+    sanitizedPath === '/blog/home' ||
+    sanitizedPath === '/blog/';
+  const isBlogLpStart = sanitizedPath === '/blog/lp-start';
+  const isBlogPremium = sanitizedPath === '/blog/premium';
+
+  if (forceHomeView || isBlogHome) {
+    return <HomePage />;
+  }
+
+  if (isBlogLpStart) {
     return <LpStartPage />;
   }
 
-  if (forceHomeView) {
-    return <HomePage />;
+  if (isBlogPremium) {
+    return <PremiumLandingPage />;
   }
 
-  if ((isHomePath || isLegacyFaqPath) && !hasAccessToken) {
-    return <HomePage />;
+  if (sanitizedPath.startsWith('/blog/')) {
+    return <NotFound message="Esta página de conteúdo ainda não existe. Atualize os links para os novos caminhos." />;
+  }
+
+  if (sanitizedPath !== '/' && sanitizedPath !== '/auth') {
+    return <NotFound />;
   }
 
   // Se há erro nos dados (não confundir com erro de auth)

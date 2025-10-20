@@ -1,666 +1,745 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  MessageSquare,
+  Brain,
+  Target,
+  Sparkles,
+  Compass,
+  ChevronDown,
+  Shield
+} from 'lucide-react';
+import { WHATSAPP_URL, WHATSAPP_PREMIUM_URL } from '@/constants/whatsapp';
 
-const styleContent = `
-  :root {
-    --primary:#6b5cff;
-    --primary-dark:#4c3df2;
-    --accent:#0fc7d8;
-    --accent-dark:#0891b2;
-    --surface:#0b1021;
-    --white:#ffffff;
-    --muted:#667085;
-    --muted-light:#94a3b8;
-    --border:rgba(255,255,255,.12);
-    --card-border:rgba(15,23,42,.08);
-    --bg-1:#f8fbff;
-    --bg-2:#eef3ff;
-    --radius-md:18px;
-    --radius-lg:28px;
-    --shadow-sm:0 20px 40px rgba(15,23,42,.08);
-    --shadow-lg:0 40px 120px rgba(91,76,255,.25);
-    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html, body { min-height:100%; background:linear-gradient(160deg,#f6f7ff 0%,#eef6ff 45%,#fefbff 100%); color:#0f172a; }
-  body { line-height:1.6; -webkit-font-smoothing:antialiased; }
-  a { color:inherit; text-decoration:none; }
-  img { max-width:100%; display:block; }
-  .shell { width: min(1180px, 92vw); margin:0 auto; position:relative; }
-  .section { padding: clamp(80px, 9vw, 120px) 0; position:relative; }
-  .section::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.65; }
-  .section--gradient::before { background:radial-gradient( circle at 0% 0%, rgba(107,92,255,.12), transparent 55%), radial-gradient(circle at 100% 12%, rgba(15,199,216,.14), transparent 45%); }
-  .section--on-surface { background:#ffffff; }
-  .glass {
-    background:rgba(255,255,255,.78);
-    border-radius:var(--radius-lg);
-    border:1px solid rgba(148,163,184,.18);
-    box-shadow:var(--shadow-sm);
-    backdrop-filter:blur(18px);
-  }
-  .headline { font-size:clamp(2.4rem, 4vw, 3.2rem); font-weight:800; letter-spacing:-.02em; line-height:1.12; }
-  .subhead { font-size:clamp(1.05rem, 1.4vw, 1.25rem); color:var(--muted); max-width:66ch; }
-  .tagline { text-transform:uppercase; letter-spacing:.28em; font-size:.75rem; color:var(--muted-light); font-weight:600; }
-  .pill {
-    display:inline-flex; align-items:center; gap:.45rem;
-    padding:.5rem .95rem; border-radius:999px;
-    background:linear-gradient(120deg, rgba(107,92,255,.16), rgba(15,199,216,.16));
-    border:1px solid rgba(107,92,255,.25);
-    font-size:.85rem; font-weight:600; color:#4338ca;
-  }
-  .button {
-    display:inline-flex; align-items:center; justify-content:center;
-    gap:.55rem; padding:.85rem 1.35rem; border-radius:999px; font-weight:700;
-    border:1px solid transparent; transition:transform .16s ease, box-shadow .16s ease, background .2s ease;
-  }
-  .button--primary {
-    background:linear-gradient(120deg,var(--primary),var(--accent));
-    color:var(--white); box-shadow:var(--shadow-lg);
-  }
-  .button--primary:hover { transform:translateY(-2px); box-shadow:0 36px 90px rgba(79,70,229,.32); }
-  .button--outline {
-    border:1px solid rgba(107,92,255,.22); background:rgba(255,255,255,.85); color:#3730a3;
-  }
-  .button--outline:hover { background:rgba(107,92,255,.08); }
-  .grid { display:grid; gap: clamp(24px, 3vw, 36px); }
-  .grid--2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .grid--3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
-  .grid--4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
-  @media (max-width:980px){ .grid--2, .grid--3, .grid--4 { grid-template-columns:repeat(1,minmax(0,1fr)); } }
-  .card {
-    position:relative; background:linear-gradient(145deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
-    border-radius:var(--radius-md); border:1px solid rgba(209,213,219,.4);
-    padding:clamp(22px, 3vw, 32px);
-    box-shadow:0 24px 60px rgba(15,23,42,.08);
-  }
-  .card::after {
-    content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
-    background:linear-gradient(120deg, rgba(107,92,255,.28), rgba(15,199,216,.12));
-    opacity:.25; z-index:-1;
-  }
-  .card--flat { box-shadow:none; background:#ffffff; }
-  .list-check { margin-top:1.2rem; display:grid; gap:.65rem; }
-  .list-check li { list-style:none; display:flex; gap:.6rem; align-items:flex-start; font-size:1rem; font-weight:500; }
-  .list-check li::before {
-    content:""; width:18px; height:18px; flex-shrink:0;
-    border-radius:6px; background:linear-gradient(135deg,var(--primary),var(--accent));
-    box-shadow:0 10px 18px rgba(107,92,255,.28);
-  }
-  .chips { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
-  .chip {
-    font-size:.8rem; font-weight:600; color:#4338ca;
-    padding:.45rem .75rem; border-radius:999px;
-    background:rgba(107,92,255,.12); border:1px solid rgba(107,92,255,.2);
-  }
-  .hero { position:relative; }
-  .hero::before {
-    content:""; position:absolute; inset:-120px -5%; z-index:-1;
-    background:radial-gradient(circle at 12% 20%, rgba(15,199,216,.10), transparent 60%),
-               radial-gradient(circle at 88% 8%, rgba(107,92,255,.18), transparent 55%);
-  }
-  .hero-grid { display:grid; gap:clamp(28px, 5vw, 60px); grid-template-columns:minmax(0,1.04fr) minmax(0,.9fr); align-items:center; }
-  @media (max-width:980px){ .hero-grid { grid-template-columns:1fr; } }
-  .hero-showcase {
-    position:relative; border-radius:32px; padding:18px; background:linear-gradient(160deg, rgba(107,92,255,.15), rgba(15,199,216,.15));
-    border:1px solid rgba(148,163,184,.25); box-shadow:0 40px 90px rgba(59,130,246,.22);
-    overflow:hidden;
-  }
-  .hero-showcase::after {
-    content:""; position:absolute; inset:22px; border-radius:26px;
-    background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(255,255,255,.75));
-    border:1px solid rgba(203,213,225,.45);
-  }
-  .hero-showcase svg { position:relative; z-index:1; filter:drop-shadow(0 28px 60px rgba(79,70,229,.35)); }
-  .section-title { font-size:clamp(2rem, 3vw, 2.5rem); font-weight:800; letter-spacing:-.015em; margin-bottom:clamp(18px, 2vw, 24px); }
-  .section-lead { color:var(--muted); font-size:1rem; max-width:60ch; }
-  .split { display:grid; gap:clamp(24px,3vw,36px); grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
-  @media (max-width:900px){ .split { grid-template-columns:1fr; } }
-  .divider { height:1px; width:100%; background:linear-gradient(120deg, rgba(148,163,184,.15), rgba(107,92,255,.25), rgba(148,163,184,.12)); margin:clamp(24px, 4vw, 32px) 0; }
-  .stat-block { display:flex; flex-direction:column; gap:.45rem; padding:1.4rem; border-radius:var(--radius-md); background:rgba(15,23,42,.03); border:1px solid rgba(148,163,184,.2); }
-  .stat-block strong { font-size:1.8rem; color:var(--primary-dark); }
-  .steps { display:grid; gap:clamp(18px, 2.6vw, 28px); }
-  .step {
-    position:relative; padding:1.6rem; border-radius:var(--radius-md);
-    background:linear-gradient(145deg, rgba(255,255,255,.92), rgba(255,255,255,.8));
-    border:1px solid rgba(148,163,184,.22); box-shadow:0 18px 45px rgba(15,23,42,.06);
-  }
-  .step::before {
-    content:attr(data-step); position:absolute; top:-16px; left:16px;
-    width:42px; height:42px; display:grid; place-items:center;
-    border-radius:14px; background:linear-gradient(135deg,var(--primary),var(--accent));
-    color:var(--white); font-weight:700; font-size:1.05rem;
-    box-shadow:0 22px 48px rgba(79,70,229,.36);
-  }
-  .mini-grid { display:grid; gap:clamp(18px, 2.5vw, 26px); grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
-  .mini-card {
-    padding:clamp(18px, 2.2vw, 24px); border-radius:var(--radius-md);
-    border:1px solid rgba(148,163,184,.18); background:linear-gradient(145deg, rgba(255,255,255,.94), rgba(255,255,255,.85));
-    box-shadow:0 20px 46px rgba(15,23,42,.06);
-  }
-  .mini-title { font-weight:700; font-size:1.05rem; color:#111827; margin-bottom:.6rem; }
-  .plan-grid { display:grid; gap:clamp(20px,3vw,28px); grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
-  .plan-card {
-    position:relative; padding:clamp(24px,3vw,30px);
-    border-radius:var(--radius-lg); border:1px solid rgba(107,92,255,.22);
-    background:linear-gradient(150deg, rgba(255,255,255,.94), rgba(255,255,255,.82));
-    box-shadow:0 32px 80px rgba(15,23,42,.09);
-  }
-  .plan-card--highlight {
-    border-color:rgba(107,92,255,.45); box-shadow:0 40px 120px rgba(91,76,255,.25);
-  }
-  .badge {
-    position:absolute; top:20px; right:20px;
-    padding:.35rem .75rem; font-size:.75rem; font-weight:700;
-    border-radius:12px; background:#111827; color:#f8fafc; letter-spacing:.08em; text-transform:uppercase;
-  }
-  .faq { display:grid; gap:16px; }
-  details { border-radius:var(--radius-md); border:1px solid rgba(148,163,184,.22); background:rgba(255,255,255,.92); padding:1.1rem 1.35rem; box-shadow:0 18px 44px rgba(15,23,42,.05); }
-  details[open] { border-color:rgba(107,92,255,.36); }
-  summary { cursor:pointer; font-weight:700; list-style:none; position:relative; padding-right:30px; }
-  summary::-webkit-details-marker { display:none; }
-  summary::after { content:"+"; position:absolute; right:0; top:0; font-weight:700; color:var(--primary); transition:transform .2s ease; }
-  details[open] summary::after { transform:rotate(45deg); }
-  .answer { margin-top:.75rem; color:var(--muted); font-size:.95rem; }
-  footer { background:#0b1021; color:#cbd5f5; padding:64px 0 48px; margin-top:80px; }
-  footer .footer-grid { display:grid; gap:26px; grid-template-columns:2fr 1fr 1fr; }
-  @media (max-width:900px){ footer .footer-grid { grid-template-columns:1fr; } }
-  footer a { color:#94a3b8; }
-  .sticky-cta {
-    position:fixed; inset:auto 1.2rem 1.2rem auto; display:flex; align-items:center; gap:.8rem;
-    background:linear-gradient(120deg,var(--primary),var(--accent)); color:var(--white);
-    padding:.85rem 1.35rem; border-radius:999px; box-shadow:0 40px 90px rgba(79,70,229,.35);
-    z-index:80; transform:translateY(120%); transition:transform .4s ease;
-  }
-  .sticky-cta .button { background:rgba(255,255,255,.9); color:#312e81; padding:.55rem 1.1rem; }
-  .overlay {
-    position:fixed; inset:0; display:none; place-items:center; background:rgba(11,16,33,.68);
-    z-index:90; padding:1.6rem;
-  }
-  .overlay.show { display:grid; }
-  .modal {
-    width:min(720px, 92vw); border-radius:32px;
-    background:linear-gradient(145deg, rgba(23,37,84,.92), rgba(15,23,42,.94));
-    border:1px solid rgba(99,102,241,.45); color:#e2e8f0;
-    box-shadow:0 60px 160px rgba(15,23,42,.55); padding:clamp(24px, 4vw, 36px);
-  }
-  .modal h3 { font-size:clamp(1.9rem, 2.6vw, 2.2rem); letter-spacing:-.01em; margin-bottom:.4rem; }
-  .modal .muted { color:rgba(226,232,240,.78); }
-  .modal .row { display:flex; gap:.85rem; margin-top:1.4rem; flex-wrap:wrap; }
-  .modal input {
-    flex:1; min-width:220px;
-    padding:1rem 1.1rem; border-radius:16px; border:1px solid rgba(148,163,184,.4);
-    background:rgba(15,23,42,.6); color:#f8fafc; font-size:1rem;
-  }
-  .modal input::placeholder { color:rgba(148,163,184,.7); }
-  .modal .button--primary { width:220px; box-shadow:0 28px 70px rgba(79,70,229,.45); }
-  .modal .escape { margin-top:1.2rem; text-align:center; font-size:.85rem; color:rgba(148,163,184,.8); }
-  .modal .escape button { background:none; border:none; color:inherit; text-decoration:underline; cursor:pointer; }
-  @media (max-width:540px){ .modal .button--primary { width:100%; } .sticky-cta { inset:auto 1rem 1rem 1rem; justify-content:space-between; } }
-`;
+const IDENTIFY_POINTS = [
+  'Muitas ideias no papel, mas na hora da ação você trava.',
+  'Começa vários projetos, mas raramente termina algo.',
+  'Sente que merece mais da vida, mas os resultados não aparecem.',
+  'Se cobra o tempo todo, mas quase nunca se sente satisfeito.',
+  'Quer agradar todo mundo e acaba se esgotando.',
+  'Pensa demais e age de menos.',
+  'Conquista coisas, mas o vazio não passa.'
+];
 
-const htmlContent = `
-  <header class="section--on-surface" style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);border-bottom:1px solid rgba(148,163,184,.22);">
-    <div class="shell" style="padding:18px 0; display:flex; align-items:center; justify-content:space-between; gap:clamp(16px,4vw,32px);">
-      <div style="display:flex; align-items:center; gap:14px;">
-        <svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true">
-          <defs><linearGradient id="logoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b5cff"/><stop offset="1" stop-color="#0fc7d8"/></linearGradient></defs>
-          <circle cx="50" cy="50" r="46" fill="url(#logoGradient)" opacity=".95"/>
-          <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#fff"/>
-        </svg>
-        <div>
-          <strong style="font-size:1.1rem;">MindQuest</strong>
-          <p style="margin-top:4px; font-size:.85rem; color:var(--muted-light); font-weight:500;">Mente clara, resultados reais</p>
-        </div>
-      </div>
-      <nav style="display:flex; align-items:center; gap:clamp(16px,2.8vw,32px);">
-        <div style="display:flex; gap:clamp(16px,2vw,24px); font-weight:600; font-size:.95rem;">
-          <a href="#como-funciona">Como funciona</a>
-          <a href="#beneficios">Benefícios</a>
-          <a href="#planos">Planos</a>
-          <a href="#faq">FAQ</a>
-        </div>
-        <a class="button button--primary" href="WHATSAPP_LINK" id="ctaHeader">Começar no WhatsApp</a>
-      </nav>
-    </div>
-  </header>
-  <main>
-    <section class="section section--gradient hero" aria-labelledby="hero-title">
-      <div class="shell hero-grid glass">
-        <div style="padding: clamp(24px, 4vw, 40px);">
-          <span class="pill" aria-label="slogan">Autoconhecimento guiado por IA</span>
-          <h1 id="hero-title" class="headline" style="margin:16px 0 12px;">
-            Converse com sua IA e descubra <span style="background:linear-gradient(120deg,var(--primary),var(--accent));-webkit-background-clip:text;color:transparent;">o que sua mente quer te dizer</span>.
-          </h1>
-          <p class="subhead">
-            O MindQuest transforma emoções em <strong>clareza</strong>, <strong>força mental</strong> e <strong>evolução pessoal</strong> —
-            <em>uma conversa por dia</em>.
-          </p>
-          <ul class="list-check" style="margin-top:1.2rem;">
-            <li><strong>clareza emocional em minutos</strong></li>
-            <li>diário inteligente que conversa com você</li>
-            <li>sem login, sem atrito — WhatsApp imediato</li>
-          </ul>
-          <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:1.6rem;">
-            <a class="button button--primary" href="WHATSAPP_LINK" id="ctaHero">Começar agora no WhatsApp</a>
-            <a class="button button--outline" href="#como-funciona">Ver como funciona</a>
-          </div>
-          <p class="muted" style="margin-top:.85rem; font-size:.9rem; color:var(--muted);">Acesso protegido por token. Sem login. Sem senha.</p>
-        </div>
-        <div class="hero-showcase" aria-hidden="true">
-          <svg viewBox="0 0 640 360" width="100%" height="100%">
-            <defs>
-              <linearGradient id="gauge" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#6b5cff"/><stop offset="1" stop-color="#0fc7d8"/>
-              </linearGradient>
-              <linearGradient id="cardFill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#eef2ff" stop-opacity=".92"/>
-              </linearGradient>
-            </defs>
-            <path d="M80,280 A200,200 0 0 1 560,280" fill="none" stroke="rgba(226,232,240,.65)" stroke-width="24" stroke-linecap="round"/>
-            <path d="M80,280 A200,200 0 0 1 360,140" fill="none" stroke="url(#gauge)" stroke-width="24" stroke-linecap="round"/>
-            <circle cx="320" cy="280" r="14" fill="#0f172a"/>
-            <line x1="320" y1="280" x2="360" y2="140" stroke="#0f172a" stroke-width="8" stroke-linecap="round"/>
-            <rect x="380" y="54" rx="18" width="208" height="94" fill="url(#cardFill)" stroke="rgba(148,163,184,.45)"/>
-            <text x="406" y="88" font-size="18" font-weight="700" fill="#0f172a">Humor</text>
-            <text x="406" y="120" font-size="30" font-weight="700" fill="#6b5cff">7.8</text>
-            <rect x="82" y="60" rx="18" width="240" height="94" fill="url(#cardFill)" stroke="rgba(148,163,184,.45)"/>
-            <text x="108" y="94" font-size="18" font-weight="700" fill="#0f172a">Energia</text>
-            <text x="108" y="126" font-size="28" font-weight="700" fill="#0fc7d8">Alta</text>
-            <rect x="240" y="250" rx="12" width="168" height="34" fill="#0f172a" opacity=".94"/>
-            <text x="256" y="273" font-size="16" fill="#f8fafc">Insights hoje: 3</text>
-          </svg>
-        </div>
-      </div>
-    </section>
-    <section class="section section--on-surface" id="dores" aria-labelledby="sec-dores">
-      <div class="shell">
-        <div class="card">
-          <h2 id="sec-dores" class="section-title">🧩 Você se identifica?</h2>
-          <p class="section-lead" style="margin-bottom:1.1rem;">Às vezes, a mente parece uma montanha-russa.<br/>Cheia de ideias, mas sem força pra sair do lugar.<br/>Veja se algo disso soa familiar:</p>
-          <ul class="list-check">
-            <li><strong>Muitas ideias no papel, mas na hora da ação você trava.</strong></li>
-            <li><strong>Começa vários projetos, mas raramente termina algo.</strong></li>
-            <li><strong>Sente que merece mais da vida, mas os resultados não aparecem.</strong></li>
-            <li><strong>Se cobra o tempo todo, mas quase nunca se sente satisfeito.</strong></li>
-            <li><strong>Quer agradar todo mundo e acaba se esgotando.</strong></li>
-            <li><strong>Pensa demais e age de menos.</strong></li>
-            <li><strong>Conquista coisas, mas o vazio não passa.</strong></li>
-          </ul>
-          <div class="divider"></div>
-          <p class="section-lead" style="font-style:italic; font-weight:600;">💭 Nada disso é fraqueza — é a mente tentando te proteger do desconforto.<br/>O MindQuest te ajuda a entender esses padrões e transformá-los em clareza e direção.</p>
-        </div>
-      </div>
-    </section>
-    <section class="section section--gradient" id="transformacao" aria-labelledby="sec-transforma">
-      <div class="shell">
-        <div class="card">
-          <div class="split">
-            <div>
-              <h2 id="sec-transforma" class="section-title">💫 O que muda com o MindQuest</h2>
-              <p class="section-lead">O MindQuest não te ensina a ser outra pessoa. Ele te ajuda a <strong>descobrir quem você é por dentro</strong> — e usar isso a seu favor.</p>
-              <ul class="list-check" style="margin-top:1.4rem;">
-                <li><strong>Você começa a se entender.</strong> As conversas te mostram por que sente o que sente — e o que isso quer te dizer.</li>
-                <li><strong>Você ganha clareza.</strong> Entende o que te trava e o que te impulsiona — sem precisar forçar mudanças.</li>
-                <li><strong>Você cria movimento.</strong> Pequenas percepções viram pequenas ações — e isso muda tudo aos poucos.</li>
-                <li><strong>Você sente leveza.</strong> O peso da cobrança dá lugar a uma mente mais estável e presente.</li>
-              </ul>
-              <p class="section-lead" style="margin-top:1.4rem; font-style:italic; font-weight:600;">🌱 MindQuest — a conversa diária que te fortalece, te revela e te coloca em movimento.</p>
-            </div>
-            <div class="card card--flat" style="height:100%; display:flex; align-items:center; justify-content:center;">
-              <svg viewBox="0 0 520 320" width="100%" height="100%">
-                <defs><linearGradient id="bars" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0fc7d8"/><stop offset="1" stop-color="#6b5cff"/></linearGradient></defs>
-                <rect x="32" y="32" width="456" height="240" fill="#fff" stroke="rgba(148,163,184,.4)" rx="18"/>
-                <rect x="82" y="230" width="48" height="28" fill="url(#bars)" rx="12"/>
-                <rect x="162" y="196" width="48" height="62" fill="url(#bars)" rx="12"/>
-                <rect x="242" y="158" width="48" height="100" fill="url(#bars)" rx="12"/>
-                <rect x="322" y="116" width="48" height="142" fill="url(#bars)" rx="12"/>
-                <rect x="402" y="92" width="48" height="166" fill="url(#bars)" rx="12"/>
-                <text x="54" y="284" font-size="13" fill="#64748b">Dia 1</text>
-                <text x="430" y="284" font-size="13" fill="#64748b">Dia 5</text>
-                <text x="60" y="28" font-size="15" fill="#1e293b" font-weight="600">Clareza emocional</text>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section--on-surface" id="como-funciona" aria-labelledby="sec-como">
-      <div class="shell">
-        <div class="card">
-          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:clamp(16px,3vw,24px); flex-wrap:wrap;">
-            <div>
-              <h2 id="sec-como" class="section-title">Como funciona</h2>
-              <p class="section-lead">A jornada começa no WhatsApp e evolui com o seu painel inteligente.</p>
-            </div>
-            <a class="button button--primary" href="WHATSAPP_LINK" id="ctaComo">Começar grátis agora</a>
-          </div>
-          <div class="steps" style="margin-top:1.8rem;">
-            <div class="step" data-step="01">
-              <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:.4rem;">Diga o que está acontecendo</h3>
-              <p class="section-lead" style="margin:0;">Envie “oi” no WhatsApp.</p>
-            </div>
-            <div class="step" data-step="02">
-              <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:.4rem;">Converse com sua IA</h3>
-              <p class="section-lead" style="margin:0;">Perguntas leves, reflexão guiada.</p>
-            </div>
-            <div class="step" data-step="03">
-              <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:.4rem;">Valide o resumo</h3>
-              <p class="section-lead" style="margin:0;">A IA traduz emoções em descobertas.</p>
-            </div>
-            <div class="step" data-step="04">
-              <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:.4rem;">Veja o painel atualizar</h3>
-              <p class="section-lead" style="margin:0;">Humor, energia e insights em tempo real.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section--gradient" id="beneficios" aria-labelledby="sec-benef">
-      <div class="shell">
-        <div class="card">
-          <h2 id="sec-benef" class="section-title">🌟 Benefícios que você vai sentir</h2>
-          <ul class="list-check">
-            <li>
-              <strong>Autoconhecimento real.</strong>
-              <span style="display:block; color:var(--muted); margin-top:.25rem;">Descubra seus padrões, gatilhos e forças internas.</span>
-            </li>
-            <li>
-              <strong>Clareza emocional.</strong>
-              <span style="display:block; color:var(--muted); margin-top:.25rem;">Entenda o que sente em minutos, sem rótulos.</span>
-            </li>
-            <li>
-              <strong>Evolução natural.</strong>
-              <span style="display:block; color:var(--muted); margin-top:.25rem;">Cresça sem pressão, no seu ritmo e do seu jeito.</span>
-            </li>
-            <li>
-              <strong>Consistência leve.</strong>
-              <span style="display:block; color:var(--muted); margin-top:.25rem;">Um pequeno passo por dia, sem se perder no processo.</span>
-            </li>
-            <li>
-              <strong>Conexão consigo mesmo.</strong>
-              <span style="display:block; color:var(--muted); margin-top:.25rem;">Volte a sentir prazer em estar com você.</span>
-            </li>
-          </ul>
-          <p class="section-lead" style="margin-top:1.2rem; font-style:italic; font-weight:600;">✨ Não é sobre mudar quem você é — é sobre entender sua mente e deixar que o melhor de você apareça.</p>
-        </div>
-      </div>
-    </section>
-    <section class="section section--on-surface" id="autoridade" aria-labelledby="sec-auto">
-      <div class="shell">
-        <div class="card">
-          <h2 id="sec-auto" class="section-title">Por trás do MindQuest</h2>
-          <div class="mini-grid">
-            <div class="mini-card">
-              <div class="mini-title">Neurociência aplicada</div>
-              <p class="section-lead" style="margin:0;">Conversas objetivas, sem jargão.</p>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Psicologia comportamental</div>
-              <p class="section-lead" style="margin:0;">Big Five, PANAS, TCC.</p>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Filosofias práticas</div>
-              <p class="section-lead" style="margin:0;">Roda da Vida, Sabotadores, estoicismo.</p>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Posicionamento</div>
-              <p class="section-lead" style="margin:0;"><em>MindQuest não é terapia nem “app de produtividade”. É autoconhecimento ativo — um diário inteligente que aprende com você.</em></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section--gradient" id="planos" aria-labelledby="sec-planos">
-      <div class="shell">
-        <div class="card">
-          <h2 id="sec-planos" class="section-title">Planos</h2>
-          <div class="plan-grid">
-            <div class="plan-card plan-card--highlight">
-              <h3 style="font-size:1.6rem; font-weight:800;">Free</h3>
-              <p class="section-lead" style="margin:.5rem 0 1.2rem;">Comece agora. Sem cartão, sem espera.</p>
-              <ul class="list-check">
-                <li>1 conversa por dia no WhatsApp</li>
-                <li>Painel com humor, energia e insights</li>
-                <li>Acesso imediato, sem login</li>
-              </ul>
-              <a class="button button--primary" href="WHATSAPP_LINK" id="ctaFree" style="margin-top:1.5rem; width:fit-content;">Começar grátis agora</a>
-            </div>
-            <div class="plan-card">
-              <span class="badge">em breve</span>
-              <h3 style="font-size:1.6rem; font-weight:800;">Premium</h3>
-              <p class="section-lead" style="margin:.5rem 0 1.2rem;">Experiência completa para quem quer acelerar.</p>
-              <ul class="list-check">
-                <li>Mentor 24h</li>
-                <li>Histórico completo</li>
-                <li>Jornadas e automações inteligentes</li>
-              </ul>
-              <a class="button button--outline" href="PREMIUM_WAITLIST_LINK" id="ctaWaitlist" style="margin-top:1.5rem; width:fit-content;">Quero ser avisado</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section--on-surface" id="faq" aria-labelledby="sec-faq">
-      <div class="shell">
-        <div class="card">
-          <h2 id="sec-faq" class="section-title">FAQ</h2>
-          <div class="faq">
-            <details>
-              <summary>O que é o MindQuest?</summary>
-              <div class="answer">Uma IA que conversa com você e traduz emoções em clareza, descobertas e micro-ações.</div>
-            </details>
-            <details>
-              <summary>Preciso pagar para começar?</summary>
-              <div class="answer">Não. A versão Free permite iniciar agora pelo WhatsApp.</div>
-            </details>
-            <details>
-              <summary>É terapia?</summary>
-              <div class="answer">Não. MindQuest não substitui psicoterapia. É autoconhecimento ativo e guiado por IA.</div>
-            </details>
-            <details>
-              <summary>Meus dados estão seguros?</summary>
-              <div class="answer">Sim. Acesso por token renovado a cada sessão. Sem login e sem senha.</div>
-            </details>
-            <details>
-              <summary>Funciona no celular?</summary>
-              <div class="answer">Sim. Conversa via WhatsApp e acompanha no dashboard.</div>
-            </details>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section section--gradient" id="call-final" aria-labelledby="sec-final">
-      <div class="shell">
-        <div class="card" style="text-align:center;">
-          <h2 id="sec-final" class="section-title">Tudo começa com uma conversa.</h2>
-          <p class="section-lead" style="margin:0 auto 1.4rem;">Diga “oi” no WhatsApp e sinta a diferença na primeira semana.</p>
-          <a class="button button--primary" href="WHATSAPP_LINK" id="ctaFooter">Começar agora no WhatsApp</a>
-          <p class="muted" style="margin-top:12px; font-size:.9rem; color:var(--muted);">Acesso protegido por token. Sem login. Sem senha.</p>
-        </div>
-      </div>
-    </section>
-  </main>
-  <footer>
-    <div class="shell">
-      <div class="footer-grid">
-        <div>
-        <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;">
-          <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true">
-            <defs><linearGradient id="footerLogo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b5cff"/><stop offset="1" stop-color="#0fc7d8"/></linearGradient></defs>
-            <circle cx="50" cy="50" r="46" fill="url(#footerLogo)"/>
-            <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#fff"/>
-          </svg>
-          <div>
-            <strong style="font-size:1.1rem;">MindQuest</strong>
-            <p style="color:#94a3b8; font-size:.9rem; margin-top:4px;">Mente clara, resultados reais</p>
-          </div>
-        </div>
-        </div>
-        <div>
-          <p style="font-weight:700; margin-bottom:8px;">Navegação</p>
-          <div style="display:flex; flex-direction:column; gap:6px; font-size:.95rem;">
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#beneficios">Benefícios</a>
-            <a href="#planos">Planos</a>
-            <a href="#faq">FAQ</a>
-          </div>
-        </div>
-        <div>
-          <p style="font-weight:700; margin-bottom:8px;">Segurança</p>
-          <p style="color:#94a3b8; font-size:.95rem;">Acesso por token renovado. Conversas privadas.</p>
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(148,163,184,.28); margin-top:24px; padding-top:18px; font-size:.85rem; color:#94a3b8;">
-        © <span id="year"></span> MindQuest. Todos os direitos reservados.
-      </div>
-    </div>
-  </footer>
-  <div class="sticky-cta" role="region" aria-label="Ação rápida">
-    <span style="font-weight:600; font-size:.95rem;">Comece grátis agora pelo WhatsApp</span>
-    <a class="button button--outline" href="WHATSAPP_LINK" id="ctaSticky">Começar</a>
-  </div>
-  <div class="overlay" id="exitModal" aria-hidden="true" aria-modal="true" role="dialog">
-    <div class="modal" role="document">
-      <h3>Antes de ir: quer receber seu primeiro insight agora?</h3>
-      <p class="muted">Leva menos de 1 minuto. Enviamos o link direto no WhatsApp.</p>
-      <div class="row">
-        <input type="tel" placeholder="Seu WhatsApp com DDI (ex: +351 912 345 678)" id="phoneInput" aria-label="WhatsApp" />
-        <button class="button button--primary" id="ctaModal">Receber no WhatsApp</button>
-      </div>
-      <p class="muted">Privado e seguro. Sem spam.</p>
-      <div class="escape">
-        <button id="forceLeave">Prefiro sair agora</button>
-      </div>
-    </div>
-  </div>
-`;
+const STEPS = [
+  {
+    title: 'Diga o que está acontecendo',
+    description: 'Envie uma mensagem no WhatsApp. Sem formulários: é só você e a IA.'
+  },
+  {
+    title: 'Receba perguntas poderosas',
+    description: 'A IA conduz uma reflexão leve e objetiva para entender seu momento.'
+  },
+  {
+    title: 'Valide a conversa',
+    description: 'Ao final, você aprova o resumo. Ajuste se achar necessário.'
+  },
+  {
+    title: 'Veja o painel atualizar',
+    description: 'Humor, energia, insights e recomendações aparecem automaticamente.'
+  }
+];
+
+const BENEFITS = [
+  {
+    title: 'Autoconhecimento real',
+    description: 'Descubra padrões, gatilhos e forças internas, sem abstrações.'
+  },
+  {
+    title: 'Clareza emocional',
+    description: 'Entenda o que sente em minutos, transformando emoção em decisão.'
+  },
+  {
+    title: 'Evolução natural',
+    description: 'Cresça no seu ritmo, com suporte contínuo e sem pressão.'
+  },
+  {
+    title: 'Consistência leve',
+    description: 'Um pequeno passo por dia — a IA garante que você mantenha o ritmo.'
+  },
+  {
+    title: 'Conexão consigo mesmo',
+    description: 'Volte a sentir prazer em estar com você, com foco e presença.'
+  }
+];
+
+const TRANSFORM_POINTS = [
+  {
+    title: 'Conversa vira clareza',
+    description: 'Você fala no WhatsApp e recebe sínteses objetivas que traduzem emoções em foco.'
+  },
+  {
+    title: 'Indicadores ao vivo',
+    description: 'Humor, energia e padrões evoluem a cada interação para mostrar exatamente onde agir.'
+  },
+  {
+    title: 'Recomendações acionáveis',
+    description: 'Micro passos personalizados mantêm seu ritmo sem burocracia ou cobrança excessiva.'
+  },
+  {
+    title: 'Você no controle',
+    description: 'Aprovação de cada resumo garante privacidade e autonomia para continuar quando quiser.'
+  }
+];
+
+const TEAM_POINTS = [
+  {
+    title: 'Neurociência aplicada',
+    description: 'Conversas objetivas, sem jargão.'
+  },
+  {
+    title: 'Psicologia comportamental',
+    description: 'Big Five, PANAS, TCC — convertidos em práticas simples.'
+  },
+  {
+    title: 'Filosofias práticas',
+    description: 'Roda da Vida, Sabotadores, estoicismo — adaptados ao seu dia a dia.'
+  },
+  {
+    title: 'Posicionamento',
+    description:
+      'MindQuest não é terapia nem app de produtividade. É autoconhecimento ativo com IA.'
+  }
+];
+
+const FAQ_ITEMS = [
+  {
+    question: 'O que é o MindQuest?',
+    answer:
+      'Um assistente de IA que conversa com você pelo WhatsApp e atualiza seu dashboard com métricas emocionais, insights e recomendações.'
+  },
+  {
+    question: 'Como inicio meu cadastro?',
+    answer: 'Clique em “Começar no WhatsApp”, diga seu nome e siga as instruções do assistente.'
+  },
+  {
+    question: 'Por que acesso por token?',
+    answer:
+      'Tokens são únicos, expiram automaticamente e garantem segurança sem a fricção de login/senha.'
+  },
+  {
+    question: 'Meus dados estão protegidos?',
+    answer:
+      'Sim. Conversas e dashboard usam tokens renovados e armazenamento seguro. Você decide quando interagir.'
+  },
+  {
+    question: 'Funciona pelo celular?',
+    answer:
+      'Sim. O fluxo via WhatsApp e o dashboard responsivo funcionam perfeitamente no smartphone.'
+  }
+];
+
+const palette = {
+  baseSurface: '#F7FAFC',
+  cardSurface: '#FFFFFF',
+  primaryTeal: '#2F6F7E',
+  secondaryMint: '#8FD3C8',
+  accentCoral: '#FF6B3D',
+  textPrimary: '#1F2937',
+  textMuted: '#4B5563',
+  divider: '#E5E7EB'
+};
 
 const LpStartPage: React.FC = () => {
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
   useEffect(() => {
-    const yearEl = document.getElementById('year');
-    if (yearEl) {
-      yearEl.textContent = new Date().getFullYear().toString();
+    document.title = 'MindQuest — Autoconhecimento com clareza ativa';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      meta.setAttribute(
+        'content',
+        'Converse com sua IA pelo WhatsApp, entenda suas emoções em minutos e acompanhe a evolução no dashboard. Clareza, serenidade e ação todos os dias.'
+      );
     }
-
-    const track = (event: string, meta: Record<string, unknown> = {}) => {
-      try {
-        console.log('[track]', event, meta);
-      } catch (error) {
-        // noop
-      }
-    };
-
-    const trackingIds = ['ctaHeader','ctaHero','ctaComo','ctaFree','ctaWaitlist','ctaFooter','ctaSticky','ctaModal'];
-    const listeners: Array<{ el: HTMLElement; handler: () => void }> = [];
-
-    trackingIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const handler = () => track(id);
-      el.addEventListener('click', handler);
-      listeners.push({ el, handler });
-    });
-
-    const cleanups: Array<() => void> = [];
-
-    const sticky = document.querySelector('.sticky-cta') as HTMLElement | null;
-    const enableExitIntent = false;
-
-    if (enableExitIntent) {
-      const exitModal = document.getElementById('exitModal');
-      const ctaModal = document.getElementById('ctaModal');
-      const phoneInput = document.getElementById('phoneInput') as HTMLInputElement | null;
-      const forceLeave = document.getElementById('forceLeave');
-
-      if (exitModal) {
-        let modalShown = false;
-        let canLeave = false;
-
-        const showExitModal = () => {
-          if (modalShown) return;
-          modalShown = true;
-          exitModal.classList.add('show');
-          exitModal.setAttribute('aria-hidden', 'false');
-        };
-
-        const handleMouseOut = (event: MouseEvent) => {
-          if (event.clientY < 10 && !modalShown) {
-            showExitModal();
-          }
-        };
-
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-          if (!canLeave) {
-            showExitModal();
-            event.preventDefault();
-            event.returnValue = '';
-            return '';
-          }
-          return undefined;
-        };
-
-        const handleModalClick = () => {
-          const value = phoneInput?.value.trim() ?? '';
-          track('lead_exit_whatsapp', { phone: value });
-          if (!phoneInput) return;
-          if (!value) {
-            window.alert('Por favor, informe seu WhatsApp (com DDI).');
-            return;
-          }
-          const msg = encodeURIComponent(`Oi! Quero começar meu MindQuest (versão gratuita). Meu número: ${value}`);
-          window.location.href = 'WHATSAPP_LINK' || `https://wa.me/351928413957?text=${msg}`;
-          canLeave = true;
-          exitModal.classList.remove('show');
-        };
-
-        const handleForceLeave = () => {
-          track('declined_exit_modal');
-          canLeave = true;
-          exitModal.classList.remove('show');
-          setTimeout(() => window.history.back(), 150);
-        };
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-          if (event.key === 'Escape' && exitModal.classList.contains('show')) {
-            exitModal.classList.remove('show');
-            setTimeout(() => exitModal.classList.add('show'), 4000);
-          }
-        };
-
-        document.addEventListener('mouseout', handleMouseOut);
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        ctaModal?.addEventListener('click', handleModalClick);
-        forceLeave?.addEventListener('click', handleForceLeave);
-        document.addEventListener('keydown', handleKeyDown);
-
-        cleanups.push(
-          () => document.removeEventListener('mouseout', handleMouseOut),
-          () => window.removeEventListener('beforeunload', handleBeforeUnload),
-          () => ctaModal?.removeEventListener('click', handleModalClick),
-          () => forceLeave?.removeEventListener('click', handleForceLeave),
-          () => document.removeEventListener('keydown', handleKeyDown)
-        );
-      }
-    }
-
-    const handleScroll = () => {
-      if (!sticky) return;
-      sticky.style.transform = window.scrollY > 300 ? 'translateY(0)' : 'translateY(120%)';
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    cleanups.push(() => window.removeEventListener('scroll', handleScroll));
-    handleScroll();
-
-    return () => {
-      listeners.forEach(({ el, handler }) => el.removeEventListener('click', handler));
-      cleanups.forEach((fn) => fn());
-    };
   }, []);
 
   return (
-    <div>
-      <style>{styleContent}</style>
-      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    <div style={{ backgroundColor: palette.baseSurface, color: palette.textPrimary }}>
+      <header
+        style={{ backgroundColor: palette.cardSurface, borderBottom: `1px solid ${palette.divider}` }}
+        className="sticky top-0 z-40"
+      >
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4">
+          <a href="/" className="flex items-center gap-3">
+            <span
+              style={{ backgroundColor: palette.primaryTeal, color: palette.cardSurface }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-xs font-semibold"
+            >
+              MQ
+            </span>
+            <div>
+              <p className="text-base font-bold tracking-wide">MindQuest</p>
+              <p style={{ color: palette.textMuted }} className="text-xs font-medium">
+                mente clara, resultados reais
+              </p>
+            </div>
+          </a>
+          <nav className="hidden items-center gap-5 text-xs font-semibold uppercase tracking-[0.25em] md:flex">
+            <a href="#identidade" className="hover:text-black">
+              Por que dói
+            </a>
+            <a href="#transformacao" className="hover:text-black">
+              Transformação
+            </a>
+            <a href="#como-funciona" className="hover:text-black">
+              Como funciona
+            </a>
+            <a href="#beneficios" className="hover:text-black">
+              Benefícios
+            </a>
+            <a href="#planos" className="hover:text-black">
+              Planos
+            </a>
+            <a href="#faq" className="hover:text-black">
+              FAQ
+            </a>
+          </nav>
+          <a
+            id="ctaHeader"
+            href={WHATSAPP_URL}
+            style={{ backgroundColor: palette.accentCoral, color: '#FFFFFF' }}
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] shadow-sm transition hover:opacity-90"
+          >
+            Começar no WhatsApp
+            <ArrowRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </header>
+
+      <main>
+        {/* HERO */}
+        <section style={{ backgroundColor: palette.cardSurface }} className="border-b border-slate-200">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-16 md:flex-row md:items-center">
+            <div className="flex-1 space-y-6">
+              <span
+                style={{ backgroundColor: palette.secondaryMint, color: palette.primaryTeal }}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]"
+              >
+                <Sparkles className="h-4 w-4" />
+                Conversa diária · clareza contínua
+              </span>
+              <h1 className="text-4xl font-black leading-tight md:text-5xl">
+                Converse com sua IA e entenda o que sua mente quer te dizer.
+              </h1>
+              <p style={{ color: palette.textMuted }} className="text-lg">
+                Uma conversa leve no WhatsApp. Você fala, a IA sintetiza e o painel mostra exatamente onde agir.
+              </p>
+              <ul className="space-y-3 text-sm" style={{ color: palette.textMuted }}>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 style={{ color: palette.primaryTeal }} className="mt-1 h-4 w-4 flex-shrink-0" />
+                  Clareza emocional em minutos.
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 style={{ color: palette.primaryTeal }} className="mt-1 h-4 w-4 flex-shrink-0" />
+                  Diário inteligente que conversa com você.
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 style={{ color: palette.primaryTeal }} className="mt-1 h-4 w-4 flex-shrink-0" />
+                  Sem login, sem atrito — apenas o seu nome.
+                </li>
+              </ul>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  id="ctaHero"
+                  href={WHATSAPP_URL}
+                  style={{ backgroundColor: palette.accentCoral, color: '#FFFFFF' }}
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition hover:opacity-90"
+                >
+                  Começar agora
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+                <span
+                  style={{
+                    borderColor: palette.divider,
+                    color: palette.textMuted
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium"
+                >
+                  <Shield className="h-4 w-4" />
+                  Acesso por token renovado
+                </span>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-4">
+              <div
+                style={{
+                  backgroundColor: palette.baseSurface,
+                  borderColor: palette.divider
+                }}
+                className="rounded-3xl border p-6 shadow-sm"
+              >
+                <div className="flex items-center justify-between text-xs" style={{ color: palette.textMuted }}>
+                  <span>Resumo da sessão</span>
+                  <span>MindQuest Beta</span>
+                </div>
+                <div className="mt-4 space-y-3 text-sm" style={{ color: palette.textMuted }}>
+                  <div
+                    style={{ backgroundColor: palette.cardSurface, borderColor: palette.divider }}
+                    className="rounded-2xl border p-4 shadow-sm"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                      Conversa de hoje
+                    </p>
+                    <p className="mt-2">
+                      “Estou disperso esta semana. Não consigo me concentrar no trabalho.”
+                    </p>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div
+                      style={{ backgroundColor: palette.cardSurface, borderColor: palette.divider }}
+                      className="rounded-2xl border p-4 shadow-sm"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                        Humor
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold" style={{ color: palette.primaryTeal }}>
+                        7.8
+                      </p>
+                      <p className="text-xs" style={{ color: palette.textMuted }}>
+                        Estável vs semana passada
+                      </p>
+                    </div>
+                    <div
+                      style={{ backgroundColor: palette.cardSurface, borderColor: palette.divider }}
+                      className="rounded-2xl border p-4 shadow-sm"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                        Emoção dominante
+                      </p>
+                      <p className="mt-2 font-semibold" style={{ color: palette.primaryTeal }}>
+                        Antecipação
+                      </p>
+                      <p className="text-xs" style={{ color: palette.textMuted }}>
+                        Contexto: foco e planejamento
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* IDENTIFICAÇÃO */}
+        <section id="identidade" className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="grid gap-12 lg:grid-cols-[1.1fr,0.9fr]">
+              <div className="space-y-6">
+                <h2 className="text-3xl font-extrabold md:text-4xl">🧩 Você se identifica?</h2>
+                <p style={{ color: palette.textMuted }} className="text-base leading-relaxed">
+                  Às vezes, a mente parece uma montanha-russa. Muita ideia, pouca ação. Veja se algo disso soa familiar:
+                </p>
+                <div className="grid gap-3 text-sm md:grid-cols-2">
+                  {IDENTIFY_POINTS.map((point) => (
+                    <div
+                      key={point}
+                      style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                      className="flex items-start gap-2 rounded-xl border p-3"
+                    >
+                      <span
+                        style={{ backgroundColor: palette.primaryTeal }}
+                        className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                      />
+                      <span style={{ color: palette.textMuted }}>{point}</span>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{ backgroundColor: palette.secondaryMint, color: palette.primaryTeal }}
+                  className="rounded-2xl px-4 py-3 text-sm font-medium"
+                >
+                  Nada disso é fraqueza — é a mente tentando te proteger. O MindQuest traduz esses padrões em clareza e
+                  direção.
+                </div>
+              </div>
+              <div
+                style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                className="space-y-5 rounded-3xl border p-6 shadow-sm"
+              >
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                    Score atual
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold" style={{ color: palette.primaryTeal }}>
+                    Clareza 62%
+                  </p>
+                  <p className="text-xs" style={{ color: palette.textMuted }}>
+                    Meta: 85%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                    Padrão detectado
+                  </p>
+                  <p className="mt-2 text-lg font-semibold" style={{ color: palette.primaryTeal }}>
+                    Autocrítica constante
+                  </p>
+                  <p className="text-sm" style={{ color: palette.textMuted }}>
+                    Seu diálogo interno ainda olha mais para o erro do que para o avanço incremental.
+                  </p>
+                </div>
+                <div
+                  style={{ backgroundColor: palette.baseSurface, borderColor: palette.divider }}
+                  className="rounded-2xl border p-4 text-sm"
+                >
+                  Recomendações do dia:
+                  <ul className="mt-2 space-y-1" style={{ color: palette.textMuted }}>
+                    <li>• Registrar uma vitória ao final do dia.</li>
+                    <li>• Revisar sabotadores às quartas.</li>
+                    <li>• Reduzir compromissos paralelos neste ciclo.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TRANSFORMAÇÃO */}
+        <section id="transformacao" style={{ backgroundColor: palette.cardSurface }} className="border-b border-slate-200">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-16 md:flex-row">
+            <div className="flex-1 space-y-6">
+              <h2 className="text-3xl font-extrabold md:text-4xl">💫 O que muda com o MindQuest</h2>
+              <p style={{ color: palette.textMuted }} className="text-base">
+                O MindQuest não te ensina a ser outra pessoa. Ele te ajuda a descobrir quem você é por dentro — e usar isso a seu favor.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {TRANSFORM_POINTS.map((item) => (
+                  <div
+                    key={item.title}
+                    style={{ borderColor: palette.divider, backgroundColor: palette.baseSurface }}
+                    className="rounded-2xl border p-4 text-sm shadow-sm"
+                  >
+                    <p className="text-base font-semibold" style={{ color: palette.primaryTeal }}>
+                      {item.title}
+                    </p>
+                    <p className="mt-2" style={{ color: palette.textMuted }}>
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div
+              style={{ borderColor: palette.divider, backgroundColor: palette.baseSurface }}
+              className="flex-1 space-y-4 rounded-3xl border p-6 shadow-sm"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: palette.textMuted }}>
+                Indicadores-chave
+              </p>
+              {[
+                { label: 'Clareza mental', value: 74 },
+                { label: 'Consistência diária', value: 68 },
+                { label: 'Autocompaixão', value: 62 },
+                { label: 'Foco nas prioridades', value: 71 }
+              ].map((metric) => (
+                <div key={metric.label}>
+                  <div className="flex items-center justify-between text-xs font-semibold" style={{ color: palette.textMuted }}>
+                    <span>{metric.label}</span>
+                    <span>{metric.value}%</span>
+                  </div>
+                  <div style={{ backgroundColor: palette.divider }} className="mt-2 h-2 rounded-full">
+                    <div
+                      style={{ width: `${metric.value}%`, backgroundColor: palette.primaryTeal }}
+                      className="h-2 rounded-full"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* BENEFÍCIOS */}
+        <section id="beneficios" className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-extrabold md:text-4xl">🌟 Benefícios que você vai sentir</h2>
+              <p style={{ color: palette.textMuted }} className="mt-3 text-base">
+                Clareza, serenidade e ação — na mesma experiência.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {BENEFITS.map((benefit) => (
+                <div
+                  key={benefit.title}
+                  style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                  className="rounded-2xl border p-5 text-sm shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                  <p className="text-base font-semibold" style={{ color: palette.primaryTeal }}>
+                    {benefit.title}
+                  </p>
+                  <p className="mt-2" style={{ color: palette.textMuted }}>
+                    {benefit.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TEAM */}
+        <section className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="mb-8 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em]" style={{ color: palette.textMuted }}>
+              <Compass className="h-4 w-4" />
+              Por trás do MindQuest
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {TEAM_POINTS.map((item) => (
+                <div
+                  key={item.title}
+                  style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                  className="rounded-2xl border p-5 text-sm shadow-sm"
+                >
+                  <p className="text-base font-semibold" style={{ color: palette.primaryTeal }}>
+                    {item.title}
+                  </p>
+                  <p className="mt-2" style={{ color: palette.textMuted }}>
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COMO FUNCIONA */}
+        <section id="como-funciona" className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-extrabold md:text-4xl">Como funcionam as conversas</h2>
+              <p style={{ color: palette.textMuted }} className="mt-3 text-base">
+                Cada conversa gera dados, insights e recomendações — sempre com você no controle.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {STEPS.map((step, index) => (
+                <div
+                  key={step.title}
+                  style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                  className="relative rounded-2xl border p-5 shadow-sm"
+                >
+                  <div
+                    style={{ backgroundColor: palette.primaryTeal, color: '#FFFFFF' }}
+                    className="absolute -top-4 -left-4 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold"
+                  >
+                    {index + 1}
+                  </div>
+                  <div
+                    style={{ backgroundColor: palette.secondaryMint, color: palette.primaryTeal }}
+                    className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl"
+                  >
+                    {index === 0 && <MessageSquare className="h-5 w-5" />}
+                    {index === 1 && <Brain className="h-5 w-5" />}
+                    {index === 2 && <CheckCircle2 className="h-5 w-5" />}
+                    {index === 3 && <Target className="h-5 w-5" />}
+                  </div>
+                  <p className="text-base font-semibold" style={{ color: palette.primaryTeal }}>
+                    {step.title}
+                  </p>
+                  <p className="mt-2 text-sm" style={{ color: palette.textMuted }}>
+                    {step.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PLANOS */}
+        <section id="planos" className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-extrabold md:text-4xl">Planos</h2>
+              <p style={{ color: palette.textMuted }} className="mt-3 text-base">
+                Comece grátis e evolua para o Premium quando quiser mentoria ativa.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div
+                style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                className="space-y-4 rounded-2xl border p-6 shadow-sm"
+              >
+                <p className="text-lg font-semibold" style={{ color: palette.primaryTeal }}>
+                  Free
+                </p>
+                <ul style={{ color: palette.textMuted }} className="space-y-2 text-sm">
+                  <li>• 1 conversa por dia no WhatsApp</li>
+                  <li>• Dashboard com humor, energia e insights</li>
+                  <li>• Acesso imediato, sem login</li>
+                </ul>
+                <a
+                  id="ctaFree"
+                  href={WHATSAPP_URL}
+                  style={{ backgroundColor: palette.accentCoral, color: '#FFFFFF' }}
+                  className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition hover:opacity-90"
+                >
+                  Começar grátis
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+              <div
+                style={{ borderColor: palette.divider, backgroundColor: palette.cardSurface }}
+                className="space-y-4 rounded-2xl border p-6 shadow-sm"
+              >
+                <p className="text-lg font-semibold" style={{ color: palette.primaryTeal }}>
+                  Premium (em breve)
+                </p>
+                <ul style={{ color: palette.textMuted }} className="space-y-2 text-sm">
+                  <li>• Sessões ilimitadas</li>
+                  <li>• Histórico completo com busca semântica</li>
+                  <li>• Rotinas automatizadas e mentor 24h</li>
+                </ul>
+                <a
+                  id="ctaWaitlist"
+                  href={WHATSAPP_PREMIUM_URL}
+                  style={{
+                    borderColor: palette.primaryTeal,
+                    color: palette.primaryTeal
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition hover:bg-slate-100"
+                >
+                  Quero ser avisado
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-5xl px-5 py-16">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-extrabold md:text-4xl">Perguntas frequentes</h2>
+              <p style={{ color: palette.textMuted }} className="mt-3 text-base">
+                Reunimos as perguntas mais comuns para você decidir com segurança.
+              </p>
+            </div>
+            <div className="mx-auto max-w-3xl divide-y" style={{ borderColor: palette.divider }}>
+              {FAQ_ITEMS.map((item, index) => {
+                const isOpen = openFaq === index;
+                return (
+                  <div key={item.question}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                      className="flex w-full items-center justify-between py-4 text-left text-base font-semibold"
+                    >
+                      <span>{item.question}</span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        style={{ color: palette.primaryTeal }}
+                      />
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all ${isOpen ? 'max-h-40' : 'max-h-0'}`}
+                      style={{ color: palette.textMuted }}
+                    >
+                      <p className="pb-4 text-sm">{item.answer}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section style={{ backgroundColor: palette.cardSurface }} className="border-b border-slate-200">
+          <div className="mx-auto w-full max-w-4xl px-5 py-16 text-center">
+            <h2 className="text-3xl font-extrabold md:text-4xl">Tudo começa com uma conversa.</h2>
+            <p style={{ color: palette.textMuted }} className="mt-4 text-base">
+              Diga “oi” no WhatsApp e sinta a diferença na primeira semana. Clareza, serenidade e movimento.
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                id="ctaFooter"
+                href={WHATSAPP_URL}
+                style={{ backgroundColor: palette.accentCoral, color: '#FFFFFF' }}
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:opacity-90"
+              >
+                Começar agora
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href={WHATSAPP_PREMIUM_URL}
+                style={{ borderColor: palette.primaryTeal, color: palette.primaryTeal }}
+                className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition hover:bg-slate-100"
+              >
+                Conhecer Premium
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+            <p style={{ color: palette.textMuted }} className="mt-4 text-xs">
+              Segurança: acesso por token renovado a cada sessão. Sem login e sem senha.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer style={{ backgroundColor: palette.cardSurface, borderTop: `1px solid ${palette.divider}` }}>
+        <div className="mx-auto w-full max-w-5xl px-5 py-12">
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span
+                  style={{ backgroundColor: palette.primaryTeal, color: palette.cardSurface }}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-xs font-semibold"
+                >
+                  MQ
+                </span>
+                <div>
+                  <p className="text-sm font-semibold">MindQuest</p>
+                  <p style={{ color: palette.textMuted }} className="text-xs">
+                    mente clara, resultados reais
+                  </p>
+                </div>
+              </div>
+              <p style={{ color: palette.textMuted }} className="text-xs">
+                Autoconhecimento guiado por IA — serenidade para decidir, ação para evoluir.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Navegação</p>
+              <ul style={{ color: palette.textMuted }} className="mt-2 space-y-1 text-xs">
+                <li>
+                  <a href="#como-funciona" className="hover:text-black">
+                    Como funciona
+                  </a>
+                </li>
+                <li>
+                  <a href="#beneficios" className="hover:text-black">
+                    Benefícios
+                  </a>
+                </li>
+                <li>
+                  <a href="#planos" className="hover:text-black">
+                    Planos
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-black">
+                    FAQ
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Contato</p>
+              <p style={{ color: palette.textMuted }} className="mt-2 text-xs">
+                suporte@mindquest.pt
+              </p>
+            </div>
+          </div>
+          <p style={{ color: palette.textMuted }} className="mt-6 text-xs">
+            © {new Date().getFullYear()} MindQuest. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
