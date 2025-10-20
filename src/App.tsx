@@ -18,6 +18,7 @@ import ConquistasPage from './pages/ConquistasPage';
 import SabotadorDetailPage from './pages/SabotadorDetailPage';
 import ResumoConversasPage from './pages/ResumoConversasPage';
 import HomePage from './pages/HomePage';
+import PanasDetailPage from './pages/PanasDetailPage';
 import { authService } from './services/authService';
 
 function App() {
@@ -126,6 +127,14 @@ function App() {
     return (
       <AuthGuard>
         <SabotadorDetailPage />
+      </AuthGuard>
+    );
+  }
+
+  if (view === 'panasDetail') {
+    return (
+      <AuthGuard>
+        <PanasDetailPage />
       </AuthGuard>
     );
   }

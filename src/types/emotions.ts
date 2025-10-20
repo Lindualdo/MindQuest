@@ -285,7 +285,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -309,7 +309,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;

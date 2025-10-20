@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Info, Lightbulb, Target, ShieldCheck, Compass } from 'lucide-react';
+import { ArrowRight, Lightbulb, Target, ShieldCheck, Compass } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
 import { getSabotadorById } from '../../data/sabotadoresCatalogo';
@@ -130,14 +130,14 @@ const SabotadorCard: React.FC = () => {
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={handleOpenDetail}
-          className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+          className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2"
           type="button"
         >
-          Saber mais
-          <Info size={16} className="text-white/80" />
+          Saiba mais sobre o sabotador
+          <ArrowRight size={16} className="text-white/80" />
         </motion.button>
       </motion.div>
     </Card>
