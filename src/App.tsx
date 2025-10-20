@@ -61,16 +61,14 @@ function App() {
   };
 
   const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
+  const normalizedPath = sanitizedPath.replace(/\.html$/, '');
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const forceHomeView = searchParams?.get('public') === '1';
 
-  const isBlogHome =
-    sanitizedPath === '/blog' ||
-    sanitizedPath === '/blog/home' ||
-    sanitizedPath === '/blog/';
-  const isBlogLpStart = sanitizedPath === '/blog/lp-start';
-  const isBlogPremium = sanitizedPath === '/blog/premium';
+  const isBlogHome = normalizedPath === '/blog' || normalizedPath === '/blog/home';
+  const isBlogLpStart = normalizedPath === '/blog/lp-start';
+  const isBlogPremium = normalizedPath === '/blog/premium';
 
   if (forceHomeView || isBlogHome) {
     return <HomePage />;
@@ -84,7 +82,7 @@ function App() {
     return <PremiumLandingPage />;
   }
 
-  if (sanitizedPath.startsWith('/blog/')) {
+  if (normalizedPath.startsWith('/blog/')) {
     return <NotFound message="Esta página de conteúdo ainda não existe. Atualize os links para os novos caminhos." />;
   }
 

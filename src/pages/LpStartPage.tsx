@@ -176,7 +176,7 @@ const LpStartPage: React.FC = () => {
               </p>
             </div>
           </a>
-          <nav className="hidden items-center gap-5 text-xs font-semibold uppercase tracking-[0.25em] md:flex">
+          <nav className="hidden items-center gap-5 whitespace-nowrap text-xs font-semibold uppercase tracking-[0.08em] md:flex">
             <a href="#identidade" className="hover:text-black">
               Por que dói
             </a>
@@ -200,7 +200,7 @@ const LpStartPage: React.FC = () => {
             id="ctaHeader"
             href={WHATSAPP_URL}
             style={{ backgroundColor: palette.accentCoral, color: '#FFFFFF' }}
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] shadow-sm transition hover:opacity-90"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] shadow-sm transition hover:opacity-90"
           >
             Começar no WhatsApp
             <ArrowRight className="h-3.5 w-3.5" />
