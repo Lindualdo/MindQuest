@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Brain, RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/HumorHistoryPage';
@@ -174,14 +174,29 @@ function App() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:h-16">
               {/* Logo e Nome */}
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
-                  <Brain className="text-white" size={24} />
-                </div>
+                <svg
+                  width={36}
+                  height={36}
+                  viewBox="0 0 100 100"
+                  aria-hidden="true"
+                  className="drop-shadow-sm"
+                >
+                  <defs>
+                    <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stopColor="#6b5cff" />
+                      <stop offset="1" stopColor="#0fc7d8" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="46" fill="url(#logo-gradient)" />
+                  <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#ffffff" />
+                </svg>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     MindQuest
                   </h1>
-                  <p className="text-xs text-gray-500">v1.1 - Mente clara, resultados reais</p>
+                  <p className="text-xs text-gray-500">
+                    Mente clara, resultados reais · v1.1
+                  </p>
                 </div>
               </div>
 

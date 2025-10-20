@@ -208,7 +208,7 @@ const htmlContent = `
         </svg>
         <div>
           <strong style="font-size:1.1rem;">MindQuest</strong>
-          <p style="font-size:.75rem; letter-spacing:.32em; text-transform:uppercase; color:var(--muted-light); font-weight:600;">Mente clara</p>
+          <p style="margin-top:4px; font-size:.85rem; color:var(--muted-light); font-weight:500;">Mente clara, resultados reais</p>
         </div>
       </div>
       <nav style="display:flex; align-items:center; gap:clamp(16px,2.8vw,32px);">
@@ -226,7 +226,7 @@ const htmlContent = `
     <section class="section section--gradient hero" aria-labelledby="hero-title">
       <div class="shell hero-grid glass">
         <div style="padding: clamp(24px, 4vw, 40px);">
-          <span class="pill" aria-label="slogan">Mente clara, resultados reais</span>
+          <span class="pill" aria-label="slogan">Autoconhecimento guiado por IA</span>
           <h1 id="hero-title" class="headline" style="margin:16px 0 12px;">
             Converse com sua IA e descubra <span style="background:linear-gradient(120deg,var(--primary),var(--accent));-webkit-background-clip:text;color:transparent;">o que sua mente quer te dizer</span>.
           </h1>
@@ -274,15 +274,19 @@ const htmlContent = `
     <section class="section section--on-surface" id="dores" aria-labelledby="sec-dores">
       <div class="shell">
         <div class="card">
-          <h2 id="sec-dores" class="section-title">Você se reconhece?</h2>
+          <h2 id="sec-dores" class="section-title">🧩 Você se identifica?</h2>
+          <p class="section-lead" style="margin-bottom:1.1rem;">Às vezes, a mente parece uma montanha-russa.<br/>Cheia de ideias, mas sem força pra sair do lugar.<br/>Veja se algo disso soa familiar:</p>
           <ul class="list-check">
-            <li>Pensamento demais, ação de menos?</li>
-            <li>Vive no automático e sente-se desconectado de si?</li>
-            <li>Conquista coisas, mas o vazio não passa?</li>
-            <li>Quer evoluir, mas não sabe por onde começar?</li>
+            <li><strong>Muitas ideias no papel, mas na hora da ação você trava.</strong></li>
+            <li><strong>Começa vários projetos, mas raramente termina algo.</strong></li>
+            <li><strong>Sente que merece mais da vida, mas os resultados não aparecem.</strong></li>
+            <li><strong>Se cobra o tempo todo, mas quase nunca se sente satisfeito.</strong></li>
+            <li><strong>Quer agradar todo mundo e acaba se esgotando.</strong></li>
+            <li><strong>Pensa demais e age de menos.</strong></li>
+            <li><strong>Conquista coisas, mas o vazio não passa.</strong></li>
           </ul>
           <div class="divider"></div>
-          <p class="section-lead"><span style="background:linear-gradient(120deg,var(--primary),var(--accent));-webkit-background-clip:text;color:transparent;font-weight:700;">O que você sente tem valor</span> — nós traduzimos isso em <strong>clareza emocional</strong> e <strong>pequenas ações diárias</strong>.</p>
+          <p class="section-lead" style="font-style:italic; font-weight:600;">💭 Nada disso é fraqueza — é a mente tentando te proteger do desconforto.<br/>O MindQuest te ajuda a entender esses padrões e transformá-los em clareza e direção.</p>
         </div>
       </div>
     </section>
@@ -291,22 +295,15 @@ const htmlContent = `
         <div class="card">
           <div class="split">
             <div>
-              <h2 id="sec-transforma" class="section-title">Antes → Depois</h2>
-              <div class="split" style="gap:24px;">
-                <div class="stat-block">
-                  <span class="tagline">Antes</span>
-                  <span>Confusão mental</span>
-                  <span>Oscilações emocionais</span>
-                  <span>Falta de direção</span>
-                </div>
-                <div class="stat-block">
-                  <span class="tagline">Depois</span>
-                  <span>Clareza do que sente (e por quê)</span>
-                  <span>Estabilidade emocional crescente</span>
-                  <span>Foco e força interior para agir</span>
-                </div>
-              </div>
-              <p class="section-lead" style="margin-top:1.4rem;"><em style="background:linear-gradient(120deg,var(--primary),var(--accent));-webkit-background-clip:text;color:transparent;font-weight:700;">uma conversa por dia</em> muda a forma como você pensa e sente.</p>
+              <h2 id="sec-transforma" class="section-title">💫 O que muda com o MindQuest</h2>
+              <p class="section-lead">O MindQuest não te ensina a ser outra pessoa. Ele te ajuda a <strong>descobrir quem você é por dentro</strong> — e usar isso a seu favor.</p>
+              <ul class="list-check" style="margin-top:1.4rem;">
+                <li><strong>Você começa a se entender.</strong> As conversas te mostram por que sente o que sente — e o que isso quer te dizer.</li>
+                <li><strong>Você ganha clareza.</strong> Entende o que te trava e o que te impulsiona — sem precisar forçar mudanças.</li>
+                <li><strong>Você cria movimento.</strong> Pequenas percepções viram pequenas ações — e isso muda tudo aos poucos.</li>
+                <li><strong>Você sente leveza.</strong> O peso da cobrança dá lugar a uma mente mais estável e presente.</li>
+              </ul>
+              <p class="section-lead" style="margin-top:1.4rem; font-style:italic; font-weight:600;">🌱 MindQuest — a conversa diária que te fortalece, te revela e te coloca em movimento.</p>
             </div>
             <div class="card card--flat" style="height:100%; display:flex; align-items:center; justify-content:center;">
               <svg viewBox="0 0 520 320" width="100%" height="100%">
@@ -360,33 +357,30 @@ const htmlContent = `
     <section class="section section--gradient" id="beneficios" aria-labelledby="sec-benef">
       <div class="shell">
         <div class="card">
-          <h2 id="sec-benef" class="section-title">Benefícios</h2>
-          <div class="mini-grid">
-            <div class="mini-card">
-              <div class="mini-title">Clareza emocional instantânea</div>
-              <ul class="list-check" style="margin-top:.4rem;">
-                <li>Veja como você está se sentindo em segundos</li>
-              </ul>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Descoberta de padrões</div>
-              <ul class="list-check" style="margin-top:.4rem;">
-                <li>Identifique gatilhos e tendências mentais</li>
-              </ul>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Evolução guiada</div>
-              <ul class="list-check" style="margin-top:.4rem;">
-                <li>Converta sentimentos em micro-ações no seu ritmo</li>
-              </ul>
-            </div>
-            <div class="mini-card">
-              <div class="mini-title">Sem fricção</div>
-              <ul class="list-check" style="margin-top:.4rem;">
-                <li>WhatsApp + dashboard. Sem login, sem senha</li>
-              </ul>
-            </div>
-          </div>
+          <h2 id="sec-benef" class="section-title">🌟 Benefícios que você vai sentir</h2>
+          <ul class="list-check">
+            <li>
+              <strong>Autoconhecimento real.</strong>
+              <span style="display:block; color:var(--muted); margin-top:.25rem;">Descubra seus padrões, gatilhos e forças internas.</span>
+            </li>
+            <li>
+              <strong>Clareza emocional.</strong>
+              <span style="display:block; color:var(--muted); margin-top:.25rem;">Entenda o que sente em minutos, sem rótulos.</span>
+            </li>
+            <li>
+              <strong>Evolução natural.</strong>
+              <span style="display:block; color:var(--muted); margin-top:.25rem;">Cresça sem pressão, no seu ritmo e do seu jeito.</span>
+            </li>
+            <li>
+              <strong>Consistência leve.</strong>
+              <span style="display:block; color:var(--muted); margin-top:.25rem;">Um pequeno passo por dia, sem se perder no processo.</span>
+            </li>
+            <li>
+              <strong>Conexão consigo mesmo.</strong>
+              <span style="display:block; color:var(--muted); margin-top:.25rem;">Volte a sentir prazer em estar com você.</span>
+            </li>
+          </ul>
+          <p class="section-lead" style="margin-top:1.2rem; font-style:italic; font-weight:600;">✨ Não é sobre mudar quem você é — é sobre entender sua mente e deixar que o melhor de você apareça.</p>
         </div>
       </div>
     </section>
@@ -489,15 +483,17 @@ const htmlContent = `
     <div class="shell">
       <div class="footer-grid">
         <div>
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true">
-              <defs><linearGradient id="footerLogo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b5cff"/><stop offset="1" stop-color="#0fc7d8"/></linearGradient></defs>
-              <circle cx="50" cy="50" r="46" fill="url(#footerLogo)"/>
-              <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#fff"/>
-            </svg>
+        <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;">
+          <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true">
+            <defs><linearGradient id="footerLogo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b5cff"/><stop offset="1" stop-color="#0fc7d8"/></linearGradient></defs>
+            <circle cx="50" cy="50" r="46" fill="url(#footerLogo)"/>
+            <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#fff"/>
+          </svg>
+          <div>
             <strong style="font-size:1.1rem;">MindQuest</strong>
+            <p style="color:#94a3b8; font-size:.9rem; margin-top:4px;">Mente clara, resultados reais</p>
           </div>
-          <p style="color:#94a3b8;">Mente clara, resultados reais.</p>
+        </div>
         </div>
         <div>
           <p style="font-weight:700; margin-bottom:8px;">Navegação</p>
@@ -564,91 +560,100 @@ const LpStartPage: React.FC = () => {
       listeners.push({ el, handler });
     });
 
-    const exitModal = document.getElementById('exitModal');
+    const cleanups: Array<() => void> = [];
+
     const sticky = document.querySelector('.sticky-cta') as HTMLElement | null;
-    const ctaModal = document.getElementById('ctaModal');
-    const phoneInput = document.getElementById('phoneInput') as HTMLInputElement | null;
-    const forceLeave = document.getElementById('forceLeave');
+    const enableExitIntent = false;
 
-    let modalShown = false;
-    let canLeave = false;
+    if (enableExitIntent) {
+      const exitModal = document.getElementById('exitModal');
+      const ctaModal = document.getElementById('ctaModal');
+      const phoneInput = document.getElementById('phoneInput') as HTMLInputElement | null;
+      const forceLeave = document.getElementById('forceLeave');
 
-    const showExitModal = () => {
-      if (modalShown || !exitModal) return;
-      modalShown = true;
-      exitModal.classList.add('show');
-      exitModal.setAttribute('aria-hidden', 'false');
-    };
+      if (exitModal) {
+        let modalShown = false;
+        let canLeave = false;
 
-    const handleMouseOut = (event: MouseEvent) => {
-      if (event.clientY < 10 && !modalShown) {
-        showExitModal();
+        const showExitModal = () => {
+          if (modalShown) return;
+          modalShown = true;
+          exitModal.classList.add('show');
+          exitModal.setAttribute('aria-hidden', 'false');
+        };
+
+        const handleMouseOut = (event: MouseEvent) => {
+          if (event.clientY < 10 && !modalShown) {
+            showExitModal();
+          }
+        };
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+          if (!canLeave) {
+            showExitModal();
+            event.preventDefault();
+            event.returnValue = '';
+            return '';
+          }
+          return undefined;
+        };
+
+        const handleModalClick = () => {
+          const value = phoneInput?.value.trim() ?? '';
+          track('lead_exit_whatsapp', { phone: value });
+          if (!phoneInput) return;
+          if (!value) {
+            window.alert('Por favor, informe seu WhatsApp (com DDI).');
+            return;
+          }
+          const msg = encodeURIComponent(`Oi! Quero começar meu MindQuest (versão gratuita). Meu número: ${value}`);
+          window.location.href = 'WHATSAPP_LINK' || `https://wa.me/351928413957?text=${msg}`;
+          canLeave = true;
+          exitModal.classList.remove('show');
+        };
+
+        const handleForceLeave = () => {
+          track('declined_exit_modal');
+          canLeave = true;
+          exitModal.classList.remove('show');
+          setTimeout(() => window.history.back(), 150);
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (event.key === 'Escape' && exitModal.classList.contains('show')) {
+            exitModal.classList.remove('show');
+            setTimeout(() => exitModal.classList.add('show'), 4000);
+          }
+        };
+
+        document.addEventListener('mouseout', handleMouseOut);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        ctaModal?.addEventListener('click', handleModalClick);
+        forceLeave?.addEventListener('click', handleForceLeave);
+        document.addEventListener('keydown', handleKeyDown);
+
+        cleanups.push(
+          () => document.removeEventListener('mouseout', handleMouseOut),
+          () => window.removeEventListener('beforeunload', handleBeforeUnload),
+          () => ctaModal?.removeEventListener('click', handleModalClick),
+          () => forceLeave?.removeEventListener('click', handleForceLeave),
+          () => document.removeEventListener('keydown', handleKeyDown)
+        );
       }
-    };
-
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!canLeave) {
-        showExitModal();
-        event.preventDefault();
-        event.returnValue = '';
-        return '';
-      }
-      return undefined;
-    };
-
-    const handleModalClick = () => {
-      const value = phoneInput?.value.trim() ?? '';
-      track('lead_exit_whatsapp', { phone: value });
-      if (!phoneInput) return;
-      if (!value) {
-        window.alert('Por favor, informe seu WhatsApp (com DDI).');
-        return;
-      }
-      const msg = encodeURIComponent(`Oi! Quero começar meu MindQuest (versão gratuita). Meu número: ${value}`);
-      window.location.href = 'WHATSAPP_LINK' || `https://wa.me/351928413957?text=${msg}`;
-      canLeave = true;
-      exitModal?.classList.remove('show');
-    };
-
-    const handleForceLeave = () => {
-      track('declined_exit_modal');
-      canLeave = true;
-      exitModal?.classList.remove('show');
-      setTimeout(() => window.history.back(), 150);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && exitModal?.classList.contains('show')) {
-        exitModal.classList.remove('show');
-        setTimeout(() => exitModal.classList.add('show'), 4000);
-      }
-    };
+    }
 
     const handleScroll = () => {
       if (!sticky) return;
-      if (window.scrollY > 300) {
-        sticky.style.transform = 'translateY(0)';
-      } else {
-        sticky.style.transform = 'translateY(120%)';
-      }
+      sticky.style.transform = window.scrollY > 300 ? 'translateY(0)' : 'translateY(120%)';
     };
 
-    document.addEventListener('mouseout', handleMouseOut);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    ctaModal?.addEventListener('click', handleModalClick);
-    forceLeave?.addEventListener('click', handleForceLeave);
-    document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('scroll', handleScroll);
+    cleanups.push(() => window.removeEventListener('scroll', handleScroll));
     handleScroll();
 
     return () => {
       listeners.forEach(({ el, handler }) => el.removeEventListener('click', handler));
-      document.removeEventListener('mouseout', handleMouseOut);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      ctaModal?.removeEventListener('click', handleModalClick);
-      forceLeave?.removeEventListener('click', handleForceLeave);
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('scroll', handleScroll);
+      cleanups.forEach((fn) => fn());
     };
   }, []);
 
