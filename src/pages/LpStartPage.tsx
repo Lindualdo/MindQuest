@@ -131,14 +131,14 @@ const FAQ_ITEMS = [
 ];
 
 const palette = {
-  baseSurface: '#F7FAFC',
+  baseSurface: '#F6F0FF',
   cardSurface: '#FFFFFF',
-  primaryTeal: '#2F6F7E',
-  secondaryMint: '#8FD3C8',
-  accentCoral: '#FF6B3D',
-  textPrimary: '#1F2937',
-  textMuted: '#4B5563',
-  divider: '#E5E7EB'
+  primaryTeal: '#7444C0',
+  secondaryMint: '#E5D8FF',
+  accentCoral: '#A36EF5',
+  textPrimary: '#2D1B4C',
+  textMuted: '#5E4A80',
+  divider: '#E3D8FF'
 };
 
 const LpStartPage: React.FC = () => {

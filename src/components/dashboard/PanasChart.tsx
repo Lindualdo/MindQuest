@@ -108,7 +108,7 @@ const PanasChart: React.FC = () => {
         <button
           type="button"
           onClick={handleLearnMore}
-          className="inline-flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2"
+          className="inline-flex w-fit items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-200/60 transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:ring-offset-2"
         >
           Saiba mais sobre o PANAS
           <ArrowRight size={16} />

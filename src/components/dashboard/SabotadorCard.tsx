@@ -133,7 +133,7 @@ const SabotadorCard: React.FC = () => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleOpenDetail}
-          className="mt-auto self-center inline-flex w-fit items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2"
+          className="mt-auto self-center inline-flex w-fit items-center justify-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-200/60 transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:ring-offset-2"
           type="button"
         >
           Saiba mais sobre o sabotador

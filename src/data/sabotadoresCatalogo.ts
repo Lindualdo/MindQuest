@@ -578,5 +578,21 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
   ],
 };
 
-export const getSabotadorById = (id: string): SabotadorCatalogoEntry | undefined =>
-  sabotadoresCatalogo.entries.find((entry) => entry.id === id);
+const normalizeSabotadorId = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s\-_]+/g, '');
+
+export const getSabotadorById = (id: string): SabotadorCatalogoEntry | undefined => {
+  const directMatch = sabotadoresCatalogo.entries.find((entry) => entry.id === id);
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const normalizedTarget = normalizeSabotadorId(id);
+  return sabotadoresCatalogo.entries.find(
+    (entry) => normalizeSabotadorId(entry.id) === normalizedTarget
+  );
+};
