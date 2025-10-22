@@ -1,5 +1,5 @@
 {
-  "name": "sw_chat_interations_v2",
+  "name": "sw_chat_interations_v2.1",
   "nodes": [
     {
       "parameters": {
@@ -227,39 +227,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4144,
-        -880
+        -4096,
+        -928
       ],
       "id": "3cdf0d32-2519-459b-b2c7-b97288079e9c",
       "name": "LOCK ativo?"
-    },
-    {
-      "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-        "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-        "messageText": "=Nosso ciclo de {{ $('mindquest_config').item.json.limit_iteration }} interações já foi concluído. \n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu painel já está atualizado 🙌",
-        "options_message": {
-          "delay": 1200
-        }
-      },
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -2704,
-        -1072
-      ],
-      "id": "6a6f3527-0fc5-4ad6-8e3f-bf585048bfd4",
-      "name": "Mensagem de Bloqueio (12h)",
-      "retryOnFail": true,
-      "maxTries": 2,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
     },
     {
       "parameters": {
@@ -486,7 +458,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// junta_dados_gravacao\n// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst config = $('mindquest_config').first().json;\nconst sessionLimit = Number(config?.limit_iteration) || 8;\nconst mensagensCompletas = chatMemory.messages || [];\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\n// FUNÇÃO PARA EXTRAIR MENSAGEM REAL DO PROMPT\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n  \n  // Regex para capturar texto entre **Mensagem do Usuário:** e a próxima tag **\n  const regex = /\\*\\*Mensagem do Usuário:\\*\\*\\s*(.*?)(?:\\n\\*\\*|$)/s;\n  const match = promptCompleto.match(regex);\n  \n  if (match && match[1]) {\n    return match[1].trim();\n  }\n  \n  // Fallback: retorna o prompt completo se não encontrar o padrão\n  return promptCompleto;\n}\n\n// Construir array de mensagens APENAS com conversas reais\nconst mensagens = [];\nlet interactionNumber = 1;\n\nmensagensCompletas.forEach((msg) => {\n  // Ignorar mensagens do sistema (controle interno)\n  if (msg.system && !msg.human && !msg.ai) {\n    return;\n  }\n  \n  // Processar mensagem do usuário\n  if (msg.human) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"usuario\",\n      texto: extrairMensagemUsuario(msg.human),\n      timestamp: new Date().toISOString()\n    });\n  }\n  \n  // Processar resposta da IA\n  if (msg.ai) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"agente\",\n      texto: msg.ai,\n      timestamp: new Date().toISOString()\n    });\n    \n    // Incrementar interaction apenas quando completar um par (user + agent)\n    interactionNumber++;\n  }\n});\n\n// Montar contexto_final\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || \"\",\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || \"média\",\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || \"\"\n};\n\n// Retornar dados para o Postgres\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || sessionLimit,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || \"\"\n};\n"
+        "jsCode": "// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst config = $('mindquest_config').first().json;\nconst mensagensCompletas = Array.isArray(chatMemory.messages) ? chatMemory.messages : [];\n\n// Determina limite de sessão (fallback seguro)\nconst configuredLimit = Number(config?.limit_iteration);\nconst sessionLimit = Number.isFinite(configuredLimit) && configuredLimit > 0\n  ? configuredLimit\n  : Number(dadosOrganizados.total_interactions) || 8;\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\nconst USER_REGEX = /\\*\\*Mensagem do Usu[aá]rio:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|\\n<|$)/i;\n\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n\n  const match = promptCompleto.match(USER_REGEX);\n  if (match && match[1]) {\n    const cleaned = match[1].replace(/^[:\\-–\\s]+/, '').trim();\n    if (cleaned) {\n      return cleaned;\n    }\n  }\n\n  const linhas = promptCompleto\n    .split(/\\r?\\n/)\n    .map(l => l.trim())\n    .filter(l => l && !l.startsWith('#') && !l.startsWith('=') && !l.startsWith('**') && !l.startsWith('-') && !l.startsWith('_') && !l.startsWith('<'));\n\n  if (linhas.length > 0) {\n    return linhas[0];\n  }\n\n  return promptCompleto.trim();\n}\n\nfunction textoValido(valor) {\n  return typeof valor === 'string' && valor.trim().length > 0;\n}\n\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of mensagensCompletas) {\n  if (!msg || typeof msg !== 'object') {\n    continue;\n  }\n\n  const role = msg.role ?? null;\n  const systemFlag = msg.system === true || role === 'system';\n\n  const humanTexto = textoValido(msg.human)\n    ? msg.human.trim()\n    : ((role === 'user' || role === 'human') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const aiTexto = textoValido(msg.ai)\n    ? msg.ai.trim()\n    : ((role === 'assistant' || role === 'ai') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const isSystemOnly = systemFlag && !humanTexto && !aiTexto;\n  if (isSystemOnly) {\n    continue;\n  }\n\n  const isControleInterno = humanTexto && humanTexto.toLowerCase().startsWith('sistema:');\n  if (systemFlag || isControleInterno) {\n    if (!aiTexto) {\n      continue;\n    }\n  }\n\n  if (humanTexto && !isControleInterno) {\n    const textoExtraido = extrairMensagemUsuario(humanTexto);\n    if (textoValido(textoExtraido)) {\n      mensagens.push({\n        interaction: interactionNumber,\n        autor: 'usuario',\n        texto: textoExtraido,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n\n  if (aiTexto) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: 'agente',\n      texto: aiTexto,\n      timestamp: new Date().toISOString()\n    });\n    interactionNumber++;\n  }\n}\n\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || '',\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || 'média',\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || ''\n};\n\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || sessionLimit,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || ''\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -708,62 +680,6 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-        "remoteJid": "={{ $('Transcrição').first().json.WhstsApp_Number }}",
-        "messageText": "={{ $('organiza_json').first().json.user_message }} \n\nAcesse: https://mindquest.pt/auth?token?{{ $('dados_usr').first().json.token_acesso }}",
-        "options_message": {
-          "delay": 1500
-        }
-      },
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -1792,
-        -1040
-      ],
-      "id": "5358f1ed-30ad-407a-b9de-7b7d5e429a03",
-      "name": "Envia msg ao usr1",
-      "retryOnFail": true,
-      "maxTries": 2,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-        "remoteJid": "={{ $('Transcrição').first().json.WhstsApp_Number }}",
-        "messageText": "={{ $('organiza_json').item.json.user_message }}",
-        "options_message": {
-          "delay": 1500
-        }
-      },
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -1808,
-        -544
-      ],
-      "id": "ac4c47b0-68bf-42b2-9820-7311d81238ee",
-      "name": "Envia msg ao usr",
-      "retryOnFail": true,
-      "maxTries": 2,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "mode": "delete",
         "deleteMode": "all"
       },
@@ -799,56 +715,6 @@
           "name": "Redis account"
         }
       }
-    },
-    {
-      "parameters": {
-        "amount": 4
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        -1584,
-        -1040
-      ],
-      "id": "63467118-33a1-4278-92f2-2c7deb41193d",
-      "name": "Wait",
-      "webhookId": "77327523-e3c8-4f0d-9689-caef73513c63"
-    },
-    {
-      "parameters": {
-        "amount": 4
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        -1600,
-        -544
-      ],
-      "id": "8bc940dc-308b-44d4-9f56-4b225d149a8a",
-      "name": "Wait1",
-      "webhookId": "5532c543-4e80-4b30-8eb1-92499895b966"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        -1392,
-        -1040
-      ],
-      "id": "3e10566b-6748-4b36-8ba4-7390217ba0e6",
-      "name": "No Operation, do nothing1"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        -1408,
-        -544
-      ],
-      "id": "5abf521b-f778-4b8d-aff5-761ab4f5576b",
-      "name": "No Operation, do nothing3"
     },
     {
       "parameters": {
@@ -1302,37 +1168,12 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3664,
-        -400
+        -3824,
+        -384
       ],
       "id": "abbcf951-9c15-4dd3-b60a-3a0f859d15d9",
       "name": "Chat Memory - Delete All (final)1",
       "disabled": true
-    },
-    {
-      "parameters": {
-        "amount": 3
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        -2480,
-        -1072
-      ],
-      "id": "1c365db8-21fe-4702-b2aa-92357e74ba59",
-      "name": "Wait2",
-      "webhookId": "77327523-e3c8-4f0d-9689-caef73513c63"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        -2272,
-        -1072
-      ],
-      "id": "c3bd4522-9f8b-482f-bd5c-8b39a10d0229",
-      "name": "No Operation, do nothing"
     },
     {
       "parameters": {
@@ -1399,6 +1240,195 @@
       ],
       "id": "095ed6f4-2a4d-4a2e-898a-0bdf10c44171",
       "name": "mindquest_config"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/auth?token?{{ $('dados_usr').first().json.token_acesso }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1888,
+        -960
+      ],
+      "id": "c5e50638-4c98-4157-84c5-f8dd01c5772c",
+      "name": "Call 'sw_send_message_with_retry'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+            "messageText": "={{ $('organiza_json').first().json.user_message }} "
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1888,
+        -528
+      ],
+      "id": "0c4c407a-6726-4ec6-a0e7-bcc53deb5efc",
+      "name": "Call 'sw_send_message_with_retry'1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+            "messageText": "=Nosso ciclo de {{ $('mindquest_config').item.json.limit_iteration }} interações já foi concluído. \n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu painel já está atualizado 🙌"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -2672,
+        -1040
+      ],
+      "id": "0b32af2d-c3d0-40e2-a0c2-b27cca453c4c",
+      "name": "Call 'sw_send_message_with_retry'2"
     }
   ],
   "pinData": {
@@ -1407,11 +1437,11 @@
         "json": {
           "usr_id": "c6c21a80-b3ea-4159-a46d-e63bfa66e45d",
           "body.instance": "MindQuest",
-          "body.data.key.id": "3ADD5C03E4371E6391AB",
+          "body.data.key.id": "3A82E24488C2924525D9",
           "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo",
-          "body.data.message.conversation": "Ola",
+          "body.data.message.conversation": "Está isso mesmo",
           "body.data.messageType": "conversation"
         }
       }
@@ -1471,7 +1501,7 @@
       "main": [
         [
           {
-            "node": "Mensagem de Bloqueio (12h)",
+            "node": "Call 'sw_send_message_with_retry'2",
             "type": "main",
             "index": 0
           }
@@ -1558,7 +1588,7 @@
       "main": [
         [
           {
-            "node": "Mensagem de Bloqueio (12h)",
+            "node": "Call 'sw_send_message_with_retry'2",
             "type": "main",
             "index": 0
           }
@@ -1723,50 +1753,6 @@
         ]
       ]
     },
-    "Envia msg ao usr1": {
-      "main": [
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "No Operation, do nothing1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Envia msg ao usr": {
-      "main": [
-        [
-          {
-            "node": "Wait1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait1": {
-      "main": [
-        [
-          {
-            "node": "No Operation, do nothing3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Structured Output Parser": {
       "ai_outputParser": [
         [
@@ -1794,28 +1780,6 @@
         ]
       ]
     },
-    "Wait2": {
-      "main": [
-        [
-          {
-            "node": "No Operation, do nothing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mensagem de Bloqueio (12h)": {
-      "main": [
-        [
-          {
-            "node": "Wait2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "intertion_count": {
       "main": [
         [
@@ -1836,14 +1800,14 @@
             "index": 0
           },
           {
-            "node": "Envia msg ao usr1",
+            "node": "Call 'sw_send_message_with_retry'",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Envia msg ao usr",
+            "node": "Call 'sw_send_message_with_retry'1",
             "type": "main",
             "index": 0
           }
@@ -1866,7 +1830,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f1d93ed0-4616-44d8-9b29-b8aa6c8f3736",
+  "versionId": "17374c58-2705-4b82-9078-351776499688",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
