@@ -39,12 +39,18 @@ class AuthService {
    * Extrai token da URL atual
    */
   public extractTokenFromUrl(): string | null {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    const search = window.location.search;
+    const urlParams = new URLSearchParams(search);
+    let token = urlParams.get('token');
+
+    if (!token) {
+      const fallbackMatch = search.match(/token(?:=|\?)([^&]+)/i);
+      token = fallbackMatch?.[1] ?? null;
+    }
     
     if (token) {
       this.token = token;
-      // Limpa a URL após extrair o token
+      // Limpa a URL após extrair o token (remove qualquer variante do parâmetro)
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
     }
