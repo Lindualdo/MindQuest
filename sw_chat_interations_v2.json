@@ -1,0 +1,1798 @@
+{
+  "name": "sw_chat_interations_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usr_id"
+            },
+            {
+              "name": "body.instance"
+            },
+            {
+              "name": "body.data.key.id"
+            },
+            {
+              "name": "body.data.key.remoteJid"
+            },
+            {
+              "name": "body.data.key.fromMe",
+              "type": "boolean"
+            },
+            {
+              "name": "body.data.pushName"
+            },
+            {
+              "name": "body.data.message.conversation"
+            },
+            {
+              "name": "body.data.messageType"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -5248,
+        448
+      ],
+      "id": "2f293090-26f4-4cc9-8a9e-97364e7055ca",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN perfis_big_five p\n  ON p.usuario_id = u.id\nWHERE u.id = $1;\n",
+        "options": {
+          "queryReplacement": "={{ $('start').item.json.usr_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -5088,
+        448
+      ],
+      "id": "7d8d108b-5a3e-4e4c-8106-d985a5e47f65",
+      "name": "dados_usr",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "jUAvu7DUAzyqZhJd",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/jUAvu7DUAzyqZhJd",
+          "cachedResultName": "sw_chat_transcription"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.instance": "={{ $('start').item.json[\"body.instance\"] }}",
+            "body.data.key.remoteJid": "={{ $('start').item.json[\"body.data.key.remoteJid\"] }}",
+            "body.data.key.id": "={{ $('start').item.json[\"body.data.key.id\"] }}",
+            "body.data.key.fromMe": "={{ $('start').item.json[\"body.data.key.fromMe\"] }}",
+            "body.data.pushName": "={{ $('start').item.json[\"body.data.pushName\"] }}",
+            "body.data.message.conversation": "={{ $('start').item.json[\"body.data.message.conversation\"] }}",
+            "body.data.messageType": "={{ $('start').item.json[\"body.data.messageType\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "body.instance",
+              "displayName": "body.instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.remoteJid",
+              "displayName": "body.data.key.remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.id",
+              "displayName": "body.data.key.id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.fromMe",
+              "displayName": "body.data.key.fromMe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "body.data.pushName",
+              "displayName": "body.data.pushName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.message.conversation",
+              "displayName": "body.data.message.conversation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.messageType",
+              "displayName": "body.data.messageType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -3984,
+        448
+      ],
+      "id": "a3937f12-a200-4910-9b55-91264febbc45",
+      "name": "Transcrição"
+    },
+    {
+      "parameters": {
+        "jsCode": "// =======================================\n// NODE: Build Keys\n// Gera sessionKey e lockKey únicas por usuário\n// =======================================\n\n// Captura dados necessários\nconst startData = $('start').first().json;\nconst userData = $('dados_usr').first().json;\n\n// Extrai valores com fallback de segurança\nconst instance = startData?.['body.instance'] || 'unknownInstance';\nconst userId = startData?.usr_id || 'unknownUser';\nconst phone = userData?.whatsapp_numero || 'unknownPhone';\n\n// Monta chaves\nconst sessionKey = `${instance}_${userId}_${phone}`;\nconst lockKey = `lock:${sessionKey}`;\n\n// Retorna como JSON limpo\nreturn {\n  sessionKey,\n  lockKey\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4864,
+        448
+      ],
+      "id": "5fc65859-c0c3-4c4e-a088-c5e4f544c734",
+      "name": "Build Keys"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Build Keys').first().json.lockKey }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4672,
+        448
+      ],
+      "id": "7362d50f-b7d6-48e7-b27a-435195c177ca",
+      "name": "Redis GET Lock",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ \n  Number(\n    (\n      (\n        $('Redis GET Lock').first().json.propertyName \n        || $('Redis GET Lock').first().json.value \n        || JSON.stringify($('Redis GET Lock').first().json)\n      ).toString().match(/\\d{10,}/)?.[0]   /* pega o epoch (>=10 dígitos) onde quer que esteja */\n    ) || 0\n  )\n}}\n",
+              "rightValue": "={{ +Math.floor(Date.now()/1000) }}\n",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "id": "bda2c9fa-d4eb-44bb-86d3-f3fba4f7a194"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4240,
+        336
+      ],
+      "id": "7650ee05-b548-4fb3-9dd9-c12019739a0e",
+      "name": "LOCK ativo?"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+        "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+        "messageText": "=Nosso ciclo de 5 interações já foi concluído. \n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu painel já está atualizado 🙌",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -2800,
+        144
+      ],
+      "id": "da979b56-b5ca-41cd-b40e-29b2b7fc6a3f",
+      "name": "Mensagem de Bloqueio (12h)",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('start').first().json[\"body.instance\"] }}{{ $('start').first().json.usr_id }}{{ $('dados_usr').first().json.whatsapp_numero }}",
+        "sessionTTL": 43200,
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -2688,
+        1232
+      ],
+      "id": "f4416fb0-6ead-4cb9-b25f-66a221a2ba10",
+      "name": "memory",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "groupMessages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -3760,
+        448
+      ],
+      "id": "ba6a3b92-78e3-4772-ab6a-5aa49f3cff7d",
+      "name": "Chat Memory  - Get"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// CONTROLE DE INTERAÇÕES - N8N CODE NODE\n// Com suporte correto a Item Linking\n// ============================================\n\nconst userData = $('dados_usr').first().json;\n\n// Tenta acessar dados da memória (pode não existir na primeira interação)\nlet memoryData = null;\ntry {\n  const inputItems = $input.all();\n  if (inputItems && inputItems.length > 0) {\n    memoryData = inputItems[0].json;\n  }\n} catch (error) {\n  memoryData = null;\n}\n\n// Calcula número da interação atual\nlet interactionCount = 1;\nif (memoryData && memoryData.messages && Array.isArray(memoryData.messages)) {\n  const systemMessages = memoryData.messages.filter(msg => msg.system);\n  interactionCount = systemMessages.length + 1;\n}\n\n// Limita a 5 interações\n//interactionCount = Math.min(interactionCount, 5);\n\n// Define foco para cada interação\nlet nextFocus;\nlet isLastInteraction = false;\nlet shouldGenerateJson = false;\n\nswitch(interactionCount) {\n  case 1: \n    nextFocus = \"PRIMEIRA INTERAÇÃO: Saudação calorosa usando o nome preferido + análise empática da mensagem + UMA pergunta para aprofundar o contexto emocional\"; \n    break;\n  case 2: \n    nextFocus = \"SEGUNDA INTERAÇÃO: Aprofundar especificamente a situação apresentada + explorar sentimentos subjacentes + UMA pergunta sobre impactos ou desafios\"; \n    break;\n  case 3: \n    nextFocus = \"TERCEIRA INTERAÇÃO: Continuar diálogo validando a experiência + oferecer perspectiva empática + UMA pergunta sobre estratégias ou recursos\"; \n    break;\n  case 4: \n    nextFocus = \"QUARTA INTERAÇÃO: **OBRIGATÓRIO** - Fazer resumo completo do entendimento + listar pontos principais + perguntar 'Consegui entender bem sua situação?' para validação\"; \n    break;\n  case 5: \n    nextFocus = \"QUINTA INTERAÇÃO: **ENCERRAMENTO OBRIGATÓRIO** - Processar feedback do usuário (se houver correção, ajustar brevemente) + dar conclusão empática + dizer 'Nossa conversa de hoje está finalizada' + gerar JSON\";\n    isLastInteraction = true;\n    shouldGenerateJson = true;\n    break;\n  default: \n    nextFocus = \"Sessão já encerrada - não deve mais responder\"; \n    break;\n}\n\n// ============================================\n// RETORNO COM PAIRED ITEM\n// Mantém vínculo com item de entrada para \n// permitir acesso via .item em nós posteriores\n// ============================================\n\nreturn [{\n  json: {\n    interaction_count: interactionCount,\n    next_focus: nextFocus,\n    should_generate_json: shouldGenerateJson,\n    is_last_interaction: isLastInteraction,\n    nome_preferencia: userData.nome_preferencia || userData.nome || \"amigo\",\n    perfil_usuario: userData.perfil_primario || \"neutro\",\n    instructions_adherence: \"CRITICAL: Follow next_focus instructions EXACTLY\"\n  },\n  pairedItem: 0\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3472,
+        448
+      ],
+      "id": "19ee8178-6166-456b-9831-b6eddbd7609d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Sistema: Interaction {{ $('Code in JavaScript').item.json.interaction_count }} de 5. Foco: {{ $('Code in JavaScript').item.json.next_focus }}.",
+              "hideFromUI": true
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -3312,
+        448
+      ],
+      "id": "7b78e7ee-257c-471c-88a1-89f624055b1a",
+      "name": "Chat Memory - Insert"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "e9d7398d-88e3-4023-8a02-606ab2e3a08a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Maior que 5"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
+                    "rightValue": 5,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "50077f16-4b38-4c3c-b47e-bc210052084f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Menor ou igual a 5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -3024,
+        448
+      ],
+      "id": "fd01d507-8f9f-4bfa-905c-9385280a74af",
+      "name": "Interações (Pré-Agente)"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2848,
+        704
+      ],
+      "id": "63b988d2-ceb6-4002-aa5b-7473f58d0e75",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to search the history of users' latest conversations.",
+        "workflowId": {
+          "__rl": true,
+          "value": "HDTrSrJiBIv2FFks",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HDTrSrJiBIv2FFks",
+          "cachedResultName": "sw_get_history"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usr_id": "={{ $('dados_usr').item.json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usr_id",
+              "displayName": "usr_id",
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -2640,
+        720
+      ],
+      "id": "96620880-5a42-46ec-9a1a-667d1ca5a1ec",
+      "name": "get_history"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# 💬 USER PROMPT — MINDQUEST v2.2  \n## Contexto da Conversa com o Mentor\n\nVocê está falando com seu **Mentor de Vida MindQuest**, um assistente pessoal criado para te ouvir, entender suas emoções e te ajudar a transformar o que sente em clareza e foco.  \nEu represento sua **parte mais equilibrada e consciente**, treinada para te guiar com leveza e empatia.\n\n\n---\n\n## 🧭 TAREFA DO AGENTE\n1. **Chame a ferramenta `get_history`** para buscar o histórico das últimas conversas e compreender melhor o contexto do usuário.  \n2. Use o histórico para **criar rapport, empatia e engajamento**, incentivando-o a se expressar mais livremente.  \n3. Leia a **mensagem atual do usuário** e **siga as instruções do System Prompt** para conduzir a conversa dentro do fluxo de **5 interações**.  \n4. **Use o histórico apenas se fizer sentido** dentro do contexto atual (nunca force uma conexão artificial).  \n5 - se o numero de interações for maior que 5, fale gentilmente com o usuario e reforce que esta conversa está concluída, e insentive ele a voltar depois...\n6 - Na primeira interação ou quando for conviniente para gerar raport use o Nome do assistente (seu nome escolhido pelo usuário)\n7 - Sua saida deve ter apenas texto, nada de json ou outros dados\n---\n\nNumero de interações: {{ $('Code in JavaScript').item.json.interaction_count }}\n\nNome do assistente: {{ $('dados_usr').item.json.nome_assistente }}\n\n## 💬 DADOS DA CONVERSA ATUAL\n<contexto_conversa>\n\n**Mensagem do Usuário:** {{ $('Transcrição').item.json.message }}\n**Nome Preferido:** {{ $('dados_usr').first().json.nome_preferencia }}  \n**Perfil do Usuário:** {{ $('dados_usr').first().json.perfil_primario }}  \n**Nome do assistente:** {{ $('dados_usr').item.json.nome_assistente }}\n</contexto_conversa>\n\n---\n\n## 🧘 COMO FUNCIONA PARA O USUÁRIO\nDurante as próximas **5 trocas de mensagens**, o Mentor vai:\n1. Te ouvir com empatia,  \n2. Te ajudar a entender o que está por trás do que sente,  \n3. Te mostrar padrões e pequenas percepções,  \n4. Enviar um **resumo breve** do que ele entendeu (você poderá **confirmar ou ajustar**),  \n5. Finalizar com uma mensagem positiva e um **convite para visitar seu dashboard MindQuest** e ver seu progresso.\n\n---\n\n## 🌿 DICAS DE CONVERSA\nVocê pode falar de:\n- Emoções (alegria, ansiedade, cansaço, motivação, medo etc.);  \n- Situações do dia a dia (trabalho, rotina, relacionamentos, metas).  \n\nNão há respostas certas.  \nO objetivo é **clarear o que você sente** e transformar isso em leveza e direção.\n\n---\n\n## 💡 EXEMPLOS DE COMO COMEÇAR\n- “Hoje acordei meio ansioso e sem vontade de fazer nada.”  \n- “Acho que melhorei um pouco, mas ainda sinto um peso.”  \n- “Não sei o que dizer, só queria conversar.”  \n- “Quero entender por que fico tão distraído.”  \n\n---\n\n## 🎯 OBJETIVO FINAL\nAo final das 5 mensagens, você deve se sentir:\n- Mais leve,  \n- Com mais clareza,  \n- E com a sensação de ter dado um passo real no seu autoconhecimento.  \n",
+        "options": {
+          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST v2.2  \n## Mentor de Vida — Agente de Conversa (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Mentor de Vida MindQuest**, um assistente emocional especializado em **autoconhecimento, foco mental e bem-estar produtivo**.  \nSeu papel é **conduzir conversas humanas, leves e empáticas**, ajudando o usuário a compreender suas emoções, encontrar clareza e transformar sentimentos em ações práticas.  \nVocê representa a **parte mais sábia, calma e consciente da mente do próprio usuário**.\n\n---\n\n### 🧩 CONTEXTO GERAL\nO usuário conversa com você pelo **WhatsApp**.  \nCada sessão tem **exatamente 5 interações** e gera dados emocionais que alimentam o dashboard do MindQuest.  \nVocê **nunca menciona o sistema, ferramentas ou termos técnicos** — apenas age como um mentor humano e presente.\n\n#### 📥 Dados recebidos dinamicamente via fluxo do N8N\nUse essas informações **somente como contexto interno** — nunca mencione-as diretamente ao usuário.\n\n| Dado | Variável | Finalidade |\n|-------|-----------|-------------|\n| **Nome Preferido:** | `{{ $('dados_usr').first().json.nome_preferencia }}` | Personalizar o tratamento (se existir). |\n| **Perfil do Usuário:** | `{{ $('dados_usr').first().json.perfil_primario }}` | Ajustar o estilo de comunicação (analítico, emocional, prático etc.). |\n| **Nome do Assistente:** | `{{ $('dados_usr').first().json.nome_assistente}}` | O nome que o usuário lhe deu. Você agora deve sempre usar esse nome para se conectar mais com o usuario. |\n\n**Como deve chamar o usuário:**  \nUse o nome preferido **apenas se existir e for válido**.  \nSe a expressão retornar vazio ou \"null\", mantenha tratamento neutro (sem nome próprio, use “oi”, “vamos por partes?”, “me conta…”).\n\n\n### 🔢 CONTROLE DE INTERAÇÕES (N8N)\nO número da interação atual é informado externamente pelo sistema N8N:\n\n**Interaction Count:** {{ $('Code in JavaScript').item.json.interaction_count }}\n\n- Este valor vai de **1 a 5**, e representa qual etapa da conversa está em andamento.  \n- Você **não deve contar interações manualmente**.  \n- Siga o comportamento correspondente a este número:  \n\n| interaction_count | Ação esperada |\n|--------------------|----------------|\n| 1 | Buscar `get_history` e iniciar a conversa com acolhimento. |\n| 2 | Explorar emoções e validar sentimentos. |\n| 3 | Aprofundar padrões e oferecer mini-insights. |\n| 4 | Gerar resumo validável e pedir confirmação ao usuário. |\n| 5 | Encerrar com reforço positivo e convidar o usuário ao dashboard. |\n\nApós a 5ª interação, **encerre a conversa** com tom de conclusão emocional leve.  \nNunca inicie uma nova interação por conta própria.\n\n\n---\n\n### ⚙️ FLUXO ESTRUTURADO DE 5 INTERAÇÕES\n\nSiga **exatamente** as 5 interações abaixo.  \nNão adicione, repita ou prolongue etapas.  \nCada interação tem um objetivo e tom emocional específico.\n\n| Etapa | Objetivo | Instrução imperativa |\n|-------|-----------|----------------------|\n| **1️⃣ Abertura / Check-in (com histórico)** | Criar rapport, detectar tipo de início e buscar contexto. | Esta é a **1ª interação de 5**. Antes de responder, **chame a ferramenta `get_history`** para buscar o resumo das últimas 7 conversas. Use esse histórico apenas como base para entender o estado emocional e criar conexão (“vi que nos últimos dias você vinha falando sobre foco e energia — como tem se sentido agora?”). Se o usuário começar aberto (falando sobre si), apenas acolha e incentive. |\n| **2️⃣ Exploração emocional inicial** | Aprofundar a percepção emocional. | Esta é a **2ª interação de 5**. Incentive o usuário a descrever o que sente, o que aconteceu e como reagiu. Use reflexão empática (“entendo... parece que isso te afetou mais do que esperava, né?”) e micro-validações (“posso te perguntar algo sobre isso?”). |\n| **3️⃣ Aprofundamento / Padrões** | Identificar gatilhos e repetições. | Esta é a **3ª interação de 5**. Explore causas, padrões e repetições (“o que você acha que costuma gerar esse sentimento?”). Gere mini-insights se perceber conexões com o histórico (“isso se conecta com algo que você comentou outro dia…”). |\n| **4️⃣ Validação / Resumo** | Consolidar entendimento e pedir confirmação. | Esta é a **4ª interação de 5**. Gere um **resumo breve, empático e validável** do que entendeu sobre os sentimentos e aprendizados do usuário. Peça confirmação (“faz sentido isso pra você?” ou “quer ajustar algo?”). Este resumo será usado para atualizar o dashboard. Se o usuário corrigir, reformule de forma breve e gentil. |\n| **5️⃣ Encerramento / Convite ao Dashboard** | Finalizar positivamente e incentivar continuidade. | Esta é a **5ª e última interação**. Reforce algo bom que o usuário demonstrou (“gostei de ver você mais consciente hoje — isso é um avanço”). Encerre com leveza e convide-o a visitar o dashboard (“seu painel já foi atualizado com as métricas de hoje, dá uma olhada quando quiser”). Se ele tentar continuar, agradeça e direcione para o próximo ciclo (“vamos continuar amanhã, combinado?”). \n---\n\n### 🛠️ TOOL: `get_history`\n- **Função:** buscar o resumo das **últimas 7 conversas** do usuário (emoções, temas e evolução).  \n- **Chamado:** sempre na **1ª interação**.  \n- **Uso do conteúdo:** apenas se fizer sentido no contexto da conversa atual.  \n- **Parâmetros:** nenhum — a ferramenta retorna o resumo completo automaticamente.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Fale como um **mentor humano**, calmo e interessado.  \n- Use frases curtas e naturais, com pausas sutis (“hmm”, “entendo”, “faz sentido…”).  \n- Evite linguagem técnica, diagnósticos ou jargões psicológicos.  \n- Adapte o ritmo e a energia conforme o **perfil do usuário**.  \n- Seja consistente: acolher → entender → validar → concluir.  \n- Pode usar metáforas leves quando apropriado (“a mente às vezes precisa respirar antes de decidir”).  \n\n---\n\n### 💡 TÉCNICAS QUE VOCÊ DOMINA\n- **Reflexão empática** → reconhecer sentimentos antes de responder.  \n- **Micro-validação** → confirmar escuta e presença.  \n- **Mini-insights** → oferecer percepções sutis.  \n- **Ancoragem de contexto** → conectar com histórico.  \n- **Encerramento positivo** → gerar leveza e motivação.  \n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema, ferramentas ou prompts.  \n- Não ultrapasse as 5 interações.  \n- Não discuta sobre o dashboard — apenas convide o usuário a acessá-lo no final.  \n- Não forneça conselhos clínicos ou diagnósticos.  \n\n---\n\n### 🧭 MISSÃO FINAL\nGuiar o usuário em **5 passos curtos e humanos**:\n1. Nomear o que sente.  \n2. Explorar e compreender o porquê.  \n3. Identificar padrões.  \n4. Validar aprendizados (resumo).  \n5. Finalizar com clareza e incentivo (convite ao dashboard).  \n\n### 📤 FORMATO DE SAÍDA\n- **Sempre responda apenas com texto natural**, fluido e humano.  \n- **Nunca inclua blocos de código**, JSON, listas estruturadas, tabelas ou markdown.  \n- **Não use aspas, chaves ou colchetes** no corpo da mensagem.  \n- O conteúdo deve ser compreensível e natural, como uma conversa no WhatsApp.\n- formate o texto da melhor forma possível para facilitar a leitura e experiência do usuário \n\nA conversa deve terminar com o usuário se sentindo **mais leve, claro e conectado com sua própria mente.**\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2816,
+        464
+      ],
+      "id": "3bc2dc31-92e5-4cc0-b002-a88ac8d7df30",
+      "name": "Mentor de vida"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ====================================================\n// NODE: organiza_json\n// Separa a mensagem do usuário e o JSON de contexto (se existir)\n// ====================================================\n\n// Resposta do agente\nconst aiResponse = $input.first()?.json?.output ?? \"\";\n\n// Dados de controle da interação\nconst jsNode = $('Code in JavaScript').first().json;\nconst interactionCount = jsNode?.interaction_count ?? 1;\nconst isLastInteraction = jsNode?.is_last_interaction ?? false;\n\n// Se não for a última (5ª) interação → retorna só a mensagem\nif (interactionCount !== 5 || !isLastInteraction) {\n  return {\n    user_message: aiResponse,\n    context_json: null,\n    has_context: false,\n    interaction_count: interactionCount,\n    is_last_interaction: isLastInteraction,\n    original_response: aiResponse\n  };\n}\n\n// ----------------------------------------------------\n// Tenta detectar JSON dentro da resposta (se existir)\n// ----------------------------------------------------\nconst jsonStartPattern = /\\{[\\s\\n]*\"interaction_completa\"/;\nconst jsonMatch = aiResponse.match(jsonStartPattern);\n\nlet userMessage = aiResponse;\nlet contextJson = null;\nlet hasJson = false;\n\nif (jsonMatch) {\n  const jsonStartIndex = jsonMatch.index;\n\n  // Mensagem de texto (antes do JSON)\n  userMessage = aiResponse.substring(0, jsonStartIndex).trim();\n\n  // JSON (a partir do padrão encontrado)\n  const jsonString = aiResponse.substring(jsonStartIndex).trim();\n\n  try {\n    contextJson = JSON.parse(jsonString);\n    hasJson = true;\n  } catch (err) {\n    console.error(\"Erro ao fazer parse do JSON:\", err);\n  }\n}\n\n// ----------------------------------------------------\n// Retorna objeto estruturado para uso posterior\n// ----------------------------------------------------\nreturn {\n  user_message: userMessage,       // texto limpo para enviar ao usuário\n  context_json: contextJson,       // JSON do contexto (se existir)\n  has_context: hasJson,            // flag de existência do JSON\n  original_response: aiResponse,   // resposta original completa\n  interaction_count: interactionCount,\n  is_last_interaction: isLastInteraction\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2496,
+        464
+      ],
+      "id": "dfc33452-3268-43d6-8011-663bbeef20fa",
+      "name": "organiza_json"
+    },
+    {
+      "parameters": {
+        "options": {
+          "groupMessages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -2016,
+        448
+      ],
+      "id": "26f3e7ae-478b-4efb-870f-47953d9a572d",
+      "name": "Chat Memory  - Get1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst mensagensCompletas = chatMemory.messages || [];\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\n// FUNÇÃO PARA EXTRAIR MENSAGEM REAL DO PROMPT\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n  \n  // Regex para capturar texto entre **Mensagem do Usuário:** e a próxima tag **\n  const regex = /\\*\\*Mensagem do Usuário:\\*\\*\\s*(.*?)(?:\\n\\*\\*|$)/s;\n  const match = promptCompleto.match(regex);\n  \n  if (match && match[1]) {\n    return match[1].trim();\n  }\n  \n  // Fallback: retorna o prompt completo se não encontrar o padrão\n  return promptCompleto;\n}\n\n// Construir array de mensagens APENAS com conversas reais\nconst mensagens = [];\nlet interactionNumber = 1;\n\nmensagensCompletas.forEach((msg) => {\n  // Ignorar mensagens do sistema (controle interno)\n  if (msg.system && !msg.human && !msg.ai) {\n    return;\n  }\n  \n  // Processar mensagem do usuário\n  if (msg.human) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"usuario\",\n      texto: extrairMensagemUsuario(msg.human),\n      timestamp: new Date().toISOString()\n    });\n  }\n  \n  // Processar resposta da IA\n  if (msg.ai) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"agente\",\n      texto: msg.ai,\n      timestamp: new Date().toISOString()\n    });\n    \n    // Incrementar interaction apenas quando completar um par (user + agent)\n    interactionNumber++;\n  }\n});\n\n// Montar contexto_final\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || \"\",\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || \"média\",\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || \"\"\n};\n\n// Retornar dados para o Postgres\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || 5,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || \"\"\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        448
+      ],
+      "id": "88f26ec0-56bd-47dc-985f-17751b75aac7",
+      "name": "junta_dados_gravacao"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- ====================================================\n-- INSERT usr_chat - Gravação de Conversa Completa\n-- ====================================================\n\nINSERT INTO usr_chat (\n    usuario_id,\n    session_id,\n    total_interactions,\n    status,\n    mensagens,\n    data_conversa,\n    horario_inicio,\n    horario_fim\n) VALUES (\n    $1,  -- usuario_id\n    $2,  -- session_id\n    $3,  -- total_interactions\n    $4,  -- status\n    $5::jsonb,  -- mensagens\n    CURRENT_DATE,\n    CURRENT_TIME,\n    CURRENT_TIME\n)\nRETURNING id, usuario_id, data_conversa, status;",
+        "options": {
+          "queryReplacement": "={{[ $json.usuario_id, $json.session_id, $json.total_interactions, $json.status, $json.mensagens ]}}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1472,
+        448
+      ],
+      "id": "0b98211a-0e79-4f0b-a6cd-b87330f9f926",
+      "name": "Grava_chat",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        1328
+      ],
+      "id": "d98e0bf2-8b74-4c63-b981-ddde78944074",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa completa abaixo entre o usuário e o agente.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $('junta_dados_gravacao').item.json.mensagens }}\n\nUser Name: {{ $('dados_usr').first().json.nome_preferencia }}\n\nSUA TAREFA:\n1. GERAR RESUMO CONCISO\nCrie um resumo mantendo APENAS:\n\nSituação emocional do dia (estado atual)\nEventos importantes mencionados\nSentimentos expressos (não repita, liste únicos)\nContextos relevantes (trabalho, família, relacionamentos, etc)\nInsights ou reflexões importantes\nDecisões ou planos mencionados\n\nRemova:\n\nPerguntas do agente (mantenha só respostas do usuário)\nValidações e confirmações\nRepetições de informações\nSaudações e despedidas\n\n2. ANALISAR REFLEXÃO DO USUÁRIO\nDetermine se o usuário demonstrou reflexão profunda:\nTEM REFLEXÃO = true se:\n\nUsuário analisou seus sentimentos com profundidade\nFez conexões entre eventos e emoções\nDemonstrou autoconhecimento\nQuestionou padrões próprios\nFalou sobre aprendizados ou insights pessoais\n\nTEM REFLEXÃO = false se:\n\nApenas relatou fatos superficialmente\nRespostas curtas e diretas sem elaboração\nNão explorou emoções ou causas\n\n3. CONTAR PALAVRAS DO USUÁRIO\nConte APENAS palavras das falas do usuário (autor: \"usuario\"), excluindo falas do agente.\n\n\nRETORNE APENAS ESTE JSON:\n\n{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": true,  // ← SEM aspas, SEM dois pontos\n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": 204,  // ← número, não string\n  \"confianca_analise\": 95  // ← número, não string\n}\n\nIMPORTANTE:\n\nO resumo deve ser em 3ª pessoa\nUse o nome do usuário se disponível, senão use \"Usuário\"\nSeja preciso e objetivo\nFoque no que é ÚNICO desta conversa (não generalidades)",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas.\n\nSeu trabalho é:\n1. Analisar a conversa completa entre usuário e agente (5 interações)\n2. Gerar um resumo conciso mantendo APENAS o essencial\n3. Identificar se o usuário fez reflexões profundas\n4. Contar palavras totais do usuário\n5. Preservar contexto emocional e insights importantes\n\nREGRAS CRÍTICAS:\n- Remova redundâncias e repetições\n- Mantenha apenas informações únicas e relevantes\n- Preserve sentimentos, eventos e contextos mencionados\n- Seja objetivo e direto\n- Máximo de 300 palavras no resumo\n- Retorne APENAS JSON estruturado\n\nVocê está ajudando a construir o perfil psicológico do usuário ao longo do tempo, então cada palavra conta."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1072,
+        1136
+      ],
+      "id": "2a6605cd-f8f9-4b7b-88d9-0085ed6d5a95",
+      "name": "Resumo das conversas"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": true, \n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": 204,  \n  \"confianca_analise\": 95 \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -912,
+        1344
+      ],
+      "id": "c9ee63d7-c925-4273-9eb4-938f1eb049df",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "usr_chat",
+          "mode": "list",
+          "cachedResultName": "usr_chat"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Grava_chat').item.json.id }}",
+            "total_palavras_usuario": "={{ $json.output.total_palavras_usuario }}",
+            "resumo_conversa": "={{ $json.output.resumo_conversa }}",
+            "tem_reflexao": "={{ $json.output.tem_reflexao }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "type": "string",
+              "defaultMatch": true
+            },
+            {
+              "id": "resumo_conversa",
+              "displayName": "resumo_conversa",
+              "type": "string"
+            },
+            {
+              "id": "tem_reflexao",
+              "displayName": "tem_reflexao",
+              "type": "boolean"
+            },
+            {
+              "id": "total_palavras_usuario",
+              "displayName": "total_palavras_usuario",
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -752,
+        1136
+      ],
+      "id": "fa16c98e-d58b-40a0-b7de-758ceed342c0",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "agXJK8Dd49If1eFx",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/agXJK8Dd49If1eFx",
+          "cachedResultName": "sw_experts_gamification"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('junta_dados_gravacao').item.json.usuario_id }}",
+            "chat_id": "={{ $('Grava_chat').item.json.id }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "tem_reflexao": "={{ $('Resumo das conversas').item.json.output.tem_reflexao }}",
+            "justificativa_reflexao": "={{ $('Resumo das conversas').item.json.output.justificativa_reflexao }}",
+            "total_palavras_usuario": "={{ $('Resumo das conversas').item.json.output.total_palavras_usuario }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "type": "string"
+            },
+            {
+              "id": "tem_reflexao",
+              "displayName": "tem_reflexao",
+              "type": "boolean"
+            },
+            {
+              "id": "justificativa_reflexao",
+              "displayName": "justificativa_reflexao",
+              "type": "string"
+            },
+            {
+              "id": "total_palavras_usuario",
+              "displayName": "total_palavras_usuario",
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -544,
+        1136
+      ],
+      "id": "4569e2b3-50cf-4d92-8fbf-f773fde523ad",
+      "name": "Gamificação"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+        "remoteJid": "={{ $('Transcrição').first().json.WhstsApp_Number }}",
+        "messageText": "={{ $('organiza_json').first().json.user_message }} \n\nAcesse: https://mindquest.pt/auth?token?{{ $('dados_usr').first().json.token_acesso }}",
+        "options_message": {
+          "delay": 1500
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        176
+      ],
+      "id": "1f660724-69d1-48e6-9558-62472afe5759",
+      "name": "Envia msg ao usr1",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
+        "remoteJid": "={{ $('Transcrição').first().json.WhstsApp_Number }}",
+        "messageText": "={{ $('organiza_json').item.json.user_message }}",
+        "options_message": {
+          "delay": 1500
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        672
+      ],
+      "id": "b39a0f1c-bf5c-4033-859f-51d8a8a454c5",
+      "name": "Envia msg ao usr",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "id": "20decd9a-8a71-4c52-86de-1891070b3b96"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2304,
+        464
+      ],
+      "id": "dc29dbe4-ad11-4847-94d8-ff643baad526",
+      "name": "É a 5ª?"
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -1088,
+        944
+      ],
+      "id": "3804d1d4-4fe0-4f5d-89f6-eeeb08cf41bc",
+      "name": "Chat Memory - Delete All (final)"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ `lock:${$('Build Keys').first().json.sessionKey}` }}",
+        "value": "={{ Math.floor(Date.now()/1000) + 43200 }}",
+        "keyType": "strings",
+        "expire": true,
+        "ttl": 43200
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        944
+      ],
+      "id": "9dc9a8b8-73a5-4d98-9315-2283acd93739",
+      "name": "Redis SET Lock (12h)",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1680,
+        176
+      ],
+      "id": "ba3de557-def7-4a63-9870-cf89083231c3",
+      "name": "Wait",
+      "webhookId": "77327523-e3c8-4f0d-9689-caef73513c63"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1696,
+        672
+      ],
+      "id": "9c3b65a6-6f7f-45bf-9070-fd72f415603e",
+      "name": "Wait1",
+      "webhookId": "5532c543-4e80-4b30-8eb1-92499895b966"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        176
+      ],
+      "id": "26fb52f9-19c1-4b4d-8c5c-52ef70b2be46",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        672
+      ],
+      "id": "b13ec2e8-0d7b-4ed9-86e4-d88e9b8b4bcc",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "vJRfrbY4NhpNyfCD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
+          "cachedResultName": "sw_experts_panas"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('junta_dados_gravacao').item.json.usuario_id }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "mensagens": "={{ $('junta_dados_gravacao').item.json.mensagens }}",
+            "chat_id": "={{ $('Grava_chat').item.json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        64
+      ],
+      "id": "6d4628f6-e693-4bb7-a270-8fa0ede7da00",
+      "name": "experts_panas"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "GykxpS5vsg8NeoOh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/GykxpS5vsg8NeoOh",
+          "cachedResultName": "sw_expert_humor_energia"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('junta_dados_gravacao').item.json.usuario_id }}",
+            "mensagens": "={{ $('junta_dados_gravacao').item.json.mensagens }}",
+            "chat_id": "={{ $('Grava_chat').item.json.id }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "usr_name": "={{ $('dados_usr').all()[0].json.nome_preferencia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        224
+      ],
+      "id": "7422d1ab-0640-49d1-8516-143343546bf4",
+      "name": "experts_humor_energia"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Vbc4JHAR3388mLcv",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Vbc4JHAR3388mLcv",
+          "cachedResultName": "sw_expert_sabotadores"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Grava_chat').first().json.usuario_id }}",
+            "chat_id": "={{ $('Grava_chat').first().json.id }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "mensagens": "={{ $('junta_dados_gravacao').first().json.mensagens }}",
+            "usr_name": "={{ $('dados_usr').first().json.nome_preferencia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        384
+      ],
+      "id": "1ab5f039-32b1-4c2f-9265-5c8f17687a24",
+      "name": "experts_sabotadores"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nEstxgiVE8GLXgUQ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/nEstxgiVE8GLXgUQ",
+          "cachedResultName": "sw_expert_insights_acionaveis"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('junta_dados_gravacao').first().json.usuario_id }}",
+            "mensagens": "={{ $('junta_dados_gravacao').first().json.mensagens }}",
+            "chat_id": "={{ $('Grava_chat').first().json.id }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "usr_name": "={{ $('dados_usr').first().json.nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "contexto_final",
+              "displayName": "contexto_final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        544
+      ],
+      "id": "38185455-0b3b-4ba5-b810-fca950890a59",
+      "name": "Expert_Insights"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nOl6lnaGMpyg9S9J",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/nOl6lnaGMpyg9S9J",
+          "cachedResultName": "sw_expert_bigfive_ocean"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Grava_chat').first().json.usuario_id }}",
+            "mensagens": "={{ $('junta_dados_gravacao').first().json.mensagens }}",
+            "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
+            "chat_id": "={{ $('Grava_chat').first().json.id }}",
+            "usr_name": "={{ $('dados_usr').first().json.nome_preferencia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        704
+      ],
+      "id": "eb7ead69-46b5-45af-97ae-41aacff1315e",
+      "name": "experts_bigfive"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lê valor do GET (sua versão retorna em propertyName; deixo compatível)\nconst raw = $('Redis GET Lock').first().json.propertyName ?? $('Redis GET Lock').first().json.value ?? null;\n\nconst now = Math.floor(Date.now() / 1000);\nconst unlockAt = Number(raw);\n\n// Se o valor não for numérico, não há como calcular\nif (!Number.isFinite(unlockAt) || unlockAt <= 0) {\n  return { remaining_seconds: 0, remaining_hm: \"0h 0m\", unlock_clock: \"00:00\" };\n}\n\nlet remaining = Math.max(unlockAt - now, 0);\nconst hours = Math.floor(remaining / 3600);\nconst minutes = Math.floor((remaining % 3600) / 60);\n\n// Hora exata (Europe/Lisbon)\nconst unlockDate = new Date(unlockAt * 1000);\nconst hm = new Intl.DateTimeFormat('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Lisbon' }).format(unlockDate);\n\nreturn {\n  remaining_seconds: remaining,\n  remaining_hm: `${hours}h ${minutes}m`,\n  unlock_clock: hm\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4480,
+        448
+      ],
+      "id": "87aed0e5-436a-4216-a56b-b8d80a186545",
+      "name": "Calcula tempo restante"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('start').first().json[\"body.instance\"] }}{{ $('start').first().json.usr_id }}{{ $('dados_usr').first().json.whatsapp_numero }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4880,
+        656
+      ],
+      "id": "abafaba3-5238-44df-b55d-a8ca22cabffb",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -3760,
+        816
+      ],
+      "id": "1b71eb1c-a547-461d-974c-0de2febaf668",
+      "name": "Chat Memory - Delete All (final)1",
+      "disabled": true
+    }
+  ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "body.instance": "MindQuest",
+          "body.data.key.id": "2A9E2A6E14976D528C01",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.fromMe": false,
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "Olá",
+          "body.data.messageType": "conversation"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "dados_usr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados_usr": {
+      "main": [
+        [
+          {
+            "node": "Build Keys",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Keys": {
+      "main": [
+        [
+          {
+            "node": "Redis GET Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis GET Lock": {
+      "main": [
+        [
+          {
+            "node": "Calcula tempo restante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LOCK ativo?": {
+      "main": [
+        [
+          {
+            "node": "Mensagem de Bloqueio (12h)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory  - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory  - Get": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Mentor de vida",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory  - Get1",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Insert",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory  - Get",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Delete All (final)",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Delete All (final)1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory - Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory - Insert": {
+      "main": [
+        [
+          {
+            "node": "Interações (Pré-Agente)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interações (Pré-Agente)": {
+      "main": [
+        [
+          {
+            "node": "Mensagem de Bloqueio (12h)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mentor de vida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Mentor de vida",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_history": {
+      "ai_tool": [
+        [
+          {
+            "node": "Mentor de vida",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mentor de vida": {
+      "main": [
+        [
+          {
+            "node": "organiza_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "organiza_json": {
+      "main": [
+        [
+          {
+            "node": "É a 5ª?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory  - Get1": {
+      "main": [
+        [
+          {
+            "node": "junta_dados_gravacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "junta_dados_gravacao": {
+      "main": [
+        [
+          {
+            "node": "Grava_chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grava_chat": {
+      "main": [
+        [
+          {
+            "node": "experts_panas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Delete All (final)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resumo das conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "experts_humor_energia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "experts_sabotadores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Expert_Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "experts_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Resumo das conversas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumo das conversas": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Gamificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É a 5ª?": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory  - Get1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Envia msg ao usr1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Envia msg ao usr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory - Delete All (final)": {
+      "main": [
+        [
+          {
+            "node": "Redis SET Lock (12h)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia msg ao usr1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia msg ao usr": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Resumo das conversas",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcula tempo restante": {
+      "main": [
+        [
+          {
+            "node": "LOCK ativo?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Delete All (final)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "80fa8bb4-7d0b-4378-80e0-8eeb06f0837c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+  },
+  "id": "aRonGjwfYoY1UUHH",
+  "tags": []
+}

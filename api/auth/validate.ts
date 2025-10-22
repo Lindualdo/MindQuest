@@ -11,9 +11,31 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  let parsedBody: any = null;
+
+  if (req.method === 'POST') {
+    const rawBody = req.body;
+
+    if (typeof rawBody === 'string') {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch {
+        parsedBody = null;
+      }
+    } else if (rawBody && typeof rawBody === 'object') {
+      parsedBody = rawBody;
+    } else if (Buffer.isBuffer(rawBody)) {
+      try {
+        parsedBody = JSON.parse(rawBody.toString('utf-8'));
+      } catch {
+        parsedBody = null;
+      }
+    }
+  }
+
   const token =
     req.method === 'POST'
-      ? req.body?.token
+      ? parsedBody?.token
       : req.query?.token;
 
   if (!token || Array.isArray(token)) {
@@ -56,21 +78,11 @@ export default async function handler(req: any, res: any) {
     // fallback para GET se a API ainda não aceitar POST
     const getResponse = await fetch(`${REMOTE_ENDPOINT}?token=${encodeURIComponent(token)}`);
     await handleResponse(getResponse);
-    const contentType = upstreamResponse.headers.get('content-type') || '';
-    const isJson = contentType.includes('application/json');
-    const responseBody = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
-
-    if (!upstreamResponse.ok) {
-      res.status(upstreamResponse.status).json(
-        typeof responseBody === 'string'
-          ? { success: false, error: responseBody || 'Erro desconhecido' }
-          : responseBody
-      );
-      return;
-    }
-
-    res.status(200).json(responseBody);
+    return;
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço externo' });
+    console.error('Erro ao validar token:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço externo' });
+    }
   }
 }
