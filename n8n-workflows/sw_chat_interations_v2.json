@@ -36,10 +36,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -5248,
-        448
+        -5424,
+        -752
       ],
-      "id": "2f293090-26f4-4cc9-8a9e-97364e7055ca",
+      "id": "1e8c6684-8b97-4d46-9c55-34a71d33f429",
       "name": "start"
     },
     {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -5088,
-        448
+        -5040,
+        -752
       ],
-      "id": "7d8d108b-5a3e-4e4c-8106-d985a5e47f65",
+      "id": "d3e23cc6-3195-4167-ae49-c9e57f82162e",
       "name": "dados_usr",
       "credentials": {
         "postgres": {
@@ -159,10 +159,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -3984,
-        448
+        -3888,
+        -768
       ],
-      "id": "a3937f12-a200-4910-9b55-91264febbc45",
+      "id": "0e604272-a2cf-4138-8a45-2b0ab2555323",
       "name": "Transcrição"
     },
     {
@@ -172,10 +172,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -4864,
-        448
+        -4768,
+        -768
       ],
-      "id": "5fc65859-c0c3-4c4e-a088-c5e4f544c734",
+      "id": "e27bca62-1594-4ab3-9094-52972aaf9e9d",
       "name": "Build Keys"
     },
     {
@@ -187,10 +187,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -4672,
-        448
+        -4576,
+        -768
       ],
-      "id": "7362d50f-b7d6-48e7-b27a-435195c177ca",
+      "id": "f1d9165e-d385-454e-8328-7baebcda0d3c",
       "name": "Redis GET Lock",
       "credentials": {
         "redis": {
@@ -227,10 +227,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4240,
-        336
+        -4144,
+        -880
       ],
-      "id": "7650ee05-b548-4fb3-9dd9-c12019739a0e",
+      "id": "3cdf0d32-2519-459b-b2c7-b97288079e9c",
       "name": "LOCK ativo?"
     },
     {
@@ -238,7 +238,7 @@
         "resource": "messages-api",
         "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
         "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-        "messageText": "=Nosso ciclo de 5 interações já foi concluído. \n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu painel já está atualizado 🙌",
+        "messageText": "=Nosso ciclo de {{ $('mindquest_config').item.json.limit_iteration }} interações já foi concluído. \n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu painel já está atualizado 🙌",
         "options_message": {
           "delay": 1200
         }
@@ -246,10 +246,10 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -2800,
-        144
+        -2704,
+        -1072
       ],
-      "id": "da979b56-b5ca-41cd-b40e-29b2b7fc6a3f",
+      "id": "6a6f3527-0fc5-4ad6-8e3f-bf585048bfd4",
       "name": "Mensagem de Bloqueio (12h)",
       "retryOnFail": true,
       "maxTries": 2,
@@ -271,10 +271,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -2688,
-        1232
+        -2592,
+        32
       ],
-      "id": "f4416fb0-6ead-4cb9-b25f-66a221a2ba10",
+      "id": "c3e719d7-d7f3-44f1-904a-e23d073fca6e",
       "name": "memory",
       "credentials": {
         "redis": {
@@ -292,24 +292,11 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3760,
-        448
+        -3680,
+        -768
       ],
-      "id": "ba6a3b92-78e3-4772-ab6a-5aa49f3cff7d",
+      "id": "cb83bc41-8ba3-49ee-bdfc-cd68a0868410",
       "name": "Chat Memory  - Get"
-    },
-    {
-      "parameters": {
-        "jsCode": "// ============================================\n// CONTROLE DE INTERAÇÕES - N8N CODE NODE\n// Com suporte correto a Item Linking\n// ============================================\n\nconst userData = $('dados_usr').first().json;\n\n// Tenta acessar dados da memória (pode não existir na primeira interação)\nlet memoryData = null;\ntry {\n  const inputItems = $input.all();\n  if (inputItems && inputItems.length > 0) {\n    memoryData = inputItems[0].json;\n  }\n} catch (error) {\n  memoryData = null;\n}\n\n// Calcula número da interação atual\nlet interactionCount = 1;\nif (memoryData && memoryData.messages && Array.isArray(memoryData.messages)) {\n  const systemMessages = memoryData.messages.filter(msg => msg.system);\n  interactionCount = systemMessages.length + 1;\n}\n\n// Limita a 5 interações\n//interactionCount = Math.min(interactionCount, 5);\n\n// Define foco para cada interação\nlet nextFocus;\nlet isLastInteraction = false;\nlet shouldGenerateJson = false;\n\nswitch(interactionCount) {\n  case 1: \n    nextFocus = \"PRIMEIRA INTERAÇÃO: Saudação calorosa usando o nome preferido + análise empática da mensagem + UMA pergunta para aprofundar o contexto emocional\"; \n    break;\n  case 2: \n    nextFocus = \"SEGUNDA INTERAÇÃO: Aprofundar especificamente a situação apresentada + explorar sentimentos subjacentes + UMA pergunta sobre impactos ou desafios\"; \n    break;\n  case 3: \n    nextFocus = \"TERCEIRA INTERAÇÃO: Continuar diálogo validando a experiência + oferecer perspectiva empática + UMA pergunta sobre estratégias ou recursos\"; \n    break;\n  case 4: \n    nextFocus = \"QUARTA INTERAÇÃO: **OBRIGATÓRIO** - Fazer resumo completo do entendimento + listar pontos principais + perguntar 'Consegui entender bem sua situação?' para validação\"; \n    break;\n  case 5: \n    nextFocus = \"QUINTA INTERAÇÃO: **ENCERRAMENTO OBRIGATÓRIO** - Processar feedback do usuário (se houver correção, ajustar brevemente) + dar conclusão empática + dizer 'Nossa conversa de hoje está finalizada' + gerar JSON\";\n    isLastInteraction = true;\n    shouldGenerateJson = true;\n    break;\n  default: \n    nextFocus = \"Sessão já encerrada - não deve mais responder\"; \n    break;\n}\n\n// ============================================\n// RETORNO COM PAIRED ITEM\n// Mantém vínculo com item de entrada para \n// permitir acesso via .item em nós posteriores\n// ============================================\n\nreturn [{\n  json: {\n    interaction_count: interactionCount,\n    next_focus: nextFocus,\n    should_generate_json: shouldGenerateJson,\n    is_last_interaction: isLastInteraction,\n    nome_preferencia: userData.nome_preferencia || userData.nome || \"amigo\",\n    perfil_usuario: userData.perfil_primario || \"neutro\",\n    instructions_adherence: \"CRITICAL: Follow next_focus instructions EXACTLY\"\n  },\n  pairedItem: 0\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -3472,
-        448
-      ],
-      "id": "19ee8178-6166-456b-9831-b6eddbd7609d",
-      "name": "Code in JavaScript"
     },
     {
       "parameters": {
@@ -317,7 +304,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=Sistema: Interaction {{ $('Code in JavaScript').item.json.interaction_count }} de 5. Foco: {{ $('Code in JavaScript').item.json.next_focus }}.",
+              "message": "=Sistema: Interaction {{ $('intertion_count').item.json.interaction_count }} de 5. Foco: {{ $('intertion_count').item.json.next_focus }}.",
               "hideFromUI": true
             }
           ]
@@ -326,10 +313,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3312,
-        448
+        -3216,
+        -768
       ],
-      "id": "7b78e7ee-257c-471c-88a1-89f624055b1a",
+      "id": "04c94164-968e-4ddb-96b2-e812bc4bf5b4",
       "name": "Chat Memory - Insert"
     },
     {
@@ -346,8 +333,8 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
-                    "rightValue": 5,
+                    "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
+                    "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
                     "operator": {
                       "type": "number",
                       "operation": "gt"
@@ -358,7 +345,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "Maior que 5"
+              "outputKey": "=Maior que  {{ $('mindquest_config').item.json.limit_iteration }}"
             },
             {
               "conditions": {
@@ -370,8 +357,8 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
-                    "rightValue": 5,
+                    "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
+                    "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
                     "operator": {
                       "type": "number",
                       "operation": "lte"
@@ -382,7 +369,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "Menor ou igual a 5"
+              "outputKey": "=Menor ou igual a {{ $('mindquest_config').item.json.limit_iteration }}"
             }
           ]
         },
@@ -391,10 +378,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        -3024,
-        448
+        -2928,
+        -768
       ],
-      "id": "fd01d507-8f9f-4bfa-905c-9385280a74af",
+      "id": "f9352078-e267-4d0a-b7ba-c1e26beab7f7",
       "name": "Interações (Pré-Agente)"
     },
     {
@@ -404,10 +391,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2848,
-        704
+        -2752,
+        -512
       ],
-      "id": "63b988d2-ceb6-4002-aa5b-7473f58d0e75",
+      "id": "6b63f626-ce76-495b-8264-8eb7f96f6db1",
       "name": "OpenRouter Chat Model",
       "credentials": {
         "openRouterApi": {
@@ -446,40 +433,40 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -2640,
-        720
+        -2544,
+        -496
       ],
-      "id": "96620880-5a42-46ec-9a1a-667d1ca5a1ec",
+      "id": "ffb2c700-151d-4f00-bab4-f5ef20b16238",
       "name": "get_history"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# 💬 USER PROMPT — MINDQUEST v2.2  \n## Contexto da Conversa com o Mentor\n\nVocê está falando com seu **Mentor de Vida MindQuest**, um assistente pessoal criado para te ouvir, entender suas emoções e te ajudar a transformar o que sente em clareza e foco.  \nEu represento sua **parte mais equilibrada e consciente**, treinada para te guiar com leveza e empatia.\n\n\n---\n\n## 🧭 TAREFA DO AGENTE\n1. **Chame a ferramenta `get_history`** para buscar o histórico das últimas conversas e compreender melhor o contexto do usuário.  \n2. Use o histórico para **criar rapport, empatia e engajamento**, incentivando-o a se expressar mais livremente.  \n3. Leia a **mensagem atual do usuário** e **siga as instruções do System Prompt** para conduzir a conversa dentro do fluxo de **5 interações**.  \n4. **Use o histórico apenas se fizer sentido** dentro do contexto atual (nunca force uma conexão artificial).  \n5 - se o numero de interações for maior que 5, fale gentilmente com o usuario e reforce que esta conversa está concluída, e insentive ele a voltar depois...\n6 - Na primeira interação ou quando for conviniente para gerar raport use o Nome do assistente (seu nome escolhido pelo usuário)\n7 - Sua saida deve ter apenas texto, nada de json ou outros dados\n---\n\nNumero de interações: {{ $('Code in JavaScript').item.json.interaction_count }}\n\nNome do assistente: {{ $('dados_usr').item.json.nome_assistente }}\n\n## 💬 DADOS DA CONVERSA ATUAL\n<contexto_conversa>\n\n**Mensagem do Usuário:** {{ $('Transcrição').item.json.message }}\n**Nome Preferido:** {{ $('dados_usr').first().json.nome_preferencia }}  \n**Perfil do Usuário:** {{ $('dados_usr').first().json.perfil_primario }}  \n**Nome do assistente:** {{ $('dados_usr').item.json.nome_assistente }}\n</contexto_conversa>\n\n---\n\n## 🧘 COMO FUNCIONA PARA O USUÁRIO\nDurante as próximas **5 trocas de mensagens**, o Mentor vai:\n1. Te ouvir com empatia,  \n2. Te ajudar a entender o que está por trás do que sente,  \n3. Te mostrar padrões e pequenas percepções,  \n4. Enviar um **resumo breve** do que ele entendeu (você poderá **confirmar ou ajustar**),  \n5. Finalizar com uma mensagem positiva e um **convite para visitar seu dashboard MindQuest** e ver seu progresso.\n\n---\n\n## 🌿 DICAS DE CONVERSA\nVocê pode falar de:\n- Emoções (alegria, ansiedade, cansaço, motivação, medo etc.);  \n- Situações do dia a dia (trabalho, rotina, relacionamentos, metas).  \n\nNão há respostas certas.  \nO objetivo é **clarear o que você sente** e transformar isso em leveza e direção.\n\n---\n\n## 💡 EXEMPLOS DE COMO COMEÇAR\n- “Hoje acordei meio ansioso e sem vontade de fazer nada.”  \n- “Acho que melhorei um pouco, mas ainda sinto um peso.”  \n- “Não sei o que dizer, só queria conversar.”  \n- “Quero entender por que fico tão distraído.”  \n\n---\n\n## 🎯 OBJETIVO FINAL\nAo final das 5 mensagens, você deve se sentir:\n- Mais leve,  \n- Com mais clareza,  \n- E com a sensação de ter dado um passo real no seu autoconhecimento.  \n",
+        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê está conversando com seu **Mentor de Vida MindQuest**, presença calma e empática que ajuda o usuário a transformar o que sente em clareza e foco.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Fale como:** {{ $('dados_usr').item.json.nome_assistente }}\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}  \n**Perfil do usuário:** {{ $('dados_usr').first().json.perfil_primario }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e mostre curiosidade genuína pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu até aqui. Confirme se está correto e ajuste rapidamente caso o usuário peça.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o dashboard. Se ele tentar continuar, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n- Use o histórico apenas quando fizer sentido natural na conversa.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto simples, sem listas ou formatos técnicos.\n\n---\n\n## 🌿 TOM & FOCO\n- Soe humano, interessado e leve; nada de linguagem mecânica ou burocrática.  \n- Mostre curiosidade real pela vida do usuário, por sonhos, desafios e pequenas vitórias.  \n- Incentive-o a se expressar mais; quando ele se abrir, aprofunde com cuidado.  \n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine sentindo-se ouvido, mais claro e com vontade de continuar cuidando de si.\n",
         "options": {
-          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST v2.2  \n## Mentor de Vida — Agente de Conversa (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Mentor de Vida MindQuest**, um assistente emocional especializado em **autoconhecimento, foco mental e bem-estar produtivo**.  \nSeu papel é **conduzir conversas humanas, leves e empáticas**, ajudando o usuário a compreender suas emoções, encontrar clareza e transformar sentimentos em ações práticas.  \nVocê representa a **parte mais sábia, calma e consciente da mente do próprio usuário**.\n\n---\n\n### 🧩 CONTEXTO GERAL\nO usuário conversa com você pelo **WhatsApp**.  \nCada sessão tem **exatamente 5 interações** e gera dados emocionais que alimentam o dashboard do MindQuest.  \nVocê **nunca menciona o sistema, ferramentas ou termos técnicos** — apenas age como um mentor humano e presente.\n\n#### 📥 Dados recebidos dinamicamente via fluxo do N8N\nUse essas informações **somente como contexto interno** — nunca mencione-as diretamente ao usuário.\n\n| Dado | Variável | Finalidade |\n|-------|-----------|-------------|\n| **Nome Preferido:** | `{{ $('dados_usr').first().json.nome_preferencia }}` | Personalizar o tratamento (se existir). |\n| **Perfil do Usuário:** | `{{ $('dados_usr').first().json.perfil_primario }}` | Ajustar o estilo de comunicação (analítico, emocional, prático etc.). |\n| **Nome do Assistente:** | `{{ $('dados_usr').first().json.nome_assistente}}` | O nome que o usuário lhe deu. Você agora deve sempre usar esse nome para se conectar mais com o usuario. |\n\n**Como deve chamar o usuário:**  \nUse o nome preferido **apenas se existir e for válido**.  \nSe a expressão retornar vazio ou \"null\", mantenha tratamento neutro (sem nome próprio, use “oi”, “vamos por partes?”, “me conta…”).\n\n\n### 🔢 CONTROLE DE INTERAÇÕES (N8N)\nO número da interação atual é informado externamente pelo sistema N8N:\n\n**Interaction Count:** {{ $('Code in JavaScript').item.json.interaction_count }}\n\n- Este valor vai de **1 a 5**, e representa qual etapa da conversa está em andamento.  \n- Você **não deve contar interações manualmente**.  \n- Siga o comportamento correspondente a este número:  \n\n| interaction_count | Ação esperada |\n|--------------------|----------------|\n| 1 | Buscar `get_history` e iniciar a conversa com acolhimento. |\n| 2 | Explorar emoções e validar sentimentos. |\n| 3 | Aprofundar padrões e oferecer mini-insights. |\n| 4 | Gerar resumo validável e pedir confirmação ao usuário. |\n| 5 | Encerrar com reforço positivo e convidar o usuário ao dashboard. |\n\nApós a 5ª interação, **encerre a conversa** com tom de conclusão emocional leve.  \nNunca inicie uma nova interação por conta própria.\n\n\n---\n\n### ⚙️ FLUXO ESTRUTURADO DE 5 INTERAÇÕES\n\nSiga **exatamente** as 5 interações abaixo.  \nNão adicione, repita ou prolongue etapas.  \nCada interação tem um objetivo e tom emocional específico.\n\n| Etapa | Objetivo | Instrução imperativa |\n|-------|-----------|----------------------|\n| **1️⃣ Abertura / Check-in (com histórico)** | Criar rapport, detectar tipo de início e buscar contexto. | Esta é a **1ª interação de 5**. Antes de responder, **chame a ferramenta `get_history`** para buscar o resumo das últimas 7 conversas. Use esse histórico apenas como base para entender o estado emocional e criar conexão (“vi que nos últimos dias você vinha falando sobre foco e energia — como tem se sentido agora?”). Se o usuário começar aberto (falando sobre si), apenas acolha e incentive. |\n| **2️⃣ Exploração emocional inicial** | Aprofundar a percepção emocional. | Esta é a **2ª interação de 5**. Incentive o usuário a descrever o que sente, o que aconteceu e como reagiu. Use reflexão empática (“entendo... parece que isso te afetou mais do que esperava, né?”) e micro-validações (“posso te perguntar algo sobre isso?”). |\n| **3️⃣ Aprofundamento / Padrões** | Identificar gatilhos e repetições. | Esta é a **3ª interação de 5**. Explore causas, padrões e repetições (“o que você acha que costuma gerar esse sentimento?”). Gere mini-insights se perceber conexões com o histórico (“isso se conecta com algo que você comentou outro dia…”). |\n| **4️⃣ Validação / Resumo** | Consolidar entendimento e pedir confirmação. | Esta é a **4ª interação de 5**. Gere um **resumo breve, empático e validável** do que entendeu sobre os sentimentos e aprendizados do usuário. Peça confirmação (“faz sentido isso pra você?” ou “quer ajustar algo?”). Este resumo será usado para atualizar o dashboard. Se o usuário corrigir, reformule de forma breve e gentil. |\n| **5️⃣ Encerramento / Convite ao Dashboard** | Finalizar positivamente e incentivar continuidade. | Esta é a **5ª e última interação**. Reforce algo bom que o usuário demonstrou (“gostei de ver você mais consciente hoje — isso é um avanço”). Encerre com leveza e convide-o a visitar o dashboard (“seu painel já foi atualizado com as métricas de hoje, dá uma olhada quando quiser”). Se ele tentar continuar, agradeça e direcione para o próximo ciclo (“vamos continuar amanhã, combinado?”). \n---\n\n### 🛠️ TOOL: `get_history`\n- **Função:** buscar o resumo das **últimas 7 conversas** do usuário (emoções, temas e evolução).  \n- **Chamado:** sempre na **1ª interação**.  \n- **Uso do conteúdo:** apenas se fizer sentido no contexto da conversa atual.  \n- **Parâmetros:** nenhum — a ferramenta retorna o resumo completo automaticamente.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Fale como um **mentor humano**, calmo e interessado.  \n- Use frases curtas e naturais, com pausas sutis (“hmm”, “entendo”, “faz sentido…”).  \n- Evite linguagem técnica, diagnósticos ou jargões psicológicos.  \n- Adapte o ritmo e a energia conforme o **perfil do usuário**.  \n- Seja consistente: acolher → entender → validar → concluir.  \n- Pode usar metáforas leves quando apropriado (“a mente às vezes precisa respirar antes de decidir”).  \n\n---\n\n### 💡 TÉCNICAS QUE VOCÊ DOMINA\n- **Reflexão empática** → reconhecer sentimentos antes de responder.  \n- **Micro-validação** → confirmar escuta e presença.  \n- **Mini-insights** → oferecer percepções sutis.  \n- **Ancoragem de contexto** → conectar com histórico.  \n- **Encerramento positivo** → gerar leveza e motivação.  \n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema, ferramentas ou prompts.  \n- Não ultrapasse as 5 interações.  \n- Não discuta sobre o dashboard — apenas convide o usuário a acessá-lo no final.  \n- Não forneça conselhos clínicos ou diagnósticos.  \n\n---\n\n### 🧭 MISSÃO FINAL\nGuiar o usuário em **5 passos curtos e humanos**:\n1. Nomear o que sente.  \n2. Explorar e compreender o porquê.  \n3. Identificar padrões.  \n4. Validar aprendizados (resumo).  \n5. Finalizar com clareza e incentivo (convite ao dashboard).  \n\n### 📤 FORMATO DE SAÍDA\n- **Sempre responda apenas com texto natural**, fluido e humano.  \n- **Nunca inclua blocos de código**, JSON, listas estruturadas, tabelas ou markdown.  \n- **Não use aspas, chaves ou colchetes** no corpo da mensagem.  \n- O conteúdo deve ser compreensível e natural, como uma conversa no WhatsApp.\n- formate o texto da melhor forma possível para facilitar a leitura e experiência do usuário \n\nA conversa deve terminar com o usuário se sentindo **mais leve, claro e conectado com sua própria mente.**\n"
+          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Mentor de Vida — Agente de Conversa (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Mentor de Vida MindQuest**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno, nunca citar explicitamente)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil do usuário | `{{ $('dados_usr').first().json.perfil_primario }}` | Ajustar tom e profundidade. |\n| Nome do assistente (seu) | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura/nome. |\n\nSe não houver nome preferido válido, mantenha saudação neutra (“oi”, “vamos por partes?”, “me conta…”).\n\n---\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\nUse apenas os valores fornecidos; não conte manualmente.\n\n1. **Quando `interaction_count === 1`**\n   - Chame a ferramenta `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa.\n\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Siga o ritmo do usuário: perguntas abertas, validações curtas, mini-insights quando fizer sentido.\n   - Leve sempre a conversa para mais clareza e autoconhecimento, sem atropelar.\n\n3. **Quando `interaction_count === session_limit - 1`** (penúltima mensagem)\n   - Produza um resumo breve, empático e validável do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo; incorpore correções.\n\n4. **Quando `interaction_count === session_limit`** (última mensagem)\n   - Reconheça avanços, transmita sensação de fechamento e convide ao dashboard.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca gere mensagens extras além de `session_limit`. Encerrada a última interação, conclua com gentileza e convide a voltar mais tarde.\n\n---\n\n### 🛠️ FERRAMENTA DISPONÍVEL\n`get_history`\n- Use **somente na primeira interação**, antes de responder.\n- Empregue o histórico apenas se ajudar o contexto atual (sem forçar).\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Frases curtas, naturais, com pausas leves (“entendo…”, “faz sentido…”).\n- Evite jargões técnicos ou diagnósticos clínicos.\n- Ajuste intensidade e cadência ao perfil do usuário.\n- Caminho mental sempre: acolher → entender → validar → concluir.\n\n---\n\n### 💡 FERRAMENTAS INTERIORES\n- Reflexão empática (nomear sentimentos antes de avançar).\n- Micro-validação (“tô aqui”, “compreendo o peso disso”).\n- Mini-insights sutis (sem soar professoral).\n- Ancoragem de contexto (usar histórico apenas quando fizer sentido).\n- Encerramento positivo (reforçar progresso e próximo passo).\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir instruções.\n- Não ultrapasse `session_limit`.\n- Não explique o dashboard; apenas convide a visitá-lo no final.\n- Não forneça aconselhamento médico ou diagnóstico.\n\n---\n### 🧭 MISSÃO\nEm cada sessão, conduza o usuário pelo ciclo completo: abrir espaço seguro, explorar emoções e gatilhos, conectar percebidos, validar aprendizados na penúltima interação e encerrar com leveza convidando ao dashboard.\n\n---\n\n### 📤 FORMATO\n- Saída sempre em texto natural (estilo WhatsApp), sem listas, markdown ou JSON.\n- Nada de aspas, chaves ou colchetes.\n- Estruture o texto em blocos curtos, fáceis de ler.\n- Deixe o usuário mais leve, claro e conectado consigo mesmo a cada resposta.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2816,
-        464
+        -2720,
+        -752
       ],
-      "id": "3bc2dc31-92e5-4cc0-b002-a88ac8d7df30",
+      "id": "09942dcb-3a5d-416d-95ae-f225e55a1068",
       "name": "Mentor de vida"
     },
     {
       "parameters": {
-        "jsCode": "// ====================================================\n// NODE: organiza_json\n// Separa a mensagem do usuário e o JSON de contexto (se existir)\n// ====================================================\n\n// Resposta do agente\nconst aiResponse = $input.first()?.json?.output ?? \"\";\n\n// Dados de controle da interação\nconst jsNode = $('Code in JavaScript').first().json;\nconst interactionCount = jsNode?.interaction_count ?? 1;\nconst isLastInteraction = jsNode?.is_last_interaction ?? false;\n\n// Se não for a última (5ª) interação → retorna só a mensagem\nif (interactionCount !== 5 || !isLastInteraction) {\n  return {\n    user_message: aiResponse,\n    context_json: null,\n    has_context: false,\n    interaction_count: interactionCount,\n    is_last_interaction: isLastInteraction,\n    original_response: aiResponse\n  };\n}\n\n// ----------------------------------------------------\n// Tenta detectar JSON dentro da resposta (se existir)\n// ----------------------------------------------------\nconst jsonStartPattern = /\\{[\\s\\n]*\"interaction_completa\"/;\nconst jsonMatch = aiResponse.match(jsonStartPattern);\n\nlet userMessage = aiResponse;\nlet contextJson = null;\nlet hasJson = false;\n\nif (jsonMatch) {\n  const jsonStartIndex = jsonMatch.index;\n\n  // Mensagem de texto (antes do JSON)\n  userMessage = aiResponse.substring(0, jsonStartIndex).trim();\n\n  // JSON (a partir do padrão encontrado)\n  const jsonString = aiResponse.substring(jsonStartIndex).trim();\n\n  try {\n    contextJson = JSON.parse(jsonString);\n    hasJson = true;\n  } catch (err) {\n    console.error(\"Erro ao fazer parse do JSON:\", err);\n  }\n}\n\n// ----------------------------------------------------\n// Retorna objeto estruturado para uso posterior\n// ----------------------------------------------------\nreturn {\n  user_message: userMessage,       // texto limpo para enviar ao usuário\n  context_json: contextJson,       // JSON do contexto (se existir)\n  has_context: hasJson,            // flag de existência do JSON\n  original_response: aiResponse,   // resposta original completa\n  interaction_count: interactionCount,\n  is_last_interaction: isLastInteraction\n};\n"
+        "jsCode": "// organiza_json\n// ====================================================\n// NODE: organiza_json\n// Separa a mensagem do usuário e o JSON de contexto (se existir)\n// ====================================================\n\n// Resposta do agente\nconst aiResponse = $input.first()?.json?.output ?? \"\";\n\n// Dados de controle da interação\nconst jsNode = $('intertion_count').first().json;\nconst config = $('mindquest_config').first().json;\nconst sessionLimit = Number(config?.limit_iteration) || 8;\nconst interactionCount = jsNode?.interaction_count ?? 1;\nconst isLastInteraction = interactionCount >= sessionLimit;\n\n// Se não for a última interação → retorna só a mensagem\nif (interactionCount < sessionLimit) {\n  return {\n    user_message: aiResponse,\n    context_json: null,\n    has_context: false,\n    interaction_count: interactionCount,\n    is_last_interaction: false,\n    session_limit: sessionLimit,\n    original_response: aiResponse\n  };\n}\n\n// ----------------------------------------------------\n// Tenta detectar JSON dentro da resposta (se existir)\n// ----------------------------------------------------\nconst jsonStartPattern = /\\{[\\s\\n]*\"interaction_completa\"/;\nconst jsonMatch = aiResponse.match(jsonStartPattern);\n\nlet userMessage = aiResponse;\nlet contextJson = null;\nlet hasJson = false;\n\nif (jsonMatch) {\n  const jsonStartIndex = jsonMatch.index;\n\n  // Mensagem de texto (antes do JSON)\n  userMessage = aiResponse.substring(0, jsonStartIndex).trim();\n\n  // JSON (a partir do padrão encontrado)\n  const jsonString = aiResponse.substring(jsonStartIndex).trim();\n\n  try {\n    contextJson = JSON.parse(jsonString);\n    hasJson = true;\n  } catch (err) {\n    console.error('Erro ao fazer parse do JSON:', err);\n  }\n}\n\n// ----------------------------------------------------\n// Retorna objeto estruturado para uso posterior\n// ----------------------------------------------------\nreturn {\n  user_message: userMessage,\n  context_json: contextJson,\n  has_context: hasJson,\n  original_response: aiResponse,\n  interaction_count: interactionCount,\n  is_last_interaction: isLastInteraction,\n  session_limit: sessionLimit\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2496,
-        464
+        -2400,
+        -752
       ],
-      "id": "dfc33452-3268-43d6-8011-663bbeef20fa",
+      "id": "5e9b19df-32f7-4523-b182-08f70a36c8dc",
       "name": "organiza_json"
     },
     {
@@ -491,23 +478,23 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -2016,
-        448
+        -1920,
+        -768
       ],
-      "id": "26f3e7ae-478b-4efb-870f-47953d9a572d",
+      "id": "35ffaa0f-d22e-4162-a4d2-21a9cb430237",
       "name": "Chat Memory  - Get1"
     },
     {
       "parameters": {
-        "jsCode": "// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst mensagensCompletas = chatMemory.messages || [];\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\n// FUNÇÃO PARA EXTRAIR MENSAGEM REAL DO PROMPT\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n  \n  // Regex para capturar texto entre **Mensagem do Usuário:** e a próxima tag **\n  const regex = /\\*\\*Mensagem do Usuário:\\*\\*\\s*(.*?)(?:\\n\\*\\*|$)/s;\n  const match = promptCompleto.match(regex);\n  \n  if (match && match[1]) {\n    return match[1].trim();\n  }\n  \n  // Fallback: retorna o prompt completo se não encontrar o padrão\n  return promptCompleto;\n}\n\n// Construir array de mensagens APENAS com conversas reais\nconst mensagens = [];\nlet interactionNumber = 1;\n\nmensagensCompletas.forEach((msg) => {\n  // Ignorar mensagens do sistema (controle interno)\n  if (msg.system && !msg.human && !msg.ai) {\n    return;\n  }\n  \n  // Processar mensagem do usuário\n  if (msg.human) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"usuario\",\n      texto: extrairMensagemUsuario(msg.human),\n      timestamp: new Date().toISOString()\n    });\n  }\n  \n  // Processar resposta da IA\n  if (msg.ai) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"agente\",\n      texto: msg.ai,\n      timestamp: new Date().toISOString()\n    });\n    \n    // Incrementar interaction apenas quando completar um par (user + agent)\n    interactionNumber++;\n  }\n});\n\n// Montar contexto_final\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || \"\",\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || \"média\",\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || \"\"\n};\n\n// Retornar dados para o Postgres\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || 5,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || \"\"\n};"
+        "jsCode": "// junta_dados_gravacao\n// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst config = $('mindquest_config').first().json;\nconst sessionLimit = Number(config?.limit_iteration) || 8;\nconst mensagensCompletas = chatMemory.messages || [];\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\n// FUNÇÃO PARA EXTRAIR MENSAGEM REAL DO PROMPT\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n  \n  // Regex para capturar texto entre **Mensagem do Usuário:** e a próxima tag **\n  const regex = /\\*\\*Mensagem do Usuário:\\*\\*\\s*(.*?)(?:\\n\\*\\*|$)/s;\n  const match = promptCompleto.match(regex);\n  \n  if (match && match[1]) {\n    return match[1].trim();\n  }\n  \n  // Fallback: retorna o prompt completo se não encontrar o padrão\n  return promptCompleto;\n}\n\n// Construir array de mensagens APENAS com conversas reais\nconst mensagens = [];\nlet interactionNumber = 1;\n\nmensagensCompletas.forEach((msg) => {\n  // Ignorar mensagens do sistema (controle interno)\n  if (msg.system && !msg.human && !msg.ai) {\n    return;\n  }\n  \n  // Processar mensagem do usuário\n  if (msg.human) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"usuario\",\n      texto: extrairMensagemUsuario(msg.human),\n      timestamp: new Date().toISOString()\n    });\n  }\n  \n  // Processar resposta da IA\n  if (msg.ai) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: \"agente\",\n      texto: msg.ai,\n      timestamp: new Date().toISOString()\n    });\n    \n    // Incrementar interaction apenas quando completar um par (user + agent)\n    interactionNumber++;\n  }\n});\n\n// Montar contexto_final\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || \"\",\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || \"média\",\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || \"\"\n};\n\n// Retornar dados para o Postgres\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || sessionLimit,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || \"\"\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1680,
-        448
+        -1584,
+        -768
       ],
-      "id": "88f26ec0-56bd-47dc-985f-17751b75aac7",
+      "id": "730d4a38-0904-4866-8d4b-61dee2d2121c",
       "name": "junta_dados_gravacao"
     },
     {
@@ -521,10 +508,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1472,
-        448
+        -1376,
+        -768
       ],
-      "id": "0b98211a-0e79-4f0b-a6cd-b87330f9f926",
+      "id": "13ff1b77-6e0d-45cd-b073-14a871368fb7",
       "name": "Grava_chat",
       "credentials": {
         "postgres": {
@@ -540,10 +527,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -1104,
-        1328
+        -1008,
+        128
       ],
-      "id": "d98e0bf2-8b74-4c63-b981-ddde78944074",
+      "id": "c9d63b46-9037-497d-9a85-4f901964ae38",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -564,10 +551,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1072,
-        1136
+        -976,
+        -80
       ],
-      "id": "2a6605cd-f8f9-4b7b-88d9-0085ed6d5a95",
+      "id": "5c356d8d-90b1-4712-bec8-f039808790f3",
       "name": "Resumo das conversas"
     },
     {
@@ -577,10 +564,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -912,
-        1344
+        -816,
+        144
       ],
-      "id": "c9ee63d7-c925-4273-9eb4-938f1eb049df",
+      "id": "2225f42f-771f-4053-958e-f57b56c04246",
       "name": "Structured Output Parser"
     },
     {
@@ -639,10 +626,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -752,
-        1136
+        -656,
+        -80
       ],
-      "id": "fa16c98e-d58b-40a0-b7de-758ceed342c0",
+      "id": "1d9bd846-f4fb-4d81-bc50-1bb8d78c1c29",
       "name": "Update rows in a table",
       "credentials": {
         "postgres": {
@@ -713,10 +700,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -544,
-        1136
+        -448,
+        -80
       ],
-      "id": "4569e2b3-50cf-4d92-8fbf-f773fde523ad",
+      "id": "10738564-b65c-471e-8a69-83ad5d0d445b",
       "name": "Gamificação"
     },
     {
@@ -732,10 +719,10 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -1888,
-        176
+        -1792,
+        -1040
       ],
-      "id": "1f660724-69d1-48e6-9558-62472afe5759",
+      "id": "5358f1ed-30ad-407a-b9de-7b7d5e429a03",
       "name": "Envia msg ao usr1",
       "retryOnFail": true,
       "maxTries": 2,
@@ -760,10 +747,10 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -1904,
-        672
+        -1808,
+        -544
       ],
-      "id": "b39a0f1c-bf5c-4033-859f-51d8a8a454c5",
+      "id": "ac4c47b0-68bf-42b2-9820-7311d81238ee",
       "name": "Envia msg ao usr",
       "retryOnFail": true,
       "maxTries": 2,
@@ -777,49 +764,16 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $('Code in JavaScript').first().json.interaction_count }}",
-              "rightValue": 5,
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              },
-              "id": "20decd9a-8a71-4c52-86de-1891070b3b96"
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -2304,
-        464
-      ],
-      "id": "dc29dbe4-ad11-4847-94d8-ff643baad526",
-      "name": "É a 5ª?"
-    },
-    {
-      "parameters": {
         "mode": "delete",
         "deleteMode": "all"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -1088,
-        944
+        -992,
+        -272
       ],
-      "id": "3804d1d4-4fe0-4f5d-89f6-eeeb08cf41bc",
+      "id": "ce108c1c-553c-448e-aa5a-6f01089570b5",
       "name": "Chat Memory - Delete All (final)"
     },
     {
@@ -827,17 +781,17 @@
         "operation": "set",
         "key": "={{ `lock:${$('Build Keys').first().json.sessionKey}` }}",
         "value": "={{ Math.floor(Date.now()/1000) + 43200 }}",
-        "keyType": "strings",
+        "keyType": "string",
         "expire": true,
         "ttl": 43200
       },
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -768,
-        944
+        -672,
+        -272
       ],
-      "id": "9dc9a8b8-73a5-4d98-9315-2283acd93739",
+      "id": "2fefa773-2290-4285-a17b-dfe23f39dad4",
       "name": "Redis SET Lock (12h)",
       "credentials": {
         "redis": {
@@ -848,29 +802,29 @@
     },
     {
       "parameters": {
-        "amount": 3
+        "amount": 4
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1680,
-        176
+        -1584,
+        -1040
       ],
-      "id": "ba3de557-def7-4a63-9870-cf89083231c3",
+      "id": "63467118-33a1-4278-92f2-2c7deb41193d",
       "name": "Wait",
       "webhookId": "77327523-e3c8-4f0d-9689-caef73513c63"
     },
     {
       "parameters": {
-        "amount": 3
+        "amount": 4
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1696,
-        672
+        -1600,
+        -544
       ],
-      "id": "9c3b65a6-6f7f-45bf-9070-fd72f415603e",
+      "id": "8bc940dc-308b-44d4-9f56-4b225d149a8a",
       "name": "Wait1",
       "webhookId": "5532c543-4e80-4b30-8eb1-92499895b966"
     },
@@ -879,10 +833,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -1488,
-        176
+        -1392,
+        -1040
       ],
-      "id": "26fb52f9-19c1-4b4d-8c5c-52ef70b2be46",
+      "id": "3e10566b-6748-4b36-8ba4-7390217ba0e6",
       "name": "No Operation, do nothing1"
     },
     {
@@ -890,10 +844,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -1504,
-        672
+        -1408,
+        -544
       ],
-      "id": "b13ec2e8-0d7b-4ed9-86e4-d88e9b8b4bcc",
+      "id": "5abf521b-f778-4b8d-aff5-761ab4f5576b",
       "name": "No Operation, do nothing3"
     },
     {
@@ -962,10 +916,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -768,
-        64
+        -672,
+        -1152
       ],
-      "id": "6d4628f6-e693-4bb7-a270-8fa0ede7da00",
+      "id": "0bebb277-d92b-493a-aefe-84b3ba361196",
       "name": "experts_panas"
     },
     {
@@ -1044,10 +998,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -768,
-        224
+        -672,
+        -992
       ],
-      "id": "7422d1ab-0640-49d1-8516-143343546bf4",
+      "id": "4dbad360-1e9e-4d9b-9bb5-18136532bd5c",
       "name": "experts_humor_energia"
     },
     {
@@ -1126,10 +1080,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -768,
-        384
+        -672,
+        -832
       ],
-      "id": "1ab5f039-32b1-4c2f-9265-5c8f17687a24",
+      "id": "cd22ee7b-4b3f-47f7-9825-e04f7e2a80e4",
       "name": "experts_sabotadores"
     },
     {
@@ -1218,10 +1172,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -768,
-        544
+        -672,
+        -672
       ],
-      "id": "38185455-0b3b-4ba5-b810-fca950890a59",
+      "id": "761ea051-1046-4ae2-b70a-e5705d2a7445",
       "name": "Expert_Insights"
     },
     {
@@ -1300,10 +1254,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -768,
-        704
+        -672,
+        -512
       ],
-      "id": "eb7ead69-46b5-45af-97ae-41aacff1315e",
+      "id": "4cc80bb7-f632-4eda-a57f-65c81338367a",
       "name": "experts_bigfive"
     },
     {
@@ -1313,10 +1267,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -4480,
-        448
+        -4384,
+        -768
       ],
-      "id": "87aed0e5-436a-4216-a56b-b8d80a186545",
+      "id": "5954e5e0-6e41-4d46-9baf-84d82427f089",
       "name": "Calcula tempo restante"
     },
     {
@@ -1327,10 +1281,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -4880,
-        656
+        -4784,
+        -560
       ],
-      "id": "abafaba3-5238-44df-b55d-a8ca22cabffb",
+      "id": "9d368b75-5f2e-431d-82a2-22efb3ff367f",
       "name": "Redis",
       "credentials": {
         "redis": {
@@ -1348,25 +1302,116 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3760,
-        816
+        -3664,
+        -400
       ],
-      "id": "1b71eb1c-a547-461d-974c-0de2febaf668",
+      "id": "abbcf951-9c15-4dd3-b60a-3a0f859d15d9",
       "name": "Chat Memory - Delete All (final)1",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        -1072
+      ],
+      "id": "1c365db8-21fe-4702-b2aa-92357e74ba59",
+      "name": "Wait2",
+      "webhookId": "77327523-e3c8-4f0d-9689-caef73513c63"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2272,
+        -1072
+      ],
+      "id": "c3bd4522-9f8b-482f-bd5c-8b39a10d0229",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// CONTROLE DE INTERAÇÕES - N8N CODE NODE\n// Simplificado para retorno do contador\n// ============================================\n\n// Recupera memória agregada para este usuário\nlet memoryData = null;\ntry {\n  const items = $input.all();\n  if (items?.length) {\n    memoryData = items[0]?.json ?? null;\n  }\n} catch {\n  memoryData = null;\n}\n\n// Calcula a interação atual\nlet interactionCount = 1;\nconst messages = memoryData?.messages;\nif (Array.isArray(messages)) {\n  const systemMessages = messages.filter(msg => msg?.system);\n  interactionCount = systemMessages.length + 1;\n}\n\n// Retorna somente o contador (mantendo paired item)\nreturn [{\n  json: {\n    interaction_count: interactionCount\n  },\n  pairedItem: 0\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3376,
+        -768
+      ],
+      "id": "6e2d22c9-8708-42d2-96ce-2016b0b42c32",
+      "name": "intertion_count"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
+              "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "id": "20decd9a-8a71-4c52-86de-1891070b3b96"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2208,
+        -752
+      ],
+      "id": "b52fca60-d125-4d53-87e5-2665adcd1886",
+      "name": "É a 8ª?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fVrO1PaqFuA957u0",
+          "mode": "list",
+          "cachedResultName": "MindQuest",
+          "cachedResultUrl": "/projects/u1M57XAwIiLpPwjp/datatables/fVrO1PaqFuA957u0"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -5248,
+        -752
+      ],
+      "id": "095ed6f4-2a4d-4a2e-898a-0bdf10c44171",
+      "name": "mindquest_config"
     }
   ],
   "pinData": {
     "start": [
       {
         "json": {
-          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "usr_id": "c6c21a80-b3ea-4159-a46d-e63bfa66e45d",
           "body.instance": "MindQuest",
-          "body.data.key.id": "2A9E2A6E14976D528C01",
-          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "3ADD5C03E4371E6391AB",
+          "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Aldo Santos",
-          "body.data.message.conversation": "Olá",
+          "body.data.pushName": "Aldo",
+          "body.data.message.conversation": "Ola",
           "body.data.messageType": "conversation"
         }
       }
@@ -1377,7 +1422,7 @@
       "main": [
         [
           {
-            "node": "dados_usr",
+            "node": "mindquest_config",
             "type": "main",
             "index": 0
           }
@@ -1455,7 +1500,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "intertion_count",
             "type": "main",
             "index": 0
           }
@@ -1493,17 +1538,6 @@
           {
             "node": "Chat Memory - Delete All (final)1",
             "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Chat Memory - Insert",
-            "type": "main",
             "index": 0
           }
         ]
@@ -1575,7 +1609,7 @@
       "main": [
         [
           {
-            "node": "É a 5ª?",
+            "node": "É a 8ª?",
             "type": "main",
             "index": 0
           }
@@ -1678,29 +1712,6 @@
         ]
       ]
     },
-    "É a 5ª?": {
-      "main": [
-        [
-          {
-            "node": "Chat Memory  - Get1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Envia msg ao usr1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Envia msg ao usr",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Chat Memory - Delete All (final)": {
       "main": [
         [
@@ -1782,13 +1793,80 @@
           }
         ]
       ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem de Bloqueio (12h)": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "intertion_count": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory - Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É a 8ª?": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory  - Get1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Envia msg ao usr1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Envia msg ao usr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mindquest_config": {
+      "main": [
+        [
+          {
+            "node": "dados_usr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "80fa8bb4-7d0b-4378-80e0-8eeb06f0837c",
+  "versionId": "f1d93ed0-4616-44d8-9b29-b8aa6c8f3736",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
