@@ -21,6 +21,7 @@ import HomePage from './pages/HomePage';
 import PanasDetailPage from './pages/PanasDetailPage';
 import LpStartPage from './pages/LpStartPage';
 import PremiumLandingPage from './pages/PremiumLandingPage';
+import ProductDefinitionPage from './pages/ProductDefinitionPage';
 
 declare global {
   interface Window {
@@ -28,6 +29,7 @@ declare global {
       currentPath: string;
       sanitizedPath: string;
       normalizedPath: string;
+      resolvedPath?: string;
     };
   }
 }
@@ -64,29 +66,46 @@ function App() {
     view
   } = useDashboard();
 
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : '';
+  const rawPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const currentPath = rawPath.toLowerCase();
 
   const handleRefresh = async () => {
     await refreshData();
   };
 
-  const sanitizedPath = currentPath.replace(/\/+$/, '') || '/';
-  const normalizedPath = sanitizedPath.replace(/\.html$/, '');
+  const withoutIndex = currentPath.replace(/\/index\.html$/, '/');
+  const sanitizedPath = withoutIndex.replace(/\/+$/, '') || '/';
+  const normalizedPath = sanitizedPath.replace(/\.html$/, '') || '/';
+  const blogSegmentIndex = normalizedPath.indexOf('/blog');
+  const resolvedPath =
+    blogSegmentIndex >= 0 ? normalizedPath.slice(blogSegmentIndex) || '/blog' : normalizedPath;
+  const isBlogPath = blogSegmentIndex >= 0;
 
   if (typeof window !== 'undefined') {
     // Debug routing issues in production
-    window.__MINDQUEST_ROUTING__ = { currentPath, sanitizedPath, normalizedPath };
+    window.__MINDQUEST_ROUTING__ = {
+      currentPath,
+      sanitizedPath,
+      normalizedPath,
+      resolvedPath,
+    };
     if (import.meta.env.PROD) {
-      console.debug('[MindQuest][routing]', { currentPath, sanitizedPath, normalizedPath });
+      console.debug('[MindQuest][routing]', {
+        currentPath,
+        sanitizedPath,
+        normalizedPath,
+        resolvedPath,
+      });
     }
   }
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const forceHomeView = searchParams?.get('public') === '1';
 
-  const isBlogHome = normalizedPath === '/blog' || normalizedPath === '/blog/home';
-  const isBlogLpStart = normalizedPath === '/blog/lp-start';
-  const isBlogPremium = normalizedPath === '/blog/premium';
+  const isBlogHome = resolvedPath === '/blog' || resolvedPath === '/blog/home';
+  const isBlogLpStart = resolvedPath === '/blog/lp-start';
+  const isBlogPremium = resolvedPath === '/blog/premium';
+  const isBlogProduct = resolvedPath === '/blog/produto';
 
   if (forceHomeView || isBlogHome) {
     return <HomePage />;
@@ -100,11 +119,15 @@ function App() {
     return <PremiumLandingPage />;
   }
 
-  if (normalizedPath.startsWith('/blog/')) {
+  if (isBlogProduct) {
+    return <ProductDefinitionPage />;
+  }
+
+  if (isBlogPath) {
     return <NotFound message="Esta página de conteúdo ainda não existe. Atualize os links para os novos caminhos." />;
   }
 
-  if (sanitizedPath !== '/' && sanitizedPath !== '/auth') {
+  if (resolvedPath !== '/' && resolvedPath !== '/auth') {
     return <NotFound />;
   }
 
