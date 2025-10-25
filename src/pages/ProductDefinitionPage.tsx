@@ -144,25 +144,26 @@ const mindMapClusters = [
   {
     title: '💬 Chat',
     items: [
-      'Assistente pessoal orientado por IA',
+      'Reflexão Guiada por IA',
       'Free: 1 conversa por dia',
       'Premium: até 5 conversas/dia',
-      'Follow-ups automáticos baseados em humor',
     ],
   },
   {
     title: '🔄 Interações',
     items: [
-      'Convite smart para conversar',
-      'Convite para definir metas e ações',
+      'Lembrete para reflexões guiadas',
+      'Definir metas e ações',
       'Resumo semanal inteligente',
       'Resumo mensal completo (Premium)',
+      'Motivacional/inspiração',
+      'Sabotadores/contramedidas/insigts',
     ],
   },
   {
     title: '🧠 Mentor Virtual',
     items: [
-      'Acesso 24h a orientações aprofundadas',
+      'Conversa 24h com orientações aprofundadas',
       'Integra filosofias e práticas de crescimento',
       'Acompanha evolução integral do usuário',
       'Funciona como “versão aprimorada” da mente',
