@@ -14,12 +14,23 @@ import './index.css';
 
 // Configurações globais
 const isDevelopment = import.meta.env.DEV;
+const defaultApiBase = 'https://mindquest-n8n.cloudfy.live/webhook';
+const rawApiBase =
+  typeof import.meta.env.VITE_API_BASE_URL === 'string' && import.meta.env.VITE_API_BASE_URL.trim()
+    ? import.meta.env.VITE_API_BASE_URL.trim()
+    : defaultApiBase;
+const normalizedApiBase = rawApiBase.replace(/\/$/, '');
+const shouldUseProxy =
+  typeof import.meta.env.VITE_API_USE_PROXY === 'string'
+    ? import.meta.env.VITE_API_USE_PROXY.toLowerCase() === 'true'
+    : (isDevelopment && !import.meta.env.VITE_API_BASE_URL);
 
 // Log de inicialização
 if (isDevelopment) {
   console.log('🚀 MindQuest v1.1 iniciando...');
   console.log('🔗 Modo:', isDevelopment ? 'Desenvolvimento' : 'Produção');
-  console.log('🌐 API Base:', 'https://mindquest-n8n.cloudfy.live/webhook');
+  console.log('🌐 API Base:', normalizedApiBase);
+  console.log('🔁 Proxy ativo:', shouldUseProxy ? 'sim' : 'não');
 }
 
 // Renderização principal

@@ -25,8 +25,33 @@ class AuthService {
   private readonly TOKEN_KEY = 'mindquest_token';
   private readonly TOKEN_EXP_KEY = 'mindquest_token_expiration';
   private readonly TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
+  private remoteBaseUrl = 'https://mindquest-n8n.cloudfy.live/webhook';
+  private useProxyPaths = false;
 
-  private constructor() {}
+  private constructor() {
+    let env: Record<string, unknown> | undefined;
+    try {
+      if (typeof import.meta !== 'undefined' && import.meta.env) {
+        env = import.meta.env as Record<string, unknown>;
+      }
+    } catch (_) {
+      env = undefined;
+    }
+
+    const baseFromEnv = typeof env?.VITE_API_BASE_URL === 'string'
+      ? (env.VITE_API_BASE_URL as string).trim()
+      : undefined;
+
+    if (baseFromEnv) {
+      this.remoteBaseUrl = baseFromEnv.replace(/\/$/, '');
+    }
+
+    if (typeof env?.VITE_API_USE_PROXY === 'string') {
+      this.useProxyPaths = String(env.VITE_API_USE_PROXY).toLowerCase() === 'true';
+    } else {
+      this.useProxyPaths = Boolean(env?.DEV) && !baseFromEnv;
+    }
+  }
 
   public static getInstance(): AuthService {
     if (!AuthService.instance) {
@@ -167,11 +192,13 @@ class AuthService {
    * Valida token com a API N8N
    */
   private buildValidateUrl(): string {
-    if (typeof window !== 'undefined') {
-      return '/api/auth/validate';
+    const endpoint = '/auth/validate';
+
+    if (this.useProxyPaths && typeof window !== 'undefined') {
+      return `/api${endpoint}`;
     }
 
-    return 'https://mindquest-n8n.cloudfy.live/webhook/auth/validate';
+    return `${this.remoteBaseUrl}${endpoint}`;
   }
 
   public async validateToken(token?: string): Promise<AuthResponse> {

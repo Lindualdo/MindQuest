@@ -2,6 +2,14 @@
 
 Sistema gamificado de monitoramento emocional baseado na Roda de Emoções de Plutchik.
 
+## 📌 Status da Versão
+
+- Versão atual: **1.1.3 (estável)**
+- Workflow de interação via N8N em produção e monitorado
+- Fluxo de conversa validado com 16 mensagens por ciclo (8 do usuário ↔ 8 da IA)
+- Fluxo de onboarding concluindo com sucesso
+- Validação de sessões de conversa ativa e funcionando
+
 ## 🚀 Tecnologias
 
 - **React 18** + TypeScript
@@ -21,8 +29,63 @@ Sistema gamificado de monitoramento emocional baseado na Roda de Emoções de Pl
 - 🏆 Sistema de insights e recomendações
 - ⚡ Animações fluidas com Framer Motion
 - 🔄 Seletor de períodos (semana/mês/trimestre)
+- 🤖 Jornada conversacional guiada com validação de sessão a cada ciclo
 
-## 🛠️ Desenvolvimento
+## 📦 Pré-requisitos
+
+- **Node.js 20 LTS** (testado com 20.11+). Use `nvm` ou `fnm` para garantir a versão correta.
+- **npm 10+** (instalado junto com o Node). Caso prefira pnpm/yarn, adapte os comandos.
+- **Git** para clonar o repositório.
+- **Acesso à API MindQuest (N8N)** em `https://mindquest-n8n.cloudfy.live`. O app consome dados em tempo real desse endpoint.
+- **Token de sessão válido** gerado pelo fluxo MindQuest (onboarding via WhatsApp). Sem esse token as rotas autenticadas não carregam.
+
+> 💡 Recomenda-se executar `nvm install 20 && nvm use 20` (ou equivalente) ao entrar na pasta do projeto.
+
+## 🧰 Configuração do ambiente local
+
+1. Clone o repositório e acesse a pasta:
+   ```bash
+   git clone git@github.com:MindQuest/MindQuest.git
+   cd MindQuest
+   ```
+2. Garanta a versão suportada do Node:
+   ```bash
+   nvm use 20
+   ```
+   Se a versão não estiver instalada, rode `nvm install 20`.
+3. Instale as dependências:
+   ```bash
+   npm install
+   ```
+4. Crie o arquivo de variáveis:
+   ```bash
+   cp .env.example .env
+   ```
+5. Ajuste as variáveis conforme necessário (detalhes abaixo).
+6. Execute o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+   O Vite abrirá em `http://localhost:5173`. Use `npm run preview` para simular o build.
+
+### Variáveis de ambiente
+
+| Variável              | Descrição                                                                                 | Exemplo                                           | Obrigatório |
+|-----------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------|-------------|
+| `VITE_API_BASE_URL`   | URL base dos webhooks MindQuest. Se não for definida, o app usa o endpoint de produção.  | `https://mindquest-n8n.cloudfy.live/webhook`      | ✅          |
+| `VITE_API_USE_PROXY`  | Define se o app chama a API via proxy local `/api`. Útil em dev para evitar CORS.        | `true` (dev) / `false` (prod)                     | ➖          |
+
+- Quando `VITE_API_USE_PROXY=true`, o Vite roteia chamadas para `MindQuest/api/*` (vide `api/`).
+- Em produção, mantenha `VITE_API_USE_PROXY=false` (ou remova a variável) para falar direto com o endpoint externo.
+- Tokens de usuário são injetados via URL na primeira visita e persistidos em `localStorage`.
+
+### Dependências externas não versionadas
+
+- **API MindQuest (N8N)**: exposta em `mindquest-n8n.cloudfy.live`. Certifique-se de que sua rede libera requisições HTTPS para esse host.
+- **Token MindQuest**: gere pelo fluxo oficial (hoje via WhatsApp). O token deve ser anexado à URL (`?token=...`) na primeira carga do dashboard.
+- **Fonts**: o projeto consome fontes via CDN (Inter). Nada adicional é necessário, apenas internet ativa.
+
+## 🛠️ Scripts de desenvolvimento
 
 ```bash
 # Instalar dependências
@@ -41,11 +104,13 @@ npm run typecheck
 npm run lint
 ```
 
-## ⚙️ Configuração da API
+## ⚙️ Notas sobre a API
 
 - Copie `.env.example` para `.env` e ajuste conforme necessário.
 - `VITE_API_BASE_URL` define a URL base para os webhooks do MindQuest (padrão aponta para o ambiente de produção).
 - Se preferir utilizar o proxy `/api` do Vite durante o desenvolvimento, defina `VITE_API_USE_PROXY=true`. Em produção mantenha `false` (ou remova) para que o app fale diretamente com a API remota.
+- As rotas proxy (`api/*.ts`) replicam o comportamento das funções serverless usadas na Vercel e evitam problemas de CORS durante o desenvolvimento local.
+- Falhas de autenticação redirecionam o usuário para `/auth-error`. Verifique o token antes de reportar bugs.
 
 ## 📁 Estrutura
 
@@ -107,4 +172,4 @@ Panel gamificado com insights inteligentes:
 
 ---
 
-**MindQuest** - Sua jornada para o bem-estar mental 🌟
+**MindQuest v1.1.3** — Sua jornada para o bem-estar mental 🌟
