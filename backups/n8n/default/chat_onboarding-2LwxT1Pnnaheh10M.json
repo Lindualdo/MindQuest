@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-09-30T11:31:35.749Z",
-  "updatedAt": "2025-10-17T21:01:36.466Z",
+  "updatedAt": "2025-10-25T22:44:54.173Z",
   "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
   "active": false,
@@ -325,7 +325,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usuarios (\n  whatsapp_numero, nome, nome_preferencia, nome_assistente, token_acesso, token_expira_em, status_onboarding\n) VALUES (\n  $1, $2, $3, $4,\n  gen_random_uuid() || $5 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  CURRENT_TIMESTAMP + INTERVAL '45 days',\n  'completo')\nRETURNING id, token_acesso, whatsapp_numero, nome_preferencia, nome_assistente;",
+        "query": "INSERT INTO usuarios (\n  whatsapp_numero, nome, nome_preferencia, nome_assistente, token_acesso, token_expira_em, status_onboarding\n) VALUES (\n  $1, $2, $3, $4,\n  gen_random_uuid() || $5 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  CURRENT_TIMESTAMP + INTERVAL '15 days',\n  'completo')\nRETURNING id, token_acesso, whatsapp_numero, nome_preferencia, nome_assistente;",
         "options": {
           "queryReplacement": "={{ [ $('start').first().json.whatsapp_number, $('start').item.json.pushName, $('Code - Parse Determinístico').item.json.nome_usuario, $('Code - Parse Determinístico').item.json.nome_assistente, $('start').item.json.id ] }}"
         }
@@ -896,7 +896,7 @@
       }
     ]
   },
-  "versionId": "8f2b38da-3c73-4a92-9429-2ffb77c61490",
+  "versionId": "bb4435b6-b623-4ec7-b5a4-3a632d7dc1db",
   "triggerCount": 1,
   "shared": [
     {

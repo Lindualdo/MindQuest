@@ -158,6 +158,14 @@ Gráfico de barras animado mostrando distribuição PANAS:
 - Barras animadas com shimmer effect
 - Meta de positividade
 
+## 🔁 Backup automático do n8n
+
+- **Primeira execução manual:** `./scripts/run-n8n-backup.sh`. Informe o token obtido no painel do n8n Cloudfy; o script armazena o valor com segurança no Keychain (`account=mindquest_backup_token`, `service=mindquest_n8n_backup`) e organiza os JSON em `backups/n8n/<projeto>/…`.
+- **Agendamento diário (08h):** `./scripts/install-n8n-launchd.sh`. O utilitário instala o agente `com.mindquest.n8n-backup` em `~/Library/LaunchAgents/` e agenda a execução via `launchd`. Logs estão em `~/Library/Logs/mindquest-n8n-backup.log`.
+- **Permissões necessárias:** conceda *Full Disk Access* para `/bin/zsh` e `/usr/bin/security` em *System Settings → Privacy & Security*. Sem isso o macOS bloqueia o acesso à pasta `Documents` e ao Keychain.
+- **Comandos úteis:** `launchctl kickstart -kp gui/$UID/com.mindquest.n8n-backup` força a execução imediata; `launchctl bootout gui/$UID ~/Library/LaunchAgents/com.mindquest.n8n-backup.plist` remove o agendamento; edite `scripts/com.mindquest.n8n-backup.plist` (chave `StartCalendarInterval`) para alterar horário ou frequência.
+- **Resolução de problemas:** verifique o log citado acima para mensagens como “Operation not permitted” (permissão ao disco) ou “node: command not found” (garanta `nvm` configurado ou defina `NODE_BIN=/path/do/node` antes de rodar o script/agente).
+
 ### EmotionWheel
 Roda das emoções interativa baseada em Plutchik:
 - 8 emoções primárias

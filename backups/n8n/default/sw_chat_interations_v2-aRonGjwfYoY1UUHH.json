@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-24T15:52:59.088Z",
+  "updatedAt": "2025-10-25T23:30:18.653Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -41,8 +41,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -5424,
-        -752
+        -5376,
+        -768
       ],
       "id": "1e8c6684-8b97-4d46-9c55-34a71d33f429",
       "name": "start"
@@ -58,8 +58,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -5040,
-        -752
+        -4992,
+        -768
       ],
       "id": "d3e23cc6-3195-4167-ae49-c9e57f82162e",
       "name": "dados_usr",
@@ -1240,8 +1240,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -5248,
-        -752
+        -5200,
+        -768
       ],
       "id": "095ed6f4-2a4d-4a2e-898a-0bdf10c44171",
       "name": "mindquest_config"
@@ -1260,7 +1260,7 @@
           "value": {
             "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
             "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/auth?token?{{ $('dados_usr').first().json.token_acesso }}"
+            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/auth?token?{{ $json.token_acesso }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -1303,8 +1303,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1888,
-        -960
+        -1728,
+        -1056
       ],
       "id": "c5e50638-4c98-4157-84c5-f8dd01c5772c",
       "name": "Call 'sw_send_message_with_retry'"
@@ -1366,8 +1366,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1888,
-        -528
+        -1808,
+        -560
       ],
       "id": "0c4c407a-6726-4ec6-a0e7-bcc53deb5efc",
       "name": "Call 'sw_send_message_with_retry'1"
@@ -1490,6 +1490,40 @@
       ],
       "id": "61be858c-d753-4ade-9a18-0f5619d32572",
       "name": "agent_conversation_guide´"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usuarios\nSET \n  token_acesso = gen_random_uuid() || $1 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  token_expira_em = CURRENT_TIMESTAMP + INTERVAL '10 days'\nWHERE id = $1;\n\nSELECT token_acesso \nFROM usuarios \nWHERE id = $1;\n",
+        "options": {
+          "queryReplacement": "={{ $('dados_usr').item.json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1920,
+        -1056
+      ],
+      "id": "05f7b4c4-ed46-475f-9838-1d78fccac2e3",
+      "name": "update_token",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        -1056
+      ],
+      "id": "7b7eff7a-2c8a-4ef5-9d00-efc562777bf9",
+      "name": "No Operation, do nothing"
     }
   ],
   "connections": {
@@ -1509,11 +1543,6 @@
         [
           {
             "node": "Build Keys",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Redis",
             "type": "main",
             "index": 0
           }
@@ -1845,7 +1874,7 @@
             "index": 0
           },
           {
-            "node": "Call 'sw_send_message_with_retry'",
+            "node": "update_token",
             "type": "main",
             "index": 0
           }
@@ -1891,6 +1920,28 @@
           }
         ]
       ]
+    },
+    "update_token": {
+      "main": [
+        [
+          {
+            "node": "Call 'sw_send_message_with_retry'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'sw_send_message_with_retry'": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1906,16 +1957,17 @@
         "json": {
           "usr_id": "c6c21a80-b3ea-4159-a46d-e63bfa66e45d",
           "body.instance": "MindQuest",
-          "body.data.key.id": "3A1A0A4E61FA791D7565",
+          "body.data.key.id": "3A3C18594642CDC0E199",
           "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo",
-          "body.data.messageType": "audioMessage"
+          "body.data.message.conversation": "Está bom assim",
+          "body.data.messageType": "conversation"
         }
       }
     ]
   },
-  "versionId": "16880147-6843-4cd2-a2ac-08e998901ce1",
+  "versionId": "11681629-1d0e-4cd3-988a-41ee2fabe59b",
   "triggerCount": 0,
   "shared": [
     {
