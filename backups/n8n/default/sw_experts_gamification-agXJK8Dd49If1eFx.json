@@ -1,0 +1,258 @@
+{
+  "createdAt": "2025-10-10T11:10:56.623Z",
+  "updatedAt": "2025-10-12T11:39:48.508Z",
+  "id": "agXJK8Dd49If1eFx",
+  "name": "sw_experts_gamification",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "tem_reflexao",
+              "type": "boolean"
+            },
+            {
+              "name": "justificativa_reflexao"
+            },
+            {
+              "name": "total_palavras_usuario",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        160
+      ],
+      "id": "017422ff-2bbe-4b08-8872-27f4446ebe89",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH ultimos_7_dias AS (\n  -- Gera os últimos 7 dias (hoje até 6 dias atrás)\n  SELECT \n    CURRENT_DATE - INTERVAL '1 day' * s.dia as data\n  FROM generate_series(0, 6) as s(dia)\n),\nconversas_por_dia AS (\n  -- Verifica quais desses 7 dias tiveram conversa\n  SELECT \n    d.data,\n    CASE \n      WHEN EXISTS (\n        SELECT 1 FROM usr_chat \n        WHERE usuario_id = $1::uuid \n        AND DATE(data_conversa) = d.data\n      ) THEN 1 \n      ELSE 0 \n    END as teve_conversa\n  FROM ultimos_7_dias d\n  ORDER BY d.data DESC\n),\nstreak_consecutivo AS (\n  -- Conta consecutivos de hoje para trás até encontrar 0\n  SELECT \n    data,\n    teve_conversa,\n    -- Soma cumulativa de dias SEM conversa (0 = teve, 1+ = não teve)\n    SUM(CASE WHEN teve_conversa = 0 THEN 1 ELSE 0 END) \n      OVER (ORDER BY data DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as quebras\n  FROM conversas_por_dia\n)\nSELECT \n  g.*,\n  COALESCE((\n    SELECT COUNT(*) \n    FROM streak_consecutivo \n    WHERE teve_conversa = 1 \n      AND quebras = 0  -- Só conta antes da primeira quebra\n  ), 0) as dias_consecutivos,\n  (SELECT COUNT(*) FROM usr_chat WHERE usuario_id = g.usuario_id AND DATE(data_conversa) = CURRENT_DATE) as conversas_hoje\nFROM gamificacao g\nWHERE g.usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        160
+      ],
+      "id": "85c856e6-5b5b-4868-9d98-0728cfc493e3",
+      "name": "Buscar Estado Atual",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================\n// CÁLCULO DE XP E ATUALIZAÇÃO DE GAMIFICAÇÃO\n// ==========================================\n\n// Pega o estado do node \"Buscar Estado Atual\"\nconst estado = $('Buscar Estado Atual').first().json;\n\n// === SANITIZAR DADOS DO RESUMO ===\nconst resumo = $('start').first().json;\n\nconsole.log('=== DEBUG REFLEXÃO ===');\nconsole.log('resumo completo:', JSON.stringify(resumo, null, 2));\nconsole.log('tem_reflexao original:', resumo.tem_reflexao);\nconsole.log('tipo:', typeof resumo.tem_reflexao);\nconsole.log('total_palavras_usuario:', resumo.total_palavras_usuario);\n\n// Converter tem_reflexao para boolean verdadeiro\nconst tem_reflexao = resumo.tem_reflexao === true || \n                     resumo.tem_reflexao === 'true' || \n                     resumo.tem_reflexao === ':true';\n\nconsole.log('tem_reflexao convertido:', tem_reflexao);\n\n// Converter total_palavras para número\nconst total_palavras = parseInt(resumo.total_palavras_usuario) || 0;\n\nconsole.log('total_palavras convertido:', total_palavras);\n\n// Data de hoje\nconst data_hoje = new Date($('start').item.json.data_conversa).toISOString().split('T')[0];\n\n// === 1. CALCULAR TIPO DE CONVERSA ===\nlet xp_base = 20; // conversa simples\n\nif (tem_reflexao && total_palavras > 50) {\n  xp_base = 40; // conversa profunda\n  console.log('✅ CONVERSA PROFUNDA - XP Base: 40');\n} else if (tem_reflexao) {\n  xp_base = 30; // conversa com reflexão\n  console.log('✅ CONVERSA COM REFLEXÃO - XP Base: 30');\n} else {\n  console.log('❌ CONVERSA SIMPLES - XP Base: 20');\n}\n\n// === 2. CALCULAR BÔNUS DE STREAK (USA dias_consecutivos DA QUERY) ===\nconst dias_consecutivos = parseInt(estado.dias_consecutivos) || 0;\nlet bonus_streak = 0;\n\nif (dias_consecutivos >= 30) {\n  bonus_streak = 20;\n} else if (dias_consecutivos >= 7) {\n  bonus_streak = 10;\n}\n\nconsole.log('🔥 Dias consecutivos (da query):', dias_consecutivos);\nconsole.log('💎 Bônus streak:', bonus_streak);\n\n// === 3. ATUALIZAR QUEST DIÁRIA ===\nconst quest_data = estado.quest_diaria_data;\nlet quest_status = 'pendente';\nlet quest_progresso = 0;\nlet bonus_quest = 0;\n\nconsole.log('Quest data anterior:', quest_data, '| Data hoje:', data_hoje);\n\n// Se é um novo dia, reseta quest\nif (quest_data !== data_hoje) {\n  quest_status = 'pendente';\n  quest_progresso = 0;\n  console.log('🎯 Novo dia - Quest resetada');\n}\n\n// Atualiza progresso da quest\nif (tem_reflexao) {\n  quest_status = 'completa';\n  quest_progresso = 100;\n  bonus_quest = 30;\n  console.log('✅ Quest COMPLETA - Bônus: +30 XP');\n} else {\n  quest_status = 'parcial';\n  quest_progresso = 50;\n  console.log('⏳ Quest PARCIAL - Sem bônus');\n}\n\n// === 4. CALCULAR XP TOTAL ===\nconst xp_ganho = xp_base + bonus_streak + bonus_quest;\nconst novo_xp_total = (estado.xp_total || 0) + xp_ganho;\n\nconsole.log('💎 XP Ganho:', xp_ganho, '(base:', xp_base, '+ streak:', bonus_streak, '+ quest:', bonus_quest, ')');\nconsole.log('💎 XP Total:', novo_xp_total);\n\n// === 5. CALCULAR NOVO NÍVEL ===\nlet nivel_atual = estado.nivel_atual || 1;\nlet xp_proximo_nivel = estado.xp_proximo_nivel || 200;\nlet titulo_nivel = estado.titulo_nivel || 'Explorador';\n\nconst niveis = {\n  1: { titulo: 'Explorador', xp: 200 },\n  2: { titulo: 'Aprendiz', xp: 550 },\n  3: { titulo: 'Observador', xp: 1050 },\n  4: { titulo: 'Focado', xp: 1700 },\n  5: { titulo: 'Praticante', xp: 2500 },\n  6: { titulo: 'Consciente', xp: 3450 },\n  7: { titulo: 'Iluminado', xp: 4550 },\n  8: { titulo: 'Sábio', xp: 5800 },\n  9: { titulo: 'Ascendente', xp: 7200 },\n  10: { titulo: 'Mestre', xp: 9000 },\n  15: { titulo: 'Transcendente', xp: 15000 }\n};\n\n// === 6. VERIFICAR CONQUISTAS ===\nconst conquistas_atuais = estado.conquistas_desbloqueadas || [];\nconst novas_conquistas = [];\n\nconst total_conversas = (estado.total_conversas || 0) + 1;\nconst total_reflexoes = (estado.total_reflexoes || 0) + (tem_reflexao ? 1 : 0);\n\nconsole.log('📊 Total conversas:', total_conversas);\nconsole.log('📊 Total reflexões:', total_reflexoes, '(tem_reflexao:', tem_reflexao, ')');\nconsole.log('📊 Dias consecutivos:', dias_consecutivos);\n\n// Conquistas a verificar\nconst conquistas_map = {\n  'primeira_conversa': {\n    criterio: total_conversas === 1,\n    nome: 'Primeira Semente',\n    emoji: '🌱',\n    xp_bonus: 50,\n    categoria: 'primeiros_passos'\n  },\n  'primeira_semana': {\n    criterio: total_conversas === 7,\n    nome: 'Semana Completa',\n    emoji: '🎯',\n    xp_bonus: 100,\n    categoria: 'primeiros_passos'\n  },\n  'streak_7_dias': {\n    criterio: dias_consecutivos === 7,  // ← USA dias_consecutivos\n    nome: 'Chama Acesa',\n    emoji: '🔥',\n    xp_bonus: 150,\n    categoria: 'consistencia'\n  },\n  'streak_30_dias': {\n    criterio: dias_consecutivos === 30,  // ← USA dias_consecutivos\n    nome: 'Consistência Bronze',\n    emoji: '🥉',\n    xp_bonus: 300,\n    categoria: 'consistencia'\n  },\n  'primeira_reflexao': {\n    criterio: total_reflexoes === 1,\n    nome: 'Pensador',\n    emoji: '💭',\n    xp_bonus: 50,\n    categoria: 'primeiros_passos'\n  },\n  'reflexao_profunda': {\n    criterio: total_reflexoes === 10,\n    nome: 'Reflexão Profunda',\n    emoji: '🧠',\n    xp_bonus: 200,\n    categoria: 'profundidade'\n  }\n};\n\n// Verifica conquistas não desbloqueadas\nlet xp_bonus_conquistas = 0;\nconsole.log('🏆 Verificando conquistas...');\n\nfor (const [id, conquista] of Object.entries(conquistas_map)) {\n  const ja_desbloqueada = conquistas_atuais.some(c => c.id === id);\n  \n  console.log(`  - ${id}: critério=${conquista.criterio}, já desbloqueada=${ja_desbloqueada}`);\n  \n  if (!ja_desbloqueada && conquista.criterio) {\n    novas_conquistas.push({\n      id: id,\n      nome: conquista.nome,\n      emoji: conquista.emoji,\n      xp_bonus: conquista.xp_bonus,\n      categoria: conquista.categoria,\n      desbloqueada_em: new Date().toISOString()\n    });\n    xp_bonus_conquistas += conquista.xp_bonus;\n    console.log(`  ✅ DESBLOQUEADA: ${conquista.emoji} ${conquista.nome} (+${conquista.xp_bonus} XP)`);\n  }\n}\n\nconsole.log('🏆 Total conquistas desbloqueadas:', novas_conquistas.length);\nconsole.log('🏆 XP bônus de conquistas:', xp_bonus_conquistas);\n\n// Adiciona XP de conquistas ao total\nconst xp_total_final = novo_xp_total + xp_bonus_conquistas;\n\nconsole.log('💎 XP TOTAL FINAL:', xp_total_final);\n\n// Recalcula nível com XP final\nwhile (xp_total_final >= xp_proximo_nivel && nivel_atual < 15) {\n  nivel_atual++;\n  if (niveis[nivel_atual]) {\n    xp_proximo_nivel = niveis[nivel_atual].xp;\n    titulo_nivel = niveis[nivel_atual].titulo;\n  } else {\n    xp_proximo_nivel = (nivel_atual * 150) + 50;\n    titulo_nivel = `Nível ${nivel_atual}`;\n  }\n  console.log('⬆️ SUBIU DE NÍVEL!', nivel_atual, '-', titulo_nivel);\n}\n\n// === 7. MELHOR STREAK (RECORDE) ===\nconst melhor_streak = Math.max(estado.melhor_streak || 0, dias_consecutivos);\n\n// === 8. GERAR NOVA QUEST DIÁRIA ===\nconst quests_possiveis = [\n  'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia',\n  'Compartilhe como você está se sentindo hoje e o que te trouxe energia',\n  'Reflita sobre uma pequena vitória de hoje, por menor que pareça',\n  'Identifique uma emoção que sentiu hoje e explore o que a causou'\n];\n\nconst nova_quest = quests_possiveis[Math.floor(Math.random() * quests_possiveis.length)];\n\nconsole.log('🎯 Nova quest gerada:', nova_quest);\n\n// === RESUMO FINAL ===\nconsole.log('=== RESUMO FINAL ===');\nconsole.log('XP Total:', xp_total_final);\nconsole.log('Nível:', nivel_atual, '-', titulo_nivel);\nconsole.log('Dias Consecutivos:', dias_consecutivos);\nconsole.log('Quest:', quest_status, '-', quest_progresso + '%');\nconsole.log('Reflexões:', total_reflexoes);\nconsole.log('Conversas:', total_conversas);\n\n// === RETORNO ===\nreturn [{\n  json: {\n    usuario_id: $('start').item.json.usuario_id,\n    xp_total: xp_total_final,\n    nivel_atual: nivel_atual,\n    xp_proximo_nivel: xp_proximo_nivel,\n    titulo_nivel: titulo_nivel,\n    streak_conversas_dias: dias_consecutivos,  // ← ATUALIZADO COM VALOR CORRETO\n    melhor_streak: melhor_streak,\n    ultima_conversa_data: data_hoje,\n    quest_diaria_status: quest_status,\n    quest_diaria_progresso: quest_progresso,\n    quest_diaria_descricao: nova_quest,\n    quest_diaria_data: data_hoje,\n    total_conversas: total_conversas,\n    total_reflexoes: total_reflexoes,\n    conquistas_json: JSON.stringify(novas_conquistas),\n    total_xp_ganho_hoje: xp_ganho + xp_bonus_conquistas,\n    ultima_conquista_id: novas_conquistas.length > 0 ? novas_conquistas[novas_conquistas.length - 1].id : null,\n    ultima_conquista_data: novas_conquistas.length > 0 ? new Date().toISOString() : null,\n    \n    _debug: {\n      xp_base: xp_base,\n      bonus_streak: bonus_streak,\n      bonus_quest: bonus_quest,\n      xp_bonus_conquistas: xp_bonus_conquistas,\n      xp_ganho_total: xp_ganho + xp_bonus_conquistas,\n      subiu_nivel: nivel_atual > (estado.nivel_atual || 1),\n      conquistasDesbloqueadas: novas_conquistas.length,\n      tem_reflexao_usado: tem_reflexao,\n      total_palavras_usado: total_palavras,\n      dias_consecutivos_usado: dias_consecutivos\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        160
+      ],
+      "id": "0007f81d-3a6a-49f4-9817-84fe3228efa3",
+      "name": "Calcular Gamificação"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE gamificacao SET\n  xp_total = {{ $json.xp_total }}::integer,\n  nivel_atual = {{ $json.nivel_atual }}::integer,\n  xp_proximo_nivel = {{ $json.xp_proximo_nivel }}::integer,\n  titulo_nivel = '{{ $json.titulo_nivel }}'::varchar(50),\n  streak_conversas_dias = {{ $json.streak_conversas_dias }}::integer,\n  melhor_streak = {{ $json.melhor_streak }}::integer,\n  ultima_conversa_data = '{{ $json.ultima_conversa_data }}'::date,\n  quest_diaria_status = '{{ $json.quest_diaria_status }}'::varchar(20),\n  quest_diaria_progresso = {{ $json.quest_diaria_progresso }}::integer,\n  quest_diaria_descricao = '{{ $json.quest_diaria_descricao }}'::text,\n  quest_diaria_data = '{{ $json.quest_diaria_data }}'::date,\n  total_conversas = {{ $json.total_conversas }}::integer,\n  total_reflexoes = {{ $json.total_reflexoes }}::integer,\n  conquistas_desbloqueadas = COALESCE(conquistas_desbloqueadas, '[]'::jsonb) || '{{ $json.conquistas_json }}'::jsonb,\n  atualizado_em = NOW()\nWHERE usuario_id = '{{ $json.usuario_id }}'::uuid\nRETURNING *;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        864,
+        160
+      ],
+      "id": "4b730ef6-95af-4be0-a787-ecb4f4e2baeb",
+      "name": "Atualizar Gamificação",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        160
+      ],
+      "id": "22cae1fe-aa5e-47d7-8d4c-a5726d13e41c",
+      "name": "Preparar Resultado"
+    },
+    {
+      "parameters": {
+        "content": "## 🎮 WORKFLOW: ATUALIZAÇÃO DE GAMIFICAÇÃO\n\n**Recebe:**\n- usuario_id\n- chat_id  \n- data_conversa\n- tem_reflexao (boolean)\n- total_palavras (number)\n\n**Processa:**\n1. Busca estado atual\n2. Calcula XP (base + bônus)\n3. Atualiza streak\n4. Verifica conquistas\n5. Atualiza quest diária\n6. Calcula novo nível\n7. Salva tudo no DB\n\n**Retorna:**\n- Estado atualizado completo\n- Debug info (XP ganho, conquistas, etc)",
+        "height": 460,
+        "width": 360,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        -80
+      ],
+      "id": "ec95c3ef-467e-494b-8a67-8df8418a8bdd",
+      "name": "Sticky Note - Info"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estado Atual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estado Atual": {
+      "main": [
+        [
+          {
+            "node": "Calcular Gamificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Gamificação": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Gamificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Gamificação": {
+      "main": [
+        [
+          {
+            "node": "Preparar Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "bae07463-0efa-444f-a5cc-288b579e536f",
+          "data_conversa": "Sun Oct 12 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "tem_reflexao": true,
+          "justificativa_reflexao": "Aldo mostrou autoconhecimento ao identificar as causas da dificuldade em seguir seu plano, como ansiedade e otimismo exagerado. Ele refletiu sobre o impacto emocional dessas sensações em sua confiança e disciplina, questionou a eficácia das técnicas tradicionais de controle emocional para seu caso, e reconheceu a necessidade de uma abordagem personalizada devido à urgência do mercado. Isso demonstra uma análise profunda dos próprios padrões emocionais e comportamentais.",
+          "total_palavras_usuario": 204
+        }
+      }
+    ]
+  },
+  "versionId": "e9147ff2-5903-4e58-b79f-b5ac12430036",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-10T11:10:56.623Z",
+      "updatedAt": "2025-10-10T11:10:56.623Z",
+      "role": "workflow:owner",
+      "workflowId": "agXJK8Dd49If1eFx",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

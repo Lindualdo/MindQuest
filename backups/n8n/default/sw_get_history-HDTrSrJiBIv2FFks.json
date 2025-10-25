@@ -1,0 +1,144 @@
+{
+  "createdAt": "2025-10-18T15:32:30.610Z",
+  "updatedAt": "2025-10-19T11:21:19.081Z",
+  "id": "HDTrSrJiBIv2FFks",
+  "name": "sw_get_history",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT data_conversa, resumo_conversa FROM usr_chat \n   WHERE usuario_id = $1\n   ORDER BY data_conversa DESC \n   LIMIT 5",
+        "options": {
+          "queryReplacement": "={{ $('start').item.json.usr_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        96,
+        -96
+      ],
+      "id": "581d8c44-5b19-4eef-9178-517c6700b7a3",
+      "name": "get_history",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usr_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -96
+      ],
+      "id": "86d2f573-7b81-4d6e-ae48-53dc96a34239",
+      "name": "start"
+    }
+  ],
+  "connections": {
+    "get_history": {
+      "main": [
+        []
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "get_history",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "section_key": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582"
+        }
+      }
+    ]
+  },
+  "versionId": "aff8386a-1ab5-472d-9d6e-5aec197a4813",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-18T15:32:30.610Z",
+      "updatedAt": "2025-10-18T15:32:30.610Z",
+      "role": "workflow:owner",
+      "workflowId": "HDTrSrJiBIv2FFks",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

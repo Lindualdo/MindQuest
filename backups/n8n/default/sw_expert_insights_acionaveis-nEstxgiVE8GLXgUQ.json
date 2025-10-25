@@ -1,0 +1,277 @@
+{
+  "createdAt": "2025-10-09T14:32:30.486Z",
+  "updatedAt": "2025-10-11T18:31:00.794Z",
+  "id": "nEstxgiVE8GLXgUQ",
+  "name": "sw_expert_insights_acionaveis",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "mensagens"
+            },
+            {
+              "name": "contexto_final"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "usr_name"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "ebcbbdd2-bc5a-46e3-9fd9-dae42379d170",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é psicólogo especialista em desenvolvimento pessoal. Analise a conversa e contexto validado abaixo.\n\nCONVERSA:\n{{ $json.mensagens }}\n\nUsuário: {{ $json.usr_name }} | Data: {{ $json.data_conversa }}\n\nTAREFA: Gere 2-4 insights acionáveis com Feedback Sanduíche + Recursos Práticos.\n\nESTRUTURA DE CADA INSIGHT:\n1. RESUMO (30-50 palavras): Sintetize estado emocional objetivamente\n2. FEEDBACK SANDUÍCHE:\n   - Positivo (20-30 pal): Reconheça forças\n   - Desenvolvimento (30-40 pal): Padrão que merece atenção\n   - Motivacional (20-30 pal): Esperança + próximos passos\n3. RECURSOS (2-4 itens): tipo, nome, descricao, aplicacao_pratica\n\n═══════════════════════════════════════════════════════\n⚠️ VALORES PERMITIDOS - USE EXATAMENTE COMO LISTADO ⚠️\n═══════════════════════════════════════════════════════\n\nCATEGORIA (use APENAS estes valores):\n✓ comportamental\n✓ emocional\n✓ social\n✓ cognitivo\n✗ NUNCA: financeiro, profissional, financeiro-emocional, ou qualquer outro\n\nTIPO INSIGHT (use APENAS estes valores):\n✓ padrao\n✓ melhoria\n✓ positivo\n✓ alerta\n\nPRIORIDADE (use APENAS estes valores):\n✓ alta\n✓ media (SEM acento)\n✓ baixa\n\nTIPO RECURSO (use APENAS estes valores):\n✓ tecnica\n✓ conceito\n✓ leitura\n✓ pratica\n✓ reflexao\n\n═══════════════════════════════════════════════════════\n\nREGRAS CRÍTICAS:\n- Base TUDO no relatado (sem suposições)\n- Use APENAS os valores listados acima (sem variações, adaptações ou combinações)\n- Seja ESPECÍFICO nas evidências\n- Recursos PRÁTICOS e aplicáveis\n- Tom EMPÁTICO mas DIRETO\n- VALIDE cada campo antes de gerar o JSON\n\nANTES DE RETORNAR: Verifique se TODOS os valores de categoria, tipo, prioridade e tipo_recurso estão EXATAMENTE como listado acima.\n\nRETORNE JSON ARRAY com 2-4 insights no formato:\n[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Título\",\"icone\":\"🔄\",\"prioridade\":\"alta\",\"resumo_situacao\":\"...\",\"feedback_positivo\":\"...\",\"feedback_desenvolvimento\":\"...\",\"feedback_motivacional\":\"...\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"...\",\"descricao\":\"...\",\"aplicacao_pratica\":\"...\"}],\"baseado_em\":[\"evidência1\",\"evidência2\"]}]",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Psicólogo especialista. Gera insights acionáveis com feedback sanduíche e recursos práticos. Retorna array JSON com 2-4 insights.",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        48
+      ],
+      "id": "5519a1ef-0ee6-4d12-9c14-42beb5e915de",
+      "name": "Gerador Insights"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Ciclo Produtividade\",\"icone\":\"🔄\",\"prioridade\":\"media\",\"resumo_situacao\":\"Resumo\",\"feedback_positivo\":\"Positivo\",\"feedback_desenvolvimento\":\"Desenvolvimento\",\"feedback_motivacional\":\"Motivacional\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"Nome\",\"descricao\":\"Desc\",\"aplicacao_pratica\":\"Aplicação\"}],\"baseado_em\":[\"ev1\"]}]",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        272
+      ],
+      "id": "a80b485e-52ee-4e43-9a5a-0e3952051056",
+      "name": "Parser JSON"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        112,
+        400
+      ],
+      "id": "0f6db9cf-f7b1-4821-8975-ec2653eb95d2",
+      "name": "OpenRouter Claude",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO insights (\n  usuario_id,\n  chat_id,\n  tipo,\n  categoria,\n  titulo,\n  descricao,\n  icone,\n  prioridade,\n  ativo,\n  resumo_situacao,\n  feedback_positivo,\n  feedback_desenvolvimento,\n  feedback_motivacional,\n  recursos_sugeridos,\n  baseado_em\n)\nSELECT \n  $1::uuid,\n  $2::uuid,\n  elem->>'tipo',\n  elem->>'categoria',\n  elem->>'titulo',\n  elem->>'resumo_situacao',\n  elem->>'icone',\n  elem->>'prioridade',\n  true,\n  elem->>'resumo_situacao',\n  elem->>'feedback_positivo',\n  elem->>'feedback_desenvolvimento',\n  elem->>'feedback_motivacional',\n  elem->'recursos_sugeridos',\n  ARRAY(SELECT jsonb_array_elements_text(elem->'baseado_em'))\nFROM jsonb_array_elements($3::jsonb) AS elem\nRETURNING id, tipo, categoria, titulo, prioridade, criado_em;",
+        "options": {
+          "queryReplacement": "=[\n  {{ $('start').item.json.usuario_id }},\n  {{ $('start').item.json.chat_id }},\n  {{ JSON.stringify($json.output) }}\n]"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        464,
+        48
+      ],
+      "id": "ccdb2a1e-fc51-4c5e-bb21-9803cbc29993",
+      "name": "Gravar Insights",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        48
+      ],
+      "id": "5480e67e-2907-4cfa-9a95-f100a3a2164a",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Gerador Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerador Insights": {
+      "main": [
+        [
+          {
+            "node": "Gravar Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser JSON": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Gerador Insights",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gerador Insights",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser JSON",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar Insights": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "mensagens": "[{\"interaction\":1,\"autor\":\"usuario\",\"texto\":\"Hoje eu tô gravando meu primeiro áudio aqui. Ultimamente tem sido uns dias um pouco complicado pra mim, porque eu estou morando em outro país, mudei recentemente, e tô longe da minha família. Também me separei há uns dois anos da minha esposa, e também estou tendo alguns problemas aqui com os meus investimentos estou perdendo bastante dinheiro e o meu estado emocional está ficando bastante oscilando bastante conforme as coisas vão complicando em uma área da minha vida a outra acaba sentindo mais\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":1,\"autor\":\"agente\",\"texto\":\"Bolsonaro, percebo que você está enfrentando várias mudanças e desafios ao mesmo tempo, e isso tem pesado bastante no seu estado emocional. Morar longe da família, lidar com uma separação e ainda passar por dificuldades financeiras certamente traz uma oscilação natural nos sentimentos. Como você tem se sentido nesse processo de ajuste a essas mudanças na sua vida?\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":2,\"autor\":\"usuario\",\"texto\":\"tudo depende de como anda cada coisa nesse momento eu estou priorizando mais a questão financeira essa é a dor que incomoda mais porque eu vim pra cá com a reserva que eu imaginava que daria pra eu ter uma certa tranquilidade financeira não estou trabalhando de empregado pra ninguém, então eu tinha a intenção de montar meu próprio negócio e esse dinheiro ia ser uma reserva suficiente para eu conseguir ter tranquilidade para montar um negócio próprio. Mas como agora está em risco, eu estou tendo que dedicar mais tempo nisso. Finais de semana e datas comemorativas acabam pegando mais a questão da solidão e eu vou tentando gerenciar isso, buscando fazer coisa que eu gosto, e enfim, suportando como eu posso.\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":2,\"autor\":\"agente\",\"texto\":\"Bolsonaro, entendo que a preocupação financeira tem ocupado grande parte do seu foco, especialmente porque o planejamento inicial não saiu como esperado e isso traz uma pressão extra. A solidão nos momentos mais emblemáticos do calendário também parece fazer esse período ficar ainda mais difícil. De que forma essa situação financeira e a solidão têm impactado o seu dia a dia e suas decisões?\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":3,\"autor\":\"usuario\",\"texto\":\"Depende muito. Tem dia que eu acordo bem, tem dia que eu acordo... tem dia que é mais complicado, isso depende muito do meu humor. Então, isso não está no meu controle. Depende muito de como eu acordo, depende muito do meu dia, e depende muito do conjunto de fatores. Quase sempre eu não sei explicar exatamente qual é o gatilho. Às vezes eu estou feliz, às vezes do nada fico triste, e assim eu sigo. E essa questão da solidão é um fator que eu sempre tenho estado sozinho, não é uma questão agora porque eu separei, porque eu mudei de país. Desde criança eu sempre fui muito sozinho e não sei se por escolha ou por incômodo, ainda não entendo muito bem essa característica minha.\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":3,\"autor\":\"agente\",\"texto\":\"Bolsonaro, parece que essa oscilação no seu humor e essa sensação de solidão já fazem parte da sua vida há muito tempo, o que pode tornar tudo mais complexo agora, com tantas outras mudanças acontecendo. Reconhecer essas nuances é importante para entender melhor seus próprios sentimentos. Que estratégias ou recursos você tem buscado para lidar com essas variações emocionais e com a solidão que sente?\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":4,\"autor\":\"usuario\",\"texto\":\"Então, eu estou fazendo análise, terapia toda semana, já é psicóloga que eu já me acompanhava lá no Brasil e eu também contratei um coach, que é um amigo meu também, que já trabalhou comigo em outros projetos para me ajudar a manter o foco aí na questão dos meus negócios e no desenvolvimento de um app que eu estou desenvolvendo\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":4,\"autor\":\"agente\",\"texto\":\"Bolsonaro, pelo que você compartilhou, entendo que está passando por um período de muita transição, enfrentando desafios financeiros que afetam seu equilíbrio emocional, além de lidar com a solidão, que é algo presente na sua vida há bastante tempo. Você tem procurado apoio profissional consistente, fazendo terapia semanal e contando com o acompanhamento de uma psicóloga que já conhece seu histórico, além de contar com o suporte de um coach, que te ajuda a manter o foco nos seus negócios e no desenvolvimento do seu app.\\n\\nResumo dos pontos principais:\\n- Mudança para outro país e a distância da família\\n- Separação há dois anos e solidão, que é uma característica antiga sua\\n- Oscilação emocional que varia com o dia e fatores diversos\\n- Preocupação financeira com perda de reservas e impacto nos seus planos de negócio\\n- Uso de recursos terapêuticos e coaching para suporte emocional e profissional\\n\\nConsegui entender bem sua situação?\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":5,\"autor\":\"usuario\",\"texto\":\"sim\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"},{\"interaction\":5,\"autor\":\"agente\",\"texto\":\"Obrigado por confirmar, Bolsonaro. Vejo que você está buscando apoio consistente e tem tentando equilibrar sua vida pessoal e profissional, mesmo diante de tantos desafios. Manter essa dedicação aos seus cuidados emocionais e ao seu desenvolvimento é um passo importante e valioso.\\n\\nNossa conversa de hoje está finalizada, te espero amanhã para saber as novidades.\\n\\n{\\n  \\\"interaction_completa\\\": true,\\n  \\\"total_interactions\\\": 5,\\n  \\\"status\\\": \\\"completa\\\",\\n  \\\"contexto_final\\\": {\\n    \\\"situacao_emocional\\\": \\\"estado emocional oscilante devido a mudanças recentes, solidão e preocupações financeiras\\\",\\n    \\\"contextos_mencionados\\\": [\\\"mudança para outro país\\\", \\\"separação conjugal\\\", \\\"dificuldades financeiras\\\", \\\"solidão\\\", \\\"apoio terapêutico e coaching\\\"],\\n    \\\"sentimentos_expressos\\\": [\\\"preocupação\\\", \\\"solidão\\\", \\\"incerteza\\\", \\\"esperança\\\"],\\n    \\\"eventos_importantes\\\": [\\\"mudança de país\\\", \\\"separação de esposa\\\", \\\"perda de dinheiro em investimentos\\\"],\\n    \\\"intensidade_geral\\\": \\\"média\\\",\\n    \\\"validado_pelo_usuario\\\": true,\\n    \\\"observacoes_agente\\\": \\\"usuario demonstra autoconhecimento e busca ativa por suporte emocional e profissional, apesar das oscilações emocionais\\\"\\n  },\\n  \\\"emocoes_detectadas\\\": {\\n    \\\"emocao_primaria\\\": \\\"sadness\\\",\\n    \\\"intensidade_emocao\\\": 7,\\n    \\\"energia_detectada\\\": 6,\\n    \\\"humor_autoavaliado\\\": 7\\n  },\\n  \\\"qualidade_interacao\\\": 8,\\n  \\\"emoji_dia\\\": \\\"😊\\\",\\n  \\\"pronta_para_especialista\\\": true\\n}\",\"timestamp\":\"2025-10-11T17:36:21.370Z\"}]",
+          "contexto_final": null,
+          "data_conversa": "2025-10-11T00:00:00.000Z",
+          "chat_id": "6dea02a2-1261-485d-b28d-9ee2dc4fafe3",
+          "usr_name": "Bolsonaro"
+        }
+      }
+    ]
+  },
+  "versionId": "7bfc5ab3-329e-4028-b280-6908904cde78",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-09T14:32:30.486Z",
+      "updatedAt": "2025-10-09T14:32:30.486Z",
+      "role": "workflow:owner",
+      "workflowId": "nEstxgiVE8GLXgUQ",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

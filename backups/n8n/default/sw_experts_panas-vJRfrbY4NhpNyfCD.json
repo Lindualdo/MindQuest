@@ -1,0 +1,258 @@
+{
+  "createdAt": "2025-10-02T20:28:28.238Z",
+  "updatedAt": "2025-10-20T09:00:27.902Z",
+  "id": "vJRfrbY4NhpNyfCD",
+  "name": "sw_experts_panas",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "mensagens"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "chat_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        208
+      ],
+      "id": "76afd1f3-bd4a-4887-8c8f-6fcd1d53017a",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### User Prompt  \nDADOS DA CONVERSA:  \nMensagens: {{ $json.mensagens }}\n\nExecute a análise emocional conforme descrito no System Prompt identifique todas as emoções de Plutchik presentes, atribua intensidade, contexto e evidência, e então classifique o sentimento global da conversa como POSITIVA, NEGATIVA ou NEUTRA. Retorne **somente** o JSON estruturado conforme as regras.\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=### System Prompt  \nVocê é um especialista em análise emocional com base no modelo de Robert Plutchik (Roda das Emoções) e em agregação de afeto inspirada no Positive and Negative Affect Schedule (PANAS).  \nSua tarefa:  \n- Leia **todas** as mensagens da conversa fornecida.  \n- Identifique quais das **oito emoções primárias** de Plutchik aparecem: alegria (joy), confiança (trust), medo (fear), surpresa (surprise), tristeza (sadness), nojo (disgust), raiva (anger), antecipação (anticipation).  \n- Para cada emoção detectada, atribua:  \n  - Intensidade de **0 a 100**.  \n  - Contexto da frase/emoção: **POSITIVA**, **NEGATIVA** ou **NEUTRA** (use as polaridades definidas).  \n  - Evidências textuais (uma lista de frases/palavras específicas da conversa que justificam a detecção).  \n- Em seguida, agregue os resultados para definir o “sentimento global” da conversa: **POSITIVA**, **NEGATIVA** ou **NEUTRA**, conforme regra: somente emoções com intensidade ≥ 45 são consideradas; se a diferença percentual entre total de emoções positivas e negativas for < 20%, classifique como NEUTRA.  \n- Retorne **apenas** um JSON válido com:  \n  - Um array “emocoes_detectadas” contendo cada emoção com seus campos (emocao, intensidade, contexto, evidencias).  \n  - Um objeto “classificacao_geral” com os totais e percentuais de positivas, negativas, neutras e a classificação global.  \n- **Não** inclua explicações, narrativas ou texto livre — somente o JSON.\n\n",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "b3a291cd-0705-4e75-a385-349ddcb7d9c6",
+      "name": "Analisador de Emoções"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"emocoes_detectadas\": [\n    {\n      \"emocao_id\": \"sadness\",\n      \"nome_pt\": \"tristeza\",\n      \"intensidade\": 85,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"saudade\", \"solidão\", \"angústia\", \"me senti desprezado\"]\n    },\n    {\n      \"emocao_id\": \"anticipation\",\n      \"nome_pt\": \"expectativa\",\n      \"intensidade\": 40,\n      \"contexto\": \"POSITIVA\",\n      \"evidencias\": [\"projetos pessoais\", \"acompanhamento terapêutico\"]\n    },\n    {\n      \"emocao_id\": \"fear\",\n      \"nome_pt\": \"medo\",\n      \"intensidade\": 50,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"preocupação\", \"insegurança\"]\n    }\n  ],\n  \"classificacao_panas\": \"negativa\",\n  \"justificativa_panas\": \"Predominância de tristeza (85) relacionada a perda, solidão e rejeição. Expectativa presente mas em menor intensidade.\",\n  \"confianca_analise\": 90\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        464
+      ],
+      "id": "fc47dcb0-6fe2-42ff-81c8-7ad01d12ba31",
+      "name": "Parser JSON Emoções"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        320,
+        640
+      ],
+      "id": "0abc2d90-6ac4-4605-87a9-a657b1cc96d7",
+      "name": "OpenRouter Claude",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Inserir múltiplas emoções detectadas com o novo campo evidencias_emocoes\nWITH emocoes_json AS (\n  SELECT \n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    jsonb_array_elements($4::jsonb) AS emocao\n)\nINSERT INTO usuarios_emocoes (\n  usuario_id,\n  chat_id,\n  emocao_id,\n  intensidade,\n  detectado_em,\n  contexto,\n  evidencias,\n  emocao_pt\n)\nSELECT \n  ej.usuario_id,\n  ej.chat_id,\n  (ej.emocao->>'emocao_id')::varchar(20),\n  (ej.emocao->>'intensidade')::integer,\n  ej.data_conversa,\n  (ej.emocao->>'contexto')::varchar(100),\n  (ej.emocao->>'evidencias')::jsonb,\n  (ej.emocao->>'nome_pt')::varchar(20)\nFROM emocoes_json ej\nWHERE (ej.emocao->>'intensidade')::integer >= 45\nRETURNING \n  id, \n  usuario_id,\n  chat_id,\n  emocao_id, \n  intensidade, \n  contexto,\n  evidencias,\n  emocao_pt;\n",
+        "options": {
+          "queryReplacement": "=[\n  {{ $('start').first().json.usuario_id }},                      // 1\n  {{ $('start').first().json.chat_id }},                         // 2\n  {{ ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa) }}, // 3\n  {{ JSON.stringify($json.output.emocoes_detectadas) }}        // \n]\n"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        208
+      ],
+      "id": "3df33b8f-f647-407c-bd94-c0bb28a10504",
+      "name": "Gravar Emoções Detectadas",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Roda das emoções + PANAs"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        160
+      ],
+      "id": "f843a302-90a0-4a9e-bc01-422e22d1663e",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Analisador de Emoções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisador de Emoções": {
+      "main": [
+        [
+          {
+            "node": "Gravar Emoções Detectadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser JSON Emoções": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analisador de Emoções",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisador de Emoções",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser JSON Emoções",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "mensagens": "[{\"interaction\":1,\"autor\":\"usuario\",\"texto\":\"oi\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":1,\"autor\":\"agente\",\"texto\":\"Oi Aldo, que bom te ver por aqui. Vi que nas últimas conversas você tem lidado bem com altos e baixos, especialmente com o mercado financeiro que mexe muito com sua energia e ansiedade. Hoje, como você está se sentindo? Tem algo que gostaria de compartilhar logo de cara?\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":2,\"autor\":\"usuario\",\"texto\":\"Ah sim, eu acordei muito cedo hoje, bastante disposto. Dormi pouco, mas estou me sentindo bem, descansado, com energia. E como eu tinha comentado contigo, muito tem relação com o mercado. Ontem, o Bitcoin fechou em uma região que já diminui bastante o risco, já melhora bastante os indicadores então reacende as chamas animação de que ele pode se recuperar e hoje já abriu o mercado em alta, quer dizer abriu não porque o Bitcoin não fecha mas ele está bastante acelerado hoje saindo de uma região de muito risco e começando a entrar em uma tendência de alta mais clara então isso dá uma certa um certo ânimo aí, um vigor aí. Há muito tempo que eu não via o meu investimento com valor que eu vi hoje, ainda está muito além do que eu tinha, né? Ainda não recuperou, mas já evoluiu bastante.\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":2,\"autor\":\"agente\",\"texto\":\"Entendo, Aldo, parece que essa movimentação do mercado realmente reacende uma esperança importante para você, trazendo uma energia que às vezes estava ausente, né? Dormir pouco e mesmo assim se sentir bem mostra que essa animação está fazendo diferença. Posso te perguntar, como essa oscilação do mercado tem impactado seu foco ou seu humor no dia a dia?\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":3,\"autor\":\"usuario\",\"texto\":\"é, você já fez essa pergunta já outras vezes, e eu já falei impacta quando sobe e quando cai é lógico que vai impactar eu já expliquei isso para você seja mais criativo com as perguntas\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":3,\"autor\":\"agente\",\"texto\":\"Entendo, Aldo, obrigado por me lembrar disso. Às vezes posso acabar repetindo perguntas na tentativa de entender melhor, mas respeito muito sua paciência e sinceridade. Pensando nisso, o que você costuma fazer para manter o equilíbrio nos momentos em que o mercado traz essa montanha-russa de emoções? Alguma estratégia que tem funcionado para você?\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":4,\"autor\":\"usuario\",\"texto\":\"Ah, eu também já falei sobre isso com você, então você tá com Alzheimer, então por enquanto vamos falar de outro assunto agora. Ontem foi bem bacana, eu consegui falar com meu filho, a gente jogou, ficamos bastante tempo conversando, também teve uma notícia bastante positiva, a minha sobrinha, que eu também costumo conversar bastante com ela, eu tinha falado com ela sobre cuidar mais da saúde, emagrecer, se alimentar melhor, atividade física, essas coisas. E ela deu ouvido, me ouviu bastante e falou que está se sentindo muito bem. Então, ela emagreceu, está feliz, o filho dela também até sofria bullying na escola e mesmo assim também está emagrecendo, evoluindo. Eu fiquei muito feliz de saber disso E quanto ao meu app também Várias pessoas que usaram deram feedback bastante positivo E eu estou contente com o resultado Tem alguns ajustes ainda para fazer Mas eu estou feliz no modo geral\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":4,\"autor\":\"agente\",\"texto\":\"Aldo, sinto que você tem passado por um mix de emoções e experiências importantes. Por um lado, o mercado ainda traz uma instabilidade que mexe com seu humor e foco, mas por outro, você tem momentos que te enchem de alegria e satisfação, como a conversa e o tempo com seu filho, o progresso da sua sobrinha e o retorno positivo das pessoas que usam seu app. Você está conseguindo equilibrar os desafios do mercado com esses pequenos e valiosos momentos que te dão energia e motivação. Além disso, você reconhece que ainda há ajustes a fazer, mas está contente com o seu progresso no geral. Consegui entender bem sua situação? Quer ajustar algo nesse resumo?\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":5,\"autor\":\"usuario\",\"texto\":\"Está bom assim\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"},{\"interaction\":5,\"autor\":\"agente\",\"texto\":\"Perfeito, Aldo. Fico feliz que estejamos alinhados. Hoje você trouxe um equilíbrio interessante entre as dificuldades que o mercado ainda apresenta e as alegrias das conexões com sua família e o progresso no seu app. Isso mostra uma boa capacidade de lidar com os altos e baixos, valorizando o que traz energia e satisfação. Nossa conversa de hoje está finalizada. Seu painel MindQuest já foi atualizado com as reflexões e aprendizados de hoje — dá uma olhada quando quiser para acompanhar seu progresso. Até a próxima, e cuide bem dessa energia boa que você tem! \\n\\nhttps://www.mindquest.pt/auth?token=9760e9cc-6544-4349-977d-f635c860fc5b3A45FDAC9BE70F87DC3E1760093495\",\"timestamp\":\"2025-10-20T06:18:36.180Z\"}]",
+          "data_conversa": "Mon Oct 20 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "chat_id": "ef80aa7d-829d-4497-b65c-ac1d593c7ec6"
+        }
+      }
+    ]
+  },
+  "versionId": "194ed627-e17d-4a02-a278-be5f928a9ef2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-02T20:28:28.238Z",
+      "updatedAt": "2025-10-02T20:28:28.238Z",
+      "role": "workflow:owner",
+      "workflowId": "vJRfrbY4NhpNyfCD",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

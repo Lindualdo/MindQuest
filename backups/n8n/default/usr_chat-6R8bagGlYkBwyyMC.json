@@ -1,0 +1,572 @@
+{
+  "createdAt": "2025-09-23T18:04:11.192Z",
+  "updatedAt": "2025-10-22T13:42:22.076Z",
+  "id": "6R8bagGlYkBwyyMC",
+  "name": "usr_chat",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "2LwxT1Pnnaheh10M",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2LwxT1Pnnaheh10M",
+          "cachedResultName": "chat_onboarding"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "remoteJid": "={{ $('start').first().json.body.data.key.remoteJid }}",
+            "whatsapp_number": "={{ $('start').first().json.body.data.key.remoteJid.split('@')[0]}}",
+            "pushName": "={{ $('start').first().json.body.data.pushName }}",
+            "id": "={{ $('start').item.json.body.data.key.id }}",
+            "evolution_instancia": "={{ $('start').item.json.body.instance }}",
+            "menssagem": "={{ $('start').item.json.body.data.message.conversation }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "pushName",
+              "displayName": "pushName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "evolution_instancia",
+              "displayName": "evolution_instancia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "menssagem",
+              "displayName": "menssagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        -1472
+      ],
+      "id": "71f9c335-e04f-4c11-8760-75cc631fcf1f",
+      "name": "new_user"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3bf7a3c4-d2a9-4e86-af60-1af16d0b2dc7",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        -1584
+      ],
+      "id": "3acabf8a-2b84-4f70-9ba8-498d8eeb6544",
+      "name": "usr_exist?"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "usuarios",
+          "mode": "list",
+          "cachedResultName": "usuarios"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "whatsapp_numero",
+              "value": "={{ $('start').item.json.body.data.key.remoteJid.replace(\"@s.whatsapp.net\", \"\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -848,
+        -1584
+      ],
+      "id": "463baabd-2496-48ee-a938-20077d9e80c4",
+      "name": "usr_validate",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## usr_chat\n**interface de entrada das msg do usr** ",
+        "height": 80,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        -1888
+      ],
+      "id": "1fd157c9-00d6-40c4-bc46-b060eecc2d54",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bdb7cd24-5cc8-4efd-899e-06716680dcdb",
+              "leftValue": "={{ $json.ativo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -416,
+        -1664
+      ],
+      "id": "bb9df853-2609-477b-840b-22a7993486da",
+      "name": "Usr Ativo?"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').first().json.body.instance }}",
+        "remoteJid": "={{ $json.whatsapp_numero }}",
+        "messageText": "=Ah sinto muito, seu cadastro está inativo.\n\nProcure o suporte para ajuda: https://www.mindquest.pt",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -1536
+      ],
+      "id": "6f285722-f04f-4675-a203-5a461b744019",
+      "name": "Enviar texto - Usuario inativo",
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "aRonGjwfYoY1UUHH",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/aRonGjwfYoY1UUHH",
+          "cachedResultName": "sw_chat_interations_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.data.key.fromMe": "={{ $('start').first().json.body.data.key.fromMe }}",
+            "usr_id": "={{ $('usr_validate').first().json.id }}",
+            "body.instance": "={{ $('start').first().json.body.instance }}",
+            "body.data.key.id": "={{ $('start').first().json.body.data.key.id }}",
+            "body.data.key.remoteJid": "={{ $('start').first().json.body.data.key.remoteJid }}",
+            "body.data.pushName": "={{ $('start').first().json.body.data.pushName }}",
+            "body.data.message.conversation": "={{ $('start').first().json.body.data.message.conversation }}",
+            "body.data.messageType": "={{ $('start').first().json.body.data.messageType }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usr_id",
+              "displayName": "usr_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.instance",
+              "displayName": "body.instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.id",
+              "displayName": "body.data.key.id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.remoteJid",
+              "displayName": "body.data.key.remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.fromMe",
+              "displayName": "body.data.key.fromMe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "body.data.pushName",
+              "displayName": "body.data.pushName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.message.conversation",
+              "displayName": "body.data.message.conversation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.messageType",
+              "displayName": "body.data.messageType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        -1760
+      ],
+      "id": "ade64ea0-d67a-40f7-aee4-60433fb24687",
+      "name": "chat_interations"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "MindQuest",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1040,
+        -1584
+      ],
+      "id": "ce8efc7f-b6cc-473a-ba0a-f7c95b5c962a",
+      "name": "start",
+      "webhookId": "9f15db7a-9363-4715-8605-f86bdb16c4fc"
+    }
+  ],
+  "connections": {
+    "usr_exist?": {
+      "main": [
+        [
+          {
+            "node": "Usr Ativo?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "new_user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usr_validate": {
+      "main": [
+        [
+          {
+            "node": "usr_exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usr Ativo?": {
+      "main": [
+        [
+          {
+            "node": "chat_interations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto - Usuario inativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "usr_validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "axios/1.10.0",
+            "content-length": "926",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "5.78.124.8",
+            "cf-ipcountry": "US",
+            "cf-ray": "9929521dce2ecf48-PDX",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "x-forwarded-for": "104.23.160.39",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "104.23.160.39"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "messages.upsert",
+            "instance": "MindQuest",
+            "data": {
+              "key": {
+                "remoteJid": "351932786582@s.whatsapp.net",
+                "fromMe": false,
+                "id": "2AA6D19C18E11412D6C2",
+                "senderLid": "111167292891314@lid"
+              },
+              "pushName": "Aldo Santos",
+              "status": "DELIVERY_ACK",
+              "message": {
+                "conversation": "Olá",
+                "messageContextInfo": {
+                  "deviceListMetadata": {
+                    "senderKeyHash": "l4dt22lLZjLoPQ==",
+                    "senderTimestamp": "1760013144",
+                    "recipientKeyHash": "H4FYq1vlwzKt5g==",
+                    "recipientTimestamp": "1760442998"
+                  },
+                  "deviceListMetadataVersion": 2,
+                  "messageSecret": "ChRTTjePIetyYJL4ZBJXbM6Nf/eBVV1uJVbRjtNFliY="
+                }
+              },
+              "messageType": "conversation",
+              "messageTimestamp": 1761139527,
+              "instanceId": "df976ecf-000a-4a31-aeee-eaf025a8d9ff",
+              "source": "unknown"
+            },
+            "destination": "https://mindquest-n8n.cloudfy.live/webhook/MindQuest",
+            "date_time": "2025-10-22T10:25:27.314Z",
+            "sender": "351928413957@s.whatsapp.net",
+            "server_url": "https://mindquest-evolution.cloudfy.live",
+            "apikey": "881FB17719A5-45F5-A1CD-2373E685DE43"
+          },
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/MindQuest",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "35608209-fa3d-4724-bd7c-9eb265e72ea8",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-23T18:04:11.192Z",
+      "updatedAt": "2025-09-23T18:04:11.192Z",
+      "role": "workflow:owner",
+      "workflowId": "6R8bagGlYkBwyyMC",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

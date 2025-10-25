@@ -1,0 +1,358 @@
+{
+  "createdAt": "2025-10-22T18:20:20.342Z",
+  "updatedAt": "2025-10-25T11:12:06.663Z",
+  "id": "U44ZfEwFU77EUthb",
+  "name": "sw_send_message_with_retry",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instanceName"
+            },
+            {
+              "name": "remoteJid"
+            },
+            {
+              "name": "messageText"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        192
+      ],
+      "id": "a2844218-6ee4-4dc3-b7f8-fa696b6d920b",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $('start').item.json.remoteJid }}",
+        "messageText": "={{ $('start').item.json.messageText }}",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        192
+      ],
+      "id": "2f7ef405-8f81-4d46-89a0-dabd6282c972",
+      "name": "Send Message",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? 'UNKNOWN').toUpperCase();\nconst successFlags = new Set(['SUCCESS', 'SENT', 'DELIVERED']);\nconst success = response.success === true || successFlags.has(statusRaw);\nconst shouldRetry = !success;\nconst errorMessage = data.error ?? response.error ?? null;\n\nreturn [{\n  json: {\n    success,\n    status: statusRaw,\n    shouldRetry,\n    firstResponse: response,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        192
+      ],
+      "id": "5d3c4b4e-0642-495d-a3ce-9b1a74e546f7",
+      "name": "Check Initial"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and",
+          "options": {
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        192
+      ],
+      "id": "50e46273-7026-4c07-a933-ee71fc12c38f",
+      "name": "Should Retry?"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        64
+      ],
+      "id": "bb3501b4-500e-45d3-ad1e-7741898ba977",
+      "name": "Retry Delay",
+      "webhookId": "c70f06a7-7b09-46dc-9217-d26a00515d2d"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $('start').item.json.remoteJid }}",
+        "messageText": "={{ $('start').item.json.messageText }}",
+        "options_message": {
+          "delay": 800
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        704,
+        64
+      ],
+      "id": "c15a75d8-71fe-4e37-bdae-63f853415b1b",
+      "name": "Send Message (retry)",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? 'UNKNOWN').toUpperCase();\nconst successFlags = new Set(['SUCCESS', 'SENT', 'DELIVERED']);\nconst success = (response.success === true || successFlags.has(statusRaw));\nconst errorMessage = data.error ?? response.error ?? null;\n\nreturn [{\n  json: {\n    success,\n    status: statusRaw,\n    shouldRetry: !success,\n    firstResponse: $('Check Initial').first().json.firstResponse,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        64
+      ],
+      "id": "5fddbd46-a225-4185-8cbb-984f2f145a2b",
+      "name": "Check Retry"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        288
+      ],
+      "id": "8a3b08f4-5100-4ce8-853e-7c9f6ad07aa3",
+      "name": "Wait",
+      "webhookId": "352b747d-08f7-444b-b9c3-8e33fc3a250e"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        288
+      ],
+      "id": "86baa737-c633-4040-b734-5b1ef112ce88",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message": {
+      "main": [
+        [
+          {
+            "node": "Check Initial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Initial": {
+      "main": [
+        [
+          {
+            "node": "Should Retry?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Retry?": {
+      "main": [
+        [
+          {
+            "node": "Retry Delay",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry Delay": {
+      "main": [
+        [
+          {
+            "node": "Send Message (retry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message (retry)": {
+      "main": [
+        [
+          {
+            "node": "Check Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Retry": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJid": "351932786582@s.whatsapp.net",
+          "messageText": "Aldo, essa sequência que você desenha soa bem estruturada e cheia de sentido para você. Primeiro cuidar do financeiro para aliviar o peso, depois se reconectar com seus filhos e diminuir a solidão, avançar nos negócios e só depois mergulhar no namoro e construir um relacionamento mais consciente.\n\nPercebo que cada passo parece abrir espaço para o próximo, como se fosse um caminho que vai cuidando de você em camadas, respeitando o tempo e a complexidade de cada área.\n\nO que você sente ao imaginar esses passos acontecendo, um de cada vez, com essa calma que você está buscando? Alguma parte disso que você antevê como maior desafio ou que te dá mais esperança? Quero sentir como essa jornada está se revelando pra você. "
+        }
+      }
+    ]
+  },
+  "versionId": "985e29d6-2692-400a-bb93-361139a867f2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-22T18:20:20.342Z",
+      "updatedAt": "2025-10-22T18:20:20.342Z",
+      "role": "workflow:owner",
+      "workflowId": "U44ZfEwFU77EUthb",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

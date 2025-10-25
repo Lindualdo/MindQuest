@@ -1,0 +1,190 @@
+{
+  "createdAt": "2025-10-16T11:52:20.583Z",
+  "updatedAt": "2025-10-25T20:48:14.032Z",
+  "id": "CGdzaV8rqARmJCwO",
+  "name": "dash_conversa_full",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "full_chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "da8c9637-2c77-483e-a512-f72bdc50180e",
+      "name": "Webhook",
+      "webhookId": "47a7dd1b-8e15-4b94-b91e-494ec7d40a86"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * from usr_chat \nWHERE id = $1",
+        "options": {
+          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.chat_id }}\n"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "346e7ff2-8d53-4ca8-aabe-7e38b6bebc60",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "47e1b2b3-1240-4a4a-a9fb-a4c16738c55a",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "PostmanRuntime/7.48.0",
+            "content-length": "19",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:159:48f8:4174:3c89",
+            "cf-ipcountry": "PT",
+            "cf-ray": "98f75f02ad8c6930-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "postman-token": "152772f4-439c-4c3b-80bc-48ee3d2d90f1",
+            "x-forwarded-for": "172.68.103.15",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.15"
+          },
+          "params": {},
+          "query": {
+            "chat_id": "03c34cb4-bbcf-4078-afff-25f50f314968"
+          },
+          "body": {
+            "teste": "direto"
+          },
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/full_chat",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "33d04c87-7f5e-465e-825f-dc27a9bcc608",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T11:52:20.583Z",
+      "updatedAt": "2025-10-16T11:52:20.583Z",
+      "role": "workflow:owner",
+      "workflowId": "CGdzaV8rqARmJCwO",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

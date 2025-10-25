@@ -1,0 +1,196 @@
+{
+  "createdAt": "2025-10-12T07:55:47.675Z",
+  "updatedAt": "2025-10-25T20:48:44.270Z",
+  "id": "v7HttxPItfsC82pA",
+  "name": "dash_conversa_resumo",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "resumo_conversas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "39a1ab4c-66a0-4c27-a64c-df9b474012eb",
+      "name": "Webhook",
+      "webhookId": "daf2181d-3e1c-4c2f-aa4a-78c4616b778e"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1\n  AND criado_em::date BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE\nORDER BY criado_em DESC;\n",
+        "options": {
+          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}\n"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cf8a3d82-2199-4ae3-826f-f81605748eed",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "c81020fc-cb83-4640-8bd4-10f4e5e5e831",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5,de;q=0.4,zh-CN;q=0.3,zh;q=0.2,it;q=0.1,pt-BR;q=0.1",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:159:48f8:4174:3c89",
+            "cf-ipcountry": "PT",
+            "cf-ray": "98f76fe0b80fb17c-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "if-none-match": "W/\"2421-srDw9C/ik4m8KxyDMCimLrldfGc\"",
+            "origin": "http://localhost:5176",
+            "priority": "u=1, i",
+            "referer": "http://localhost:5176/",
+            "sec-ch-ua": "\"Opera\";v=\"120\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.68.103.16",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.16"
+          },
+          "params": {},
+          "query": {
+            "user_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+          },
+          "body": {},
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/resumo_conversas",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "5fde7173-3d81-4b34-8f8b-772085eeafb2",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-12T07:55:47.675Z",
+      "updatedAt": "2025-10-12T07:55:47.675Z",
+      "role": "workflow:owner",
+      "workflowId": "v7HttxPItfsC82pA",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

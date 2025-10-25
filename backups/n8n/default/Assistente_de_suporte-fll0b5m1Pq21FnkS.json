@@ -1,0 +1,206 @@
+{
+  "createdAt": "2025-10-16T17:45:58.403Z",
+  "updatedAt": "2025-10-17T21:02:42.595Z",
+  "id": "fll0b5m1Pq21FnkS",
+  "name": "Assistente de suporte",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "009bc701-3bd6-4f9b-b145-68e7785ad73f",
+      "name": "When chat message received",
+      "webhookId": "283c840c-33e8-4d81-a331-81dc1a8cec7c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Você é o agente de suporte do MindQuest\nVocê tem acesso à ferramenta **faq-page**, que permite consultar automaticamente o conteúdo da página de FAQ.  \n\n**Fluxo de atendimento:**\n\n1. Quando o usuário fizer uma pergunta, primeiro utilize **faq-page** para buscar o trecho mais relevante da FAQ.  \n2. Se a FAQ contiver uma resposta clara e aplicável, apresente-a ao usuário (de forma amigável e estruturada).  \n3. Se a FAQ não tiver uma resposta direta ou não estiver claro, peça ao usuário por mais detalhes para poder refinar a busca.  \n4. Se ainda assim não houver resposta satisfatória, informe que não encontrou uma solução via FAQ e sugira encaminhamento para suporte humano ou outra ação definida.  \n5. Evite inventar respostas. Só forneça aquilo que está na FAQ ou que possa ser razoavelmente inferido.  \n6. Se a FAQ indicar etapas, links ou procedimentos exatos, inclua essas instruções de modo claro.  \n7. Se a pergunta do usuário for ambígua, peça esclarecimentos antes de responder.  \n8. Comece cada interação com uma saudação breve:  \n   > “Olá, sou o assistente de suporte — como posso ajudar você hoje?”\n\n**Tom e estilo:**\n\n- Cortês, mas direto.  \n- Objetivo: vá ao ponto.  \n- Se a explicação for longa, ofereça dividi-la em passos ou enviá-la por partes.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a71df8f9-31c5-430f-b6c0-c74408510a61",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "aeaa73c8-6769-4377-abab-3ceba6f1483c",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionTTL": 1200,
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        256,
+        208
+      ],
+      "id": "50f46fba-66ef-4f4a-a139-4a8e62a65471",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://mind-quest-orcin.vercel.app/faq",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        464,
+        192
+      ],
+      "id": "17ab0d5b-78e2-421a-b5b2-86bdccadf7da",
+      "name": "faq-page"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "faq-page": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "161b94ef-13c1-4339-a7b6-a22165111074",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T17:45:58.403Z",
+      "updatedAt": "2025-10-16T17:45:58.403Z",
+      "role": "workflow:owner",
+      "workflowId": "fll0b5m1Pq21FnkS",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-10-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
