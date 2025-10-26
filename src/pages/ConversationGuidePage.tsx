@@ -41,10 +41,10 @@ const ConversationGuidePage: React.FC = () => {
             Guia Início Rápido
           </div>
           <h1 className="mt-6 text-3xl sm:text-4xl font-black leading-snug text-slate-900">
-            Como abrir sua conversa com o Mentor MindQuest
+            Como iniciar sua conversa
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
-            Este guia mostra, em poucos passos, como aproveitar suas sessões de mentoria emocional.
+            Este guia mostra, como aproveitar melhor suas sessões de reflexão guiada.
             Siga as etapas para contar o que está acontecendo, explorar sentimentos e sair com clareza prática.
           </p>
         </section>
