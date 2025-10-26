@@ -6,6 +6,16 @@
 - **Repositório:** estrutura Vite (`src/` para páginas/ componentes, `docs/` para materiais de apoio, `backups/n8n/` para workflows versionados).
 - **Ambiente externo:** N8N hospedado em `https://mindquest-n8n.cloudfy.live` com workflows de conversa, resumo, gamificação etc.
 
+### Contexto do produto
+- **MindQuest** é uma plataforma de evolução pessoal guiada por IA (“sua mente fala com você todos os dias; o MindQuest transforma ruídos em clareza e ações em resultados”) — referência completa em `docs/definições do produto.md`.
+- Experiência distribuída em quatro pilares:
+  - **Dashboard MindQuest:** painel vivo atualizado a cada conversa com humor, roda das emoções, PANAS, sabotadores, gamificação, histórico e insights.
+  - **Assistente de Reflexão (IA no WhatsApp):** conduz até 8 trocas diárias com perguntas baseadas em TCC e conversação guiada para mapear emoções e objetivos.
+  - **Assistente de Interações:** envia convites, lembretes, resumos semanais/mensais e acompanhamento de metas (integrações WhatsApp → N8N).
+  - **Mentor Virtual (Premium):** disponível 24h para conversas livres, combina filosofias e orientações práticas para acelerar a transformação pessoal.
+  - **Especialistas de IA:** agentes em background analisam a conversa (Sabotadores de Shirzad Chamine, Roda das Emoções, Sentimentos PANAS, perfis Big Five) e devolvem dados estruturados ao dashboard.
+- **Guia público para usuários:** `/suporte/conversation-guide` (código em `src/pages/ConversationGuidePage.tsx`, conteúdo base em `docs/user_conversation_guide.md`) explica a jornada inicial, pilares e o que acontece pós-conversa; sempre referenciar esse material em novos atendimentos.
+
 ### Arquitetura Front-end
 - **React 18 + TypeScript** com SPA; roteamento manual em `src/App.tsx` (sem react-router), usando `window.location` para decidir a página.
 - **Páginas principais**:
@@ -21,9 +31,15 @@
 ### Regras de negócio chave
 - **Token**: expira em 7 dias; sem token válido, `AuthGuard` bloqueia e orienta usuário a solicitar novo link.
 - **Ciclo de conversa**: 16 mensagens (8 usuário ↔ 8 IA) conforme README; workflows garantem checkpoints (resumo, insights, gamificação).
+- **Sessões WhatsApp**:
+  - Cada rodada mantém a sessão “em aberto” até completar as 8 interações; o usuário tem até 12 horas (TTL atual da memória) para retomar sem perder o progresso.
+  - Ao atingir a 8ª interação, o fluxo grava conversa, aplica especialistas (humor, PANAS, sabotadores, insights) e atualiza o dashboard.
+  - Concluída a sessão, é aplicado cooldown de 12 horas (lock em Redis) antes de liberar uma nova rodada; mensagens nesse intervalo recebem aviso automático com horário de retorno.
+  - Caso não conclua as 8 interações dentro do TTL, a memória expira e a próxima mensagem inicia um novo ciclo sem gravação anterior.
 - **Navegação suporte:** qualquer página sob `/suporte/...` deve ser pública e voltar para `/suporte`.
 - **Naming de URLs públicas:** usar hífen (`conversation-guide`). Nunca underline (documentado no README).
 - **Wait no envio de mensagens:** workflows do n8n mantêm breves waits (~3-5s) para garantir que a Evolution (WhatsApp) finalize o envio antes do workflow encerrar.
+- **Pós-conversa:** conclusão da 8ª interação dispara especialistas, gera resumo estruturado (contagem de palavras, reflexão), ajusta métricas no dashboard e concede XP/conquistas; reforçar para usuários que o painel reflete o que foi validado na última mensagem.
 
 ### Processo automático de backup (n8n)
 - **Scripts principais:**
@@ -42,9 +58,10 @@
 - **Foco**: usar estes arquivos apenas como backup informativo; alterações reais devem ser feitas no n8n e exportadas.
 
 ### Dados do produto
-- **Visão do usuário** (docs/definições do produto.md):Mindquest é Uma plataforma de evolução pessoal guiada por IA -  WhatsApp + dashboard + interações automatizadas
-- **Proposta de valor:** transformar emoções em clareza e ação diária, trackear humor/PANAS, insights personalizados, recomendações microplanejadas.
-- **Posicionamento:** não é terapia; complementa autoconhecimento e performance.
+- **Proposta de valor:** “Converse com sua IA e entenda o que sua mente quer te dizer”; transformar emoções em clareza e ação diária usando WhatsApp + dashboard + interações automatizadas.
+- **Público primário:** mulheres (~80%) e pessoas buscando clareza mental para tirar planos do papel.
+- **Visão Free vs Premium:** Free entrega todos os blocos essenciais com limites de profundidade/quantidade; Premium amplia número de sessões (até 5/dia), histórico completo, métricas avançadas e acesso contínuo ao Mentor Virtual (reflexão guiada 24h).
+- **Posicionamento:** não é terapia; atua como sistema de desenvolvimento pessoal baseado em dados emocionais e hábitos mentais.
 
 ### Autenticação e tokens
 - Tokens distribuídos no onboarding WhatsApp; primeiro acesso `?token=<token>` → `authService` captura e salva.

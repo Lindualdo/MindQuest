@@ -1,1 +1,51 @@
-# Guia Rápido: Como Conversar com o Mentor MindQuest  Este roteiro ajuda você (ou o assistente) a orientar usuários que querem aproveitar ao máximo as sessões de mentoria emocional. A ideia é manter a conversa leve, focada em autoconhecimento e transformação prática.  ---  ## 1. Como começar a conversa - Conte como está se sentindo hoje (ex.: “Acordei sem foco”, “Estou animado, mas ansioso com X”). - Compartilhe um momento marcante recente: algo que deu certo, algo que incomodou ou surpreendeu. - Diga o que espera da sessão: clarear uma decisão, entender um padrão, organizar a semana, etc.  > **Exemplo simples:** “Oi Mentor, hoje estou meio travado para começar o dia. Acho que tem a ver com o peso das metas do trabalho. Pode me ajudar a entender isso?”  ---  ## 2. Temas que valem explorar ### Emoções e estados internos - Como o corpo reage em momentos de tensão ou alegria. - Situações que dispararam ansiedade, frustração, euforia ou cansaço. - Momentos de orgulho, gratidão ou coragem que merecem ser reforçados.  ### Padrões de pensamento - Narrativas que se repetem (“Nunca vou dar conta”, “Sempre deixo para depois”). - Crenças sobre si, trabalho, relacionamentos, dinheiro, produtividade. - Diálogos internos que funcionam como sabotadores (Crítico, Perfeccionista, Controlador, etc.).  ### Hábitos e rotinas - O que está ajudando a manter equilíbrio (ex.: journaling, exercícios, pausas conscientes). - O que está drenando energia (uso do celular, hiperfoco sem descanso, alimentação, sono). - Pequenas ações que gostaria de incorporar na semana.  ### Relações e comunicação - Conversas difíceis que estão pendentes ou pesando. - Limites que precisam ser colocados (familiares, trabalho, amigos). - Pessoas que dão suporte emocional e como fortalecer esses vínculos.  ### Propósito, metas e decisões - Objetivos de médio/longo prazo e por que são importantes. - Dúvidas estratégicas no trabalho ou projetos pessoais. - Momentos de escolha (ficar, sair, investir, pausar) que pedem clareza emocional.  ---  ## 3. Quando o usuário não sabe o que dizer Sugestões rápidas que o assistente pode oferecer: - “Como você se sentiu na última vez que realmente descansou?” - “Teve algo nos últimos dias que te deixou orgulhoso ou incomodado?” - “Se pudesse mudar apenas uma coisa hoje, qual seria?” - “Existe algum pensamento repetitivo que está te travando?” - “Qual foi o momento mais carregado de emoção nesta semana?”
+# Guia Rápido: Como Conversar com o Assistente de Reflexão MindQuest  
+Este roteiro ajuda você (ou o assistente) a orientar usuários que querem aproveitar ao máximo as sessões guiadas pelo Assistente de Reflexão. A ideia é manter a conversa leve, focada em autoconhecimento e transformação prática.  
+---
+
+## 1. Como começar a conversa
+- Conte como está se sentindo hoje (ex.: “Acordei sem foco”, “Estou animado, mas ansioso com X”).
+- Compartilhe um momento marcante recente: algo que deu certo, algo que incomodou ou surpreendeu.
+- Diga o que espera da sessão: clarear uma decisão, entender um padrão, organizar a semana, etc.
+
+> **Exemplo simples:** “Oi, hoje estou meio travado para começar o dia. Acho que tem a ver com o peso das metas do trabalho. Pode me ajudar a entender isso?”
+
+---
+
+## 2. Temas que valem explorar
+
+### Emoções e estados internos
+- Como o corpo reage em momentos de tensão ou alegria.
+- Situações que dispararam ansiedade, frustração, euforia ou cansaço.
+- Momentos de orgulho, gratidão ou coragem que merecem ser reforçados.
+
+### Padrões de pensamento
+- Narrativas que se repetem (“Nunca vou dar conta”, “Sempre deixo para depois”).
+- Crenças sobre si, trabalho, relacionamentos, dinheiro, produtividade.
+- Diálogos internos que funcionam como sabotadores (Crítico, Perfeccionista, Controlador, etc.).
+
+### Hábitos e rotinas
+- O que está ajudando a manter equilíbrio (ex.: journaling, exercícios, pausas conscientes).
+- O que está drenando energia (uso do celular, hiperfoco sem descanso, alimentação, sono).
+- Pequenas ações que gostaria de incorporar na semana.
+
+### Relações e comunicação
+- Conversas difíceis que estão pendentes ou pesando.
+- Limites que precisam ser colocados (familiares, trabalho, amigos).
+- Pessoas que dão suporte emocional e como fortalecer esses vínculos.
+
+### Propósito, metas e decisões
+- Objetivos de médio/longo prazo e por que são importantes.
+- Dúvidas estratégicas no trabalho ou projetos pessoais.
+- Momentos de escolha (ficar, sair, investir, pausar) que pedem clareza emocional.
+
+---
+
+## 3. Quando o usuário não sabe o que dizer
+Sugestões rápidas que o assistente pode oferecer:
+- “Como você se sentiu na última vez que realmente descansou?”
+- “Teve algo nos últimos dias que te deixou orgulhoso ou incomodado?”
+- “Se pudesse mudar apenas uma coisa hoje, qual seria?”
+- “Existe algum pensamento repetitivo que está te travando?”
+- “Qual foi o momento mais carregado de emoção nesta semana?”
+
+---

@@ -5,9 +5,7 @@
 
 ## 0. O que é o MindQuest?
 
-> "Uma plataforma de evolução pessoal guiada por IA. Sua mente fala com você todos os dias. O MindQuest transforma ruidos em clareza, ações e resultados"
-
-> "Uma plataforma de IA para evolução pessoal. O MindQuest transforma ruídos mentais em clareza, foco e ação."
+> "Uma plataforma de evolução pessoal guiada por IA. Sua mente fala com você todos os dias. O MindQuest transforma ruidos em clareza e ações em resultados"
 
 ---
 
