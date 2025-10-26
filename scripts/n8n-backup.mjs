@@ -1,4 +1,4 @@
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, rm, access } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -12,6 +12,15 @@ if (!apiKey) {
 
 const backupDir = path.resolve('backups/n8n');
 const pageLimit = Number(process.env.N8N_PAGE_LIMIT ?? '100');
+
+async function fileExists(targetPath) {
+  try {
+    await access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function fetchJson(relativePath, searchParams = {}) {
   const url = new URL(relativePath, apiRoot);
@@ -138,8 +147,13 @@ async function exportWorkflows() {
       seen.add(workflow.id);
 
       const data = await fetchJson(`workflows/${workflow.id}`);
-      const safeName = sanitizeName(workflow.name || `workflow-${workflow.id}`, `workflow-${workflow.id}`);
-      const filePath = path.join(projectDir, `${safeName}-${workflow.id}.json`);
+      const baseSafeName = sanitizeName(workflow.name || `workflow-${workflow.id}`, `workflow-${workflow.id}`);
+      let filePath = path.join(projectDir, `${baseSafeName}.json`);
+
+      if (await fileExists(filePath)) {
+        const suffix = workflow.id ? `-${workflow.id}` : `-${Date.now()}`;
+        filePath = path.join(projectDir, `${baseSafeName}${suffix}.json`);
+      }
 
       await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
       console.log(`✓ ${projectName}: ${workflow.name ?? 'Sem nome'} (#${workflow.id})`);

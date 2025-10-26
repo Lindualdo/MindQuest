@@ -206,7 +206,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-25T10:36:27.185Z",
+              "updatedAt": "2025-10-26T07:40:32.710Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -231,7 +231,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-25",
+              "lastActiveAt": "2025-10-26",
               "isPending": false
             }
           }
