@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-26T18:36:39.663Z",
+  "updatedAt": "2025-10-26T19:00:51.157Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -1747,11 +1747,6 @@
             "index": 0
           },
           {
-            "node": "Chat Memory - Delete All (final)",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Resumo das conversas",
             "type": "main",
             "index": 0
@@ -1773,6 +1768,11 @@
           },
           {
             "node": "experts_bigfive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory - Delete All (final)",
             "type": "main",
             "index": 0
           }
@@ -1957,7 +1957,7 @@
       }
     ]
   },
-  "versionId": "a3d204ef-6623-4cdd-84ab-f3a404b67fda",
+  "versionId": "7f7182f4-56b2-47ed-8927-4e8c55b8d889",
   "triggerCount": 0,
   "shared": [
     {

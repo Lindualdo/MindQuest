@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-18T15:32:30.610Z",
-  "updatedAt": "2025-10-26T18:16:56.327Z",
+  "updatedAt": "2025-10-26T18:40:44.347Z",
   "id": "HDTrSrJiBIv2FFks",
   "name": "sw_get_history",
   "active": false,
@@ -17,10 +17,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        96,
-        -96
+        -256,
+        -208
       ],
-      "id": "581d8c44-5b19-4eef-9178-517c6700b7a3",
+      "id": "30ce1a7b-d72d-47e3-bc64-dc38cdee69ba",
       "name": "get_history",
       "alwaysOutputData": true,
       "credentials": {
@@ -43,19 +43,14 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -96,
-        -96
+        -448,
+        -208
       ],
-      "id": "86d2f573-7b81-4d6e-ae48-53dc96a34239",
+      "id": "111614ef-32f9-491c-b137-2a6205618e7d",
       "name": "start"
     }
   ],
   "connections": {
-    "get_history": {
-      "main": [
-        []
-      ]
-    },
     "start": {
       "main": [
         [
@@ -82,7 +77,7 @@
       }
     ]
   },
-  "versionId": "ff88d0f1-8a2a-4aa8-845f-d0c9cfedf96c",
+  "versionId": "aaeafc1f-03a3-475f-bcd6-104311fd04b9",
   "triggerCount": 0,
   "shared": [
     {
