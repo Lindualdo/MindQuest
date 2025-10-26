@@ -1,3 +1,0 @@
-./scripts/run-n8n-backup.sh
-
-executar no raiz do projeto por um terminal fora do vscode

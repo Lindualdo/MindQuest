@@ -22,6 +22,8 @@ import PanasDetailPage from './pages/PanasDetailPage';
 import LpStartPage from './pages/LpStartPage';
 import PremiumLandingPage from './pages/PremiumLandingPage';
 import ProductDefinitionPage from './pages/ProductDefinitionPage';
+import ConversationGuidePage from './pages/ConversationGuidePage';
+import SupportHomePage from './pages/SupportHomePage';
 
 declare global {
   interface Window {
@@ -57,21 +59,8 @@ const NotFound: React.FC<{ message?: string }> = ({ message }) => (
 );
 
 function App() {
-  const { 
-    dashboardData, 
-    refreshData, 
-    isLoading, 
-    error,
-    ultimaAtualizacao,
-    view
-  } = useDashboard();
-
   const rawPath = typeof window !== 'undefined' ? window.location.pathname : '';
   const currentPath = rawPath.toLowerCase();
-
-  const handleRefresh = async () => {
-    await refreshData();
-  };
 
   const withoutIndex = currentPath.replace(/\/index\.html$/, '/');
   const sanitizedPath = withoutIndex.replace(/\/+$/, '') || '/';
@@ -80,9 +69,10 @@ function App() {
   const resolvedPath =
     blogSegmentIndex >= 0 ? normalizedPath.slice(blogSegmentIndex) || '/blog' : normalizedPath;
   const isBlogPath = blogSegmentIndex >= 0;
+  const isSupportHome = resolvedPath === '/suporte';
+  const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
 
   if (typeof window !== 'undefined') {
-    // Debug routing issues in production
     window.__MINDQUEST_ROUTING__ = {
       currentPath,
       sanitizedPath,
@@ -98,6 +88,28 @@ function App() {
       });
     }
   }
+
+  if (isSupportHome) {
+    return <SupportHomePage />;
+  }
+
+  if (isSupportConversationGuide) {
+    return <ConversationGuidePage />;
+  }
+
+  const { 
+    dashboardData, 
+    refreshData, 
+    isLoading, 
+    error,
+    ultimaAtualizacao,
+    view
+  } = useDashboard();
+
+  const handleRefresh = async () => {
+    await refreshData();
+  };
+
   const searchParams =
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const forceHomeView = searchParams?.get('public') === '1';

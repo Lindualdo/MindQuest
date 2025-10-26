@@ -136,6 +136,11 @@ src/
 └── utils/            # Utilitários (futuro)
 ```
 
+## 🔤 Convenções de URL
+
+- **URLs públicas externas** devem usar hífen (`conversation-guide`) em nomes compostos. Nunca utilize sublinhado (`conversation_guide`) em rotas expostas.
+- Em rotas e arquivos internos o padrão atual pode ser mantido, desde que as URLs externas sigam o formato com hífen.
+
 ## 🎨 Design System
 
 - **Cores**: Gradientes azul/roxo com acentos coloridos
