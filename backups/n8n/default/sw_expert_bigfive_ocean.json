@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-19T20:04:57.978Z",
-  "updatedAt": "2025-10-26T19:16:44.006Z",
+  "updatedAt": "2025-10-26T20:26:17.280Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
   "active": false,
@@ -172,8 +172,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1936,
-        0
+        2000,
+        96
       ],
       "id": "f2331ac6-85da-45d0-a887-3eb6b040589d",
       "name": "Gravar Big Five",
@@ -289,7 +289,7 @@
       }
     ]
   },
-  "versionId": "68b968d0-f6ec-4f1d-9faa-ab4df6ec55a5",
+  "versionId": "7029ffb0-0d46-4611-bacc-a0678e0306d1",
   "triggerCount": 0,
   "shared": [
     {
