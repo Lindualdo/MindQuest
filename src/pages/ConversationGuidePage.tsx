@@ -132,7 +132,7 @@ const ConversationGuidePage: React.FC = () => {
         <section className="max-w-5xl mx-auto rounded-3xl shadow-xl border border-slate-200 bg-white p-8 sm:p-10 mb-12">
           <div className="inline-flex items-center gap-3 rounded-full px-4 py-2 bg-indigo-50 text-indigo-600 text-xs font-semibold uppercase tracking-[0.2em]">
             <Sparkles size={16} />
-            Guia rápido · Assistente de Reflexão
+            Guia rápido · Assistente de Reflexão pessoal
           </div>
           <h2 className="mt-6 text-3xl sm:text-4xl font-black leading-snug text-slate-900">
             Bem-vindo à sua primeira jornada MindQuest
