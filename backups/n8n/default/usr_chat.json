@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-09-23T18:04:11.192Z",
-  "updatedAt": "2025-10-22T13:42:22.076Z",
+  "updatedAt": "2025-10-26T10:52:57.567Z",
   "id": "6R8bagGlYkBwyyMC",
   "name": "usr_chat",
   "active": true,
@@ -164,7 +164,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -848,
+        -864,
         -1584
       ],
       "id": "463baabd-2496-48ee-a938-20077d9e80c4",
@@ -368,12 +368,56 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1040,
-        -1584
+        -1280,
+        -1600
       ],
       "id": "ce8efc7f-b6cc-473a-ba0a-f7c95b5c962a",
       "name": "start",
       "webhookId": "9f15db7a-9363-4715-8605-f86bdb16c4fc"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        -1856
+      ],
+      "id": "831fa89d-fc01-4a38-8656-b82cbbb5da2a",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f9c0c839-914c-40df-af6e-bdc612d588eb",
+              "leftValue": "={{ $json.body.data.wuid }}",
+              "rightValue": "351928413957@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1072,
+        -1600
+      ],
+      "id": "dbba9915-6d1d-4fd4-a6b2-d9a1090d940d",
+      "name": "é o proprio numero da instancia"
     }
   ],
   "connections": {
@@ -428,6 +472,24 @@
       "main": [
         [
           {
+            "node": "é o proprio numero da instancia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "é o proprio numero da instancia": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "usr_validate",
             "type": "main",
             "index": 0
@@ -450,56 +512,37 @@
           "headers": {
             "host": "mindquest-n8n.cloudfy.live",
             "user-agent": "axios/1.10.0",
-            "content-length": "926",
+            "content-length": "651",
             "accept": "application/json, text/plain, */*",
             "accept-encoding": "gzip, br",
             "cdn-loop": "cloudflare; loops=1",
             "cf-connecting-ip": "5.78.124.8",
             "cf-ipcountry": "US",
-            "cf-ray": "9929521dce2ecf48-PDX",
+            "cf-ray": "99491d832b221a0b-PDX",
             "cf-visitor": "{\"scheme\":\"https\"}",
             "content-type": "application/json",
-            "x-forwarded-for": "104.23.160.39",
+            "x-forwarded-for": "172.68.175.117",
             "x-forwarded-host": "mindquest-n8n.cloudfy.live",
             "x-forwarded-port": "443",
             "x-forwarded-proto": "https",
             "x-forwarded-server": "d49265bfcab0",
-            "x-real-ip": "104.23.160.39"
+            "x-real-ip": "172.68.175.117"
           },
           "params": {},
           "query": {},
           "body": {
-            "event": "messages.upsert",
+            "event": "connection.update",
             "instance": "MindQuest",
             "data": {
-              "key": {
-                "remoteJid": "351932786582@s.whatsapp.net",
-                "fromMe": false,
-                "id": "2AA6D19C18E11412D6C2",
-                "senderLid": "111167292891314@lid"
-              },
-              "pushName": "Aldo Santos",
-              "status": "DELIVERY_ACK",
-              "message": {
-                "conversation": "Olá",
-                "messageContextInfo": {
-                  "deviceListMetadata": {
-                    "senderKeyHash": "l4dt22lLZjLoPQ==",
-                    "senderTimestamp": "1760013144",
-                    "recipientKeyHash": "H4FYq1vlwzKt5g==",
-                    "recipientTimestamp": "1760442998"
-                  },
-                  "deviceListMetadataVersion": 2,
-                  "messageSecret": "ChRTTjePIetyYJL4ZBJXbM6Nf/eBVV1uJVbRjtNFliY="
-                }
-              },
-              "messageType": "conversation",
-              "messageTimestamp": 1761139527,
-              "instanceId": "df976ecf-000a-4a31-aeee-eaf025a8d9ff",
-              "source": "unknown"
+              "instance": "MindQuest",
+              "wuid": "351928413957@s.whatsapp.net",
+              "profileName": "MindQuest",
+              "profilePictureUrl": "https://pps.whatsapp.net/v/t61.24694-24/554537447_2213944532363385_8922414078958902825_n.jpg?ccb=11-4&oh=01_Q5Aa2wFoUbvaSm9KxVOToMXYboABDd7l1E560NdC8hwDz0cZSg&oe=690B189F&_nc_sid=5e03e0&_nc_cat=102",
+              "state": "open",
+              "statusReason": 200
             },
             "destination": "https://mindquest-n8n.cloudfy.live/webhook/MindQuest",
-            "date_time": "2025-10-22T10:25:27.314Z",
+            "date_time": "2025-10-26T07:01:56.978Z",
             "sender": "351928413957@s.whatsapp.net",
             "server_url": "https://mindquest-evolution.cloudfy.live",
             "apikey": "881FB17719A5-45F5-A1CD-2373E685DE43"
@@ -510,7 +553,7 @@
       }
     ]
   },
-  "versionId": "35608209-fa3d-4724-bd7c-9eb265e72ea8",
+  "versionId": "a87ebe41-07c9-491b-a10b-555380d6cb6f",
   "triggerCount": 1,
   "shared": [
     {

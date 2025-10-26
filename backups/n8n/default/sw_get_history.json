@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-18T15:32:30.610Z",
-  "updatedAt": "2025-10-19T11:21:19.081Z",
+  "updatedAt": "2025-10-26T18:16:56.327Z",
   "id": "HDTrSrJiBIv2FFks",
   "name": "sw_get_history",
   "active": false,
@@ -22,6 +22,7 @@
       ],
       "id": "581d8c44-5b19-4eef-9178-517c6700b7a3",
       "name": "get_history",
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -76,13 +77,12 @@
     "start": [
       {
         "json": {
-          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "section_key": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582"
+          "usr_id": "178edaa3-5389-47df-adde-7ad2c2dcd1b3"
         }
       }
     ]
   },
-  "versionId": "aff8386a-1ab5-472d-9d6e-5aec197a4813",
+  "versionId": "ff88d0f1-8a2a-4aa8-845f-d0c9cfedf96c",
   "triggerCount": 0,
   "shared": [
     {

@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-19T20:04:57.978Z",
-  "updatedAt": "2025-10-19T23:14:46.508Z",
+  "updatedAt": "2025-10-26T18:06:26.199Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
   "active": false,
@@ -31,16 +31,72 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -256,
-        32
+        0,
+        -176
       ],
-      "id": "9aec82c0-1805-427c-a807-b2ddd78e86ce",
+      "id": "6d6af44c-607e-4166-89a1-003e22f6000c",
       "name": "start"
     },
     {
       "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "HDTrSrJiBIv2FFks",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HDTrSrJiBIv2FFks",
+          "cachedResultName": "sw_get_history"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usr_id": "={{ $('start').first().json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usr_id",
+              "displayName": "usr_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        -176
+      ],
+      "id": "2d9e3377-1e5c-44a8-97d0-039d3a262276",
+      "name": "Buscar Histórico",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "functionCode": "const startData = $items('start')[0]?.json ?? {};\nconst historyItems = $items('Buscar Histórico').map((item) => item.json).filter(Boolean);\nconst formatDate = (value) => {\n  if (!value) return null;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return value;\n  return parsed.toISOString().slice(0, 10);\n};\nconst historicoOrdenado = historyItems\n  .map((entry) => ({\n    data: formatDate(entry.data_conversa),\n    resumo: entry.resumo_conversa ?? ''\n  }))\n  .filter((entry) => entry.data || entry.resumo)\n  .sort((a, b) => {\n    if (!a.data || !b.data) return 0;\n    return a.data < b.data ? 1 : -1;\n  });\nconst historicoResumo = historicoOrdenado.length\n  ? historicoOrdenado\n      .map((entry) => `- ${entry.data ?? 'data indeterminada'}: ${entry.resumo || 'sem resumo disponível'}`)\n      .join('\\n')\n  : 'Sem histórico relevante nos últimos 5 dias.';\nreturn [\n  {\n    json: {\n      ...startData,\n      historico_resumo: historicoResumo,\n      historico_itens: historicoOrdenado\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -176
+      ],
+      "id": "038cbd0b-3bdf-4935-b154-5664bd23276a",
+      "name": "Preparar Contexto Big Five"
+    },
+    {
+      "parameters": {
         "promptType": "define",
-        "text": "=Analise a conversa COMPLETA e estime o perfil Big Five (OCEAN).\n\n**CONVERSA (JSON):**\n```json\n{{ $json.mensagens }}\n```\n**Nome do usuário:** {{ $json.usr_name }}\n\n**SEU OBJETIVO**\n1) Identificar sinais claros e textuais para cada traço: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.\n2) Atribuir **score 0-100** por traço (escala contínua; 50 = neutro/mediano).\n3) Extrair **EVIDÊNCIAS** em 2-4 **trechos curtos** (máx. 15 palavras cada) para cada traço (somente do texto do usuário).\n4) Estimar **confiabilidade (0-100)** por traço, baseada na quantidade/clareza das evidências.\n5) Determinar **perfil_primario** = traço com maior score (se diferença <5 pontos entre o 1º e 2º, retorne \"misto\").\n6) Produzir um **resumo_perfil** (máx. 400 caracteres) em linguagem acessível e não-clínica, coerente com o MindQuest.\n7) Se as evidências forem insuficientes para qualquer traço, retorne score=50 e confiabilidade ≤ 40 para aquele traço.\n\n**REGRAS CRÍTICAS**\n- Leia APENAS mensagens com `autor = \"usuario\"`.\n- **Proíba suposições**: não invente fatos não ditos; use somente trechos literais como evidência.\n- **Escala obrigatória 0-100** para scores e confiabilidade.\n- Mantenha saídas em **português**.\n- **NÃO** faça diagnósticos clínicos. Foco descritivo, orientado a autoconhecimento.\n- Retorne **APENAS JSON válido**, no formato definido em \"FORMATO DE SAÍDA\".\n\n**CRITÉRIOS DE INTERPRETAÇÃO (guia resumido)**\n- **Openness (Abertura):** curiosidade, ideias novas, explorar possibilidades; baixo: preferência por rotina.\n- **Conscientiousness (Conscienciosidade):** organização, disciplina, plano/execução; baixo: impulsividade, procrastinação.\n- **Extraversion (Extroversão):** energia social, busca de estímulos/contato; baixo: reserva, foco interno.\n- **Agreeableness (Amabilidade):** empatia, cooperação; baixo: assertividade dura, conflito, ceticismo.\n- **Neuroticism (Neuroticismo):** sensibilidade a estresse, ansiedade/ruminação; baixo: estabilidade emocional.\n\n**FORMATO DE SAÍDA (JSON):**\n{\n  \"big_five\": {\n    \"openness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"conscientiousness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"extraversion\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"agreeableness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"neuroticism\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    }\n  },\n  \"perfil_primario\": \"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\n  \"resumo_perfil\": \"texto curto e não clínico\",\n  \"insuficiente\": false\n}\n\n**NOTAS DE QUALIDADE**\n- Se a conversa for pobre em pistas, defina `insuficiente = true` e mantenha scores próximos de 50 com baixa confiabilidade.\n- \"Evidências\" DEVEM ser trechos literais e curtos do usuário (não reescreva).",
+        "text": "=Use a conversa ATUAL como fonte principal e estime o perfil Big Five (OCEAN), tratando o histórico recente apenas como contexto complementar.\n\n**HISTÓRICO (resumos últimos 5 dias):**\n{{ $json.historico_resumo }}\n\n**CONVERSA ATUAL (JSON):**\n```json\n{{ $json.mensagens }}\n```\n**Nome do usuário:** {{ $json.usr_name }}\n\n**SEU OBJETIVO**\n1) Identificar sinais claros e textuais na conversa atual para cada traço: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.\n2) Atribuir **score 0-100** por traço (escala contínua; 50 = neutro/mediano).\n3) Extrair **EVIDÊNCIAS** em 2-4 trechos curtos (máx. 15 palavras cada) da conversa atual para cada traço.\n4) Estimar **confiabilidade (0-100)** por traço, baseada na quantidade/clareza das evidências.\n5) Determinar **perfil_primario** = traço com maior score (se diferença <5 pontos entre o 1º e 2º, retorne \"misto\").\n6) Produzir um **resumo_perfil** (máx. 400 caracteres) em linguagem acessível e não-clínica, coerente com o MindQuest.\n7) Se as evidências forem insuficientes para qualquer traço, retorne score=50 e confiabilidade ≤ 40 para aquele traço.\n\n**REGRAS CRÍTICAS**\n- Leia APENAS mensagens com `autor = \"usuario\"` da conversa atual.\n- Utilize o histórico somente para reconhecer padrões, mas NÃO use trechos do histórico como evidência literal.\n- **Proíba suposições**: não invente fatos não ditos; use somente trechos literais da conversa atual.\n- **Escala obrigatória 0-100** para scores e confiabilidade.\n- Mantenha saídas em **português**.\n- **NÃO** faça diagnósticos clínicos. Foco descritivo, orientado a autoconhecimento.\n- Retorne **APENAS JSON válido**, no formato definido em \"FORMATO DE SAÍDA\".\n\n**CRITÉRIOS DE INTERPRETAÇÃO (guia resumido)**\n- **Openness (Abertura):** curiosidade, ideias novas, explorar possibilidades; baixo: preferência por rotina.\n- **Conscientiousness (Conscienciosidade):** organização, disciplina, plano/execução; baixo: impulsividade, procrastinação.\n- **Extraversion (Extroversão):** energia social, busca de estímulos/contato; baixo: reserva, foco interno.\n- **Agreeableness (Amabilidade):** empatia, cooperação; baixo: assertividade dura, conflito, ceticismo.\n- **Neuroticism (Neuroticismo):** sensibilidade a estresse, ansiedade/ruminação; baixo: estabilidade emocional.\n\n**FORMATO DE SAÍDA (JSON):**\n{\n  \"big_five\": {\n    \"openness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"conscientiousness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"extraversion\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"agreeableness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"neuroticism\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    }\n  },\n  \"perfil_primario\": \"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\n  \"resumo_perfil\": \"texto curto e não clínico\",\n  \"insuficiente\": false\n}\n\n**NOTAS DE QUALIDADE**\n- Se a conversa for pobre em pistas, defina `insuficiente = true` e mantenha scores próximos de 50 com baixa confiabilidade.\n- \"Evidências\" DEVEM ser trechos literais e curtos da conversa atual (não use o histórico).",
         "hasOutputParser": true,
         "options": {
           "systemMessage": "Você é um assistente especialista em Big Five (OCEAN) e ética em IA. Sua função é inferir tendências de personalidade com base EXCLUSIVAMENTE em trechos literais do usuário. Siga estes princípios:\n1) Precisão e parcimônia: sem extrapolações. Use apenas o que está escrito.\n2) Transparência: inclua evidências curtas (2-4) por traço.\n3) Escalas contínuas 0-100 para score e confiabilidade (50 = neutro; 0-20 muito baixo; 80-100 muito alto).\n4) Comunicação responsável: linguagem acessível, não clínica, acolhedora.\n5) Se faltarem sinais para um traço, use score=50, confiabilidade ≤ 40 e marque `insuficiente=true` se a conversa inteira não sustentar inferência.\nRetorne SEMPRE JSON válido no formato solicitado.",
@@ -50,10 +106,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -16,
-        32
+        576,
+        -176
       ],
-      "id": "56bcd51c-4721-4bf5-a859-0fa1636b467c",
+      "id": "de861070-7a1b-44e9-9dfb-315135dfdf10",
       "name": "Analisador Big Five"
     },
     {
@@ -64,10 +120,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        112,
-        256
+        720,
+        128
       ],
-      "id": "fd55a9e6-1fb1-4407-b98f-770f1b6a319c",
+      "id": "79a22690-54fe-4514-a0ab-55794b9fe063",
       "name": "Parser JSON Big Five"
     },
     {
@@ -80,10 +136,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -192,
-        288
+        320,
+        224
       ],
-      "id": "b0de55cd-8550-48d2-b1e6-18d29e307c66",
+      "id": "806255b1-c195-4833-8e78-617f94e052da",
       "name": "OpenRouter Claude",
       "credentials": {
         "openRouterApi": {
@@ -94,20 +150,33 @@
     },
     {
       "parameters": {
+        "functionCode": "const startItem = $items(\"start\")[0]?.json ?? {};\nconst payload = $json.output ?? {};\nconst traits = ['openness','conscientiousness','extraversion','agreeableness','neuroticism'];\nconst scores = traits.map((key) => {\n  const data = payload.big_five?.[key] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  return {\n    id: key,\n    score: Number.isFinite(score) ? score : null,\n    confiabilidade: Number.isFinite(confianca) ? confianca : null\n  };\n});\nconst sorted = [...scores].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));\nconst validTraits = new Set(traits);\nconst originalPrimary = payload.perfil_primario ?? null;\nlet primary = originalPrimary;\nif (!primary || primary === 'misto' || !validTraits.has(primary)) {\n  primary = sorted[0]?.id ?? null;\n}\nlet secondary = sorted.find((entry) => entry.id !== primary)?.id ?? null;\nif (!secondary && sorted[1]) {\n  secondary = sorted[1].id;\n}\nconst sumConfianca = scores.reduce((acc, entry) => acc + (entry.confiabilidade ?? 0), 0);\nconst confiancaMedia = scores.length ? Math.round(sumConfianca / scores.length) : null;\nconst rawDate = startItem.data_conversa;\nlet dataConversa = null;\nif (rawDate) {\n  const parsed = new Date(rawDate);\n  if (!isNaN(parsed)) {\n    dataConversa = parsed.toISOString().slice(0, 10);\n  }\n}\nif (!dataConversa) {\n  const now = new Date();\n  dataConversa = now.toISOString().slice(0, 10);\n}\nconst result = {\n  usuario_id: startItem.usuario_id ?? null,\n  chat_id: startItem.chat_id ?? null,\n  data_conversa: dataConversa,\n  perfil_original: originalPrimary,\n  perfil_primario: primary,\n  perfil_secundario: secondary,\n  resumo_perfil: payload.resumo_perfil ?? null,\n  insuficiente: Boolean(payload.insuficiente),\n  confianca_media: confiancaMedia,\n  raw_resposta: payload\n};\nfor (const trait of traits) {\n  const data = payload.big_five?.[trait] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  result[`score_${trait}`] = Number.isFinite(score) ? score : null;\n  result[`confianca_${trait}`] = Number.isFinite(confianca) ? confianca : null;\n}\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -176
+      ],
+      "id": "ca049c17-2bca-42ff-af17-79f560695aac",
+      "name": "Preparar Registro Big Five"
+    },
+    {
+      "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO perfis_big_five (\n  usuario_id,\n  chat_id,\n  openness,\n  conscientiousness,\n  extraversion,\n  agreeableness,\n  neuroticism,\n  confiabilidade,\n  perfil_primario,\n  perfil_secundario,\n  metodo_deteccao,\n  sabotadores_json,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::jsonb ->> 'openness_score'::int,\n  $3::jsonb ->> 'conscientiousness_score'::int,\n  $3::jsonb ->> 'extraversion_score'::int,\n  $3::jsonb ->> 'agreeableness_score'::int,\n  $3::jsonb ->> 'neuroticism_score'::int,\n  $3::jsonb ->> 'confiabilidade_media_calc'::int,\n  $3::jsonb ->> 'perfil_primario_final',\n  $3::jsonb ->> 'perfil_secundario_final',\n  'ia_bigfive_v1',\n  $3::jsonb,\n  NOW(),\n  NOW()\n);\n",
+        "query": "INSERT INTO usuarios_perfis (\n  usuario_id,\n  chat_id,\n  data_conversa,\n  perfil_original,\n  perfil_primario,\n  perfil_secundario,\n  resumo_perfil,\n  insuficiente,\n  score_openness,\n  score_conscientiousness,\n  score_extraversion,\n  score_agreeableness,\n  score_neuroticism,\n  confianca_openness,\n  confianca_conscientiousness,\n  confianca_extraversion,\n  confianca_agreeableness,\n  confianca_neuroticism,\n  confianca_media,\n  raw_resposta,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::date,\n  $4::varchar,\n  $5::varchar,\n  $6::varchar,\n  $7::text,\n  $8::boolean,\n  $9::integer,\n  $10::integer,\n  $11::integer,\n  $12::integer,\n  $13::integer,\n  $14::integer,\n  $15::integer,\n  $16::integer,\n  $17::integer,\n  $18::integer,\n  $19::integer,\n  $20::jsonb,\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) DO UPDATE SET\n  perfil_original = EXCLUDED.perfil_original,\n  perfil_primario = EXCLUDED.perfil_primario,\n  perfil_secundario = EXCLUDED.perfil_secundario,\n  resumo_perfil = EXCLUDED.resumo_perfil,\n  insuficiente = EXCLUDED.insuficiente,\n  score_openness = EXCLUDED.score_openness,\n  score_conscientiousness = EXCLUDED.score_conscientiousness,\n  score_extraversion = EXCLUDED.score_extraversion,\n  score_agreeableness = EXCLUDED.score_agreeableness,\n  score_neuroticism = EXCLUDED.score_neuroticism,\n  confianca_openness = EXCLUDED.confianca_openness,\n  confianca_conscientiousness = EXCLUDED.confianca_conscientiousness,\n  confianca_extraversion = EXCLUDED.confianca_extraversion,\n  confianca_agreeableness = EXCLUDED.confianca_agreeableness,\n  confianca_neuroticism = EXCLUDED.confianca_neuroticism,\n  confianca_media = EXCLUDED.confianca_media,\n  raw_resposta = EXCLUDED.raw_resposta,\n  atualizado_em = NOW();\n",
         "options": {
-          "queryReplacement": "=[   {{ $('start').first().json.usuario_id }},   {{ $('start').first().json.chat_id }},   {{ JSON.stringify({         openness_score: $json.output.big_five.openness.score,         conscientiousness_score: $json.output.big_five.conscientiousness.score,         extraversion_score: $json.output.big_five.extraversion.score,         agreeableness_score: $json.output.big_five.agreeableness.score,         neuroticism_score: $json.output.big_five.neuroticism.score,         confiabilidade_media_calc: /* algum cálculo ou valor */,         perfil_primario_final: $json.output.perfil_primario,         perfil_secundario_final: /* algum valor */     }) }} ]"
+          "queryReplacement": "=[\n  {{ $json.usuario_id }},\n  {{ $json.chat_id }},\n  {{ $json.data_conversa }},\n  {{ $json.perfil_original ?? null }},\n  {{ $json.perfil_primario ?? null }},\n  {{ $json.perfil_secundario ?? null }},\n  {{ $json.resumo_perfil ?? null }},\n  {{ $json.insuficiente }},\n  {{ $json.score_openness ?? null }},\n  {{ $json.score_conscientiousness ?? null }},\n  {{ $json.score_extraversion ?? null }},\n  {{ $json.score_agreeableness ?? null }},\n  {{ $json.score_neuroticism ?? null }},\n  {{ $json.confianca_openness ?? null }},\n  {{ $json.confianca_conscientiousness ?? null }},\n  {{ $json.confianca_extraversion ?? null }},\n  {{ $json.confianca_agreeableness ?? null }},\n  {{ $json.confianca_neuroticism ?? null }},\n  {{ $json.confianca_media ?? null }},\n  {{ JSON.stringify($json.raw_resposta ?? {}) }}\n]"
         }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        336,
-        32
+        1104,
+        -176
       ],
-      "id": "edf815e8-09aa-476d-b021-544f5301d971",
-      "name": "Gravar Big Five (ADAPTAR SCHEMA)",
+      "id": "a9191d15-269d-4208-817a-d86e5bb519c4",
+      "name": "Gravar Big Five",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -119,14 +188,42 @@
   "connections": {
     "start": {
       "main": [
-        []
+        [
+          {
+            "node": "Buscar Histórico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Histórico": {
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto Big Five",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Contexto Big Five": {
+      "main": [
+        [
+          {
+            "node": "Analisador Big Five",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Analisador Big Five": {
       "main": [
         [
           {
-            "node": "Gravar Big Five (ADAPTAR SCHEMA)",
+            "node": "Preparar Registro Big Five",
             "type": "main",
             "index": 0
           }
@@ -139,6 +236,17 @@
           {
             "node": "Analisador Big Five",
             "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Big Five": {
+      "main": [
+        [
+          {
+            "node": "Gravar Big Five",
+            "type": "main",
             "index": 0
           }
         ]
@@ -181,7 +289,7 @@
       }
     ]
   },
-  "versionId": "35a8eeff-b897-4ca8-a827-b9f1e43e88ce",
+  "versionId": "03d47bc8-c1bf-42ee-9323-0a6124c52b74",
   "triggerCount": 0,
   "shared": [
     {

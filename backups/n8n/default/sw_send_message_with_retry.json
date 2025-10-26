@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-26T08:34:11.754Z",
+  "updatedAt": "2025-10-26T10:21:43.800Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -219,14 +219,14 @@
       "typeVersion": 1,
       "position": [
         -224,
-        528
+        544
       ],
       "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
       "name": "No Operation, do nothing"
     },
     {
       "parameters": {
-        "amount": "={{ 3.5 }}"
+        "amount": "={{ 3.4 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -394,7 +394,7 @@
       }
     ]
   },
-  "versionId": "c4eca0ac-a00e-4eac-9b8b-5fb5c232bdb3",
+  "versionId": "f452c85f-e735-4302-b06a-e1d402751590",
   "triggerCount": 0,
   "shared": [
     {

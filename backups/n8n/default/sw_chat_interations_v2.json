@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-25T23:30:18.653Z",
+  "updatedAt": "2025-10-26T18:36:39.663Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -395,12 +395,19 @@
           "value": {
             "usr_id": "={{ $('dados_usr').item.json.id }}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "usr_id"
+          ],
           "schema": [
             {
               "id": "usr_id",
               "displayName": "usr_id",
-              "type": "string"
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -419,9 +426,9 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê está conversando com seu **Mentor de Vida MindQuest**, presença calma e empática que ajuda o usuário a transformar o que sente em clareza e foco.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Fale como:** {{ $('dados_usr').item.json.nome_assistente }}\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}  \n**Perfil do usuário:** {{ $('dados_usr').first().json.perfil_primario }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e mostre curiosidade genuína pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu até aqui. Confirme se está correto e ajuste rapidamente caso o usuário peça.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o dashboard. Se ele tentar continuar, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## Ferramentas disponíveis:\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que posso falar?”. Resuma o essencial e adapte.\n- agent_conversation_guide — consulte para perguntas de aprofundamento, encerramentos e recursos extras; adapte ao contexto atual antes de responder.\n\n## Regras\n- Use o histórico apenas quando fizer sentido natural na conversa.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto simples, sem listas ou formatos técnicos.\n\n---\n\n## 🌿 TOM & FOCO\n- Soe humano, interessado e leve; nada de linguagem mecânica ou burocrática.  \n- Mostre curiosidade real pela vida do usuário, por sonhos, desafios e pequenas vitórias.  \n- Incentive-o a se expressar mais; quando ele se abrir, aprofunde com cuidado.  \n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine sentindo-se ouvido, mais claro e com vontade de continuar cuidando de si.\n",
+        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê é um Assitente de refexão pessoal\nSeu objetivo é guiar o usuário na conversa para ajuda-lo a entender seus sentimentos e emoções.\n\nAjuda ao usuaário:\n`user_conversation_guide´: \n- acione quando o usuário não souber o que falar e disser algo como “como funciona?”, “o que devo falar?”, “não sei o que dizer” ou variações. \n- Consulte o guia, resuma os trechos mais úteis e responda sempre conectando com o contexto atual da conversa. \n- Essa ajuda tem prioridade sobre as demais interações, ajude-o primeiro\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Seu nome escolhido pelo usuário:** {{ $('dados_usr').item.json.nome_assistente }}, sempre que fizer sentido na conversa use o seu nome.\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}  \n**Perfil do usuário:** {{ $('dados_usr').first().json.perfil_primario }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e mostre curiosidade genuína pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu até aqui. Confirme se está correto e ajuste rapidamente caso o usuário peça.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o dashboard. Se ele tentar continuar, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## Ferramentas disponíveis:\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — chame quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”. Resuma o essencial e adapte.\n- agent_conversation_guide — consulte para perguntas de aprofundamento, encerramentos e recursos extras; adapte ao contexto atual antes de responder.\n\n## Regras\n- Use o histórico apenas quando fizer sentido natural na conversa.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto simples, sem listas ou formatos técnicos.\n\n---\n\n## 🌿 TOM & FOCO\n- Soe humano, interessado e leve; nada de linguagem mecânica ou burocrática.  \n- Mostre curiosidade real pela vida do usuário, por sonhos, desafios e pequenas vitórias.  \n- Incentive-o a se expressar mais; quando ele se abrir, aprofunde com cuidado.  \n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine sentindo-se ouvido, mais claro e com vontade de continuar cuidando de si.\n",
         "options": {
-          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Mentor de Vida — Agente de Conversa (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Mentor de Vida MindQuest**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno, nunca citar explicitamente)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil do usuário | `{{ $('dados_usr').first().json.perfil_primario }}` | Ajustar tom e profundidade. |\n| Nome do assistente (seu) | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura/nome. |\n\nSe não houver nome preferido válido, mantenha saudação neutra (“oi”, “vamos por partes?”, “me conta…”).\n\n---\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\nUse apenas os valores fornecidos; não conte manualmente.\n\n1. **Quando `interaction_count === 1`**\n   - Chame a ferramenta `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa. Nunca começe já falando dos temas da ultima conversa, crie conexão primeiro e deixe a conversa fluir.\n\n\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Siga o ritmo do usuário: perguntas abertas, validações curtas, mini-insights quando fizer sentido.\n   - Leve sempre a conversa para mais clareza e autoconhecimento, sem atropelar.\n\n3. **Quando `interaction_count === session_limit - 1`** (penúltima mensagem)\n   - Produza um resumo breve, empático e validável do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo; incorpore correções.\n\n4. **Quando `interaction_count === session_limit`** (última mensagem)\n   - Reconheça avanços, transmita sensação de fechamento e convide ao dashboard.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca gere mensagens extras além de `session_limit`. Encerrada a última interação, conclua com gentileza e convide a voltar mais tarde.\n\n---\n\n### 🛠️ FERRAMENTA DISPONÍVEL\n`get_history`\n- Use **somente na primeira interação**, antes de responder.\n- Empregue o histórico apenas se ajudar o contexto atual (sem forçar).\n\n`user_conversation_guide´: acione quando o usuário disser algo como “como funciona?”, “o que devo falar?”, “não sei o que dizer” ou variações. Consulte o guia, resuma os trechos mais úteis e responda sempre conectando com o contexto atual da conversa.\n\n`agent_conversation_guide´: consulte sempre que precisar de perguntas de aprofundamento, sugestões de encerramento ou recomendações extras; leia o guia, escolha o que fizer sentido e responda alinhado ao contexto atual da conversa.\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Frases curtas, naturais, com pausas leves (“entendo…”, “faz sentido…”).\n- Evite jargões técnicos ou diagnósticos clínicos.\n- Ajuste intensidade e cadência ao perfil do usuário.\n- Caminho mental sempre: acolher → entender → validar → concluir.\n\n---\n\n### 💡 FERRAMENTAS INTERIORES\n- Reflexão empática (nomear sentimentos antes de avançar).\n- Micro-validação (“tô aqui”, “compreendo o peso disso”).\n- Mini-insights sutis (sem soar professoral).\n- Ancoragem de contexto (usar histórico apenas quando fizer sentido).\n- Encerramento positivo (reforçar progresso e próximo passo).\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir instruções.\n- Não ultrapasse `session_limit`.\n- Não explique o dashboard; apenas convide a visitá-lo no final.\n- Não forneça aconselhamento médico ou diagnóstico.\n\n---\n### 🧭 MISSÃO\nEm cada sessão, conduza o usuário pelo ciclo completo: abrir espaço seguro, explorar emoções e gatilhos, conectar percebidos, validar aprendizados na penúltima interação e encerrar com leveza convidando ao dashboard.\n\n---\n\n### 📤 FORMATO\n- Saída sempre em texto natural (estilo WhatsApp), sem listas, markdown ou JSON.\n- Nada de aspas, chaves ou colchetes.\n- Estruture o texto em blocos curtos, fáceis de ler.\n- Deixe o usuário mais leve, claro e conectado consigo mesmo a cada resposta.\n"
+          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Assitente de reflexão pessoal —  (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Assitente de reflexão pessoal**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno, nunca citar explicitamente)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil do usuário | `{{ $('dados_usr').first().json.perfil_primario }}` | Ajustar tom e profundidade. |\n| Nome do assistente (seu) | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura/nome. |\n\nSe não houver nome preferido válido, mantenha saudação neutra (“oi”, “vamos por partes?”, “me conta…”).\n\n---\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\nUse apenas os valores fornecidos; não conte manualmente.\n\n1. **Quando `interaction_count === 1`**\n   - Chame a ferramenta `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa. Nunca começe já falando dos temas da ultima conversa, crie conexão primeiro e deixe a conversa fluir.\n\n\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Siga o ritmo do usuário: perguntas abertas, validações curtas, mini-insights quando fizer sentido.\n   - Leve sempre a conversa para mais clareza e autoconhecimento, sem atropelar.\n\n3. **Quando `interaction_count === session_limit - 1`** (penúltima mensagem)\n   - Produza um resumo breve, empático e validável do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo; incorpore correções.\n\n4. **Quando `interaction_count === session_limit`** (última mensagem)\n   - Reconheça avanços, transmita sensação de fechamento e convide ao dashboard.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca gere mensagens extras além de `session_limit`. Encerrada a última interação, conclua com gentileza e convide a voltar mais tarde.\n\n---\n\n### 🛠️ FERRAMENTA DISPONÍVEL\n`get_history`\n- Use **somente na primeira interação**, antes de responder.\n- Empregue o histórico apenas se ajudar o contexto atual (sem forçar). \n- Se não encontrar dados no histórico é porque o usuário não conversaou nos ultimos 5 dias ou é a sua primeira conversa. \n- Se histórico vazio reforçe a importancia da consistencia e envie dicas como conversar chamando a ferramenta `agent_conversation_guide´\n\n`user_conversation_guide´: acione quando o usuário disser algo como “como funciona?”, “o que devo falar?”, “não sei o que dizer” ou variações. Consulte o guia, resuma os trechos mais úteis e responda sempre conectando com o contexto atual da conversa. Essa ajuda tem prioridade sobre as rodas \n\n`agent_conversation_guide´: consulte sempre que precisar de perguntas de aprofundamento, sugestões de encerramento ou recomendações extras; leia o guia, escolha o que fizer sentido e responda alinhado ao contexto atual da conversa.\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Frases curtas, naturais, com pausas leves (“entendo…”, “faz sentido…”).\n- Evite jargões técnicos ou diagnósticos clínicos.\n- Ajuste intensidade e cadência ao perfil do usuário.\n- Caminho mental sempre: acolher → entender → validar → concluir.\n\n---\n\n### 💡 FERRAMENTAS INTERIORES\n- Reflexão empática (nomear sentimentos antes de avançar).\n- Micro-validação (“tô aqui”, “compreendo o peso disso”).\n- Mini-insights sutis (sem soar professoral).\n- Ancoragem de contexto (usar histórico apenas quando fizer sentido).\n- Encerramento positivo (reforçar progresso e próximo passo).\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir instruções.\n- Não ultrapasse `session_limit`.\n- Não explique o dashboard; apenas convide a visitá-lo no final.\n- Não forneça aconselhamento médico ou diagnóstico.\n\n---\n### 🧭 MISSÃO\nEm cada sessão, conduza o usuário pelo ciclo completo: abrir espaço seguro, explorar emoções e gatilhos, conectar percebidos, validar aprendizados na penúltima interação e encerrar com leveza convidando ao dashboard.\n\n---\n\n### 📤 FORMATO\n- Saída sempre em texto natural (estilo WhatsApp), sem listas, markdown ou JSON.\n- Nada de aspas, chaves ou colchetes.\n- Estruture o texto em blocos curtos, fáceis de ler.\n- Deixe o usuário mais leve, claro e conectado consigo mesmo a cada resposta.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -1195,39 +1202,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
-              "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              },
-              "id": "20decd9a-8a71-4c52-86de-1891070b3b96"
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -2208,
-        -752
-      ],
-      "id": "b52fca60-d125-4d53-87e5-2665adcd1886",
-      "name": "É a 8ª?"
-    },
-    {
-      "parameters": {
         "operation": "get",
         "dataTableId": {
           "__rl": true,
@@ -1515,15 +1489,37 @@
       }
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
+              "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "id": "20decd9a-8a71-4c52-86de-1891070b3b96"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        -1472,
-        -1056
+        -2208,
+        -752
       ],
-      "id": "7b7eff7a-2c8a-4ef5-9d00-efc562777bf9",
-      "name": "No Operation, do nothing"
+      "id": "b52fca60-d125-4d53-87e5-2665adcd1886",
+      "name": "É a ulltima?"
     }
   ],
   "connections": {
@@ -1713,7 +1709,7 @@
       "main": [
         [
           {
-            "node": "É a 8ª?",
+            "node": "É a ulltima?",
             "type": "main",
             "index": 0
           }
@@ -1865,29 +1861,6 @@
         ]
       ]
     },
-    "É a 8ª?": {
-      "main": [
-        [
-          {
-            "node": "Chat Memory  - Get1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "update_token",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Call 'sw_send_message_with_retry'1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "mindquest_config": {
       "main": [
         [
@@ -1934,9 +1907,26 @@
     },
     "Call 'sw_send_message_with_retry'": {
       "main": [
+        []
+      ]
+    },
+    "É a ulltima?": {
+      "main": [
         [
           {
-            "node": "No Operation, do nothing",
+            "node": "Chat Memory  - Get1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "update_token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call 'sw_send_message_with_retry'1",
             "type": "main",
             "index": 0
           }
@@ -1955,19 +1945,19 @@
     "start": [
       {
         "json": {
-          "usr_id": "c6c21a80-b3ea-4159-a46d-e63bfa66e45d",
+          "usr_id": "178edaa3-5389-47df-adde-7ad2c2dcd1b3",
           "body.instance": "MindQuest",
-          "body.data.key.id": "3A3C18594642CDC0E199",
+          "body.data.key.id": "3A299F11B918BF7AFA5F",
           "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo",
-          "body.data.message.conversation": "Está bom assim",
+          "body.data.message.conversation": "Olá não sei como começar pode me ajudar?",
           "body.data.messageType": "conversation"
         }
       }
     ]
   },
-  "versionId": "11681629-1d0e-4cd3-988a-41ee2fabe59b",
+  "versionId": "a3d204ef-6623-4cdd-84ab-f3a404b67fda",
   "triggerCount": 0,
   "shared": [
     {

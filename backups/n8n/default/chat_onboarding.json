@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-09-30T11:31:35.749Z",
-  "updatedAt": "2025-10-25T22:44:54.173Z",
+  "updatedAt": "2025-10-26T11:05:05.029Z",
   "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
   "active": false,
@@ -193,114 +193,6 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').item.json.evolution_instancia }}",
-        "remoteJid": "={{ $('start').item.json.whatsapp_number }}",
-        "messageText": "={{ $('Code - Parse Determinístico').item.json.texto }}",
-        "options_message": {
-          "delay": 1200
-        }
-      },
-      "id": "49e736d8-6fb4-4407-b8a7-3b01fc3da8b0",
-      "name": "Send Message",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -1872,
-        208
-      ],
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const r = $('Send Message').item.json||{}; const success = r.success===true; const status = r?.data?.status || r?.status || 'UNKNOWN';\nconst shouldRetry = (!success) || (status==='ERROR');\nreturn { json: { success, status, shouldRetry } };"
-      },
-      "id": "e50df075-b516-4cb5-824c-435f03c88a50",
-      "name": "Eval Retry Intermediária",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1664,
-        208
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "conditions": [
-            {
-              "leftValue": "={{ $json.shouldRetry }}",
-              "rightValue": "true",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and",
-          "options": {
-            "typeValidation": "loose",
-            "version": 1
-          }
-        },
-        "options": {}
-      },
-      "id": "fe969c09-aadf-44bb-800f-d845e4e93cb4",
-      "name": "IF Should Retry (Mid)?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -1472,
-        208
-      ]
-    },
-    {
-      "parameters": {
-        "amount": 8,
-        "unit": "seconds"
-      },
-      "id": "9e1ab07f-03aa-45c3-9430-05fe393b8785",
-      "name": "Wait 8s (Mid)",
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1,
-      "position": [
-        -1264,
-        112
-      ],
-      "webhookId": "9952c346-ce73-47aa-b59c-904123176b15"
-    },
-    {
-      "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').item.json.evolution_instancia }}",
-        "remoteJid": "={{ $('start').item.json.whatsapp_number }}",
-        "messageText": "={{ $('Code - Parse Determinístico').item.json.texto }}",
-        "options_message": {
-          "delay": 800
-        }
-      },
-      "id": "9a999deb-12de-4618-9092-e21be7bb4320",
-      "name": "Send Message (retry mid)",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -1072,
-        112
-      ],
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "set",
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}",
         "value": "={{ ( () => { const prev = $('Redis Get').first().json.sessionData?JSON.parse($('Redis Get').first().json.sessionData):{}; const ai=$('Code - Parse Determinístico').first().json; const allowed=['inicio','nome_coletado','completo']; const next=(ai.proximo_estado&&allowed.includes(ai.proximo_estado))?ai.proximo_estado:(prev.estado||'inicio'); const nome_usuario=ai.nome_usuario||prev.nome_preferido||null; const nome_assistente=ai.nome_assistente||prev.nome_assistente||null; return JSON.stringify({ nome_preferido:nome_usuario, nome_assistente:nome_assistente, estado:next }); })() }}",
@@ -312,8 +204,8 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -832,
-        224
+        -1648,
+        160
       ],
       "credentials": {
         "redis": {
@@ -370,7 +262,7 @@
     },
     {
       "parameters": {
-        "jsCode": "let nomeAssistente; try{ const a=JSON.parse($('Agent AI (interations-style)').first().json.output||'{}'); nomeAssistente=a.nome_assistente; }catch{}\nif(!nomeAssistente){ nomeAssistente=$('Code - Parse Determinístico').first().json.nome_assistente||'Assistente'; }\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/auth?token=${token}`;\nconst mensagem = `Perfeito! Sou ${nomeAssistente} agora 😊\\n\\nPronto! 🎉\\n\\n📊 Sua experiência já foi criada: ${url}\\n\\n🔒 Acesso seguro: Esse link já contém seu token de autenticação pessoal. Não precisa criar senha ou login, é só clicar e entrar!\\n\\nE também, você já pode mandar seu texto ou audio agora.\\n\\nO que deseja me contar sobre você hoje?`;\nreturn { json: { mensagem } };"
+        "jsCode": "let nomeAssistente; try{ const a=JSON.parse($('Agent AI (interations-style)').first().json.output||'{}'); nomeAssistente=a.nome_assistente; }catch{}\nif(!nomeAssistente){ nomeAssistente=$('Code - Parse Determinístico').first().json.nome_assistente||'Assistente'; }\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/auth?token=${token}`;\nconst mensagem = `Perfeito! Sou ${nomeAssistente} agora 😊\\n\\nPronto! 🎉\\n\\n📊 Sua experiência já foi criada: ${url}\\n\\n🔒 Acesso seguro: Esse link já contém seu token de autenticação pessoal. Não precisa criar senha ou login, é só clicar e entrar!\\n\\n Recomendo você dar uma olhada no guia rápido a partir do link abaixo, para aproveitar melhor seu assitente:\\n\\n www.mindquest.pt/suporte/conversation-guide\\n\\n Se quiser começar agora, você já pode mandar seu texto ou audio.\\n\\nO que deseja me contar sobre você hoje?`;\nreturn { json: { mensagem } };"
       },
       "id": "76808fba-cf17-4bb4-b67a-5ee1aeb418c0",
       "name": "monta link para usuario",
@@ -383,132 +275,6 @@
     },
     {
       "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').item.json.evolution_instancia }}",
-        "remoteJid": "={{ $('start').item.json.whatsapp_number }}",
-        "messageText": "={{ $json.mensagem }}",
-        "options_message": {
-          "delay": 1200
-        }
-      },
-      "id": "415d8ce0-5408-42f8-92ca-23600590ab70",
-      "name": "msg final",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -1264,
-        -80
-      ],
-      "retryOnFail": true,
-      "maxTries": 2,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const r = $('msg final').item.json || {};\nconst success = r.success === true;\nconst status = r?.data?.status || r?.status || 'UNKNOWN';\nconst shouldRetry = (!success) || (status === 'ERROR');\nreturn { json: { success, status, shouldRetry } };"
-      },
-      "id": "efc1acd0-9faa-4a41-8a60-b890a72e3acb",
-      "name": "Eval Retry Final (simples)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1072,
-        -80
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "conditions": [
-            {
-              "leftValue": "={{ $json.shouldRetry }}",
-              "rightValue": "true",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and",
-          "options": {
-            "typeValidation": "loose",
-            "version": 1
-          }
-        },
-        "options": {}
-      },
-      "id": "874e39e6-c1d5-4f25-8a4b-e33b219642a9",
-      "name": "IF Should Retry? (final)",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -864,
-        -80
-      ]
-    },
-    {
-      "parameters": {
-        "amount": 8,
-        "unit": "seconds"
-      },
-      "id": "41c6b7fe-3719-450d-bc64-0cc56227eb5d",
-      "name": "Wait 8s (before retry final)",
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1,
-      "position": [
-        -672,
-        -160
-      ],
-      "webhookId": "50c43236-cdfe-4d6d-8546-405b15261509"
-    },
-    {
-      "parameters": {
-        "resource": "messages-api",
-        "instanceName": "={{ $('start').item.json.evolution_instancia }}",
-        "remoteJid": "={{ $('start').item.json.whatsapp_number }}",
-        "messageText": "={{ $('monta link para usuario').item.json.mensagem }}",
-        "options_message": {
-          "delay": 800
-        }
-      },
-      "id": "792cbc82-cd90-451f-8a20-ca28fce45f4d",
-      "name": "msg final (retry)",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -464,
-        -160
-      ],
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "amount": 2,
-        "unit": "seconds"
-      },
-      "id": "5323aa7d-5315-4e8a-9797-9c7296471567",
-      "name": "Wait 2s (flush final)",
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1,
-      "position": [
-        -176,
-        0
-      ],
-      "webhookId": "f3224c77-2f2e-4967-9940-6999bd2bcac4"
-    },
-    {
-      "parameters": {
         "operation": "delete",
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
       },
@@ -517,8 +283,8 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -16,
-        0
+        96,
+        16
       ],
       "credentials": {
         "redis": {
@@ -563,6 +329,152 @@
       "position": [
         -3264,
         608
+      ],
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "messageText": "={{ $json.mensagem }}",
+            "remoteJid": "={{ $('start').item.json.remoteJid }}",
+            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        -80
+      ],
+      "id": "668d8659-b25b-4417-aac6-afe1799cb157",
+      "name": "Call 'sw_send_message_with_retry'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "messageText": "={{ $('Code - Parse Determinístico').item.json.texto }}",
+            "remoteJid": "={{ $('start').item.json.remoteJid }}",
+            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1872,
+        160
+      ],
+      "id": "3894c93b-69e6-487a-9340-51a797a41b6d",
+      "name": "Call 'sw_send_message_with_retry'1"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
+      },
+      "id": "b2cb5aac-1911-4d73-8c65-c99077184dff",
+      "name": "Redis Delete1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -80
       ],
       "credentials": {
         "redis": {
@@ -672,69 +584,7 @@
         ],
         [
           {
-            "node": "Send Message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Message": {
-      "main": [
-        [
-          {
-            "node": "Eval Retry Intermediária",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Eval Retry Intermediária": {
-      "main": [
-        [
-          {
-            "node": "IF Should Retry (Mid)?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IF Should Retry (Mid)?": {
-      "main": [
-        [
-          {
-            "node": "Wait 8s (Mid)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Redis Update",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait 8s (Mid)": {
-      "main": [
-        [
-          {
-            "node": "Send Message (retry mid)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Message (retry mid)": {
-      "main": [
-        [
-          {
-            "node": "Redis Update",
+            "node": "Call 'sw_send_message_with_retry'1",
             "type": "main",
             "index": 0
           }
@@ -767,80 +617,7 @@
       "main": [
         [
           {
-            "node": "msg final",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "msg final": {
-      "main": [
-        [
-          {
-            "node": "Eval Retry Final (simples)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Eval Retry Final (simples)": {
-      "main": [
-        [
-          {
-            "node": "IF Should Retry? (final)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IF Should Retry? (final)": {
-      "main": [
-        [
-          {
-            "node": "Wait 8s (before retry final)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Wait 2s (flush final)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait 8s (before retry final)": {
-      "main": [
-        [
-          {
-            "node": "msg final (retry)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "msg final (retry)": {
-      "main": [
-        [
-          {
-            "node": "Wait 2s (flush final)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait 2s (flush final)": {
-      "main": [
-        [
-          {
-            "node": "Redis Delete",
+            "node": "Call 'sw_send_message_with_retry'",
             "type": "main",
             "index": 0
           }
@@ -873,6 +650,28 @@
           }
         ]
       ]
+    },
+    "Call 'sw_send_message_with_retry'": {
+      "main": [
+        [
+          {
+            "node": "Redis Delete1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'sw_send_message_with_retry'1": {
+      "main": [
+        [
+          {
+            "node": "Redis Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -886,17 +685,26 @@
     "start": [
       {
         "json": {
-          "remoteJid": "5512982389360@s.whatsapp.net",
-          "pushName": "Aldo",
-          "id": "3A673E70659B7A9B5BA6",
-          "whatsapp_number": "5512982389360",
+          "remoteJid": "5512992060001@s.whatsapp.net",
+          "pushName": "Enzo Xavier",
+          "id": "3AEC38F48C5155210545",
+          "whatsapp_number": "5512992060001",
           "evolution_instancia": "MindQuest",
-          "menssagem": "Yoda"
+          "menssagem": "Coach"
+        }
+      }
+    ],
+    "Redis Delete": [
+      {
+        "json": {
+          "success": true,
+          "status": "PENDING",
+          "shouldRetry": false
         }
       }
     ]
   },
-  "versionId": "bb4435b6-b623-4ec7-b5a4-3a632d7dc1db",
+  "versionId": "402f8d71-cdc4-42bb-acfa-b2681dd11bd7",
   "triggerCount": 1,
   "shared": [
     {
