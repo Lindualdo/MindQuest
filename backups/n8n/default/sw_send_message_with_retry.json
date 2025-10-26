@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-26T08:23:06.082Z",
+  "updatedAt": "2025-10-26T08:34:11.754Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -226,7 +226,7 @@
     },
     {
       "parameters": {
-        "amount": "={{ 3.5 }}"
+        "amount": "={{ 3.4 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -394,7 +394,7 @@
       }
     ]
   },
-  "versionId": "8db2e044-50ec-4b56-b8d5-e3ea5f993951",
+  "versionId": "c4eca0ac-a00e-4eac-9b8b-5fb5c232bdb3",
   "triggerCount": 0,
   "shared": [
     {

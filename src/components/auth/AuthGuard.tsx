@@ -93,6 +93,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Erro de autenticação
   if (error || !isAuthenticated) {
+    if (error) {
+      console.warn('[MindQuest][auth] Falha na autenticação:', error);
+    }
+
+    const friendlyMessage =
+      'Não foi possível validar seu token de acesso. Solicite um novo link ou tente novamente em instantes.';
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 flex items-center justify-center">
         <motion.div
@@ -114,9 +121,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             </div>
             
             <div className="space-y-4">
-              <p className="text-gray-700">
-                {error || 'Não foi possível validar seu token de acesso.'}
-              </p>
+              <p className="text-gray-700">{friendlyMessage}</p>
               
               <div className="p-4 bg-red-50 rounded-lg border border-red-200">
                 <p className="text-sm text-red-700">
