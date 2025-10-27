@@ -24,6 +24,7 @@ import PremiumLandingPage from './pages/PremiumLandingPage';
 import ProductDefinitionPage from './pages/ProductDefinitionPage';
 import ConversationGuidePage from './pages/ConversationGuidePage';
 import SupportHomePage from './pages/SupportHomePage';
+import ComecarAgoraLandingPage from './pages/ComecarAgoraLandingPage';
 
 declare global {
   interface Window {
@@ -118,6 +119,7 @@ function App() {
   const isBlogLpStart = resolvedPath === '/blog/lp-start';
   const isBlogPremium = resolvedPath === '/blog/premium';
   const isBlogProduct = resolvedPath === '/blog/produto';
+  const isBlogComecarAgora = resolvedPath === '/blog/comecar-agora';
 
   if (forceHomeView || isBlogHome) {
     return <HomePage />;
@@ -133,6 +135,10 @@ function App() {
 
   if (isBlogProduct) {
     return <ProductDefinitionPage />;
+  }
+
+  if (isBlogComecarAgora) {
+    return <ComecarAgoraLandingPage />;
   }
 
   if (isBlogPath) {

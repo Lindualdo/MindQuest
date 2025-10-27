@@ -104,24 +104,19 @@ const mentorFeatures = [
 const journeySteps = [
   {
     title: 'Conversa (Chat)',
-    description: 'A IA colhe emoções, fatos e traça o estado mental atual.',
+    description:
+      'Seu Assistente de reflexão (IA) colhe emoções, fatos e traça o seu estado atual.'
   },
   {
-    title: 'Insight / Estado Atual (Dash)',
-    description: 'Dashboard compila humor, sabotadores e emoções prioritárias.',
+    title: 'Insight / Estado Atual (App)',
+    description:
+      'App mostra humor, sabotadores, histórico de conversas, insights, perfil comportamental e emoções prioritárias.'
   },
   {
     title: 'Ação concreta (Interações)',
-    description: 'Sugestões de metas e micro-ações alinhadas aos objetivos.',
-  },
-  {
-    title: 'Reengajar (Convite IA)',
-    description: 'Lembretes inteligentes para manter o ciclo ativo.',
-  },
-  {
-    title: 'Progresso visualizado',
-    description: 'Indicadores atualizados reforçam conquistas e próximos passos.',
-  },
+    description:
+      'Sua mente digital (IA) interage com você pelo WhatsApp com lembretes, sugestões de metas, inspirações, dicas e micro-ações alinhadas aos objetivos.'
+  }
 ];
 
 const mindMapClusters = [
@@ -381,28 +376,47 @@ const ProductDefinitionPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="ciclo" className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <h2 className="text-3xl font-semibold text-white">Ciclo de Experiência do Usuário</h2>
-            <span className="inline-flex items-center gap-2 rounded-full bg-rose-500/20 px-3 py-1 text-xs font-medium text-rose-200 ring-1 ring-rose-500/40">
-              <ArrowRight size={14} />
-              Conversa → Insight → Ação
+        <section id="ciclo" className="space-y-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-semibold text-white">
+                Como o MindQuest transforma cada conversa em evolução real
+              </h2>
+              <p className="max-w-3xl text-sm text-slate-300 md:text-base">
+                Três momentos conectados pela IA levam o usuário do desabafo ao movimento intencional — sem fricção e
+                com clareza total do que fazer em seguida.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-2 self-start rounded-full bg-emerald-500/15 px-4 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-emerald-500/40 md:text-sm">
+              <ArrowRight size={16} />
+              Fluxo IA MindQuest
             </span>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-5">
-            {journeySteps.map((step, index) => (
-              <div
-                key={step.title}
-                className="relative flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur"
-              >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500/30 text-sm font-semibold text-indigo-100">
-                  {index + 1}
-                </span>
-                <h3 className="text-base font-semibold text-white">{step.title}</h3>
-                <p className="text-sm text-slate-300">{step.description}</p>
-              </div>
-            ))}
+          <div className="relative">
+            <div className="pointer-events-none relative hidden md:block">
+              <div className="absolute left-[16%] top-1/2 h-px w-[20%] -translate-y-1/2 bg-white/10" />
+              <div className="absolute right-[16%] top-1/2 h-px w-[20%] -translate-y-1/2 bg-white/10" />
+            </div>
+            <div className="grid gap-5 md:grid-cols-3">
+              {journeySteps.map((step, index) => (
+                <div
+                  key={step.title}
+                  className="relative flex flex-col gap-4 rounded-3xl border border-white/12 bg-slate-900/70 p-6 shadow-lg shadow-black/20 backdrop-blur"
+                >
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/20 text-sm font-semibold text-emerald-100">
+                    {index + 1}
+                  </span>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-white">{step.title}</h3>
+                    <p className="text-sm leading-6 text-slate-300">{step.description}</p>
+                  </div>
+                  {index < journeySteps.length - 1 ? (
+                    <span className="pointer-events-none absolute right-[-48px] top-1/2 hidden h-px w-10 -translate-y-1/2 bg-white/12 md:block" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
