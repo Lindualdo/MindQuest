@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-19T20:04:57.978Z",
-  "updatedAt": "2025-10-26T20:49:49.806Z",
+  "updatedAt": "2025-10-27T17:27:16.025Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
   "active": false,
@@ -31,10 +31,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        0,
-        -176
+        624,
+        112
       ],
-      "id": "6d6af44c-607e-4166-89a1-003e22f6000c",
+      "id": "e0b60749-0abd-4e65-9469-df99287d8b7f",
       "name": "start"
     },
     {
@@ -73,10 +73,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        192,
-        -176
+        816,
+        112
       ],
-      "id": "2d9e3377-1e5c-44a8-97d0-039d3a262276",
+      "id": "4f9d9041-41ae-4690-844f-b38ae9cca4a0",
       "name": "Buscar Histórico",
       "alwaysOutputData": true
     },
@@ -87,10 +87,10 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        384,
-        -176
+        1008,
+        112
       ],
-      "id": "038cbd0b-3bdf-4935-b154-5664bd23276a",
+      "id": "b9e87521-20e1-473e-9109-196173c5d3bb",
       "name": "Preparar Contexto Big Five"
     },
     {
@@ -106,10 +106,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        576,
-        -176
+        1200,
+        112
       ],
-      "id": "de861070-7a1b-44e9-9dfb-315135dfdf10",
+      "id": "029eeb7b-cc43-49dc-b521-3618e320d06e",
       "name": "Analisador Big Five"
     },
     {
@@ -120,10 +120,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        720,
-        128
+        1344,
+        416
       ],
-      "id": "79a22690-54fe-4514-a0ab-55794b9fe063",
+      "id": "dab33d20-efd2-41e3-9bc4-b3c05380d614",
       "name": "Parser JSON Big Five"
     },
     {
@@ -136,10 +136,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        320,
-        224
+        944,
+        512
       ],
-      "id": "806255b1-c195-4833-8e78-617f94e052da",
+      "id": "d002338c-5ec6-46a2-b9c8-20f9ff5cd4a8",
       "name": "OpenRouter Claude",
       "credentials": {
         "openRouterApi": {
@@ -155,10 +155,10 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        896,
-        -176
+        1520,
+        112
       ],
-      "id": "ca049c17-2bca-42ff-af17-79f560695aac",
+      "id": "aeee3901-0486-476f-9c98-86b91fcee404",
       "name": "Preparar Registro Big Five"
     },
     {
@@ -166,16 +166,16 @@
         "operation": "executeQuery",
         "query": "INSERT INTO usuarios_perfis (\n  usuario_id,\n  chat_id,\n  data_conversa,\n  perfil_original,\n  perfil_primario,\n  perfil_secundario,\n  resumo_perfil,\n  insuficiente,\n  score_openness,\n  score_conscientiousness,\n  score_extraversion,\n  score_agreeableness,\n  score_neuroticism,\n  confianca_openness,\n  confianca_conscientiousness,\n  confianca_extraversion,\n  confianca_agreeableness,\n  confianca_neuroticism,\n  confianca_media,\n  raw_resposta,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::date,\n  $4::varchar,\n  $5::varchar,\n  $6::varchar,\n  $7::text,\n  $8::boolean,\n  $9::integer,\n  $10::integer,\n  $11::integer,\n  $12::integer,\n  $13::integer,\n  $14::integer,\n  $15::integer,\n  $16::integer,\n  $17::integer,\n  $18::integer,\n  $19::integer,\n  $20::jsonb,\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) DO UPDATE SET\n  perfil_original = EXCLUDED.perfil_original,\n  perfil_primario = EXCLUDED.perfil_primario,\n  perfil_secundario = EXCLUDED.perfil_secundario,\n  resumo_perfil = EXCLUDED.resumo_perfil,\n  insuficiente = EXCLUDED.insuficiente,\n  score_openness = EXCLUDED.score_openness,\n  score_conscientiousness = EXCLUDED.score_conscientiousness,\n  score_extraversion = EXCLUDED.score_extraversion,\n  score_agreeableness = EXCLUDED.score_agreeableness,\n  score_neuroticism = EXCLUDED.score_neuroticism,\n  confianca_openness = EXCLUDED.confianca_openness,\n  confianca_conscientiousness = EXCLUDED.confianca_conscientiousness,\n  confianca_extraversion = EXCLUDED.confianca_extraversion,\n  confianca_agreeableness = EXCLUDED.confianca_agreeableness,\n  confianca_neuroticism = EXCLUDED.confianca_neuroticism,\n  confianca_media = EXCLUDED.confianca_media,\n  raw_resposta = EXCLUDED.raw_resposta,\n  atualizado_em = NOW();\n",
         "options": {
-          "queryReplacement": "=[\n  {{ $json.usuario_id }},\n  {{ $json.chat_id }},\n  {{ $json.data_conversa }},\n  {{ $json.perfil_original ?? null }},\n  {{ $json.perfil_primario ?? null }},\n  {{ $json.perfil_secundario ?? null }},\n  {{ $json.resumo_perfil ?? null }},\n  {{ $json.insuficiente }},\n  {{ $json.score_openness ?? null }},\n  {{ $json.score_conscientiousness ?? null }},\n  {{ $json.score_extraversion ?? null }},\n  {{ $json.score_agreeableness ?? null }},\n  {{ $json.score_neuroticism ?? null }},\n  {{ $json.confianca_openness ?? null }},\n  {{ $json.confianca_conscientiousness ?? null }},\n  {{ $json.confianca_extraversion ?? null }},\n  {{ $json.confianca_agreeableness ?? null }},\n  {{ $json.confianca_neuroticism ?? null }},\n  {{ $json.confianca_media ?? null }},\n  {{ JSON.stringify($json.raw_resposta ?? {}) }}\n]"
+          "queryReplacement": "={{ [\n  $json.usuario_id ?? null,\n  $json.chat_id ?? null,\n  $json.data_conversa ?? null,\n  $json.perfil_original ?? null,\n  $json.perfil_primario ?? null,\n  $json.perfil_secundario ?? null,\n  $json.resumo_perfil ?? null,\n  $json.insuficiente === true,\n  $json.score_openness ?? null,\n  $json.score_conscientiousness ?? null,\n  $json.score_extraversion ?? null,\n  $json.score_agreeableness ?? null,\n  $json.score_neuroticism ?? null,\n  $json.confianca_openness ?? null,\n  $json.confianca_conscientiousness ?? null,\n  $json.confianca_extraversion ?? null,\n  $json.confianca_agreeableness ?? null,\n  $json.confianca_neuroticism ?? null,\n  $json.confianca_media ?? null,\n  $json.raw_resposta ?? {}\n] }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1104,
-        -176
+        1728,
+        112
       ],
-      "id": "a9191d15-269d-4208-817a-d86e5bb519c4",
+      "id": "6fe2baf8-b0fa-4e50-ac07-066ea02cc643",
       "name": "Gravar Big Five",
       "credentials": {
         "postgres": {
@@ -241,17 +241,6 @@
         ]
       ]
     },
-    "Preparar Registro Big Five": {
-      "main": [
-        [
-          {
-            "node": "Gravar Big Five",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "OpenRouter Claude": {
       "ai_languageModel": [
         [
@@ -263,6 +252,17 @@
           {
             "node": "Parser JSON Big Five",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Big Five": {
+      "main": [
+        [
+          {
+            "node": "Gravar Big Five",
+            "type": "main",
             "index": 0
           }
         ]
@@ -280,16 +280,16 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "mensagens": "[]",
-          "data_conversa": "2025-10-26T00:00:00.000Z",
-          "chat_id": "bdd9802e-3805-4500-9f97-c3e2ef3e0f5d",
+          "usuario_id": "c66bdc11-a80c-428c-84cd-58e9888e910e",
+          "mensagens": "[{\"interaction\":1,\"autor\":\"usuario\",\"texto\":\"O que precisa falar?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":1,\"autor\":\"agente\",\"texto\":\"Opa, Aldo, que bom te ver por aqui! Estou aqui para ouvir o que estiver passando na sua cabeça ou no seu coração.\\n\\nPode ser algo que você queira explorar, entender melhor ou até mesmo algo simples que esteja te incomodando.\\n\\n• Que tal contar um pouco do que tem vivido ultimamente?  \\n• Se estiver difícil escolher um tema, podemos começar falando do que te trouxe até aqui hoje.  \\n• Ou, se preferir, posso ajudar a colocar em palavras o que parecer confuso.\\n\\nO que você sente que precisa colocar para fora agora?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":2,\"autor\":\"usuario\",\"texto\":\"Eu quero falar sobre a minha mãe e o meu pai. Eu cresci longe deles e não tive muito contato com eles. Eles já são falecidos, eu não tive e nem senti a dor do luto, mas de vez em quando eu sinto muita falta deles.\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":2,\"autor\":\"agente\",\"texto\":\"Entendo, Aldo, isso soa como um misto de saudade e talvez uma ausência que marcou bastante.  \\n\\nÉ natural sentir falta mesmo sem ter tido muito contato ou processado o luto da forma tradicional.  \\n\\nEsse espaço que fica vazio às vezes pode ser confuso, né?  \\n\\n• Quer contar mais sobre como é esse sentimento de falta que aparece de vez em quando?  \\n• Se preferir, podemos explorar juntos o que você gostaria de ter vivido com eles.  \\n• Também dá para pensar em como esses sentimentos aparecem no seu dia a dia hoje.  \\n\\nO que faz mais sentido para você falar agora?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":3,\"autor\":\"usuario\",\"texto\":\"Então, muitas atitudes que meu pai tinha, que na época, enquanto eu era jovem, não entendia, hoje que eu sou pai, que eu estou mais maduro, eu consigo entender com mais clareza e ver que ele só queria o meu bem. Muitas vezes eu não compreendia ele, isso gera um certo remorso, assim, que peso na consciência de não ter tido mais empatia com ele, ele era uma pessoa também, que eu não dei muito carinho atenção pra ele como eu poderia\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":3,\"autor\":\"agente\",\"texto\":\"Aldo, que coragem linda essa sua reflexão sobre seu pai e o que aconteceu entre vocês.  \\n\\nSentir remorso e um peso na consciência mostra o quanto você se importa e está tentando entender essa relação com mais profundidade.  \\n\\nReconhecer que ele também era uma pessoa com suas próprias limitações é um passo importante e pode trazer um pouco de paz para esse sentimento.  \\n\\n• Quer explorar o que você gostaria de dizer para ele hoje, se pudesse?  \\n• Podemos pensar em formas de lidar com esse remorso e permitir que ele se transforme em algo mais leve.  \\n• Também seria legal falar sobre como você quer agir agora, com seu filho, para construir essa conexão que talvez não teve com seu pai.  \\n\\nO que fala mais ao seu coração neste momento?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":4,\"autor\":\"usuario\",\"texto\":\"Então, eu já tenho um relacionamento muito bom com os meus filhos e eu acredito que em boa medida é por conta disso, né? Eu tenho um contato muito próximo com eles, gosto demais deles, a gente se fala praticamente todo dia, mesmo eu estando distante, a gente é muito distante fisicamente, vamos dizer assim, geograficamente, mas estamos muito próximos do coração. Eu ligo, falo com eles quase todo dia, jogo com eles, enfim, sou bem participativo na vida deles. e outra coisa que a minha vida inteira financeira e trabalho e dedicação na carreira foi em boa medida para proporcionar uma qualidade de vida melhor do que a que eu tive com os meus pais\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":4,\"autor\":\"agente\",\"texto\":\"Que notícia boa ouvir sobre essa conexão forte que você tem com seus filhos, Aldo!  \\n\\nMesmo com a distância física, o jeito que você mantém o contato próximo mostra um amor bem presente e cheio de dedicação.  \\n\\nE reconhecer que seu esforço pelo trabalho e pela carreira tem esse propósito de oferecer a eles uma vida melhor é uma marca linda do que você valoriza na família.  \\n\\n• Quer refletir sobre como esse cuidado que você tem hoje te ajuda a curar partes daquele relacionamento com seus pais?  \\n• Podemos falar sobre o que te dá mais satisfação nessa relação com seus filhos atualmente.  \\n• Também fica interessante pensar se há algo que você gostaria de ajustar ou aprofundar nessa conexão.  \\n\\nO que sente vontade de explorar mais por enquanto?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":5,\"autor\":\"usuario\",\"texto\":\"O que dá mais satisfação hoje em relação aos meus filhos é sentir o orgulho que eles têm por mim. Tudo que eu faço, eu faço pensando neles como inspiração, para trazer exemplo de vida, história, estímulo, inspiração mesmo. E quando eles reconhecem isso em mim, eu me sinto realizado e muito orgulhoso.\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":5,\"autor\":\"agente\",\"texto\":\"Que bonito isso que você compartilha, Aldo, deve ser uma sensação bem forte e doce esse orgulho que você sente dos seus filhos.  \\n\\nSer fonte de inspiração e exemplo para eles é algo que traz um valor enorme para sua vida e certamente também para a deles.  \\n\\nQuando essa troca acontece, ela fortalece ainda mais esse vínculo especial, que vai além da presença física.  \\n\\n• Que tal pensar em alguma situação recente em que você sentiu esse orgulho deles?  \\n• Podemos explorar o que, para você, significa ser esse exemplo de vida no dia a dia.  \\n• Também vale refletir se há algo novo que gostaria de experimentar nessa relação de exemplo e inspiração.  \\n\\nQuer continuar aqui comigo, contando um pouco mais desses momentos que te dão essa sensação?\",\"timestamp\":\"2025-10-27T11:50:55.334Z\"},{\"interaction\":6,\"autor\":\"usuario\",\"texto\":\"A situação mais recente foi no aniversário do meu filho, que foi agora no dia 13 de outubro, há uns 10 dias atrás. Ele lembrou que, muito novo, ele com 10, 11 anos, 12 anos, eu já dava aula para ele de programação, sobre finanças, sobre marketing. E hoje ele estava completando 21 anos, estava na faculdade, estava aprendendo coisas que eu já tinha ensinado para ele há 10 anos atrás. E hoje ele já trabalha na área, já é um bom profissional e ele é muito grato por eu ter ajudado ele, ensinado e contribuído com o crescimento pessoal dele também, com conversas, com orientações, essas coisas. Isso me deixou muito orgulhoso e muito realizado.\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"},{\"interaction\":6,\"autor\":\"agente\",\"texto\":\"Aldo, que história incrível essa do aniversário do seu filho!  \\n\\nVer que aquilo que você plantou com tanto cuidado há anos está florescendo na vida dele deve ser uma satisfação enorme.  \\n\\nEsse reconhecimento dele, vindo com tanto carinho e gratidão, diz muito sobre o impacto positivo que você tem na trajetória dele.  \\n\\n• Que tal pensar em outras maneiras de continuar apoiando o crescimento dele agora nessa nova fase da vida?  \\n• Podemos refletir sobre como você se sente ao perceber seu papel como pai e mentor ao longo do tempo.  \\n• Também dá para explorar se há algo novo que você gostaria de ensinar ou compartilhar com ele.  \\n\\nO que mais gostaria de dividir sobre essa relação com seus filhos?\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"},{\"interaction\":7,\"autor\":\"usuario\",\"texto\":\"Hoje eu estou longe deles, né? O que eu tenho refletido é se vale a pena ficar longe. Como eu separei recentemente, eu vim para Portugal para recomeçar a minha vida, mas tive a perda de estar longe deles. Como eu separei, ficava muito complicado para mim ter essa convivência com ele próximo da minha ex-mulher. Mesmo a gente tendo um relacionamento que não ficou desgastado, mas eu não me sentia à vontade porque ainda rola muito sentimento mas ao mesmo tempo eu perdi esse vínculo mais próximo deles\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"},{\"interaction\":7,\"autor\":\"agente\",\"texto\":\"Aldo, parece que você está vivendo um momento cheio de sentimentos complexos.  \\n\\nVocê se mudou para Portugal para recomeçar a vida depois da separação, que já foi delicada, especialmente pela necessidade de manter certa distância dos seus filhos por questões emocionais e de convivência com sua ex.  \\n\\nIsso gerou uma perda difícil para você, que sente falta do vínculo mais próximo que tinha com eles.  \\n\\nFaz sentido para você esse resumo do que está passando?  \\nQuer ajustar alguma coisa ou acrescentar algo antes da gente seguir?\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"},{\"interaction\":8,\"autor\":\"usuario\",\"texto\":\"Não está ok assim\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"},{\"interaction\":8,\"autor\":\"agente\",\"texto\":\"Sinto que não capturamos ainda o que está no seu coração, Aldo, e isso é importante para mim.\\n\\nÀs vezes, colocar em palavras tudo o que sentimos leva um tempo e vários passos.\\n\\nEsse espaço está aberto para você voltar quando quiser continuar explorando, sem pressa.\\n\\nEnquanto isso, que tal dar uma passada no seu dashboard para revisar o que já conversamos e como você está se sentindo?\\n\\nE quando quiser, estarei aqui para seguir junto, tá bom?\",\"timestamp\":\"2025-10-27T11:50:55.335Z\"}]",
+          "data_conversa": "2025-10-27T00:00:00.000Z",
+          "chat_id": "8ddd4d23-5e4c-4c0d-aa64-4007222a97bd",
           "usr_name": "Aldo"
         }
       }
     ]
   },
-  "versionId": "6331739c-d75c-403a-8b8b-552677a0398e",
+  "versionId": "5335a811-5b5b-406d-9a7c-51cff7d0c292",
   "triggerCount": 0,
   "shared": [
     {

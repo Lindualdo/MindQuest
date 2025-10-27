@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-26T10:21:43.800Z",
+  "updatedAt": "2025-10-27T11:40:15.828Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -38,7 +38,7 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": 1200
+          "delay": "={{ 4200 }}"
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -75,6 +75,12 @@
     {
       "parameters": {
         "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
           "conditions": [
             {
               "leftValue": "={{ $json.shouldRetry }}",
@@ -82,14 +88,11 @@
               "operator": {
                 "type": "boolean",
                 "operation": "equal"
-              }
+              },
+              "id": "1bd45bdc-98a6-4ea8-bd20-4204058af127"
             }
           ],
-          "combinator": "and",
-          "options": {
-            "typeValidation": "strict",
-            "version": 2
-          }
+          "combinator": "and"
         },
         "options": {}
       },
@@ -123,7 +126,7 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": 800
+          "delay": "={{ 42000 }}"
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -218,25 +221,11 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -224,
-        544
+        -240,
+        480
       ],
       "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
       "name": "No Operation, do nothing"
-    },
-    {
-      "parameters": {
-        "amount": "={{ 3.4 }}"
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        -1728,
-        560
-      ],
-      "id": "5952234d-1a40-4271-a392-b1aa43760775",
-      "name": "Wait",
-      "webhookId": "c6416108-38f8-4d73-98e5-dcfb3ded5cd6"
     }
   ],
   "connections": {
@@ -284,7 +273,7 @@
         ],
         [
           {
-            "node": "Wait",
+            "node": "No Operation, do nothing",
             "type": "main",
             "index": 0
           }
@@ -363,17 +352,6 @@
           }
         ]
       ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "No Operation, do nothing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -394,7 +372,7 @@
       }
     ]
   },
-  "versionId": "f452c85f-e735-4302-b06a-e1d402751590",
+  "versionId": "81a721ef-27de-4649-b099-e18ae06ef7bd",
   "triggerCount": 0,
   "shared": [
     {

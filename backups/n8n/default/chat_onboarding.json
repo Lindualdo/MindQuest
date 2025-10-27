@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-09-30T11:31:35.749Z",
-  "updatedAt": "2025-10-27T10:25:47.218Z",
+  "updatedAt": "2025-10-27T11:28:32.827Z",
   "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
   "active": false,
@@ -31,13 +31,13 @@
           ]
         }
       },
-      "id": "c7a44ebe-8cf4-4d61-8abd-0662c411b802",
+      "id": "451aa87d-5493-4c2b-9753-be1c5be1d70f",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1840,
-        336
+        -2224,
+        0
       ]
     },
     {
@@ -47,13 +47,13 @@
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}",
         "options": {}
       },
-      "id": "4f6012df-fe4d-46b8-9e32-dc596e242de5",
+      "id": "01137af4-b725-423f-aa77-5968d3dd7283",
       "name": "Redis Get",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -1616,
-        336
+        -2000,
+        0
       ],
       "credentials": {
         "redis": {
@@ -64,45 +64,45 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.item.json.sessionData; let s={}; try{ if(raw) s=JSON.parse(raw);}catch(e){s={};}\nconst estado = s.estado||'inicio';\nconst nome_preferido = s.nome_preferido||null; const nome_assistente = s.nome_assistente||null;\nlet interaction_count = (estado==='inicio')?1:(estado==='nome_coletado'?2:3);\nlet next_focus='', is_last_interaction=(interaction_count===3);\nif(interaction_count===1){ next_focus='ONBOARDING#1: Saudação curta + perguntar COMO QUER SER CHAMADO(A). Uma única pergunta.'; }\nif(interaction_count===2){ next_focus='ONBOARDING#2: Agradeça e peça o NOME DO ASSISTENTE (ex.: Luna, Max, Sábio). Uma única pergunta.'; }\nif(interaction_count===3){ next_focus='ONBOARDING#3 (FINAL): NÃO PERGUNTAR. Só confirmar e encerrar; o sistema envia o link.'; }\nreturn { json: { estado, nome_preferido, nome_assistente, interaction_count, next_focus, is_last_interaction } };"
+        "jsCode": "const raw = $input.item.json.sessionData; let s={}; try{ if(raw) s=JSON.parse(raw);}catch(e){s={};}\nconst estado = s.estado||'inicio';\nconst nome_preferido = s.nome_preferido||null; const nome_assistente = s.nome_assistente||null; const faixa_etaria = s.faixa_etaria||null;\nlet interaction_count;\nif(estado==='inicio'){ interaction_count=1; }\nelse if(estado==='nome_coletado'){ interaction_count=2; }\nelse if(estado==='assistente_pendente'){ interaction_count=3; }\nelse { interaction_count=4; }\nlet next_focus='', is_last_interaction=(interaction_count===4);\nif(interaction_count===1){ next_focus='ONBOARDING#1: Saudação curta + perguntar COMO QUER SER CHAMADO(A). Uma única pergunta.'; }\nif(interaction_count===2){ next_focus='ONBOARDING#2: Agradeça e peça o NOME DO ASSISTENTE (ex.: Luna, Max, Sábio). Uma única pergunta.'; }\nif(interaction_count===3){ next_focus='ONBOARDING#3: Coletar FAIXA ETÁRIA. Liste as opções 1 a 7 e instrua a responder só com o número.'; }\nif(interaction_count===4){ next_focus='ONBOARDING#4 (FINAL): NÃO PERGUNTAR. Só confirmar e encerrar; o sistema envia o link.'; }\nreturn { json: { estado, nome_preferido, nome_assistente, faixa_etaria, interaction_count, next_focus, is_last_interaction } };"
       },
-      "id": "58040ea6-424a-4872-bb63-2deecd68173f",
+      "id": "1aa3e2a0-a74f-4a1f-830b-995393a72420",
       "name": "Code - Controller (interations-style)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1424,
-        336
+        -1808,
+        0
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# USER PROMPT - ONBOARDING MINDQUEST (interations-style)\n<contexto>\nMensagem do Usuário: {{ $('start').item.json.menssagem }}\nEstado Atual: {{ $('Code - Controller (interations-style)').item.json.estado }}\nNome Preferido: {{ $('Code - Controller (interations-style)').item.json.nome_preferido }}\nNome Assistente: {{ $('Code - Controller (interations-style)').item.json.nome_assistente }}\n</contexto>\n<controle>\nInteraction: {{ $('Code - Controller (interations-style)').item.json.interaction_count }}\nnext_focus: {{ $('Code - Controller (interations-style)').item.json.next_focus }}\nÉ última interação: {{ $('Code - Controller (interations-style)').item.json.is_last_interaction }}\nREGRAS: Siga EXACTAMENTE o next_focus. Não adicione perguntas extras.\n</controle>\n<templates>\n1: \"Oi! 👋 Bem-vindo ao MindQuest!\\n\\nVamos fazer seu cadastro rápido. São só 2 perguntinhas e já liberamos tudo pra você.\\n\\nComo você prefere ser chamado(a)?\"\n2: \"Ótimo, [NOME]! Agora me dá um nome. Pode ser: Luna, Coach, Max, Sábio...\\n\\nComo quer me chamar?\"\n3: \"Perfeito! Vou finalizar seu acesso.\"\n</templates>",
+        "text": "=# USER PROMPT - ONBOARDING MINDQUEST (interations-style)\n\n<contexto>\nMensagem do Usuário: {{ $('start').item.json.menssagem }}\nEstado Atual: {{ $('Code - Controller (interations-style)').item.json.estado }}\nNome Preferido: {{ $('Code - Controller (interations-style)').item.json.nome_preferido }}\nNome Assistente: {{ $('Code - Controller (interations-style)').item.json.nome_assistente }}\n</contexto>\n\n<controle>\nInteraction: {{ $('Code - Controller (interations-style)').item.json.interaction_count }}\nnext_focus: {{ $('Code - Controller (interations-style)').item.json.next_focus }}\nÉ última interação: {{ $('Code - Controller (interations-style)').item.json.is_last_interaction }}\nREGRAS: Siga EXACTAMENTE o next_focus. Não adicione perguntas extras. Quando pedir a faixa etária, liste as opções de 1 a 7 e peça para o usuário responder apenas com o número correspondente.\n</controle>\n\n<templates>\n1: \"Oi! 👋 Que bom ter você aqui no MindQuest!\\n\\nVamos começar criando o seu espaço pessoal. É rapidinho, prometo — são só 3 perguntas pra eu te conhecer melhor e ajustar tudo à sua forma de pensar.\\n\\nComo você prefere ser chamado(a)?\"\n2: \"Perfeito, [NOME]! Agora preciso de um toque seu: qual nome você quer me dar? Pode escolher algo que combine com a nossa vibe — tipo Luna, Coach, Max, Sábio... ou qualquer outro que você quiser 😊\"\n3: \"Adorei, [NOME]! Pra deixar tudo mais personalizado, me conta sua faixa etária. Responda apenas com o número correspondente:\\n\\n1️⃣ 13 a 17 anos\\n2️⃣ 18 a 24 anos\\n3️⃣ 25 a 34 anos\\n4️⃣ 35 a 44 anos\\n5️⃣ 45 a 54 anos\\n6️⃣ 55 a 64 anos\\n7️⃣ 65 anos ou mais\"\n4: \"Perfeito, [NOME]! 🧠✨ Seu cadastro está finalizado.\\n\\nAgora é só relaxar — sua jornada com o MindQuest começa oficialmente. Tudo o que você compartilhar daqui pra frente vai servir pra deixar suas conversas, insights e recomendações cada vez mais alinhadas com quem você é.\"\n</templates>\n",
         "options": {
           "systemMessage": "=# SYSTEM\n- Fale PT-BR.\n- Obedeça ao next_focus.\n- Se for a última interação, não pergunte.\n- Direto e cordial."
         }
       },
-      "id": "c2b52b3e-3134-42bd-b232-e1dd51ed5064",
+      "id": "d2f61932-9ddb-466f-9fec-37a6aa09d667",
       "name": "Agent AI (interations-style)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1152,
-        336
+        -1536,
+        0
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "938c6cd5-3a0c-4a38-9910-603666668f46",
+      "id": "d2548b77-9f95-4bfe-95f5-ed4b23c6f171",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -1200,
-        624
+        -1584,
+        304
       ],
       "credentials": {
         "openRouterApi": {
@@ -113,15 +113,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse Determinístico — mantém lógica original + garante nome_usuario no final\nconst raw = $input.first().json.output || '';\nconst estado = $('Code - Controller (interations-style)').first().json.estado;\nconst msg = String($('start').first().json.menssagem || '').trim();\n\nlet out_text = String(raw).trim();\nlet nome_usuario = null;\nlet nome_assistente = null;\nlet proximo_estado = null;\nlet tipo = 'mensagem';\n\n// Fallback do Redis para nome_usuario (usado na fase 'completo')\nlet prev = {};\ntry { prev = JSON.parse($('Redis Get').first().json.sessionData || '{}'); } catch {}\nconst prevNome = (prev && typeof prev.nome_preferido === 'string') ? prev.nome_preferido.trim() : null;\n\nif (estado === 'inicio') {\n  proximo_estado = 'nome_coletado';\n  if (!out_text) {\n    out_text = 'Oi! 👋 Bem-vindo ao MindQuest!\\n\\nVamos fazer seu cadastro rápido. São só 2 perguntinhas e já liberamos tudo pra você.\\n\\nComo você prefere ser chamado(a)?';\n  }\n}\nelse if (estado === 'nome_coletado') {\n  if (msg.length >= 2) {\n    nome_usuario = msg;\n    proximo_estado = 'completo';\n    if (!out_text) {\n      out_text = `Ótimo, ${nome_usuario}! Agora me dá um nome. Pode ser: Luna, Coach, Max, Sábio...\\n\\nComo quer me chamar?`;\n    }\n  } else {\n    proximo_estado = 'nome_coletado';\n    if (!out_text) {\n      out_text = 'Vamos lá! Como você prefere ser chamado(a)? (mínimo 2 letras)';\n    }\n  }\n}\nelse { // estado === 'completo'\n  // GARANTE nome_usuario usando o que já está no Redis\n  if (!nome_usuario && prevNome && prevNome.length >= 2) {\n    nome_usuario = prevNome;\n  }\n  if (msg.length >= 2) {\n    nome_assistente = msg;\n    proximo_estado = 'completo';\n    tipo = 'finalizado';\n  } else {\n    proximo_estado = 'completo';\n    if (!out_text) {\n      out_text = 'Quase lá! Diga o nome do assistente (ex.: Luna, Max, Sábio) — mínimo 2 letras.';\n    }\n  }\n}\n\n// Fallback de segurança (somente se não finalizado)\nif (!out_text && tipo !== 'finalizado') {\n  out_text = 'Vamos continuar. Como você prefere ser chamado(a)?';\n}\n\nreturn { json: { tipo, texto: out_text, proximo_estado, nome_usuario, nome_assistente } };\n"
+        "jsCode": "// Parse Determinístico — mantém lógica original + garante nome_usuario no final\nconst raw = $input.first().json.output || '';\nconst estado = $('Code - Controller (interations-style)').first().json.estado;\nconst msg = String($('start').first().json.menssagem || '').trim();\n\nlet out_text = String(raw).trim();\nlet nome_usuario = null;\nlet nome_assistente = null;\nlet faixa_etaria = null;\nlet faixa_etaria_codigo = null;\nlet proximo_estado = null;\nlet tipo = 'mensagem';\n\n// Fallback do Redis para dados já coletados\nlet prev = {};\ntry { prev = JSON.parse($('Redis Get').first().json.sessionData || '{}'); } catch {}\nconst prevNome = (prev && typeof prev.nome_preferido === 'string') ? prev.nome_preferido.trim() : null;\nconst prevAssistente = (prev && typeof prev.nome_assistente === 'string') ? prev.nome_assistente.trim() : null;\nconst prevFaixa = (prev && typeof prev.faixa_etaria === 'string') ? prev.faixa_etaria : null;\n\nconst ageOptions = {\n  '1': '13-17',\n  '2': '18-24',\n  '3': '25-34',\n  '4': '35-44',\n  '5': '45-54',\n  '6': '55-64',\n  '7': '65+',\n};\n\nif (estado === 'inicio') {\n  proximo_estado = 'nome_coletado';\n  if (!out_text) {\n    out_text = 'Oi! 👋 Bem-vindo ao MindQuest!\\n\\nVamos fazer seu cadastro rápido. São só 3 perguntinhas e já liberamos tudo pra você.\\n\\nComo você prefere ser chamado(a)?';\n  }\n}\nelse if (estado === 'nome_coletado') {\n  if (msg.length >= 2) {\n    nome_usuario = msg;\n    proximo_estado = 'assistente_pendente';\n    if (!out_text) {\n      out_text = `Ótimo, ${nome_usuario}! Agora me dá um nome. Pode ser: Luna, Coach, Max, Sábio...\\n\\nComo quer me chamar?`;\n    }\n  } else {\n    proximo_estado = 'nome_coletado';\n    if (!out_text) {\n      out_text = 'Vamos lá! Como você prefere ser chamado(a)? (mínimo 2 letras)';\n    }\n  }\n}\nelse if (estado === 'assistente_pendente') {\n  if (!nome_usuario && prevNome && prevNome.length >= 2) {\n    nome_usuario = prevNome;\n  }\n  if (msg.length >= 2) {\n    nome_assistente = msg;\n    proximo_estado = 'faixa_pendente';\n    if (!out_text) {\n      const referencia = (nome_usuario && nome_usuario.length >= 2) ? `Perfeito, ${nome_usuario}` : 'Perfeito';\n      out_text = `${referencia}! Me diz sua faixa etária? Responda só com o número correspondente:\\n1: 13-17\\n2: 18-24\\n3: 25-34\\n4: 35-44\\n5: 45-54\\n6: 55-64\\n7: 65+`;\n    }\n  } else {\n    proximo_estado = 'assistente_pendente';\n    if (!out_text) {\n      out_text = 'Quase lá! Diga o nome do assistente (ex.: Luna, Max, Sábio) — mínimo 2 letras.';\n    }\n  }\n}\nelse if (estado === 'faixa_pendente') {\n  if (!nome_usuario && prevNome && prevNome.length >= 2) {\n    nome_usuario = prevNome;\n  }\n  if (!nome_assistente && prevAssistente && prevAssistente.length >= 2) {\n    nome_assistente = prevAssistente;\n  }\n  const match = msg.match(/^\\s*([1-7])\\s*$/);\n  if (match) {\n    faixa_etaria_codigo = match[1];\n    faixa_etaria = ageOptions[faixa_etaria_codigo];\n    proximo_estado = 'completo';\n    tipo = 'finalizado';\n    if (!out_text) {\n      out_text = 'Perfeito! Vou finalizar seu acesso.';\n    }\n  } else {\n    proximo_estado = 'faixa_pendente';\n    if (!out_text) {\n      out_text = 'Para concluir, responda com o número da sua faixa etária:\\n1: 13-17\\n2: 18-24\\n3: 25-34\\n4: 35-44\\n5: 45-54\\n6: 55-64\\n7: 65+';\n    }\n  }\n}\nelse {\n  proximo_estado = 'nome_coletado';\n  if (!out_text) {\n    out_text = 'Vamos lá! Como você prefere ser chamado(a)?';\n  }\n}\n\nif (!nome_usuario && prevNome && prevNome.length >= 2) {\n  nome_usuario = prevNome;\n}\nif (!nome_assistente && prevAssistente && prevAssistente.length >= 2) {\n  nome_assistente = prevAssistente;\n}\nif (!faixa_etaria && prevFaixa) {\n  faixa_etaria = prevFaixa;\n}\n\n// Fallback de segurança (somente se não finalizado)\nif (!out_text && tipo !== 'finalizado') {\n  out_text = 'Vamos continuar. Como você prefere ser chamado(a)?';\n}\n\nreturn { json: { tipo, texto: out_text, proximo_estado, nome_usuario, nome_assistente, faixa_etaria, faixa_etaria_codigo } };\n"
       },
-      "id": "5e9f73c6-9635-4d22-b9da-13db81cdc5b0",
+      "id": "5ece050a-56d8-4c0c-bd62-ebb2553b0c75",
       "name": "Code - Parse Determinístico",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -784,
-        336
+        -1168,
+        0
       ]
     },
     {
@@ -148,30 +148,30 @@
         },
         "options": {}
       },
-      "id": "bb582131-35f6-4cb8-9c7d-b132572135d6",
+      "id": "38177078-dfcf-437f-9f6d-f10285fbf99c",
       "name": "IF Finalizado",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -592,
-        336
+        -976,
+        0
       ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}",
-        "value": "={{ ( () => { const prev = $('Redis Get').first().json.sessionData?JSON.parse($('Redis Get').first().json.sessionData):{}; const ai=$('Code - Parse Determinístico').first().json; const allowed=['inicio','nome_coletado','completo']; const next=(ai.proximo_estado&&allowed.includes(ai.proximo_estado))?ai.proximo_estado:(prev.estado||'inicio'); const nome_usuario=ai.nome_usuario||prev.nome_preferido||null; const nome_assistente=ai.nome_assistente||prev.nome_assistente||null; return JSON.stringify({ nome_preferido:nome_usuario, nome_assistente:nome_assistente, estado:next }); })() }}",
+        "value": "={{ ( () => { const prev = $('Redis Get').first().json.sessionData?JSON.parse($('Redis Get').first().json.sessionData):{}; const ai=$('Code - Parse Determinístico').first().json; const allowed=['inicio','nome_coletado','assistente_pendente','faixa_pendente','completo']; const next=(ai.proximo_estado&&allowed.includes(ai.proximo_estado))?ai.proximo_estado:(prev.estado||'inicio'); const nome_usuario=ai.nome_usuario||prev.nome_preferido||null; const nome_assistente=ai.nome_assistente||prev.nome_assistente||null; const faixa_etaria=ai.faixa_etaria||prev.faixa_etaria||null; return JSON.stringify({ nome_preferido:nome_usuario, nome_assistente:nome_assistente, faixa_etaria:faixa_etaria, estado:next }); })() }}",
         "expire": true,
         "ttl": 86400
       },
-      "id": "902eaf95-bef9-42da-8d80-30fe13bd4db7",
+      "id": "71ca2ae8-625a-4601-b453-ab18c25456e1",
       "name": "Redis Update",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -128,
-        416
+        -512,
+        96
       ],
       "credentials": {
         "redis": {
@@ -183,18 +183,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usuarios (\n  whatsapp_numero, nome, nome_preferencia, nome_assistente, token_acesso, token_expira_em, status_onboarding, faixa_etaria\n) VALUES (\n  $1, $2, $3, $4,\n  gen_random_uuid() || $5 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  CURRENT_TIMESTAMP + INTERVAL '15 days',\n  'completo','35-44')\nRETURNING id, token_acesso, whatsapp_numero, nome_preferencia, nome_assistente;",
+        "query": "INSERT INTO usuarios (\n  whatsapp_numero, nome, nome_preferencia, nome_assistente, token_acesso, token_expira_em, status_onboarding, faixa_etaria\n) VALUES (\n  $1, $2, $3, $4,\n  gen_random_uuid() || $5 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  CURRENT_TIMESTAMP + INTERVAL '15 days',\n  'completo',$6)\nRETURNING id, token_acesso, whatsapp_numero, nome_preferencia, nome_assistente;",
         "options": {
-          "queryReplacement": "={{ [ $('start').first().json.whatsapp_number, $('start').item.json.pushName, $('Code - Parse Determinístico').item.json.nome_usuario, $('Code - Parse Determinístico').item.json.nome_assistente, $('start').item.json.id ] }}"
+          "queryReplacement": "={{ [ $('start').first().json.whatsapp_number, $('start').item.json.pushName, $('Code - Parse Determinístico').item.json.nome_usuario, $('Code - Parse Determinístico').item.json.nome_assistente, $('start').item.json.id, $('Code - Parse Determinístico').item.json.faixa_etaria ] }}"
         }
       },
-      "id": "0536316d-8e64-495b-b4cf-e7369ebac5ff",
+      "id": "d83eee51-4343-4819-b971-4e6e107c8ba7",
       "name": "Insert User",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -352,
-        176
+        -736,
+        -160
       ],
       "credentials": {
         "postgres": {
@@ -211,13 +211,13 @@
           "queryReplacement": "={{ [$json.id] }}"
         }
       },
-      "id": "8fee437b-c42a-439c-948c-5c5d6fdab609",
+      "id": "94e12cb4-f62b-4c47-9f16-b98b303b7e60",
       "name": "Insert Gamif",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -144,
-        176
+        -528,
+        -160
       ],
       "credentials": {
         "postgres": {
@@ -230,34 +230,14 @@
       "parameters": {
         "jsCode": "let nomeAssistente; try{ const a=JSON.parse($('Agent AI (interations-style)').first().json.output||'{}'); nomeAssistente=a.nome_assistente; }catch{}\nif(!nomeAssistente){ nomeAssistente=$('Code - Parse Determinístico').first().json.nome_assistente||'Assistente'; }\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/auth?token=${token}`;\nconst mensagem = `Perfeito! Sou ${nomeAssistente} agora 😊\\n\\nPronto! 🎉\\n\\n📊 Sua experiência já foi criada: ${url}\\n\\n🔒 Acesso seguro: Esse link já contém seu token de autenticação pessoal. Não precisa criar senha ou login, é só clicar e entrar!\\n\\n Recomendo você dar uma olhada no guia rápido a partir do link abaixo, para aproveitar melhor seu assitente:\\n\\n www.mindquest.pt/suporte/conversation-guide\\n\\n Se quiser começar agora, você já pode mandar seu texto ou audio.\\n\\nO que deseja me contar sobre você hoje?`;\nreturn { json: { mensagem } };"
       },
-      "id": "5fae25bc-edd6-490f-871c-680bff085eb5",
+      "id": "2ee4f061-f111-4038-a999-73d60509a9c4",
       "name": "monta link para usuario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        176
+        -336,
+        -160
       ]
-    },
-    {
-      "parameters": {
-        "operation": "delete",
-        "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
-      },
-      "id": "d4a29fdd-7793-4db4-9528-fe56ac412846",
-      "name": "Redis Delete",
-      "type": "n8n-nodes-base.redis",
-      "typeVersion": 1,
-      "position": [
-        1616,
-        272
-      ],
-      "credentials": {
-        "redis": {
-          "id": "PB4zpLy1jLXDEzmH",
-          "name": "Redis account"
-        }
-      }
     },
     {
       "parameters": {
@@ -266,13 +246,13 @@
         "sessionTTL": 86400,
         "contextWindowLength": 20
       },
-      "id": "891f72a7-b5be-48b8-b334-324cca8a3dae",
+      "id": "28811847-4f3f-4980-bcf5-7c9c22beef1b",
       "name": "Redis Chat Memory1",
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -1008,
-        608
+        -1392,
+        288
       ],
       "credentials": {
         "redis": {
@@ -338,10 +318,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        256,
-        176
+        -128,
+        -160
       ],
-      "id": "2fe95fa7-44e5-4674-b4c5-919cb5bc7e20",
+      "id": "7b57c632-1aaf-417d-96aa-7ddc8348fb7b",
       "name": "Call 'sw_send_message_with_retry'"
     },
     {
@@ -401,10 +381,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -352,
-        416
+        -736,
+        96
       ],
-      "id": "747b0318-703a-4cda-a613-9392b52fab2a",
+      "id": "a94d4c43-40ff-4a03-af74-7a220af4608b",
       "name": "Call 'sw_send_message_with_retry'1"
     },
     {
@@ -412,13 +392,13 @@
         "operation": "delete",
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
       },
-      "id": "d4a12d2a-4c7c-46bb-ab69-4fd5f930b1d1",
-      "name": "Redis Delete1",
+      "id": "1409504e-9d72-4325-a40a-b314abb1a28a",
+      "name": "Redis Delete",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        464,
-        176
+        80,
+        -160
       ],
       "credentials": {
         "redis": {
@@ -561,7 +541,7 @@
       "main": [
         [
           {
-            "node": "Redis Delete1",
+            "node": "Redis Delete",
             "type": "main",
             "index": 0
           }
@@ -601,7 +581,7 @@
       }
     ]
   },
-  "versionId": "7cf15412-b39e-4619-827c-847e2d09422f",
+  "versionId": "133f00ce-3c10-4051-8626-7ffffbe57d33",
   "triggerCount": 1,
   "shared": [
     {
