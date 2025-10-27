@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-26T19:00:51.157Z",
+  "updatedAt": "2025-10-26T23:45:06.624Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -41,16 +41,16 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -5376,
-        -768
+        -4032,
+        160
       ],
-      "id": "1e8c6684-8b97-4d46-9c55-34a71d33f429",
+      "id": "587351b1-257b-4c6f-a823-9d7b2aaa037c",
       "name": "start"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN perfis_big_five p\n  ON p.usuario_id = u.id\nWHERE u.id = $1;\n",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN perfis_big_five p\n  ON p.usuario_id = u.id\nWHERE u.id = $1;\n",
         "options": {
           "queryReplacement": "={{ $('start').item.json.usr_id }}"
         }
@@ -58,43 +58,43 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -4992,
-        -768
+        -3648,
+        160
       ],
-      "id": "d3e23cc6-3195-4167-ae49-c9e57f82162e",
+      "id": "49676ba2-9148-4515-b771-9d7e404290be",
       "name": "dados_usr",
-    "credentials": {
-      "postgres": {
-        "id": "8ySWxtSO7gYK5uue",
-        "name": "Postgres account"
-      }
-    }
-  },
-  {
-    "parameters": {
-      "operation": "executeQuery",
-      "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '29 days' AS inicio\n),\ndados AS (\n  SELECT up.*\n  FROM usuarios_perfis up\n  JOIN periodo p ON up.data_conversa >= p.inicio\n  WHERE up.usuario_id = $1\n),\ncalc AS (\n  SELECT 'openness'::text AS trait,\n         SUM(up.score_openness * up.confianca_openness)::numeric AS weighted_sum,\n         SUM(up.confianca_openness)::numeric AS conf_sum,\n         AVG(up.score_openness)::numeric AS avg_score,\n         AVG(up.confianca_openness)::numeric AS avg_conf\n  FROM dados up\n  UNION ALL\n  SELECT 'conscientiousness',\n         SUM(up.score_conscientiousness * up.confianca_conscientiousness)::numeric,\n         SUM(up.confianca_conscientiousness)::numeric,\n         AVG(up.score_conscientiousness)::numeric,\n         AVG(up.confianca_conscientiousness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'extraversion',\n         SUM(up.score_extraversion * up.confianca_extraversion)::numeric,\n         SUM(up.confianca_extraversion)::numeric,\n         AVG(up.score_extraversion)::numeric,\n         AVG(up.confianca_extraversion)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'agreeableness',\n         SUM(up.score_agreeableness * up.confianca_agreeableness)::numeric,\n         SUM(up.confianca_agreeableness)::numeric,\n         AVG(up.score_agreeableness)::numeric,\n         AVG(up.confianca_agreeableness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'neuroticism',\n         SUM(up.score_neuroticism * up.confianca_neuroticism)::numeric,\n         SUM(up.confianca_neuroticism)::numeric,\n         AVG(up.score_neuroticism)::numeric,\n         AVG(up.confianca_neuroticism)::numeric\n  FROM dados up\n),\nscores AS (\n  SELECT\n    trait,\n    CASE WHEN conf_sum > 0 THEN weighted_sum / conf_sum ELSE avg_score END AS score_ponderado,\n    avg_score,\n    avg_conf,\n    conf_sum\n  FROM calc\n),\nordenado AS (\n  SELECT *, ROW_NUMBER() OVER (ORDER BY score_ponderado DESC NULLS LAST) AS pos\n  FROM scores\n),\nlabels AS (\n  SELECT * FROM (VALUES\n    ('openness','Abertura'),\n    ('conscientiousness','Conscienciosidade'),\n    ('extraversion','Extroversão'),\n    ('agreeableness','Amabilidade'),\n    ('neuroticism','Neuroticismo')\n  ) AS l(trait,label)\n)\nSELECT\n  (SELECT trait FROM ordenado WHERE pos = 1) AS perfil_primario,\n  (SELECT trait FROM ordenado WHERE pos = 2) AS perfil_secundario,\n  COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0) AS confianca_media,\n  COALESCE((SELECT bool_or(insuficiente) FROM dados), false) AS insuficiente,\n  json_build_object(\n    'openness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'openness'),\n    'conscientiousness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'conscientiousness'),\n    'extraversion', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'extraversion'),\n    'agreeableness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'agreeableness'),\n    'neuroticism', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'neuroticism')\n  ) AS detalhes_traits,\n  (SELECT COUNT(*) FROM dados) AS registros_analisados,\n  (SELECT COUNT(DISTINCT dados.chat_id) FROM dados) AS conversas_distintas,\n  (SELECT inicio FROM periodo) AS inicio_periodo,\n  CURRENT_DATE AS fim_periodo,\n  CASE\n    WHEN EXISTS (SELECT 1 FROM dados) THEN CONCAT(\n      'Traço dominante nos últimos 30 dias: ',\n      COALESCE((SELECT label FROM labels WHERE trait = (SELECT trait FROM ordenado WHERE pos = 1)), 'indefinido'),\n      '. Confiabilidade média geral: ',\n      TO_CHAR(COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0), 'FM990.0'),\n      '.'\n    )\n    ELSE 'Sem leituras nas últimas 30 conversas.'\n  END AS resumo_perfil\nFROM periodo;",
-      "options": {
-        "queryReplacement": "={{ $('start').item.json.usr_id }}"
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
       }
     },
-    "type": "n8n-nodes-base.postgres",
-    "typeVersion": 2.6,
-    "position": [
-      -4768,
-      -944
-    ],
-    "id": "55b3aa9f-1a8f-4a3f-9738-13c7212e9d0b",
-    "name": "perfil_bigfive",
-    "alwaysOutputData": true,
-    "credentials": {
-      "postgres": {
-        "id": "8ySWxtSO7gYK5uue",
-        "name": "Postgres account"
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '29 days' AS inicio\n),\ndados AS (\n  SELECT up.*\n  FROM usuarios_perfis up\n  JOIN periodo p ON up.data_conversa >= p.inicio\n  WHERE up.usuario_id = $1\n),\ncalc AS (\n  SELECT 'openness'::text AS trait,\n         SUM(up.score_openness * up.confianca_openness)::numeric AS weighted_sum,\n         SUM(up.confianca_openness)::numeric AS conf_sum,\n         AVG(up.score_openness)::numeric AS avg_score,\n         AVG(up.confianca_openness)::numeric AS avg_conf\n  FROM dados up\n  UNION ALL\n  SELECT 'conscientiousness',\n         SUM(up.score_conscientiousness * up.confianca_conscientiousness)::numeric,\n         SUM(up.confianca_conscientiousness)::numeric,\n         AVG(up.score_conscientiousness)::numeric,\n         AVG(up.confianca_conscientiousness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'extraversion',\n         SUM(up.score_extraversion * up.confianca_extraversion)::numeric,\n         SUM(up.confianca_extraversion)::numeric,\n         AVG(up.score_extraversion)::numeric,\n         AVG(up.confianca_extraversion)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'agreeableness',\n         SUM(up.score_agreeableness * up.confianca_agreeableness)::numeric,\n         SUM(up.confianca_agreeableness)::numeric,\n         AVG(up.score_agreeableness)::numeric,\n         AVG(up.confianca_agreeableness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'neuroticism',\n         SUM(up.score_neuroticism * up.confianca_neuroticism)::numeric,\n         SUM(up.confianca_neuroticism)::numeric,\n         AVG(up.score_neuroticism)::numeric,\n         AVG(up.confianca_neuroticism)::numeric\n  FROM dados up\n),\nscores AS (\n  SELECT\n    trait,\n    CASE\n      WHEN conf_sum > 0 THEN weighted_sum / conf_sum\n      ELSE avg_score\n    END AS score_ponderado,\n    avg_score,\n    avg_conf,\n    conf_sum\n  FROM calc\n  WHERE conf_sum > 0 OR avg_score IS NOT NULL\n),\nordenado AS (\n  SELECT\n    trait,\n    score_ponderado,\n    ROW_NUMBER() OVER (ORDER BY score_ponderado DESC NULLS LAST) AS pos\n  FROM scores\n),\nlabels AS (\n  SELECT * FROM (VALUES\n    ('openness','Abertura'),\n    ('conscientiousness','Conscienciosidade'),\n    ('extraversion','Extroversão'),\n    ('agreeableness','Amabilidade'),\n    ('neuroticism','Neuroticismo')\n  ) AS l(trait,label)\n)\nSELECT\n  (SELECT trait FROM ordenado WHERE pos = 1) AS perfil_primario,\n  (SELECT trait FROM ordenado WHERE pos = 2) AS perfil_secundario,\n  COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0) AS confianca_media,\n  COALESCE((SELECT bool_or(insuficiente) FROM dados), false) AS insuficiente,\n  json_build_object(\n    'openness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'openness'),\n    'conscientiousness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'conscientiousness'),\n    'extraversion', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'extraversion'),\n    'agreeableness', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'agreeableness'),\n    'neuroticism', (SELECT json_build_object('score_ponderado', ROUND(score_ponderado, 1), 'media_score', ROUND(avg_score, 1), 'media_confianca', ROUND(avg_conf, 1), 'total_confianca', ROUND(conf_sum, 1)) FROM scores WHERE trait = 'neuroticism')\n  ) AS detalhes_traits,\n  (SELECT COUNT(*) FROM dados) AS registros_analisados,\n  (SELECT COUNT(DISTINCT dados.chat_id) FROM dados) AS conversas_distintas,\n  (SELECT inicio FROM periodo) AS inicio_periodo,\n  CURRENT_DATE AS fim_periodo,\n  CASE\n    WHEN EXISTS (SELECT 1 FROM dados) THEN CONCAT(\n      'Traço dominante nos últimos 30 dias: ',\n      COALESCE((SELECT label FROM labels WHERE trait = (SELECT trait FROM ordenado WHERE pos = 1)), 'indefinido'),\n      '. Confiabilidade média geral: ',\n      TO_CHAR(COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0), 'FM990.0'),\n      '.'\n    )\n    ELSE 'Sem leituras nas últimas 30 conversas.'\n  END AS resumo_perfil\nFROM periodo;\n",
+        "options": {
+          "queryReplacement": "={{ $('start').item.json.usr_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -3440,
+        160
+      ],
+      "id": "6914ba63-bb43-473f-8c36-5709bd5a80e2",
+      "name": "perfil_bigfive",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
       }
-    }
-  },
-  {
+    },
+    {
       "parameters": {
         "workflowId": {
           "__rl": true,
@@ -188,10 +188,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -3888,
-        -768
+        -2352,
+        160
       ],
-      "id": "0e604272-a2cf-4138-8a45-2b0ab2555323",
+      "id": "fb706a08-fe84-4a48-a7b0-b9d8e0eb94ed",
       "name": "Transcrição"
     },
     {
@@ -201,10 +201,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -4768,
-        -768
+        -3232,
+        160
       ],
-      "id": "e27bca62-1594-4ab3-9094-52972aaf9e9d",
+      "id": "ebcefcc0-a333-4faa-b1ce-b62a5791a9a9",
       "name": "Build Keys"
     },
     {
@@ -216,10 +216,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -4576,
-        -768
+        -3040,
+        160
       ],
-      "id": "f1d9165e-d385-454e-8328-7baebcda0d3c",
+      "id": "c26422c8-7207-4338-972d-2c3138e4b918",
       "name": "Redis GET Lock",
       "credentials": {
         "redis": {
@@ -256,10 +256,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4096,
-        -928
+        -2560,
+        0
       ],
-      "id": "3cdf0d32-2519-459b-b2c7-b97288079e9c",
+      "id": "d2bc2fa8-32d0-4067-881b-98292d132454",
       "name": "LOCK ativo?"
     },
     {
@@ -272,10 +272,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -2592,
-        32
+        -1056,
+        960
       ],
-      "id": "c3e719d7-d7f3-44f1-904a-e23d073fca6e",
+      "id": "ce5948a9-a3df-43a4-916e-6efbfb94152c",
       "name": "memory",
       "credentials": {
         "redis": {
@@ -293,10 +293,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3680,
-        -768
+        -2144,
+        160
       ],
-      "id": "cb83bc41-8ba3-49ee-bdfc-cd68a0868410",
+      "id": "f98d3b2d-f038-4d82-a976-847bbd66fa34",
       "name": "Chat Memory  - Get"
     },
     {
@@ -314,10 +314,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3216,
-        -768
+        -1680,
+        160
       ],
-      "id": "04c94164-968e-4ddb-96b2-e812bc4bf5b4",
+      "id": "bd00f389-130c-4080-8381-3995bc0cb472",
       "name": "Chat Memory - Insert"
     },
     {
@@ -379,10 +379,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        -2928,
-        -768
+        -1392,
+        160
       ],
-      "id": "f9352078-e267-4d0a-b7ba-c1e26beab7f7",
+      "id": "3847cfd1-edf1-413a-892b-444c0438fe72",
       "name": "Interações (Pré-Agente)"
     },
     {
@@ -392,10 +392,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2880,
-        -528
+        -1344,
+        400
       ],
-      "id": "6b63f626-ce76-495b-8264-8eb7f96f6db1",
+      "id": "ef6994ff-012d-4d48-9465-89d3ff568d60",
       "name": "OpenRouter Chat Model",
       "credentials": {
         "openRouterApi": {
@@ -441,27 +441,27 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -2704,
-        -528
+        -1168,
+        400
       ],
-      "id": "ffb2c700-151d-4f00-bab4-f5ef20b16238",
+      "id": "c7e80cc7-35cc-4142-8b26-2d24352ffb19",
       "name": "get_history"
     },
     {
       "parameters": {
         "promptType": "define",
-    "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê é o Assistente de reflexão pessoal. Sua missão é guiar o usuário com acolhimento e curiosidade, ajudando-o a transformar sentimentos em clareza e pequenos passos possíveis.\n\n### Como entregar a resposta\n- Abra com acolhimento curto (até 2 frases curtas).\n- Quebre o texto em blocos de até 3 frases; evite parágrafos longos.\n- Ao sugerir possibilidades, use bullets com o símbolo `•`.\n- Finalize sempre com uma pergunta ou convite gentil para continuar conversando.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Seu nome escolhido pelo usuário:** {{ $('dados_usr').item.json.nome_assistente }} (use quando fizer sentido).\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}\n**Big Five (últimos 30 dias):**\n{{ (() => {\n  const node = $('perfil_bigfive').first();\n  const perfil = node && node.json ? node.json : null;\n  const label = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'};\n  if (!perfil || (!perfil.perfil_primario && !perfil.resumo_perfil)) {\n    return '• Sem leituras nas últimas 30 conversas.';\n  }\n  const lines = [];\n  if (perfil.resumo_perfil) {\n    lines.push('• ' + perfil.resumo_perfil);\n  } else if (perfil.perfil_primario) {\n    lines.push('• Traço dominante: ' + (label[perfil.perfil_primario] || perfil.perfil_primario));\n  }\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario) {\n    lines.push('• Secundário: ' + (label[perfil.perfil_secundario] || perfil.perfil_secundario));\n  }\n  const conf = Number(perfil.confianca_media);\n  if (!Number.isNaN(conf)) {\n    lines.push('• Confiabilidade média: ' + conf.toFixed(1));\n  }\n  const conv = perfil.conversas_distintas ?? perfil.registros_analisados;\n  if (conv) {\n    lines.push('• Conversas analisadas: ' + conv);\n  }\n  return lines.join('\n');\n})() }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e curiosidade pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu. Confirme se faz sentido e ajuste se o usuário sinalizar.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o dashboard. Se ele insistir, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## 🎨 TOM PERSONALIZADO\n{{ (() => {\n  const node = $('perfil_bigfive').first();\n  const perfil = node && node.json ? node.json : null;\n  const toneMap = {\n    openness: 'Estimule curiosidade e novas perspectivas; convide a imaginar caminhos.',\n    conscientiousness: 'Ofereça estrutura leve, reconheça disciplina e proponha passos simples.',\n    extraversion: 'Traga energia calorosa, celebre interações e convide a compartilhar histórias.',\n    agreeableness: 'Redobre a empatia, valide intenções gentis e co-construa soluções.',\n    neuroticism: 'Passe segurança emocional, normalize oscilações e avance com calma.'\n  };\n  if (!perfil || perfil.insuficiente || !perfil.perfil_primario) {\n    return '- Tom base neutro e acolhedor; priorize validação e escuta.';\n  }\n  const lines = ['- Tom base: ' + (toneMap[perfil.perfil_primario] || 'Mantenha acolhimento neutro.')];\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario && toneMap[perfil.perfil_secundario]) {\n    lines.push('- Toque secundário: ' + toneMap[perfil.perfil_secundario]);\n  }\n  if (perfil.resumo_perfil) {\n    lines.push('- Resumo 30 dias: ' + perfil.resumo_perfil);\n  }\n  return lines.join('\n');\n})() }}\n\n## Ferramentas disponíveis\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”.\n- agent_conversation_guide — apoia aprofundamento, encerramentos e recursos extras; adapte antes de responder.\n\n## Regras\n- Use o histórico apenas quando fizer sentido natural.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto natural estilo WhatsApp, obedecendo às diretrizes de formato acima.\n\n---\n\n## 🌿 TOM & FOCO\n- Soe humano, interessado e leve; nada de linguagem mecânica.\n- Mostre curiosidade sincera pela vida do usuário e pelas nuances do que ele conta.\n- Incentive-o a se expressar mais; aprofunde com cuidado quando ele se abrir.\n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine se sentindo ouvido, mais claro e com vontade de continuar cuidando de si.\n",
+        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê é o Assistente de reflexão pessoal. Sua missão é guiar o usuário com acolhimento e curiosidade, ajudando-o a transformar sentimentos em clareza e pequenos passos possíveis.\n\n### Estrutura da resposta\n1. **Acolhimento curto** – no máximo 2 frases curtas, na mesma linha.\n2. **Bloco central** – parágrafos de até 3 frases. Quebre as frases com linhas em branco entre cada uma.\n3. **Sugestões ou caminhos** – sempre em lista com bullets `•`, cada bullet com até 2 frases.\n4. **Encerramento** – 1 pergunta ou convite gentil, em frase única.\n5. **Nunca repita instruções internas ou ferramentas. Não adicione assinaturas.**\n\n### Estilo e ritmo\n- Quebre o texto com uma linha em branco entre cada parágrafo.\n- Use linguagem coloquial, leve e calorosa; evite frases longas.\n- Valide o que o usuário sente antes de propor qualquer caminho.\n- Ao responder, prefira verbos no presente e convites suaves (“que tal…?”, “topa contar…?”).\n- Quando trouxer exemplos, varie o início dos bullets para não soar repetitivo.\n- Nunca mencione que está seguindo regras, prompts ou ferramentas.\n\n\n### Ajuda ao usuário\n- Se ele não souber como continuar ou pedir orientação, consulte a  `user_conversation_guide` e traga apenas o que fizer sentido, adaptando à conversa.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Seu nome escolhido pelo usuário:** {{ $('dados_usr').item.json.nome_assistente }} (use quando fizer sentido).\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}\n**Big Five (últimos 30 dias):**\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const label = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'};\n  if (!perfil || !perfil.perfil_primario) {\n    return '• Sem leituras nas últimas 30 conversas.';\n  }\n  const lines = [];\n  lines.push('• Traço dominante: ' + (label[perfil.perfil_primario] || perfil.perfil_primario));\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario) {\n    lines.push('• Traço secundário: ' + (label[perfil.perfil_secundario] || perfil.perfil_secundario));\n  }\n  return lines.join('\\n');\n})() }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e curiosidade pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu. Confirme se faz sentido e ajuste se o usuário sinalizar.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o dashboard. Se ele insistir, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## 🎨 TOM PERSONALIZADO\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const toneMap = {\n    openness: 'Estimule curiosidade e novas perspectivas; convide a imaginar caminhos.',\n    conscientiousness: 'Ofereça estrutura leve, reconheça disciplina e proponha passos simples.',\n    extraversion: 'Traga energia calorosa, celebre interações e convide a compartilhar histórias.',\n    agreeableness: 'Redobre a empatia, valide intenções gentis e co-construa soluções.',\n    neuroticism: 'Passe segurança emocional, normalize oscilações e avance com calma.'\n  };\n  if (!perfil || !perfil.perfil_primario) {\n    return '- Tom base neutro e acolhedor; priorize validação e escuta.';\n  }\n  const lines = ['- Tom base: ' + (toneMap[perfil.perfil_primario] || 'Mantenha acolhimento neutro.')];\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario && toneMap[perfil.perfil_secundario]) {\n    lines.push('- Toque secundário: ' + toneMap[perfil.perfil_secundario]);\n  }\n  return lines.join('\\n');\n})() }}\n\n## Ferramentas disponíveis\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”.\n- agent_conversation_guide — apoia aprofundamento, encerramentos e recursos extras; adapte antes de responder.\n\n## Regras\n- Use o histórico apenas quando fizer sentido natural.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto natural estilo WhatsApp, obedecendo às diretrizes de formato acima.\n\n---\n\n## 🌿 TOM & FOCO\n- Soe humano, interessado e leve; nada de linguagem mecânica.\n- Mostre curiosidade sincera pela vida do usuário e pelas nuances do que ele conta.\n- Incentive-o a se expressar mais; aprofunde com cuidado quando ele se abrir.\n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine se sentindo ouvido, mais claro e com vontade de continuar cuidando de si.\n",
         "options": {
-      "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Assistente de reflexão pessoal — (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Assistente de reflexão pessoal**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_primario; return map[trait] || trait || 'Neutro'; })() }}` | Modular tom. |\n| Perfil secundário | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_secundario; return map[trait] || 'Sem secundário'; })() }}` | Ajuste extra. |\n| Resumo Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; return data.resumo_perfil || 'sem resumo recente'; })() }}` | Lembrar inclinações. |\n| Nome do assistente | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura. |\n\nSe não houver nome preferido válido, mantenha saudação neutra.\n\n---\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\n1. **Quando `interaction_count === 1`**\n   - Chame `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa antes de citar histórico.\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Use perguntas abertas, validações curtas e mini-insights quando fizer sentido.\n3. **Quando `interaction_count === session_limit - 1`**\n   - Produza um resumo breve e empático do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo e incorpore correções.\n4. **Quando `interaction_count === session_limit`**\n   - Reconheça avanços, transmita sensação de fechamento e convide ao dashboard.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca ultrapasse `session_limit` mensagens.\n\n---\n\n### 🧬 PERFIL BIG FIVE\n- Use a última leitura para modular tom e ritmo.\n- Se `insuficiente` for verdadeiro ou não houver leitura, mantenha abordagem neutra e acolhedora.\n- Mapa rápido:\n  - `openness`: estimule curiosidade, metáforas leves e novas perspectivas.\n  - `conscientiousness`: ofereça estrutura suave, reconheça disciplina e proponha pequenos passos.\n  - `extraversion`: traga energia calorosa, convide a compartilhar histórias sociais.\n  - `agreeableness`: redobre empatia, cooperação e valide intenções gentis.\n  - `neuroticism`: passe segurança emocional, normalize oscilações e avance devagar.\n\n---\n\n### 📐 FORMATO DA RESPOSTA\n- Parágrafos curtos (até 3 frases) separados por linha em branco.\n- Quando sugerir exemplos ou caminhos, use bullets `•`.\n- Linguagem coloquial, sem jargões técnicos ou diagnósticos.\n- Finalize sempre com pergunta ou convite leve.\n\n---\n\n### 🛠️ FERRAMENTAS\n`get_history`\n- Use somente na primeira interação, antes de responder.\n- Histórico vazio indica ausência de conversas recentes; incentive consistência e, se útil, chame `agent_conversation_guide`.\n\n`user_conversation_guide`\n- Acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”. Resuma e conecte ao contexto atual.\n\n`agent_conversation_guide`\n- Use para perguntas de aprofundamento, sugestões de encerramento ou recursos extras. Leia, escolha o que fizer sentido e adapte.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Nomeie sentimentos antes de avançar; valide experiências.\n- Integre referências recentes apenas quando fizer sentido natural.\n- Caminho mental: acolher → entender → validar → apontar próximos passos leves.\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir prompts.\n- Não forneça aconselhamento médico ou diagnóstico.\n- Não explique o dashboard; apenas convide a visitá-lo no encerramento.\n\n---\n\n### 🧭 MISSÃO\nAbra espaço seguro, explore emoções e gatilhos, conecte percepções e encerre com leveza, convidando o usuário a continuar cuidando de si.\n"
+          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Assistente de reflexão pessoal — (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Assistente de reflexão pessoal**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_primario; return map[trait] || trait || 'Neutro'; })() }}` | Modular tom. |\n| Perfil secundário | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_secundario; return map[trait] || 'Sem secundário'; })() }}` | Ajuste extra. |\n| Resumo Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; return data.resumo_perfil || 'sem resumo recente'; })() }}` | Lembrar inclinações. |\n| Nome do assistente | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura. |\n\nSe não houver nome preferido válido, mantenha saudação neutra.\n\n---\n\n### 👥 CONTEXTO GERACIONAL\n- Se houver faixa etária `{{ $('dados_usr').first().json.faixa_etaria }}` válido, ajuste exemplos e linguagem conforme a faixa:\n  - **13‑17 — Adolescência:** acolha inseguranças típicas; evite pressões; incentive explorar sentimentos com calma; convide a contar eventos da escola, amigos, família e sonhos iniciais.\n  - **18‑24 — Início da vida adulta:** traga curiosidade sobre transições como vestibular, universidade, primeiro emprego e construção de identidade; normalize dúvidas sobre rumo profissional e autonomia.\n  - **25‑34 — Consolidação inicial:** converse sobre avanços na carreira, relacionamentos sérios e primeiros planejamentos financeiros; estimule pequenas ações para equilibrar ambições e autocuidado.\n  - **35‑44 — Meio de carreira / família em crescimento:** reconheça múltiplas responsabilidades familiares e profissionais; ajude a priorizar, estabelecer metas de médio prazo e cuidar da própria energia.\n  - **45‑54 — Reavaliação e maturidade:** destaque propósito, saúde preventiva e realinhamento de metas; valide desafios com filhos adolescentes/universitários e mudanças de carreira.\n  - **55‑64 — Transições para novos ritmos:** aborde pré-aposentadoria, mudanças de papel familiar e manutenção de relevância; incentive novas rotinas que preservem significado e vínculos.\n  - **65+ — Longevidade ativa:** celebre conquistas; foque em bem-estar integral, autonomia, legado e redes de apoio; convide a revisitar histórias e compromissos que nutram sentido.\n- Se não houver idade, mantenha tom neutro e centrado no contexto trazido pelo usuário.\n\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\n1. **Quando `interaction_count === 1`**\n   - Chame `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa antes de citar histórico.\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Use perguntas abertas, validações curtas e mini-insights quando fizer sentido.\n3. **Quando `interaction_count === session_limit - 1`**\n   - Produza um resumo breve e empático do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo e incorpore correções.\n4. **Quando `interaction_count === session_limit`**\n   - Reconheça avanços, transmita sensação de fechamento e convide ao dashboard.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca ultrapasse `session_limit` mensagens.\n\n---\n\n### 🧬 PERFIL BIG FIVE\n- Use a última leitura para modular tom e ritmo.\n- Se `insuficiente` for verdadeiro ou não houver leitura, mantenha abordagem neutra e acolhedora.\n- Mapa rápido:\n  - `openness`: estimule curiosidade, metáforas leves e novas perspectivas.\n  - `conscientiousness`: ofereça estrutura suave, reconheça disciplina e proponha pequenos passos.\n  - `extraversion`: traga energia calorosa, convide a compartilhar histórias sociais.\n  - `agreeableness`: redobre empatia, cooperação e valide intenções gentis.\n  - `neuroticism`: passe segurança emocional, normalize oscilações e avance devagar.\n\n---\n\n### 📐 FORMATO DA RESPOSTA\n- Parágrafos curtos (até 3 frases) separados por linha em branco.\n- Quando sugerir exemplos ou caminhos, use bullets `•`.\n- Linguagem coloquial, sem jargões técnicos ou diagnósticos.\n- Finalize sempre com pergunta ou convite leve.\n\n---\n\n### 🛠️ FERRAMENTAS\n`get_history`\n- Use somente na primeira interação, antes de responder.\n- Histórico vazio indica ausência de conversas recentes; incentive consistência e, se útil, chame `agent_conversation_guide`.\n\n`user_conversation_guide`\n- Acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”. Resuma e conecte ao contexto atual.\n\n`agent_conversation_guide`\n- Use para perguntas de aprofundamento, sugestões de encerramento ou recursos extras. Leia, escolha o que fizer sentido e adapte.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Nomeie sentimentos antes de avançar; valide experiências.\n- Integre referências recentes apenas quando fizer sentido natural.\n- Caminho mental: acolher → entender → validar → apontar próximos passos leves.\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir prompts.\n- Não forneça aconselhamento médico ou diagnóstico.\n- Não explique o dashboard; apenas convide a visitá-lo no encerramento.\n\n---\n\n### 🧭 MISSÃO\nAbra espaço seguro, explore emoções e gatilhos, conecte percepções e encerre com leveza, convidando o usuário a continuar cuidando de si.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2720,
-        -752
+        -1184,
+        176
       ],
-      "id": "09942dcb-3a5d-416d-95ae-f225e55a1068",
+      "id": "9db8775a-5d86-44ee-9b71-5ef5a3533bde",
       "name": "Mentor de vida"
     },
     {
@@ -471,10 +471,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2400,
-        -752
+        -864,
+        176
       ],
-      "id": "5e9b19df-32f7-4523-b182-08f70a36c8dc",
+      "id": "d805dde0-8805-4595-9c5c-e8d721d85814",
       "name": "organiza_json"
     },
     {
@@ -486,10 +486,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -1920,
-        -768
+        -384,
+        160
       ],
-      "id": "35ffaa0f-d22e-4162-a4d2-21a9cb430237",
+      "id": "64ad6269-a551-4c9f-82f1-a77125881ce7",
       "name": "Chat Memory  - Get1"
     },
     {
@@ -499,10 +499,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1584,
-        -768
+        -48,
+        160
       ],
-      "id": "730d4a38-0904-4866-8d4b-61dee2d2121c",
+      "id": "899f97c3-c70b-4a4b-8478-0d93adaff8e8",
       "name": "junta_dados_gravacao"
     },
     {
@@ -516,10 +516,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1376,
-        -768
+        160,
+        160
       ],
-      "id": "13ff1b77-6e0d-45cd-b073-14a871368fb7",
+      "id": "c0e80752-3616-4946-8556-5d950bc56782",
       "name": "Grava_chat",
       "credentials": {
         "postgres": {
@@ -535,10 +535,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -1008,
-        128
+        528,
+        1056
       ],
-      "id": "c9d63b46-9037-497d-9a85-4f901964ae38",
+      "id": "b347d2da-68c5-4af6-891e-0160d0047a2f",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -559,10 +559,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -976,
-        -80
+        560,
+        848
       ],
-      "id": "5c356d8d-90b1-4712-bec8-f039808790f3",
+      "id": "fdb6f224-26fb-41b2-848c-d7c987b9095d",
       "name": "Resumo das conversas"
     },
     {
@@ -572,10 +572,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -816,
-        144
+        720,
+        1072
       ],
-      "id": "2225f42f-771f-4053-958e-f57b56c04246",
+      "id": "8d309b97-97f4-4eb6-a2b2-d246d30a24b5",
       "name": "Structured Output Parser"
     },
     {
@@ -634,10 +634,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
-        -80
+        880,
+        848
       ],
-      "id": "1d9bd846-f4fb-4d81-bc50-1bb8d78c1c29",
+      "id": "a3b150a4-5887-4c50-bc74-3dba77232211",
       "name": "Update rows in a table",
       "credentials": {
         "postgres": {
@@ -708,10 +708,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -448,
-        -80
+        1088,
+        848
       ],
-      "id": "10738564-b65c-471e-8a69-83ad5d0d445b",
+      "id": "f74c9646-c3a8-4ad9-93ba-63af4fec5c46",
       "name": "Gamificação"
     },
     {
@@ -722,10 +722,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -992,
-        -272
+        544,
+        656
       ],
-      "id": "ce108c1c-553c-448e-aa5a-6f01089570b5",
+      "id": "cc94bcf2-47e2-4e68-8244-a5f3bed312c7",
       "name": "Chat Memory - Delete All (final)"
     },
     {
@@ -740,10 +740,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -672,
-        -272
+        864,
+        656
       ],
-      "id": "2fefa773-2290-4285-a17b-dfe23f39dad4",
+      "id": "52cd3df1-61a9-4afb-bc29-55c8f4a3af70",
       "name": "Redis SET Lock (12h)",
       "credentials": {
         "redis": {
@@ -818,10 +818,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -672,
-        -1152
+        864,
+        -224
       ],
-      "id": "0bebb277-d92b-493a-aefe-84b3ba361196",
+      "id": "f20af3b9-9a71-43f6-b986-0966af31f5b8",
       "name": "experts_panas"
     },
     {
@@ -900,10 +900,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -672,
-        -992
+        864,
+        -64
       ],
-      "id": "4dbad360-1e9e-4d9b-9bb5-18136532bd5c",
+      "id": "7c9a5d06-a8be-49ba-86e6-33a4855d4086",
       "name": "experts_humor_energia"
     },
     {
@@ -982,10 +982,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -672,
-        -832
+        864,
+        96
       ],
-      "id": "cd22ee7b-4b3f-47f7-9825-e04f7e2a80e4",
+      "id": "23efcc87-7cff-4fe6-83e3-7b50beee0ec8",
       "name": "experts_sabotadores"
     },
     {
@@ -1074,10 +1074,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -672,
-        -672
+        864,
+        256
       ],
-      "id": "761ea051-1046-4ae2-b70a-e5705d2a7445",
+      "id": "846eb0f1-89d5-46c8-a3c8-a4dffb1cac9f",
       "name": "Expert_Insights"
     },
     {
@@ -1156,10 +1156,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -672,
-        -512
+        864,
+        416
       ],
-      "id": "4cc80bb7-f632-4eda-a57f-65c81338367a",
+      "id": "3028451d-228e-41bd-b217-2d44e4d70beb",
       "name": "experts_bigfive"
     },
     {
@@ -1169,10 +1169,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -4384,
-        -768
+        -2848,
+        160
       ],
-      "id": "5954e5e0-6e41-4d46-9baf-84d82427f089",
+      "id": "c324b5bd-2ef5-406e-85f5-e06cb55a12c9",
       "name": "Calcula tempo restante"
     },
     {
@@ -1183,10 +1183,10 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -4784,
-        -560
+        -3248,
+        368
       ],
-      "id": "9d368b75-5f2e-431d-82a2-22efb3ff367f",
+      "id": "6e26e2d6-c8f5-4df9-befe-c57221dc681d",
       "name": "Redis",
       "credentials": {
         "redis": {
@@ -1204,10 +1204,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3824,
-        -384
+        -2288,
+        544
       ],
-      "id": "abbcf951-9c15-4dd3-b60a-3a0f859d15d9",
+      "id": "93390cd1-0a65-4d5e-a198-3bca221e49ce",
       "name": "Chat Memory - Delete All (final)1",
       "disabled": true
     },
@@ -1218,10 +1218,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -3376,
-        -768
+        -1840,
+        160
       ],
-      "id": "6e2d22c9-8708-42d2-96ce-2016b0b42c32",
+      "id": "4f15b7b2-6a14-424a-aa22-56745192179a",
       "name": "intertion_count"
     },
     {
@@ -1238,10 +1238,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -5200,
-        -768
+        -3856,
+        160
       ],
-      "id": "095ed6f4-2a4d-4a2e-898a-0bdf10c44171",
+      "id": "617a5590-5462-4247-a8ed-4dffe40ca4f5",
       "name": "mindquest_config"
     },
     {
@@ -1301,10 +1301,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1728,
-        -1056
+        -192,
+        -128
       ],
-      "id": "c5e50638-4c98-4157-84c5-f8dd01c5772c",
+      "id": "84146ffe-2179-49fe-8ab2-c1676d5ba61f",
       "name": "Call 'sw_send_message_with_retry'"
     },
     {
@@ -1364,10 +1364,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1808,
-        -560
+        -272,
+        368
       ],
-      "id": "0c4c407a-6726-4ec6-a0e7-bcc53deb5efc",
+      "id": "4dd208c7-deec-4a2f-90bb-f64dc23f405e",
       "name": "Call 'sw_send_message_with_retry'1"
     },
     {
@@ -1427,10 +1427,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -2672,
-        -1040
+        -1136,
+        -112
       ],
-      "id": "0b32af2d-c3d0-40e2-a0c2-b27cca453c4c",
+      "id": "f55db40b-6034-4c27-a95b-40a8e438c1c4",
       "name": "Call 'sw_send_message_with_retry'2"
     },
     {
@@ -1455,10 +1455,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -2528,
-        -528
+        -992,
+        400
       ],
-      "id": "a7d10805-c690-44da-b3b1-e81969c6858b",
+      "id": "4211fa1b-0846-4b70-bef4-6d2e8a069b69",
       "name": "user_conversation_guide"
     },
     {
@@ -1483,10 +1483,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -2336,
-        -528
+        -800,
+        400
       ],
-      "id": "61be858c-d753-4ade-9a18-0f5619d32572",
+      "id": "56845ffd-40a3-471c-8fea-c45c543f9a95",
       "name": "agent_conversation_guide´"
     },
     {
@@ -1500,10 +1500,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1920,
-        -1056
+        -384,
+        -128
       ],
-      "id": "05f7b4c4-ed46-475f-9838-1d78fccac2e3",
+      "id": "653e8936-046d-41dd-bc24-fdea866c6288",
       "name": "update_token",
       "credentials": {
         "postgres": {
@@ -1539,10 +1539,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2208,
-        -752
+        -672,
+        176
       ],
-      "id": "b52fca60-d125-4d53-87e5-2665adcd1886",
+      "id": "69d8f022-ee17-4a28-8757-6a289a680c31",
       "name": "É a ulltima?"
     }
   ],
@@ -1940,11 +1940,6 @@
         ]
       ]
     },
-    "Call 'sw_send_message_with_retry'": {
-      "main": [
-        []
-      ]
-    },
     "É a ulltima?": {
       "main": [
         [
@@ -1980,19 +1975,18 @@
     "start": [
       {
         "json": {
-          "usr_id": "178edaa3-5389-47df-adde-7ad2c2dcd1b3",
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.id": "3A299F11B918BF7AFA5F",
-          "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
+          "body.data.key.id": "2AFB9BC63852188B1F6C",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Aldo",
-          "body.data.message.conversation": "Olá não sei como começar pode me ajudar?",
-          "body.data.messageType": "conversation"
+          "body.data.pushName": "Aldo Santos",
+          "body.data.messageType": "audioMessage"
         }
       }
     ]
   },
-  "versionId": "7f7182f4-56b2-47ed-8927-4e8c55b8d889",
+  "versionId": "824e5c3f-8de9-4c1e-a2fe-06bea47cf7ac",
   "triggerCount": 0,
   "shared": [
     {
@@ -2017,7 +2011,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-26T07:40:32.710Z",
+              "updatedAt": "2025-10-27T08:00:06.115Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -2042,7 +2036,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-26",
+              "lastActiveAt": "2025-10-27",
               "isPending": false
             }
           }

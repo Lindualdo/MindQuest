@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-19T20:04:57.978Z",
-  "updatedAt": "2025-10-26T20:26:17.280Z",
+  "updatedAt": "2025-10-26T20:49:49.806Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
   "active": false,
@@ -31,10 +31,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        832,
-        0
+        0,
+        -176
       ],
-      "id": "c5f6740a-f38a-4641-afb4-f505a9621884",
+      "id": "6d6af44c-607e-4166-89a1-003e22f6000c",
       "name": "start"
     },
     {
@@ -73,10 +73,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1024,
-        0
+        192,
+        -176
       ],
-      "id": "59d9ed76-c461-465c-b7be-19a4edec3037",
+      "id": "2d9e3377-1e5c-44a8-97d0-039d3a262276",
       "name": "Buscar Histórico",
       "alwaysOutputData": true
     },
@@ -87,10 +87,10 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        1216,
-        0
+        384,
+        -176
       ],
-      "id": "c391141e-1c14-405e-91db-a0fe93dc7cb2",
+      "id": "038cbd0b-3bdf-4935-b154-5664bd23276a",
       "name": "Preparar Contexto Big Five"
     },
     {
@@ -106,10 +106,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        1408,
-        0
+        576,
+        -176
       ],
-      "id": "ab35ba7d-de27-47d5-b34d-a1fe4fd5f653",
+      "id": "de861070-7a1b-44e9-9dfb-315135dfdf10",
       "name": "Analisador Big Five"
     },
     {
@@ -120,10 +120,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1552,
-        304
+        720,
+        128
       ],
-      "id": "23a19488-9157-4653-a931-b32ec7f1440d",
+      "id": "79a22690-54fe-4514-a0ab-55794b9fe063",
       "name": "Parser JSON Big Five"
     },
     {
@@ -136,10 +136,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1152,
-        400
+        320,
+        224
       ],
-      "id": "5f0afbdc-b516-462c-8191-9961898f6aad",
+      "id": "806255b1-c195-4833-8e78-617f94e052da",
       "name": "OpenRouter Claude",
       "credentials": {
         "openRouterApi": {
@@ -155,10 +155,10 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        1728,
-        0
+        896,
+        -176
       ],
-      "id": "1722c9f0-a1cd-4a6e-8031-ecf31a5dec2d",
+      "id": "ca049c17-2bca-42ff-af17-79f560695aac",
       "name": "Preparar Registro Big Five"
     },
     {
@@ -166,16 +166,16 @@
         "operation": "executeQuery",
         "query": "INSERT INTO usuarios_perfis (\n  usuario_id,\n  chat_id,\n  data_conversa,\n  perfil_original,\n  perfil_primario,\n  perfil_secundario,\n  resumo_perfil,\n  insuficiente,\n  score_openness,\n  score_conscientiousness,\n  score_extraversion,\n  score_agreeableness,\n  score_neuroticism,\n  confianca_openness,\n  confianca_conscientiousness,\n  confianca_extraversion,\n  confianca_agreeableness,\n  confianca_neuroticism,\n  confianca_media,\n  raw_resposta,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::date,\n  $4::varchar,\n  $5::varchar,\n  $6::varchar,\n  $7::text,\n  $8::boolean,\n  $9::integer,\n  $10::integer,\n  $11::integer,\n  $12::integer,\n  $13::integer,\n  $14::integer,\n  $15::integer,\n  $16::integer,\n  $17::integer,\n  $18::integer,\n  $19::integer,\n  $20::jsonb,\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) DO UPDATE SET\n  perfil_original = EXCLUDED.perfil_original,\n  perfil_primario = EXCLUDED.perfil_primario,\n  perfil_secundario = EXCLUDED.perfil_secundario,\n  resumo_perfil = EXCLUDED.resumo_perfil,\n  insuficiente = EXCLUDED.insuficiente,\n  score_openness = EXCLUDED.score_openness,\n  score_conscientiousness = EXCLUDED.score_conscientiousness,\n  score_extraversion = EXCLUDED.score_extraversion,\n  score_agreeableness = EXCLUDED.score_agreeableness,\n  score_neuroticism = EXCLUDED.score_neuroticism,\n  confianca_openness = EXCLUDED.confianca_openness,\n  confianca_conscientiousness = EXCLUDED.confianca_conscientiousness,\n  confianca_extraversion = EXCLUDED.confianca_extraversion,\n  confianca_agreeableness = EXCLUDED.confianca_agreeableness,\n  confianca_neuroticism = EXCLUDED.confianca_neuroticism,\n  confianca_media = EXCLUDED.confianca_media,\n  raw_resposta = EXCLUDED.raw_resposta,\n  atualizado_em = NOW();\n",
         "options": {
-          "queryReplacement": "={{ [\n  $json.usuario_id ?? null,\n  $json.chat_id ?? null,\n  $json.data_conversa ?? null,\n  $json.perfil_original ?? null,\n  $json.perfil_primario ?? null,\n  $json.perfil_secundario ?? null,\n  $json.resumo_perfil ?? null,\n  $json.insuficiente === true,\n  $json.score_openness ?? null,\n  $json.score_conscientiousness ?? null,\n  $json.score_extraversion ?? null,\n  $json.score_agreeableness ?? null,\n  $json.score_neuroticism ?? null,\n  $json.confianca_openness ?? null,\n  $json.confianca_conscientiousness ?? null,\n  $json.confianca_extraversion ?? null,\n  $json.confianca_agreeableness ?? null,\n  $json.confianca_neuroticism ?? null,\n  $json.confianca_media ?? null,\n  $json.raw_resposta ?? {}\n] }}"
+          "queryReplacement": "=[\n  {{ $json.usuario_id }},\n  {{ $json.chat_id }},\n  {{ $json.data_conversa }},\n  {{ $json.perfil_original ?? null }},\n  {{ $json.perfil_primario ?? null }},\n  {{ $json.perfil_secundario ?? null }},\n  {{ $json.resumo_perfil ?? null }},\n  {{ $json.insuficiente }},\n  {{ $json.score_openness ?? null }},\n  {{ $json.score_conscientiousness ?? null }},\n  {{ $json.score_extraversion ?? null }},\n  {{ $json.score_agreeableness ?? null }},\n  {{ $json.score_neuroticism ?? null }},\n  {{ $json.confianca_openness ?? null }},\n  {{ $json.confianca_conscientiousness ?? null }},\n  {{ $json.confianca_extraversion ?? null }},\n  {{ $json.confianca_agreeableness ?? null }},\n  {{ $json.confianca_neuroticism ?? null }},\n  {{ $json.confianca_media ?? null }},\n  {{ JSON.stringify($json.raw_resposta ?? {}) }}\n]"
         }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2000,
-        96
+        1104,
+        -176
       ],
-      "id": "f2331ac6-85da-45d0-a887-3eb6b040589d",
+      "id": "a9191d15-269d-4208-817a-d86e5bb519c4",
       "name": "Gravar Big Five",
       "credentials": {
         "postgres": {
@@ -280,16 +280,16 @@
     "start": [
       {
         "json": {
-          "usuario_id": "178edaa3-5389-47df-adde-7ad2c2dcd1b3",
-          "mensagens": "[{\"interaction\":1,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":1,\"autor\":\"agente\",\"texto\":\"Oi Aldo, que bom te ver por aqui. Fique à vontade, não precisa saber exatamente como começar — o importante é conversar e ir descobrindo juntos o que faz sentido para você agora. Me conta um pouco do que está passando ou do que gostaria de olhar hoje? Estou aqui para ouvir.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":2,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":2,\"autor\":\"agente\",\"texto\":\"Oi Aldo, que bom te ver por aqui. Fique à vontade, sem pressa para encontrar as palavras certas. Me diga, o que tem passado pela sua cabeça ou coração hoje? Estou aqui para ouvir e entender você.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":3,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":3,\"autor\":\"agente\",\"texto\":\"Oi Aldo, que bom você ter vindo. Às vezes o começo pode parecer difícil mesmo, mas o importante é estar aqui, e ir sentindo aos poucos o que surge. Me conta: o que tem ocupado sua mente ou coração nesses dias? Algum desafio ou desejo que queira explorar juntos? Estou aqui para te acompanhar nessa conversa.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":4,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":4,\"autor\":\"agente\",\"texto\":\"Oi Aldo, que bom te ter aqui comigo. Às vezes começar é mesmo o mais difícil, e tudo bem sentir isso. Gostaria que a gente fosse devagar, só me falando o que está passando para você nesse momento, mesmo que seja algo simples ou confuso. Pode ser um sentimento, um pensamento, um pequeno detalhe do seu dia... O que vier primeiro, eu tô aqui para ouvir.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":5,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":5,\"autor\":\"agente\",\"texto\":\"Oi Aldo, obrigado por estar aqui. Entendo bem essa sensação de não saber como começar, e tá tudo bem. Podemos ir devagar, sem pressa. Me conta, o que tem ocupado seus pensamentos ou sentimentos ultimamente? Qualquer coisa que vier, vou estar aqui para ouvir e ajudar a clarear.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":6,\"autor\":\"usuario\",\"texto\":\"Olá não sei como começar pode me ajudar?\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":6,\"autor\":\"agente\",\"texto\":\"Aldo, entendo que começar pode parecer meio travado às vezes, e isso é bem comum. Posso te ajudar com algumas ideias para a gente ir desenhando o que faz sentido. Pode ser algo do tipo: contar como você está se sentindo hoje, algum momento marcante que viveu recentemente, um desafio que tem pesado, ou até um objetivo que esteja precisando clarear. \\n\\nPor exemplo, você pode me falar como tem sido sua semana, ou se tem algo que te trouxe alegria ou incômodo. Também vale contar se tem algum pensamento que se repete e te atrapalha, ou algo que gostaria de mudar. O que você acha? Quer tentar começar por algum desses caminhos? Estou aqui para ajudar, Sábio.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":7,\"autor\":\"usuario\",\"texto\":\"Então, Sábio, é isso mesmo, eu gostei das dicas aí, eu vou falar sobre essa semana. Foi uma semana bastante agitada, e pra você entender um pouquinho o meu contexto, eu sou uma pessoa que eu saí da casa dos meus pais muito novo, muito cedo, com 15 anos, Vivei muito tempo na casa das pessoas, cresci muito sozinho e sempre trabalhei demais, sempre fui muito focado em ganhar dinheiro para não depender do dinheiro. Muito focado em estudar, trabalhar e sempre acreditei muito em mim mesmo, em trabalhar, ganhar minha vida para não depender das pessoas. e sempre estive muito isolado muito sozinho porque estava a maior parte do tempo dedicado nesse crescimento financeiro\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":7,\"autor\":\"agente\",\"texto\":\"Aldo, que história intensa e cheia de coragem você compartilha comigo. Crescer sozinho assim, tão jovem, e com tanta responsabilidade nas costas, mostra uma força enorme. Imagino que essa dedicação ao trabalho e à independência tenha trazido muitas vitórias, mas talvez também um peso de solidão ou cansaço, né? Como foi para você essa semana agitada no meio de toda essa trajetória? Tem algo que apareceu, sentimentos ou situações que chamaram sua atenção? Quero entender seu momento com cuidado.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":8,\"autor\":\"usuario\",\"texto\":\"Então, eu mudei para Portugal recentemente. Bom, primeiro assim, eu tenho 52 anos, tenho dois filhos, fui casado por 26 anos, faz um ano e meio que eu estou separado. Mudei do Brasil aqui para Portugal para recomeçar minha vida. trouxe um valor expressivo financeiramente para ter uma estabilidade financeira e recomeçar a minha vida aqui. Acontece que teve uns percalços nos meus investimentos, eu acabei perdendo dinheiro e isso acabou mudando um pouco os meus planos e eu tive que dedicar mais energia do que eu esperava nessa questão financeira para recuperar as perdas. E nisso, os meus projetos que eu vim para cá, que era de buscar relacionamentos e mais qualidade de vida, lazer, e crescer, evoluir outros idiomas, essas coisas todas, eu tive que deixar para o segundo plano.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":8,\"autor\":\"agente\",\"texto\":\"Aldo, essa mudança para Portugal e esse recomeço depois de tanta história... deve ser uma mistura grande de sentimentos aí, né? Vejo que você veio com planos importantes de qualidade de vida e crescimento, mas que os desafios financeiros acabaram desviando seu foco. Como você tem se sentido diante dessas mudanças e ajustes nos seus planos? O que você percebe surgindo para você nesse momento, entre o que precisava deixar para depois e o que ainda quer trazer de volta para sua vida? Quero te acompanhar nesse olhar com atenção.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":9,\"autor\":\"usuario\",\"texto\":\"É uma constante dúvida e uma divisão, porque eu quero evoluir nesses objetivos que eu vim buscar aqui em Portugal, mas ao mesmo tempo eu não posso perder o foco dos meus investimentos, porque eu estou em um momento bastante crítico e se eu não der atenção para isso eu posso perder mais dinheiro ainda do que já perdi. outra questão é que eu estou me esforçando para conciliar essa energia maior dedicada nas finanças sem abrir mão das outras áreas estou procurando conhecer outras pessoas estou evoluindo nos meus negócios, estou desenvolvendo um aplicativo também bastante, que está me deixando bastante empolgado e otimista\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":9,\"autor\":\"agente\",\"texto\":\"Aldo, essa divisão que você sente entre cuidar das finanças e ainda querer evoluir em outras áreas importantes é realmente um peso grande para carregar. Parece que você está numa corda bamba, tentando equilibrar segurança e crescimento, e ainda buscar conexão e novidade. Queria saber como agrada ou pesa para você essa busca por manter o foco nas finanças, mas ao mesmo tempo se abrir para novos caminhos e projetos, como esse aplicativo que te empolga. O que tem te dado força nessas horas? E o que, se deixar falar, te causa mais dificuldade? Quero entender onde estão as suas maiores tensões agora.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":10,\"autor\":\"usuario\",\"texto\":\"A maior preocupação é que, como a minha vida inteira foi dedicada nessa questão financeira, eu sempre corri atrás do dinheiro para não precisar do dinheiro. E era quase que uma busca sem fim. E eu decidi desacelerar um pouco. Mas o dinheiro fugiu de mim e eu acabei tendo uma perda muito grande financeira. Então agora eu estou tendo que dedicar a maior parte da minha vida nisso, em recuperar o dinheiro perdido e recomeçar de onde eu parei, com a vida financeira mais estabilizada e, enfim, ter tempo para dedicar nas outras áreas. Essa parte, de fato, está tomando mais a minha atenção e mexendo mais com as minhas emoções. Cada vez que o mercado sobe ou cai, é um estresse diferente e é uma montanha-russa de emoções.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":10,\"autor\":\"agente\",\"texto\":\"Aldo, sinto o peso dessa montanha-russa emocional que você vive com o mercado e as finanças. É como se a busca por segurança, que sempre guiou sua vida, tivesse dado uma guinada inesperada, te colocando num lugar delicado de luta e incerteza. Essa mistura de querer desacelerar e, ao mesmo tempo, precisar acelerar para recuperar o que foi perdido deve mexer muito com seu equilíbrio interno, né? O que você tem descoberto sobre como lidar com esses momentos intensos, essas emoções que sobem e descem junto com o mercado? Tem alguma coisa que te ajuda a respirar ou a encontrar um pouco de paz quando essa tensão aperta? Quero estar aqui para apoiar você nesse caminho.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":11,\"autor\":\"usuario\",\"texto\":\"A minha força vem da minha história. Eu lembro dos desafios que eu já passei, as dificuldades, essa não é a primeira vez que acontece e também não é a primeira vez que eu supero. E sempre que termina essas fases eu volto mais forte. Apesar do medo rodeando a minha mente, eu acredito no meu potencial e na minha qualidade. Tenho um histórico de vitória muito grande, vim de família pobre e consegui dar a volta por cima. Então eu confio muito na minha capacidade. Outra coisa é que eu já venho nesse caminho, nessa busca de autoconhecimento, desenvolvimento pessoal há bastante tempo. E buscando esse equilíbrio e entender melhor minhas emoções, meus sentimentos, o que eu quero, o que me faz bem, o que é importante, meus sabotadores...\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":11,\"autor\":\"agente\",\"texto\":\"Aldo, que força inspiradora vem da sua história... Reconhecer as batalhas que já venceu e a resiliência que carrega como legado é tão poderoso. Essa confiança no seu potencial, mesmo diante do medo, revela uma coragem que muitos admirariam. Sinto também que seu caminho no autoconhecimento tem sido um apoio fundamental para enfrentar esses altos e baixos. Me conta, nessa busca por equilíbrio e clareza sobre suas emoções, o que tem te surpreendido ou ajudado mais até aqui? E onde sente que ainda gostaria de entender melhor a si mesmo? Estou aqui para ajudar a explorar isso com você, Sábio.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":12,\"autor\":\"usuario\",\"texto\":\"Tem vários pontos ainda em mim que eu gostaria de melhorar. Um deles é a disciplina, principalmente nos investimentos. Eu sempre acabo me arriscando mais do que deveria, sou muito arrojado e quase sempre o otimismo muito exagerado. Então, com isso eu acabo me alavancando, me arriscando além do necessário. e isso tem atrapalhado. Outro ponto ainda é na questão dos relacionamentos. Como eu gosto muito da minha solitude, gosto muito de estar comigo mesmo, dos meus pensamentos, de me conhecer, sou muito introspectivo, eu tenho um pouco de dificuldade ainda de convivência. Então, minha bateria social é muito curta. então por mais que eu goste da pessoa, do momento, da ocasião, das companhias gera um desgaste emocional muito grande quando eu volto para casa, que estou na minha caverna, ali no meu canto eu me sinto mais tranquilo, em paz enfim, mas às vezes me sinto também muito triste sozinho por isso\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":12,\"autor\":\"agente\",\"texto\":\"Aldo, se entendi bem, você sente que tem uma força enorme e um histórico de superação que sustenta você, mas encara algumas batalhas internas, como o otimismo exagerado que atrapalha sua disciplina nos investimentos, e essa necessidade de solitude que, embora te dê paz, às vezes te deixa triste pela pouca energia para relações sociais. Você tem um equilíbrio delicado entre querer proteger seu espaço interno e ainda assim desejar conexões, e também entre arriscar para crescer e precisar de mais disciplina para segurar esse ímpeto. Faz sentido para você esse resumo? Gostaria de ajustar algo? Quero que a gente siga esse caminho juntos, com clareza e suavidade.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":13,\"autor\":\"usuario\",\"texto\":\"Está bom assim\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"},{\"interaction\":13,\"autor\":\"agente\",\"texto\":\"Fico feliz que tenha feito sentido para você, Aldo. É um passo importante reconhecer esses lugares tão pessoais e complexos dentro de si mesmo. Você tem uma força grande, e esse olhar que você vem cultivando já é um avanço que merece ser valorizado. Quando quiser, podemos continuar explorando juntos, trazendo mais clareza e leveza para sua caminhada. Enquanto isso, te convido a visitar seu dashboard para acompanhar seu progresso e insights. Cuide bem de você e até a próxima, Sábio está aqui sempre que precisar.\",\"timestamp\":\"2025-10-26T18:55:57.744Z\"}]",
-          "data_conversa": "Sun Oct 26 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "chat_id": "9787087e-a2db-4806-804b-4e82ef7ca1af",
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "mensagens": "[]",
+          "data_conversa": "2025-10-26T00:00:00.000Z",
+          "chat_id": "bdd9802e-3805-4500-9f97-c3e2ef3e0f5d",
           "usr_name": "Aldo"
         }
       }
     ]
   },
-  "versionId": "7029ffb0-0d46-4611-bacc-a0678e0306d1",
+  "versionId": "6331739c-d75c-403a-8b8b-552677a0398e",
   "triggerCount": 0,
   "shared": [
     {
@@ -314,7 +314,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-26T07:40:32.710Z",
+              "updatedAt": "2025-10-27T08:00:06.115Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -339,7 +339,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-26",
+              "lastActiveAt": "2025-10-27",
               "isPending": false
             }
           }
