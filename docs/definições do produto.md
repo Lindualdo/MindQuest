@@ -1,135 +1,173 @@
-# MVP – MindQuest v1.1  
-### Proposta de Valor e Estrutura de Produto (atualizado)
+# Produto · MindQuest v1.1
+
+## Uma plataforma de evolução pessoal guiada por IA
+
+Sua mente fala com você todos os dias. O MindQuest transforma ruídos em clareza e ações em resultados.
 
 ---
 
-## 0. O que é o MindQuest?
+## Público focal
+Mulheres (≈80%) e pessoas com projetos travados que buscam clareza, coragem e progresso consistente.
 
-> "Uma plataforma de evolução pessoal guiada por IA. Sua mente fala com você todos os dias. O MindQuest transforma ruidos em clareza e ações em resultados"
+## Proposta única
+Sua mente fala todos os dias. O MindQuest te ensina a ouvir, entender e evoluir.
 
----
+## Engajamento real
+Ciclo contínuo que integra conversa orientada, dashboards intuitivos e planos de ação personalizados.
 
-## 1. Público-Alvo  
-- Público principal: mulheres (~80%)  
-- Também pessoas que têm planos para tirar do papel e não estão contentes com a vida atual  
-- Buscam clareza mental, autoconhecimento e progresso real  
-
----
-
-## 2. Proposta Única de Valor  
-> "Converse com sua IA e entenda o que sua mente quer te dizer"
-> "Sua mente fala todos os dias. O MindQuest te ensina a ouvir, entender e evoluir."
-> "Descubra o que está te travando — e transforme confusão em clareza, e clareza em ação"
+## Experiência premium
+Mentor virtual 24h, insights acionáveis e acompanhamento 360° da jornada emocional.
 
 ---
 
-## 3. Métricas de Sucesso  
-- ≥ 30% dos usuários conversam 3+ dias/semana  
-- Média ≥ 1,5 sessões/dia nos primeiros 7 dias  
-- ≥ 40% acessam o dashboard após a 1ª conversa  
-- ≥ 25% retornam após 5 dias  
-- ≥ 10% clicam em “Quero ser avisado” (interesse no Premium)
+## Métricas-chave do MVP
+Foco em engajamento recorrente, retorno de aprendizados e ativação do plano Premium.
+
+### Product KPIs
+
+**CONVERSAS FREQUENTES**
+≥ 30%
+Usuários conversando 3+ dias por semana.
+
+**RETENÇÃO INICIAL**
+1,5 sessões/dia
+Média nos primeiros 7 dias de uso.
+
+**ENGAJAMENTO NO DASHBOARD**
+≥ 40%
+Acessos ao painel após a primeira conversa.
+
+**RETORNO APÓS 5 DIAS**
+≥ 25%
+Usuários que mantêm o hábito.
+
+**INTERESSE NO PREMIUM**
+≥ 10%
+Cliques em "Quero ser avisado".
 
 ---
 
-## 4. Estrutura do Produto por Interface
+## Estrutura do Produto por Interface
 
-### 🧭 DASH (Dashboard de Evolução)
-| Bloco | Free | Premium |
+### Free vs Premium
+
+#### Dashboard de Evolução
+
+| BLOCO | FREE | PREMIUM |
 |-------|------|---------|
-| **Humor atual** | ✅ | ✅ |
-| **Roda das emoções (média semanal)** | ✅ | ✅ |
-| **Sentimentos (PANAS – média semanal)** | ✅ | ✅ |
-| **Sabotadores – o mais ativo** | ✅ | ✅ |
-| **Histórico de humor interativo + descrição dos gatilhos** | Últimos 3 dias | Total, com filtros por período |
-| **Histórico de emoções (destaque das áreas da vida impactadas)** | — | ✅ |
-| **Histórico dos sabotadores (intensidade, insights e contramedidas)** | — | ✅ |
-| **Gamificação (ações para melhorar resultados e padrões mentais)** | 1 ação por semana | Todas as ações definidas com a IA |
-| **Insights** | Visualização simples | Pode transformar em ações monitoráveis/acionáveis |
-| **Histórico de conversas** | ✅ | ✅ |
-| **Resumo das conversas + conversa completa** | ✅ | ✅ |
+| Humor atual | Incluído | Incluído |
+| Roda das emoções (média semanal) | Incluído | Incluído |
+| Sentimentos PANAS (média semanal) | Incluído | Incluído |
+| Sabotadores – o mais ativo | Incluído | Incluído |
+| Histórico de humor + gatilhos | Últimos 3 dias | Completo com filtros |
+| Histórico de emoções (áreas da vida) | — | Incluído |
+| Histórico de sabotadores (insights + contramedidas) | — | Incluído |
+| Gamificação (ações orientadas) | 1 ação por semana | Plano completo com IA |
+| Insights | Visualização simples | Transformar em planos acionáveis |
+| Histórico e resumo de conversas | Incluído | Incluído |
+
+#### Chat · Assistente Pessoal
+
+| RECURSO | FREE | PREMIUM |
+|---------|------|---------|
+| Conversa diária com a IA pessoal | 1 conversa/dia (≈8 interações) | Até 5 conversas/dia |
+
+#### Interações Inteligentes
+
+| RECURSO | FREE | PREMIUM |
+|---------|------|---------|
+| Convite para conversa | Incluído | Incluído |
+| Convite para metas e ações | 1 por semana | Ilimitado |
+| Resumo da semana | Incluído | Incluído |
+| Resumo do mês (ações, metas, evolução, raio X das emoções) | — | Incluído |
+
+#### Mentor Virtual · Premium
+
+- Conversas livres a qualquer hora do dia
+- Orientações práticas e técnicas de crescimento pessoal
+- Filosofias de vida e hábitos mentais eficientes
+- Visão 360° da evolução do usuário
+- Acompanhamento como "versão aprimorada da mente"
 
 ---
 
-### 💬 CHAT (Conversa com o Assistente Pessoal)
-| Recurso | Free | Premium |
-|--------|------|---------|
-| **Conversa diária com a IA pessoal** | 1 por dia (5–8 interações) | Até 5 conversas por dia |
+## Ciclo de Experiência do Usuário
+
+### Conversa → Insight → Ação
+
+**1. Conversa (Chat)**
+A IA colhe emoções, fatos e traça o estado mental atual.
+
+**2. Insight / Estado Atual (Dash)**
+Dashboard compila humor, sabotadores e emoções prioritárias.
+
+**3. Ação concreta (Interações)**
+Sugestões de metas e micro-ações alinhadas aos objetivos.
+
+**4. Reengajar (Convite IA)**
+Lembretes inteligentes para manter o ciclo ativo.
+
+**5. Progresso visualizado**
+Indicadores atualizados reforçam conquistas e próximos passos.
 
 ---
 
-### 🔄 INTERAÇÕES (IA ↔ Usuário)
-| Recurso | Free | Premium |
-|--------|------|---------|
-| **Convite para conversa** | ✅ | ✅ |
-| **Convite para definir metas e ações** | 1 por semana | Ilimitado |
-| **Resumo da semana** | ✅ | ✅ |
-| **Resumo do mês (ações, metas, evolução, raio X das emoções)** | — | ✅ |
+## Mapa Mental das Funcionalidades
+
+### Visão 360°
+
+#### 📊 Dash
+- Humor atual
+- Roda das emoções (média semanal)
+- Sentimentos PANAS (média semanal)
+- Sabotador mais ativo
+- Histórico de humor com gatilhos
+- Histórico de emoções (Premium)
+- Histórico de sabotadores (Premium)
+- Gamificação orientada
+- Insights acionáveis (Premium)
+- Histórico completo de conversas
+- Resumo das conversas + conversa completa
+
+#### 💬 Chat
+- Reflexão Guiada por IA
+- Free: 1 conversa por dia
+- Premium: até 5 conversas/dia
+
+#### 🔄 Interações
+- Lembrete para reflexões guiadas
+- Definir metas e ações
+- Resumo semanal inteligente
+- Resumo mensal completo (Premium)
+- Motivacional/inspiração
+- Sabotadores/contramedidas/insights
+
+#### 🧠 Mentor Virtual
+- Conversa 24h com orientações aprofundadas
+- Integra filosofias e práticas de crescimento
+- Acompanha evolução integral do usuário
+- Funciona como "versão aprimorada" da mente
 
 ---
 
-### 🧠 MENTOR VIRTUAL (Somente Premium)
-| Recurso | Premium |
-|--------|---------|
-| **Conversas livres a qualquer hora do dia** | ✅ |
-| **Orientações práticas e técnicas de crescimento pessoal** | ✅ |
-| **Ensina filosofias de vida e hábitos mentais eficientes** | ✅ |
-| **Acompanha evolução completa do usuário (visão 360°)** | ✅ |
-| **Atua como “versão aprimorada da mente” do usuário** | ✅ |
+## Estratégia Free x Premium
+
+### MindQuest Free
+- Entrega valor real em curto prazo com dados e orientações suficientes.
+- Permite experimentar todo o fluxo (chat → dash → ações) com limites leves.
+- Apresenta gatilhos para curiosidade sobre recursos avançados.
+
+### MindQuest Premium
+- Expande profundidade e continuidade: histórico completo, múltiplas conversas.
+- Inclui mentor virtual e insights acionáveis orientados pela IA.
+- Entrega acompanhamento ativo focado em crescimento pessoal.
 
 ---
 
-## 5. Ciclo de Experiência do Usuário
-```
-Conversa (Chat)
-   ↓
-Insight / Estado Atual (Dash)
-   ↓
-Ação Concreta (Interação)
-   ↓
-Relembrar / Reengajar (Convite IA)
-   ↓
-Progresso Visualizado (Dash Atualizado)
-```
+## Briefing pronto para o time de Marketing
 
----
+### Transforme estes pilares em narrativas cativantes
 
-## 6. Estratégia Free × Premium
-- O **Free** permite experimentar todos os recursos principais, mas com **limite de quantidade, profundidade ou histórico** onde indicado.  
-- O **Premium** amplia o alcance e remove restrições, oferecendo **continuidade, personalização e acompanhamento ativo** (Mentor Virtual).  
-- O objetivo do Free é gerar valor real e despertar curiosidade pelo Premium — a isca digital de engajamento.
+Use esta página como referência visual e textual para landing pages, campanhas, apresentações e materiais promocionais do MindQuest v1.1.
 
----
-
-## 7. Mapa Mental das Funcionalidades
-```
-📊 DASH
- ├─ Humor atual
- ├─ Roda das emoções (média semanal)
- ├─ Sentimentos PANAS (média semanal)
- ├─ Sabotadores (mais ativo)
- ├─ Histórico de humor interativo (+ descrição dos gatilhos)
- ├─ Histórico de emoções (áreas impactadas) – Premium
- ├─ Histórico de sabotadores (intensidade + contramedidas) – Premium
- ├─ Gamificação (ações de melhoria)
- ├─ Insights (transformação em ação – Premium)
- ├─ Histórico de conversas
- └─ Resumo das conversas + conversa completa
-
-💬 CHAT
- └─ Conversa com assistente pessoal
-     ├─ Free: 1 conversa/dia (5–8 interações)
-     └─ Premium: até 5 conversas/dia
-
-🔄 INTERAÇÕES
- ├─ Convite para conversa
- ├─ Convite para metas/ações
- ├─ Resumo da semana
- └─ Resumo do mês – Premium
-
-🧠 MENTOR VIRTUAL (Premium)
- ├─ Conversas livres 24h
- ├─ Orientações e técnicas práticas
- ├─ Filosofias e crescimento pessoal
- └─ Visão completa do usuário
-```
+**Enviar para o time de marketing**
