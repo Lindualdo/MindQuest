@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-09-30T11:31:35.749Z",
-  "updatedAt": "2025-10-27T00:19:01.675Z",
+  "updatedAt": "2025-10-27T10:25:47.218Z",
   "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
   "active": false,
@@ -127,6 +127,12 @@
     {
       "parameters": {
         "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
           "conditions": [
             {
               "leftValue": "={{ $json.tipo }}",
@@ -134,15 +140,11 @@
               "operator": {
                 "type": "string",
                 "operation": "equals"
-              }
+              },
+              "id": "0531552e-c58e-4386-a7c8-0fe2f618b330"
             }
           ],
-          "combinator": "and",
-          "options": {
-            "caseSensitive": true,
-            "typeValidation": "strict",
-            "version": 1
-          }
+          "combinator": "and"
         },
         "options": {}
       },
@@ -270,7 +272,7 @@
       "typeVersion": 1.5,
       "position": [
         -1008,
-        640
+        608
       ],
       "credentials": {
         "redis": {
@@ -585,8 +587,21 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "0c2b4bd5-7d48-47f2-a610-e4f3cbfb2cd8",
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "remoteJid": "5512982389360@s.whatsapp.net",
+          "pushName": "Aldo",
+          "id": "3A544CF9530268200864",
+          "whatsapp_number": "5512982389360",
+          "evolution_instancia": "MindQuest",
+          "menssagem": "Sábio"
+        }
+      }
+    ]
+  },
+  "versionId": "7cf15412-b39e-4619-827c-847e2d09422f",
   "triggerCount": 1,
   "shared": [
     {
