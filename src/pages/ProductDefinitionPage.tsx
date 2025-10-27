@@ -12,6 +12,7 @@ import {
   Brain,
 } from 'lucide-react';
 import Card from '../components/ui/Card';
+import cicloMindquest from '../img/ciclo-mindquest.png';
 
 const metrics = [
   {
@@ -171,18 +172,31 @@ const ProductDefinitionPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
       <header className="relative overflow-hidden border-b border-white/10 bg-gradient-to-br from-indigo-950/80 via-slate-900/60 to-purple-950/60">
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" />
-        <div className="mx-auto flex min-h-[420px] max-w-6xl flex-col justify-center gap-10 px-6 py-16 md:px-10 lg:px-12">
-          <div className="max-w-2xl space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-600/20 px-4 py-1 text-sm font-medium text-indigo-200 ring-1 ring-indigo-500/40">
-              <Sparkles size={16} />
-              Produto · MindQuest v1.1
-            </span>
-            <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
-              Uma plataforma de evolução pessoal guiada por IA
-            </h1>
-            <p className="text-lg text-slate-300">
-              Sua mente fala com você todos os dias. O MindQuest transforma ruidos em clareza e ações em resultados 
-            </p>
+        <div className="mx-auto flex min-h-[420px] max-w-6xl flex-col justify-center gap-12 px-6 py-16 md:px-10 lg:px-12">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-indigo-600/20 px-4 py-1 text-sm font-medium text-indigo-200 ring-1 ring-indigo-500/40">
+                <Sparkles size={16} />
+                Produto · MindQuest v1.1
+              </span>
+              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+                Uma plataforma de evolução pessoal guiada por IA
+              </h1>
+              <p className="text-lg text-slate-300">
+                Sua mente fala com você todos os dias. O MindQuest transforma ruídos em clareza e ações em resultados.
+              </p>
+            </div>
+            <figure className="relative w-full max-w-xl rounded-[32px] border border-white/10 bg-slate-900/40 p-4 shadow-[0_40px_120px_-50px_rgba(56,189,248,0.45)] backdrop-blur sm:p-6">
+              <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
+                Fluxo MindQuest
+              </span>
+              <img
+                src={cicloMindquest}
+                alt="Visual do ciclo MindQuest: conversa, insight e ação concreta."
+                className="w-full rounded-[24px] border border-white/5 object-cover"
+                loading="lazy"
+              />
+            </figure>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

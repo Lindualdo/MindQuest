@@ -1,18 +1,19 @@
 import React, { useEffect } from 'react';
 import { Brain, MessageSquare, Target, Sparkles, Shield, Zap, ArrowRight, Quote } from 'lucide-react';
 import { WHATSAPP_URL } from '@/constants/whatsapp';
+import cicloMindquest from '@/img/ciclo-mindquest.png';
 
 const palette = {
-  surface: '#F8F9FB',
+  surface: '#CBB699',
   card: '#FFFFFF',
-  primary: '#1F8A70',
-  secondary: '#2C3E50',
+  primary: '#F7AB8A',
+  secondary: '#A2846C',
   accent: '#FF9B71',
   footer: '#1A242F',
   muted: '#5B6475',
   stroke: 'rgba(47, 63, 80, 0.14)',
-  soft: '#E7F1EF',
-  warmSurface: '#FFF3EB'
+  soft: '#EBD3C0',
+  warmSurface: '#EBD3C0'
 };
 
 const PAIN_POINTS = [
@@ -205,7 +206,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
   useEffect(() => {
     document.title = 'MindQuest — Sua mente fala com você todos os dias';
     const description =
-      'Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.';
+      'MidQuest: Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.';
     const existingMeta = document.querySelector("meta[name='description']");
     if (existingMeta) {
       existingMeta.setAttribute('content', description);
@@ -279,7 +280,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-16 md:pt-24 lg:pt-28">
         <section
-          className="grid items-center gap-10 rounded-[32px] p-10 md:grid-cols-[1.1fr_0.9fr] md:p-14"
+          className="grid items-start gap-10 rounded-[32px] p-10 md:grid-cols-[1.1fr_0.9fr] md:p-14"
           style={{
             backgroundColor: palette.secondary,
             boxShadow: '0 28px 80px -40px rgba(22, 29, 39, 0.55)'
@@ -314,32 +315,21 @@ const ComecarAgoraLandingPage: React.FC = () => {
               </span>
             </div>
           </div>
-          <div
-            className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[28px] border border-white/10 p-6"
+          <figure
+            className="relative flex w-full items-center justify-center overflow-hidden rounded-[28px] border border-white/10 p-6"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.08)'
+              backgroundColor: '#F8EEDF',
+              boxShadow: '0 32px 90px -48px rgba(18, 28, 35, 0.6)',
+              minHeight: '340px'
             }}
           >
-            <div
-              className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-[24px] border border-white/10 p-6 text-center text-sm font-medium leading-relaxed tracking-wide text-white/70"
-              style={{ backdropFilter: 'blur(18px)' }}
-            >
-              <span className="text-xs uppercase tracking-[0.28em]" style={{ color: palette.accent }}>
-                conceito visual
-              </span>
-              <p>
-                [Imagem conceito: Diagrama circular suave mostrando o fluxo contínuo das 5 etapas com ilustração
-                minimalista]
-              </p>
-              <div
-                className="mt-6 flex w-full flex-col gap-3 rounded-[20px] bg-white/5 p-4 text-left text-xs leading-5 text-white/80"
-                style={{ letterSpacing: '0.03em' }}
-              >
-                <span>Conversa → Insight → Ação → Progresso</span>
-                <span>Acesso imediato. Sem login. Sem senha. Apenas você e sua evolução.</span>
-              </div>
-            </div>
-          </div>
+            <img
+              src={cicloMindquest}
+              alt="Ciclo MindQuest mostrando conversa, insight no app e ação concreta."
+              className="h-full w-full max-h-[360px] object-contain"
+              loading="lazy"
+            />
+          </figure>
         </section>
 
         <section
@@ -503,7 +493,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
               >
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: 'rgba(31, 138, 112, 0.12)' }}
+                  style={{ backgroundColor: 'rgba(247, 171, 138, 0.12)' }}
                 >
                   <Icon size={24} style={{ color: palette.primary }} />
                 </div>
@@ -530,7 +520,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
                 backgroundColor: palette.primary,
                 color: palette.card,
                 letterSpacing: '0.2em',
-                boxShadow: '0 16px 40px -26px rgba(31, 138, 112, 0.45)'
+                boxShadow: '0 16px 40px -26px rgba(247, 171, 138, 0.45)'
               }}
             >
               Ver como funciona
@@ -568,7 +558,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
                 backgroundColor: palette.primary,
                 color: palette.card,
                 letterSpacing: '0.24em',
-                boxShadow: '0 24px 50px -26px rgba(31, 138, 112, 0.5)'
+                boxShadow: '0 24px 50px -26px rgba(247, 171, 138, 0.5)'
               }}
             >
               Começar agora - É grátis
