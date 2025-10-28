@@ -16,7 +16,7 @@ const foundations = [
   },
   {
     title: "Posicionamento",
-    description: "MindQuest não é terapia nem app de produtividade. É evolução pessoal guiado IA.",
+    description: "MindQuest não é terapia nem app de produtividade. É evolução pessoal guiado por IA.",
   },
 ];
 

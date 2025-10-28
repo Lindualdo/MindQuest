@@ -12,7 +12,7 @@ const Hero = ({ onCtaClick }: HeroProps) => (
       boxShadow: "0 28px 80px -40px rgba(22, 29, 39, 0.55)",
     }}
   >
-    <div className="flex w-full max-w-2xl flex-col gap-6 text-white">
+    <div className="flex w-full max-w-[640px] flex-col gap-6 text-white md:max-w-[720px]">
       <h1
         className="text-3xl font-semibold leading-tight md:text-4xl"
         style={{ fontFamily: "Poppins, sans-serif" }}

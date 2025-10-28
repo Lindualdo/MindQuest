@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import { palette } from "./constants";
-import { WHATSAPP_PREMIUM_URL, WHATSAPP_URL } from "@/constants/whatsapp";
+import { WHATSAPP_URL } from "@/constants/whatsapp";
 
 type PlanContent = {
   free: string[];
@@ -18,16 +18,14 @@ const planSections: Array<{
     summary: "O coração do MindQuest: um diálogo guiado que converte sentimentos em clareza prática.",
     content: {
       free: [
-        "1 conversa guiada por dia via WhatsApp com perguntas acolhedoras e objetivas.",
-        "Aprovação manual de resumos antes de salvar qualquer informação.",
-        "Tokens renovados a cada sessão — sem login, sem senha.",
-        "Suporte a texto e áudio (transcrição simples) para registrar o que importa no momento.",
+        "1 conversa guiada por dia no WhatsApp com perguntas certeiras.",
+        "Você aprova cada resumo antes de guardar qualquer informação.",
+        "Tokens renovados a cada sessão — zero login, zero senha.",
       ],
       premium: [
-        "Até 5 conversas por dia com continuidade inteligente do contexto.",
-        "Resumos automáticos com insights e recomendações priorizadas para seus objetivos.",
-        "Transcrição multimodal (texto + áudio) com análise semântica aprofundada.",
-        "Memória ativa entre sessões para acelerar decisões e destravar padrões recorrentes.",
+        "Até 5 conversas por dia mantendo o contexto vivo.",
+        "Insights automáticos com próximos passos priorizados.",
+        "Memória ativa entre sessões para destravar ciclos mais rápido.",
       ],
     },
   },
@@ -36,16 +34,14 @@ const planSections: Array<{
     summary: "Veja sua evolução em painéis vivos que traduzem emoções em direção clara.",
     content: {
       free: [
-        "Dashboard com humor atual, energia e sabotador mais ativo.",
+        "Dashboard com humor, energia e sabotador em tempo real.",
         "Histórico dos últimos 3 dias com gatilhos destacados.",
-        "Gráficos semanais de emoções (PANAS) e rodas sentimentais simplificadas.",
-        "Checklist de micro ações guiadas (1 por semana) alinhadas ao objetivo escolhido.",
+        "Painel semanal de emoções e micro ações orientadas.",
       ],
       premium: [
-        "Histórico completo com filtros por período, temas e intensidade emocional.",
-        "Visão por áreas da vida (trabalho, relações, saúde, finanças e propósito).",
-        "Insights convertidos automaticamente em planos acionáveis com passos claros.",
-        "Busca semântica nas conversas e notas para recuperar aprendizados instantaneamente.",
+        "Histórico completo com filtros por período e área da vida.",
+        "Busca semântica e planos automáticos prontos para executar.",
+        "Indicadores detalhados por trabalho, relações, saúde, finanças e propósito.",
       ],
     },
   },
@@ -54,16 +50,14 @@ const planSections: Array<{
     summary: "Automatizamos o acompanhamento para que você mantenha o ritmo sem sentir pressão.",
     content: {
       free: [
-        "Convite diário para refletir com a IA no horário que fizer sentido.",
-        "Resumo inteligente ao final da semana com principais emoções e aprendizados.",
-        "Sugestão de uma micro ação personalizada por semana para sair da inércia.",
-        "Lembretes gentis quando um padrão emocional se repetir com frequência.",
+        "Convite diário para refletir na hora que fizer sentido.",
+        "Resumo inteligente no fim da semana.",
+        "Lembretes quando padrões emocionais se repetem.",
       ],
       premium: [
-        "Interações ilimitadas sob demanda para ajustar metas e rotinas sempre que precisar.",
-        "Rotinas automatizadas (manhã, meio do dia, noite) adaptadas à sua agenda real.",
-        "Check-ins de progresso com indicadores de consistência e energia em tempo real.",
-        "Recomendações proativas baseadas em padrões emocionais, sabotadores e metas em aberto.",
+        "Interações sob demanda para ajustar metas a qualquer hora.",
+        "Rotinas automatizadas (manhã, meio do dia e noite) adaptadas a você.",
+        "Check-ins com indicadores de consistência e energia em tempo real.",
       ],
     },
   },
@@ -71,15 +65,11 @@ const planSections: Array<{
     area: "Mentor ativo 24 × 7",
     summary: "Uma camada premium para quem quer mentoria contínua baseada em neurociência e filosofia prática.",
     content: {
-      free: [
-        "Disponível somente no Premium (em breve).",
-        "Enquanto isso, você segue evoluindo com o assistente principal e o app dinâmico.",
-      ],
+      free: ["Você evolui com o assistente principal e o app dinâmico."],
       premium: [
-        "Mentor virtual com personalidade moldada ao seu estilo de aprendizado.",
-        "Respostas em tempo real para dilemas complexos, com exemplos e exercícios aplicáveis.",
-        "Integra todo o histórico de conversas, emoções e avanços para personalizar o conselho.",
-        "Sugestões de técnicas avançadas (neurociência, TCC, filosofia prática) e acompanhamentos semanais.",
+        "Mentor virtual 24×7 moldado ao seu estilo de aprendizado.",
+        "Sugestões avançadas de neurociência, TCC e filosofia prática quando você precisa destravar.",
+        "Acompanha toda a jornada para acelerar decisões difíceis com segurança.",
       ],
     },
   },
@@ -103,8 +93,11 @@ const Plans = () => {
     >
       <SectionTitle
         title="Planos"
-        description="Compare o que você recebe no Free e no Premium (em breve) e escolha o nível de suporte ideal."
+        description="80% do MindQuest está no plano Free. Quando o Premium chegar, ele só adiciona turbo para quem quiser acelerar."
       />
+      <p className="mt-4 text-center text-xs uppercase tracking-[0.2em]" style={{ color: palette.muted }}>
+        Premium disponível em breve — aproveite o Free agora mesmo.
+      </p>
 
       <div className="mt-12 space-y-8">
         {planSections.map((section) => (
@@ -157,7 +150,7 @@ const Plans = () => {
                   className="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
                   style={{ backgroundColor: palette.primary, color: palette.card }}
                 >
-                  Premium (em breve)
+                  Premium
                 </span>
                 <ul className="space-y-2 text-sm leading-6" style={{ color: palette.secondary }}>
                   {section.content.premium.map((item) => (
@@ -170,7 +163,7 @@ const Plans = () => {
         ))}
       </div>
 
-      <div className="mt-12 flex flex-col items-center gap-4 md:flex-row md:justify-center">
+      <div className="mt-12 flex justify-center">
         <button
           type="button"
           onClick={() => handleOpen(WHATSAPP_URL)}
@@ -181,20 +174,7 @@ const Plans = () => {
             boxShadow: "0 18px 40px -24px rgba(247, 171, 138, 0.6)",
           }}
         >
-          Começar grátis
-          <ArrowRight size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => handleOpen(WHATSAPP_PREMIUM_URL)}
-          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition duration-200"
-          style={{
-            backgroundColor: "transparent",
-            color: palette.secondary,
-            border: `1px solid ${palette.secondary}`,
-          }}
-        >
-          Quero o Premium primeiro
+          Começar grátis agora
           <ArrowRight size={16} />
         </button>
       </div>
