@@ -35,6 +35,10 @@ const PainPoints = () => (
         </article>
       ))}
     </div>
+    <p className="mt-8 text-center text-sm leading-6" style={{ color: palette.muted }}>
+      Esses pensamentos são naturais e humanos — foram “programados” em sua mente para te proteger, mas podem estar travando sua
+      felicidade e crescimento pessoal.
+    </p>
   </section>
 );
 
