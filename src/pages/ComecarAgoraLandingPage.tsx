@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { Brain, MessageSquare, Target, Sparkles, Shield, Zap, ArrowRight, Quote } from 'lucide-react';
 import { WHATSAPP_URL } from '@/constants/whatsapp';
-import cicloMindquest from '@/img/ciclo-mindquest.png';
 
 const palette = {
-  surface: '#CBB699',
+  surface: '#E1D8CC',
   card: '#FFFFFF',
   primary: '#F7AB8A',
   secondary: '#A2846C',
@@ -287,15 +286,17 @@ const ComecarAgoraLandingPage: React.FC = () => {
           }}
         >
           <div className="flex flex-col gap-6 text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em]" style={{ color: palette.accent }}>
-              Clareza. Serenidade. Movimento.
-            </p>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1">
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.28em]"
+                style={{ color: palette.card, letterSpacing: '0.28em' }}
+              >
+                Clareza • Serenidade • Movimento
+              </span>
+            </div>
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Sua mente fala com você todos os dias. Aprenda a ouvir, entender e evoluir.
+              Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.
             </h1>
-            <p className="text-base leading-7 text-white/90">
-              Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.
-            </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
@@ -310,26 +311,12 @@ const ComecarAgoraLandingPage: React.FC = () => {
               >
                 Começar agora no WhatsApp - É grátis
               </button>
-              <span className="text-xs font-medium uppercase tracking-[0.22em] text-white/80 sm:ml-4">
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:ml-4">
                 Sem login, sem senha. Apenas uma conversa.
               </span>
             </div>
           </div>
-          <figure
-            className="relative flex w-full items-center justify-center overflow-hidden rounded-[28px] border border-white/10 p-6"
-            style={{
-              backgroundColor: '#F8EEDF',
-              boxShadow: '0 32px 90px -48px rgba(18, 28, 35, 0.6)',
-              minHeight: '340px'
-            }}
-          >
-            <img
-              src={cicloMindquest}
-              alt="Ciclo MindQuest mostrando conversa, insight no app e ação concreta."
-              className="h-full w-full max-h-[360px] object-contain"
-              loading="lazy"
-            />
-          </figure>
+          <div className="hidden md:block" />
         </section>
 
         <section
@@ -480,8 +467,8 @@ const ComecarAgoraLandingPage: React.FC = () => {
           style={{ backgroundColor: palette.card, boxShadow: '0 24px 80px -48px rgba(59, 59, 88, 0.28)' }}
         >
           <SectionTitle
-            kicker="Como funciona"
-            title="O ciclo que gera evolução real"
+            kicker="O que é MindQuest"
+            title="Plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados."
             description="Conversa → Insight → Ação → Progresso"
           />
           <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -543,12 +530,6 @@ const ComecarAgoraLandingPage: React.FC = () => {
             title="Tudo começa com uma conversa"
             description='Diga "oi" no WhatsApp e sinta a diferença na primeira semana.'
           />
-          <p
-            className="mt-6 text-lg font-semibold uppercase tracking-[0.28em]"
-            style={{ color: palette.secondary, fontFamily: 'Poppins, sans-serif' }}
-          >
-            Clareza. Serenidade. Movimento.
-          </p>
           <div className="mt-10 flex flex-col items-center gap-4">
             <button
               type="button"

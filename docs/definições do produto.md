@@ -1,16 +1,15 @@
 # Produto · MindQuest v1.1
 
 ## Uma plataforma de evolução pessoal guiada por IA
-
-Sua mente fala com você todos os dias. O MindQuest transforma ruídos em clareza e ações em resultados.
-
+O MindQuest transforma ruídos em clareza e ações em resultados.
+Sua mente fala com você todos os dias. Aprenda a ouvir, entender e evoluir.
 ---
 
 ## Público focal
 Mulheres (≈80%) e pessoas com projetos travados que buscam clareza, coragem e progresso consistente.
 
 ## Proposta única
-Sua mente fala todos os dias. O MindQuest te ensina a ouvir, entender e evoluir.
+Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.
 
 ## Engajamento real
 Ciclo contínuo que integra conversa orientada, dashboards intuitivos e planos de ação personalizados.
