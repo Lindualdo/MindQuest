@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { format, isValid, parseISO } from 'date-fns';
 import { ArrowLeft, MessageSquare, RefreshCw } from 'lucide-react';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
 
 const normalizeParagraphs = (text?: string) => {
   if (!text) {

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
 
 const FullChatPage: React.FC = () => {
   const { fullChatDetail, fullChatLoading, fullChatError, selectedChatId, closeFullChat, openFullChat } = useDashboard();

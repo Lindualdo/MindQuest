@@ -14,8 +14,8 @@ import {
   Brain,
   Users
 } from 'lucide-react';
-import { useDashboard } from '../store/useStore';
-import type { InsightResource } from '../types/emotions';
+import { useDashboard } from '@/store/useStore';
+import type { InsightResource } from '@/types/emotions';
 
 const feedbackConfigs: Array<{
   key: 'feedback_positivo' | 'feedback_desenvolvimento' | 'feedback_motivacional';

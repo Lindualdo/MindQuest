@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { ArrowLeft, Award, Calendar, Layers, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
 
 const ConquistasPage: React.FC = () => {
   const { dashboardData, setView } = useDashboard();

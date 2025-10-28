@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { ArrowLeft, Lightbulb, Compass, Target, HeartPulse, ShieldCheck } from 'lucide-react';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
-import { getSabotadorById, sabotadoresCatalogo } from '../data/sabotadoresCatalogo';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
+import { getSabotadorById, sabotadoresCatalogo } from '@/data/sabotadoresCatalogo';
 
 const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => {
   if (!items.length) return null;

@@ -10,9 +10,9 @@ import {
   Compass,
   Activity
 } from 'lucide-react';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
-import type { PlutchikEmotion } from '../types/emotions';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
+import type { PlutchikEmotion } from '@/types/emotions';
 
 const emotionTone: Record<string, 'positivo' | 'negativo' | 'neutro'> = {
   alegria: 'positivo',

@@ -11,8 +11,8 @@ import {
   Legend
 } from 'recharts';
 import { ArrowLeft, Info } from 'lucide-react';
-import Card from '../components/ui/Card';
-import { useDashboard } from '../store/useStore';
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
 
 const HumorHistoryPage: React.FC = () => {
   const {

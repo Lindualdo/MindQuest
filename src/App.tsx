@@ -10,21 +10,16 @@ import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
-import HumorHistoryPage from './pages/HumorHistoryPage';
-import FullChatPage from './pages/FullChatPage';
-import InsightDetailPage from './pages/InsightDetailPage';
+import HumorHistoryPage from './pages/App/HumorHistoryPage';
+import FullChatPage from './pages/App/FullChatPage';
+import InsightDetailPage from './pages/App/InsightDetailPage';
 import { useDashboard } from './store/useStore';
-import ConquistasPage from './pages/ConquistasPage';
-import SabotadorDetailPage from './pages/SabotadorDetailPage';
-import ResumoConversasPage from './pages/ResumoConversasPage';
-import HomePage from './pages/HomePage';
-import PanasDetailPage from './pages/PanasDetailPage';
-import LpStartPage from './pages/LpStartPage';
-import PremiumLandingPage from './pages/PremiumLandingPage';
-import ProductDefinitionPage from './pages/ProductDefinitionPage';
-import ConversationGuidePage from './pages/ConversationGuidePage';
-import SupportHomePage from './pages/SupportHomePage';
-import ComecarAgoraLandingPage from './pages/ComecarAgoraLandingPage';
+import ConquistasPage from './pages/App/ConquistasPage';
+import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
+import ResumoConversasPage from './pages/App/ResumoConversasPage';
+import PanasDetailPage from './pages/App/PanasDetailPage';
+import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
+import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 
 declare global {
   interface Window {
@@ -70,7 +65,6 @@ function App() {
   const resolvedPath =
     blogSegmentIndex >= 0 ? normalizedPath.slice(blogSegmentIndex) || '/blog' : normalizedPath;
   const isBlogPath = blogSegmentIndex >= 0;
-  const isSupportHome = resolvedPath === '/suporte';
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
 
   if (typeof window !== 'undefined') {
@@ -90,10 +84,6 @@ function App() {
     }
   }
 
-  if (isSupportHome) {
-    return <SupportHomePage />;
-  }
-
   if (isSupportConversationGuide) {
     return <ConversationGuidePage />;
   }
@@ -111,31 +101,7 @@ function App() {
     await refreshData();
   };
 
-  const searchParams =
-    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const forceHomeView = searchParams?.get('public') === '1';
-
-  const isBlogHome = resolvedPath === '/blog' || resolvedPath === '/blog/home';
-  const isBlogLpStart = resolvedPath === '/blog/lp-start';
-  const isBlogPremium = resolvedPath === '/blog/premium';
-  const isBlogProduct = resolvedPath === '/blog/produto';
   const isBlogComecarAgora = resolvedPath === '/blog/comecar-agora';
-
-  if (forceHomeView || isBlogHome) {
-    return <HomePage />;
-  }
-
-  if (isBlogLpStart) {
-    return <LpStartPage />;
-  }
-
-  if (isBlogPremium) {
-    return <PremiumLandingPage />;
-  }
-
-  if (isBlogProduct) {
-    return <ProductDefinitionPage />;
-  }
 
   if (isBlogComecarAgora) {
     return <ComecarAgoraLandingPage />;
