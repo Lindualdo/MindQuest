@@ -32,8 +32,8 @@ const Plans = () => (
   <section
     className="rounded-[32px] px-6 py-16 md:px-12"
     style={{
-      backgroundColor: "rgba(247, 171, 138, 0.08)",
-      border: `1px solid rgba(247, 171, 138, 0.35)`,
+      backgroundColor: palette.card,
+      border: `1px solid ${palette.stroke}`,
       boxShadow: "0 24px 60px -38px rgba(59, 77, 89, 0.28)",
     }}
   >
@@ -48,14 +48,14 @@ const Plans = () => (
           key={plan.name}
           className="flex h-full flex-col gap-6 rounded-[28px] border p-7 shadow-sm"
           style={{
-            borderColor: plan.variant === "solid" ? "rgba(123, 97, 255, 0.2)" : "rgba(123, 97, 255, 0.35)",
-            backgroundColor: "#FFFFFF",
+            borderColor: palette.stroke,
+            backgroundColor: palette.surface,
           }}
         >
           <div>
             <h3
               className="text-lg font-semibold"
-              style={{ color: plan.variant === "solid" ? "#5A35D6" : "#6B4AF1" }}
+              style={{ color: palette.secondary }}
             >
               {plan.name}
             </h3>
@@ -75,13 +75,13 @@ const Plans = () => (
             style={
               plan.variant === "solid"
                 ? {
-                    backgroundColor: "#6B4AF1",
-                    color: "#FFFFFF",
-                    boxShadow: "0 18px 40px -24px rgba(107, 74, 241, 0.6)",
+                    backgroundColor: palette.primary,
+                    color: palette.card,
+                    boxShadow: "0 18px 40px -24px rgba(247, 171, 138, 0.6)",
                   }
                 : {
-                    color: "#6B4AF1",
-                    border: "1px solid rgba(107, 74, 241, 0.6)",
+                    color: palette.primary,
+                    border: "1px solid rgba(247, 171, 138, 0.6)",
                     backgroundColor: "transparent",
                   }
             }
