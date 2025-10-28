@@ -64,27 +64,40 @@ export const INSIGHT_POINTS = [
 export const RESULT_POINTS = [
   {
     icon: BarChart3,
-    title: "Evolução emocional visível",
+    title: "1- Organize seus pensamento para ter clareza",
     description:
-      "Acaba com a sensação de estar perdido: humor, energia e tendências aparecem em gráficos simples para você saber exatamente como está avançando.",
+      "Faça uma conversa guiada em menos de 10 minutos por dia. No MindQuest você conversará pelo WhatsApp com seu assitente de IA pessoal treinado para te guiar em reflexões leves.",
   },
   {
     icon: Flame,
-    title: "Gamificação que sustenta o ritmo",
+    title: "2 - Veja o que sua mente quer te dizer",
     description:
-      "Acaba com a oscilação de motivação. Pontos, streaks e conquistas celebram cada ação e mantêm você engajado sem pressão.",
+      "No MindQuest você terá também um App que é atualizado a cada nova conversa. Tudo 100% visual e sem termos técnicos. Histórico das conversa, Humor e energia, emoções que mais se destacaram, seu padrão de pensamento (sabotador), perfil comportamental e muito mais..",
   },
   {
     icon: Lightbulb,
-    title: "Insights da IA que destravam decisões",
+    title: "3 - Descubra o que fazer para mudar padrões que travam seu crescimento",
     description:
-      "Nada de ficar tentando entender seus sabotadores sozinho. A IA gera resumos, padrões e recomendações práticas para o próximo passo.",
+      "No MindQest você tem uma equipe de assitentes de IA especialistas em neurociencia que vão netender suas conversas e gerar dicas e insights exclusivos para você. Veja seus insights no App e defina suas prioridades",
   },
   {
     icon: MessageSquare,
-    title: "Conversas completas, sempre acessíveis",
+    title: "4 - Pequenas ações - grandes resultados",
     description:
-      "Nunca mais perca um insight. Texto e áudio das conversas ficam guardados para revisitar aprendizados quando quiser.",
+      "Não adianta saber o que fazer se não agir. O MindQuest tem um assistente de IA especializado em te ajudar a colocar em prática os insigths recebidos",
+  },
+  {
+    icon: MessageSquare,
+    title: "5 - Celebre cada vitória",
+    description:
+      "O MindQuest acompanha seu progresso e comemora com você a cada pequena conquista",
+  },
+    {
+    icon: MessageSquare,
+    title: "6 - MidQuest é um ecosistema completo",
+    description:
+      "- Assistende IA para Reflexões guiada - App com informações atualizadas a cada conversa - Assistentes de IA especializados em neurociencia para gerar insigts - Assistentes de IA para te ajudar nas ações. Trasformando pensamentos em ações com resultados reais"
+      
   },
 ];
 

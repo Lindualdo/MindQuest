@@ -9,7 +9,7 @@ const Results = () => (
     <SectionTitle
       kicker="Resultados reais"
       title="O MindQuest transforma ruídos em clareza e ações em resultados."
-      description="Cada recurso existe para tirar você do looping mental e mostrar exatamente como manter o progresso com clareza e motivação."
+      description="Tudo começa na mente: pensamentos moldam sentimentos > sentimentos inpulcionam ações > ações constroem resultados > resultados geram satisfação pessoal    "
     />
     <div className="mt-10 grid gap-6 md:grid-cols-2">
       {RESULT_POINTS.map(({ icon: Icon, title, description }) => (
