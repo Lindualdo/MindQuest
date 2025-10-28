@@ -7,6 +7,7 @@ import Hero from "@/components/landing_start/Hero";
 import HowItWorks from "@/components/landing_start/HowItWorks";
 import Insights from "@/components/landing_start/Insights";
 import PainPoints from "@/components/landing_start/Dores";
+import Partners from "@/components/landing_start/Partners";
 import Results from "@/components/landing_start/Results";
 import Testimonials from "@/components/landing_start/Testimonials";
 import { palette } from "@/components/landing_start/constants";
@@ -57,6 +58,8 @@ const ComecarAgoraLandingPage = () => {
         <Hero onCtaClick={handleCtaClick} />
         <PainPoints />
         <Results />
+        <HowItWorks onCtaClick={handleCtaClick} />
+        <Partners />
         <FinalCTA onCtaClick={handleCtaClick} />
         <FAQ />
       </main>

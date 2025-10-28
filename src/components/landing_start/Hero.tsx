@@ -33,7 +33,8 @@ const Hero = ({ onCtaClick }: HeroProps) => (
             letterSpacing: "0.2em",
             boxShadow: "0 16px 32px -18px rgba(255, 255, 255, 0.4)",
             whiteSpace: "normal",
-            maxWidth: "280px",
+            maxWidth: "360px",
+            minWidth: "280px",
           }}
         >
           Começar agora no WhatsApp - É grátis

@@ -12,7 +12,7 @@ Mulheres (≈80%) e pessoas com projetos travados que buscam clareza, coragem e 
 Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.
 
 ## Engajamento real
-Ciclo contínuo que integra conversa orientada, dashboards intuitivos e planos de ação personalizados.
+Ciclo contínuo que integra conversa orientada, app com informações intuitivas, planos de ação personalizados e assistente para te ajudar a colocar em prática.
 
 ## Experiência premium
 Mentor virtual 24h, insights acionáveis e acompanhamento 360° da jornada emocional.

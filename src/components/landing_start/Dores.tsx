@@ -6,7 +6,7 @@ const PainPoints = () => (
     className="rounded-[32px] px-6 py-14 md:px-12"
     style={{ backgroundColor: palette.card, boxShadow: "0 32px 60px -48px rgba(59, 59, 88, 0.35)" }}
   >
-    <SectionTitle title="Você se identifica em alguma dessas situações?" />
+    <SectionTitle title="Situações que te prendem?" />
     <div className="mt-10 grid gap-5 md:grid-cols-2">
       {PAIN_POINTS.map((pain) => (
         <article
