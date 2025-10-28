@@ -290,7 +290,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
               Sua mente fala com você todos os dias.
             </h1>
             <p className="text-base leading-7 text-white/85">O MindQuest te ajuda a ouvir, entender e evoluir.</p>
-            <div className="flex flex-col items-center gap-4 text-center md:w-full">
+            <div className="flex flex-col items-center gap-6 text-center md:w-full md:gap-5">
               <button
                 type="button"
                 onClick={() => handleCtaClick('hero')}
@@ -306,7 +306,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
               >
                 Começar agora no WhatsApp - É grátis
               </button>
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80">
+              <span className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 md:mt-0">
                 Sem login, sem senha. Apenas uma conversa.
               </span>
             </div>
@@ -318,8 +318,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
           style={{ backgroundColor: palette.card, boxShadow: '0 32px 60px -48px rgba(59, 59, 88, 0.35)' }}
         >
           <SectionTitle
-            title="Reconhece alguma dessas situações?"
-            description="Sua mente não é o problema — ela só está tentando te proteger de formas que não funcionam mais."
+            title="Você se reconheçe em alguma dessas situações?"
           />
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {PAIN_POINTS.map((pain) => (
