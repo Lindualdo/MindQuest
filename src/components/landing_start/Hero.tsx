@@ -30,7 +30,7 @@ const Hero = ({ onCtaClick }: HeroProps) => (
         <button
           type="button"
           onClick={() => onCtaClick("hero")}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] leading-relaxed text-center transition duration-200"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] leading-relaxed text-center transition duration-200"
         style={{
           backgroundColor: palette.hero.buttonBg,
           color: palette.hero.buttonText,

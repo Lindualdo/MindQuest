@@ -12,7 +12,7 @@ const FAQ = () => {
       style={{
         backgroundColor: palette.card,
         border: `1px solid ${palette.stroke}`,
-        boxShadow: "0 28px 70px -46px rgba(59, 59, 88, 0.32)",
+        boxShadow: palette.shadows.soft,
       }}
     >
       <SectionTitle
@@ -20,7 +20,10 @@ const FAQ = () => {
         description="Reunimos as perguntas mais comuns para você decidir com segurança."
       />
 
-      <div className="mx-auto mt-12 w-full max-w-3xl divide-y rounded-[28px] border bg-white shadow-lg">
+      <div
+        className="mx-auto mt-12 w-full max-w-3xl divide-y rounded-[28px] border shadow-lg"
+        style={{ backgroundColor: palette.card, borderColor: palette.stroke, boxShadow: palette.shadows.card }}
+      >
         {FAQ_ITEMS.map((faq, index) => {
           const isOpen = openIndex === index;
           const panelId = `faq-panel-${index}`;
@@ -32,10 +35,10 @@ const FAQ = () => {
                 id={buttonId}
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D90368]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 style={{
                   color: palette.secondary,
-                  backgroundColor: isOpen ? "rgba(247, 171, 138, 0.12)" : "transparent",
+                  backgroundColor: isOpen ? "rgba(217, 3, 104, 0.08)" : "transparent",
                   borderRadius: "28px",
                 }}
                 aria-expanded={isOpen}

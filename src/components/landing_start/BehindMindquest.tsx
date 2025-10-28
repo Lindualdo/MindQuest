@@ -26,7 +26,7 @@ const BehindMindquest = () => (
     style={{
       backgroundColor: palette.card,
       border: `1px solid ${palette.stroke}`,
-      boxShadow: "0 24px 50px -38px rgba(59, 77, 89, 0.28)",
+      boxShadow: palette.shadows.soft,
     }}
   >
     <div className="mb-10 flex flex-col gap-4 text-center">
