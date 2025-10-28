@@ -23,7 +23,7 @@ const partners = [
 const Partners = () => (
   <section
     className="rounded-[32px] px-6 py-14 md:px-12"
-    style={{ backgroundColor: palette.surface, border: `1px solid ${palette.stroke}` }}
+    style={{ backgroundColor: palette.card, border: `1px solid ${palette.stroke}`, boxShadow: "0 28px 70px -48px rgba(59, 59, 88, 0.3)" }}
   >
     <SectionTitle
       kicker="Parcerias estratégicas"
