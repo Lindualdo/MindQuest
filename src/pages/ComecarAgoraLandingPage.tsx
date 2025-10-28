@@ -279,44 +279,38 @@ const ComecarAgoraLandingPage: React.FC = () => {
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-16 md:pt-24 lg:pt-28">
         <section
-          className="grid items-start gap-10 rounded-[32px] p-10 md:grid-cols-[1.1fr_0.9fr] md:p-14"
+          className="flex flex-col items-center gap-8 rounded-[32px] p-10 text-center md:p-14"
           style={{
             backgroundColor: palette.secondary,
             boxShadow: '0 28px 80px -40px rgba(22, 29, 39, 0.55)'
           }}
         >
-          <div className="flex flex-col gap-6 text-white">
+          <div className="flex w-full max-w-2xl flex-col gap-6 text-white">
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Sua mente fala com você todos os dias.
             </h1>
             <p className="text-base leading-7 text-white/85">O MindQuest te ajuda a ouvir, entender e evoluir.</p>
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  onClick={() => handleCtaClick('hero')}
-                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
-                  style={{
-                    backgroundColor: palette.card,
-                    color: palette.secondary,
-                    fontFamily: 'Montserrat, Poppins, sans-serif',
-                    fontWeight: 600,
-                    letterSpacing: '0.2em',
-                    boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)'
-                  }}
-                >
-                  Começar agora no WhatsApp - É grátis
-                </button>
-                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:ml-4 sm:text-left text-center">
-                  Sem login, sem senha. Apenas uma conversa.
-                </span>
-              </div>
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:hidden">
+            <div className="flex flex-col items-center gap-4 text-center md:w-full">
+              <button
+                type="button"
+                onClick={() => handleCtaClick('hero')}
+                className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
+                style={{
+                  backgroundColor: palette.card,
+                  color: palette.secondary,
+                  fontFamily: 'Montserrat, Poppins, sans-serif',
+                  fontWeight: 600,
+                  letterSpacing: '0.2em',
+                  boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)'
+                }}
+              >
+                Começar agora no WhatsApp - É grátis
+              </button>
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80">
                 Sem login, sem senha. Apenas uma conversa.
               </span>
             </div>
           </div>
-          <div className="hidden md:block" />
         </section>
 
         <section
