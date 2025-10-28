@@ -37,8 +37,8 @@ const PAIN_POINTS = [
     description: 'Dizer não parece impossível, até você colapsar.'
   },
   {
-    title: 'Pensa demais e age de menos',
-    description: 'Sua mente vira uma prisão de análises infinitas sem saída prática.'
+    title: 'Pensa demais e age pouco por falta de clareza',
+    description: 'Sua mente vira uma prisão de pensamentos infinitos sem saída prática.'
   }
 ];
 
@@ -290,23 +290,25 @@ const ComecarAgoraLandingPage: React.FC = () => {
               Sua mente fala com você todos os dias.
             </h1>
             <p className="text-base leading-7 text-white/85">O MindQuest te ajuda a ouvir, entender e evoluir.</p>
-            <div className="flex flex-col items-center gap-6 text-center md:w-full md:gap-5">
+            <div className="flex flex-col items-center gap-10 text-center md:w-full md:gap-6">
               <button
                 type="button"
                 onClick={() => handleCtaClick('hero')}
-                className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
+                className="w-full rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] leading-relaxed text-center transition duration-200"
                 style={{
                   backgroundColor: palette.card,
                   color: palette.secondary,
                   fontFamily: 'Montserrat, Poppins, sans-serif',
                   fontWeight: 600,
                   letterSpacing: '0.2em',
-                  boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)'
+                  boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)',
+                  whiteSpace: 'normal',
+                  maxWidth: '280px'
                 }}
               >
                 Começar agora no WhatsApp - É grátis
               </button>
-              <span className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 md:mt-0">
+              <span className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 md:mt-3">
                 Sem login, sem senha. Apenas uma conversa.
               </span>
             </div>
@@ -318,7 +320,7 @@ const ComecarAgoraLandingPage: React.FC = () => {
           style={{ backgroundColor: palette.card, boxShadow: '0 32px 60px -48px rgba(59, 59, 88, 0.35)' }}
         >
           <SectionTitle
-            title="Você se reconheçe em alguma dessas situações?"
+            title="Você se identifica em alguma dessas situações?"
           />
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {PAIN_POINTS.map((pain) => (
