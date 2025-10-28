@@ -1,4 +1,4 @@
-import { BarChart3, Brain, Flame, Lightbulb, MessageSquare, Sparkles, Target } from "lucide-react";
+import { Brain, MessageSquare, Sparkles, Target } from "lucide-react";
 
 export const palette = {
   surface: "#E1D8CC",
@@ -63,41 +63,39 @@ export const INSIGHT_POINTS = [
 
 export const RESULT_POINTS = [
   {
-    icon: BarChart3,
-    title: "1- Organize seus pensamento para ter clareza",
+    title: "Organize seus pensamentos com clareza",
     description:
-      "Faça uma conversa guiada em menos de 10 minutos por dia. No MindQuest você conversará pelo WhatsApp com seu assitente de IA pessoal treinado para te guiar em reflexões leves.",
+      "Faça uma conversa guiada com seu assistente de IA no WhatsApp em menos de 10 minutos por dia e transforme ruído mental em foco real.",
   },
   {
-    icon: Flame,
-    title: "2 - Veja o que sua mente quer te dizer",
+    title: "Veja o que sua mente está dizendo",
     description:
-      "No MindQuest você terá também um App que é atualizado a cada nova conversa. Tudo 100% visual e sem termos técnicos. Histórico das conversa, Humor e energia, emoções que mais se destacaram, seu padrão de pensamento (sabotador), perfil comportamental e muito mais..",
+      "Cada conversa atualiza o app com visualizações simples de humor, energia, sabotadores e perfis comportamentais para você enxergar padrões sem jargões.",
   },
   {
-    icon: Lightbulb,
-    title: "3 - Descubra o que fazer para mudar padrões que travam seu crescimento",
+    title: "Descubra como mudar padrões que travam seu crescimento",
     description:
-      "No MindQest você tem uma equipe de assitentes de IA especialistas em neurociencia que vão netender suas conversas e gerar dicas e insights exclusivos para você. Veja seus insights no App e defina suas prioridades",
+      "Especialistas de IA em neurociência interpretam suas conversas e entregam insights objetivos sobre o que priorizar e por quê.",
   },
   {
-    icon: MessageSquare,
-    title: "4 - Pequenas ações - grandes resultados",
+    title: "Pequenas ações, grandes resultados",
     description:
-      "Não adianta saber o que fazer se não agir. O MindQuest tem um assistente de IA especializado em te ajudar a colocar em prática os insigths recebidos",
+      "O assistente sugere micro-ações personalizadas para colocar em prática o que você aprendeu, mantendo você em movimento com consistência.",
   },
   {
-    icon: MessageSquare,
-    title: "5 - Celebre cada vitória",
+    title: "Celebre cada vitória",
     description:
-      "O MindQuest acompanha seu progresso e comemora com você a cada pequena conquista",
+      "O MindQuest acompanha seu progresso, registra conquistas e reforça hábitos positivos para que você sinta evolução contínua.",
   },
-    {
-    icon: MessageSquare,
-    title: "6 - MidQuest é um ecosistema completo",
-    description:
-      "- Assistende IA para Reflexões guiada - App com informações atualizadas a cada conversa - Assistentes de IA especializados em neurociencia para gerar insigts - Assistentes de IA para te ajudar nas ações. Trasformando pensamentos em ações com resultados reais"
-      
+  {
+    title: "MindQuest é um ecossistema completo",
+    description: "Todo o ecossistema foi criado para sustentar sua evolução com suporte 360°.",
+    bullets: [
+      "Assistente de IA para reflexões guiadas no WhatsApp",
+      "App com informações atualizadas a cada conversa",
+      "IA especialista em neurociência gerando insights personalizados",
+      "IA focada em execução para colocar planos em prática",
+    ],
   },
 ];
 

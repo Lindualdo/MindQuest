@@ -58,7 +58,6 @@ const ComecarAgoraLandingPage = () => {
         <Hero onCtaClick={handleCtaClick} />
         <PainPoints />
         <Results />
-        <HowItWorks onCtaClick={handleCtaClick} />
         <Partners />
         <FinalCTA onCtaClick={handleCtaClick} />
         <FAQ />

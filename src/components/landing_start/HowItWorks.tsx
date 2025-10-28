@@ -12,7 +12,7 @@ const HowItWorks = ({ onCtaClick }: HowItWorksProps) => (
   >
     <SectionTitle
       kicker="O que é MindQuest"
-      title="Plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados."
+      title="Plataforma de evolução pessoal guiada por IA"
       description="Conversa → Insight → Ação → Progresso"
     />
     <div className="mt-12 grid gap-6 md:grid-cols-2">
