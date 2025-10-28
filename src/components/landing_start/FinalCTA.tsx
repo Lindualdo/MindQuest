@@ -10,14 +10,18 @@ const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
   <section
     className="rounded-[32px] px-6 py-14 text-center md:px-12 lg:-mx-5 lg:px-16"
     style={{
-      backgroundColor: palette.soft,
-      boxShadow: "0 24px 60px -48px rgba(59, 77, 89, 0.35)",
+      backgroundColor: palette.card,
+      border: `1px solid ${palette.stroke}`,
+      boxShadow: "0 28px 70px -46px rgba(59, 59, 88, 0.28)",
     }}
   >
     <SectionTitle
       kicker="Chegou sua hora de organizar a mente"
       title="Tudo começa com uma conversa"
       description='Diga "oi" no WhatsApp e sinta a diferença na primeira semana.'
+      kickerColor={palette.secondary}
+      titleColor={palette.secondary}
+      descriptionColor={palette.footer}
     />
     <div className="mt-10 flex flex-col items-center gap-4">
       <button
@@ -34,7 +38,7 @@ const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
         Começar agora - É grátis
         <Zap size={18} />
       </button>
-      <p className="text-xs uppercase tracking-[0.22em]" style={{ color: palette.muted }}>
+      <p className="text-xs uppercase tracking-[0.22em]" style={{ color: palette.footer }}>
         Acesso imediato. Sem login. Sem senha. Apenas você e sua evolução.
       </p>
     </div>
