@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-27T11:40:15.828Z",
+  "updatedAt": "2025-10-27T23:48:53.569Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -38,7 +38,7 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": "={{ 4200 }}"
+          "delay": "={{ 2000 }}"
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -126,7 +126,7 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": "={{ 42000 }}"
+          "delay": "={{ 2000 }}"
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -222,10 +222,24 @@
       "typeVersion": 1,
       "position": [
         -240,
-        480
+        544
       ],
       "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
       "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 4 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1728,
+        560
+      ],
+      "id": "9fc4fda8-d08a-4ca9-9dca-120b61cbf535",
+      "name": "Wait",
+      "webhookId": "5c58e400-8855-497b-8c82-c4debfcfda55"
     }
   ],
   "connections": {
@@ -273,7 +287,7 @@
         ],
         [
           {
-            "node": "No Operation, do nothing",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -352,6 +366,17 @@
           }
         ]
       ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -372,7 +397,7 @@
       }
     ]
   },
-  "versionId": "81a721ef-27de-4649-b099-e18ae06ef7bd",
+  "versionId": "0cac63f3-daad-4213-86eb-133fab1054b7",
   "triggerCount": 0,
   "shared": [
     {
@@ -397,7 +422,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-27T08:00:06.115Z",
+              "updatedAt": "2025-10-28T08:05:25.511Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -422,7 +447,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-27",
+              "lastActiveAt": "2025-10-28",
               "isPending": false
             }
           }

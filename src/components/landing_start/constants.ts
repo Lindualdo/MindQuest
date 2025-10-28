@@ -15,28 +15,44 @@ export const palette = {
 
 export const PAIN_POINTS = [
   {
-    title: "Muitas ideias no papel, mas trava na hora de agir",
-    description: "O perfeccionismo paralisa antes mesmo de começar.",
+    title: "Ideias incríveis na cabeça, mas trava na hora de agir",
+    description: "o medo do 'inperfeito' trava tudo antes de começar e o sonho fica só no papel",
   },
   {
-    title: "Começa vários projetos empolgado, mas raramente termina algo",
-    description: "A energia inicial se perde no meio do caminho.",
+    title: "Começa projetos com empolgação, ma depois a motivação evapora",
+    description: "A energia inicial se perde no meio do caminho deixando um monte de 'quase' e frustração",
   },
   {
-    title: "Sente que merece mais da vida, mas os resultados não aparecem",
-    description: "Mesmo trabalhando duro, algo parece estar faltando.",
+    title: "Sente que merece mais da vida, mas o esforço duro nunca dá resultado",
+    description: "Esse ciclo de culpa e frustração, mina cada vez mais sua energia ",
   },
   {
-    title: "Se cobra o tempo todo, mas quase nunca se sente satisfeito",
+    title: "Cobra-se o tempo todo, alcança resultados mas não se sente realizado",
     description: "A autocrítica constante rouba o prazer das conquistas.",
   },
   {
     title: "Quer agradar todo mundo e acaba se esgotando",
-    description: "Dizer não parece impossível, até você colapsar.",
+    description: "Diz 'sim' para os outros mas não tem tempo e energia para você",
   },
   {
-    title: "Pensa demais e age pouco por falta de clareza",
-    description: "Sua mente vira uma prisão de pensamentos infinitos sem saída prática.",
+    title: "Vive em loops infinitos de pensamentos, mas não chega a nenhum lugar",
+    description: "Sua mente vira uma prisão cheia de 'e se', mas sem ações práticas",
+  },
+  {
+    title: "Foge do desconforto com distrações, mas os problemas voltam piores",
+    description: "Esse ciclo bloqeia o avanço que tanto você deseja mas nunca chega",
+  },
+  {
+    title: "Precisa controlar cada detalhe para se sentir seguro",
+    description: "Mas o cansaço chega quando a vida sai do roteiro e você se sente isolado",
+  },
+  {
+    title: "Conquista no trabalho ou fora, mas dentro fica um vazio",
+    description: "É só isso?' – sucesso que não aquece o coração.",
+  },
+  {
+    title: "Enxerga riscos em cada canto, e esse alerta constante rouba momentos felizes",
+    description: "Isso gera tensão, cansaço físico e mental",
   },
 ];
 
