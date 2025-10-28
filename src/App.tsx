@@ -101,9 +101,9 @@ function App() {
     await refreshData();
   };
 
-  const isBlogComecarAgora = resolvedPath === '/blog/comecar-agora';
+  const isComecarAgoraLanding = resolvedPath === '/comecar-agora';
 
-  if (isBlogComecarAgora) {
+  if (isComecarAgoraLanding) {
     return <ComecarAgoraLandingPage />;
   }
 
