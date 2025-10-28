@@ -4,12 +4,11 @@ import LandingHeader from "@/components/landing_start/LandingHeader";
 import FinalCTA from "@/components/landing_start/FinalCTA";
 import FAQ from "@/components/landing_start/FAQ";
 import Hero from "@/components/landing_start/Hero";
-import HowItWorks from "@/components/landing_start/HowItWorks";
-import Insights from "@/components/landing_start/Insights";
 import PainPoints from "@/components/landing_start/Dores";
 import Partners from "@/components/landing_start/Partners";
+import Plans from "@/components/landing_start/Plans";
 import Results from "@/components/landing_start/Results";
-import Testimonials from "@/components/landing_start/Testimonials";
+import BehindMindquest from "@/components/landing_start/BehindMindquest";
 import { palette } from "@/components/landing_start/constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
 
@@ -58,8 +57,12 @@ const ComecarAgoraLandingPage = () => {
         <Hero onCtaClick={handleCtaClick} />
         <PainPoints />
         <Results />
-        <Partners />
         <FinalCTA onCtaClick={handleCtaClick} />
+        <BehindMindquest />
+        <Partners />
+        <Plans />
+
+
         <FAQ />
       </main>
       <LandingFooter />
