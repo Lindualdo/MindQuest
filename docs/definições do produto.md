@@ -1,25 +1,121 @@
-# Produto · MindQuest v1.1
+# Produto · MindQuest v1.2
 
 ## Uma plataforma de evolução pessoal guiada por IA
 O MindQuest transforma ruídos em clareza e ações em resultados.
 Sua mente fala com você todos os dias. Aprenda a ouvir, entender e evoluir.
+
 ---
 
 ## Público focal
 Mulheres (≈80%) e pessoas com projetos travados que buscam clareza, coragem e progresso consistente.
+**Faixa etária**: 25-45 anos — fase de equilibrar carreira, família e sonhos pessoais.
+
+---
 
 ## Proposta única
-Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.
+**Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.**
 
-## Engajamento real
-Ciclo contínuo que integra conversa orientada, app com informações intuitivas, planos de ação personalizados e assistente para te ajudar a colocar em prática.
+Como: O MindQuest transforma ruídos em clareza e ações em resultados.
 
-## Experiência premium
-Mentor virtual 24h, insights acionáveis e acompanhamento 360° da jornada emocional.
+---
+
+## Posicionamento
+**MindQuest não é terapia nem app de produtividade. É evolução pessoal guiada por IA.**
+
+---
+
+## 10 Situações que Prendem (Dores)
+
+1. **Ideias incríveis na cabeça, mas trava na hora de agir**
+   O medo do 'imperfeito' trava tudo antes de começar e o sonho fica só no papel.
+
+2. **Começa projetos com empolgação, mas depois a motivação evapora**
+   A energia inicial se perde no meio do caminho deixando um monte de 'quase' e frustração.
+
+3. **Sente que merece mais da vida, mas o esforço duro nunca dá resultado**
+   Esse ciclo de culpa e frustração, mina cada vez mais sua energia.
+
+4. **Cobra-se o tempo todo, alcança resultados mas não se sente realizado**
+   A autocrítica constante rouba o prazer das conquistas.
+
+5. **Quer agradar todo mundo e acaba se esgotando**
+   Diz 'sim' para os outros mas não tem tempo e energia para você.
+
+6. **Vive em loops infinitos de pensamentos, mas não chega a nenhum lugar**
+   Sua mente vira uma prisão cheia de 'e se', mas sem ações práticas.
+
+7. **Foge do desconforto com distrações, mas os problemas voltam piores**
+   Esse ciclo bloqueia o avanço que tanto você deseja mas nunca chega.
+
+8. **Precisa controlar cada detalhe para se sentir seguro**
+   Mas o cansaço chega quando a vida sai do roteiro e você se sente isolado.
+
+9. **Conquista no trabalho ou fora, mas dentro fica um vazio**
+   'É só isso?' — sucesso que não aquece o coração.
+
+10. **Enxerga riscos em cada canto, e esse alerta constante rouba momentos felizes**
+    Isso gera tensão, cansaço físico e mental.
+
+> **Nota importante**: Esses pensamentos são naturais e humanos — foram "programados" em sua mente para te proteger, mas podem estar travando sua felicidade e crescimento pessoal.
+
+---
+
+## Ciclo de 6 Passos do MindQuest
+
+**Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados.**
+Cada etapa foi desenhada para manter esse ciclo a seu favor.
+
+### 01. Organize seus pensamentos com clareza
+Faça uma conversa guiada com seu assistente de IA no WhatsApp em menos de 10 minutos por dia e transforme ruído mental em foco real.
+
+### 02. Veja o que sua mente está dizendo
+Cada conversa atualiza o app com visualizações simples de humor, energia, sabotadores e perfis comportamentais para você enxergar padrões sem jargões.
+
+### 03. Descubra como mudar padrões que travam seu crescimento
+Especialistas de IA em neurociência interpretam suas conversas e entregam insights objetivos sobre o que priorizar e por quê.
+
+### 04. Pequenas ações, grandes resultados
+O assistente sugere micro-ações personalizadas para colocar em prática o que você aprendeu, mantendo você em movimento com consistência.
+
+### 05. Celebre cada vitória
+O MindQuest acompanha seu progresso, registra conquistas e reforça hábitos positivos para que você sinta evolução contínua.
+
+### 06. MindQuest é um ecossistema completo
+Todo o ecossistema foi criado para sustentar sua evolução com suporte 360°:
+- Assistente de IA para reflexões guiadas no WhatsApp
+- App com informações atualizadas a cada conversa
+- IA especialista em neurociência gerando insights personalizados
+- IA focada em execução para colocar planos em prática
+
+---
+
+## Pilares Metodológicos
+
+Cada conversa, insight e ação é construída sobre fundamentos sólidos para garantir evolução real e consistente.
+
+### Neurociência aplicada
+Conversas objetivas, sem jargão.
+
+### Psicologia comportamental
+Big Five, PANAS e TCC traduzidos em práticas simples.
+
+### Filosofias práticas
+Roda da Vida, sabotadores e estoicismo adaptados ao dia a dia.
+
+---
+
+## Parcerias Tecnológicas
+
+Combinamos diferentes modelos para entregar a melhor experiência conversacional, analítica e de apoio:
+- **OpenAI** · ChatGPT
+- **Anthropic** · Claude
+- **Google** · Gemini
+- **Meta** · Meta AI
 
 ---
 
 ## Métricas-chave do MVP
+
 Foco em engajamento recorrente, retorno de aprendizados e ativação do plano Premium.
 
 ### Product KPIs
@@ -48,16 +144,14 @@ Cliques em "Quero ser avisado".
 
 ## Estrutura do Produto por Interface
 
-### Free vs Premium
-
-#### Dashboard de Evolução
+### Dashboard de Evolução
 
 | BLOCO | FREE | PREMIUM |
 |-------|------|---------|
 | Humor atual | Incluído | Incluído |
 | Roda das emoções (média semanal) | Incluído | Incluído |
 | Sentimentos PANAS (média semanal) | Incluído | Incluído |
-| Sabotadores – o mais ativo | Incluído | Incluído |
+| Sabotadores — o mais ativo | Incluído | Incluído |
 | Histórico de humor + gatilhos | Últimos 3 dias | Completo com filtros |
 | Histórico de emoções (áreas da vida) | — | Incluído |
 | Histórico de sabotadores (insights + contramedidas) | — | Incluído |
@@ -65,13 +159,13 @@ Cliques em "Quero ser avisado".
 | Insights | Visualização simples | Transformar em planos acionáveis |
 | Histórico e resumo de conversas | Incluído | Incluído |
 
-#### Chat · Assistente Pessoal
+### Chat · Assistente Pessoal
 
 | RECURSO | FREE | PREMIUM |
 |---------|------|---------|
 | Conversa diária com a IA pessoal | 1 conversa/dia (≈8 interações) | Até 5 conversas/dia |
 
-#### Interações Inteligentes
+### Interações Inteligentes
 
 | RECURSO | FREE | PREMIUM |
 |---------|------|---------|
@@ -80,72 +174,13 @@ Cliques em "Quero ser avisado".
 | Resumo da semana | Incluído | Incluído |
 | Resumo do mês (ações, metas, evolução, raio X das emoções) | — | Incluído |
 
-#### Mentor Virtual · Premium
+### Mentor Virtual · Premium
 
 - Conversas livres a qualquer hora do dia
 - Orientações práticas e técnicas de crescimento pessoal
 - Filosofias de vida e hábitos mentais eficientes
 - Visão 360° da evolução do usuário
 - Acompanhamento como "versão aprimorada da mente"
-
----
-
-## Ciclo de Experiência do Usuário
-
-### Conversa → Insight → Ação
-
-**1. Conversa (Chat)**
-A IA colhe emoções, fatos e traça o estado mental atual.
-
-**2. Insight / Estado Atual (Dash)**
-Dashboard compila humor, sabotadores e emoções prioritárias.
-
-**3. Ação concreta (Interações)**
-Sugestões de metas e micro-ações alinhadas aos objetivos.
-
-**4. Reengajar (Convite IA)**
-Lembretes inteligentes para manter o ciclo ativo.
-
-**5. Progresso visualizado**
-Indicadores atualizados reforçam conquistas e próximos passos.
-
----
-
-## Mapa Mental das Funcionalidades
-
-### Visão 360°
-
-#### 📊 Dash
-- Humor atual
-- Roda das emoções (média semanal)
-- Sentimentos PANAS (média semanal)
-- Sabotador mais ativo
-- Histórico de humor com gatilhos
-- Histórico de emoções (Premium)
-- Histórico de sabotadores (Premium)
-- Gamificação orientada
-- Insights acionáveis (Premium)
-- Histórico completo de conversas
-- Resumo das conversas + conversa completa
-
-#### 💬 Chat
-- Reflexão Guiada por IA
-- Free: 1 conversa por dia
-- Premium: até 5 conversas/dia
-
-#### 🔄 Interações
-- Lembrete para reflexões guiadas
-- Definir metas e ações
-- Resumo semanal inteligente
-- Resumo mensal completo (Premium)
-- Motivacional/inspiração
-- Sabotadores/contramedidas/insights
-
-#### 🧠 Mentor Virtual
-- Conversa 24h com orientações aprofundadas
-- Integra filosofias e práticas de crescimento
-- Acompanha evolução integral do usuário
-- Funciona como "versão aprimorada" da mente
 
 ---
 
@@ -163,36 +198,87 @@ Indicadores atualizados reforçam conquistas e próximos passos.
 
 ---
 
-## Briefing pronto para o time de Marketing
+## FAQ - Perguntas Frequentes
 
-### Transforme estes pilares em narrativas cativantes
+### O que é o MindQuest?
+Um assistente de IA que conversa com você pelo WhatsApp e atualiza seu dashboard com métricas emocionais e recomendações.
 
-Use esta página como referência visual e textual para landing pages, campanhas, apresentações e materiais promocionais do MindQuest v1.1.
+### Como inicio meu cadastro?
+Sem login, sem senha. Apenas uma conversa. Comece pelo WhatsApp com acesso imediato.
 
-# Visão geral de mkt 
+### Por que o acesso usa token e não login/senha?
+Para simplificar sua experiência e eliminar barreiras. O token garante segurança sem complicação.
 
-## Proposta de Valor
-Sua mente fala com você todos os dias. 
-O MindQuest te ajuda a ouvir, entender e evolui
+### Meus dados estão protegidos?
+Sim. Seguimos padrões rigorosos de privacidade e criptografia para proteger suas informações.
 
-Como: O MindQuest transforma ruídos em clareza e ações em resultados.
+### Posso usar apenas pelo celular?
+Sim. A conversa acontece no WhatsApp e o dashboard pode ser acessado pelo navegador do celular ou desktop.
 
-## Faixa Etária
-25-45 anos: Fase de equilibrar carreira, família e sonhos pessoais, onde ideias travam, energia some e autocrítica rouba a paz.
+### O que acontece depois que eu envio minha primeira mensagem no WhatsApp?
+O assistente inicia uma conversa guiada para entender seu estado atual e começa a atualizar seu dashboard com insights personalizados.
 
-## 10 Dores Mais Fortes
-1. "Ideias incríveis na cabeça, mas o medo do 'não perfeito' trava tudo antes de começar – e o sonho fica só no papel."
-2. "Começa projetos cheia de empolgação, mas no meio a motivação evapora, deixando um monte de 'quase' e frustração."
-3. "Sente que merece mais da vida, mas o esforço duro nunca dá resultado – vira um ciclo de culpa que não acaba."
-4. "Cobra-se o tempo todo, mas as vitórias não te trás realizações. perdem a graça na onda de críticas internas que tiram sua alegria."
-5. "Diz 'sim' para todo mundo, mas acaba exausta carregando pesos alheios, sem tempo ou energia para si mesma."
-6. "Pensa em loops infinitos sobre tudo, mas isso paralisa as ações – presa em 'e se' que não levam a lugar nenhum."
-7. "Foge de situações desconfortáveis com distrações, mas os problemas voltam piores, bloqueando o avanço que você quer."
-8. "Precisa controlar cada detalhe para se sentir segura, mas o cansaço chega quando a vida sai do roteiro – e você se sente isolada."
-9. "Conquista no trabalho ou fora, mas dentro fica um vazio: 'É só isso?' – sucesso que não aquece o coração."
-10. "Vigia riscos em cada canto, mas o alerta constante rouba momentos felizes – vivendo tensa, não plena."
+### Preciso pagar algo para começar?
+Não. O MindQuest oferece acesso gratuito com recursos essenciais. O Premium expande funcionalidades.
 
-## 10 Benefícios
+### E se eu não souber o que dizer na conversa?
+O assistente conduz a conversa com perguntas simples. Você só precisa responder naturalmente.
+
+### O MindQuest é um app, um site ou um assistente virtual?
+É um ecossistema: assistente no WhatsApp + dashboard web. Tudo integrado.
+
+### Como o dashboard é atualizado?
+Automaticamente após cada conversa no WhatsApp. Os insights aparecem em tempo real.
+
+### O que ganho ao usar o MindQuest diariamente?
+Clareza mental, padrões identificados, ações concretas e evolução consistente. Você vê seu progresso.
+
+### Qual a diferença para apps de meditação ou produtividade?
+MindQuest foca em autoconhecimento guiado por IA, não em técnicas isoladas. É evolução pessoal integrada.
+
+### Posso pausar meu progresso e continuar depois?
+Sim. Seu histórico fica salvo e você retoma quando quiser, sem perder contexto.
+
+### Como o sistema garante uso ético das minhas respostas?
+Seus dados são privados, criptografados e usados apenas para gerar insights personalizados. Sem compartilhamento.
+
+### Posso usar o MindQuest para desempenho no trabalho ou em relacionamentos?
+Sim. A ferramenta se adapta às suas áreas de foco, incluindo carreira, relacionamentos e desenvolvimento pessoal.
+
+### Posso exportar meus dados ou histórico?
+Funcionalidade planejada para versões futuras. No momento, você acessa todo histórico pelo dashboard.
+
+### Posso cancelar meu cadastro a qualquer momento?
+Sim. Você tem controle total sobre sua conta e pode cancelar quando desejar.
+
+### Posso falar com minha IA pessoal direto no dashboard?
+No plano Premium, sim. O Mentor Virtual está disponível 24h para conversas aprofundadas.
+
+---
+
+## Briefing para Marketing
+
+### Proposta de Valor
+**Sua mente fala com você todos os dias.**
+**O MindQuest te ajuda a ouvir, entender e evoluir.**
+
+**Como:** O MindQuest transforma ruídos em clareza e ações em resultados.
+
+### Público-Alvo
+**Faixa etária:** 25-45 anos
+**Perfil:** Mulheres e pessoas equilibrando carreira, família e sonhos pessoais, onde ideias travam, energia some e autocrítica rouba a paz.
+
+### Call-to-Action Principal
+**"COMEÇAR AGORA - É GRÁTIS"**
+Acesso imediato. Sem login. Sem senha. Apenas você e sua evolução.
+
+### Mensagem Secundária
+**"Diga 'oi' no WhatsApp e sinta a diferença na primeira semana."**
+
+---
+
+## 10 Benefícios-Chave
+
 1. **Clareza no Dia a Dia**: Gráficos fáceis mostram padrões que travam você, saindo do looping mental.
 2. **Progresso que Você Vê**: Evolução emocional semanal, celebrando conquistas reais.
 3. **Motivação que Dura**: Pontos, sequências e prêmios mantêm o ritmo leve e divertido.
@@ -204,13 +290,19 @@ Como: O MindQuest transforma ruídos em clareza e ações em resultados.
 9. **Guia 24h Premium**: Conversas profundas com dicas de vida e hábitos, como uma versão melhor de você.
 10. **Hábitos que Pegam**: Lembretes inteligentes que viram rotina natural.
 
-## Recursos e Funcionalidades
+---
 
-| Categoria          | Recursos Principais                                                                 | Free                  | Premium                                      |
-|--------------------|-------------------------------------------------------------------------------------|-----------------------|----------------------------------------------|
-| **Painel Principal** | Humor do momento, círculo de emoções (semanal), sentimentos chave, obstáculo principal, histórico de humor com causas, prêmios por ações, dicas visuais, resumo de conversas. | Básico (3 dias)      | Completo + filtros, histórico de emoções/obstáculos, planos com IA. |
-| **Chat com Guia**  | Reflexão guiada, captura de emoções e fatos.                                       | 1 conversa/dia (8 trocas) | Até 5/dia + guia virtual 24h (dicas, hábitos). |
-| **Interações Diárias** | Convites para metas/ações, resumo semanal, motivação, ideias contra obstáculos.    | 1/semana             | Ilimitado + resumo mensal (ações, progresso). |
-| **Guia Virtual**   | Acompanhamento total, visão completa da jornada.                                   | —                    | Incluído: conversas livres, práticas de vida eficientes. |
+## Mapa de Recursos
 
+| Categoria | Recursos Principais | Free | Premium |
+|-----------|-------------------|------|---------|
+| **Dashboard** | Humor do momento, roda de emoções (semanal), sentimentos chave, sabotador principal, histórico de humor com gatilhos, prêmios por ações, insights visuais, resumo de conversas. | Básico (3 dias) | Completo + filtros, histórico de emoções/sabotadores, planos com IA. |
+| **Chat** | Reflexão guiada, captura de emoções e fatos. | 1 conversa/dia (≈8 trocas) | Até 5/dia + mentor virtual 24h (dicas, hábitos). |
+| **Interações** | Convites para metas/ações, resumo semanal, motivação, insights contra sabotadores. | 1/semana | Ilimitado + resumo mensal (ações, progresso). |
+| **Mentor Virtual** | Acompanhamento total, visão completa da jornada, conversas livres. | — | Incluído: práticas de vida eficientes, filosofias aplicadas. |
 
+---
+
+**Versão:** 1.2
+**Última atualização:** Baseada na landing page MindQuest 2025
+**Contato:** suporte@mindquest.pt
