@@ -12,7 +12,7 @@ const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
     style={{
       backgroundColor: palette.card,
       border: `1px solid ${palette.stroke}`,
-      boxShadow: "0 28px 70px -46px rgba(59, 59, 88, 0.28)",
+      boxShadow: palette.shadows.soft,
     }}
   >
     <SectionTitle
@@ -29,10 +29,10 @@ const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
         onClick={() => onCtaClick("cta-final")}
         className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold uppercase tracking-[0.24em] transition duration-200"
         style={{
-          backgroundColor: palette.primary,
-          color: palette.card,
+          backgroundColor: palette.buttons.primaryBg,
+          color: palette.buttons.primaryText,
           letterSpacing: "0.24em",
-          boxShadow: "0 24px 50px -26px rgba(247, 171, 138, 0.5)",
+          boxShadow: palette.buttons.primaryShadow,
         }}
       >
         Começar agora - É grátis

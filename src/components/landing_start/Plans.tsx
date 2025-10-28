@@ -169,9 +169,9 @@ const Plans = () => {
           onClick={() => handleOpen(WHATSAPP_URL)}
           className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition duration-200"
           style={{
-            backgroundColor: palette.primary,
-            color: palette.card,
-            boxShadow: "0 18px 40px -24px rgba(247, 171, 138, 0.6)",
+            backgroundColor: palette.buttons.primaryBg,
+            color: palette.buttons.primaryText,
+            boxShadow: palette.buttons.primaryShadow,
           }}
         >
           Começar grátis agora

@@ -4,7 +4,7 @@ import { PAIN_POINTS, palette } from "./constants";
 const PainPoints = () => (
   <section
     className="rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
-    style={{ backgroundColor: palette.card, boxShadow: "0 32px 60px -48px rgba(59, 59, 88, 0.35)" }}
+    style={{ backgroundColor: palette.card, boxShadow: palette.shadows.soft }}
   >
     <SectionTitle
       title="Situações que te prendem"
@@ -20,7 +20,7 @@ const PainPoints = () => (
             borderLeft: `4px solid ${palette.accent}`,
             borderTopRightRadius: "28px",
             borderBottomRightRadius: "28px",
-            boxShadow: "0 22px 48px -40px rgba(255, 155, 113, 0.65)",
+            boxShadow: palette.shadows.card,
           }}
         >
           <h3

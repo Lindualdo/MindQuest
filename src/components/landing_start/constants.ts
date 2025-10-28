@@ -1,16 +1,55 @@
 import { Brain, MessageSquare, Sparkles, Target } from "lucide-react";
 
+export const baseColors = {
+  dogwoodRose: "#D90368",
+  spaceCadet: "#1C2541",
+  palePurple: "#FFE4FA",
+  bleuDeFrance: "#3083DC",
+  verdigris: "#7EBDC2",
+  white: "#FFFFFF",
+  nearWhite: "#FCF8FF",
+};
+
+const rgba = (hex: string, alpha: number) => {
+  const bigint = parseInt(hex.replace("#", ""), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export const palette = {
-  surface: "#E1D8CC",
-  card: "#FFFFFF",
-  primary: "#F7AB8A",
-  secondary: "#7A5E48",
-  accent: "#FF9B71",
-  footer: "#1A242F",
-  muted: "#5B6475",
-  stroke: "rgba(47, 63, 80, 0.14)",
-  soft: "#EBD3C0",
-  warmSurface: "#EBD3C0",
+  surface: baseColors.palePurple,
+  card: baseColors.white,
+  primary: baseColors.dogwoodRose,
+  secondary: baseColors.spaceCadet,
+  accent: baseColors.bleuDeFrance,
+  supportive: baseColors.verdigris,
+  footer: baseColors.spaceCadet,
+  muted: "#4F5779",
+  stroke: rgba(baseColors.spaceCadet, 0.14),
+  soft: "#F9EEFF",
+  warmSurface: "#F4E1FF",
+  neutral: "#E4E9FB",
+  hero: {
+    background: baseColors.spaceCadet,
+    headline: baseColors.white,
+    subtext: "#D6DCF5",
+    helper: rgba(baseColors.verdigris, 0.9),
+    buttonBg: baseColors.dogwoodRose,
+    buttonText: baseColors.white,
+    buttonShadow: "0 18px 40px -24px rgba(217, 3, 104, 0.45)",
+  },
+  buttons: {
+    primaryBg: baseColors.dogwoodRose,
+    primaryText: baseColors.white,
+    primaryShadow: "0 18px 40px -24px rgba(217, 3, 104, 0.45)",
+  },
+  shadows: {
+    soft: "0 24px 60px -48px rgba(28, 37, 65, 0.18)",
+    medium: "0 32px 80px -40px rgba(28, 37, 65, 0.26)",
+    card: "0 22px 48px -36px rgba(28, 37, 65, 0.22)",
+  },
 };
 
 export const PAIN_POINTS = [
