@@ -34,7 +34,7 @@ const Plans = () => (
     style={{
       backgroundColor: palette.card,
       border: `1px solid ${palette.stroke}`,
-      boxShadow: "0 24px 60px -38px rgba(59, 77, 89, 0.28)",
+      boxShadow: "0 24px 50px -36px rgba(59, 77, 89, 0.28)",
     }}
   >
     <SectionTitle
@@ -53,10 +53,7 @@ const Plans = () => (
           }}
         >
           <div>
-            <h3
-              className="text-lg font-semibold"
-              style={{ color: palette.secondary }}
-            >
+            <h3 className="text-lg font-semibold" style={{ color: palette.secondary }}>
               {plan.name}
             </h3>
           </div>
@@ -72,19 +69,11 @@ const Plans = () => (
               window.open(plan.ctaHref, "_blank", "noopener");
             }}
             className="inline-flex w-fit items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition duration-200"
-            style={
-              plan.variant === "solid"
-                ? {
-                    backgroundColor: palette.primary,
-                    color: palette.card,
-                    boxShadow: "0 18px 40px -24px rgba(247, 171, 138, 0.6)",
-                  }
-                : {
-                    color: palette.primary,
-                    border: "1px solid rgba(247, 171, 138, 0.6)",
-                    backgroundColor: "transparent",
-                  }
-            }
+            style={{
+              backgroundColor: palette.primary,
+              color: palette.card,
+              boxShadow: "0 18px 40px -24px rgba(247, 171, 138, 0.6)",
+            }}
           >
             {plan.ctaLabel}
             <ArrowRight size={16} />
