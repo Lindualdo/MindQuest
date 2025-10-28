@@ -6,7 +6,7 @@ type HeroProps = {
 
 const Hero = ({ onCtaClick }: HeroProps) => (
   <section
-    className="flex flex-col items-center gap-8 rounded-[32px] p-10 text-center md:p-14"
+    className="flex flex-col items-center gap-8 rounded-[32px] p-10 text-center md:p-14 lg:-mx-5 lg:px-16"
     style={{
       backgroundColor: palette.secondary,
       boxShadow: "0 28px 80px -40px rgba(22, 29, 39, 0.55)",

@@ -8,7 +8,7 @@ type FinalCTAProps = {
 
 const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
   <section
-    className="rounded-[32px] px-6 py-14 text-center md:px-12"
+    className="rounded-[32px] px-6 py-14 text-center md:px-12 lg:-mx-5 lg:px-16"
     style={{
       backgroundColor: palette.soft,
       boxShadow: "0 24px 60px -48px rgba(59, 77, 89, 0.35)",

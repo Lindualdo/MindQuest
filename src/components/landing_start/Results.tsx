@@ -3,7 +3,7 @@ import { RESULT_POINTS, palette } from "./constants";
 
 const Results = () => (
   <section
-    className="rounded-[32px] px-6 py-14 md:px-12"
+    className="rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
     style={{ backgroundColor: palette.card, boxShadow: "0 24px 60px -48px rgba(59, 77, 89, 0.35)" }}
   >
     <SectionTitle
