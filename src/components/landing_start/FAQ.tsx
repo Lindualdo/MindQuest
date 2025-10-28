@@ -10,7 +10,7 @@ const FAQ = () => {
     <section
       className="rounded-[32px] px-6 py-16 md:px-12"
       style={{
-        backgroundColor: palette.soft,
+        backgroundColor: palette.card,
         border: `1px solid ${palette.stroke}`,
         boxShadow: "0 28px 70px -46px rgba(59, 59, 88, 0.32)",
       }}
@@ -20,10 +20,7 @@ const FAQ = () => {
         description="Reunimos as perguntas mais comuns para você decidir com segurança."
       />
 
-      <div
-        className="mx-auto mt-12 w-full max-w-3xl divide-y rounded-[28px] border bg-white/90 shadow-lg backdrop-blur"
-        style={{ borderColor: palette.stroke }}
-      >
+      <div className="mx-auto mt-12 w-full max-w-3xl divide-y rounded-[28px] border bg-white shadow-lg">
         {FAQ_ITEMS.map((faq, index) => {
           const isOpen = openIndex === index;
           const panelId = `faq-panel-${index}`;
