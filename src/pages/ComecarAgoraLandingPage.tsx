@@ -6,7 +6,7 @@ const palette = {
   surface: '#E1D8CC',
   card: '#FFFFFF',
   primary: '#F7AB8A',
-  secondary: '#A2846C',
+  secondary: '#7A5E48',
   accent: '#FF9B71',
   footer: '#1A242F',
   muted: '#5B6475',
@@ -286,17 +286,10 @@ const ComecarAgoraLandingPage: React.FC = () => {
           }}
         >
           <div className="flex flex-col gap-6 text-white">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1">
-              <span
-                className="text-[11px] font-semibold uppercase tracking-[0.28em]"
-                style={{ color: palette.card, letterSpacing: '0.28em' }}
-              >
-                Clareza • Serenidade • Movimento
-              </span>
-            </div>
             <h1 className="text-3xl font-semibold leading-tight md:text-4xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Sua mente fala com você todos os dias. O MindQuest te ajuda a ouvir, entender e evoluir.
+              Sua mente fala com você todos os dias.
             </h1>
+            <p className="text-base leading-7 text-white/85">O MindQuest te ajuda a ouvir, entender e evoluir.</p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
