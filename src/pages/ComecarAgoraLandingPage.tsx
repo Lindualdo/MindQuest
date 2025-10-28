@@ -290,23 +290,28 @@ const ComecarAgoraLandingPage: React.FC = () => {
               Sua mente fala com você todos os dias.
             </h1>
             <p className="text-base leading-7 text-white/85">O MindQuest te ajuda a ouvir, entender e evoluir.</p>
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => handleCtaClick('hero')}
-                className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
-                style={{
-                  backgroundColor: palette.card,
-                  color: palette.secondary,
-                  fontFamily: 'Montserrat, Poppins, sans-serif',
-                  fontWeight: 600,
-                  letterSpacing: '0.2em',
-                  boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)'
-                }}
-              >
-                Começar agora no WhatsApp - É grátis
-              </button>
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:ml-4 sm:text-left text-center">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  onClick={() => handleCtaClick('hero')}
+                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
+                  style={{
+                    backgroundColor: palette.card,
+                    color: palette.secondary,
+                    fontFamily: 'Montserrat, Poppins, sans-serif',
+                    fontWeight: 600,
+                    letterSpacing: '0.2em',
+                    boxShadow: '0 16px 32px -18px rgba(255, 255, 255, 0.4)'
+                  }}
+                >
+                  Começar agora no WhatsApp - É grátis
+                </button>
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:ml-4 sm:text-left text-center">
+                  Sem login, sem senha. Apenas uma conversa.
+                </span>
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/80 sm:hidden">
                 Sem login, sem senha. Apenas uma conversa.
               </span>
             </div>
