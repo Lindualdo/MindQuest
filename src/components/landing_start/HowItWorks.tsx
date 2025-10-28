@@ -46,7 +46,7 @@ const HowItWorks = ({ onCtaClick }: HowItWorksProps) => (
       <button
         type="button"
         onClick={() => onCtaClick("como-funciona")}
-        className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
+        className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200"
         style={{
           backgroundColor: palette.primary,
           color: palette.card,
@@ -54,6 +54,7 @@ const HowItWorks = ({ onCtaClick }: HowItWorksProps) => (
           boxShadow: "0 16px 40px -26px rgba(247, 171, 138, 0.45)",
         }}
       >
+        <i className="fa-brands fa-whatsapp" aria-hidden="true" />
         Ver como funciona
       </button>
       <p className="text-xs uppercase tracking-[0.24em]" style={{ color: palette.muted }}>

@@ -1,5 +1,4 @@
 import { palette } from "./constants";
-import whatsappLogo from "@/img/WhatsApp_Logo.jpeg";
 
 type HeroProps = {
   onCtaClick: (origin: string) => void;
@@ -31,21 +30,21 @@ const Hero = ({ onCtaClick }: HeroProps) => (
           type="button"
           onClick={() => onCtaClick("hero")}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] leading-relaxed text-center transition duration-200"
-        style={{
-          backgroundColor: palette.hero.buttonBg,
-          color: palette.hero.buttonText,
-          fontFamily: "Montserrat, Poppins, sans-serif",
-          fontWeight: 600,
-          letterSpacing: "0.2em",
-          boxShadow: palette.hero.buttonShadow,
-          whiteSpace: "normal",
-          maxWidth: "360px",
-          minWidth: "280px",
-        }}
-      >
-        <img src={whatsappLogo} alt="WhatsApp" className="h-4 w-4" />
-        Começar agora no WhatsApp
-      </button>
+          style={{
+            backgroundColor: palette.hero.buttonBg,
+            color: palette.hero.buttonText,
+            fontFamily: "Montserrat, Poppins, sans-serif",
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            boxShadow: palette.hero.buttonShadow,
+            whiteSpace: "normal",
+            maxWidth: "360px",
+            minWidth: "280px",
+          }}
+        >
+          <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+          Começar agora no WhatsApp
+        </button>
         <span
           className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] md:mt-3"
           style={{ color: palette.hero.helper }}
