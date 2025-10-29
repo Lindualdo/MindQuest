@@ -3,7 +3,10 @@ import SectionTitle from "./SectionTitle";
 import { IMPACT_STATS, TESTIMONIALS, palette } from "./constants";
 
 const Testimonials = () => (
-  <section className="flex flex-col gap-12 rounded-[32px] bg-white px-6 py-14 md:px-12">
+  <section
+    className="flex flex-col gap-12 rounded-[32px] px-6 py-14 md:px-12"
+    style={{ backgroundColor: palette.offWhite }}
+  >
     <SectionTitle
       kicker="Prova social"
       title="Benefícios que você vai sentir na prática"

@@ -1,5 +1,5 @@
 import SectionTitle from "./SectionTitle";
-import { palette } from "./constants";
+import { baseColors, palette } from "./constants";
 
 const partners = [
   {
@@ -42,7 +42,7 @@ const Partners = ({ sectionId = "parcerias" }: PartnersProps) => (
           className="group relative flex flex-col items-center justify-center gap-4 rounded-3xl border p-6 text-center transition-transform duration-200 hover:-translate-y-1"
           style={{
             borderColor: palette.stroke,
-            backgroundColor: palette.card,
+            backgroundColor: baseColors.white,
             boxShadow: palette.shadows.card,
           }}
         >

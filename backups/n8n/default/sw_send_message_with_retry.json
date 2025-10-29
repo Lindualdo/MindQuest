@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-27T23:48:53.569Z",
+  "updatedAt": "2025-10-28T23:05:28.823Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -392,12 +392,12 @@
         "json": {
           "instanceName": "MindQuest",
           "remoteJid": "351932786582@s.whatsapp.net",
-          "messageText": "Aldo, essa sequência que você desenha soa bem estruturada e cheia de sentido para você. Primeiro cuidar do financeiro para aliviar o peso, depois se reconectar com seus filhos e diminuir a solidão, avançar nos negócios e só depois mergulhar no namoro e construir um relacionamento mais consciente.\n\nPercebo que cada passo parece abrir espaço para o próximo, como se fosse um caminho que vai cuidando de você em camadas, respeitando o tempo e a complexidade de cada área.\n\nO que você sente ao imaginar esses passos acontecendo, um de cada vez, com essa calma que você está buscando? Alguma parte disso que você antevê como maior desafio ou que te dá mais esperança? Quero sentir como essa jornada está se revelando pra você. "
+          "messageText": "Entendo, Aldo, é super válido querer explorar outras áreas da sua vida e trazer novos assuntos para a conversa.\n\nFico feliz de saber que seu app tem um propósito transformador, isso mostra como você valoriza impacto real, não só resultados. Esse cuidado reflete um lado muito importante seu, que quer mais significado no que faz.\n\nPensando em outras áreas pessoais, que tal conversarmos um pouco sobre:\n\n• Como você tem se sentido nas relações com as pessoas ao seu redor, além dos seus filhos?\n\n• Que momentos no seu dia a dia trazem mais calma ou prazer, mesmo que pequenos?\n\n• Se pudesse dedicar um tempo só para você, sem obrigações, o que gostaria de fazer?\n\nQuero ajudar a encontrar um foco que faça sentido pra você hoje. Tem algo aí que chama mais sua atenção para a gente começar? "
         }
       }
     ]
   },
-  "versionId": "0cac63f3-daad-4213-86eb-133fab1054b7",
+  "versionId": "89575b04-9cce-40a2-bead-05f3031af7f7",
   "triggerCount": 0,
   "shared": [
     {
@@ -422,7 +422,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-28T08:05:25.511Z",
+              "updatedAt": "2025-10-29T08:00:03.799Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -447,7 +447,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-28",
+              "lastActiveAt": "2025-10-29",
               "isPending": false
             }
           }

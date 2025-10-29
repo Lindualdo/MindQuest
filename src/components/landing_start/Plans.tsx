@@ -133,7 +133,7 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
                 className="flex flex-col gap-2 rounded-[24px] border p-5 text-sm leading-6 md:rounded-[20px]"
                 style={{
                   borderColor: "rgba(247, 171, 138, 0.35)",
-                  backgroundColor: "rgba(255, 255, 255, 0.92)",
+                  backgroundColor: palette.overlays.translucentCard,
                   color: palette.secondary,
                 }}
               >

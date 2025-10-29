@@ -42,7 +42,7 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
         <div
           className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-5"
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
+            backgroundColor: palette.overlays.header,
             borderBottom: `1px solid ${palette.stroke}`,
           }}
         >
@@ -107,7 +107,7 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
               style={{
                 borderColor: palette.stroke,
                 color: palette.secondary,
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                backgroundColor: palette.overlays.headerButton,
               }}
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
@@ -120,8 +120,8 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
 
         {menuOpen && sections.length > 0 ? (
           <div
-            className="absolute inset-x-5 top-full z-40 mt-3 rounded-3xl border bg-white shadow-xl md:hidden"
-            style={{ borderColor: palette.stroke }}
+            className="absolute inset-x-5 top-full z-40 mt-3 rounded-3xl border shadow-xl md:hidden"
+            style={{ borderColor: palette.stroke, backgroundColor: palette.overlays.menu }}
           >
             <nav className="flex flex-col divide-y" aria-label="Menu móvel">
               {sections.map((section) => (

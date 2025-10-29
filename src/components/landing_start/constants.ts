@@ -3,9 +3,10 @@ import { Brain, MessageSquare, Sparkles, Target } from "lucide-react";
 export const baseColors = {
   dogwoodRose: "#D90368",
   spaceCadet: "#1C2541",
-  palePurple: "#FFE4FA",
+  palePurple: "#fae6f6ff",
   bleuDeFrance: "#3083DC",
   verdigris: "#7EBDC2",
+  verdigrisMist: "#E8F3F5",
   white: "#FFFFFF",
   nearWhite: "#FCF8FF",
 };
@@ -18,9 +19,12 @@ const rgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const offWhiteBase = baseColors.verdigrisMist;
+
 export const palette = {
   surface: baseColors.palePurple,
-  card: baseColors.white,
+  card: offWhiteBase,
+  offWhite: offWhiteBase,
   primary: baseColors.dogwoodRose,
   secondary: baseColors.spaceCadet,
   accent: baseColors.bleuDeFrance,
@@ -31,6 +35,12 @@ export const palette = {
   soft: "#F9EEFF",
   warmSurface: "#F4E1FF",
   neutral: "#E4E9FB",
+  overlays: {
+    header: rgba(offWhiteBase, 0.92),
+    headerButton: rgba(offWhiteBase, 0.9),
+    menu: rgba(offWhiteBase, 0.96),
+    translucentCard: rgba(offWhiteBase, 0.92),
+  },
   hero: {
     background: baseColors.spaceCadet,
     headline: baseColors.white,
@@ -104,7 +114,7 @@ export const RESULT_POINTS = [
   {
     title: "Transforme ruído mental em informações organizadas",
     description:
-      "Com menos de 10 minutos de conversa por dia você já terá a clareza que faltava para entender sua mente. Conversa no WhatsApp guiada por assitente de IA"
+      "Com menos de 10 minutos de conversa por dia você já terá a clareza que faltava para entender sua mente. Converse no WhatsApp guiada por assitente de IA"
   },
   {
     title: "Entenda o que sua mente está te dizendo",
