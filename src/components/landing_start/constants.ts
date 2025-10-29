@@ -1,9 +1,8 @@
-import { Brain, MessageSquare, Sparkles, Target } from "lucide-react";
 
 export const baseColors = {
   dogwoodRose: "#D90368",
   spaceCadet: "#1C2541",
-  palePurple: "#fae6f6ff",
+  palePurple: "#FFE4FA",
   bleuDeFrance: "#3083DC",
   verdigris: "#7EBDC2",
   verdigrisMist: "#E8F3F5",
@@ -133,32 +132,79 @@ export const RESULT_POINTS = [
   }
 ];
 
-export const HOW_IT_WORKS = [
+export const IMMEDIATE_BENEFITS = [
   {
-    icon: MessageSquare,
-    title: "Você conversa no WhatsApp",
+    title: "Clareza no Dia a Dia",
     description:
-      "Fale livremente sobre seu dia, seus desafios, suas conquistas. A IA faz perguntas poderosas que revelam o que está acontecendo por baixo da superfície.",
+      "Gráficos fáceis mostram padrões que travam você, saindo do looping mental.",
   },
   {
-    icon: Brain,
-    title: "App traduz emoções em dados",
+    title: "Progresso que Você Vê",
     description:
-      "Humor, roda das emoções, sentimentos PANAS, sabotadores ativos — tudo atualizado em tempo real para você ver exatamente onde está.",
+      "Evolução emocional semanal, celebrando conquistas reais.",
   },
   {
-    icon: Target,
-    title: "Recebe ações personalizadas",
+    title: "Motivação que Dura",
     description:
-      "Metas e micro-ações práticas, alinhadas com seus objetivos. Não é motivação vazia — é direção clara sobre o próximo passo.",
+      "Pontos, sequências e prêmios mantêm o ritmo leve e divertido.",
   },
   {
-    icon: Sparkles,
-    title: "IA mantém você engajado",
+    title: "Dicas Personalizadas da IA",
     description:
-      "Lembretes inteligentes, resumos semanais e convites para reflexões guiadas. O sistema trabalha para você manter o ritmo, sem pressão.",
-    extra:
-      "Indicadores visuais mostram seu progresso. Cada pequena vitória é registrada e celebrada — porque evolução é soma de consistência.",
+      "Resumos automáticos com ideias práticas para superar obstáculos.",
+  },
+  {
+    title: "Escuta Ativa",
+    description:
+      "Conversas leves e dinamicas guiada por IA em texto ou áudio.",
+  },
+  {
+    title: "Passos Simples e Concretos",
+    description:
+      "Planos semanais feitos para você, quebrando inércias.",
+  },
+  {
+    title: "Tudo Guardado",
+    description:
+      "Histórico completo de conversas, humor, emoções e gatilhos para rever e melhorar.",
+  },
+  {
+    title: "Resumos Espertos",
+    description:
+      "Semanais e mensais de metas, ações e visão geral das emoções.",
+  },
+  {
+    title: "Mentor 24h (Premium)",
+    description:
+      "Conversas profundas com dicas de vida e hábitos, como uma versão melhor de você.",
+  },
+  {
+    title: "Hábitos que Pegam",
+    description:
+      "Lembretes inteligentes que viram rotina natural.",
+  },
+];
+
+export const AI_PARTNERS = [
+  {
+    name: "OpenAI · ChatGPT",
+    description: "Garante conversas naturais e empáticas com compreensão contextual avançada.",
+    logo: new URL("../../img/logos-ia/ChatGPT-Logo.png", import.meta.url).href,
+  },
+  {
+    name: "Anthropic · Claude",
+    description: "Refina reflexões profundas com foco em segurança e alinhamento humano.",
+    logo: new URL("../../img/logos-ia/claude-ai-logo-rounded-hd-free-png.webp", import.meta.url).href,
+  },
+  {
+    name: "Google · Gemini",
+    description: "Análises rápidas para organizar dados emocionais e insights em dashboards claros.",
+    logo: new URL("../../img/logos-ia/gemini.png", import.meta.url).href,
+  },
+  {
+    name: "Meta · Meta AI",
+    description: "Engajamento contínuo com micro interações multicanal e reforço de hábitos.",
+    logo: new URL("../../img/logos-ia/Meta_AI.webp", import.meta.url).href,
   },
 ];
 

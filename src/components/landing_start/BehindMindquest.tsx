@@ -1,5 +1,5 @@
 import { Compass } from "lucide-react";
-import { palette } from "./constants";
+import { AI_PARTNERS, palette } from "./constants";
 
 const foundations = [
   {
@@ -15,8 +15,9 @@ const foundations = [
     description: "Roda da Vida, sabotadores e estoicismo adaptados ao dia a dia.",
   },
   {
-    title: "Posicionamento",
-    description: "MindQuest não é terapia nem app de produtividade. É evolução pessoal guiado por IA.",
+    title: "Parceiros de IA",
+    description: "Integramos modelos especializados para equilibrar empatia, análise e engajamento contínuo.",
+    logos: AI_PARTNERS,
   },
 ];
 

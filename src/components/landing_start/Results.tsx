@@ -1,5 +1,5 @@
 import SectionTitle from "./SectionTitle";
-import { RESULT_POINTS, palette } from "./constants";
+import { IMMEDIATE_BENEFITS, RESULT_POINTS, palette } from "./constants";
 
 type ResultsProps = {
   sectionId?: string;
@@ -13,7 +13,7 @@ const Results = ({ sectionId = "resultados" }: ResultsProps) => (
   >
     <SectionTitle
       kicker="Resultados reais"
-      title="O MindQuest transforma ruídos em clareza e ações em resultados."
+      title="O MindQuest transforma ruídos em clareza e ações em resultados"
       description="Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados. Cada etapa do MindQuest foi desenhada para manter esse ciclo a seu favor."
     />
     <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -44,6 +44,48 @@ const Results = ({ sectionId = "resultados" }: ResultsProps) => (
           ) : null}
         </article>
       ))}
+    </div>
+    <p className="mt-12 text-center text-sm font-semibold uppercase tracking-[0.22em]" style={{ color: palette.muted }}>
+      MindQuest não é terapia nem app de produtividade. É evolução pessoal guiado por IA.
+    </p>
+    <div
+      className="mt-14 rounded-[28px] border p-6 md:p-8"
+      style={{ backgroundColor: palette.offWhite, borderColor: palette.stroke }}
+    >
+      <h3 className="text-lg font-semibold" style={{ color: palette.secondary }}>
+        Benefícios imediatos
+      </h3>
+      <p className="mt-2 text-sm leading-6" style={{ color: palette.muted }}>
+        Resultados que aparecem desde a primeira semana — clareza mental, hábitos consistentes e motivação que dura.
+      </p>
+      <ul className="mt-6 grid gap-4 md:grid-cols-2">
+        {IMMEDIATE_BENEFITS.map((benefit, index) => (
+          <li
+            key={benefit.title}
+            className="flex items-start gap-4 rounded-[20px] border p-4"
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.stroke,
+              boxShadow: palette.shadows.soft,
+            }}
+          >
+            <span
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase tracking-[0.18em]"
+              style={{ backgroundColor: "rgba(217, 3, 104, 0.12)", color: palette.primary }}
+            >
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold leading-5" style={{ color: palette.secondary }}>
+                {benefit.title}
+              </h4>
+              <p className="text-sm leading-6" style={{ color: palette.muted }}>
+                {benefit.description}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 );

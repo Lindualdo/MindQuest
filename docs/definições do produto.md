@@ -302,45 +302,6 @@ Acesso imediato. Sem login. Sem senha. Apenas você e sua evolução.
 9. **Guia 24h Premium**: Conversas profundas com dicas de vida e hábitos, como uma versão melhor de você.
 10. **Hábitos que Pegam**: Lembretes inteligentes que viram rotina natural.
 
-
-export const RESULT_POINTS = [
-  {
-    title: "Organize seus pensamentos com clareza",
-    description:
-      "Faça uma conversa guiada com seu assistente de IA no WhatsApp em menos de 10 minutos por dia e transforme ruído mental em foco real.",
-  },
-  {
-    title: "Veja o que sua mente está dizendo",
-    description:
-      "Cada conversa atualiza o app com visualizações simples de humor, energia, sabotadores e perfis comportamentais para você enxergar padrões sem jargões.",
-  },
-  {
-    title: "Descubra como mudar padrões que travam seu crescimento",
-    description:
-      "Especialistas de IA em neurociência interpretam suas conversas e entregam insights objetivos sobre o que priorizar e por quê.",
-  },
-  {
-    title: "Pequenas ações, grandes resultados",
-    description:
-      "O assistente sugere micro-ações personalizadas para colocar em prática o que você aprendeu, mantendo você em movimento com consistência.",
-  },
-  {
-    title: "Celebre cada vitória",
-    description:
-      "O MindQuest acompanha seu progresso, registra conquistas e reforça hábitos positivos para que você sinta evolução contínua.",
-  },
-  {
-    title: "MindQuest é um ecossistema completo",
-    description: "Todo o ecossistema foi criado para sustentar sua evolução com suporte 360°.",
-    bullets: [
-      "Assistente de IA para reflexões guiadas no WhatsApp",
-      "App com informações atualizadas a cada conversa",
-      "IA especialista em neurociência gerando insights personalizados",
-      "IA focada em execução para colocar planos em prática",
-    ],
-  },
-];
-
 ---
 
 ## Mapa de Recursos
@@ -353,7 +314,3 @@ export const RESULT_POINTS = [
 | **Mentor Virtual** | Acompanhamento total, visão completa da jornada, conversas livres. | — | Incluído: práticas de vida eficientes, filosofias aplicadas. |
 
 ---
-
-**Versão:** 1.2
-**Última atualização:** Baseada na landing page MindQuest 2025
-**Contato:** suporte@mindquest.pt
