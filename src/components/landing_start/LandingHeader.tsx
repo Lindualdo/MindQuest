@@ -74,8 +74,8 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
                   key={section.id}
                   type="button"
                   onClick={() => handleNavigate(section.id)}
-                  className="text-[11px] font-semibold uppercase tracking-[0.16em] text-inherit transition-colors duration-200 hover:text-[rgba(217,3,104,0.9)]"
-                  style={{ color: palette.muted, letterSpacing: "0.2em" }}
+                  className="text-sm font-medium text-inherit transition-colors duration-200 hover:text-[rgba(217,3,104,0.9)]"
+                  style={{ color: palette.muted }}
                 >
                   {section.label}
                 </button>
@@ -129,8 +129,8 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
                   key={section.id}
                   type="button"
                   onClick={() => handleNavigate(section.id)}
-                  className="px-5 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-inherit transition-colors duration-200 hover:bg-[rgba(217,3,104,0.08)]"
-                  style={{ color: palette.secondary, letterSpacing: "0.18em" }}
+                  className="px-5 py-4 text-left text-sm font-medium text-inherit transition-colors duration-200 hover:bg-[rgba(217,3,104,0.08)]"
+                  style={{ color: palette.secondary }}
                 >
                   {section.label}
                 </button>

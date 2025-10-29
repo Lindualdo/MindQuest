@@ -15,11 +15,8 @@ const landingSections = [
   { id: "inicio", label: "Início" },
   { id: "dores", label: "Para quem é" },
   { id: "resultados", label: "Resultados" },
-  { id: "recursos", label: "Recursos" },
-  { id: "pilares", label: "Método" },
-  { id: "parcerias", label: "Tecnologia" },
+  { id: "recursos", label: "Planos" },
   { id: "faq", label: "FAQ" },
-  { id: "comecar", label: "Começar" },
 ] as const;
 
 const ComecarAgoraLandingPage = () => {

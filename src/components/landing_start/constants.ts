@@ -5,7 +5,7 @@ export const baseColors = {
   palePurple: "#FFE4FA",
   bleuDeFrance: "#3083DC",
   verdigris: "#7EBDC2",
-  verdigrisMist: "#E8F3F5",
+  verdigrisMist: "#eef4f5ff",
   white: "#FFFFFF",
   nearWhite: "#FCF8FF",
 };
@@ -95,8 +95,8 @@ export const PAIN_POINTS = [
     description: "Mas o cansaço chega quando a vida sai do roteiro e você se sente isolado",
   },
   {
-    title: "Conquista no trabalho ou fora, mas dentro fica um vazio",
-    description: "É só isso?' – sucesso que não aquece o coração.",
+    title: "Várias conquistas no trabalho e outras área, mas em você sente um vazio",
+    description: "É só isso? – sucesso que não aquece o coração.",
   },
   {
     title: "Enxerga riscos em cada canto, e esse alerta constante rouba momentos felizes",

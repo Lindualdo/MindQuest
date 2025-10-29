@@ -142,8 +142,8 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
       }}
     >
       <SectionTitle
-        title="Free vs Premium — qual conversa com você agora?"
-        description="Comece de graça para sentir a evolução. Quando quiser acelerar, o Premium amplia tudo que funcionou."
+        title="Free vs Premium"
+        description="Comece gratis para sentir a evolução. Quando quiser acelerar, o Premium amplia tudo que funcionou."
       />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
@@ -214,29 +214,46 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
           Em resumo prático
         </div>
         <div
-          className="grid grid-cols-1 gap-3 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-center text-[color:var(--summary-label-color)] md:grid-cols-[1.4fr,0.8fr,0.8fr]"
+          className="hidden grid-cols-[1.4fr,0.8fr,0.8fr] gap-3 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-center md:grid"
           style={{
             color: palette.muted,
             borderBottom: `1px solid ${palette.stroke}`,
-            ["--summary-label-color" as const]: palette.muted,
           }}
         >
           <span className="text-left md:text-left">O que você quer</span>
           <span>Free</span>
           <span>Premium</span>
         </div>
-        <div className="divide-y" style={{ borderColor: palette.stroke }}>
+        <div className="divide-y border-t md:border-t-0" style={{ borderColor: palette.stroke }}>
           {summaryRows.map((row) => (
             <div
               key={row.label}
-              className="grid grid-cols-1 gap-3 px-6 py-4 text-sm leading-6 md:grid-cols-[1.4fr,0.8fr,0.8fr] md:items-center"
+              className="grid grid-cols-1 gap-4 px-6 py-4 text-sm leading-6 md:grid-cols-[1.4fr,0.8fr,0.8fr] md:items-center"
               style={{ color: palette.secondary }}
             >
               <span className="font-medium">{row.label}</span>
-              <span className="md:text-center" style={{ color: typeof row.free === "boolean" ? palette.secondary : palette.muted }}>
+              <span
+                className="flex items-center gap-2 md:justify-center md:text-center"
+                style={{ color: typeof row.free === "boolean" ? palette.secondary : palette.muted }}
+              >
+                <span
+                  className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
+                  style={{ color: palette.muted }}
+                >
+                  Free
+                </span>
                 {renderCell(row.free)}
               </span>
-              <span className="md:text-center" style={{ color: typeof row.premium === "boolean" ? palette.secondary : palette.primary }}>
+              <span
+                className="flex items-center gap-2 md:justify-center md:text-center"
+                style={{ color: typeof row.premium === "boolean" ? palette.secondary : palette.primary }}
+              >
+                <span
+                  className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
+                  style={{ color: palette.muted }}
+                >
+                  Premium
+                </span>
                 {renderCell(row.premium)}
               </span>
             </div>
