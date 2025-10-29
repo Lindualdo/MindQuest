@@ -1,77 +1,57 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import { palette } from "./constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
 
-type PlanContent = {
-  free: string[];
-  premium: string[];
+type ResourceRow = {
+  category: string;
+  features: string[];
+  free?: string;
+  premium: string;
 };
 
-const planSections: Array<{
-  area: string;
-  summary: string;
-  content: PlanContent;
-}> = [
+const resourceMap: ResourceRow[] = [
   {
-    area: "Assistente de IA pessoal para conversas e reflexão",
-    summary: "O coração do MindQuest: um diálogo guiado que converte sentimentos em clareza prática.",
-    content: {
-      free: [
-        "1 conversa guiada por dia no WhatsApp com perguntas certeiras.",
-        "Você aprova cada resumo antes de guardar qualquer informação.",
-        "Tokens renovados a cada sessão — zero login, zero senha.",
-      ],
-      premium: [
-        "Até 5 conversas por dia mantendo o contexto vivo.",
-        "Insights automáticos com próximos passos priorizados.",
-        "Memória ativa entre sessões para destravar ciclos mais rápido.",
-      ],
-    },
+    category: "Dashboard de evolução",
+    features: [
+      "Humor do momento e sentimentos-chave",
+      "Roda de emoções com visão semanal",
+      "Sabotador principal sempre atualizado",
+      "Histórico de humor com gatilhos destacados",
+      "Prêmios por ações e insights visuais",
+      "Resumo de conversas para você revisar quando quiser",
+    ],
+    free: "Histórico básico dos últimos 3 dias para manter a clareza inicial.",
+    premium:
+      "Acesso completo com filtros avançados, histórico de emoções e sabotadores e planos guiados por IA.",
   },
   {
-    area: "App com informações dinâmicas",
-    summary: "Veja sua evolução em painéis vivos que traduzem emoções em direção clara.",
-    content: {
-      free: [
-        "Dashboard com humor, energia e sabotador em tempo real.",
-        "Histórico dos últimos 3 dias com gatilhos destacados.",
-        "Painel semanal de emoções e micro ações orientadas.",
-      ],
-      premium: [
-        "Histórico completo com filtros por período e área da vida.",
-        "Busca semântica e planos automáticos prontos para executar.",
-        "Indicadores detalhados por trabalho, relações, saúde, finanças e propósito.",
-      ],
-    },
+    category: "Chat · Assistente pessoal",
+    features: [
+      "Reflexão guiada no WhatsApp",
+      "Captura de emoções e fatos relevantes",
+    ],
+    free: "1 conversa guiada por dia (≈8 trocas) para manter o hábito vivo.",
+    premium: "Até 5 conversas por dia com mentor virtual ativo 24h para destravar ciclos na hora.",
   },
   {
-    area: "IA de interações",
-    summary: "Automatizamos o acompanhamento para que você mantenha o ritmo sem sentir pressão.",
-    content: {
-      free: [
-        "Convite diário para refletir na hora que fizer sentido.",
-        "Resumo inteligente no fim da semana.",
-        "Lembretes quando padrões emocionais se repetem.",
-      ],
-      premium: [
-        "Interações sob demanda para ajustar metas a qualquer hora.",
-        "Rotinas automatizadas (manhã, meio do dia e noite) adaptadas a você.",
-        "Check-ins com indicadores de consistência e energia em tempo real.",
-      ],
-    },
+    category: "Interações inteligentes",
+    features: [
+      "Convites para metas e micro ações",
+      "Resumo inteligente da semana",
+      "Motivação contínua com insights contra sabotadores",
+    ],
+    free: "1 interação orientada por semana para ajustar o rumo sem pressão.",
+    premium: "Interações ilimitadas + resumo mensal completo com ações, progresso e raio X das emoções.",
   },
   {
-    area: "Mentor ativo 24 × 7",
-    summary: "Uma camada premium para quem quer mentoria contínua baseada em neurociência e filosofia prática.",
-    content: {
-      free: ["Você evolui com o assistente principal e o app dinâmico."],
-      premium: [
-        "Mentor virtual 24×7 moldado ao seu estilo de aprendizado.",
-        "Sugestões avançadas de neurociência, TCC e filosofia prática quando você precisa destravar.",
-        "Acompanha toda a jornada para acelerar decisões difíceis com segurança.",
-      ],
-    },
+    category: "Mentor virtual Premium",
+    features: [
+      "Acompanhamento total da sua jornada",
+      "Conversas livres quando você precisar",
+      "Visão integrada das áreas da vida",
+    ],
+    premium: "Incluído no Premium: práticas de vida eficientes, filosofias aplicadas e mentor 24h pensado para você.",
   },
 ];
 
@@ -79,7 +59,7 @@ type PlansProps = {
   sectionId?: string;
 };
 
-const Plans = ({ sectionId = "planos" }: PlansProps) => {
+const Plans = ({ sectionId = "recursos" }: PlansProps) => {
   const handleOpen = (href: string) => {
     if (typeof window !== "undefined") {
       window.open(href, "_blank", "noopener");
@@ -97,75 +77,98 @@ const Plans = ({ sectionId = "planos" }: PlansProps) => {
       }}
     >
       <SectionTitle
-        title="Planos"
-        description="80% do MindQuest está no plano Free. Quando o Premium chegar, ele só adiciona turbo para quem quiser acelerar."
+        title="Recursos Free vs Premium"
+        description="O plano Free entrega quase tudo. O Premium adiciona profundidade, histórico ilimitado e mentor ativo para quem quer acelerar."
       />
       <p className="mt-4 text-center text-xs uppercase tracking-[0.2em]" style={{ color: palette.muted }}>
         Premium disponível em breve — aproveite o Free agora mesmo.
       </p>
 
-      <div className="mt-12 space-y-8">
-        {planSections.map((section) => (
-          <article
-            key={section.area}
-            className="rounded-[28px] border p-8 shadow-sm transition-shadow duration-200 hover:shadow-lg"
-            style={{
-              borderColor: palette.stroke,
-              backgroundColor: palette.surface,
-            }}
-          >
-            <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-2xl">
-                <h3 className="text-xl font-semibold" style={{ color: palette.secondary }}>
-                  {section.area}
-                </h3>
-                <p className="mt-2 text-sm leading-6" style={{ color: palette.muted }}>
-                  {section.summary}
-                </p>
+      <div
+        className="mt-12 overflow-hidden rounded-[32px] border"
+        style={{
+          borderColor: palette.stroke,
+          backgroundColor: palette.card,
+          boxShadow: "0 28px 60px -42px rgba(28, 37, 65, 0.25)",
+        }}
+      >
+        <div
+          className="hidden h-full items-center justify-between gap-4 px-8 py-5 font-semibold uppercase tracking-[0.22em] text-xs text-white md:grid md:grid-cols-[1.6fr,1fr,1fr]"
+          style={{
+            backgroundImage: "linear-gradient(135deg, rgba(217, 3, 104, 0.92) 0%, rgba(126, 189, 194, 0.88) 100%)",
+            letterSpacing: "0.22em",
+          }}
+        >
+          <span>Recursos</span>
+          <span className="text-right">Free</span>
+          <span className="text-right">Premium</span>
+        </div>
+
+        <div className="divide-y" style={{ borderColor: palette.stroke }}>
+          {resourceMap.map((row) => (
+            <div
+              key={row.category}
+              className="flex flex-col gap-6 px-6 py-6 md:grid md:grid-cols-[1.6fr,1fr,1fr] md:items-start md:px-8"
+            >
+              <div className="flex flex-col gap-4">
+                <div>
+                  <span
+                    className="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                    style={{ backgroundColor: "rgba(217, 3, 104, 0.12)", color: palette.primary }}
+                  >
+                    {row.category}
+                  </span>
+                </div>
+                <ul className="space-y-2 text-sm leading-6">
+                  {row.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2" style={{ color: palette.secondary }}>
+                      <Check size={16} style={{ color: palette.primary, marginTop: 2 }} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </header>
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+
               <div
-                className="flex h-full flex-col gap-3 rounded-[24px] border p-6"
+                className="flex flex-col gap-2 rounded-[24px] border p-5 text-sm leading-6 md:rounded-[20px]"
                 style={{
-                  borderColor: "rgba(247, 171, 138, 0.4)",
+                  borderColor: "rgba(247, 171, 138, 0.35)",
                   backgroundColor: "rgba(255, 255, 255, 0.92)",
+                  color: palette.secondary,
                 }}
               >
                 <span
-                  className="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
-                  style={{ backgroundColor: "rgba(247, 171, 138, 0.18)", color: palette.secondary }}
+                  className="text-xs font-semibold uppercase tracking-[0.2em] md:hidden"
+                  style={{ color: palette.muted }}
                 >
                   Free
                 </span>
-                <ul className="space-y-2 text-sm leading-6" style={{ color: palette.secondary }}>
-                  {section.content.free.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
+                {row.free ? (
+                  <p>{row.free}</p>
+                ) : (
+                  <p style={{ color: palette.muted }}>Disponível apenas no plano Premium.</p>
+                )}
               </div>
+
               <div
-                className="flex h-full flex-col gap-3 rounded-[24px] border p-6"
+                className="flex flex-col gap-2 rounded-[24px] border p-5 text-sm leading-6 md:rounded-[20px]"
                 style={{
-                  borderColor: "rgba(247, 171, 138, 0.55)",
-                  backgroundColor: "rgba(247, 171, 138, 0.12)",
+                  borderColor: "rgba(217, 3, 104, 0.55)",
+                  backgroundColor: "rgba(217, 3, 104, 0.1)",
+                  color: palette.secondary,
                 }}
               >
                 <span
-                  className="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
-                  style={{ backgroundColor: palette.primary, color: palette.card }}
+                  className="text-xs font-semibold uppercase tracking-[0.2em] md:hidden"
+                  style={{ color: palette.primary }}
                 >
                   Premium
                 </span>
-                <ul className="space-y-2 text-sm leading-6" style={{ color: palette.secondary }}>
-                  {section.content.premium.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
+                <p>{row.premium}</p>
               </div>
             </div>
-          </article>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div className="mt-12 flex justify-center">

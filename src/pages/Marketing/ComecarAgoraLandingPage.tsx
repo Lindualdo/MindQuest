@@ -16,7 +16,7 @@ const landingSections = [
   { id: "inicio", label: "Início" },
   { id: "dores", label: "Para quem é" },
   { id: "resultados", label: "Resultados" },
-  { id: "planos", label: "Planos" },
+  { id: "recursos", label: "Recursos" },
   { id: "pilares", label: "Método" },
   { id: "parcerias", label: "Tecnologia" },
   { id: "faq", label: "FAQ" },
@@ -68,6 +68,7 @@ const ComecarAgoraLandingPage = () => {
         <Hero onCtaClick={handleCtaClick} sectionId="inicio" />
         <PainPoints sectionId="dores" />
         <Results sectionId="resultados" />
+        <Plans sectionId="recursos" />
         <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
         <BehindMindquest sectionId="pilares" />
         <Partners sectionId="parcerias" />
