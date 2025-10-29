@@ -4,9 +4,7 @@ import LandingHeader from "@/components/landing_start/LandingHeader";
 import FinalCTA from "@/components/landing_start/FinalCTA";
 import FAQ from "@/components/landing_start/FAQ";
 import Hero from "@/components/landing_start/Hero";
-import PainPoints from "@/components/landing_start/Dores";
-import Partners from "@/components/landing_start/Partners";
-import Plans from "@/components/landing_start/Plans";
+import Dores from "@/components/landing_start/Dores";
 import Results from "@/components/landing_start/Results";
 import BehindMindquest from "@/components/landing_start/BehindMindquest";
 import { palette } from "@/components/landing_start/constants";
@@ -66,11 +64,10 @@ const ComecarAgoraLandingPage = () => {
       <LandingHeader onCtaClick={handleCtaClick} sections={landingSections} />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-16 md:pt-24 lg:pt-28">
         <Hero onCtaClick={handleCtaClick} sectionId="inicio" />
-        <PainPoints sectionId="dores" />
+        <Dores sectionId="dores" />
         <Results sectionId="resultados" />
         <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
         <BehindMindquest sectionId="pilares" />
-        <Partners sectionId="parcerias" />
         <FAQ sectionId="faq" />
         <FinalCTA onCtaClick={handleCtaClick} sectionId="comecar" />
       </main>

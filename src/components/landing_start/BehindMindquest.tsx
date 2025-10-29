@@ -1,7 +1,13 @@
 import { Compass } from "lucide-react";
 import { AI_PARTNERS, palette } from "./constants";
 
-const foundations = [
+type FoundationItem = {
+  title: string;
+  description: string;
+  logos?: typeof AI_PARTNERS;
+};
+
+const foundations: FoundationItem[] = [
   {
     title: "Neurociência aplicada",
     description: "Conversas objetivas, sem jargão.",
@@ -16,7 +22,7 @@ const foundations = [
   },
   {
     title: "Parceiros de IA",
-    description: "Integramos modelos especializados para equilibrar empatia, análise e engajamento contínuo.",
+    description: "Combinamos diferentes modelos de IA para garantir melhor experiência conversacional, analítica e de apoio.",
     logos: AI_PARTNERS,
   },
 ];
@@ -66,6 +72,25 @@ const BehindMindquest = ({ sectionId = "pilares" }: BehindMindquestProps) => (
           <p className="mt-2 text-sm leading-6" style={{ color: palette.muted }}>
             {item.description}
           </p>
+          {item.logos ? (
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              {item.logos.map((partner) => (
+                <div
+                  key={partner.name}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl border"
+                  style={{ backgroundColor: palette.card, borderColor: palette.neutral }}
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    title={partner.name}
+                    className="h-8 w-8 object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : null}
         </article>
       ))}
     </div>

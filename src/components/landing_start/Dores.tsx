@@ -1,11 +1,11 @@
 import SectionTitle from "./SectionTitle";
 import { PAIN_POINTS, palette } from "./constants";
 
-type PainPointsProps = {
+type DoresProps = {
   sectionId?: string;
 };
 
-const PainPoints = ({ sectionId = "dores" }: PainPointsProps) => (
+const PainPoints = ({ sectionId = "dores" }: DoresProps) => (
   <section
     id={sectionId}
     className="scroll-mt-28 rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"

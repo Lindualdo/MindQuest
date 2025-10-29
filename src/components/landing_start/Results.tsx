@@ -1,5 +1,5 @@
 import SectionTitle from "./SectionTitle";
-import { IMMEDIATE_BENEFITS, RESULT_POINTS, palette } from "./constants";
+import { IMMEDIATE_BENEFITS, RESULT_POINTS, palette, type ResultPoint } from "./constants";
 
 type ResultsProps = {
   sectionId?: string;
@@ -17,7 +17,7 @@ const Results = ({ sectionId = "resultados" }: ResultsProps) => (
       description="Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados. Cada etapa do MindQuest foi desenhada para manter esse ciclo a seu favor."
     />
     <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {RESULT_POINTS.map((result, index) => (
+      {RESULT_POINTS.map((result: ResultPoint, index) => (
         <article
           key={result.title}
           className="group flex h-full flex-col gap-4 rounded-[24px] border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
@@ -37,8 +37,8 @@ const Results = ({ sectionId = "resultados" }: ResultsProps) => (
           </p>
           {result.bullets ? (
             <ul className="mt-2 space-y-2 pl-5 text-sm leading-6" style={{ color: palette.muted, listStyleType: "disc" }}>
-              {result.bullets.map((item) => (
-                <li key={item}>{item}</li>
+              {result.bullets.map((bullet: string) => (
+                <li key={bullet}>{bullet}</li>
               ))}
             </ul>
           ) : null}

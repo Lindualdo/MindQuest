@@ -109,7 +109,13 @@ export const INSIGHT_POINTS = [
   "O MindQuest não te ensina a ser outra pessoa. Ele te ajuda a descobrir quem você é por dentro — e usar isso a seu favor para evoluir de verdade.",
 ];
 
-export const RESULT_POINTS = [
+export type ResultPoint = {
+  title: string;
+  description: string;
+  bullets?: string[];
+};
+
+export const RESULT_POINTS: ResultPoint[] = [
   {
     title: "Transforme ruído mental em informações organizadas",
     description:
