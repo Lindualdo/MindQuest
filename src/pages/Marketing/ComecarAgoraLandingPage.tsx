@@ -68,7 +68,6 @@ const ComecarAgoraLandingPage = () => {
         <Hero onCtaClick={handleCtaClick} sectionId="inicio" />
         <PainPoints sectionId="dores" />
         <Results sectionId="resultados" />
-        <Plans sectionId="planos" />
         <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
         <BehindMindquest sectionId="pilares" />
         <Partners sectionId="parcerias" />

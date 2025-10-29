@@ -16,7 +16,7 @@ const Results = ({ sectionId = "resultados" }: ResultsProps) => (
       title="O MindQuest transforma ruídos em clareza e ações em resultados."
       description="Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados. Cada etapa do MindQuest foi desenhada para manter esse ciclo a seu favor."
     />
-    <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {RESULT_POINTS.map((result, index) => (
         <article
           key={result.title}
