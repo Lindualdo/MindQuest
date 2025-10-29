@@ -5,17 +5,23 @@ import { WHATSAPP_URL } from "@/constants/whatsapp";
 
 type SummaryRow = {
   label: string;
-  free: boolean | string;
-  premium: boolean | string;
+  free: string;
+  premium: string;
 };
 
 const summaryRows: SummaryRow[] = [
-  { label: "Conversa guiada por IA", free: true, premium: true },
-  { label: "Entender padrões básicos", free: true, premium: true },
-  { label: "Acelerar resultados", free: false, premium: true },
-  { label: "Ter suporte contínuo", free: false, premium: true },
-  { label: "Histórico completo", free: "Últimos 3 dias", premium: "Ilimitado" },
-  { label: "Conversar mais", free: "1x/dia", premium: "5x/dia" },
+  { label: "Humor e energia", free: "Sim", premium: "Sim" },
+  { label: "Emoções predominantes", free: "Sim", premium: "Sim" },
+  { label: "Emoções detalhadas", free: "Sim", premium: "Sim" },
+  { label: "Padrão mental", free: "Sim", premium: "Sim" },
+  { label: "Perfil comportamental", free: "Sim", premium: "Sim" },
+  { label: "Resumo das conversas", free: "Sim", premium: "Sim" },
+  { label: "Resumo da semana", free: "sim", premium: "sim" },
+  { label: "Lembretes e ajuda", free: "sim", premium: "sim" },
+  { label: "Conversa guiada por IA", free: "1 por dia", premium: "5 por dia" },
+  { label: "Desafios a partir dos insighs", free: "1 por semana", premium: "Ilimitados" },
+  { label: "Histórico", free: "7 dias", premium: "Ilimitado" },
+  { label: "IA para te ajudar nas metas", free: "1x/dia", premium: "5x/dia" },
   { label: "Mentor disponível", free: "—", premium: "24h" },
 ];
 
@@ -30,19 +36,30 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
     }
   };
 
-  const renderCell = (value: SummaryRow["free"]) => {
-    if (typeof value === "boolean") {
-      return value ? (
-        <span className="inline-flex items-center gap-1 font-semibold" style={{ color: palette.primary }}>
-          <Check size={16} /> Sim
-        </span>
-      ) : (
-        <span className="inline-flex items-center gap-1 font-semibold" style={{ color: palette.muted }}>
-          <Minus size={16} /> Não
-        </span>
-      );
+  const interpretCell = (value: string) => {
+    const trimmed = value.trim();
+    const normalized = trimmed
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    if (!trimmed) {
+      return { text: "—", color: palette.muted, icon: null };
     }
-    return <span>{value}</span>;
+
+    if (normalized === "sim") {
+      return { text: trimmed, color: palette.primary, icon: <Check size={16} /> };
+    }
+
+    if (normalized === "nao" || normalized === "não") {
+      return { text: trimmed, color: palette.muted, icon: <Minus size={16} /> };
+    }
+
+    if (trimmed === "—" || trimmed === "-") {
+      return { text: trimmed, color: palette.muted, icon: null };
+    }
+
+    return { text: trimmed, color: palette.secondary, icon: null };
   };
 
   return (
@@ -77,44 +94,45 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
             borderBottom: `1px solid ${palette.stroke}`,
           }}
         >
-          <span className="text-left md:text-left">O que você quer</span>
+          <span className="text-left md:text-left">Você vai receber</span>
           <span>Free</span>
           <span>Premium</span>
         </div>
         <div className="divide-y border-t md:border-t-0" style={{ borderColor: palette.stroke }}>
-          {summaryRows.map((row) => (
-            <div
-              key={row.label}
-              className="grid grid-cols-1 gap-4 px-6 py-4 text-sm leading-6 md:grid-cols-[1.4fr,0.8fr,0.8fr] md:items-center"
-              style={{ color: palette.secondary }}
-            >
-              <span className="font-medium">{row.label}</span>
-              <span
-                className="flex items-center gap-2 md:justify-center md:text-center"
-                style={{ color: typeof row.free === "boolean" ? palette.secondary : palette.muted }}
+          {summaryRows.map((row) => {
+            const freeCell = interpretCell(row.free);
+            const premiumCell = interpretCell(row.premium);
+
+            return (
+              <div
+                key={row.label}
+                className="grid grid-cols-1 gap-4 px-6 py-4 text-sm leading-6 md:grid-cols-[1.4fr,0.8fr,0.8fr] md:items-center"
+                style={{ color: palette.secondary }}
               >
-                <span
-                  className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
-                  style={{ color: palette.muted }}
-                >
-                  Free
+                <span className="font-medium">{row.label}</span>
+                <span className="flex items-center gap-2 md:justify-center md:text-center" style={{ color: freeCell.color }}>
+                  <span
+                    className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
+                    style={{ color: palette.muted }}
+                  >
+                    Free
+                  </span>
+                  {freeCell.icon}
+                  <span>{freeCell.text}</span>
                 </span>
-                {renderCell(row.free)}
-              </span>
-              <span
-                className="flex items-center gap-2 md:justify-center md:text-center"
-                style={{ color: typeof row.premium === "boolean" ? palette.secondary : palette.primary }}
-              >
-                <span
-                  className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
-                  style={{ color: palette.muted }}
-                >
-                  Premium
+                <span className="flex items-center gap-2 md:justify-center md:text-center" style={{ color: premiumCell.color }}>
+                  <span
+                    className="text-xs font-semibold uppercase tracking-[0.16em] md:hidden"
+                    style={{ color: palette.muted }}
+                  >
+                    Premium
+                  </span>
+                  {premiumCell.icon}
+                  <span>{premiumCell.text}</span>
                 </span>
-                {renderCell(row.premium)}
-              </span>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
