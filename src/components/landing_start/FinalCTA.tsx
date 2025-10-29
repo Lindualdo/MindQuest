@@ -4,11 +4,15 @@ import { palette } from "./constants";
 
 type FinalCTAProps = {
   onCtaClick: (origin: string) => void;
+  sectionId?: string;
 };
 
-const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
+const FinalCTA = ({ onCtaClick, sectionId }: FinalCTAProps) => (
   <section
-    className="rounded-[32px] px-6 py-14 text-center md:px-12 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className={`rounded-[32px] px-6 py-14 text-center md:px-12 lg:-mx-5 lg:px-16 ${
+      sectionId ? "scroll-mt-28" : ""
+    }`}
     style={{
       backgroundColor: palette.card,
       border: `1px solid ${palette.stroke}`,

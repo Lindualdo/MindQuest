@@ -102,40 +102,25 @@ export const INSIGHT_POINTS = [
 
 export const RESULT_POINTS = [
   {
-    title: "Organize seus pensamentos com clareza",
+    title: "Transforme ruído mental em informações organizadas",
     description:
-      "Faça uma conversa guiada com seu assistente de IA no WhatsApp em menos de 10 minutos por dia e transforme ruído mental em foco real.",
+      "Com menos de 10 minutos de conversa por dia você já terá a clareza que faltava para entender sua mente. Conversa no WhatsApp guiada por assitente de IA"
   },
   {
-    title: "Veja o que sua mente está dizendo",
+    title: "Entenda o que sua mente está te dizendo",
     description:
-      "Cada conversa atualiza o app com visualizações simples de humor, energia, sabotadores e perfis comportamentais para você enxergar padrões sem jargões.",
+      "Cada conversa atualiza o app com informações valiosas sobre seu humor, energia, emoções, padrão mental e insights com ações objetivas",
   },
-  {
-    title: "Descubra como mudar padrões que travam seu crescimento",
+  { 
+    title: "Encontre a energia que faltava para agir",
     description:
-      "Especialistas de IA em neurociência interpretam suas conversas e entregam insights objetivos sobre o que priorizar e por quê.",
-  },
-  {
-    title: "Pequenas ações, grandes resultados",
-    description:
-      "O assistente sugere micro-ações personalizadas para colocar em prática o que você aprendeu, mantendo você em movimento com consistência.",
+     "O assistente sugere micro-ações personalizadas, mantendo você em movimento respeitando seus limites",
   },
   {
     title: "Celebre cada vitória",
     description:
-      "O MindQuest acompanha seu progresso, registra conquistas e reforça hábitos positivos para que você sinta evolução contínua.",
-  },
-  {
-    title: "MindQuest é um ecossistema completo",
-    description: "Todo o ecossistema foi criado para sustentar sua evolução com suporte 360°.",
-    bullets: [
-      "Assistente de IA para reflexões guiadas no WhatsApp",
-      "App com informações atualizadas a cada conversa",
-      "IA especialista em neurociência gerando insights personalizados",
-      "IA focada em execução para colocar planos em prática",
-    ],
-  },
+      "O MindQuest acompanha seu progresso, registra as conquistas no App e reforça hábitos positivos para que você sinta evolução contínua",
+  }
 ];
 
 export const HOW_IT_WORKS = [
@@ -266,7 +251,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     answer: {
       paragraphs: [
         "Não. O MindQuest oferece acesso gratuito com recursos essenciais.",
-        "A versão Premium expande funcionalidades para quem deseja acelerar seus resultados.",
+        "A versão Premium expande funcionalidades.",
       ],
     },
   },
@@ -311,7 +296,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     question: "Qual a diferença para apps de meditação ou produtividade?",
     answer: {
       paragraphs: [
-        "MindQuest foca em evolução pessoal guiada por IA — não em técnicas isoladas. É uma jornada integrada, feita sob medida para você.",
+        "MindQuest foca em evolução pessoal guiado por IA, não em técnicas isoladas. É evolução pessoal integrada.",
       ],
     },
   },

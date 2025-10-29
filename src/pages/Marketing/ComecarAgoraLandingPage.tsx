@@ -12,6 +12,17 @@ import BehindMindquest from "@/components/landing_start/BehindMindquest";
 import { palette } from "@/components/landing_start/constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
 
+const landingSections = [
+  { id: "inicio", label: "Início" },
+  { id: "dores", label: "Para quem é" },
+  { id: "resultados", label: "Resultados" },
+  { id: "planos", label: "Planos" },
+  { id: "pilares", label: "Método" },
+  { id: "parcerias", label: "Tecnologia" },
+  { id: "faq", label: "FAQ" },
+  { id: "comecar", label: "Começar" },
+] as const;
+
 const ComecarAgoraLandingPage = () => {
   useEffect(() => {
     document.title = "MindQuest — Sua mente fala com você todos os dias";
@@ -52,16 +63,17 @@ const ComecarAgoraLandingPage = () => {
         color: palette.secondary,
       }}
     >
-      <LandingHeader onCtaClick={handleCtaClick} />
+      <LandingHeader onCtaClick={handleCtaClick} sections={landingSections} />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-16 md:pt-24 lg:pt-28">
-        <Hero onCtaClick={handleCtaClick} />
-        <PainPoints />
-        <Results />
-        <FinalCTA onCtaClick={handleCtaClick} />
-        <BehindMindquest />
-        <Partners />
-        <FAQ />
-        <FinalCTA onCtaClick={handleCtaClick} />
+        <Hero onCtaClick={handleCtaClick} sectionId="inicio" />
+        <PainPoints sectionId="dores" />
+        <Results sectionId="resultados" />
+        <Plans sectionId="planos" />
+        <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
+        <BehindMindquest sectionId="pilares" />
+        <Partners sectionId="parcerias" />
+        <FAQ sectionId="faq" />
+        <FinalCTA onCtaClick={handleCtaClick} sectionId="comecar" />
       </main>
       <LandingFooter />
     </div>

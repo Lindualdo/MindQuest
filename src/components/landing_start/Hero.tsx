@@ -2,11 +2,13 @@ import { palette } from "./constants";
 
 type HeroProps = {
   onCtaClick: (origin: string) => void;
+  sectionId?: string;
 };
 
-const Hero = ({ onCtaClick }: HeroProps) => (
+const Hero = ({ onCtaClick, sectionId = "inicio" }: HeroProps) => (
   <section
-    className="flex flex-col items-center gap-8 rounded-[32px] p-10 text-center md:p-14 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className="scroll-mt-28 flex flex-col items-center gap-8 rounded-[32px] p-10 text-center md:p-14 lg:-mx-5 lg:px-16"
     style={{
       backgroundColor: palette.hero.background,
       boxShadow: palette.shadows.medium,

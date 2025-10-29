@@ -20,9 +20,14 @@ const partners = [
   },
 ];
 
-const Partners = () => (
+type PartnersProps = {
+  sectionId?: string;
+};
+
+const Partners = ({ sectionId = "parcerias" }: PartnersProps) => (
   <section
-    className="rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className="scroll-mt-28 rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
     style={{ backgroundColor: palette.card, border: `1px solid ${palette.stroke}`, boxShadow: palette.shadows.soft }}
   >
     <SectionTitle

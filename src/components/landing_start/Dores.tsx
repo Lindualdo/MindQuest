@@ -1,14 +1,19 @@
 import SectionTitle from "./SectionTitle";
 import { PAIN_POINTS, palette } from "./constants";
 
-const PainPoints = () => (
+type PainPointsProps = {
+  sectionId?: string;
+};
+
+const PainPoints = ({ sectionId = "dores" }: PainPointsProps) => (
   <section
-    className="rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className="scroll-mt-28 rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
     style={{ backgroundColor: palette.card, boxShadow: palette.shadows.soft }}
   >
     <SectionTitle
-      title="Situações que te prendem"
-      description="Você se identifica em alguma dessas situações?"
+      title="Pare de ser refém da sua própria mente"
+      description="Quanto tempo você vai deixar sua mente trabalhar contra você?"
     />
     <div className="mt-10 grid gap-5 md:grid-cols-2">
       {PAIN_POINTS.map((pain) => (
@@ -35,10 +40,6 @@ const PainPoints = () => (
         </article>
       ))}
     </div>
-    <p className="mt-8 text-center text-sm leading-6" style={{ color: palette.muted }}>
-      Esses pensamentos são naturais e humanos — foram “programados” em sua mente para te proteger, mas podem estar travando sua
-      felicidade e crescimento pessoal.
-    </p>
   </section>
 );
 

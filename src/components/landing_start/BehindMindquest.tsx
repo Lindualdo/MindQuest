@@ -20,9 +20,14 @@ const foundations = [
   },
 ];
 
-const BehindMindquest = () => (
+type BehindMindquestProps = {
+  sectionId?: string;
+};
+
+const BehindMindquest = ({ sectionId = "pilares" }: BehindMindquestProps) => (
   <section
-    className="rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className="scroll-mt-28 rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
     style={{
       backgroundColor: palette.card,
       border: `1px solid ${palette.stroke}`,
@@ -36,7 +41,7 @@ const BehindMindquest = () => (
       </span>
       <div className="mx-auto max-w-2xl">
         <h2 className="text-2xl font-semibold md:text-3xl" style={{ color: palette.secondary }}>
-          Os pilares que sustentam nossa metodologia
+          Os pilares que sustentam nosso método
         </h2>
         <p className="mt-3 text-base leading-7" style={{ color: palette.muted }}>
           Cada conversa, insight e ação é construída sobre fundamentos sólidos para garantir evolução real e consistente.

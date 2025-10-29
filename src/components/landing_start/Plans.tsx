@@ -75,7 +75,11 @@ const planSections: Array<{
   },
 ];
 
-const Plans = () => {
+type PlansProps = {
+  sectionId?: string;
+};
+
+const Plans = ({ sectionId = "planos" }: PlansProps) => {
   const handleOpen = (href: string) => {
     if (typeof window !== "undefined") {
       window.open(href, "_blank", "noopener");
@@ -84,7 +88,8 @@ const Plans = () => {
 
   return (
     <section
-      className="rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
+      id={sectionId}
+      className="scroll-mt-28 rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
       style={{
         backgroundColor: palette.card,
         border: `1px solid ${palette.stroke}`,

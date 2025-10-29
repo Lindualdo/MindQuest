@@ -3,12 +3,17 @@ import { ChevronDown } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import { FAQ_ITEMS, palette } from "./constants";
 
-const FAQ = () => {
+type FAQProps = {
+  sectionId?: string;
+};
+
+const FAQ = ({ sectionId = "faq" }: FAQProps) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <section
-    className="rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
+      id={sectionId}
+      className="scroll-mt-28 rounded-[32px] px-6 py-16 md:px-12 lg:-mx-5 lg:px-16"
       style={{
         backgroundColor: palette.card,
         border: `1px solid ${palette.stroke}`,

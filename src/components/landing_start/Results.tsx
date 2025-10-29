@@ -1,9 +1,14 @@
 import SectionTitle from "./SectionTitle";
 import { RESULT_POINTS, palette } from "./constants";
 
-const Results = () => (
+type ResultsProps = {
+  sectionId?: string;
+};
+
+const Results = ({ sectionId = "resultados" }: ResultsProps) => (
   <section
-    className="rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
+    id={sectionId}
+    className="scroll-mt-28 rounded-[32px] px-6 py-14 md:px-12 lg:-mx-5 lg:px-16"
     style={{ backgroundColor: palette.card, boxShadow: palette.shadows.soft }}
   >
     <SectionTitle
