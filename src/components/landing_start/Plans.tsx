@@ -3,87 +3,14 @@ import SectionTitle from "./SectionTitle";
 import { palette } from "./constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
 
-type PlanSection = {
-  title: string;
-  items: string[];
-};
-
-type PlanCard = {
-  id: "free" | "premium";
-  badge: string;
-  subtitle: string;
-  sections: PlanSection[];
-  result: string;
-};
-
 type SummaryRow = {
   label: string;
   free: boolean | string;
   premium: boolean | string;
 };
 
-const planCards: PlanCard[] = [
-  {
-    id: "free",
-    badge: "MindQuest FREE",
-    subtitle: "O que você tem",
-    sections: [
-      {
-        title: "Conversas diárias",
-        items: [
-          "1 conversa guiada por dia no WhatsApp (≈8 mensagens)",
-          "Resumo automático da sua semana",
-        ],
-      },
-      {
-        title: "Dashboard de evolução",
-        items: [
-          "Humor atual e média semanal das emoções",
-          "Sabotador principal identificado",
-          "Histórico dos últimos 3 dias",
-          "1 ação sugerida por semana",
-        ],
-      },
-    ],
-    result: "Experimente o ciclo completo (conversa → insights → ação) e veja evolução real.",
-  },
-  {
-    id: "premium",
-    badge: "MindQuest PREMIUM",
-    subtitle: "O que você ganha a mais",
-    sections: [
-      {
-        title: "Conversas expandidas",
-        items: [
-          "Até 5 conversas por dia",
-          "Mentor virtual 24h para qualquer dúvida",
-          "Resumo mensal completo com progresso + raio-X emocional",
-        ],
-      },
-      {
-        title: "Dashboard completo",
-        items: [
-          "Histórico ilimitado com filtros personalizados",
-          "Todos os sabotadores + contramedidas específicas",
-          "Insights viram planos de ação criados pela IA",
-          "Ações ilimitadas orientadas por gamificação",
-        ],
-      },
-      {
-        title: "Acompanhamento profundo",
-        items: [
-          "Visão 360° da sua evolução",
-          "Orientações práticas de crescimento pessoal",
-          "Filosofias de vida aplicadas ao seu contexto",
-        ],
-      },
-    ],
-    result: "Acelere sua evolução com suporte completo e sem limites.",
-  },
-];
-
 const summaryRows: SummaryRow[] = [
-  { label: "Experimentar e ver se funciona", free: true, premium: true },
+  { label: "Conversa guiada por IA", free: true, premium: true },
   { label: "Entender padrões básicos", free: true, premium: true },
   { label: "Acelerar resultados", free: false, premium: true },
   { label: "Ter suporte contínuo", free: false, premium: true },
@@ -91,19 +18,6 @@ const summaryRows: SummaryRow[] = [
   { label: "Conversar mais", free: "1x/dia", premium: "5x/dia" },
   { label: "Mentor disponível", free: "—", premium: "24h" },
 ];
-
-const planStyles: Record<PlanCard["id"], { background: string; border: string; header: string }> = {
-  free: {
-    background: palette.card,
-    border: `1px solid ${palette.stroke}`,
-    header: "rgba(217, 3, 104, 0.12)",
-  },
-  premium: {
-    background: "rgba(217, 3, 104, 0.08)",
-    border: `1px solid rgba(217, 3, 104, 0.45)`,
-    header: "rgba(217, 3, 104, 0.14)",
-  },
-};
 
 type PlansProps = {
   sectionId?: string;
@@ -143,65 +57,8 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
     >
       <SectionTitle
         title="Free vs Premium"
-        description="Comece gratis para sentir a evolução. Quando quiser acelerar, o Premium amplia tudo que funcionou."
+        description="Experimente o ciclo completo no free. Mude para o Premium e evolua o que funcionou."
       />
-
-      <div className="mt-12 grid gap-6 lg:grid-cols-2">
-        {planCards.map((plan) => {
-          const styles = planStyles[plan.id];
-          return (
-            <article
-              key={plan.id}
-              className="flex h-full flex-col gap-6 rounded-[28px] p-8"
-              style={{ backgroundColor: styles.background, border: styles.border, boxShadow: palette.shadows.card }}
-            >
-              <header className="flex flex-col gap-2">
-                <span
-                  className="inline-flex w-fit items-center rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em]"
-                  style={{ backgroundColor: styles.header, color: palette.primary }}
-                >
-                  {plan.badge}
-                </span>
-                <h3 className="text-xl font-semibold" style={{ color: palette.secondary }}>
-                  {plan.badge.replace("MindQuest ", "")}
-                </h3>
-                <p className="text-sm font-medium uppercase tracking-[0.18em]" style={{ color: palette.muted }}>
-                  {plan.subtitle}
-                </p>
-              </header>
-
-              <div className="flex flex-col gap-5">
-                {plan.sections.map((section) => (
-                  <section key={section.title} className="rounded-[20px] border p-5" style={{ borderColor: palette.stroke }}>
-                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em]" style={{ color: palette.secondary }}>
-                      {section.title}
-                    </h4>
-                    <ul className="mt-3 space-y-2 text-sm leading-6" style={{ color: palette.muted }}>
-                      {section.items.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <Check size={16} style={{ color: palette.primary, marginTop: 2 }} />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-              </div>
-
-              <p
-                className="rounded-[20px] px-5 py-4 text-sm font-semibold leading-6"
-                style={{
-                  color: palette.secondary,
-                  backgroundColor:
-                    plan.id === "premium" ? "rgba(217, 3, 104, 0.12)" : palette.overlays.translucentCard,
-                }}
-              >
-                {plan.result}
-              </p>
-            </article>
-          );
-        })}
-      </div>
 
       <div
         className="mt-16 overflow-hidden rounded-[32px] border"
@@ -211,7 +68,7 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
           className="px-6 py-4 text-sm font-semibold uppercase tracking-[0.2em]"
           style={{ backgroundColor: "rgba(217, 3, 104, 0.12)", color: palette.primary }}
         >
-          Em resumo prático
+          Recursos
         </div>
         <div
           className="hidden grid-cols-[1.4fr,0.8fr,0.8fr] gap-3 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-center md:grid"
