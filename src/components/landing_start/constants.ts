@@ -142,7 +142,7 @@ export const IMMEDIATE_BENEFITS = [
   {
     title: "Clareza no Dia a Dia",
     description:
-      "Gráficos fáceis mostram padrões que travam você, saindo do looping mental.",
+      "Gráficos dinamicos mostram padrões que travam você, te ajudando a sair do looping mental.",
   },
   {
     title: "Progresso que Você Vê",
@@ -175,7 +175,7 @@ export const IMMEDIATE_BENEFITS = [
       "Histórico completo de conversas, humor, emoções e gatilhos para rever e melhorar.",
   },
   {
-    title: "Resumos Espertos",
+    title: "Resumos Práticos",
     description:
       "Semanais e mensais de metas, ações e visão geral das emoções.",
   },

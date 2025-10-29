@@ -22,10 +22,10 @@ const Hero = ({ onCtaClick, sectionId = "inicio" }: HeroProps) => (
         className="text-3xl font-semibold leading-tight md:text-4xl"
         style={{ fontFamily: "Poppins, sans-serif" }}
       >
-        Sua mente fala com você todos os dias
+        Ideias incríveis, projetos parados, resultados que não chegam?
       </h1>
       <p className="text-base leading-7" style={{ color: palette.hero.subtext }}>
-        O MindQuest te ajuda a ouvir, entender e evoluir
+        MindQuest é para quem está pronto para quebrar esse ciclo
       </p>
       <div className="flex flex-col items-center gap-10 text-center md:w-full md:gap-6">
         <button

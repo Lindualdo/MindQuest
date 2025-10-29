@@ -12,8 +12,8 @@ const PainPoints = ({ sectionId = "dores" }: DoresProps) => (
     style={{ backgroundColor: palette.card, boxShadow: palette.shadows.soft }}
   >
     <SectionTitle
-      title="Ideias incríveis, projetos parados, resultados que não chegam?"
-      description="MindQuest é para quem está pronto para quebrar esse ciclo"
+      title="Reconhece algum desses padrões mentais? Então o MindQuest é para você"
+      description="MindQuest foi criado para quem já tentou de tudo e precisa de uma abordagem diferente"
     />
     <div className="mt-10 grid gap-5 md:grid-cols-2">
       {PAIN_POINTS.map((pain) => (
