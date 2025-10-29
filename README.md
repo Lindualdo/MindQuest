@@ -116,25 +116,41 @@ npm run lint
 
 ```
 src/
+├── pages/
+│   ├── App/                          # Vistas autenticadas do dashboard
+│   │   ├── DashboardPage.tsx
+│   │   ├── ConquistasPage.tsx
+│   │   ├── FullChatPage.tsx
+│   │   ├── HumorHistoryPage.tsx
+│   │   ├── InsightDetailPage.tsx
+│   │   ├── PanasDetailPage.tsx
+│   │   ├── ResumoConversasPage.tsx
+│   │   └── SabotadorDetailPage.tsx
+│   ├── Marketing/
+│   │   └── ComecarAgoraLandingPage.tsx
+│   └── Suport/
+│       └── ConversationGuidePage.tsx
 ├── components/
-│   ├── dashboard/     # Componentes principais do dashboard
+│   ├── dashboard/                    # Componentes específicos da DashboardPage
 │   │   ├── Dashboard.tsx
 │   │   ├── PeriodSelector.tsx
 │   │   ├── MoodGauge.tsx
 │   │   ├── PanasChart.tsx
 │   │   ├── EmotionWheel.tsx
-│   │   └── InsightsPanel.tsx
-│   └── ui/           # Componentes reutilizáveis
-│       ├── Card.tsx
-│       └── Button.tsx
-├── store/            # Estado global (Zustand)
+│   │   ├── InsightsPanel.tsx
+│   │   ├── GamificacaoPanel.tsx
+│   │   └── SabotadorCard.tsx
+│   ├── landing_start/                # Seções reutilizadas pela landing de campanha
+│   └── ui/                           # Componentes compartilhados (cards, botões, etc.)
+├── store/                            # Estado global (Zustand)
 │   └── useStore.ts
-├── types/            # Tipagem TypeScript
-│   └── emotions.ts
-├── data/             # Dados mockados
-│   └── mockData.ts
-└── utils/            # Utilitários (futuro)
+├── types/                            # Tipos TypeScript
+├── data/                             # Catálogos e mocks
+└── utils/                            # Funções auxiliares
 ```
+
+> 🔁 **Padrão de organização**  
+> Toda página dentro de `src/pages/App` expõe apenas o container da vista. Componentes específicos de cada página devem viver em `src/components/<NomeDaPagina>` (ex.: a `DashboardPage` consome `src/components/dashboard/*`). Ao criar uma nova página, replique esse formato para manter a coesão da codebase.
 
 ## 🔤 Convenções de URL
 

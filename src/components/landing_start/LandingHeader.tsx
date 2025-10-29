@@ -44,7 +44,7 @@ const LandingHeader = ({ onCtaClick }: LandingHeaderProps) => (
           letterSpacing: "0.22em",
         }}
       >
-        <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+        <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
         <span>Começar agora</span>
         <ArrowRight size={16} />
       </button>

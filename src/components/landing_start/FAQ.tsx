@@ -55,11 +55,25 @@ const FAQ = () => {
                 id={panelId}
                 role="region"
                 aria-labelledby={buttonId}
-                className={`overflow-hidden px-6 transition-all duration-300 ${isOpen ? "max-h-52" : "max-h-0"}`}
+                className={`overflow-hidden px-6 transition-all duration-300 ${
+                  isOpen ? "max-h-[520px] py-2" : "max-h-0"
+                }`}
               >
-                <p className="pb-6 text-sm leading-6" style={{ color: palette.muted }}>
-                  {faq.answer}
-                </p>
+                <div
+                  className="space-y-3 pb-6 text-sm leading-6"
+                  style={{ color: palette.muted }}
+                >
+                  {faq.answer.paragraphs?.map((paragraph, paragraphIndex) => (
+                    <p key={paragraphIndex}>{paragraph}</p>
+                  ))}
+                  {faq.answer.bullets && faq.answer.bullets.length > 0 ? (
+                    <ul className="list-disc space-y-2 pl-5">
+                      {faq.answer.bullets.map((bullet, bulletIndex) => (
+                        <li key={bulletIndex}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
               </div>
             </div>
           );

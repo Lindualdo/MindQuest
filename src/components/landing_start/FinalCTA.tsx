@@ -35,7 +35,7 @@ const FinalCTA = ({ onCtaClick }: FinalCTAProps) => (
           boxShadow: palette.buttons.primaryShadow,
         }}
       >
-        <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+        <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
         Começar agora - É grátis
         <Zap size={18} />
       </button>

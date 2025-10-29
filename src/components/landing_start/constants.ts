@@ -203,91 +203,157 @@ export const IMPACT_STATS = [
   },
 ];
 
-export const FAQ_ITEMS = [
+type FAQAnswer = {
+  paragraphs?: string[];
+  bullets?: string[];
+};
+
+export type FAQItem = {
+  question: string;
+  answer: FAQAnswer;
+};
+
+export const FAQ_ITEMS: FAQItem[] = [
   {
     question: "O que é o MindQuest?",
-    answer:
-      "Um assistente de IA que conversa com você pelo WhatsApp e atualiza seu dashboard com métricas emocionais e recomendações.",
+    answer: {
+      paragraphs: [
+        "MindQuest é um ecossistema completo, criado para sustentar sua evolução com suporte 360°.",
+      ],
+      bullets: [
+        "Assistente de IA no WhatsApp para reflexões guiadas.",
+        "App com informações atualizadas a cada conversa.",
+        "IA especialista em neurociência gerando insights personalizados.",
+        "IA focada em execução para colocar planos em prática.",
+        "Mentor disponível 24h por dia para acelerar ainda mais sua evolução (Premium).",
+      ],
+    },
   },
   {
     question: "Como inicio meu cadastro?",
-    answer: 'Clique em “Começar no WhatsApp”, diga seu nome e siga as instruções do assistente.',
+    answer: {
+      paragraphs: ["Sem login, sem senha. Apenas uma conversa. Comece pelo WhatsApp com acesso imediato."],
+    },
   },
   {
     question: "Por que o acesso usa token e não login/senha?",
-    answer:
-      "Tokens são únicos, expiram automaticamente e são renovados a cada sessão, garantindo segurança com menos fricção.",
+    answer: {
+      paragraphs: ["Para simplificar sua experiência e eliminar barreiras. O token garante segurança sem complicação."],
+    },
   },
   {
     question: "Meus dados estão protegidos?",
-    answer: "Sim. As conversas e o acesso ao painel são protegidos.",
+    answer: {
+      paragraphs: ["Sim. Seguimos padrões rigorosos de privacidade e criptografia para proteger suas informações."],
+    },
   },
   {
     question: "Posso usar apenas pelo celular?",
-    answer: "Sim. O fluxo via WhatsApp e o dashboard responsivo funcionam no smartphone.",
+    answer: {
+      paragraphs: ["Sim. A conversa acontece no WhatsApp e o app pode ser acessado no celular ou desktop."],
+    },
   },
   {
     question: "O que acontece depois que eu envio minha primeira mensagem no WhatsApp?",
-    answer:
-      "O assistente faz perguntas guiadas para entender seu momento, gera um resumo com seus principais pontos e atualiza automaticamente seu dashboard. Ao final, seu token é renovado.",
+    answer: {
+      paragraphs: [
+        "O assistente inicia uma conversa guiada e, ao final, atualiza seu app com insights personalizados.",
+      ],
+    },
   },
   {
     question: "Preciso pagar algo para começar?",
-    answer:
-      "Não. Você começa na versão Free, com cadastro pelo WhatsApp e acesso ao dashboard completo podendo ver seu histórico das últimas 7 conversas.",
+    answer: {
+      paragraphs: [
+        "Não. O MindQuest oferece acesso gratuito com recursos essenciais.",
+        "A versão Premium expande funcionalidades para quem deseja acelerar seus resultados.",
+      ],
+    },
   },
   {
     question: "E se eu não souber o que dizer na conversa?",
-    answer:
-      "Tudo bem. Diga isso ao assistente e deixe ele te conduzir. Você pode responder por texto ou áudio e já pode falar sobre você na primeira interação.",
+    answer: {
+      paragraphs: [
+        "O assistente conduz a conversa com perguntas simples. Você só precisa responder naturalmente.",
+        "Se precisar de ideias sobre o que falar, é só pedir sugestões para a sua assistente.",
+      ],
+    },
   },
   {
     question: "O MindQuest é um app, um site ou um assistente virtual?",
-    answer:
-      "É um assistente de IA que interage via WhatsApp e conta com um dashboard web/app para acompanhar seu progresso.",
+    answer: {
+      paragraphs: ["É um ecossistema completo e integrado:"],
+      bullets: [
+        "Assistente de Reflexão no WhatsApp.",
+        "App dinâmico (mobile e desktop).",
+        "IA interativa que convida você a agir e a refletir.",
+        "Mentor 24h para orientar e aprofundar sua evolução (Premium).",
+      ],
+    },
   },
   {
-    question: "Como o dashboard é atualizado?",
-    answer:
-      "Automaticamente ao final de cada conversa. As métricas, insights e recomendações aparecem no painel sem você precisar fazer nada.",
+    question: "Como o app é atualizado?",
+    answer: {
+      paragraphs: [
+        "Automaticamente após cada conversa no WhatsApp. Os insights e todas as informações sobre você aparecem em tempo real.",
+      ],
+    },
   },
   {
     question: "O que ganho ao usar o MindQuest diariamente?",
-    answer:
-      "Clareza emocional, foco em ações pequenas e consistentes, acompanhamento visual do humor/energia, insights sobre padrões e missões que mantêm o progresso.",
+    answer: {
+      paragraphs: [
+        "Clareza mental, padrões identificados, ações concretas e evolução consistente. Você acompanha todo o progresso.",
+      ],
+    },
   },
   {
     question: "Qual a diferença para apps de meditação ou produtividade?",
-    answer:
-      "Em vez de listas de tarefas ou meditações genéricas, o MindQuest converte sua conversa em dados estruturados e recomendações personalizadas. Não é terapia; é um sistema de desenvolvimento pessoal.",
+    answer: {
+      paragraphs: [
+        "MindQuest foca em evolução pessoal guiada por IA — não em técnicas isoladas. É uma jornada integrada, feita sob medida para você.",
+      ],
+    },
   },
   {
     question: "Posso pausar meu progresso e continuar depois?",
-    answer:
-      "Sim. Você pode retomar a qualquer momento. Seus registros anteriores permanecem disponíveis no dashboard.",
+    answer: {
+      paragraphs: ["Sim. Seu histórico fica salvo e você retoma quando quiser, sem perder contexto."],
+    },
   },
   {
     question: "Como o sistema garante uso ético das minhas respostas?",
-    answer:
-      "As respostas servem para personalizar sua experiência e gerar métricas no painel. O acesso é controlado por token e você decide quando interagir.",
+    answer: {
+      paragraphs: [
+        "Seus dados são privados, criptografados e usados apenas para gerar insights personalizados. Nada é compartilhado sem consentimento.",
+      ],
+    },
   },
   {
     question: "Posso usar o MindQuest para desempenho no trabalho ou em relacionamentos?",
-    answer:
-      "Sim. O assistente adapta as recomendações ao seu contexto — organizando tudo em áreas da vida como trabalho, relacionamentos, saúde, finanças e propósito.",
+    answer: {
+      paragraphs: [
+        "Sim. A plataforma se adapta às suas áreas de foco, incluindo carreira, relacionamentos, saúde, finanças e desenvolvimento pessoal.",
+      ],
+    },
   },
   {
     question: "Posso exportar meus dados ou histórico?",
-    answer:
-      "Sim. Você poderá solicitar exportação direta do dashboard com segurança e controle total.",
+    answer: {
+      paragraphs: ["Funcionalidade planejada para versões futuras."],
+      bullets: ["No momento, você acessa todo o histórico diretamente no app."],
+    },
   },
   {
     question: "Posso cancelar meu cadastro a qualquer momento?",
-    answer:
-      "Sim. Você pode cancelar seu cadastro direto pelo dashboard ou solicitando pelo suporte.",
+    answer: {
+      paragraphs: ["Sim. Você tem controle total sobre sua conta e pode cancelar quando desejar."],
+    },
   },
   {
-    question: "Posso falar com minha IA pessoal direto no dashboard?",
-    answer: "Sim. Na versão Premium você pode falar pelo WhatsApp ou pelo dashboard.",
+    question: "Posso falar com minha Assistente de Reflexão (IA pessoal) direto no app?",
+    answer: {
+      paragraphs: ["Nas próximas versões será possível conversar direto pelo app, além do WhatsApp."],
+    },
   },
 ];

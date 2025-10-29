@@ -18,12 +18,15 @@
 
 ### Arquitetura Front-end
 - **React 18 + TypeScript** com SPA; roteamento manual em `src/App.tsx` (sem react-router), usando `window.location` para decidir a página.
-- **Páginas principais**:
-  - `/` → dashboard protegido (`AuthGuard`) renderiza componentes conforme estado `view` (`useDashboard`).
-  - `/blog/*` → landings públicas (`Home`, `LpStart`, `Premium`, `ProductDefinition`).
-  - `/suporte` → home de suporte (`SupportHomePage`).
+- **Organização das páginas**:
+  - Toda view autenticada mora em `src/pages/App/*.tsx` (ex.: `DashboardPage`, `PanasDetailPage`), atuando como *containers* enxutos.
+  - Cada página possui seus componentes específicos em `src/components/<NomeDaPagina>/` (ex.: `DashboardPage` consome `src/components/dashboard/*`).
+  - Landings públicas seguem o mesmo formato em subpastas como `src/pages/Marketing/`.
+- **Rotas principais**:
+  - `/` → dashboard protegido (`AuthGuard`) renderiza o container `DashboardPage`, que orquestra os dados via Zustand.
+  - `/comecar-agora` → landing pública de campanha (`ComecarAgoraLandingPage`), sem necessidade de token.
   - `/suporte/conversation-guide` → guia público de conversa (`ConversationGuidePage`).
-  - Qualquer outra rota → `NotFound`.
+  - Qualquer outra rota → `NotFound`, com mensagem dedicada para slugs ainda não publicados.
 - **AuthGuard:** valida token via `useAuth.initializeAuth()`; exibe tela de loading enquanto autentica e fallback amigável em caso de erro (mensagem técnica apenas no console).
 - **Estado global:** `src/store/useStore.ts` (Zustand) gerencia dados do dashboard, views, indicadores e interações com serviços (`apiService`, `authService`).
 - **UI/Design:** Tailwind classes utilitárias, Framer Motion para animações suaves, componentes reutilizáveis em `src/components/ui`.
@@ -70,13 +73,14 @@
 - Rotas internas exigem token válido (`/`, `/auth` fallback, views do dashboard via Zustand).
 
 ### Navegação e páginas relevantes
-- **/ (dashboard)**: Layout principal com cards, gráficos, abas (`view` controlado por store): `dashboard`, `humorHistorico`, `insightDetail`, `conquistas`, `resumoConversas`, `sabotadorDetail`, etc.
-- **Landing pages**: `/blog`, `/blog/lp-start`, `/blog/premium`, `/blog/produto` importadas diretamente em `App.tsx`.
-- **Suporte**: `/suporte` (cards estilo posts), `/suporte/conversation-guide` (guia passo a passo).
-- **Fallback**: Qualquer `/blog/*` não mapeado → `NotFound` com mensagem orientando atualização de links.
+- **/ (dashboard)**: Layout principal renderizado por `DashboardPage`, com cards, gráficos e abas (`view` controlado por store) para `dashboard`, `humorHistorico`, `insightDetail`, `conquistas`, `resumoConversas`, `sabotadorDetail`, etc.
+- **Landing de campanha**: `/comecar-agora` (pública) reutiliza componentes em `src/components/landing_start`.
+- **Suporte**: `/suporte/conversation-guide` permanece público para onboarding e dúvidas rápidas.
+- **Fallback**: Qualquer rota não mapeada (incluindo antigos `/blog/*`) cai no `NotFound`, orientando atualização de links.
 
 ### Convenções/boas práticas para Codex
 - Respeitar convenção de URLs sem underline (documento “Convenções de URL” no README).
+- Ao criar uma nova view autenticada, adicionar o container em `src/pages/App` e centralizar os componentes específicos em `src/components/<NomeDaPagina>/`.
 - Em backups n8n, não editar JSON manualmente salvo quando explicitamente solicitado; alterações devem vir do n8n.
 - Para roteamento: considerar nova rota pública antes de acionar hooks de autenticação.
 - Manter abordagem mobile-first, gradientes suaves e visuais consistentes com Tailwind.
@@ -91,8 +95,10 @@
 
 ### Arquivos-chave
 - `src/App.tsx`: roteamento manual, tratamentos de autenticação/erro.
-- `src/components/auth/AuthGuard.tsx`: valida token, mensagens amigáveis.
-- `src/pages/SupportHomePage.tsx`, `src/pages/ConversationGuidePage.tsx`: páginas públicas de suporte.
+- `src/pages/App/*.tsx`: containers das páginas autenticadas (`DashboardPage`, `PanasDetailPage`, etc.).
+- `src/components/dashboard/*`: blocos reutilizáveis da DashboardPage (cards, gráficos, seletores).
+- `src/pages/Marketing/ComecarAgoraLandingPage.tsx`: landing pública de campanha.
+- `src/pages/Suport/ConversationGuidePage.tsx`: página pública de suporte.
 - `scripts/run-n8n-backup.mjs`: exportador de workflows.
 - `docs/user_conversation_guide.md`: base de conteúdo para suporte.
 

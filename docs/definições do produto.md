@@ -201,7 +201,12 @@ Cliques em "Quero ser avisado".
 ## FAQ - Perguntas Frequentes
 
 ### O que é o MindQuest?
-Um assistente de IA que conversa com você pelo WhatsApp e atualiza seu dashboard com métricas emocionais e recomendações.
+MindQuest é um ecossistema completo. Criado para sustentar sua evolução com suporte 360°.
+- Assistente de IA no WhatsApp para suas reflexões guiadas
+- App com informações atualizadas a cada conversa
+- IA especialista em neurociência gerando insights personalizados
+- IA focada em execução para colocar planos em prática
+- Mentor disponível 24 hs por dia para acelerar ainda mais sua evolução (Premium)
 
 ### Como inicio meu cadastro?
 Sem login, sem senha. Apenas uma conversa. Comece pelo WhatsApp com acesso imediato.
@@ -213,28 +218,34 @@ Para simplificar sua experiência e eliminar barreiras. O token garante seguran�
 Sim. Seguimos padrões rigorosos de privacidade e criptografia para proteger suas informações.
 
 ### Posso usar apenas pelo celular?
-Sim. A conversa acontece no WhatsApp e o dashboard pode ser acessado pelo navegador do celular ou desktop.
+Sim. A conversa acontece no WhatsApp e o App pode ser acessado no celular ou desktop.
 
 ### O que acontece depois que eu envio minha primeira mensagem no WhatsApp?
-O assistente inicia uma conversa guiada para entender seu estado atual e começa a atualizar seu dashboard com insights personalizados.
+O assistente inicia uma conversa guiada e ao fnal atualiza seu App com insights personalizados.
 
 ### Preciso pagar algo para começar?
-Não. O MindQuest oferece acesso gratuito com recursos essenciais. O Premium expande funcionalidades.
+Não. O MindQuest oferece acesso gratuito com recursos essenciais. 
+A versão Premium expande funcionalidades para quem quer acelerar sua evolução
 
 ### E se eu não souber o que dizer na conversa?
 O assistente conduz a conversa com perguntas simples. Você só precisa responder naturalmente.
+Se precisar de ideia sobre o que falar, é só pergutar a sua Assitente
 
 ### O MindQuest é um app, um site ou um assistente virtual?
-É um ecossistema: assistente no WhatsApp + dashboard web. Tudo integrado.
+É um ecossistema completo e integrado: 
+- Assistente de Reflexão no WhatsApp 
+- App dinamico (mobile e desktop) 
+- IA interativa que te chama para conversar e te ajudar a evoluir
+- Mentor 24 hs para te guiar e te orientar (premium)
 
-### Como o dashboard é atualizado?
-Automaticamente após cada conversa no WhatsApp. Os insights aparecem em tempo real.
+### Como o App é atualizado?
+Automaticamente após cada conversa no WhatsApp. Os insights e todas as informações sobre você aparecem em tempo real.
 
 ### O que ganho ao usar o MindQuest diariamente?
 Clareza mental, padrões identificados, ações concretas e evolução consistente. Você vê seu progresso.
 
 ### Qual a diferença para apps de meditação ou produtividade?
-MindQuest foca em autoconhecimento guiado por IA, não em técnicas isoladas. É evolução pessoal integrada.
+MindQuest foca em evolução pessoal guiado por IA, não em técnicas isoladas. É evolução pessoal integrada.
 
 ### Posso pausar meu progresso e continuar depois?
 Sim. Seu histórico fica salvo e você retoma quando quiser, sem perder contexto.
@@ -243,16 +254,17 @@ Sim. Seu histórico fica salvo e você retoma quando quiser, sem perder contexto
 Seus dados são privados, criptografados e usados apenas para gerar insights personalizados. Sem compartilhamento.
 
 ### Posso usar o MindQuest para desempenho no trabalho ou em relacionamentos?
-Sim. A ferramenta se adapta às suas áreas de foco, incluindo carreira, relacionamentos e desenvolvimento pessoal.
+Sim. A plataforma se adapta às suas áreas de foco, incluindo carreira, relacionamentos e desenvolvimento pessoal.
 
 ### Posso exportar meus dados ou histórico?
-Funcionalidade planejada para versões futuras. No momento, você acessa todo histórico pelo dashboard.
+- Funcionalidade planejada para versões futuras. 
+- No momento, você acessa todo histórico pelo App.
 
 ### Posso cancelar meu cadastro a qualquer momento?
 Sim. Você tem controle total sobre sua conta e pode cancelar quando desejar.
 
-### Posso falar com minha IA pessoal direto no dashboard?
-No plano Premium, sim. O Mentor Virtual está disponível 24h para conversas aprofundadas.
+### Posso falar com minha Assistente de Reflexão (IA pessoal) direto no App?
+Nas próximas versões será possível 
 
 ---
 

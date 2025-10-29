@@ -174,7 +174,7 @@ const Plans = () => {
             boxShadow: palette.buttons.primaryShadow,
           }}
         >
-          <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+          <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
           Começar grátis agora
           <ArrowRight size={16} />
         </button>

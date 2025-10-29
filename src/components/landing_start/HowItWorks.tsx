@@ -54,7 +54,7 @@ const HowItWorks = ({ onCtaClick }: HowItWorksProps) => (
           boxShadow: "0 16px 40px -26px rgba(247, 171, 138, 0.45)",
         }}
       >
-        <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+        <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
         Ver como funciona
       </button>
       <p className="text-xs uppercase tracking-[0.24em]" style={{ color: palette.muted }}>

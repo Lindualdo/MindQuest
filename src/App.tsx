@@ -8,7 +8,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle } from 'lucide-react';
-import Dashboard from './components/dashboard/Dashboard';
+import DashboardPage from './pages/App/DashboardPage';
 import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/App/HumorHistoryPage';
 import FullChatPage from './pages/App/FullChatPage';
@@ -308,7 +308,7 @@ function App() {
           )}
 
           {/* Dashboard */}
-          <Dashboard />
+          <DashboardPage />
         </main>
 
         {/* Footer */}
@@ -320,14 +320,6 @@ function App() {
         >
           <div className="max-w-7xl mx-auto px-4">
             <p>MindQuest v1.1 - Mente clara, resultados reais.</p>
-            <p className="mt-2">
-              <a
-                href="/?public=1"
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                Acessar Home
-              </a>
-            </p>
           </div>
         </motion.footer>
       </div>
