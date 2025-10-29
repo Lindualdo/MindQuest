@@ -6,6 +6,7 @@ import FAQ from "@/components/landing_start/FAQ";
 import Hero from "@/components/landing_start/Hero";
 import Dores from "@/components/landing_start/Dores";
 import Results from "@/components/landing_start/Results";
+import Plans from "@/components/landing_start/Plans";
 import BehindMindquest from "@/components/landing_start/BehindMindquest";
 import { palette } from "@/components/landing_start/constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
@@ -69,6 +70,7 @@ const ComecarAgoraLandingPage = () => {
         <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
         <BehindMindquest sectionId="pilares" />
         <FAQ sectionId="faq" />
+        <Plans sectionId="recursos" />
         <FinalCTA onCtaClick={handleCtaClick} sectionId="comecar" />
       </main>
       <LandingFooter />
