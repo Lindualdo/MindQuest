@@ -21,7 +21,7 @@ const landingSections = [
 
 const ComecarAgoraLandingPage = () => {
   useEffect(() => {
-    const pageTitle = "MindQuest — Sua mente fala com você todos os dias";
+    const pageTitle = "MindQuest — Mente clara, resultados reais";
     const description =
       "MidQuest: Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.";
     const ogImagePath = "/mindquest_logo_vazado.png";
