@@ -33,7 +33,7 @@ const summarySections: SummarySection[] = [
   },
   {
     title: "Assistentes de IA - WhatsApp",
-    columnLabel: "Sua própria mente - evoluida",
+    columnLabel: "Sua conciência - evoluida",
     rows: [
       { label: "Conversas guiadas", free: "1X ao dia", premium: "Até 5 X" },
       { label: "Mensagens inspiradoras", free: "Sim", premium: "Sim" },
