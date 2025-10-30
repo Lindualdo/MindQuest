@@ -21,9 +21,25 @@ const landingSections = [
 
 const ComecarAgoraLandingPage = () => {
   useEffect(() => {
-    document.title = "MindQuest — Sua mente fala com você todos os dias";
+    const pageTitle = "MindQuest — Sua mente fala com você todos os dias";
     const description =
       "MidQuest: Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.";
+    const imageUrl =
+      typeof window !== "undefined" ? `${window.location.origin}/mindquest_logo.png` : "/mindquest_logo.png";
+
+    document.title = pageTitle;
+
+    const setMetaTag = (attribute: "name" | "property", attributeValue: string, content: string) => {
+      let meta = document.querySelector<HTMLMetaElement>(`meta[${attribute}='${attributeValue}']`);
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute(attribute, attributeValue);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", content);
+      return meta;
+    };
+
     const existingMeta = document.querySelector("meta[name='description']");
     if (existingMeta) {
       existingMeta.setAttribute("content", description);
@@ -33,6 +49,17 @@ const ComecarAgoraLandingPage = () => {
       meta.content = description;
       document.head.appendChild(meta);
     }
+
+    setMetaTag("property", "og:title", pageTitle);
+    setMetaTag("property", "og:description", description);
+    setMetaTag("property", "og:image", imageUrl);
+    setMetaTag("property", "og:url", typeof window !== "undefined" ? window.location.href : "");
+    setMetaTag("property", "og:type", "website");
+
+    setMetaTag("name", "twitter:card", "summary_large_image");
+    setMetaTag("name", "twitter:title", pageTitle);
+    setMetaTag("name", "twitter:description", description);
+    setMetaTag("name", "twitter:image", imageUrl);
 
     if (!document.querySelector('link[data-landing-font="comecar-agora"]')) {
       const fontLink = document.createElement("link");
