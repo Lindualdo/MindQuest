@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { palette } from "./constants";
+import mindquestLogo from "@/img/mindquest_logo.png";
 
 type NavSection = {
   id: string;
@@ -47,16 +48,12 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
           }}
         >
           <a href="/" className="flex items-center gap-3">
-            <span
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold"
-              style={{
-                backgroundColor: palette.primary,
-                color: palette.card,
-                fontFamily: "Poppins, sans-serif",
-              }}
-            >
-              MQ
-            </span>
+            <img
+              src={mindquestLogo}
+              alt="MindQuest"
+              className="h-10 w-auto"
+              style={{ display: "block" }}
+            />
             <div className="leading-tight">
               <p className="text-sm font-semibold" style={{ color: palette.secondary }}>
                 MindQuest
