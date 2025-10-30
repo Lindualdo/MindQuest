@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-28T23:05:28.823Z",
+  "updatedAt": "2025-10-29T18:25:42.164Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2688,
-        464
+        -2048,
+        832
       ],
       "id": "4d89a479-acb2-4829-97c6-0812e6ad1b51",
       "name": "start"
@@ -44,8 +44,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -2448,
-        464
+        -1824,
+        832
       ],
       "id": "d75f2f40-7abe-48e5-ad10-e9fd31a0eac1",
       "name": "Send Message",
@@ -66,44 +66,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2208,
+        -2240,
         464
       ],
       "id": "6891de20-ae7a-4d58-8508-3c29fe588083",
       "name": "Check Initial"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $json.shouldRetry }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equal"
-              },
-              "id": "1bd45bdc-98a6-4ea8-bd20-4204058af127"
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -1984,
-        464
-      ],
-      "id": "6a3564c3-e09c-4378-bae5-1246aaacb883",
-      "name": "Should Retry?"
     },
     {
       "parameters": {
@@ -162,36 +129,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "conditions": [
-            {
-              "leftValue": "={{ $json.success === true }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equal"
-              }
-            }
-          ],
-          "combinator": "and",
-          "options": {
-            "typeValidation": "strict",
-            "version": 2
-          }
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -1056,
-        336
-      ],
-      "id": "edb5a1cd-e64b-48ac-a3c0-3d213c04356f",
-      "name": "Retry Success?"
-    },
-    {
-      "parameters": {
         "jsCode": "const startData = $('start').first()?.json ?? {};\nconst initial = $('Check Initial').first()?.json ?? {};\nconst retry = $('Check Retry').first()?.json ?? {};\n\nreturn [{\n  json: {\n    message: 'Falha ao enviar mensagem após tentativas via Evolution API.',\n    remoteJid: startData.remoteJid ?? null,\n    instanceName: startData.instanceName ?? null,\n    messageText: startData.messageText ?? null,\n    initial,\n    retry,\n    timestamp: new Date().toISOString()\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
@@ -221,25 +158,93 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -240,
-        544
+        -336,
+        480
       ],
       "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
       "name": "No Operation, do nothing"
     },
     {
       "parameters": {
-        "amount": "={{ 4 }}"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6584398-e020-47f1-ae63-788c2bb25414",
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        464
+      ],
+      "id": "d07e550c-4fdf-4093-8cfe-5952c22997e8",
+      "name": "shouldRetry"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "deb99412-312c-46d9-b4af-27e22ec72243",
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1072,
+        336
+      ],
+      "id": "6dfb4d9a-c18e-4386-8c5c-8fbd41ec424e",
+      "name": "Retry failed?"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 3 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1728,
-        560
+        -1600,
+        832
       ],
-      "id": "9fc4fda8-d08a-4ca9-9dca-120b61cbf535",
+      "id": "97262a21-748d-4002-aad6-929997780459",
       "name": "Wait",
-      "webhookId": "5c58e400-8855-497b-8c82-c4debfcfda55"
+      "webhookId": "656c33df-2b6b-42f2-b1ad-9cac02bd9b77"
     }
   ],
   "connections": {
@@ -258,7 +263,7 @@
       "main": [
         [
           {
-            "node": "Check Initial",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -269,25 +274,7 @@
       "main": [
         [
           {
-            "node": "Should Retry?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Should Retry?": {
-      "main": [
-        [
-          {
-            "node": "Retry Delay",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Wait",
+            "node": "shouldRetry",
             "type": "main",
             "index": 0
           }
@@ -320,25 +307,7 @@
       "main": [
         [
           {
-            "node": "Retry Success?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Retry Success?": {
-      "main": [
-        [
-          {
-            "node": "No Operation, do nothing",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Build Failure Report",
+            "node": "Retry failed?",
             "type": "main",
             "index": 0
           }
@@ -358,6 +327,42 @@
     },
     "Raise Failure": {
       "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "shouldRetry": {
+      "main": [
+        [
+          {
+            "node": "Retry Delay",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry failed?": {
+      "main": [
+        [
+          {
+            "node": "Build Failure Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "No Operation, do nothing",
@@ -392,12 +397,12 @@
         "json": {
           "instanceName": "MindQuest",
           "remoteJid": "351932786582@s.whatsapp.net",
-          "messageText": "Entendo, Aldo, é super válido querer explorar outras áreas da sua vida e trazer novos assuntos para a conversa.\n\nFico feliz de saber que seu app tem um propósito transformador, isso mostra como você valoriza impacto real, não só resultados. Esse cuidado reflete um lado muito importante seu, que quer mais significado no que faz.\n\nPensando em outras áreas pessoais, que tal conversarmos um pouco sobre:\n\n• Como você tem se sentido nas relações com as pessoas ao seu redor, além dos seus filhos?\n\n• Que momentos no seu dia a dia trazem mais calma ou prazer, mesmo que pequenos?\n\n• Se pudesse dedicar um tempo só para você, sem obrigações, o que gostaria de fazer?\n\nQuero ajudar a encontrar um foco que faça sentido pra você hoje. Tem algo aí que chama mais sua atenção para a gente começar? "
+          "messageText": "Que ótimo, Aldo! Você tem feito um trabalho sólido cuidando do que é importante para você, equilibrando foco, descanso e bem-estar.\n\nFico feliz de ter acompanhado esse pouco da sua história e de como você tem clareza e disciplina para seguir seu caminho.\n\nQuando quiser continuar essa jornada, estarei aqui para ajudar.\n\nEnquanto isso, que tal dar uma olhada no seu dashboard para ver seus avanços e próximos passos com calma?   Acesse: https://mindquest.pt/auth?token?00c1e4ed-87e7-419b-b50f-580f18cdaeefd949d81c-9235-41ce-8b3b-6b5d593c5e241761758517"
         }
       }
     ]
   },
-  "versionId": "89575b04-9cce-40a2-bead-05f3031af7f7",
+  "versionId": "45e85020-6fbe-4190-ac46-730b0f990403",
   "triggerCount": 0,
   "shared": [
     {

@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-27T11:27:50.270Z",
+  "updatedAt": "2025-10-29T19:51:12.331Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -469,8 +469,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -384,
-        160
+        160,
+        128
       ],
       "id": "64ad6269-a551-4c9f-82f1-a77125881ce7",
       "name": "Chat Memory  - Get1"
@@ -482,8 +482,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        160
+        496,
+        128
       ],
       "id": "899f97c3-c70b-4a4b-8478-0d93adaff8e8",
       "name": "junta_dados_gravacao"
@@ -499,8 +499,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        160
+        752,
+        128
       ],
       "id": "c0e80752-3616-4946-8556-5d950bc56782",
       "name": "Grava_chat",
@@ -518,8 +518,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        528,
-        1056
+        1136,
+        1168
       ],
       "id": "b347d2da-68c5-4af6-891e-0160d0047a2f",
       "name": "OpenRouter Chat Model1",
@@ -542,8 +542,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        560,
-        848
+        1168,
+        960
       ],
       "id": "fdb6f224-26fb-41b2-848c-d7c987b9095d",
       "name": "Resumo das conversas"
@@ -555,8 +555,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        720,
-        1072
+        1328,
+        1184
       ],
       "id": "8d309b97-97f4-4eb6-a2b2-d246d30a24b5",
       "name": "Structured Output Parser"
@@ -617,8 +617,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        880,
-        848
+        1488,
+        960
       ],
       "id": "a3b150a4-5887-4c50-bc74-3dba77232211",
       "name": "Update rows in a table",
@@ -691,8 +691,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1088,
-        848
+        1696,
+        960
       ],
       "id": "f74c9646-c3a8-4ad9-93ba-63af4fec5c46",
       "name": "Gamificação"
@@ -705,8 +705,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        544,
-        656
+        1152,
+        768
       ],
       "id": "cc94bcf2-47e2-4e68-8244-a5f3bed312c7",
       "name": "Chat Memory - Delete All (final)"
@@ -723,8 +723,8 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        864,
-        656
+        1472,
+        768
       ],
       "id": "52cd3df1-61a9-4afb-bc29-55c8f4a3af70",
       "name": "Redis SET Lock (12h)",
@@ -801,7 +801,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        864,
+        1312,
         -224
       ],
       "id": "f20af3b9-9a71-43f6-b986-0966af31f5b8",
@@ -883,7 +883,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        864,
+        1312,
         -64
       ],
       "id": "7c9a5d06-a8be-49ba-86e6-33a4855d4086",
@@ -965,7 +965,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        864,
+        1312,
         96
       ],
       "id": "23efcc87-7cff-4fe6-83e3-7b50beee0ec8",
@@ -1057,7 +1057,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        864,
+        1312,
         256
       ],
       "id": "846eb0f1-89d5-46c8-a3c8-a4dffb1cac9f",
@@ -1139,7 +1139,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        864,
+        1312,
         416
       ],
       "id": "3028451d-228e-41bd-b217-2d44e4d70beb",
@@ -1279,13 +1279,15 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
-        "options": {}
+        "options": {
+          "waitForSubWorkflow": true
+        }
       },
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -192,
-        -128
+        -64,
+        128
       ],
       "id": "84146ffe-2179-49fe-8ab2-c1676d5ba61f",
       "name": "Call 'sw_send_message_with_retry'"
@@ -1342,13 +1344,15 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
-        "options": {}
+        "options": {
+          "waitForSubWorkflow": true
+        }
       },
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -272,
-        368
+        -320,
+        336
       ],
       "id": "4dd208c7-deec-4a2f-90bb-f64dc23f405e",
       "name": "Call 'sw_send_message_with_retry'1"
@@ -1483,8 +1487,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -384,
-        -128
+        -320,
+        128
       ],
       "id": "653e8936-046d-41dd-bc24-fdea866c6288",
       "name": "update_token",
@@ -1933,11 +1937,6 @@
       "main": [
         [
           {
-            "node": "Chat Memory  - Get1",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "update_token",
             "type": "main",
             "index": 0
@@ -1962,6 +1961,17 @@
           }
         ]
       ]
+    },
+    "Call 'sw_send_message_with_retry'": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory  - Get1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1975,19 +1985,19 @@
     "start": [
       {
         "json": {
-          "usr_id": "8526fe38-c1a1-4cf5-82bb-365c1aff6e01",
+          "usr_id": "c66bdc11-a80c-428c-84cd-58e9888e910e",
           "body.instance": "MindQuest",
-          "body.data.key.id": "3A164BF768B06C1F701B",
+          "body.data.key.id": "3AE76DDDABA6A7F894AF",
           "body.data.key.remoteJid": "5512982389360@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo",
-          "body.data.message.conversation": "Ainda não entendi como isso aqui funciona pode me ajudar?",
+          "body.data.message.conversation": "Faz sentido é isso",
           "body.data.messageType": "conversation"
         }
       }
     ]
   },
-  "versionId": "f40a9651-8db7-4271-945d-57168b178d29",
+  "versionId": "e280e794-53d9-45e2-aa8a-2484df037497",
   "triggerCount": 0,
   "shared": [
     {
