@@ -24,8 +24,9 @@ const ComecarAgoraLandingPage = () => {
     const pageTitle = "MindQuest — Sua mente fala com você todos os dias";
     const description =
       "MidQuest: Uma plataforma de evolução pessoal guiada por IA que transforma ruídos em clareza e ações em resultados.";
+    const ogImagePath = "/mindquest_logo_vazado.png";
     const imageUrl =
-      typeof window !== "undefined" ? `${window.location.origin}/mindquest_logo.png` : "/mindquest_logo.png";
+      typeof window !== "undefined" ? `${window.location.origin}${ogImagePath}` : ogImagePath;
 
     document.title = pageTitle;
 
