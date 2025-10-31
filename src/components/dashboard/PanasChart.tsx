@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Smile, Frown, Minus, Info, ArrowRight } from 'lucide-react';
+import { Info, ArrowRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
@@ -23,27 +23,21 @@ const PanasChart: React.FC = () => {
       label: 'Positivos',
       value: distribuicao_panas.positivas,
       color: 'bg-green-400',
-      icon: Smile,
-      textColor: 'text-green-600',
-      bgColor: 'bg-green-50'
+      textColor: 'text-green-600'
     },
     {
       key: 'negativas',
       label: 'Desafiador',
       value: distribuicao_panas.negativas,
       color: 'bg-rose-400',
-      icon: Frown,
-      textColor: 'text-rose-600',
-      bgColor: 'bg-red-50'
+      textColor: 'text-rose-600'
     },
     {
       key: 'neutras',
       label: 'Neutro/Calmo',
       value: distribuicao_panas.neutras,
       color: 'bg-gray-400',
-      icon: Minus,
-      textColor: 'text-gray-600',
-      bgColor: 'bg-gray-50'
+      textColor: 'text-gray-600'
     }
   ];
 
@@ -81,12 +75,7 @@ const PanasChart: React.FC = () => {
         {categories.map((category, index) => (
           <div key={category.key} className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={`p-2 rounded-lg ${category.bgColor}`}>
-                  <category.icon className={category.textColor} size={18} />
-                </div>
-                <span className="font-medium text-gray-700">{category.label}</span>
-              </div>
+              <span className="font-medium text-gray-700">{category.label}</span>
               <span className={`font-bold text-lg ${category.textColor}`}>
                 {category.value}%
               </span>

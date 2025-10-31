@@ -18,15 +18,16 @@ const EmotionWheel: React.FC = () => {
   const [showInfo, setShowInfo] = React.useState(false);
 
   // Configuração da roda
-  const centerX = 160;
-  const centerY = 160;
+  const centerX = 170;
+  const centerY = 170;
   const radius = 120;
   const emotionRadius = 24;
+  const linePadding = 6;
 
   return (
-    <Card>
+    <Card className="flex flex-col min-h-[420px]">
       <div className="flex items-center gap-2 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Roda Emocional</h3>
+        <h3 className="text-xl font-semibold text-gray-800">Roda das emoções</h3>
         <div className="ml-auto relative">
           <button
             type="button"
@@ -47,25 +48,36 @@ const EmotionWheel: React.FC = () => {
       </div>
 
       {/* SVG da Roda */}
-      <div className="flex justify-center">
-        <svg width="320" height="320" className="overflow-visible">
+      <div className="flex flex-1 items-center justify-center pb-4">
+        <svg width="340" height="340" className="overflow-visible">
           {/* Background circle */}
           <circle
             cx={centerX}
             cy={centerY}
-            r={radius + 12}
+            r={radius + 18}
             fill="none"
-            stroke="#E5E7EB"
-            strokeWidth="2"
-            strokeDasharray="5,5"
+            stroke="#D9E3FF"
+            strokeWidth="1.5"
+            strokeDasharray="6,8"
           />
           
           {/* Emoções */}
           {roda_emocoes.map((emocao, index) => {
             const angle = (index * 360) / roda_emocoes.length;
             const radian = (angle * Math.PI) / 180;
-            const x = centerX + radius * Math.cos(radian);
-            const y = centerY + radius * Math.sin(radian);
+            const cosValue = Math.cos(radian);
+            const sinValue = Math.sin(radian);
+            const circleX = centerX + radius * cosValue;
+            const circleY = centerY + radius * sinValue;
+            const lineX = centerX + (radius - emotionRadius - linePadding) * cosValue;
+            const lineY = centerY + (radius - emotionRadius - linePadding) * sinValue;
+            const labelX = circleX + (emotionRadius + 22) * cosValue;
+            const labelY = circleY + (emotionRadius + 22) * sinValue;
+            const percentX = circleX;
+            const percentY = circleY + 2;
+            const textAnchor = Math.abs(cosValue) < 0.25 ? 'middle' : cosValue > 0 ? 'start' : 'end';
+            const nameDy = sinValue < -0.4 ? -6 : sinValue > 0.4 ? 12 : 6;
+            const dominantBaseline = Math.abs(sinValue) < 0.25 ? 'middle' : sinValue > 0 ? 'hanging' : 'ideographic';
             
             // Opacidade baseada na intensidade
             const opacity = (emocao.intensidade / 100) * 0.8 + 0.2;
@@ -81,17 +93,17 @@ const EmotionWheel: React.FC = () => {
                 <line
                   x1={centerX}
                   y1={centerY}
-                  x2={x}
-                  y2={y}
+                  x2={lineX}
+                  y2={lineY}
                   stroke={emocao.cor}
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                   opacity={opacity}
                 />
                 
                 {/* Círculo da emoção */}
                 <motion.circle
-                  cx={x}
-                  cy={y}
+                  cx={circleX}
+                  cy={circleY}
                   r={emotionRadius}
                   fill={emocao.cor}
                   opacity={opacity}
@@ -104,18 +116,21 @@ const EmotionWheel: React.FC = () => {
                 
                 {/* Label */}
                 <text
-                  x={x}
-                  y={y + emotionRadius + 18}
-                  textAnchor="middle"
-                  className="text-sm font-medium fill-gray-700 pointer-events-none"
+                  x={labelX}
+                  y={labelY}
+                  textAnchor={textAnchor}
+                  dominantBaseline={dominantBaseline}
+                  dy={String(nameDy)}
+                  className="text-[13px] font-medium fill-gray-700 pointer-events-none"
                 >
                   {emocao.nome}
                 </text>
                 <text
-                  x={x}
-                  y={y + emotionRadius + 32}
+                  x={percentX}
+                  y={percentY}
                   textAnchor="middle"
-                  className="text-xs fill-gray-500 pointer-events-none"
+                  dominantBaseline="middle"
+                  className="text-[11px] font-semibold fill-gray-700 pointer-events-none"
                 >
                   {emocao.intensidade}%
                 </text>

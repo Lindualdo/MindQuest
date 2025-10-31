@@ -79,9 +79,15 @@ const ResumoConversasPage: React.FC = () => {
       return [];
     }
 
+    const normalizeKey = (value: string) =>
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '_');
+
     const reservas = new Set(['resumo_conversa', 'data_conversa']);
     const isBlockedKey = (key: string) => {
-      const normalized = key.toLowerCase();
+      const normalized = normalizeKey(key);
       return (
         reservas.has(normalized) ||
         normalized === 'id' ||
@@ -125,11 +131,18 @@ const ResumoConversasPage: React.FC = () => {
 
   const extraSections = useMemo(() => {
     if (!resumoConversas?.extras) return [];
+
+    const normalizeKey = (value: string) =>
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '_');
+
     return Object.entries(resumoConversas.extras)
       .filter(([key, value]) => {
         if (value === null || value === undefined) return false;
-        const normalized = key.toLowerCase();
-        if (normalized === 'id' || normalized.endsWith('_id')) return false;
+        const normalized = normalizeKey(key);
+        if (normalized === 'id' || normalized.endsWith('_id') || normalized === 'data_conversa') return false;
         return true;
       })
       .map(([key, value]) => ({ key, value }));
@@ -202,24 +215,28 @@ const ResumoConversasPage: React.FC = () => {
 
             {!resumoConversasLoading && !resumoConversasError && conversasDetalhadas.length > 0 && (
               <div className="space-y-6">
-                {conversasDetalhadas.map((conversa) => (
-                  <div
-                    key={conversa.key}
-                    className="border border-white/40 rounded-xl bg-white/70 p-4 space-y-4 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                        <MessageSquare size={16} className="text-blue-600" />
-                        <span>Conversa {conversa.indice}</span>
-                      </div>
-                      {conversa.dataFormatada && (
-                        <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                          {conversa.dataFormatada}
-                        </span>
-                      )}
-                    </div>
+                {conversasDetalhadas.map((conversa) => {
+                  const hasSummary = conversa.paragraphs.length > 0;
+                  const showDate = hasSummary && Boolean(conversa.dataFormatada);
 
-                    {conversa.paragraphs.length > 0 && (
+                  return (
+                    <div
+                      key={conversa.key}
+                      className="border border-white/40 rounded-xl bg-white/70 p-4 space-y-4 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                          <MessageSquare size={16} className="text-blue-600" />
+                          <span>Conversa {conversa.indice}</span>
+                        </div>
+                        {showDate && (
+                          <span className="text-xs font-semibold mq-link-muted bg-[#3083DC14] px-2 py-1 rounded-full">
+                            {conversa.dataFormatada}
+                          </span>
+                        )}
+                      </div>
+
+                      {hasSummary && (
                       <div className="space-y-3">
                     {conversa.paragraphs.map((paragraph, index) => (
                         <p key={index} className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
@@ -228,7 +245,7 @@ const ResumoConversasPage: React.FC = () => {
                       ))}
                     </div>
                   )}
-
+  
                     {conversa.extras.length > 0 && (
                       <div className="space-y-3 border-t border-white/50 pt-3">
                         {conversa.extras.map(({ key, value }) => {
@@ -313,7 +330,8 @@ const ResumoConversasPage: React.FC = () => {
                       );
                     })()}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

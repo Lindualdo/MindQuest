@@ -67,8 +67,7 @@ const MoodGauge: React.FC = () => {
 
   return (
     <Card className="text-center">
-      <div className="flex items-center gap-3 mb-6">
-        <Smile className="text-blue-600" size={24} />
+      <div className="flex items-center gap-3 mb-6">  
         <h3 className="text-xl font-semibold text-gray-800">Humor</h3>
         <div className="ml-auto flex items-center gap-3">
           <button
@@ -250,7 +249,11 @@ const MoodGauge: React.FC = () => {
           const tendencia = dashboardData?.mood_gauge?.tendencia_semanal ?? 0;
           const isUp = tendencia > 0;
           const isDown = tendencia < 0;
-          const colorClass = isUp ? 'text-green-700' : isDown ? 'text-red-700' : 'text-gray-700';
+          const colorClass = isUp
+            ? 'text-green-700'
+            : isDown
+              ? 'text-[#D90368]'
+              : 'text-gray-700';
           const Icon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
           const medio = typeof humorMedio === 'number' ? humorMedio.toFixed(1) : '--';
           return (

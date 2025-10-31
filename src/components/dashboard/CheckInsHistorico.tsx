@@ -116,7 +116,7 @@ const CheckInsHistorico: React.FC = () => {
       <div className="flex items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-2">
           <Calendar className="text-blue-600" size={24} />
-          <h3 className="text-xl font-semibold text-gray-800">Conversas diárias (7d)</h3>
+          <h3 className="text-xl font-semibold text-gray-800">Histórico de conversas</h3>
         </div>
 
         <button
@@ -147,9 +147,6 @@ const CheckInsHistorico: React.FC = () => {
             `}>
               {checkin ? (
                 <div className="text-center">
-                  <div className="text-lg leading-none">
-                    {checkin.emoji_dia}
-                  </div>
                   <div className="text-xs mt-1 font-bold text-gray-600">
                     {getStatusIcon(checkin.status_resposta)}
                   </div>
