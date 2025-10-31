@@ -225,7 +225,7 @@ const ConversationGuidePage: React.FC = () => {
                 >
                   <div
                     className="flex items-center gap-2 mb-2 font-semibold"
-                    style={{ color: supportPalette.accent }}
+                    style={{ color: '#1C2541' }}
                   >
                     <Icon size={18} />
                     <span>{title}</span>
@@ -277,7 +277,7 @@ const ConversationGuidePage: React.FC = () => {
                 >
                   <p
                     className="font-semibold mb-1"
-                    style={{ color: supportPalette.accent }}
+                    style={{ color: '#1C2541' }}
                   >
                     {title}
                   </p>
@@ -394,7 +394,7 @@ const ConversationGuidePage: React.FC = () => {
               >
                 <p
                   className="font-semibold mb-1"
-                  style={{ color: supportPalette.accent }}
+                  style={{ color: '#1C2541' }}
                 >
                   Emoções e corpo
                 </p>
@@ -409,7 +409,7 @@ const ConversationGuidePage: React.FC = () => {
               >
                 <p
                   className="font-semibold mb-1"
-                  style={{ color: supportPalette.accent }}
+                  style={{ color: '#1C2541' }}
                 >
                   Pensamentos repetitivos
                 </p>
@@ -424,7 +424,7 @@ const ConversationGuidePage: React.FC = () => {
               >
                 <p
                   className="font-semibold mb-1"
-                  style={{ color: supportPalette.accent }}
+                  style={{ color: '#1C2541' }}
                 >
                   Rotina e energia
                 </p>
@@ -439,7 +439,7 @@ const ConversationGuidePage: React.FC = () => {
               >
                 <p
                   className="font-semibold mb-1"
-                  style={{ color: supportPalette.accent }}
+                  style={{ color: '#1C2541' }}
                 >
                   Relacionamentos e limites
                 </p>
@@ -454,7 +454,7 @@ const ConversationGuidePage: React.FC = () => {
               >
                 <p
                   className="font-semibold mb-1"
-                  style={{ color: supportPalette.accent }}
+                  style={{ color: '#1C2541' }}
                 >
                   Propósito, metas e decisões
                 </p>
