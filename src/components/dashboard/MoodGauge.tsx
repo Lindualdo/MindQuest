@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus, Info, Clock, Smile } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Info, Clock} from 'lucide-react';
 import useStore from '../../store/useStore';
 import Card from '../ui/Card';
 
