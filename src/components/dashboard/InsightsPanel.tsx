@@ -138,11 +138,11 @@ const InsightsPanel: React.FC = () => {
 
   const getCategoriaLabel = (categoria: string) => {
     switch (categoria) {
-      case 'comportamental': return '🎯 Comportamental';
-      case 'emocional': return '❤️ Emocional';
-      case 'social': return '👥 Social';
-      case 'cognitivo': return '🧠 Cognitivo';
-      default: return '💡 Geral';
+      case 'comportamental': return 'Comportamental';
+      case 'emocional': return 'Emocional';
+      case 'social': return 'Social';
+      case 'cognitivo': return 'Cognitivo';
+      default: return 'Geral';
     }
   };
 
@@ -251,7 +251,7 @@ const InsightsPanel: React.FC = () => {
       {
         key: 'todos',
         total: insights.length,
-        label: '🔄 Todos'
+        label: 'Todos'
       },
       ...categoriaResumo
     ],
@@ -259,28 +259,28 @@ const InsightsPanel: React.FC = () => {
   );
 
   const tipoOptions = useMemo(() => [
-    { key: 'todos', label: 'Todos', highlight: 'bg-gray-800 text-white', icon: '📚' },
-    { key: 'alerta', label: 'Alertas', highlight: 'bg-rose-600 text-white', icon: '⚠️' },
-    { key: 'melhoria', label: 'Melhorias', highlight: 'bg-orange-500 text-white', icon: '🎯' },
-    { key: 'padrao', label: 'Padrões', highlight: 'bg-blue-600 text-white', icon: '💡' },
-    { key: 'positivo', label: 'Positivos', highlight: 'bg-green-600 text-white', icon: '🏆' }
+    { key: 'todos', label: 'Todos', highlight: 'bg-gray-800 text-white' },
+    { key: 'alerta', label: 'Alertas', highlight: 'bg-rose-600 text-white' },
+    { key: 'melhoria', label: 'Melhorias', highlight: 'bg-orange-500 text-white' },
+    { key: 'padrao', label: 'Padrões', highlight: 'bg-blue-600 text-white' },
+    { key: 'positivo', label: 'Positivos', highlight: 'bg-green-600 text-white' }
   ] as const, []);
 
   const quickTipoOptions = useMemo(
     () => [
-      { key: 'alerta', label: 'Alertas', emoji: '⚠️' },
-      { key: 'melhoria', label: 'Melhorias', emoji: '🎯' },
-      { key: 'positivo', label: 'Positivos', emoji: '🏆' },
-      { key: 'todos', label: 'Todos', emoji: '🔄' }
+      { key: 'alerta', label: 'Alertas' },
+      { key: 'melhoria', label: 'Melhorias' },
+      { key: 'positivo', label: 'Positivos' },
+      { key: 'todos', label: 'Todos' }
     ] as const,
     []
   );
 
   const prioridadeOptions = useMemo(() => [
-    { key: 'todas', label: 'Todas', highlight: 'bg-gray-800 text-white', icon: '✨' },
-    { key: 'alta', label: 'Alta', highlight: 'bg-red-600 text-white', icon: '🔥' },
-    { key: 'media', label: 'Média', highlight: 'bg-yellow-500 text-white', icon: '⚡' },
-    { key: 'baixa', label: 'Baixa', highlight: 'bg-emerald-600 text-white', icon: '💚' }
+    { key: 'todas', label: 'Todas', highlight: 'bg-gray-800 text-white' },
+    { key: 'alta', label: 'Alta', highlight: 'bg-red-600 text-white' },
+    { key: 'media', label: 'Média', highlight: 'bg-yellow-500 text-white' },
+    { key: 'baixa', label: 'Baixa', highlight: 'bg-emerald-600 text-white' }
   ] as const, []);
 
   const prioridadeCycleOrder: Array<typeof prioridadeOptions[number]['key']> = ['todas', 'alta', 'media', 'baixa'];
@@ -342,7 +342,6 @@ const InsightsPanel: React.FC = () => {
 
   const prioridadeOptionInfo = prioridadeOptions.find(({ key }) => key === prioridadeFiltro);
   const prioridadeCycleLabel = prioridadeOptionInfo?.label ?? 'Todas';
-  const prioridadeCycleIcon = prioridadeOptionInfo?.icon ?? '✨';
 
   const renderInsightCard = (
     insight: InsightItem,
@@ -407,13 +406,14 @@ const InsightsPanel: React.FC = () => {
               </span>
 
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium
                   ${insight.prioridade === 'alta' ? 'bg-red-100 text-red-700' :
                     insight.prioridade === 'media' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-green-100 text-green-700'}`}
                 >
-                  {insight.prioridade === 'alta' ? '🔥 Alta' :
-                    insight.prioridade === 'media' ? '⚡ Média' : '💚 Baixa'}
+                  {insight.prioridade === 'alta' ? 'Alta' :
+                    insight.prioridade === 'media' ? 'Média' : 'Baixa'}
                 </span>
 
                 <span className="text-gray-400">
@@ -425,7 +425,7 @@ const InsightsPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="mt-3 flex items-center gap-1 text-xs font-semibold opacity-80 group-hover:opacity-100 transition-opacity mq-link">
               <span>Ver detalhes</span>
               <ChevronRight size={14} />
             </div>
@@ -445,7 +445,7 @@ const InsightsPanel: React.FC = () => {
     return (
       <div className={containerClass}>
         <div className="flex flex-wrap gap-2">
-          {tipoOptions.map(({ key, label, highlight, icon }) => {
+          {tipoOptions.map(({ key, label, highlight }) => {
             const isActive = tipoFiltro === key;
             return (
               <button
@@ -458,7 +458,6 @@ const InsightsPanel: React.FC = () => {
                 `}
                 aria-pressed={isActive}
               >
-                <span>{icon}</span>
                 <span>{label}</span>
               </button>
             );
@@ -469,7 +468,7 @@ const InsightsPanel: React.FC = () => {
           <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
             Prioridade
           </span>
-          {prioridadeOptions.map(({ key, label, highlight, icon }) => {
+          {prioridadeOptions.map(({ key, label, highlight }) => {
             const isActive = prioridadeFiltro === key;
             return (
               <button
@@ -482,7 +481,6 @@ const InsightsPanel: React.FC = () => {
                 `}
                 aria-pressed={isActive}
               >
-                <span>{icon}</span>
                 <span>{label}</span>
               </button>
             );
@@ -585,7 +583,7 @@ const InsightsPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsFilterSheetOpen(true)}
-              className="rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
+              className="rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition mq-btn-outline"
             >
               Ajustar
             </button>
@@ -594,7 +592,7 @@ const InsightsPanel: React.FC = () => {
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex items-center rounded-full bg-blue-50 p-1 shadow-inner overflow-x-auto">
-            {quickTipoOptions.map(({ key, label, emoji }) => {
+            {quickTipoOptions.map(({ key, label }) => {
               const isActive = tipoFiltro === key;
               return (
                 <button
@@ -603,10 +601,9 @@ const InsightsPanel: React.FC = () => {
                   onClick={() => handleTipoFiltroChange(key)}
                   className={`
                     whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition
-                    ${isActive ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-500/70 hover:text-blue-600'}
+                    ${isActive ? 'mq-btn-primary text-white shadow-sm' : 'mq-link-muted'}
                   `}
                 >
-                  <span className="mr-1">{emoji}</span>
                   {label}
                 </button>
               );
@@ -619,18 +616,18 @@ const InsightsPanel: React.FC = () => {
               onClick={handlePrioridadeCycle}
               className="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs font-semibold text-yellow-700 shadow-sm hover:bg-yellow-100 transition"
             >
-              {prioridadeCycleIcon} Prioridade: {prioridadeCycleLabel}
+              Prioridade: {prioridadeCycleLabel}
             </button>
             <button
               type="button"
-              className="hidden md:inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
+              className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition mq-btn-outline"
               onClick={() => setShowAdvancedInline((prev) => !prev)}
             >
               {showAdvancedInline ? 'Ocultar filtros avançados' : 'Filtros avançados'}
             </button>
             <button
               type="button"
-              className="hidden md:inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 shadow-sm hover:bg-blue-50 transition"
+              className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold shadow-sm transition mq-btn-outline"
               onClick={() => setIsFilterSheetOpen(true)}
             >
               Painel completo
@@ -662,7 +659,7 @@ const InsightsPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetFiltros}
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-white mq-btn-primary"
               >
                 Ver principais
               </button>
@@ -688,7 +685,7 @@ const InsightsPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterSheetOpen(false)}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                className="text-sm font-semibold mq-link"
               >
                 Fechar
               </button>
@@ -707,7 +704,7 @@ const InsightsPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterSheetOpen(false)}
-                className="flex-1 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+                className="flex-1 rounded-full px-4 py-2 text-xs font-semibold text-white mq-btn-primary"
               >
                 Aplicar
               </button>

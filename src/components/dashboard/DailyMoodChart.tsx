@@ -13,31 +13,27 @@ const getTone = (value: number) => {
     return {
       bar: 'from-emerald-400 to-emerald-500',
       text: 'text-emerald-600',
-      accent: 'text-emerald-500',
-      icon: '😊'
+      accent: 'text-emerald-500'
     };
   }
   if (value >= 0) {
     return {
       bar: 'from-sky-400 to-blue-500',
       text: 'text-sky-600',
-      accent: 'text-sky-500',
-      icon: '🙂'
+      accent: 'text-sky-500'
     };
   }
   if (value >= -2) {
     return {
       bar: 'from-amber-400 to-amber-500',
       text: 'text-amber-600',
-      accent: 'text-amber-500',
-      icon: '😐'
+      accent: 'text-amber-500'
     };
   }
   return {
     bar: 'from-rose-400 to-rose-500',
     text: 'text-rose-600',
-    accent: 'text-rose-500',
-    icon: '😔'
+    accent: 'text-rose-500'
   };
 };
 
@@ -57,8 +53,6 @@ const DailyMoodChart: React.FC = () => {
 
   return (
     <Card className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white via-white to-indigo-50/60" />
-
       <div className="relative space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -92,7 +86,7 @@ const DailyMoodChart: React.FC = () => {
                   <div>
                     <div className="text-sm font-semibold text-gray-800">{item.emocaoPredominante}</div>
                     <div className={clsx('text-xs font-medium', tone.accent)}>
-                      {tone.icon} {formatMood(item.humorMedio)}
+                      {formatMood(item.humorMedio)}
                     </div>
                   </div>
                 </div>

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
@@ -26,7 +26,6 @@ const EmotionWheel: React.FC = () => {
   return (
     <Card>
       <div className="flex items-center gap-2 mb-6">
-        <Brain className="text-purple-600" size={24} />
         <h3 className="text-xl font-semibold text-gray-800">Roda Emocional</h3>
         <div className="ml-auto relative">
           <button
@@ -102,17 +101,6 @@ const EmotionWheel: React.FC = () => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 />
-                
-                {/* Emoji */}
-                <text
-                  x={x}
-                  y={y + 2}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  className="text-lg pointer-events-none select-none"
-                >
-                  {emocao.emoji}
-                </text>
                 
                 {/* Label */}
                 <text

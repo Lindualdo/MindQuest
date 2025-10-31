@@ -80,6 +80,15 @@ const ResumoConversasPage: React.FC = () => {
     }
 
     const reservas = new Set(['resumo_conversa', 'data_conversa']);
+    const isBlockedKey = (key: string) => {
+      const normalized = key.toLowerCase();
+      return (
+        reservas.has(normalized) ||
+        normalized === 'id' ||
+        normalized === 'chat_id' ||
+        normalized.endsWith('_id')
+      );
+    };
 
     const totalConversas = resumoConversas.conversas.length;
 
@@ -100,7 +109,7 @@ const ResumoConversasPage: React.FC = () => {
       const paragraphs = normalizeParagraphs(resumoTexto);
       const dataFormatada = formatDateLabel(typeof conversa.data_conversa === 'string' ? conversa.data_conversa : null);
       const extras = Object.entries(conversa)
-        .filter(([key, value]) => !reservas.has(key) && value !== null && value !== undefined)
+        .filter(([key, value]) => !isBlockedKey(String(key)) && value !== null && value !== undefined)
         .map(([key, value]) => ({ key, value }));
 
       return {
@@ -108,7 +117,7 @@ const ResumoConversasPage: React.FC = () => {
         indice: totalConversas - index,
         dataFormatada,
         paragraphs,
-        extras: extras.filter((e) => e.key !== 'id' && e.key !== 'chat_id'),
+        extras,
         chatId: rawId ? String(rawId) : null
       };
     });
@@ -117,12 +126,17 @@ const ResumoConversasPage: React.FC = () => {
   const extraSections = useMemo(() => {
     if (!resumoConversas?.extras) return [];
     return Object.entries(resumoConversas.extras)
-      .filter(([, value]) => value !== null && value !== undefined)
+      .filter(([key, value]) => {
+        if (value === null || value === undefined) return false;
+        const normalized = key.toLowerCase();
+        if (normalized === 'id' || normalized.endsWith('_id')) return false;
+        return true;
+      })
       .map(([key, value]) => ({ key, value }));
   }, [resumoConversas]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-10">
+    <div className="mindquest-dashboard min-h-screen pb-10">
       <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4">
           <button
@@ -133,7 +147,12 @@ const ResumoConversasPage: React.FC = () => {
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest</p>
+            <p
+              className="text-sm font-semibold"
+              style={{ color: '#D90368' }}
+            >
+              MindQuest
+            </p>
             <h1 className="text-lg font-semibold text-slate-800">Resumo das conversas</h1>
           </div>
         </div>
@@ -157,7 +176,7 @@ const ResumoConversasPage: React.FC = () => {
             <button
               onClick={() => loadResumoConversas().catch(() => null)}
               disabled={resumoConversasLoading}
-              className="flex items-center gap-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg px-3 py-2 hover:bg-blue-50 transition disabled:opacity-50"
+              className="flex items-center gap-2 text-xs font-semibold rounded-lg px-3 py-2 transition mq-btn-outline disabled:opacity-50"
             >
               <RefreshCw size={14} className={resumoConversasLoading ? 'animate-spin' : ''} />
               Atualizar
@@ -286,7 +305,7 @@ const ResumoConversasPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => openFullChat(chatId)}
-                            className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                            className="text-xs font-semibold mq-link"
                           >
                             Ver conversa completa
                           </button>

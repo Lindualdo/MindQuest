@@ -58,10 +58,10 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
               style={{ display: "block" }}
             />
             <div className="leading-tight">
-              <p className="text-sm font-semibold" style={{ color: palette.secondary }}>
+              <p className="text-sm font-semibold" style={{ color: '#D90368' }}>
                 MindQuest
               </p>
-              <p className="text-xs font-medium" style={{ color: palette.muted }}>
+              <p className="text-xs font-medium" style={{ color: '#4F5779' }}>
                 mente clara, resultados reais
               </p>
             </div>

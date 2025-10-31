@@ -135,7 +135,7 @@ const InsightDetailPage: React.FC = () => {
 
   if (insightDetailLoading && !detail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-6">
+      <div className="mindquest-dashboard min-h-screen flex items-center justify-center px-6">
         <div className="glass-card max-w-md w-full p-6 flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
           <p className="text-sm text-slate-600 text-center">
@@ -148,7 +148,7 @@ const InsightDetailPage: React.FC = () => {
 
   if (insightDetailError || !detail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50 to-amber-50 flex items-center justify-center px-6">
+      <div className="mindquest-dashboard min-h-screen flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,7 +174,7 @@ const InsightDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-8">
+    <div className="mindquest-dashboard min-h-screen pb-8">
       <header className="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-white/50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <button
@@ -184,9 +184,15 @@ const InsightDetailPage: React.FC = () => {
           >
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">
-              Insight MindQuest
+          <div className="leading-tight">
+            <p
+              className="text-sm font-semibold"
+              style={{ color: '#D90368' }}
+            >
+              MindQuest
+            </p>
+            <p className="text-xs font-medium text-slate-500">
+              Insight destacado
             </p>
             <h1 className="text-lg font-semibold text-slate-800">
               Aprendizados
@@ -294,7 +300,7 @@ const InsightDetailPage: React.FC = () => {
               {detail.chat_id && (
                 <button
                   onClick={handleOpenConversation}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-medium mq-btn-primary"
                   disabled
                 >
                   <LinkIcon size={16} />

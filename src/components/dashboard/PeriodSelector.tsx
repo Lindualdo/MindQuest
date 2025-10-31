@@ -26,7 +26,7 @@ const PeriodSelector: React.FC = () => {
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-sm font-medium text-gray-600">Quest Ativo</span>
           <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-medium">
-            Dia 7 🔥
+            Dia 7
           </span>
         </div>
 

@@ -135,7 +135,7 @@ const GamificacaoPanel: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setView('conquistas')}
-                  className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                  className="flex items-center gap-1 text-xs font-semibold transition-colors mq-link"
                 >
                   Ver todas
                   <ArrowRight size={14} />

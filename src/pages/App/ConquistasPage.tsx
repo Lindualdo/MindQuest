@@ -41,7 +41,7 @@ const ConquistasPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-10">
+    <div className="mindquest-dashboard min-h-screen pb-10">
       <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4">
           <button
@@ -53,7 +53,12 @@ const ConquistasPage: React.FC = () => {
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest</p>
+            <p
+              className="text-sm font-semibold"
+              style={{ color: '#D90368' }}
+            >
+              MindQuest
+            </p>
             <h1 className="text-lg font-semibold text-slate-800">Conquistas</h1>
           </div>
         </div>
@@ -110,7 +115,7 @@ const ConquistasPage: React.FC = () => {
             </div>
 
             {conquistasOrdenadas.length === 0 ? (
-              <div className="rounded-xl bg-gray-50 p-4 text-center text-sm text-gray-600">
+              <div className="rounded-xl bg-white/70 p-4 text-center text-sm text-gray-600">
                 Você ainda não desbloqueou conquistas. Volte ao dashboard para completar quests e
                 conversas!
               </div>

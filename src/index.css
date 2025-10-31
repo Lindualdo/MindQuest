@@ -66,3 +66,148 @@
     @apply bg-gradient-to-r from-blue-600 to-purple-600;
   }
 }
+
+.mindquest-dashboard {
+  --mindquest-surface-rgb: 232 243 245;
+  background-color: #FFE4FA;
+}
+
+.mindquest-dashboard .glass-card {
+  background-color: rgba(232, 243, 245, 0.88);
+  border: 1px solid rgba(28, 37, 65, 0.08);
+}
+
+.mindquest-dashboard .bg-white {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(var(--mindquest-surface-rgb) / var(--tw-bg-opacity)) !important;
+}
+
+.mindquest-dashboard .bg-white\/95 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.95) !important;
+}
+
+.mindquest-dashboard .bg-white\/90 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.9) !important;
+}
+
+.mindquest-dashboard .bg-white\/80 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.8) !important;
+}
+
+.mindquest-dashboard .bg-white\/70 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.7) !important;
+}
+
+.mindquest-dashboard .bg-white\/60 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.6) !important;
+}
+
+.mindquest-dashboard .bg-white\/50 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.5) !important;
+}
+
+.mindquest-dashboard .bg-white\/40 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.4) !important;
+}
+
+.mindquest-dashboard .bg-white\/30 {
+  background-color: rgb(var(--mindquest-surface-rgb) / 0.3) !important;
+}
+
+.mindquest-dashboard .mq-btn-primary {
+  background-color: #3083DC;
+  color: #ffffff;
+  box-shadow: 0 16px 32px -18px rgba(48, 131, 220, 0.45);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mindquest-dashboard .mq-btn-primary:hover {
+  background-color: #266ab0;
+  box-shadow: 0 18px 36px -18px rgba(38, 106, 176, 0.4);
+}
+
+.mindquest-dashboard .mq-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(48, 131, 220, 0.3), 0 16px 32px -18px rgba(48, 131, 220, 0.45);
+}
+
+.mindquest-dashboard .mq-btn-outline {
+  color: #3083DC;
+  border: 1px solid rgba(48, 131, 220, 0.35);
+  background-color: rgba(48, 131, 220, 0.08);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.mindquest-dashboard .mq-btn-outline:hover {
+  background-color: rgba(48, 131, 220, 0.14);
+}
+
+.mindquest-dashboard .mq-btn-outline:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(48, 131, 220, 0.28);
+}
+
+.mindquest-dashboard .mq-link,
+.mindquest-dashboard .mq-link:visited {
+  color: #3083DC;
+  transition: color 0.2s ease;
+}
+
+.mindquest-dashboard .mq-link:hover {
+  color: #266ab0;
+}
+
+.mindquest-dashboard .mq-link-muted {
+  color: rgba(48, 131, 220, 0.7);
+  transition: color 0.2s ease;
+}
+
+.mindquest-dashboard .mq-link-muted:hover {
+  color: #3083DC;
+}
+
+.mindquest-dashboard .text-blue-600,
+.mindquest-dashboard .text-blue-500,
+.mindquest-dashboard .text-blue-700,
+.mindquest-dashboard .text-indigo-600,
+.mindquest-dashboard .text-indigo-500 {
+  color: #3083DC !important;
+}
+
+.mindquest-dashboard .hover\:text-blue-600:hover,
+.mindquest-dashboard .hover\:text-blue-500:hover,
+.mindquest-dashboard .hover\:text-blue-700:hover,
+.mindquest-dashboard .hover\:text-indigo-600:hover {
+  color: #266ab0 !important;
+}
+
+.mindquest-dashboard .bg-blue-600,
+.mindquest-dashboard .bg-blue-500,
+.mindquest-dashboard .bg-indigo-600,
+.mindquest-dashboard .bg-indigo-500 {
+  background-color: #3083DC !important;
+}
+
+.mindquest-dashboard .hover\:bg-blue-700:hover,
+.mindquest-dashboard .hover\:bg-blue-600:hover,
+.mindquest-dashboard .hover\:bg-indigo-700:hover {
+  background-color: #266ab0 !important;
+}
+
+.mindquest-dashboard .bg-blue-50,
+.mindquest-dashboard .bg-blue-50\/40,
+.mindquest-dashboard .bg-blue-100,
+.mindquest-dashboard .bg-blue-200 {
+  background-color: rgba(48, 131, 220, 0.08) !important;
+}
+
+.mindquest-dashboard .border-blue-200,
+.mindquest-dashboard .border-blue-100,
+.mindquest-dashboard .border-indigo-200 {
+  border-color: rgba(48, 131, 220, 0.22) !important;
+}
+
+.mindquest-dashboard .shadow-indigo-200\/60,
+.mindquest-dashboard .shadow-indigo-200 {
+  box-shadow: 0 16px 32px -18px rgba(48, 131, 220, 0.35) !important;
+}

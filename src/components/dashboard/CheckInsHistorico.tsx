@@ -122,7 +122,7 @@ const CheckInsHistorico: React.FC = () => {
         <button
           type="button"
           onClick={() => openResumoConversas().catch(() => null)}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition mq-btn-outline"
         >
           <FileText size={14} />
           Resumo das conversa

@@ -133,18 +133,18 @@ const ConversationGuidePage: React.FC = () => {
                 decoding="async"
                 className="h-11 w-auto drop-shadow-sm"
               />
-              <div>
+              <div className="leading-tight">
                 <p
-                  className="text-xs uppercase tracking-[0.28em] font-semibold"
-                  style={{ color: supportPalette.primary }}
+                  className="text-sm font-semibold"
+                  style={{ color: '#D90368' }}
                 >
                   MindQuest
                 </p>
                 <p
-                  className="text-[0.55rem] uppercase tracking-[0.35em]"
-                  style={{ color: supportPalette.textMuted }}
+                  className="text-xs font-medium"
+                  style={{ color: '#4F5779' }}
                 >
-                  Mente clara, resultados reais
+                  mente clara, resultados reais
                 </p>
               </div>
             </div>

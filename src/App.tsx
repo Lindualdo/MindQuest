@@ -20,6 +20,7 @@ import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
+import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 
 declare global {
   interface Window {
@@ -215,7 +216,7 @@ function App() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="mindquest-dashboard min-h-screen">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -226,28 +227,26 @@ function App() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:h-16">
               {/* Logo e Nome */}
               <div className="flex items-center gap-3">
-                <svg
-                  width={36}
-                  height={36}
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                  className="drop-shadow-sm"
-                >
-                  <defs>
-                    <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stopColor="#6b5cff" />
-                      <stop offset="1" stopColor="#0fc7d8" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="50" cy="50" r="46" fill="url(#logo-gradient)" />
-                  <path d="M50 20 L74 50 L50 80 L26 50 Z" fill="#ffffff" />
-                </svg>
-                <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <img
+                  src={mindquestLogo}
+                  alt="MindQuest"
+                  width={40}
+                  height={40}
+                  decoding="async"
+                  className="h-10 w-auto drop-shadow-sm"
+                />
+                <div className="leading-tight">
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: '#D90368' }}
+                  >
                     MindQuest
-                  </h1>
-                  <p className="text-xs text-gray-500">
-                    Mente clara, resultados reais · v1.1
+                  </p>
+                  <p
+                    className="text-xs font-medium"
+                    style={{ color: '#4F5779' }}
+                  >
+                    mente clara, resultados reais · v1.1
                   </p>
                 </div>
               </div>

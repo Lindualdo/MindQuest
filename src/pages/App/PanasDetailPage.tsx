@@ -39,7 +39,7 @@ const PanasDetailPage: React.FC = () => {
 
   if (!distribuicao_panas) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="mindquest-dashboard min-h-screen">
         <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
           <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-4">
             <button
@@ -51,7 +51,12 @@ const PanasDetailPage: React.FC = () => {
               <ArrowLeft size={18} className="text-slate-600" />
             </button>
             <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest</p>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: '#D90368' }}
+              >
+                MindQuest
+              </p>
               <h1 className="text-lg font-semibold text-slate-800">PANAS</h1>
             </div>
           </div>
@@ -122,7 +127,7 @@ const PanasDetailPage: React.FC = () => {
   }, [topEmotions]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-16">
+    <div className="mindquest-dashboard min-h-screen pb-16">
       <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-4">
           <button
@@ -134,7 +139,12 @@ const PanasDetailPage: React.FC = () => {
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
           <div>
-            <p className="text-xs uppercase tracking-widest text-slate-400">MindQuest | Guia rápido</p>
+            <p className="text-sm font-semibold" style={{ color: '#D90368' }}>
+              MindQuest
+            </p>
+            <p className="text-xs font-medium text-slate-500">
+              Guia rápido
+            </p>
             <h1 className="text-lg font-semibold text-slate-800">PANAS – Panorama emocional em contexto</h1>
           </div>
         </div>
@@ -338,7 +348,7 @@ const PanasDetailPage: React.FC = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-5 py-2 text-sm font-semibold text-indigo-600 shadow-md transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow-md transition mq-btn-outline"
           >
             <ArrowLeft size={16} />
             Voltar para o dashboard

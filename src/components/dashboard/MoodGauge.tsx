@@ -73,7 +73,7 @@ const MoodGauge: React.FC = () => {
         <div className="ml-auto flex items-center gap-3">
           <button
             onClick={handleOpenHistory}
-            className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition"
+            className="flex items-center gap-1 text-xs font-semibold transition mq-link"
             type="button"
           >
             <Clock size={14} /> Histórico
