@@ -1,15 +1,16 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import LandingFooter from "@/components/landing_start/LandingFooter";
 import LandingHeader from "@/components/landing_start/LandingHeader";
-import FinalCTA from "@/components/landing_start/FinalCTA";
-import FAQ from "@/components/landing_start/FAQ";
 import Hero from "@/components/landing_start/Hero";
-import Dores from "@/components/landing_start/Dores";
-import Results from "@/components/landing_start/Results";
-import Plans from "@/components/landing_start/Plans";
-import BehindMindquest from "@/components/landing_start/BehindMindquest";
 import { palette } from "@/components/landing_start/constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
+
+const LazyDores = lazy(() => import("@/components/landing_start/Dores"));
+const LazyResults = lazy(() => import("@/components/landing_start/Results"));
+const LazyFinalCTA = lazy(() => import("@/components/landing_start/FinalCTA"));
+const LazyPlans = lazy(() => import("@/components/landing_start/Plans"));
+const LazyBehindMindquest = lazy(() => import("@/components/landing_start/BehindMindquest"));
+const LazyFAQ = lazy(() => import("@/components/landing_start/FAQ"));
 
 const landingSections = [
   { id: "inicio", label: "Início" },
@@ -20,6 +21,8 @@ const landingSections = [
 ] as const;
 
 const ComecarAgoraLandingPage = () => {
+  const [hasMounted, setHasMounted] = useState(false);
+
   useEffect(() => {
     const pageTitle = "MindQuest — Mente clara, resultados reais";
     const description =
@@ -62,6 +65,7 @@ const ComecarAgoraLandingPage = () => {
     setMetaTag("name", "twitter:description", description);
     setMetaTag("name", "twitter:image", imageUrl);
 
+    setHasMounted(true);
   }, []);
 
   const handleCtaClick = (origin: string) => {
@@ -82,13 +86,27 @@ const ComecarAgoraLandingPage = () => {
       <LandingHeader onCtaClick={handleCtaClick} sections={landingSections} />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-16 md:pt-24 lg:pt-28">
         <Hero onCtaClick={handleCtaClick} sectionId="inicio" />
-        <Dores sectionId="dores" />
-        <Results sectionId="resultados" />
-        <FinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
-        <Plans sectionId="recursos" />
-        <BehindMindquest sectionId="pilares" />
-        <FAQ sectionId="faq" />
-        <FinalCTA onCtaClick={handleCtaClick} sectionId="comecar" />
+        <LazySection mounted={hasMounted} height={520}>
+          <LazyDores sectionId="dores" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={520}>
+          <LazyResults sectionId="resultados" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={420}>
+          <LazyFinalCTA onCtaClick={handleCtaClick} sectionId="convite-inicial" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={720}>
+          <LazyPlans sectionId="recursos" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={540}>
+          <LazyBehindMindquest sectionId="pilares" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={520}>
+          <LazyFAQ sectionId="faq" />
+        </LazySection>
+        <LazySection mounted={hasMounted} height={380}>
+          <LazyFinalCTA onCtaClick={handleCtaClick} sectionId="comecar" />
+        </LazySection>
       </main>
       <LandingFooter />
     </div>
@@ -96,3 +114,28 @@ const ComecarAgoraLandingPage = () => {
 };
 
 export default ComecarAgoraLandingPage;
+
+type LazySectionProps = {
+  mounted: boolean;
+  height: number;
+  children: React.ReactNode;
+};
+
+const LazySection = ({ mounted, height, children }: LazySectionProps) => (
+  <Suspense fallback={<SectionSkeleton height={height} />}>
+    {mounted ? children : <SectionSkeleton height={height} />}
+  </Suspense>
+);
+
+const SectionSkeleton = ({ height }: { height: number }) => (
+  <div
+    aria-hidden="true"
+    style={{
+      minHeight: height,
+      borderRadius: "32px",
+      background:
+        "linear-gradient(120deg, rgba(247, 233, 244, 0.55), rgba(231, 242, 245, 0.45))",
+    }}
+    className="animate-pulse"
+  />
+);
