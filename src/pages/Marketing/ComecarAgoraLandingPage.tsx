@@ -62,14 +62,6 @@ const ComecarAgoraLandingPage = () => {
     setMetaTag("name", "twitter:description", description);
     setMetaTag("name", "twitter:image", imageUrl);
 
-    if (!document.querySelector('link[data-landing-font="comecar-agora"]')) {
-      const fontLink = document.createElement("link");
-      fontLink.rel = "stylesheet";
-      fontLink.href =
-        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@600;700&display=swap";
-      fontLink.setAttribute("data-landing-font", "comecar-agora");
-      document.head.appendChild(fontLink);
-    }
   }, []);
 
   const handleCtaClick = (origin: string) => {

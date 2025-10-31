@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X, MessageCircle } from "lucide-react";
 import { palette } from "./constants";
-import mindquestLogo from "@/img/mindquest_logo_vazado.png";
+import mindquestLogo from "@/img/mindquest_logo_vazado_small.png";
 
 type NavSection = {
   id: string;
@@ -51,6 +51,9 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
             <img
               src={mindquestLogo}
               alt="MindQuest"
+              width={40}
+              height={40}
+              decoding="async"
               className="h-10 w-auto"
               style={{ display: "block" }}
             />
@@ -91,7 +94,7 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
                 letterSpacing: "0.18em",
               }}
             >
-              <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+              <MessageCircle size={16} aria-hidden="true" />
               <span>Começar agora</span>
               <ArrowRight size={16} />
             </button>
@@ -144,7 +147,7 @@ const LandingHeader = ({ onCtaClick, sections = [] }: LandingHeaderProps) => {
                   letterSpacing: "0.18em",
                 }}
               >
-                <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+                <MessageCircle size={16} aria-hidden="true" />
                 Começar agora
                 <ArrowRight size={16} />
               </button>

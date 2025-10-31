@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-29T19:51:12.331Z",
+  "updatedAt": "2025-10-30T15:04:54.043Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -1997,7 +1997,7 @@
       }
     ]
   },
-  "versionId": "e280e794-53d9-45e2-aa8a-2484df037497",
+  "versionId": "d4d5a08e-3352-4b28-8b5b-7b12c3914a13",
   "triggerCount": 0,
   "shared": [
     {
@@ -2022,7 +2022,7 @@
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-10-30T08:00:04.892Z",
+              "updatedAt": "2025-10-31T08:00:05.906Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -2047,7 +2047,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-10-30",
+              "lastActiveAt": "2025-10-31",
               "isPending": false
             }
           }

@@ -182,7 +182,7 @@ export const IMMEDIATE_BENEFITS = [
   {
     title: "Mentor 24h (Premium)",
     description:
-      "Conversas profundas com dicas de vida e hábitos, como uma versão melhor de você.",
+      "Conversas profundas com seu Mentor Digital - Assistente de IA especializado em filosofias de vida e Psicologia comportamental (Estoicismo, TCC , Sabotadores..) - Ele vai te guiar em seu dia a dia para acelerar seus resultados",
   },
   {
     title: "Hábitos que Pegam",

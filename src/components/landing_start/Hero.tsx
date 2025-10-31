@@ -1,3 +1,4 @@
+import { MessageCircle } from "lucide-react";
 import { palette } from "./constants";
 
 type HeroProps = {
@@ -44,7 +45,7 @@ const Hero = ({ onCtaClick, sectionId = "inicio" }: HeroProps) => (
             minWidth: "280px",
           }}
         >
-          <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+          <MessageCircle size={18} aria-hidden="true" />
           Começar agora no WhatsApp
         </button>
         <span

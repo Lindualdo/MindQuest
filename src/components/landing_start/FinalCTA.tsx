@@ -1,4 +1,4 @@
-import { Zap } from "lucide-react";
+import { MessageCircle, Zap } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import { palette } from "./constants";
 
@@ -39,7 +39,7 @@ const FinalCTA = ({ onCtaClick, sectionId }: FinalCTAProps) => (
           boxShadow: palette.buttons.primaryShadow,
         }}
       >
-        <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+        <MessageCircle size={18} aria-hidden="true" />
         Começar agora - É grátis
         <Zap size={18} />
       </button>

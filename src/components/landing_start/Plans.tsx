@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Minus } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Minus } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import { palette } from "./constants";
 import { WHATSAPP_URL } from "@/constants/whatsapp";
@@ -177,7 +177,7 @@ const Plans = ({ sectionId = "recursos" }: PlansProps) => {
             boxShadow: palette.buttons.primaryShadow,
           }}
         >
-          <i className="fa-brands fa-whatsapp fa-lg" aria-hidden="true" />
+          <MessageCircle size={18} aria-hidden="true" />
           Começar grátis agora
           <ArrowRight size={16} />
         </button>
