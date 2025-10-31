@@ -172,21 +172,21 @@ const CheckInsHistorico: React.FC = () => {
       {/* Estatísticas resumidas */}
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
         <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-2xl font-bold text-[#3083DC]">
             {totalRespondidos}
           </div>
           <div className="text-xs text-gray-600">Dias com conversas</div>
         </div>
         
         <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-[#3083DC]">
             {totalConversas}
           </div>
           <div className="text-xs text-gray-600">Total conversas</div>
         </div>
         
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-[#3083DC]">
             {dashboardData.gamificacao.streak_conversas_dias}
           </div>
           <div className="text-xs text-gray-600">Dias seguidos</div>
