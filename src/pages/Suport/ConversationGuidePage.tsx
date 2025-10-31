@@ -63,7 +63,7 @@ const ECO_ITEMS = [
   },
   {
     icon: BrainCircuit,
-    title: 'Especialistas em Análise',
+    title: 'Especialistas em Neurociência',
     description:
       'Modelos de IA que interpretam a conversa nos bastidores (Sabotadores, Roda das Emoções, PANAS, Big Five) e alimentam o App.'
   },
@@ -152,7 +152,7 @@ const ConversationGuidePage: React.FC = () => {
               className="text-xs uppercase tracking-[0.28em] font-semibold"
               style={{ color: supportPalette.textMuted }}
             >
-              Versão 1.1.3
+              Versão 1.1.6
             </span>
           </div>
         </div>

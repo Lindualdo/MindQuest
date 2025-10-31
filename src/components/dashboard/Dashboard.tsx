@@ -2,7 +2,7 @@
  * ARQUIVO: src/components/dashboard/Dashboard.tsx
  * AÇÃO: SUBSTITUIR o arquivo existente
  * 
- * Dashboard principal baseado na Especificação v1.1
+ * Dashboard principal baseado na Especificação v1.1.6
  * Layout com todos os componentes atualizados
  */
 

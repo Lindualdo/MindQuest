@@ -4,7 +4,7 @@ Sistema gamificado de monitoramento emocional baseado na Roda de Emoções de Pl
 
 ## 📌 Status da Versão
 
-- Versão atual: **1.1.3 (estável)**
+- Versão atual: **1.1.6 (estável)**
 - Workflow de interação via N8N em produção e monitorado
 - Fluxo de conversa validado com 16 mensagens por ciclo (8 do usuário ↔ 8 da IA)
 - Fluxo de onboarding concluindo com sucesso
@@ -201,4 +201,4 @@ Panel gamificado com insights inteligentes:
 
 ---
 
-**MindQuest v1.1.3** — Sua jornada para o bem-estar mental 🌟
+**MindQuest v1.1.6** — Sua jornada para o bem-estar mental 🌟

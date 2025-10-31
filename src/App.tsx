@@ -246,7 +246,7 @@ function App() {
                     className="text-xs font-medium"
                     style={{ color: '#4F5779' }}
                   >
-                    mente clara, resultados reais · v1.1
+                    mente clara, resultados reais · v1.1.6
                   </p>
                 </div>
               </div>
@@ -318,7 +318,7 @@ function App() {
           className="text-center text-xs text-gray-400 py-6"
         >
           <div className="max-w-7xl mx-auto px-4">
-            <p>MindQuest v1.1 - Mente clara, resultados reais.</p>
+            <p>MindQuest v1.1.6 - Mente clara, resultados reais.</p>
           </div>
         </motion.footer>
       </div>
