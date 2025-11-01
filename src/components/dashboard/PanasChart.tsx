@@ -49,8 +49,8 @@ const PanasChart: React.FC = () => {
     <Card className="flex h-full flex-col overflow-visible">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-semibold text-gray-800">Meus Sentimentos</h3>
-          <p className="text-sm text-gray-500">Sentimentos da semana</p>
+          <h3 className="text-xl font-semibold text-gray-800">Afetos PANAS</h3>
+          <p className="text-sm text-gray-500">Baseado nas emoções</p>
         </div>
         <div className="relative">
           <button
@@ -63,7 +63,7 @@ const PanasChart: React.FC = () => {
           </button>
           {showInfo && (
             <div className="absolute right-0 mt-3 w-64 rounded-xl bg-white p-4 text-xs text-gray-600 shadow-2xl z-30">
-              <p><strong>Descubra:</strong> qual tipo de sentimento predominou nos últimos 7 dias.</p>
+              <p><strong>Entenda:</strong> o nível de afetos predominantes nos últimos 7 dias.</p>
               <p className="mt-1"><strong>Cálculo:</strong> baseado na intensidade das emoções detectadas.</p>
               <p className="mt-1"><strong>Modelo:</strong> PANAS.</p>
             </div>

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, BookOpen } from 'lucide-react';
 import DashboardPage from './pages/App/DashboardPage';
 import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/App/HumorHistoryPage';
@@ -307,6 +307,13 @@ function App() {
                         size={16} 
                       />
                     </motion.button>
+                    <a
+                      href="/suporte/conversation-guide"
+                      className="inline-flex items-center gap-2 rounded-lg bg-white/80 px-3 py-2 text-xs font-semibold text-indigo-600 shadow-sm hover:bg-white"
+                    >
+                      <BookOpen size={16} />
+                      Guia de Conversa
+                    </a>
                   </div>
                 </div>
               </div>

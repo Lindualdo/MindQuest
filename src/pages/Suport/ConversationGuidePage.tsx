@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MessageCircleHeart,
   HeartPulse,
@@ -9,10 +9,12 @@ import {
   LayoutDashboard,
   Repeat,
   BrainCircuit,
-  Clock3
+  Clock3,
+  LogIn
 } from 'lucide-react';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 import { palette as landingPalette } from '@/components/landing_start/constants';
+import { authService } from '@/services/authService';
 
 const supportPalette = {
   background: landingPalette.surface,
@@ -59,7 +61,7 @@ const ECO_ITEMS = [
     icon: LayoutDashboard,
     title: 'App. MindQuest',
     description:
-      'Painel vivo onde aparecem humor, roda das emoções, histórico de sentimentos (PANAS), histórico de conversas. sabotadores, insights e conquistas sempre que uma sessão é concluída.'
+      'Painel vivo onde aparecem humor, roda das emoções, Afetos PANAS, histórico de conversas. sabotadores, insights e conquistas. Sempre que uma sessão é concluída.'
   },
   {
     icon: BrainCircuit,
@@ -106,8 +108,29 @@ const AFTER_CONVERSATION = [
 ];
 
 const ConversationGuidePage: React.FC = () => {
+  const [hasAppAccess, setHasAppAccess] = useState(false);
+  const [appHref, setAppHref] = useState('/comecar-agora');
+
   useEffect(() => {
     document.title = 'Guia de Conversa • MindQuest';
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const search = window.location.search;
+    const hasTokenInQuery = /([?&])token=/i.test(search);
+
+    if (hasTokenInQuery) {
+      setHasAppAccess(true);
+      setAppHref(`/app${search}`);
+      return;
+    }
+
+    if (authService.hasTokenAvailable()) {
+      setHasAppAccess(true);
+      setAppHref('/app');
+    }
   }, []);
 
   return (
@@ -148,12 +171,27 @@ const ConversationGuidePage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <span
-              className="text-xs uppercase tracking-[0.28em] font-semibold"
-              style={{ color: supportPalette.textMuted }}
-            >
-              Versão 1.1.6
-            </span>
+            <div className="flex flex-col gap-2 sm:items-end sm:text-right">
+              <span
+                className="text-xs uppercase tracking-[0.28em] font-semibold"
+                style={{ color: supportPalette.textMuted }}
+              >
+                Versão 1.1.6
+              </span>
+              {hasAppAccess ? (
+                <a
+                  href={appHref}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-semibold text-indigo-600 shadow-sm transition hover:bg-white"
+                >
+                  <LogIn size={16} />
+                  Voltar para o App
+                </a>
+              ) : (
+                <span className="text-[11px] leading-tight text-slate-500">
+                  Conclua o cadastro para receber o link com token do dashboard.
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -181,13 +219,13 @@ const ConversationGuidePage: React.FC = () => {
             className="mt-6 text-3xl sm:text-4xl font-black leading-snug"
             style={{ color: supportPalette.textPrimary }}
           >
-            Bem-vindo à sua primeira jornada MindQuest
+            Bem-vindo ao seu Assitente de Reflexão guiada
           </h2>
           <p
             className="mt-4 text-base sm:text-lg leading-relaxed"
             style={{ color: supportPalette.textMuted }}
           >
-            O MindQuest é uma plataforma integrada de automações de IA para o seu desenvolvimento pessoal. Aqui você começa pelo Assistente de Reflexão pessoal: cada conversa guiada transforma o que você sente em clareza e ações no dashboard do App. Use este guia para aproveitar ao máximo esse primeiro passo.
+            cada conversa guiada transforma o que você sente em clareza e ações no dashboard do App. Use este guia para aproveitar ao máximo essa interação.
           </p>
         </section>
 
@@ -234,12 +272,6 @@ const ConversationGuidePage: React.FC = () => {
                 </div>
               ))}
             </div>
-            <p
-              className="mt-4 text-sm leading-relaxed"
-              style={{ color: supportPalette.textMuted }}
-            >
-              Este guia foca no Assistente de Reflexão, pois é com ele que você conversa logo após o cadastro. Os outros componentes trabalham juntos em segundo plano — sem que você precise se preocupar com detalhes técnicos.
-            </p>
           </article>
 
           <article
@@ -259,7 +291,7 @@ const ConversationGuidePage: React.FC = () => {
                 className="text-xl font-semibold"
                 style={{ color: supportPalette.textPrimary }}
               >
-                Como será a sua primeira conversa
+                Como fazer sua conversa de reflaxão:
               </h3>
             </header>
             <div
@@ -324,7 +356,7 @@ const ConversationGuidePage: React.FC = () => {
                   size={18}
                   style={{ color: supportPalette.accent }}
                 />
-                <span>Cada sessão tem até 8 trocas: você fala 8 vezes e o Assistente de Reflexão pessoal responde 8 vezes.</span>
+                <span>Cada sessão tem um numero definido de interações e você pode mandar audio (sem limite de tamnho) ou texto</span>
               </li>
               <li className="flex gap-3">
                 <ArrowRightCircle
@@ -340,7 +372,7 @@ const ConversationGuidePage: React.FC = () => {
                   size={18}
                   style={{ color: supportPalette.accent }}
                 />
-                <span>Concluir o ciclo garante que o dashboard receba todo o contexto.</span>
+                <span>Concluir o ciclo garante que o App receba todo o contexto.</span>
               </li>
               <li className="flex gap-3">
                 <ArrowRightCircle
@@ -356,7 +388,7 @@ const ConversationGuidePage: React.FC = () => {
                   size={18}
                   style={{ color: supportPalette.accent }}
                 />
-                <span>Assim que as 8 trocas terminam, o sistema atualiza seu Dashboard e faz uma pausa automática de 12 horas antes de liberar a próxima conversa.</span>
+                <span>Assim que a sessão terminam, o sistema atualiza seu App e faz uma pausa automática de 12 horas antes de liberar a próxima conversa.</span>
               </li>
             </ul>
           </article>
@@ -484,7 +516,7 @@ const ConversationGuidePage: React.FC = () => {
               className="leading-relaxed mb-4"
               style={{ color: supportPalette.textMuted }}
             >
-              Assim que a última interação é concluída, os especialistas do MindQuest entram em ação e o dashboard ganha novas camadas de clareza:
+              Assim que a última interação é concluída, os Assistentes de IA especialistas do MindQuest entram em ação e o dashboard do App ganha novas camadas de clareza:
             </p>
             <ul
               className="space-y-2 text-sm"
