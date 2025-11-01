@@ -56,10 +56,10 @@ const EmotionWheel: React.FC = () => {
   const baseRadius = isCompact ? wheelSize * 0.33 : 120;
   const baseEmotionRadius = isCompact ? wheelSize * 0.065 : 24;
   const baseLinePadding = isCompact ? wheelSize * 0.015 : 6;
-  const baseLabelOffset = isCompact ? wheelSize * 0.06 : 18;
+  const baseLabelOffset = isCompact ? wheelSize * 0.07 : 18;
   const baseDashedOffset = isCompact ? wheelSize * 0.045 : 18;
-  const baseLabelFontSize = isCompact ? Math.max(9, wheelSize * 0.027) : 12;
-  const basePercentFontSize = isCompact ? Math.max(8, wheelSize * 0.025) : 11;
+  const baseLabelFontSize = isCompact ? Math.max(11, wheelSize * 0.035) : 12;
+  const basePercentFontSize = isCompact ? Math.max(10, wheelSize * 0.03) : 11;
   const baseCenterRadius = isCompact ? wheelSize * 0.042 : 15;
 
   const radius = baseRadius * SCALE_FACTOR;
