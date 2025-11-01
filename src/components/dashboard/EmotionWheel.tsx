@@ -18,6 +18,7 @@ const EmotionWheel: React.FC = () => {
   const [showInfo, setShowInfo] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [wheelSize, setWheelSize] = React.useState(340);
+  const SCALE_FACTOR = 1.1;
 
   React.useEffect(() => {
     const updateSize = () => {
@@ -52,14 +53,28 @@ const EmotionWheel: React.FC = () => {
 
   const isCompact = wheelSize < 340;
   const center = wheelSize / 2;
-  const radius = isCompact ? wheelSize * 0.33 : 120;
-  const emotionRadius = isCompact ? wheelSize * 0.065 : 24;
-  const linePadding = isCompact ? wheelSize * 0.015 : 6;
-  const labelOffset = isCompact ? wheelSize * 0.06 : 18;
-  const dashedRadius = isCompact ? radius + wheelSize * 0.045 : radius + 18;
-  const labelFontSize = isCompact ? Math.max(9, wheelSize * 0.027) : 12;
-  const percentFontSize = isCompact ? Math.max(8, wheelSize * 0.025) : 11;
-  const centerRadius = isCompact ? wheelSize * 0.042 : 15;
+  const baseRadius = isCompact ? wheelSize * 0.33 : 120;
+  const baseEmotionRadius = isCompact ? wheelSize * 0.065 : 24;
+  const baseLinePadding = isCompact ? wheelSize * 0.015 : 6;
+  const baseLabelOffset = isCompact ? wheelSize * 0.06 : 18;
+  const baseDashedOffset = isCompact ? wheelSize * 0.045 : 18;
+  const baseLabelFontSize = isCompact ? Math.max(9, wheelSize * 0.027) : 12;
+  const basePercentFontSize = isCompact ? Math.max(8, wheelSize * 0.025) : 11;
+  const baseCenterRadius = isCompact ? wheelSize * 0.042 : 15;
+
+  const radius = baseRadius * SCALE_FACTOR;
+  const emotionRadius = baseEmotionRadius * SCALE_FACTOR;
+  const linePadding = baseLinePadding * SCALE_FACTOR;
+  const labelOffset = baseLabelOffset * SCALE_FACTOR;
+  const dashedRadius = radius + baseDashedOffset * SCALE_FACTOR;
+  const labelFontSize = baseLabelFontSize * SCALE_FACTOR;
+  const percentFontSize = basePercentFontSize * SCALE_FACTOR;
+  const centerRadius = baseCenterRadius * SCALE_FACTOR;
+  const percentYOffset = wheelSize * 0.006 * SCALE_FACTOR;
+
+  const labelClampPadding = isCompact ? wheelSize * 0.04 : Math.max(labelOffset, emotionRadius * 0.6);
+  const labelClampMin = 12 - labelClampPadding;
+  const labelClampMax = wheelSize - 12 + labelClampPadding;
 
   return (
     <Card className="flex flex-col min-h-[360px]">
@@ -120,11 +135,11 @@ const EmotionWheel: React.FC = () => {
             const rawLabelY = circleY + labelDistance * sinValue;
 
             const labelX =
-              Math.min(Math.max(rawLabelX, 12), wheelSize - 12);
-            const labelY = Math.min(Math.max(rawLabelY, 12), wheelSize - 12);
+              Math.min(Math.max(rawLabelX, labelClampMin), labelClampMax);
+            const labelY = Math.min(Math.max(rawLabelY, labelClampMin), labelClampMax);
 
             const percentX = circleX;
-            const percentY = circleY + wheelSize * 0.006;
+            const percentY = circleY + percentYOffset;
             const dominantBaseline = 'middle';
 
             const tangentAngle = angle + 90;
