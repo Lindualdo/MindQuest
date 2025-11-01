@@ -14,18 +14,47 @@ import Card from '../ui/Card';
 
 const EmotionWheel: React.FC = () => {
   const { dashboardData } = useStore();
-  const { roda_emocoes } = dashboardData;
+  const { roda_emocoes = [] } = dashboardData;
   const [showInfo, setShowInfo] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [wheelSize, setWheelSize] = React.useState(320);
 
-  // Configuração da roda
-  const centerX = 170;
-  const centerY = 170;
-  const radius = 120;
-  const emotionRadius = 24;
-  const linePadding = 6;
+  React.useEffect(() => {
+    const updateSize = () => {
+      if (!containerRef.current) {
+        return;
+      }
+
+      const width = containerRef.current.offsetWidth;
+      const paddingAdjustment = 32; // compensação aproximada do padding interno
+      const nextSize = Math.min(Math.max(width - paddingAdjustment, 240), 340);
+      setWheelSize(nextSize);
+    };
+
+    updateSize();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', updateSize);
+      return () => {
+        window.removeEventListener('resize', updateSize);
+      };
+    }
+
+    return undefined;
+  }, []);
+
+  const center = wheelSize / 2;
+  const radius = wheelSize * 0.36;
+  const emotionRadius = wheelSize * 0.07;
+  const linePadding = wheelSize * 0.018;
+  const labelOffset = wheelSize * 0.05;
+  const dashedRadius = radius + wheelSize * 0.052;
+  const labelFontSize = Math.max(11, wheelSize * 0.035);
+  const percentFontSize = Math.max(10, wheelSize * 0.032);
+  const centerRadius = wheelSize * 0.045;
 
   return (
-    <Card className="flex flex-col min-h-[420px]">
+    <Card className="flex flex-col min-h-[360px]">
       <div className="flex items-center gap-2 mb-6">
         <h3 className="text-xl font-semibold text-gray-800">Roda das emoções</h3>
         <div className="ml-auto relative">
@@ -48,13 +77,19 @@ const EmotionWheel: React.FC = () => {
       </div>
 
       {/* SVG da Roda */}
-      <div className="flex flex-1 items-center justify-center pb-4">
-        <svg width="340" height="340" className="overflow-visible">
+      <div ref={containerRef} className="flex flex-1 items-center justify-center pb-4 w-full">
+        <svg
+          width={wheelSize}
+          height={wheelSize}
+          viewBox={`0 0 ${wheelSize} ${wheelSize}`}
+          className="overflow-visible"
+          style={{ maxWidth: '100%', height: 'auto' }}
+        >
           {/* Background circle */}
           <circle
-            cx={centerX}
-            cy={centerY}
-            r={radius + 18}
+            cx={center}
+            cy={center}
+            r={dashedRadius}
             fill="none"
             stroke="#D9E3FF"
             strokeWidth="1.5"
@@ -67,17 +102,33 @@ const EmotionWheel: React.FC = () => {
             const radian = (angle * Math.PI) / 180;
             const cosValue = Math.cos(radian);
             const sinValue = Math.sin(radian);
-            const circleX = centerX + radius * cosValue;
-            const circleY = centerY + radius * sinValue;
-            const lineX = centerX + (radius - emotionRadius - linePadding) * cosValue;
-            const lineY = centerY + (radius - emotionRadius - linePadding) * sinValue;
-            const labelX = circleX + (emotionRadius + 22) * cosValue;
-            const labelY = circleY + (emotionRadius + 22) * sinValue;
+            const circleX = center + radius * cosValue;
+            const circleY = center + radius * sinValue;
+            const lineX = center + (radius - emotionRadius - linePadding) * cosValue;
+            const lineY = center + (radius - emotionRadius - linePadding) * sinValue;
+
+            const baseLabelX = center + (radius + emotionRadius + labelOffset) * cosValue;
+            const labelY = center + (radius + emotionRadius + labelOffset) * sinValue;
+
+            const textAnchor =
+              Math.abs(cosValue) < 0.3 ? 'middle' : cosValue > 0 ? 'end' : 'start';
+            const labelX =
+              textAnchor === 'start'
+                ? Math.max(baseLabelX, 16)
+                : textAnchor === 'end'
+                  ? Math.min(baseLabelX, wheelSize - 16)
+                  : Math.min(Math.max(baseLabelX, 16), wheelSize - 16);
+
             const percentX = circleX;
-            const percentY = circleY + 2;
-            const textAnchor = Math.abs(cosValue) < 0.25 ? 'middle' : cosValue > 0 ? 'start' : 'end';
-            const nameDy = sinValue < -0.4 ? -6 : sinValue > 0.4 ? 12 : 6;
-            const dominantBaseline = Math.abs(sinValue) < 0.25 ? 'middle' : sinValue > 0 ? 'hanging' : 'ideographic';
+            const percentY = circleY + wheelSize * 0.006;
+            const nameDy =
+              sinValue < -0.4
+                ? -labelFontSize * 0.65
+                : sinValue > 0.4
+                  ? labelFontSize * 0.85
+                  : labelFontSize * 0.35;
+            const dominantBaseline =
+              Math.abs(sinValue) < 0.3 ? 'middle' : sinValue > 0 ? 'hanging' : 'alphabetic';
             
             // Opacidade baseada na intensidade
             const opacity = (emocao.intensidade / 100) * 0.8 + 0.2;
@@ -91,8 +142,8 @@ const EmotionWheel: React.FC = () => {
               >
                 {/* Linha conectora */}
                 <line
-                  x1={centerX}
-                  y1={centerY}
+                  x1={center}
+                  y1={center}
                   x2={lineX}
                   y2={lineY}
                   stroke={emocao.cor}
@@ -122,6 +173,7 @@ const EmotionWheel: React.FC = () => {
                   dominantBaseline={dominantBaseline}
                   dy={String(nameDy)}
                   className="text-[13px] font-medium fill-gray-700 pointer-events-none"
+                  style={{ fontSize: `${labelFontSize}px` }}
                 >
                   {emocao.nome}
                 </text>
@@ -130,7 +182,8 @@ const EmotionWheel: React.FC = () => {
                   y={percentY}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="text-[11px] font-semibold fill-gray-700 pointer-events-none"
+                  className="font-semibold fill-gray-700 pointer-events-none"
+                  style={{ fontSize: `${percentFontSize}px` }}
                 >
                   {emocao.intensidade}%
                 </text>
@@ -140,9 +193,9 @@ const EmotionWheel: React.FC = () => {
           
           {/* Centro */}
           <motion.circle
-            cx={centerX}
-            cy={centerY}
-            r="15"
+            cx={center}
+            cy={center}
+            r={centerRadius}
             fill="url(#centerGradient)"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
