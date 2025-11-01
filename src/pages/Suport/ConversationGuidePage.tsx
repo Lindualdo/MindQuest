@@ -291,7 +291,7 @@ const ConversationGuidePage: React.FC = () => {
                 className="text-xl font-semibold"
                 style={{ color: supportPalette.textPrimary }}
               >
-                Como fazer sua conversa de reflaxão:
+                Como fazer sua conversa de reflexão:
               </h3>
             </header>
             <div
