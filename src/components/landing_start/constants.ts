@@ -67,7 +67,7 @@ export const PAIN_POINTS = [
     description: "o medo do 'inperfeito' trava tudo antes de começar e o sonho fica só no papel",
   },
   {
-    title: "Começa projetos com empolgação, ma depois a motivação evapora",
+    title: "Começa projetos com empolgação, mas depois a motivação evapora",
     description: "A energia inicial se perde no meio do caminho deixando um monte de 'quase' e frustração",
   },
   {
