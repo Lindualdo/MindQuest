@@ -37,7 +37,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
     const currentPath = window.location.pathname.toLowerCase();
     if (isAuthenticated && currentPath === '/auth') {
-      window.history.replaceState({}, document.title, '/');
+      window.history.replaceState({}, document.title, '/app');
     }
   }, [isAuthenticated]);
 

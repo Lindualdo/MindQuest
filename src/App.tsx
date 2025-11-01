@@ -46,7 +46,7 @@ const NotFound: React.FC<{ message?: string }> = ({ message }) => (
           'Esta rota não está disponível. Verifique o endereço ou acesse o painel pelo domínio principal.'}
       </p>
       <a
-        href="/"
+        href="/app"
         className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-purple-600"
       >
         Ir para o painel
@@ -67,6 +67,8 @@ function App() {
     blogSegmentIndex >= 0 ? normalizedPath.slice(blogSegmentIndex) || '/blog' : normalizedPath;
   const isBlogPath = blogSegmentIndex >= 0;
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
+  const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
+  const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
 
   if (typeof window !== 'undefined') {
     window.__MINDQUEST_ROUTING__ = {
@@ -102,9 +104,7 @@ function App() {
     await refreshData();
   };
 
-  const isComecarAgoraLanding = resolvedPath === '/comecar-agora';
-
-  if (isComecarAgoraLanding) {
+  if (isLandingRoute) {
     return <ComecarAgoraLandingPage />;
   }
 
@@ -112,7 +112,7 @@ function App() {
     return <NotFound message="Esta página de conteúdo ainda não existe. Atualize os links para os novos caminhos." />;
   }
 
-  if (resolvedPath !== '/' && resolvedPath !== '/auth') {
+  if (!isAppRoute && resolvedPath !== '/auth') {
     return <NotFound />;
   }
 
@@ -158,7 +158,7 @@ function App() {
     );
   }
 
-  if (view === 'insightDetail') {
+  if (isAppRoute && view === 'insightDetail') {
     return (
       <AuthGuard>
         <InsightDetailPage />
@@ -166,7 +166,7 @@ function App() {
     );
   }
 
-  if (view === 'humorHistorico') {
+  if (isAppRoute && view === 'humorHistorico') {
     return (
       <AuthGuard>
         <HumorHistoryPage />
@@ -174,7 +174,7 @@ function App() {
     );
   }
 
-  if (view === 'conquistas') {
+  if (isAppRoute && view === 'conquistas') {
     return (
       <AuthGuard>
         <ConquistasPage />
@@ -182,7 +182,7 @@ function App() {
     );
   }
 
-  if (view === 'sabotadorDetail') {
+  if (isAppRoute && view === 'sabotadorDetail') {
     return (
       <AuthGuard>
         <SabotadorDetailPage />
@@ -190,7 +190,7 @@ function App() {
     );
   }
 
-  if (view === 'panasDetail') {
+  if (isAppRoute && view === 'panasDetail') {
     return (
       <AuthGuard>
         <PanasDetailPage />
@@ -198,7 +198,7 @@ function App() {
     );
   }
 
-  if (view === 'resumoConversas') {
+  if (isAppRoute && view === 'resumoConversas') {
     return (
       <AuthGuard>
         <ResumoConversasPage />
@@ -206,7 +206,7 @@ function App() {
     );
   }
 
-  if (view === 'fullChatDetail') {
+  if (isAppRoute && view === 'fullChatDetail') {
     return (
       <AuthGuard>
         <FullChatPage />
