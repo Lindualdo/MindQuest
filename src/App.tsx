@@ -5,7 +5,7 @@
  * App final limpo e funcional
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import DashboardPage from './pages/App/DashboardPage';
@@ -21,6 +21,7 @@ import PanasDetailPage from './pages/App/PanasDetailPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
+import { authService } from './services/authService';
 
 declare global {
   interface Window {
@@ -69,6 +70,8 @@ function App() {
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
   const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
   const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
+  const isRootPath = resolvedPath === '/';
+  const redirectHandledRef = useRef(false);
 
   if (typeof window !== 'undefined') {
     window.__MINDQUEST_ROUTING__ = {
@@ -103,6 +106,26 @@ function App() {
   const handleRefresh = async () => {
     await refreshData();
   };
+
+  useEffect(() => {
+    if (!isRootPath || redirectHandledRef.current) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const search = window.location.search;
+    const hasTokenInQuery = /([?&])token=/i.test(search);
+    const hasStoredToken = authService.hasTokenAvailable();
+
+    if (hasTokenInQuery || hasStoredToken) {
+      redirectHandledRef.current = true;
+      const target = hasTokenInQuery ? `/app${search}` : '/app';
+      window.location.replace(target);
+    }
+  }, [isRootPath]);
 
   if (isLandingRoute) {
     return <ComecarAgoraLandingPage />;
