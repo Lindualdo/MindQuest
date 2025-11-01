@@ -1,5 +1,10 @@
 {
+  "createdAt": "2025-10-22T18:20:20.342Z",
+  "updatedAt": "2025-11-01T16:13:28.261Z",
+  "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -20,10 +25,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2656,
-        464
+        -2736,
+        64
       ],
-      "id": "4d89a479-acb2-4829-97c6-0812e6ad1b51",
+      "id": "3ec0cd09-24db-475e-95c9-81f069215fd0",
       "name": "start"
     },
     {
@@ -39,10 +44,10 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -2432,
-        464
+        -2512,
+        64
       ],
-      "id": "d75f2f40-7abe-48e5-ad10-e9fd31a0eac1",
+      "id": "de1c024a-c02f-4c4a-ad83-6dbdc3714c59",
       "name": "Send Message",
       "retryOnFail": true,
       "maxTries": 2,
@@ -56,28 +61,28 @@
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? 'UNKNOWN').toUpperCase();\nconst messageId = data.key?.id ?? null;\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED']);\nconst transientStatuses = new Set(['PENDING', 'QUEUED', 'ACCEPTED']);\nconst successRaw = String(response.success ?? '').trim().toLowerCase();\n\nconst isSuccess = successStatuses.has(statusRaw) || (!data.status && (response.success === true || successRaw === 'true'));\nconst isTransient = transientStatuses.has(statusRaw);\nconst shouldRetry = isTransient || !isSuccess;\nconst errorMessage = data.error ?? response.error ?? null;\n\nreturn [{\n  json: {\n    success: isSuccess,\n    status: statusRaw,\n    shouldRetry,\n    isTransient,\n    messageId,\n    firstResponse: response,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+        "jsCode": "\nconst response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? '').trim();\nconst statusUpper = statusRaw.toUpperCase();\nconst httpStatus = Number(response.statusCode ?? data.statusCode ?? response.code ?? 0) || null;\nconst messageId = data.key?.id ?? response.messageId ?? null;\nconst errorMessage = data.error ?? response.error ?? response.message ?? null;\nconst successFlag = String(response.success ?? '').toLowerCase() === 'true';\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED', 'READ']);\nconst acceptedStatuses = new Set(['ACCEPTED', 'PENDING', 'QUEUED', 'ACK', 'SCHEDULED']);\nconst failureStatuses = new Set(['FAILED', 'ERROR', 'REJECTED', 'BLOCKED', 'DENIED', 'UNAUTHORIZED', 'CANCELLED', 'INVALID']);\n\nlet outcome = 'unknown';\nif (successStatuses.has(statusUpper) || successFlag) {\n  outcome = 'success';\n} else if (acceptedStatuses.has(statusUpper)) {\n  outcome = 'accepted';\n} else if (failureStatuses.has(statusUpper)) {\n  outcome = 'failure';\n} else if (!statusUpper) {\n  if (successFlag) {\n    outcome = 'success';\n  } else if (httpStatus !== null && httpStatus >= 200 && httpStatus < 300) {\n    outcome = 'success';\n  }\n}\n\nconst shouldRetry = outcome === 'failure' || outcome === 'unknown';\nconst success = outcome === 'success' || outcome === 'accepted';\nconst pendingDelivery = outcome === 'accepted';\nconst finalStatus = statusUpper || (pendingDelivery ? 'ACCEPTED' : success ? 'SUCCESS' : 'UNKNOWN');\n\nreturn [{\n  json: {\n    success,\n    delivered: outcome === 'success',\n    pendingDelivery,\n    shouldRetry,\n    isFailure: outcome === 'failure',\n    status: finalStatus,\n    httpStatus,\n    messageId,\n    firstResponse: response,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2240,
-        464
+        -2320,
+        64
       ],
-      "id": "6891de20-ae7a-4d58-8508-3c29fe588083",
+      "id": "2ebddf4b-792c-42e7-9a08-c0cb9dfe3298",
       "name": "Check Initial"
     },
     {
       "parameters": {
-        "amount": "={{ 2.5 }}"
+        "amount": "={{ 5 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1728,
-        336
+        -1808,
+        -64
       ],
-      "id": "492e5aad-c37f-4479-ae1e-0a4d66234fbe",
+      "id": "67b5b22f-9f99-4ad3-9622-476a169f62df",
       "name": "Retry Delay",
       "webhookId": "c70f06a7-7b09-46dc-9217-d26a00515d2d"
     },
@@ -94,10 +99,10 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -1488,
-        336
+        -1568,
+        -64
       ],
-      "id": "6aad54fd-5a09-4fd5-a96e-07b1fd0753ab",
+      "id": "184645cb-e6d2-4d40-9536-e4787869c0eb",
       "name": "Send Message (retry)",
       "retryOnFail": true,
       "maxTries": 2,
@@ -111,15 +116,15 @@
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? 'UNKNOWN').toUpperCase();\nconst messageId = data.key?.id ?? null;\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED']);\nconst transientStatuses = new Set(['PENDING', 'QUEUED', 'ACCEPTED']);\nconst successRaw = String(response.success ?? '').trim().toLowerCase();\n\nconst isSuccess = successStatuses.has(statusRaw) || (!data.status && (response.success === true || successRaw === 'true'));\nconst isTransient = transientStatuses.has(statusRaw);\nconst shouldRetry = isTransient || !isSuccess;\nconst errorMessage = data.error ?? response.error ?? null;\nconst firstContext = $('Check Initial').first()?.json ?? {};\n\nreturn [{\n  json: {\n    success: isSuccess,\n    status: statusRaw,\n    shouldRetry,\n    isTransient,\n    messageId,\n    firstResponse: firstContext.firstResponse ?? firstContext,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+        "jsCode": "\nconst response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? '').trim();\nconst statusUpper = statusRaw.toUpperCase();\nconst httpStatus = Number(response.statusCode ?? data.statusCode ?? response.code ?? 0) || null;\nconst messageId = data.key?.id ?? response.messageId ?? null;\nconst errorMessage = data.error ?? response.error ?? response.message ?? null;\nconst successFlag = String(response.success ?? '').toLowerCase() === 'true';\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED', 'READ']);\nconst acceptedStatuses = new Set(['ACCEPTED', 'PENDING', 'QUEUED', 'ACK', 'SCHEDULED']);\nconst failureStatuses = new Set(['FAILED', 'ERROR', 'REJECTED', 'BLOCKED', 'DENIED', 'UNAUTHORIZED', 'CANCELLED', 'INVALID']);\n\nlet outcome = 'unknown';\nif (successStatuses.has(statusUpper) || successFlag) {\n  outcome = 'success';\n} else if (acceptedStatuses.has(statusUpper)) {\n  outcome = 'accepted';\n} else if (failureStatuses.has(statusUpper)) {\n  outcome = 'failure';\n} else if (!statusUpper) {\n  if (successFlag) {\n    outcome = 'success';\n  } else if (httpStatus !== null && httpStatus >= 200 && httpStatus < 300) {\n    outcome = 'success';\n  }\n}\n\nconst shouldRetry = outcome === 'failure' || outcome === 'unknown';\nconst success = outcome === 'success' || outcome === 'accepted';\nconst pendingDelivery = outcome === 'accepted';\nconst finalStatus = statusUpper || (pendingDelivery ? 'ACCEPTED' : success ? 'SUCCESS' : 'UNKNOWN');\n\nconst firstContext = $('Check Initial').first()?.json ?? {};\n\nreturn [{\n  json: {\n    success,\n    delivered: outcome === 'success',\n    pendingDelivery,\n    shouldRetry,\n    isFailure: outcome === 'failure',\n    status: finalStatus,\n    httpStatus,\n    messageId,\n    firstResponse: firstContext.firstResponse ?? firstContext,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1280,
-        336
+        -1360,
+        -64
       ],
-      "id": "905db196-6086-4826-87e6-3e5861af60dd",
+      "id": "d354092b-e18c-4168-ab3c-3f78e2bc86ed",
       "name": "Check Retry"
     },
     {
@@ -129,10 +134,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -752,
-        208
+        -832,
+        -192
       ],
-      "id": "b3c5efae-5338-4547-8bd5-625dea1dcbf9",
+      "id": "15f4ad26-df20-4cce-8ad4-f596c4df6611",
       "name": "Build Failure Report"
     },
     {
@@ -142,10 +147,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -528,
-        208
+        -608,
+        -192
       ],
-      "id": "776f85b5-a13e-4185-b208-96d6af3fa220",
+      "id": "7a8c5047-02bf-4427-bfb9-982e41038cfe",
       "name": "Raise Failure"
     },
     {
@@ -153,10 +158,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -352,
-        576
+        -432,
+        176
       ],
-      "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
+      "id": "c6ac5c0b-481f-41ef-b155-f45bb19d34c6",
       "name": "No Operation, do nothing"
     },
     {
@@ -187,10 +192,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2016,
-        464
+        -2096,
+        64
       ],
-      "id": "d07e550c-4fdf-4093-8cfe-5952c22997e8",
+      "id": "acc5936a-dd6a-45df-8d20-985ddaa9d585",
       "name": "shouldRetry"
     },
     {
@@ -221,10 +226,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1072,
-        336
+        -1152,
+        -64
       ],
-      "id": "6dfb4d9a-c18e-4386-8c5c-8fbd41ec424e",
+      "id": "6f49f48f-1c3d-4a5a-93b5-924a8fac4621",
       "name": "Retry failed?"
     },
     {
@@ -234,25 +239,14 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1728,
-        592
+        -1808,
+        192
       ],
-      "id": "97262a21-748d-4002-aad6-929997780459",
+      "id": "812dd08c-833a-4b59-ab38-2ad56b2cbe68",
       "name": "Wait",
       "webhookId": "656c33df-2b6b-42f2-b1ad-9cac02bd9b77"
     }
   ],
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "instanceName": "MindQuest",
-          "remoteJid": "5512982389360@s.whatsapp.net",
-          "messageText": "Perfeito, Aldo! Agora, informe um e-mail para recuperar seus dados caso perca esse número do WhatsApp. Por favor, use um endereço válido."
-        }
-      }
-    ]
-  },
   "connections": {
     "start": {
       "main": [
@@ -390,16 +384,81 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
     "executionTimeout": 120
   },
-  "versionId": "4db753db-be2e-4771-a55c-f3dfdbde1e05",
-  "meta": {
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJid": "5512982389360@s.whatsapp.net",
+          "messageText": "Perfeito, Aldo! Agora, informe um e-mail para recuperar seus dados caso perca esse número do WhatsApp. Por favor, use um endereço válido."
+        }
+      }
+    ]
   },
-  "id": "U44ZfEwFU77EUthb",
+  "versionId": "b0db9ff8-4d5c-49d2-8585-d587d9a854fe",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-22T18:20:20.342Z",
+      "updatedAt": "2025-10-22T18:20:20.342Z",
+      "role": "workflow:owner",
+      "workflowId": "U44ZfEwFU77EUthb",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-11-01T08:00:06.881Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-01",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

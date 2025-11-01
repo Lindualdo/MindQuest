@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-10T11:10:56.623Z",
-  "updatedAt": "2025-10-12T11:39:48.508Z",
+  "updatedAt": "2025-11-01T16:32:26.311Z",
   "id": "agXJK8Dd49If1eFx",
   "name": "sw_experts_gamification",
   "active": false,
@@ -36,10 +36,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        160,
-        160
+        -304,
+        256
       ],
-      "id": "017422ff-2bbe-4b08-8872-27f4446ebe89",
+      "id": "44a0cf36-d8c2-4e6b-ab98-fd55756766e9",
       "name": "start"
     },
     {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        416,
-        160
+        -48,
+        256
       ],
-      "id": "85c856e6-5b5b-4868-9d98-0728cfc493e3",
+      "id": "580df701-2a45-4f31-928a-a1356484e2b9",
       "name": "Buscar Estado Atual",
       "credentials": {
         "postgres": {
@@ -67,15 +67,15 @@
     },
     {
       "parameters": {
-        "jsCode": "\n// ==========================================\n// CÁLCULO DE XP E ATUALIZAÇÃO DE GAMIFICAÇÃO\n// ==========================================\n\nconst getNumber = (value, fallback = 0) => {\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst estado = ($('Buscar Estado Atual').first()?.json) ?? {};\nconst questsRaw = $('Buscar Quests').all().map((item) => item.json ?? {});\nconst resumo = ($('start').first()?.json) ?? {};\n\nconst tem_reflexao = resumo.tem_reflexao === true || resumo.tem_reflexao === 'true' || resumo.tem_reflexao === ':true';\nconst total_palavras = getNumber(resumo.total_palavras_usuario, 0);\n\nconst data_conversa_raw = resumo.data_conversa ?? estado.ultima_conversa_data ?? new Date().toISOString();\nconst data_hoje = new Date(data_conversa_raw).toISOString().split('T')[0];\n\nconst totalConversasAntes = getNumber(estado.total_conversas, 0);\nconst totalConversas = totalConversasAntes + 1;\nconst totalReflexoesAntes = getNumber(estado.total_reflexoes, 0);\nconst totalReflexoes = totalReflexoesAntes + (tem_reflexao ? 1 : 0);\nconst diasConsecutivos = getNumber(estado.dias_consecutivos, 0);\n\n// === 1. CÁLCULO DE XP BASE ===\nlet xp_base = 20;\nif (tem_reflexao && total_palavras > 50) {\n  xp_base = 40;\n} else if (tem_reflexao) {\n  xp_base = 30;\n}\n\n// === 2. BÔNUS DE STREAK ===\nlet bonus_streak = 0;\nif (diasConsecutivos >= 30) {\n  bonus_streak = 20;\n} else if (diasConsecutivos >= 7) {\n  bonus_streak = 10;\n}\n\n// === 3. PREPARAR DADOS DOS QUESTS ===\nconst nowIso = new Date().toISOString();\nconst questStates = questsRaw.map((quest) => {\n  const meta = quest.progresso_meta ?? quest.gatilho_valor ?? null;\n  return {\n    id: quest.id,\n    quest_id: quest.quest_id,\n    codigo: quest.codigo,\n    titulo: quest.titulo,\n    descricao: quest.descricao,\n    categoria: quest.categoria,\n    tipo: quest.tipo,\n    gatilho_tipo: quest.gatilho_tipo,\n    gatilho_valor: quest.gatilho_valor,\n    xp_recompensa: getNumber(quest.xp_recompensa, 0),\n    repeticao: quest.repeticao,\n    sequencia: getNumber(quest.sequencia, 0),\n    referencia_data: quest.referencia_data ? String(quest.referencia_data).split('T')[0] : null,\n    dados_extras: quest.dados_extras ?? null,\n    meta,\n    original: {\n      status: quest.status,\n      progresso_atual: getNumber(quest.progresso_atual, 0),\n      progresso_percentual: getNumber(quest.progresso_percentual, 0),\n      xp_concedido: getNumber(quest.xp_concedido, 0),\n      concluido_em: quest.concluido_em ?? null\n    },\n    final: {\n      status: quest.status,\n      progresso_atual: getNumber(quest.progresso_atual, 0),\n      progresso_percentual: getNumber(quest.progresso_percentual, 0),\n      xp_concedido: getNumber(quest.xp_concedido, 0),\n      concluido_em: quest.concluido_em ?? null\n    }\n  };\n});\n\nconst progressValues = {\n  total_conversas: totalConversas,\n  dias_consecutivos: diasConsecutivos,\n  total_reflexoes: totalReflexoes,\n  diario: tem_reflexao ? 1 : 0\n};\n\nlet xp_bonus_quests = 0;\nconst novasConquistas = [];\n\nfor (const quest of questStates) {\n  const meta = quest.meta;\n\n  if (quest.gatilho_tipo && Object.prototype.hasOwnProperty.call(progressValues, quest.gatilho_tipo)) {\n    const candidate = progressValues[quest.gatilho_tipo];\n    if (quest.gatilho_tipo === 'diario') {\n      const dailyMeta = meta && meta > 0 ? meta : 1;\n      quest.final.progresso_atual = tem_reflexao ? dailyMeta : 0;\n    } else if (candidate > quest.final.progresso_atual) {\n      quest.final.progresso_atual = candidate;\n    }\n  }\n\n  if (quest.gatilho_tipo === 'diario') {\n    quest.final.progresso_percentual = tem_reflexao ? 100 : 0;\n  } else if (meta && meta > 0) {\n    quest.final.progresso_percentual = Math.min(100, Math.round((quest.final.progresso_atual / meta) * 100));\n  }\n\n  let shouldComplete = false;\n  if (quest.original.status !== 'completa') {\n    if (quest.gatilho_tipo === 'diario') {\n      shouldComplete = tem_reflexao;\n    } else if (meta && meta > 0 && quest.final.progresso_atual >= meta) {\n      shouldComplete = true;\n    }\n  }\n\n  if (shouldComplete) {\n    quest.final.status = 'completa';\n    quest.final.progresso_atual = meta ?? quest.final.progresso_atual;\n    quest.final.progresso_percentual = 100;\n    quest.final.concluido_em = nowIso;\n    if (quest.final.xp_concedido < quest.xp_recompensa) {\n      const xpToAdd = quest.xp_recompensa - quest.final.xp_concedido;\n      xp_bonus_quests += xpToAdd;\n      quest.final.xp_concedido = quest.xp_recompensa;\n      novasConquistas.push({\n        id: quest.codigo,\n        titulo: quest.titulo,\n        categoria: quest.categoria,\n        xp_bonus: quest.xp_recompensa,\n        desbloqueada_em: nowIso\n      });\n    }\n  } else if (quest.final.status === 'pendente' && (quest.final.progresso_atual > 0 || quest.final.progresso_percentual > 0)) {\n    quest.final.status = 'ativa';\n  }\n}\n\nconst systemQuests = questStates\n  .filter((quest) => quest.tipo === 'sistema')\n  .sort((a, b) => a.sequencia - b.sequencia);\n\nfor (const quest of systemQuests) {\n  if (quest.final.status !== 'completa') {\n    const allPreviousComplete = systemQuests\n      .filter((other) => other.sequencia < quest.sequencia)\n      .every((other) => other.final.status === 'completa');\n    if (allPreviousComplete && quest.final.status === 'pendente') {\n      quest.final.status = 'ativa';\n    }\n    break;\n  }\n}\n\nconst questUpdatesPayload = questStates\n  .filter((quest) =>\n    quest.final.status !== quest.original.status ||\n    quest.final.progresso_atual !== quest.original.progresso_atual ||\n    quest.final.progresso_percentual !== quest.original.progresso_percentual ||\n    quest.final.xp_concedido !== quest.original.xp_concedido ||\n    (quest.final.concluido_em ?? null) !== (quest.original.concluido_em ?? null)\n  )\n  .map((quest) => ({\n    quest_record_id: quest.id,\n    status: quest.final.status,\n    progresso_atual: quest.final.progresso_atual,\n    progresso_percentual: quest.final.progresso_percentual,\n    xp_concedido: quest.final.xp_concedido,\n    concluido_em: quest.final.concluido_em,\n    dados_extras: quest.dados_extras\n  }));\n\nconst dailyQuestHoje = questStates.find((quest) => quest.tipo === 'diaria' && quest.referencia_data === data_hoje);\nconst quest_diaria_status = dailyQuestHoje ? dailyQuestHoje.final.status : (estado.quest_diaria_status ?? 'pendente');\nconst quest_diaria_progresso = dailyQuestHoje ? dailyQuestHoje.final.progresso_percentual : getNumber(estado.quest_diaria_progresso, 0);\nconst quest_diaria_descricao = dailyQuestHoje ? (dailyQuestHoje.descricao || dailyQuestHoje.titulo) : (estado.quest_diaria_descricao ?? null);\n\nconst xp_ganho = xp_base + bonus_streak + xp_bonus_quests;\nconst xp_total_anterior = getNumber(estado.xp_total, 0);\nlet xp_total_final = xp_total_anterior + xp_ganho;\n\nlet nivel_atual = getNumber(estado.nivel_atual, 1);\nlet xp_proximo_nivel = getNumber(estado.xp_proximo_nivel, 200);\nlet titulo_nivel = estado.titulo_nivel || 'Explorador';\n\nconst niveis = {\n  1: { titulo: 'Explorador', xp: 200 },\n  2: { titulo: 'Aprendiz', xp: 550 },\n  3: { titulo: 'Observador', xp: 1050 },\n  4: { titulo: 'Focado', xp: 1700 },\n  5: { titulo: 'Praticante', xp: 2500 },\n  6: { titulo: 'Consciente', xp: 3450 },\n  7: { titulo: 'Iluminado', xp: 4550 },\n  8: { titulo: 'Sábio', xp: 5800 },\n  9: { titulo: 'Ascendente', xp: 7200 },\n  10: { titulo: 'Mestre', xp: 9000 },\n  15: { titulo: 'Transcendente', xp: 15000 }\n};\n\nwhile (xp_total_final >= xp_proximo_nivel && nivel_atual < 15) {\n  nivel_atual += 1;\n  if (niveis[nivel_atual]) {\n    xp_proximo_nivel = niveis[nivel_atual].xp;\n    titulo_nivel = niveis[nivel_atual].titulo;\n  } else {\n    xp_proximo_nivel = (nivel_atual * 150) + 50;\n    titulo_nivel = `Nível ${nivel_atual}`;\n  }\n}\n\nconst melhor_streak = Math.max(getNumber(estado.melhor_streak, 0), diasConsecutivos);\nconst ultimaConquistaId = novasConquistas.length > 0 ? novasConquistas[novasConquistas.length - 1].id : (estado.ultima_conquista_id ?? null);\nconst ultimaConquistaData = novasConquistas.length > 0 ? nowIso : (estado.ultima_conquista_data ?? null);\n\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id ?? $('start').first().json.usuario_id,\n    xp_total: xp_total_final,\n    nivel_atual,\n    xp_proximo_nivel,\n    titulo_nivel,\n    streak_conversas_dias: diasConsecutivos,\n    melhor_streak,\n    ultima_conversa_data: data_hoje,\n    quest_diaria_status,\n    quest_diaria_progresso,\n    quest_diaria_descricao,\n    quest_diaria_data: data_hoje,\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes,\n    conquistas_json: JSON.stringify(novasConquistas),\n    total_xp_ganho_hoje: xp_ganho,\n    ultima_conquista_id: ultimaConquistaId,\n    ultima_conquista_data: ultimaConquistaData,\n    dias_consecutivos: diasConsecutivos,\n    xp_base,\n    bonus_streak,\n    xp_bonus_quests,\n    quest_updates: JSON.stringify(questUpdatesPayload),\n    tem_reflexao,\n    total_palavras,\n    _debug: {\n      totalConversasAntes,\n      totalConversas,\n      totalReflexoesAntes,\n      totalReflexoes,\n      diasConsecutivos,\n      xp_base,\n      bonus_streak,\n      xp_bonus_quests,\n      quests_processadas: questStates.length,\n      novasConquistas\n    }\n  }\n}];\n"
+        "jsCode": "\n// ==========================================\n// CÁLCULO DE XP E ATUALIZAÇÃO DE GAMIFICAÇÃO\n// ==========================================\n\nconst getNumber = (value, fallback = 0) => {\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst estado = ($('Buscar Estado Atual').first()?.json) ?? {};\nconst questsRaw = $('Buscar Quests').all().map((item) => item.json ?? {});\nconst resumo = ($('start').first()?.json) ?? {};\n\nconst tem_reflexao = resumo.tem_reflexao === true || resumo.tem_reflexao === 'true' || resumo.tem_reflexao === ':true';\nconst total_palavras = getNumber(resumo.total_palavras_usuario, 0);\n\nconst data_conversa_raw = resumo.data_conversa ?? estado.ultima_conversa_data ?? new Date().toISOString();\nconst data_hoje = new Date(data_conversa_raw).toISOString().split('T')[0];\n\nconst totalConversasAntes = getNumber(estado.total_conversas, 0);\nconst totalConversas = totalConversasAntes + 1;\nconst totalReflexoesAntes = getNumber(estado.total_reflexoes, 0);\nconst totalReflexoes = totalReflexoesAntes + (tem_reflexao ? 1 : 0);\nconst diasConsecutivos = getNumber(estado.dias_consecutivos, 0);\n\n// === 1. CÁLCULO DE XP BASE ===\nlet xp_base = 20;\nif (tem_reflexao && total_palavras > 50) {\n  xp_base = 40;\n} else if (tem_reflexao) {\n  xp_base = 30;\n}\n\n// === 2. BÔNUS DE STREAK ===\nlet bonus_streak = 0;\nif (diasConsecutivos >= 30) {\n  bonus_streak = 20;\n} else if (diasConsecutivos >= 7) {\n  bonus_streak = 10;\n}\n\n// === 3. PREPARAR DADOS DOS QUESTS ===\nconst nowIso = new Date().toISOString();\nconst questStates = questsRaw.map((quest) => {\n  const meta = quest.progresso_meta ?? quest.gatilho_valor ?? null;\n  return {\n    id: quest.id,\n    quest_id: quest.quest_id,\n    codigo: quest.codigo,\n    titulo: quest.titulo,\n    descricao: quest.descricao,\n    categoria: quest.categoria,\n    tipo: quest.tipo,\n    gatilho_tipo: quest.gatilho_tipo,\n    gatilho_valor: quest.gatilho_valor,\n    xp_recompensa: getNumber(quest.xp_recompensa, 0),\n    repeticao: quest.repeticao,\n    sequencia: getNumber(quest.sequencia, 0),\n    referencia_data: quest.referencia_data ? String(quest.referencia_data).split('T')[0] : null,\n    dados_extras: quest.dados_extras ?? null,\n    meta,\n    original: {\n      status: quest.status,\n      progresso_atual: getNumber(quest.progresso_atual, 0),\n      progresso_percentual: getNumber(quest.progresso_percentual, 0),\n      xp_concedido: getNumber(quest.xp_concedido, 0),\n      concluido_em: quest.concluido_em ?? null\n    },\n    final: {\n      status: quest.status,\n      progresso_atual: getNumber(quest.progresso_atual, 0),\n      progresso_percentual: getNumber(quest.progresso_percentual, 0),\n      xp_concedido: getNumber(quest.xp_concedido, 0),\n      concluido_em: quest.concluido_em ?? null\n    }\n  };\n});\n\nconst progressValues = {\n  total_conversas: totalConversas,\n  dias_consecutivos: diasConsecutivos,\n  total_reflexoes: totalReflexoes,\n  diario: tem_reflexao ? 1 : 0\n};\n\nlet xp_bonus_quests = 0;\nconst novasConquistas = [];\n\nfor (const quest of questStates) {\n  const meta = quest.meta;\n\n  if (quest.gatilho_tipo && Object.prototype.hasOwnProperty.call(progressValues, quest.gatilho_tipo)) {\n    const candidate = progressValues[quest.gatilho_tipo];\n    if (quest.gatilho_tipo === 'diario') {\n      const dailyMeta = meta && meta > 0 ? meta : 1;\n      quest.final.progresso_atual = tem_reflexao ? dailyMeta : 0;\n    } else if (candidate > quest.final.progresso_atual) {\n      quest.final.progresso_atual = candidate;\n    }\n  }\n\n  if (quest.gatilho_tipo === 'diario') {\n    quest.final.progresso_percentual = tem_reflexao ? 100 : 0;\n  } else if (meta && meta > 0) {\n    quest.final.progresso_percentual = Math.min(100, Math.round((quest.final.progresso_atual / meta) * 100));\n  }\n\n  let shouldComplete = false;\n  if (quest.original.status !== 'completa') {\n    if (quest.gatilho_tipo === 'diario') {\n      shouldComplete = tem_reflexao;\n    } else if (meta && meta > 0 && quest.final.progresso_atual >= meta) {\n      shouldComplete = true;\n    }\n  }\n\n  if (shouldComplete) {\n    quest.final.status = 'completa';\n    quest.final.progresso_atual = meta ?? quest.final.progresso_atual;\n    quest.final.progresso_percentual = 100;\n    quest.final.concluido_em = nowIso;\n    if (quest.final.xp_concedido < quest.xp_recompensa) {\n      const xpToAdd = quest.xp_recompensa - quest.final.xp_concedido;\n      xp_bonus_quests += xpToAdd;\n      quest.final.xp_concedido = quest.xp_recompensa;\n      novasConquistas.push({\n        id: quest.codigo,\n        titulo: quest.titulo,\n        categoria: quest.categoria,\n        xp_bonus: quest.xp_recompensa,\n        desbloqueada_em: nowIso\n      });\n    }\n  } else if (quest.final.status === 'pendente' && (quest.final.progresso_atual > 0 || quest.final.progresso_percentual > 0)) {\n    quest.final.status = 'ativa';\n  }\n}\n\nconst systemQuests = questStates\n  .filter((quest) => quest.tipo === 'sistema')\n  .sort((a, b) => a.sequencia - b.sequencia);\n\nfor (const quest of systemQuests) {\n  if (quest.final.status !== 'completa') {\n    const allPreviousComplete = systemQuests\n      .filter((other) => other.sequencia < quest.sequencia)\n      .every((other) => other.final.status === 'completa');\n    if (allPreviousComplete && quest.final.status === 'pendente') {\n      quest.final.status = 'ativa';\n    }\n    break;\n  }\n}\n\nconst questUpdatesPayload = questStates\n  .filter((quest) =>\n    quest.final.status !== quest.original.status ||\n    quest.final.progresso_atual !== quest.original.progresso_atual ||\n    quest.final.progresso_percentual !== quest.original.progresso_percentual ||\n    quest.final.xp_concedido !== quest.original.xp_concedido ||\n    (quest.final.concluido_em ?? null) !== (quest.original.concluido_em ?? null)\n  )\n  .map((quest) => ({\n    quest_record_id: quest.id,\n    status: quest.final.status,\n    progresso_atual: quest.final.progresso_atual,\n    progresso_percentual: quest.final.progresso_percentual,\n    xp_concedido: quest.final.xp_concedido,\n    concluido_em: quest.final.concluido_em,\n    dados_extras: quest.dados_extras\n  }));\n\nconst dailyQuestHoje = questStates.find((quest) => quest.tipo === 'diaria' && quest.referencia_data === data_hoje);\nlet quest_diaria_status = estado.quest_diaria_status ?? 'pendente';\nlet quest_diaria_progresso = getNumber(estado.quest_diaria_progresso, 0);\nlet quest_diaria_descricao = estado.quest_diaria_descricao ?? null;\nif (dailyQuestHoje) {\n  quest_diaria_descricao = dailyQuestHoje.descricao || dailyQuestHoje.titulo || quest_diaria_descricao;\n  quest_diaria_progresso = dailyQuestHoje.final.progresso_percentual;\n  if (dailyQuestHoje.final.progresso_percentual >= 100 || dailyQuestHoje.final.status === 'completa') {\n    quest_diaria_status = 'completa';\n  } else if (dailyQuestHoje.final.progresso_percentual > 0) {\n    quest_diaria_status = 'parcial';\n  } else {\n    quest_diaria_status = 'pendente';\n  }\n}\n\nconst xp_ganho = xp_base + bonus_streak + xp_bonus_quests;\nconst xp_total_anterior = getNumber(estado.xp_total, 0);\nlet xp_total_final = xp_total_anterior + xp_ganho;\n\nlet nivel_atual = getNumber(estado.nivel_atual, 1);\nlet xp_proximo_nivel = getNumber(estado.xp_proximo_nivel, 200);\nlet titulo_nivel = estado.titulo_nivel || 'Explorador';\n\nconst niveis = {\n  1: { titulo: 'Explorador', xp: 200 },\n  2: { titulo: 'Aprendiz', xp: 550 },\n  3: { titulo: 'Observador', xp: 1050 },\n  4: { titulo: 'Focado', xp: 1700 },\n  5: { titulo: 'Praticante', xp: 2500 },\n  6: { titulo: 'Consciente', xp: 3450 },\n  7: { titulo: 'Iluminado', xp: 4550 },\n  8: { titulo: 'Sábio', xp: 5800 },\n  9: { titulo: 'Ascendente', xp: 7200 },\n  10: { titulo: 'Mestre', xp: 9000 },\n  15: { titulo: 'Transcendente', xp: 15000 }\n};\n\nwhile (xp_total_final >= xp_proximo_nivel && nivel_atual < 15) {\n  nivel_atual += 1;\n  if (niveis[nivel_atual]) {\n    xp_proximo_nivel = niveis[nivel_atual].xp;\n    titulo_nivel = niveis[nivel_atual].titulo;\n  } else {\n    xp_proximo_nivel = (nivel_atual * 150) + 50;\n    titulo_nivel = `Nível ${nivel_atual}`;\n  }\n}\n\nconst melhor_streak = Math.max(getNumber(estado.melhor_streak, 0), diasConsecutivos);\nconst ultimaConquistaId = novasConquistas.length > 0 ? novasConquistas[novasConquistas.length - 1].id : (estado.ultima_conquista_id ?? null);\nconst ultimaConquistaData = novasConquistas.length > 0 ? nowIso : (estado.ultima_conquista_data ?? null);\n\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id ?? $('start').first().json.usuario_id,\n    xp_total: xp_total_final,\n    nivel_atual,\n    xp_proximo_nivel,\n    titulo_nivel,\n    streak_conversas_dias: diasConsecutivos,\n    melhor_streak,\n    ultima_conversa_data: data_hoje,\n    quest_diaria_status,\n    quest_diaria_progresso,\n    quest_diaria_descricao,\n    quest_diaria_data: data_hoje,\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes,\n    conquistas_json: JSON.stringify(novasConquistas),\n    total_xp_ganho_hoje: xp_ganho,\n    ultima_conquista_id: ultimaConquistaId,\n    ultima_conquista_data: ultimaConquistaData,\n    dias_consecutivos: diasConsecutivos,\n    xp_base,\n    bonus_streak,\n    xp_bonus_quests,\n    quest_updates: JSON.stringify(questUpdatesPayload),\n    tem_reflexao,\n    total_palavras,\n    _debug: {\n      totalConversasAntes,\n      totalConversas,\n      totalReflexoesAntes,\n      totalReflexoes,\n      diasConsecutivos,\n      xp_base,\n      bonus_streak,\n      xp_bonus_quests,\n      quests_processadas: questStates.length,\n      novasConquistas\n    }\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        640,
-        160
+        352,
+        256
       ],
-      "id": "0007f81d-3a6a-49f4-9817-84fe3228efa3",
+      "id": "4a291762-7a90-4c94-936b-cd960f9a4559",
       "name": "Calcular Gamificação"
     },
     {
@@ -87,10 +87,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        864,
-        160
+        736,
+        256
       ],
-      "id": "4b730ef6-95af-4be0-a787-ecb4f4e2baeb",
+      "id": "49577de0-10d4-4818-8649-9f6d08123480",
       "name": "Atualizar Gamificação",
       "credentials": {
         "postgres": {
@@ -106,10 +106,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1120,
-        160
+        960,
+        256
       ],
-      "id": "22cae1fe-aa5e-47d7-8d4c-a5726d13e41c",
+      "id": "e9e7d2a8-8392-4301-83b4-6a927fb1f2c5",
       "name": "Preparar Resultado"
     },
     {
@@ -122,10 +122,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -816,
-        -80
+        -1200,
+        16
       ],
-      "id": "ec95c3ef-467e-494b-8a67-8df8418a8bdd",
+      "id": "d78db502-2fa2-4daa-a21f-0c8fcaae6bde",
       "name": "Sticky Note - Info"
     },
     {
@@ -139,10 +139,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        608,
-        160
+        160,
+        256
       ],
-      "id": "c6ec6d55-13ea-4e48-8933-1f74a4d3009d",
+      "id": "af6ff8d4-e367-4830-a215-e6b16ca6dcee",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -160,10 +160,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        864,
-        -32
+        528,
+        256
       ],
-      "id": "02f2e983-dfbf-4a34-9a6b-5cb7e97431c5",
+      "id": "b2548aa2-d161-429c-9a3d-e15a292e3110",
       "name": "Atualizar Quests",
       "credentials": {
         "postgres": {
@@ -253,16 +253,16 @@
       {
         "json": {
           "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "bae07463-0efa-444f-a5cc-288b579e536f",
-          "data_conversa": "Sun Oct 12 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "chat_id": "dd66a9b3-d455-4730-a683-b58ca8bb4a31",
+          "data_conversa": "Fri Oct 31 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
           "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo mostrou autoconhecimento ao identificar as causas da dificuldade em seguir seu plano, como ansiedade e otimismo exagerado. Ele refletiu sobre o impacto emocional dessas sensações em sua confiança e disciplina, questionou a eficácia das técnicas tradicionais de controle emocional para seu caso, e reconheceu a necessidade de uma abordagem personalizada devido à urgência do mercado. Isso demonstra uma análise profunda dos próprios padrões emocionais e comportamentais.",
-          "total_palavras_usuario": 204
+          "justificativa_reflexao": "Aldo demonstra reflexão profunda ao analisar como a ansiedade interfere em suas decisões, diferenciando os momentos em que consegue ou não fazer pausas. Ele conecta seus sentimentos com estratégias práticas para controlar o medo e insegurança no mercado, reconhecendo sucessos pessoais e buscando adaptar ferramentas para seu processo emocional.",
+          "total_palavras_usuario": 216
         }
       }
     ]
   },
-  "versionId": "e9147ff2-5903-4e58-b79f-b5ac12430036",
+  "versionId": "54a9100f-a5e2-4d84-a19e-842d4d3ff53c",
   "triggerCount": 0,
   "shared": [
     {

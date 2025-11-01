@@ -1,5 +1,10 @@
 {
+  "createdAt": "2025-09-30T11:31:35.749Z",
+  "updatedAt": "2025-11-01T20:48:09.414Z",
+  "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -26,13 +31,13 @@
           ]
         }
       },
-      "id": "f1e37f55-c1c3-470d-b404-1c66cecd2b47",
+      "id": "8f1b2143-b0f3-472e-a5ec-debeb8de4148",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2320,
-        -112
+        -1776,
+        48
       ]
     },
     {
@@ -42,12 +47,12 @@
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}",
         "options": {}
       },
-      "id": "46e47ced-28c3-4a20-9778-c919fae7a35e",
+      "id": "250f07b9-7fb6-4eea-9946-b90f720e9223",
       "name": "Redis Get",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -2096,
+        -1424,
         -112
       ],
       "credentials": {
@@ -61,12 +66,12 @@
       "parameters": {
         "jsCode": "const raw = $input.item.json.sessionData;\nlet session = {};\ntry {\n  if (raw) session = JSON.parse(raw);\n} catch (error) {\n  session = {};\n}\n\nconst normalizeEstado = (value) => {\n  if (!value) return 'inicio';\n  if (value === 'nome_coletado') return 'esperando_nome';\n  if (value === 'assistente_pendente') return 'esperando_email';\n  if (value === 'faixa_pendente') return 'esperando_faixa';\n  return value;\n};\n\nconst estado = normalizeEstado(session.estado);\nconst nome_preferido = session.nome_preferido || null;\nconst email_usuario = session.email_usuario || null;\nconst faixa_etaria = session.faixa_etaria || null;\n\nconst stateOrder = {\n  inicio: 1,\n  esperando_nome: 2,\n  esperando_email: 3,\n  esperando_faixa: 4,\n  confirmacao_pendente: 5,\n  completo: 6,\n};\n\nconst interaction_count = stateOrder[estado] || 2;\n\nlet next_focus = '';\nif (estado === 'inicio') {\n  next_focus = 'ONBOARDING#1: Saudação curta + perguntar COMO QUER SER CHAMADO(A). Uma única pergunta.';\n} else if (estado === 'esperando_nome') {\n  next_focus = 'ONBOARDING#2: Agradeça e solicite o E-MAIL do usuário. Destaque que precisa ser um endereço válido.';\n} else if (estado === 'esperando_email') {\n  next_focus = 'ONBOARDING#3: Agradeça e peça a FAIXA ETÁRIA. Liste as opções 1 a 7 e peça só o número.';\n} else if (estado === 'esperando_faixa') {\n  next_focus = 'ONBOARDING#4: Informe que vai consolidar as informações e aguarde a confirmação final do usuário.';\n} else {\n  next_focus = 'ONBOARDING#5: Aguarde apenas a confirmação do usuário, sem abrir novos tópicos.';\n}\n\nconst is_last_interaction = estado === 'confirmacao_pendente' || estado === 'completo';\n\nreturn {\n  json: {\n    estado,\n    nome_preferido,\n    email_usuario,\n    faixa_etaria,\n    interaction_count,\n    next_focus,\n    is_last_interaction,\n  },\n};"
       },
-      "id": "dd6e19ad-8795-4b6a-82e6-3902693500ff",
+      "id": "d3a3784b-5898-48a4-91f4-c2401a7c24d2",
       "name": "Code - Controller (interations-style)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1904,
+        -1200,
         -112
       ]
     },
@@ -78,12 +83,12 @@
           "systemMessage": "=# SYSTEM\n- Fale PT-BR.\n- Obedeça ao next_focus.\n- Se for a última interação, não pergunte.\n- Direto e cordial."
         }
       },
-      "id": "6fc906ee-591c-4c39-a6e8-161b5935379f",
+      "id": "ee087705-66a6-49ac-8bbc-e8f7b697fe80",
       "name": "Agent AI (interations-style)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1632,
+        -960,
         -112
       ]
     },
@@ -91,13 +96,13 @@
       "parameters": {
         "options": {}
       },
-      "id": "73d4d1a9-90bc-4e66-82e6-b08b3f827df8",
+      "id": "13473f2a-8442-4ba3-835c-7b98d2693382",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -1680,
-        192
+        -960,
+        80
       ],
       "credentials": {
         "openRouterApi": {
@@ -110,12 +115,12 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.output || '';\nconst controllerState = $('Code - Controller (interations-style)').first().json.estado || 'inicio';\nconst incomingMessage = String($('start').first().json.menssagem || '').trim();\n\nlet out_text = String(raw || '').trim();\nlet proximo_estado = null;\nlet tipo = 'mensagem';\n\nlet nome_usuario = null;\nlet email_usuario = null;\nlet faixa_etaria = null;\nlet faixa_etaria_codigo = null;\n\nlet prev = {};\ntry {\n  prev = JSON.parse($('Redis Get').first().json.sessionData || '{}');\n} catch (error) {\n  prev = {};\n}\n\nconst prevNome = typeof prev.nome_preferido === 'string' ? prev.nome_preferido.trim() : null;\nconst prevEmail = typeof prev.email_usuario === 'string' ? prev.email_usuario.trim() : null;\nconst prevFaixa = typeof prev.faixa_etaria === 'string' ? prev.faixa_etaria : null;\nconst prevFaixaCodigo = typeof prev.faixa_etaria_codigo === 'string' ? prev.faixa_etaria_codigo : null;\n\nnome_usuario = prevNome;\nemail_usuario = prevEmail;\nfaixa_etaria = prevFaixa;\nfaixa_etaria_codigo = prevFaixaCodigo;\n\nconst normalizeEstado = (value) => {\n  if (!value) return 'inicio';\n  if (value === 'nome_coletado') return 'esperando_nome';\n  if (value === 'assistente_pendente') return 'esperando_email';\n  if (value === 'faixa_pendente') return 'esperando_faixa';\n  return value;\n};\n\nconst isValidEmail = (value) => {\n  if (!value) return false;\n  const email = value.trim();\n  const regex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i;\n  return regex.test(email);\n};\n\nconst stripAccents = (value) =>\n  value.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n\nconst ageOptions = {\n  '1': '13-17',\n  '2': '18-24',\n  '3': '25-34',\n  '4': '35-44',\n  '5': '45-54',\n  '6': '55-64',\n  '7': '65+',\n};\n\nconst ageLabels = {\n  '1': '13 a 17 anos',\n  '2': '18 a 24 anos',\n  '3': '25 a 34 anos',\n  '4': '35 a 44 anos',\n  '5': '45 a 54 anos',\n  '6': '55 a 64 anos',\n  '7': '65 anos ou mais',\n};\n\nconst buildSummary = (nome, email, faixaLabel) => {\n  const exibNome = nome && nome.trim() ? nome.trim() : 'não informado';\n  const exibEmail = email && email.trim() ? email.trim() : 'não informado';\n  const exibFaixa = faixaLabel || 'não informada';\n  return `Confere se está tudo certo? 👇\n• Nome preferido: ${exibNome}\n• E-mail: ${exibEmail}\n• Faixa etária: ${exibFaixa}\n\nSe quiser alterar, envie o dado correto (ex.: \"email novo@dominio.com\" ou \"faixa 3\").\n\nEstá correto?\nResponda: Sim ou altere\n`;\n};\n\nconst estado = normalizeEstado(controllerState);\nconst mensagem = incomingMessage;\nconst mensagemLimpa = mensagem.trim();\n\nif (estado === 'inicio') {\n  proximo_estado = 'esperando_nome';\n  if (!out_text) {\n    out_text = 'Oi! 👋 Bem-vindo ao MindQuest!\\n\\nVamos fazer seu cadastro rápido. São só 3 perguntinhas e já liberamos tudo pra você.\\n\\nComo você prefere ser chamado(a)?';\n  }\n} else if (estado === 'esperando_nome') {\n  if (mensagemLimpa.length >= 2) {\n    nome_usuario = mensagemLimpa;\n    proximo_estado = 'esperando_email';\n    if (!out_text) {\n      out_text = `Perfeito, ${nome_usuario}! Agora, informe um e-mail para recuperar seus dados caso perca esse numero do WhatsApp.`;\n    }\n  } else {\n    proximo_estado = 'esperando_nome';\n    if (!out_text) {\n      out_text = 'Preciso de um nome com pelo menos 2 caracteres. Como você prefere ser chamado(a)?';\n    }\n  }\n} else if (estado === 'esperando_email') {\n  if (isValidEmail(mensagemLimpa)) {\n    email_usuario = mensagemLimpa.trim().toLowerCase();\n    proximo_estado = 'esperando_faixa';\n    if (!out_text) {\n      out_text = 'Anotado! Agora me conta sua faixa etária. Responda apenas com o número correspondente (1 a 7).';\n    }\n  } else {\n    proximo_estado = 'esperando_email';\n    if (!out_text) {\n      out_text = 'Esse formato não parece um e-mail válido. Pode mandar no formato nome@dominio.com?';\n    }\n  }\n} else if (estado === 'esperando_faixa') {\n  const match = mensagemLimpa.match(/^([1-7])$/);\n  if (match) {\n    faixa_etaria_codigo = match[1];\n    faixa_etaria = ageOptions[faixa_etaria_codigo];\n    proximo_estado = 'confirmacao_pendente';\n    out_text = buildSummary(nome_usuario || prevNome, email_usuario || prevEmail, ageLabels[faixa_etaria_codigo] || faixa_etaria);\n  } else {\n    proximo_estado = 'esperando_faixa';\n    if (!out_text) {\n      out_text = 'Para concluir, preciso que responda apenas com o número de 1 a 7 correspondente à sua faixa etária.';\n    }\n  }\n} else if (estado === 'confirmacao_pendente') {\n  const normalized = stripAccents(mensagemLimpa).toLowerCase().replace(/[.!?]+$/g, '').trim();\n  const isConfirm = () => {\n    if (!normalized) return false;\n    if (/^confirm(o|ar|ado|ada)$/.test(normalized)) return true;\n    const confirmations = new Set(['sim', 'confirmo', 'confirmar', 'confirmado', 'confirmada', 'tudo certo', 'isso mesmo', 'ok', 'okay', 'pode seguir', 'pode continuar', 'perfeito', 'certo']);\n    return confirmations.has(normalized);\n  };\n\n  if (isConfirm()) {\n    proximo_estado = 'completo';\n    tipo = 'finalizado';\n    if (!out_text) {\n      out_text = 'Perfeito! Vou finalizar seu acesso agora.';\n    }\n  } else {\n    let handled = false;\n    const extractAfterKeyword = (keyword) => {\n      const pattern = new RegExp(`^\\\\s*${keyword}\\\\s*[:\\\\-]?\\\\s*(.+)$`, 'i');\n      const match = mensagem.match(pattern);\n      return match ? match[1].trim() : null;\n    };\n\n    const emailByPrefix = extractAfterKeyword('email');\n    if (!handled && emailByPrefix && isValidEmail(emailByPrefix)) {\n      email_usuario = emailByPrefix.trim().toLowerCase();\n      handled = true;\n    }\n\n    const faixaByPrefix = extractAfterKeyword('faixa');\n    if (!handled && faixaByPrefix) {\n      const faixaMatch = faixaByPrefix.match(/([1-7])/);\n      if (faixaMatch) {\n        faixa_etaria_codigo = faixaMatch[1];\n        faixa_etaria = ageOptions[faixa_etaria_codigo];\n        handled = true;\n      }\n    }\n\n    const nomeByPrefix = extractAfterKeyword('nome');\n    if (!handled && nomeByPrefix && nomeByPrefix.length >= 2) {\n      nome_usuario = nomeByPrefix;\n      handled = true;\n    }\n\n    if (!handled && isValidEmail(mensagemLimpa)) {\n      email_usuario = mensagemLimpa.trim().toLowerCase();\n      handled = true;\n    }\n\n    if (!handled) {\n      const changeKeywords = new Set(['altere', 'alterar', 'quero alterar']);\n      if (changeKeywords.has(normalized)) {\n        handled = true;\n      }\n    }\n\n    if (!handled) {\n      const faixaMatch = mensagemLimpa.match(/^([1-7])$/);\n      if (faixaMatch) {\n        faixa_etaria_codigo = faixaMatch[1];\n        faixa_etaria = ageOptions[faixa_etaria_codigo];\n        handled = true;\n      }\n    }\n\n    if (!handled && mensagemLimpa.length >= 2 && !/(corrig|ajust|editar)/.test(normalized)) {\n      nome_usuario = mensagemLimpa;\n      handled = true;\n    }\n\n    proximo_estado = 'confirmacao_pendente';\n    out_text = buildSummary(nome_usuario || prevNome, email_usuario || prevEmail, ageLabels[faixa_etaria_codigo] || faixa_etaria);\n    if (!handled) {\n      out_text += '\\nSe quiser alterar, envie o dado completo (ex.: \"email novo@dominio.com\" ou \"faixa 3\").';\n    }\n  }\n} else {\n  proximo_estado = 'esperando_nome';\n  if (!out_text) {\n    out_text = 'Vamos lá! Como você prefere ser chamado(a)?';\n  }\n}\n\nif (!nome_usuario && prevNome) {\n  nome_usuario = prevNome;\n}\nif (!email_usuario && prevEmail) {\n  email_usuario = prevEmail;\n}\nif (!faixa_etaria && prevFaixa) {\n  faixa_etaria = prevFaixa;\n}\nif (!faixa_etaria_codigo && prevFaixaCodigo) {\n  faixa_etaria_codigo = prevFaixaCodigo;\n}\n\nreturn {\n  json: {\n    tipo,\n    texto: out_text,\n    proximo_estado,\n    nome_usuario,\n    email_usuario,\n    faixa_etaria,\n    faixa_etaria_codigo,\n    nome_assistente: 'assistente',\n  },\n};\n"
       },
-      "id": "9db5a149-5c6c-45dc-a81e-72e4623755f9",
+      "id": "907fd40d-b3c5-4336-ace4-aeb6b485695f",
       "name": "Code - Parse Determinístico",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1264,
+        -592,
         -112
       ]
     },
@@ -143,12 +148,12 @@
         },
         "options": {}
       },
-      "id": "f0fbfca2-b292-462c-8cc8-e441d301c20b",
+      "id": "b380754b-4f60-44a6-b1e2-50e32802599a",
       "name": "IF Finalizado",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -1072,
+        -400,
         -112
       ]
     },
@@ -160,12 +165,12 @@
         "expire": true,
         "ttl": 86400
       },
-      "id": "21b21f2c-3324-40f8-bcc3-400342f9d26f",
+      "id": "b84ad144-d741-4e84-b17b-2f4ce650faa4",
       "name": "Redis Update",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -608,
+        64,
         -16
       ],
       "credentials": {
@@ -183,12 +188,12 @@
           "queryReplacement": "={{ [\n  $('start').first().json.whatsapp_number,\n  $('start').item.json.pushName,\n  $('Code - Parse Determinístico').item.json.nome_usuario,\n  $('Code - Parse Determinístico').item.json.email_usuario,\n  $('start').item.json.id,\n  $('Code - Parse Determinístico').item.json.faixa_etaria\n] }}"
         }
       },
-      "id": "190b7cae-aaee-474d-8351-8f22c031fbeb",
+      "id": "390a765f-bc53-4176-9a4c-abab28a1a820",
       "name": "Insert User",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -832,
+        -160,
         -272
       ],
       "credentials": {
@@ -201,17 +206,17 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO gamificacao (usuario_id, xp_total, nivel_atual, xp_proximo_nivel, titulo_nivel, streak_conversas_dias, streak_protecao_usada, quest_diaria_status, quest_diaria_progresso, quest_diaria_descricao, quest_diaria_data, conquistas_desbloqueadas, total_conversas, total_reflexoes, melhor_streak)\nVALUES ($1::uuid, 0, 1, 200, 'Explorador', 0, false, 'ativa', 0, COALESCE($2::text, 'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia.'), CURRENT_DATE, '[]'::jsonb, 0, 0, 0);",
+        "query": "INSERT INTO gamificacao (usuario_id, xp_total, nivel_atual, xp_proximo_nivel, titulo_nivel, streak_conversas_dias, streak_protecao_usada, quest_diaria_status, quest_diaria_progresso, quest_diaria_descricao, quest_diaria_data, conquistas_desbloqueadas, total_conversas, total_reflexoes, melhor_streak)\nVALUES ($1::uuid, 0, 1, 200, 'Explorador', 0, false, 'pendente', 0, 'Dê o primeiro passo: inicie sua primeira conversa comigo!', CURRENT_DATE, '[]'::jsonb, 0, 0, 0);",
         "options": {
-          "queryReplacement": "={{ [ $('Insert User').first().json.id, $('Select Daily Quest').first().json.descricao ] }}"
+          "queryReplacement": "={{ [$json.id] }}"
         }
       },
-      "id": "ad794eba-b4ab-43d5-bca8-d864d854df3e",
+      "id": "28018c18-d374-4d3f-a5d9-0dedc6eb41c2",
       "name": "Insert Gamif",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -624,
+        48,
         -272
       ],
       "credentials": {
@@ -225,29 +230,29 @@
       "parameters": {
         "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url}\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.\n\nSe quiser um guia rápido pra aproveitar melhor, visite https://mindquest.pt/suporte/conversation-guide.\n\nQuando quiser, é só me contar o que está acontecendo por aí.`;\n\nreturn { json: { mensagem } };"
       },
-      "id": "1ba7f577-bd39-4e78-8270-c8e84b3ab73e",
+      "id": "ed32235c-07d8-4b4f-a61a-d5baa73b2c30",
       "name": "monta link para usuario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -432,
+        240,
         -272
       ]
     },
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('start').first().json.evolution_instancia }}{{ $('start').first().json.whatsapp_number }}",
+        "sessionKey": "={{ $('start').item.json.evolution_instancia }}{{ $('start').item.json.whatsapp_number }}",
         "sessionTTL": 86400,
         "contextWindowLength": 20
       },
-      "id": "f2429617-d20b-4fdb-9133-1eb66836cc8b",
+      "id": "c91abce1-ca26-432d-b4b3-a3bfd61aab1e",
       "name": "Redis Chat Memory1",
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -1488,
-        176
+        -224,
+        752
       ],
       "credentials": {
         "redis": {
@@ -315,10 +320,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -224,
+        448,
         -272
       ],
-      "id": "b2169a8b-f3ae-45f1-a0a6-d9e3ab113139",
+      "id": "2403ac18-f31a-4e54-90f2-fabb4ab0bc43",
       "name": "Call 'sw_send_message_with_retry'"
     },
     {
@@ -380,10 +385,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -832,
+        -160,
         -16
       ],
-      "id": "f0fca6be-25bb-4416-8d9c-659cfbb21030",
+      "id": "feaf7cd8-2fbc-4a0b-b27f-9d1f0771fe69",
       "name": "Call 'sw_send_message_with_retry'1"
     },
     {
@@ -391,12 +396,12 @@
         "operation": "delete",
         "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
       },
-      "id": "5cadde51-c799-4abe-bc79-9ca120d75784",
+      "id": "770e639e-c9a6-457c-95c8-a166edcba64d",
       "name": "Redis Delete",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -16,
+        656,
         -272
       ],
       "credentials": {
@@ -408,91 +413,71 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH daily AS (\n  SELECT id, titulo, descricao\n  FROM quest_catalog\n  WHERE ativo = TRUE\n    AND tipo = 'diaria'\n  ORDER BY COALESCE(sequencia, ordem_inicial) ASC\n  LIMIT 1\n)\nSELECT id, titulo, descricao\nFROM daily\nUNION ALL\nSELECT NULL::uuid AS id,\n       'Diária · Padrão' AS titulo,\n       'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia.' AS descricao\nWHERE NOT EXISTS (SELECT 1 FROM daily);"
+        "operation": "delete",
+        "key": "=onboarding:{{ $('start').first().json.whatsapp_number }}"
       },
-      "id": "464f0bc7-f856-4c8e-830f-4b0bd1572dd2",
-      "name": "Select Daily Quest",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "id": "d8136c29-fe72-4508-a90b-e0bd5edc6851",
+      "name": "Redis Delete1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
       "position": [
-        -704,
-        -272
+        -1424,
+        80
       ],
       "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  quest_id,\n  status,\n  progresso_meta,\n  progresso_percentual,\n  xp_concedido\n)\nSELECT\n  $1::uuid AS usuario_id,\n  qc.id AS quest_id,\n  CASE\n    WHEN qc.tipo = 'sistema'\n      AND qc.sequencia = (\n        SELECT MIN(sequencia)\n        FROM quest_catalog\n        WHERE ativo = TRUE AND tipo = 'sistema' AND repeticao = 'unica'\n          AND sequencia IS NOT NULL\n      ) THEN 'ativa'\n    ELSE 'pendente'\n  END AS status,\n  CASE\n    WHEN qc.gatilho_tipo IN ('total_conversas','dias_consecutivos','total_reflexoes') THEN qc.gatilho_valor\n    WHEN qc.tipo = 'diaria' THEN 1\n    ELSE NULL\n  END AS progresso_meta,\n  0 AS progresso_percentual,\n  0 AS xp_concedido\nFROM quest_catalog qc\nWHERE qc.ativo = TRUE\nORDER BY COALESCE(qc.sequencia, qc.ordem_inicial), qc.codigo\nON CONFLICT DO NOTHING;",
-        "options": {
-          "queryReplacement": "={{ [ $('Insert User').first().json.id ] }}"
-        }
+        "mode": "delete",
+        "deleteMode": "all"
       },
-      "id": "1d887ec9-5312-4c49-9895-98372f6deb9a",
-      "name": "Insert User Quests",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
       "position": [
-        -624,
-        -112
+        -1472,
+        288
       ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
+      "id": "4e4a604e-29bf-472e-a7ed-0a1e099c6eb7",
+      "name": "Chat Memory Manager",
+      "disabled": true
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::uuid AS quest_id\n), inserted AS (\n  INSERT INTO usuarios_quest (\n    usuario_id, quest_id, status, progresso_meta, progresso_percentual, xp_concedido, referencia_data\n  )\n  SELECT\n    usuario_id,\n    quest_id,\n    'ativa' AS status,\n    1 AS progresso_meta,\n    0 AS progresso_percentual,\n    0 AS xp_concedido,\n    CURRENT_DATE AS referencia_data\n  FROM params\n  WHERE quest_id IS NOT NULL\n  ON CONFLICT DO NOTHING\n  RETURNING quest_id\n)\nSELECT COALESCE((SELECT quest_id FROM inserted LIMIT 1), (SELECT quest_id FROM params WHERE quest_id IS NOT NULL)) AS quest_id;",
-        "options": {
-          "queryReplacement": "={{ [ $('Insert User').first().json.id, $('Select Daily Quest').first().json.id ] }}"
-        }
+        "mode": "delete",
+        "deleteMode": "all"
       },
-      "id": "a3149d75-0562-4fdd-8689-f92cf6a4eb8f",
-      "name": "Insert Daily Quest",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
       "position": [
-        -624,
-        48
+        832,
+        64
       ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
+      "id": "c38ca66c-594c-4b64-a9e7-635ab8cbf6b3",
+      "name": "Chat Memory Manager1"
     }
   ],
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "remoteJid": "5512982389360@s.whatsapp.net",
-          "pushName": "Aldo",
-          "id": "3A260416D4188A53F774",
-          "whatsapp_number": "5512982389360",
-          "evolution_instancia": "MindQuest",
-          "menssagem": "5"
-        }
-      }
-    ]
-  },
   "connections": {
     "start": {
       "main": [
         [
           {
             "node": "Redis Get",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Redis Delete1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
             "type": "main",
             "index": 0
           }
@@ -576,7 +561,7 @@
       "main": [
         [
           {
-            "node": "Select Daily Quest",
+            "node": "Insert Gamif",
             "type": "main",
             "index": 0
           }
@@ -587,7 +572,7 @@
       "main": [
         [
           {
-            "node": "Insert User Quests",
+            "node": "monta link para usuario",
             "type": "main",
             "index": 0
           }
@@ -610,6 +595,16 @@
         [
           {
             "node": "Agent AI (interations-style)",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager1",
             "type": "ai_memory",
             "index": 0
           }
@@ -638,33 +633,11 @@
         ]
       ]
     },
-    "Select Daily Quest": {
+    "Redis Delete": {
       "main": [
         [
           {
-            "node": "Insert Gamif",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Insert User Quests": {
-      "main": [
-        [
-          {
-            "node": "Insert Daily Quest",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Insert Daily Quest": {
-      "main": [
-        [
-          {
-            "node": "monta link para usuario",
+            "node": "Chat Memory Manager1",
             "type": "main",
             "index": 0
           }
@@ -672,15 +645,84 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2d05dbe2-8c60-4529-8b3d-10b344f8afec",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+    "templateCredsSetupCompleted": true
   },
-  "id": "2LwxT1Pnnaheh10M",
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "remoteJid": "5512982389360@s.whatsapp.net",
+          "pushName": "Aldo",
+          "id": "3AA47BD6BCB2AF945639",
+          "whatsapp_number": "5512982389360",
+          "evolution_instancia": "MindQuest",
+          "menssagem": "Oi"
+        }
+      }
+    ]
+  },
+  "versionId": "b1ac8062-8729-4579-b7d3-282ec5e9efa1",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-30T11:31:35.749Z",
+      "updatedAt": "2025-09-30T11:31:35.749Z",
+      "role": "workflow:owner",
+      "workflowId": "2LwxT1Pnnaheh10M",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "updatedAt": "2025-11-01T08:00:06.881Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-01",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

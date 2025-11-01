@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-10-22T11:58:40.049Z",
-  "updatedAt": "2025-10-30T15:04:54.043Z",
+  "updatedAt": "2025-11-01T14:45:12.171Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
   "active": false,
@@ -1241,7 +1241,7 @@
           "value": {
             "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
             "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/auth?token?{{ $json.token_acesso }}"
+            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/app/auth?token?{{ $json.token_acesso }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -1997,7 +1997,7 @@
       }
     ]
   },
-  "versionId": "d4d5a08e-3352-4b28-8b5b-7b12c3914a13",
+  "versionId": "2fc5abcb-3dd5-4f1b-a646-ceec973d7a9f",
   "triggerCount": 0,
   "shared": [
     {
