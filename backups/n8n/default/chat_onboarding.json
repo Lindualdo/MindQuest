@@ -1,10 +1,5 @@
 {
-  "createdAt": "2025-09-30T11:31:35.749Z",
-  "updatedAt": "2025-10-30T18:06:07.229Z",
-  "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -228,7 +223,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url}\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.\n\nSe quiser um guia rápido pra aproveitar melhor, visite www.mindquest.pt/suporte/conversation-guide.\n\nQuando quiser, é só me contar o que está acontecendo por aí.`;\n\nreturn { json: { mensagem } };"
+        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url}\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.\n\nSe quiser um guia rápido pra aproveitar melhor, visite https://mindquest.pt/suporte/conversation-guide.\n\nQuando quiser, é só me contar o que está acontecendo por aí.`;\n\nreturn { json: { mensagem } };"
       },
       "id": "1ba7f577-bd39-4e78-8270-c8e84b3ab73e",
       "name": "monta link para usuario",
@@ -412,6 +407,20 @@
       }
     }
   ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "remoteJid": "5512982389360@s.whatsapp.net",
+          "pushName": "Aldo",
+          "id": "3A260416D4188A53F774",
+          "whatsapp_number": "5512982389360",
+          "evolution_instancia": "MindQuest",
+          "menssagem": "5"
+        }
+      }
+    ]
+  },
   "connections": {
     "start": {
       "main": [
@@ -564,84 +573,15 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "versionId": "2d05dbe2-8c60-4529-8b3d-10b344f8afec",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
   },
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "remoteJid": "5512982389360@s.whatsapp.net",
-          "pushName": "Aldo",
-          "id": "3A260416D4188A53F774",
-          "whatsapp_number": "5512982389360",
-          "evolution_instancia": "MindQuest",
-          "menssagem": "5"
-        }
-      }
-    ]
-  },
-  "versionId": "ad9cc1a9-b034-457d-8348-ed7d512beccb",
-  "triggerCount": 1,
-  "shared": [
-    {
-      "createdAt": "2025-09-30T11:31:35.749Z",
-      "updatedAt": "2025-09-30T11:31:35.749Z",
-      "role": "workflow:owner",
-      "workflowId": "2LwxT1Pnnaheh10M",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "updatedAt": "2025-09-25T16:38:18.729Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "updatedAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-11-01T08:00:06.881Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-11-01",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
+  "id": "2LwxT1Pnnaheh10M",
   "tags": []
 }
