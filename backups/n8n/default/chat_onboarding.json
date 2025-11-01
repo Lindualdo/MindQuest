@@ -201,9 +201,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO gamificacao (usuario_id, xp_total, nivel_atual, xp_proximo_nivel, titulo_nivel, streak_conversas_dias, streak_protecao_usada, quest_diaria_status, quest_diaria_progresso, quest_diaria_descricao, quest_diaria_data, conquistas_desbloqueadas, total_conversas, total_reflexoes, melhor_streak)\nVALUES ($1::uuid, 0, 1, 200, 'Explorador', 0, false, 'pendente', 0, 'Dê o primeiro passo: inicie sua primeira conversa comigo!', CURRENT_DATE, '[]'::jsonb, 0, 0, 0);",
+        "query": "INSERT INTO gamificacao (usuario_id, xp_total, nivel_atual, xp_proximo_nivel, titulo_nivel, streak_conversas_dias, streak_protecao_usada, quest_diaria_status, quest_diaria_progresso, quest_diaria_descricao, quest_diaria_data, conquistas_desbloqueadas, total_conversas, total_reflexoes, melhor_streak)\nVALUES ($1::uuid, 0, 1, 200, 'Explorador', 0, false, 'ativa', 0, COALESCE($2::text, 'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia.'), CURRENT_DATE, '[]'::jsonb, 0, 0, 0);",
         "options": {
-          "queryReplacement": "={{ [$json.id] }}"
+          "queryReplacement": "={{ [ $('Insert User').first().json.id, $('Select Daily Quest').first().json.descricao ] }}"
         }
       },
       "id": "ad794eba-b4ab-43d5-bca8-d864d854df3e",
@@ -405,6 +405,72 @@
           "name": "Redis account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH daily AS (\n  SELECT id, titulo, descricao\n  FROM quest_catalog\n  WHERE ativo = TRUE\n    AND tipo = 'diaria'\n  ORDER BY COALESCE(sequencia, ordem_inicial) ASC\n  LIMIT 1\n)\nSELECT id, titulo, descricao\nFROM daily\nUNION ALL\nSELECT NULL::uuid AS id,\n       'Diária · Padrão' AS titulo,\n       'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia.' AS descricao\nWHERE NOT EXISTS (SELECT 1 FROM daily);"
+      },
+      "id": "464f0bc7-f856-4c8e-830f-4b0bd1572dd2",
+      "name": "Select Daily Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -704,
+        -272
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  quest_id,\n  status,\n  progresso_meta,\n  progresso_percentual,\n  xp_concedido\n)\nSELECT\n  $1::uuid AS usuario_id,\n  qc.id AS quest_id,\n  CASE\n    WHEN qc.tipo = 'sistema'\n      AND qc.sequencia = (\n        SELECT MIN(sequencia)\n        FROM quest_catalog\n        WHERE ativo = TRUE AND tipo = 'sistema' AND repeticao = 'unica'\n          AND sequencia IS NOT NULL\n      ) THEN 'ativa'\n    ELSE 'pendente'\n  END AS status,\n  CASE\n    WHEN qc.gatilho_tipo IN ('total_conversas','dias_consecutivos','total_reflexoes') THEN qc.gatilho_valor\n    WHEN qc.tipo = 'diaria' THEN 1\n    ELSE NULL\n  END AS progresso_meta,\n  0 AS progresso_percentual,\n  0 AS xp_concedido\nFROM quest_catalog qc\nWHERE qc.ativo = TRUE\nORDER BY COALESCE(qc.sequencia, qc.ordem_inicial), qc.codigo\nON CONFLICT DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ [ $('Insert User').first().json.id ] }}"
+        }
+      },
+      "id": "1d887ec9-5312-4c49-9895-98372f6deb9a",
+      "name": "Insert User Quests",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -624,
+        -112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::uuid AS quest_id\n), inserted AS (\n  INSERT INTO usuarios_quest (\n    usuario_id, quest_id, status, progresso_meta, progresso_percentual, xp_concedido, referencia_data\n  )\n  SELECT\n    usuario_id,\n    quest_id,\n    'ativa' AS status,\n    1 AS progresso_meta,\n    0 AS progresso_percentual,\n    0 AS xp_concedido,\n    CURRENT_DATE AS referencia_data\n  FROM params\n  WHERE quest_id IS NOT NULL\n  ON CONFLICT DO NOTHING\n  RETURNING quest_id\n)\nSELECT COALESCE((SELECT quest_id FROM inserted LIMIT 1), (SELECT quest_id FROM params WHERE quest_id IS NOT NULL)) AS quest_id;",
+        "options": {
+          "queryReplacement": "={{ [ $('Insert User').first().json.id, $('Select Daily Quest').first().json.id ] }}"
+        }
+      },
+      "id": "a3149d75-0562-4fdd-8689-f92cf6a4eb8f",
+      "name": "Insert Daily Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -624,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "pinData": {
@@ -510,7 +576,7 @@
       "main": [
         [
           {
-            "node": "Insert Gamif",
+            "node": "Select Daily Quest",
             "type": "main",
             "index": 0
           }
@@ -521,7 +587,7 @@
       "main": [
         [
           {
-            "node": "monta link para usuario",
+            "node": "Insert User Quests",
             "type": "main",
             "index": 0
           }
@@ -566,6 +632,39 @@
         [
           {
             "node": "Redis Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Daily Quest": {
+      "main": [
+        [
+          {
+            "node": "Insert Gamif",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert User Quests": {
+      "main": [
+        [
+          {
+            "node": "Insert Daily Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Daily Quest": {
+      "main": [
+        [
+          {
+            "node": "monta link para usuario",
             "type": "main",
             "index": 0
           }

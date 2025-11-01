@@ -1,10 +1,5 @@
 {
-  "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-10-29T18:25:42.164Z",
-  "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -25,8 +20,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2048,
-        832
+        -2656,
+        464
       ],
       "id": "4d89a479-acb2-4829-97c6-0812e6ad1b51",
       "name": "start"
@@ -44,8 +39,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -1824,
-        832
+        -2432,
+        464
       ],
       "id": "d75f2f40-7abe-48e5-ad10-e9fd31a0eac1",
       "name": "Send Message",
@@ -158,8 +153,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -336,
-        480
+        -352,
+        576
       ],
       "id": "c1367bf5-baf1-43bd-9a5f-59490aa297a3",
       "name": "No Operation, do nothing"
@@ -234,19 +229,30 @@
     },
     {
       "parameters": {
-        "amount": "={{ 3 }}"
+        "amount": "={{ 4 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -1600,
-        832
+        -1728,
+        592
       ],
       "id": "97262a21-748d-4002-aad6-929997780459",
       "name": "Wait",
       "webhookId": "656c33df-2b6b-42f2-b1ad-9cac02bd9b77"
     }
   ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJid": "5512982389360@s.whatsapp.net",
+          "messageText": "Perfeito, Aldo! Agora, informe um e-mail para recuperar seus dados caso perca esse número do WhatsApp. Por favor, use um endereço válido."
+        }
+      }
+    ]
+  },
   "connections": {
     "start": {
       "main": [
@@ -263,7 +269,7 @@
       "main": [
         [
           {
-            "node": "Wait",
+            "node": "Check Initial",
             "type": "main",
             "index": 0
           }
@@ -347,7 +353,7 @@
         ],
         [
           {
-            "node": "No Operation, do nothing",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -384,81 +390,16 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
     "executionTimeout": 120
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "instanceName": "MindQuest",
-          "remoteJid": "351932786582@s.whatsapp.net",
-          "messageText": "Que ótimo, Aldo! Você tem feito um trabalho sólido cuidando do que é importante para você, equilibrando foco, descanso e bem-estar.\n\nFico feliz de ter acompanhado esse pouco da sua história e de como você tem clareza e disciplina para seguir seu caminho.\n\nQuando quiser continuar essa jornada, estarei aqui para ajudar.\n\nEnquanto isso, que tal dar uma olhada no seu dashboard para ver seus avanços e próximos passos com calma?   Acesse: https://mindquest.pt/auth?token?00c1e4ed-87e7-419b-b50f-580f18cdaeefd949d81c-9235-41ce-8b3b-6b5d593c5e241761758517"
-        }
-      }
-    ]
+  "versionId": "4db753db-be2e-4771-a55c-f3dfdbde1e05",
+  "meta": {
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
   },
-  "versionId": "45e85020-6fbe-4190-ac46-730b0f990403",
-  "triggerCount": 0,
-  "shared": [
-    {
-      "createdAt": "2025-10-22T18:20:20.342Z",
-      "updatedAt": "2025-10-22T18:20:20.342Z",
-      "role": "workflow:owner",
-      "workflowId": "U44ZfEwFU77EUthb",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "updatedAt": "2025-09-25T16:38:18.729Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "updatedAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-11-01T08:00:06.881Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-11-01",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
+  "id": "U44ZfEwFU77EUthb",
   "tags": []
 }

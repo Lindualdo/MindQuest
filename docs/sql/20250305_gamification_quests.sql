@@ -4,8 +4,12 @@
 -- ============================================================
 
 -- Catalogo de quests padrão (desafios do sistema e diários)
+DROP TABLE IF EXISTS public.usuarios_quest;
+DROP TABLE IF EXISTS public.quest_catalog;
+
 CREATE TABLE public.quest_catalog (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  sequencia bigint GENERATED ALWAYS AS IDENTITY,
   codigo varchar(64) NOT NULL UNIQUE,
   titulo varchar(120) NOT NULL,
   descricao text,
@@ -17,23 +21,23 @@ CREATE TABLE public.quest_catalog (
     'diaria'
   )),
   tipo varchar(20) NOT NULL DEFAULT 'sistema' CHECK (tipo IN (
-    'sistema',        -- quests globais definidos pelo produto
-    'diaria',         -- quests diárias rotativas
-    'assistente'      -- quests criadas dinamicamente pelo assistente/IA
+    'sistema',
+    'diaria',
+    'assistente'
   )),
   gatilho_tipo varchar(30) NOT NULL CHECK (gatilho_tipo IN (
-    'total_conversas',   -- baseado no total de conversas acumuladas
-    'dias_consecutivos', -- streak de conversas
-    'total_reflexoes',   -- total de reflexões completadas
-    'manual',            -- dispara via fluxo externo
-    'diario'             -- reaplicado por intervalo (ex.: quests diárias)
+    'total_conversas',
+    'dias_consecutivos',
+    'total_reflexoes',
+    'manual',
+    'diario'
   )),
   gatilho_valor integer,
   xp_recompensa integer NOT NULL DEFAULT 0 CHECK (xp_recompensa >= 0),
   repeticao varchar(20) NOT NULL DEFAULT 'unica' CHECK (repeticao IN (
-    'unica',       -- só pode ser concluída uma vez por usuário
-    'recorrente',  -- pode reabrir conforme regra (ex.: semanal)
-    'diaria'       -- instâncias por dia
+    'unica',
+    'recorrente',
+    'diaria'
   )),
   ordem_inicial smallint,
   ativo boolean NOT NULL DEFAULT true,
@@ -41,6 +45,7 @@ CREATE TABLE public.quest_catalog (
   atualizado_em timestamp without time zone NOT NULL DEFAULT now()
 );
 
+CREATE UNIQUE INDEX uq_quest_catalog_sequencia ON public.quest_catalog (sequencia);
 CREATE INDEX idx_quest_catalog_categoria ON public.quest_catalog (categoria);
 CREATE INDEX idx_quest_catalog_tipo ON public.quest_catalog (tipo);
 
@@ -99,8 +104,8 @@ INSERT INTO public.quest_catalog (
 VALUES
   (
     'primeira_conversa',
-    'Primeira Semente',
-    'Complete sua primeira conversa guiada com o assistente.',
+    'Quest: Primeira Conversa',
+    'Complete a primeira conversa completa guiada pelo assistente e comece sua jornada.',
     'primeiros_passos',
     'sistema',
     'total_conversas',
@@ -110,33 +115,33 @@ VALUES
     1
   ),
   (
+    'streak_3_dias',
+    'Quest: Streak 3 Dias',
+    'Converse com o assistente por três dias consecutivos sem quebrar a sequência.',
+    'consistencia',
+    'sistema',
+    'dias_consecutivos',
+    3,
+    150,
+    'unica',
+    2
+  ),
+  (
     'primeira_semana',
-    'Semana Completa',
-    'Conclua sete conversas para completar a primeira semana de prática.',
+    'Quest: Semana Completa',
+    'Realize sete conversas no total para fechar a primeira semana de prática.',
     'primeiros_passos',
     'sistema',
     'total_conversas',
     7,
     100,
     'unica',
-    2
-  ),
-  (
-    'streak_7_dias',
-    'Chama Acesa',
-    'Mantenha um streak de sete dias conversando com o assistente sem pular dias.',
-    'consistencia',
-    'sistema',
-    'dias_consecutivos',
-    7,
-    150,
-    'unica',
     3
   ),
   (
     'streak_30_dias',
-    'Consistência Bronze',
-    'Sustente trinta dias consecutivos de conversas para consolidar sua rotina.',
+    'Quest: Streak 30 Dias',
+    'Mantenha trinta dias seguidos de conversa ativa para consolidar o hábito.',
     'consistencia',
     'sistema',
     'dias_consecutivos',
@@ -147,8 +152,8 @@ VALUES
   ),
   (
     'primeira_reflexao',
-    'Pensador',
-    'Registre sua primeira reflexão profunda após uma conversa.',
+    'Quest: Primeira Reflexão',
+    'Registre a primeira reflexão profunda após a conversa com o assistente.',
     'primeiros_passos',
     'sistema',
     'total_reflexoes',
@@ -159,8 +164,8 @@ VALUES
   ),
   (
     'reflexao_profunda',
-    'Reflexão Profunda',
-    'Acumule dez reflexões para evoluir na jornada de autoconhecimento.',
+    'Quest: 10 Reflexões',
+    'Some dez reflexões profundas registradas para avançar na jornada de autoconhecimento.',
     'profundidade',
     'sistema',
     'total_reflexoes',
@@ -171,8 +176,8 @@ VALUES
   ),
   (
     'daily_reflexao_profunda',
-    'Diária · Reflexão Profunda',
-    'Complete sua conversa diária e faça uma reflexão profunda sobre seu dia.',
+    'Daily: Reflexão Profunda',
+    'No check-in de hoje, conclua a conversa com uma reflexão detalhada sobre o dia.',
     'diaria',
     'diaria',
     'diario',
@@ -183,8 +188,8 @@ VALUES
   ),
   (
     'daily_sentimentos',
-    'Diária · Sentimentos de Hoje',
-    'Compartilhe como você está se sentindo hoje e o que te trouxe energia.',
+    'Daily: Sentimentos do Dia',
+    'Compartilhe como está se sentindo agora e qual foi a principal fonte de energia do dia.',
     'diaria',
     'diaria',
     'diario',
@@ -195,8 +200,8 @@ VALUES
   ),
   (
     'daily_pequena_vitoria',
-    'Diária · Vitória do Dia',
-    'Reflita sobre uma pequena vitória de hoje, por menor que pareça.',
+    'Daily: Pequena Vitória',
+    'Descreva uma pequena vitória conquistada hoje, mesmo que pareça simples.',
     'diaria',
     'diaria',
     'diario',
@@ -207,8 +212,8 @@ VALUES
   ),
   (
     'daily_emocao',
-    'Diária · Emoção em Foco',
-    'Identifique uma emoção que sentiu hoje e explore o que a causou.',
+    'Daily: Emoção em Foco',
+    'Identifique uma emoção sentida hoje e explique rapidamente o que a despertou.',
     'diaria',
     'diaria',
     'diario',
