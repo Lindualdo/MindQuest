@@ -356,7 +356,7 @@ const ConversationGuidePage: React.FC = () => {
                   size={18}
                   style={{ color: supportPalette.accent }}
                 />
-                <span>Cada sessão tem um numero definido de interações e você pode mandar audio (sem limite de tamnho) ou texto</span>
+                <span>Cada sessão tem um numero definido de interações e você pode mandar audio (sem limite de tamanho) ou texto</span>
               </li>
               <li className="flex gap-3">
                 <ArrowRightCircle
