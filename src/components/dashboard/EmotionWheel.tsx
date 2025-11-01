@@ -17,17 +17,24 @@ const EmotionWheel: React.FC = () => {
   const { roda_emocoes = [] } = dashboardData;
   const [showInfo, setShowInfo] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [wheelSize, setWheelSize] = React.useState(320);
+  const [wheelSize, setWheelSize] = React.useState(340);
 
   React.useEffect(() => {
     const updateSize = () => {
-      if (!containerRef.current) {
+      if (!containerRef.current || typeof window === 'undefined') {
+        return;
+      }
+
+      const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
+      if (!isMobile) {
+        setWheelSize(340);
         return;
       }
 
       const width = containerRef.current.offsetWidth;
       const paddingAdjustment = 32; // compensação aproximada do padding interno
-      const nextSize = Math.min(Math.max(width - paddingAdjustment, 240), 340);
+      const nextSize = Math.min(Math.max(width - paddingAdjustment, 240), 320);
       setWheelSize(nextSize);
     };
 
@@ -43,15 +50,16 @@ const EmotionWheel: React.FC = () => {
     return undefined;
   }, []);
 
+  const isCompact = wheelSize < 340;
   const center = wheelSize / 2;
-  const radius = wheelSize * 0.36;
-  const emotionRadius = wheelSize * 0.07;
-  const linePadding = wheelSize * 0.018;
-  const labelOffset = wheelSize * 0.05;
-  const dashedRadius = radius + wheelSize * 0.052;
-  const labelFontSize = Math.max(11, wheelSize * 0.035);
-  const percentFontSize = Math.max(10, wheelSize * 0.032);
-  const centerRadius = wheelSize * 0.045;
+  const radius = isCompact ? wheelSize * 0.33 : 120;
+  const emotionRadius = isCompact ? wheelSize * 0.065 : 24;
+  const linePadding = isCompact ? wheelSize * 0.015 : 6;
+  const labelOffset = isCompact ? wheelSize * 0.06 : 18;
+  const dashedRadius = isCompact ? radius + wheelSize * 0.045 : radius + 18;
+  const labelFontSize = isCompact ? Math.max(9, wheelSize * 0.027) : 12;
+  const percentFontSize = isCompact ? Math.max(8, wheelSize * 0.025) : 11;
+  const centerRadius = isCompact ? wheelSize * 0.042 : 15;
 
   return (
     <Card className="flex flex-col min-h-[360px]">
@@ -107,28 +115,25 @@ const EmotionWheel: React.FC = () => {
             const lineX = center + (radius - emotionRadius - linePadding) * cosValue;
             const lineY = center + (radius - emotionRadius - linePadding) * sinValue;
 
-            const baseLabelX = center + (radius + emotionRadius + labelOffset) * cosValue;
-            const labelY = center + (radius + emotionRadius + labelOffset) * sinValue;
+            const labelDistance = emotionRadius + labelOffset;
+            const rawLabelX = circleX + labelDistance * cosValue;
+            const rawLabelY = circleY + labelDistance * sinValue;
 
-            const textAnchor =
-              Math.abs(cosValue) < 0.3 ? 'middle' : cosValue > 0 ? 'end' : 'start';
             const labelX =
-              textAnchor === 'start'
-                ? Math.max(baseLabelX, 16)
-                : textAnchor === 'end'
-                  ? Math.min(baseLabelX, wheelSize - 16)
-                  : Math.min(Math.max(baseLabelX, 16), wheelSize - 16);
+              Math.min(Math.max(rawLabelX, 12), wheelSize - 12);
+            const labelY = Math.min(Math.max(rawLabelY, 12), wheelSize - 12);
 
             const percentX = circleX;
             const percentY = circleY + wheelSize * 0.006;
-            const nameDy =
-              sinValue < -0.4
-                ? -labelFontSize * 0.65
-                : sinValue > 0.4
-                  ? labelFontSize * 0.85
-                  : labelFontSize * 0.35;
-            const dominantBaseline =
-              Math.abs(sinValue) < 0.3 ? 'middle' : sinValue > 0 ? 'hanging' : 'alphabetic';
+            const dominantBaseline = 'middle';
+
+            const tangentAngle = angle + 90;
+            let labelRotation = ((tangentAngle + 180) % 360) - 180;
+            if (labelRotation > 90) {
+              labelRotation -= 180;
+            } else if (labelRotation < -90) {
+              labelRotation += 180;
+            }
             
             // Opacidade baseada na intensidade
             const opacity = (emocao.intensidade / 100) * 0.8 + 0.2;
@@ -167,12 +172,12 @@ const EmotionWheel: React.FC = () => {
                 
                 {/* Label */}
                 <text
+                  transform={`rotate(${labelRotation} ${labelX} ${labelY})`}
                   x={labelX}
                   y={labelY}
-                  textAnchor={textAnchor}
+                  textAnchor="middle"
                   dominantBaseline={dominantBaseline}
-                  dy={String(nameDy)}
-                  className="text-[13px] font-medium fill-gray-700 pointer-events-none"
+                  className="text-[13px] font-medium fill-gray-500 pointer-events-none"
                   style={{ fontSize: `${labelFontSize}px` }}
                 >
                   {emocao.nome}
