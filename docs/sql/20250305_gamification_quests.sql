@@ -1,9 +1,3 @@
--- ============================================================
--- MindQuest - Tabelas de Suporte a Quests e Conquistas
--- Objetivo: externalizar regras hard-coded do fluxo sw_experts_gamification
--- ============================================================
-
--- Catalogo de quests padrão (desafios do sistema e diários)
 DROP TABLE IF EXISTS public.usuarios_quest;
 DROP TABLE IF EXISTS public.quest_catalog;
 
