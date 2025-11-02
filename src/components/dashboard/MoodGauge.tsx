@@ -22,15 +22,22 @@ const MoodGauge: React.FC = () => {
   const gradientId = React.useId();
   const [showInfo, setShowInfo] = React.useState(false);
 
-  // Normalizar valor de 0 a 10 para 0 a 1 e evitar extrapolações na escala
-  const clampedNivel = Math.max(0, Math.min(10, mood_gauge.nivel_atual));
-  const normalized = clampedNivel / 10;
+  const rawNivel = Number(mood_gauge?.nivel_atual);
+  const hasValidNivel = Number.isFinite(rawNivel);
+  const clampedNivel = hasValidNivel ? Math.max(0, Math.min(10, rawNivel)) : 0;
+  const normalized = hasValidNivel ? clampedNivel / 10 : 0;
   const circumference = Math.PI * GAUGE_RADIUS;
   const strokeDasharray = `${circumference} ${circumference}`;
   const strokeDashoffset = 0;
   
   // Rotação da agulha (-90° a +90°)
-  const pointerRotation = normalized * 180 - 90;
+  const pointerLength = GAUGE_RADIUS - 20;
+  const pointerAngle = hasValidNivel
+    ? Math.PI - normalized * Math.PI
+    : Math.PI;
+  const pointerEndX = GAUGE_SIZE / 2 + pointerLength * Math.cos(pointerAngle);
+  const pointerEndY = GAUGE_SIZE / 2 - pointerLength * Math.sin(pointerAngle);
+  const pointerOpacity = hasValidNivel ? 1 : 0.35;
   
   // Determinar cor baseada no nível
   const getGaugeColor = (nivel: number) => {
@@ -40,7 +47,7 @@ const MoodGauge: React.FC = () => {
     return '#EF4444'; // Vermelho crítico
   };
 
-  const gaugeColor = getGaugeColor(clampedNivel);
+  const gaugeColor = hasValidNivel ? getGaugeColor(clampedNivel) : '#9CA3AF';
   
   // Humor médio do período para exibição
   const humorMedio = dashboardData.metricas_periodo?.humor_medio ?? null;
@@ -133,28 +140,41 @@ const MoodGauge: React.FC = () => {
           />
 
           {/* Agulha */}
-          <motion.g
-            initial={{ rotate: -90 }}
-            animate={{ rotate: pointerRotation }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
-            style={{ transformOrigin: `${GAUGE_SIZE/2}px ${GAUGE_SIZE/2}px` }}
-          >
-            <line
-              x1={GAUGE_SIZE/2}
-              y1={GAUGE_SIZE/2}
-              x2={GAUGE_SIZE/2}
-              y2={GAUGE_SIZE/2 - GAUGE_RADIUS + 20}
-              stroke={gaugeColor}
-              strokeWidth={4}
-              strokeLinecap="round"
-            />
-            <circle
-              cx={GAUGE_SIZE/2}
-              cy={GAUGE_SIZE/2}
-              r={8}
-              fill={gaugeColor}
-            />
-          </motion.g>
+          <motion.line
+            key={`pointer-line-${hasValidNivel ? 'data' : 'empty'}`}
+            x1={GAUGE_SIZE / 2}
+            y1={GAUGE_SIZE / 2}
+            initial={{
+              x2: GAUGE_SIZE / 2 - pointerLength,
+              y2: GAUGE_SIZE / 2,
+            }}
+            animate={{
+              x2: pointerEndX,
+              y2: pointerEndY,
+              stroke: gaugeColor,
+            }}
+            transition={{ duration: 1.3, ease: 'easeOut' }}
+            stroke={gaugeColor}
+            strokeWidth={4}
+            strokeOpacity={pointerOpacity}
+            strokeLinecap="round"
+          />
+          <motion.circle
+            key={`pointer-tip-${hasValidNivel ? 'data' : 'empty'}`}
+            r={8}
+            initial={{
+              cx: GAUGE_SIZE / 2 - pointerLength,
+              cy: GAUGE_SIZE / 2,
+            }}
+            animate={{
+              cx: pointerEndX,
+              cy: pointerEndY,
+              fill: gaugeColor,
+            }}
+            transition={{ duration: 1.3, ease: 'easeOut' }}
+            fill={gaugeColor}
+            fillOpacity={pointerOpacity}
+          />
 
           {/* Marcadores de escala */}
           {[0, 2.5, 5, 7.5, 10].map((value) => {
@@ -233,7 +253,7 @@ const MoodGauge: React.FC = () => {
       >
         {/* Emoji removido conforme novo padrão */}
         <div className="text-3xl font-bold" style={{ color: gaugeColor }}>
-          {clampedNivel.toFixed(1)}
+          {hasValidNivel ? clampedNivel.toFixed(1) : '--'}
         </div>
         <div className="text-sm text-gray-600 mt-1">Humor atual</div>
       </motion.div>
