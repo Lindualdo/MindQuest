@@ -1288,7 +1288,9 @@ class DataAdapter {
           if (!total || total === 0) return 0;
           return (completas / total) * 100;
         })(),
-        humor_medio: humorMetrics.humorMedio || 5,
+        humor_medio: typeof humorMetrics.humorMedio === 'number' && Number.isFinite(humorMetrics.humorMedio)
+          ? humorMetrics.humorMedio
+          : 0,
         emocao_dominante: humorMetrics.ultimaConversaEmocao
       }
     };

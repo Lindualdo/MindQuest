@@ -160,20 +160,18 @@ const MoodGauge: React.FC = () => {
             strokeLinecap="round"
           />
           <motion.circle
-            key={`pointer-tip-${hasValidNivel ? 'data' : 'empty'}`}
-            r={8}
-            initial={{
-              cx: GAUGE_SIZE / 2 - pointerLength,
-              cy: GAUGE_SIZE / 2,
-            }}
+            key={`pointer-base-${hasValidNivel ? 'data' : 'empty'}`}
+            cx={GAUGE_SIZE / 2}
+            cy={GAUGE_SIZE / 2}
+            r={9}
+            initial={{ scale: 0.85, opacity: 0 }}
             animate={{
-              cx: pointerEndX,
-              cy: pointerEndY,
+              scale: 1,
+              opacity: pointerOpacity,
               fill: gaugeColor,
             }}
-            transition={{ duration: 1.3, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
             fill={gaugeColor}
-            fillOpacity={pointerOpacity}
           />
 
           {/* Marcadores de escala */}
