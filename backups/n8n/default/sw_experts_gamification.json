@@ -32,9 +32,9 @@
       "typeVersion": 1.1,
       "position": [
         -640,
-        240
+        320
       ],
-      "id": "faf86f35-a536-447a-a309-7988f0859b3b",
+      "id": "2c8cb608-ad0b-4b40-b689-da3aab1472d2",
       "name": "start"
     },
     {
@@ -49,9 +49,9 @@
       "typeVersion": 2.6,
       "position": [
         -384,
-        240
+        320
       ],
-      "id": "cebd987b-fb05-4501-93ea-8438ac5d49e4",
+      "id": "f26b296e-df1b-4e56-a5db-70199d2b7c55",
       "name": "Buscar Estado Atual",
       "credentials": {
         "postgres": {
@@ -72,9 +72,9 @@
       "typeVersion": 2.6,
       "position": [
         -176,
-        240
+        320
       ],
-      "id": "c9736b78-01f1-43ce-baac-13f4962d3209",
+      "id": "b6c7776e-ec16-459e-a67d-16bcd9dfe28a",
       "name": "Garantir Quests",
       "credentials": {
         "postgres": {
@@ -91,9 +91,9 @@
       "typeVersion": 2,
       "position": [
         224,
-        240
+        320
       ],
-      "id": "238980e0-8a5b-4a12-bfd3-98b33b192dc9",
+      "id": "2eda95ee-231d-4b62-ad3a-7816c49d94b3",
       "name": "Calcular Gamificação"
     },
     {
@@ -107,10 +107,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        608,
-        240
+        1008,
+        320
       ],
-      "id": "682d8314-829a-4299-b55d-53678768375e",
+      "id": "59cfed24-efe9-4a56-bfe3-ad799bf49eda",
       "name": "Atualizar Gamificação",
       "credentials": {
         "postgres": {
@@ -126,10 +126,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        832,
-        240
+        1216,
+        320
       ],
-      "id": "8580fe62-6154-4b9d-aedf-c4be704a4a2d",
+      "id": "14a5197c-37cc-4cad-a166-f07547d5a734",
       "name": "Preparar Resultado"
     },
     {
@@ -143,9 +143,9 @@
       "typeVersion": 1,
       "position": [
         -1328,
-        0
+        80
       ],
-      "id": "4c6a6fdd-58df-4354-82b3-5504168e1207",
+      "id": "a6b040ee-cb39-475d-a2b0-c6c8fc46ae16",
       "name": "Sticky Note - Info"
     },
     {
@@ -160,9 +160,9 @@
       "typeVersion": 2.6,
       "position": [
         32,
-        240
+        320
       ],
-      "id": "6f195e90-88d0-4710-91eb-175b38f78866",
+      "id": "37a9ac1d-966b-4fad-bdab-3db4f05c87f9",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -181,9 +181,9 @@
       "typeVersion": 2.6,
       "position": [
         400,
-        240
+        320
       ],
-      "id": "a47b1a7a-212b-473f-a87b-b0fe6094eee5",
+      "id": "04a4be39-c9ae-4d32-b20c-1fc03def4679",
       "name": "Atualizar Quests",
       "credentials": {
         "postgres": {
@@ -191,18 +191,52 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH base AS (\n  SELECT\n    '{{ ($('Calcular Gamificação').first().json.usuario_id ?? $('start').first().json.usuario_id).replace(\"'\", \"''\") }}'::uuid AS usuario_id,\n    '{{ $('Calcular Gamificação').first().json.ultima_conversa_data ?? (new Date().toISOString().split('T')[0]) }}'::date AS referencia_data\n),\nstats AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(SUM(uq.xp_concedido), 0) AS xp_total,\n    COALESCE(SUM(uq.xp_concedido) FILTER (WHERE uq.concluido_em IS NOT NULL AND uq.concluido_em::date = base.referencia_data), 0) AS xp_total_hoje,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_conversas'), 0) AS total_conversas,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_reflexoes'), 0) AS total_reflexoes\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\ndaily AS (\n  SELECT\n    uq.id AS usuario_quest_id,\n    uq.status,\n    uq.progresso_percentual,\n    COALESCE(NULLIF(qc.descricao, ''), qc.titulo) AS descricao\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE qc.tipo = 'diaria'\n    AND uq.referencia_data = base.referencia_data\n  ORDER BY uq.atualizado_em DESC\n  LIMIT 1\n),\nultima AS (\n  SELECT\n    uq.quest_id,\n    uq.concluido_em\n  FROM usuarios_quest uq\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n    AND uq.concluido_em IS NOT NULL\n  ORDER BY uq.concluido_em DESC\n  LIMIT 1\n)\nSELECT\n  base.usuario_id,\n  base.referencia_data,\n  COALESCE(stats.xp_total, 0) AS xp_total,\n  COALESCE(stats.xp_total_hoje, 0) AS xp_total_hoje,\n  COALESCE(stats.total_conversas, 0) AS total_conversas,\n  COALESCE(stats.total_reflexoes, 0) AS total_reflexoes,\n  COALESCE(daily.status, 'pendente') AS quest_diaria_status,\n  COALESCE(daily.progresso_percentual, 0) AS quest_diaria_progresso,\n  daily.descricao AS quest_diaria_descricao,\n  daily.usuario_quest_id AS quest_diaria_usuario_quest_id,\n  ultima.quest_id AS ultima_conquista_id,\n  ultima.concluido_em AS ultima_conquista_data\nFROM base\nLEFT JOIN stats ON stats.usuario_id = base.usuario_id\nLEFT JOIN daily ON TRUE\nLEFT JOIN ultima ON TRUE;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        608,
+        320
+      ],
+      "id": "bb1758b6-bb84-4491-897b-8405dd032986",
+      "name": "Consolidar Estatísticas",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const getNumber = (value, fallback = 0) => {\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst estado = ($('Buscar Estado Atual').first()?.json) ?? {};\nconst processamento = ($('Calcular Gamificação').first()?.json) ?? {};\nconst agregados = $input.first()?.json ?? {};\n\nconst xpTotal = getNumber(agregados.xp_total, 0);\nconst xpTotalHoje = getNumber(agregados.xp_total_hoje, 0);\nconst totalConversas = getNumber(agregados.total_conversas, 0);\nconst totalReflexoes = getNumber(agregados.total_reflexoes, 0);\nconst diasConsecutivos = getNumber(estado.dias_consecutivos, 0);\n\nconst niveis = [\n  { nivel: 1, xp: 200, titulo: 'Explorador' },\n  { nivel: 2, xp: 550, titulo: 'Aprendiz' },\n  { nivel: 3, xp: 1050, titulo: 'Observador' },\n  { nivel: 4, xp: 1700, titulo: 'Focado' },\n  { nivel: 5, xp: 2500, titulo: 'Praticante' },\n  { nivel: 6, xp: 3450, titulo: 'Consciente' },\n  { nivel: 7, xp: 4550, titulo: 'Iluminado' },\n  { nivel: 8, xp: 5800, titulo: 'Sábio' },\n  { nivel: 9, xp: 7200, titulo: 'Ascendente' },\n  { nivel: 10, xp: 9000, titulo: 'Mestre' },\n  { nivel: 15, xp: 15000, titulo: 'Transcendente' }\n];\n\nlet nivelAtual = 1;\nlet xpProximoNivel = niveis[0].xp;\nlet tituloNivel = niveis[0].titulo;\nfor (const entry of niveis) {\n  if (xpTotal < entry.xp) {\n    nivelAtual = entry.nivel;\n    xpProximoNivel = entry.xp;\n    tituloNivel = entry.titulo;\n    break;\n  }\n  nivelAtual = entry.nivel;\n  xpProximoNivel = entry.xp;\n  tituloNivel = entry.titulo;\n}\nif (xpTotal >= niveis[niveis.length - 1].xp) {\n  nivelAtual = niveis[niveis.length - 1].nivel;\n  xpProximoNivel = niveis[niveis.length - 1].xp;\n  tituloNivel = niveis[niveis.length - 1].titulo;\n}\n\nconst melhorStreak = Math.max(getNumber(estado.melhor_streak, 0), diasConsecutivos);\nconst referenciaData = agregados.referencia_data ?? processamento.ultima_conversa_data ?? new Date().toISOString().split('T')[0];\n\nconst questDiariaStatus = agregados.quest_diaria_status ?? 'pendente';\nconst questDiariaProgresso = getNumber(agregados.quest_diaria_progresso, 0);\nconst questDiariaDescricao = agregados.quest_diaria_descricao ?? null;\nconst questDiariaId = agregados.quest_diaria_usuario_quest_id ?? null;\n\nreturn [{\n  json: {\n    ...processamento,\n    xp_total: xpTotal,\n    total_xp_ganho_hoje: xpTotalHoje,\n    nivel_atual: nivelAtual,\n    xp_proximo_nivel: xpProximoNivel,\n    titulo_nivel: tituloNivel,\n    streak_conversas_dias: diasConsecutivos,\n    melhor_streak,\n    ultima_conversa_data: referenciaData,\n    quest_diaria_status: questDiariaStatus,\n    quest_diaria_progresso: questDiariaProgresso,\n    quest_diaria_descricao: questDiariaDescricao,\n    quest_diaria_data: referenciaData,\n    quest_diaria_id: questDiariaId,\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes,\n    ultima_conquista_id: agregados.ultima_conquista_id ?? processamento.ultima_conquista_id ?? null,\n    ultima_conquista_data: agregados.ultima_conquista_data ?? processamento.ultima_conquista_data ?? null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        320
+      ],
+      "id": "ce6c1ee1-199b-4c7f-a72e-8f237f1f3460",
+      "name": "Montar Resumo"
     }
   ],
   "pinData": {
     "start": [
       {
         "json": {
-          "usuario_id": "1308015b-7753-461c-ae2c-6bff47a25b89",
-          "chat_id": "b48b6179-0f9f-4385-b15c-5b1965b58c57",
+          "usuario_id": "dcb7933f-dd33-45b6-8e8a-0e42253387c7",
+          "chat_id": "2ef68982-40be-40bc-903e-4a0e7986a778",
           "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
           "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo demonstra reflexão profunda ao analisar suas oscilações de energia e motivação, relacionando-as a eventos específicos, como a desistência do projeto do curso. Ele conecta suas emoções ao contexto financeiro e à percepção de risco, mostrando autoconhecimento ao reconhecer suas limitações e aprendizados. Também questiona seus padrões de comparação com outras pessoas e como isso impacta sua motivação, além de refletir sobre suas experiências e desejos pessoais em perspectiva.",
-          "total_palavras_usuario": 223
+          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar seus sentimentos em relação à fé, conectando sua história pessoal e crenças com o impacto emocional no cotidiano. Ele questiona seus próprios conceitos sobre espiritualidade e autonomia, reconhece o peso emocional das decisões e revela um autoconhecimento claro sobre o que sente falta.",
+          "total_palavras_usuario": 204
         }
       }
     ]
@@ -267,7 +301,7 @@
       "main": [
         [
           {
-            "node": "Atualizar Gamificação",
+            "node": "Consolidar Estatísticas",
             "type": "main",
             "index": 0
           }
@@ -284,13 +318,35 @@
           }
         ]
       ]
+    },
+    "Consolidar Estatísticas": {
+      "main": [
+        [
+          {
+            "node": "Montar Resumo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resumo": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Gamificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a9fdf99d-a4d1-4fdf-8abd-9c29e098436d",
+  "versionId": "84f7e9ba-7d07-4a5f-8b4d-3a8427aa0838",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
