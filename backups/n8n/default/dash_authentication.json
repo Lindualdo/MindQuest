@@ -8,13 +8,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "7d1664a6-32ac-456f-ac80-33a45ae6e604",
+      "id": "bb42681b-fc6b-4092-85e4-0ca1bc8c5cd9",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -368,
-        896
+        -1568,
+        464
       ],
       "webhookId": "9d6b39b5-4dde-442c-a4d6-8fb799ba9705"
     },
@@ -26,13 +26,13 @@
           "queryReplacement": "={{ $json.body.token }}"
         }
       },
-      "id": "8ed8cd1c-2c1f-44ec-b468-d6e379d40d1f",
+      "id": "5242f810-4419-4e05-b68d-e0276ca46324",
       "name": "01_Validar_Usuario",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -144,
-        896
+        -1344,
+        464
       ],
       "credentials": {
         "postgres": {
@@ -49,13 +49,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "3442def7-477a-4a62-b858-230e14cf087c",
+      "id": "2cfac257-6d55-42bb-939e-050d5b1596a4",
       "name": "04_Sabotador",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        1088
+        -448,
+        656
       ],
       "credentials": {
         "postgres": {
@@ -73,13 +73,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "ccf4864d-efbb-4a18-9e08-06435f17b8a2",
+      "id": "e088159f-0d01-4ac4-8eb1-cb7f0deefac5",
       "name": "07_Analise_PANAS",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        688
+        -448,
+        256
       ],
       "credentials": {
         "postgres": {
@@ -97,13 +97,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "22c968e8-298a-4892-a09c-b94de7747777",
+      "id": "349a7f3a-4eb4-4c66-9465-6bb7b96bf7d5",
       "name": "08_Historico_Diario",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        1264
+        -448,
+        832
       ],
       "credentials": {
         "postgres": {
@@ -121,13 +121,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "057473f7-b5c4-48ab-9130-4366ed7e4c56",
+      "id": "0de0cae9-4182-467f-8173-309bf417f93f",
       "name": "09_Insights",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        1440
+        -448,
+        1008
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -144,39 +144,39 @@
         "responseBody": "={{ $json.response }}",
         "options": {}
       },
-      "id": "78263dca-1708-41ff-bf1e-bf8d60596d8b",
+      "id": "b433becb-52ff-47d3-a8bf-8ec21eb891f2",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1840,
-        736
+        640,
+        304
       ]
     },
     {
       "parameters": {
-        "numberInputs": 9
+        "numberInputs": 10
       },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1344,
-        640
+        144,
+        208
       ],
-      "id": "b62e5da5-8856-49ed-b042-a7bc583ea5fe",
+      "id": "ca562b75-f96d-4a6f-8d1d-8216de5cedd2",
       "name": "Merge"
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\n\nconst rows = items.map(item => {\n  const json = item.json || {};\n  if (json.jsonb_build_object) return json.jsonb_build_object;\n  if (json.json_build_object) return json.json_build_object;\n  return json;\n});\n\n\n\nfunction findRow(predicate) {\n  return rows.find(predicate) ?? {};\n}\n\nfunction parseJsonSafe(value, fallback) {\n  if (typeof value === 'string') {\n    try {\n      return JSON.parse(value);\n    } catch (error) {\n      console.warn('[Code Node] Erro ao parsear JSON:', error);\n      return fallback;\n    }\n  }\n  if (value && typeof value === 'object') return value;\n  return fallback;\n}\n\nfunction parseNullableNumber(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : null;\n}\n\nfunction parseNullableBoolean(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  if (typeof value === 'boolean') return value;\n  if (typeof value === 'number') {\n    if (value === 1) return true;\n    if (value === 0) return false;\n  }\n  if (typeof value === 'string') {\n    const normalized = value.trim().toLowerCase();\n    if (normalized === 'true' || normalized === '1') return true;\n    if (normalized === 'false' || normalized === '0') return false;\n  }\n  return null;\n}\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Perfil Big Five\nconst perfilRow = findRow(row => 'openness' in row && 'perfil_primario' in row);\nconst perfilBigFive = {\n  openness: normalizeString(perfilRow.openness),\n  conscientiousness: normalizeString(perfilRow.conscientiousness),\n  extraversion: normalizeString(perfilRow.extraversion),\n  agreeableness: normalizeString(perfilRow.agreeableness),\n  neuroticism: normalizeString(perfilRow.neuroticism),\n  confiabilidade: normalizeString(perfilRow.confiabilidade),\n  perfil_primario: normalizeString(perfilRow.perfil_primario),\n  perfil_secundario: normalizeString(perfilRow.perfil_secundario),\n};\n\n// Usuário\nconst userRow = findRow(row => 'nome' in row && ('user_id' in row || 'usuario_id' in row));\nconst user = {\n  id: normalizeString(userRow.user_id ?? userRow.usuario_id ?? perfilRow.usuario_id, 'usuario_desconhecido'),\n  nome: normalizeString(userRow.nome, 'Usuário MindQuest'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, 'Usuário'),\n  whatsapp_numero: normalizeString(userRow.whatsapp_numero, ''),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, 'matutino'),\n  status_onboarding: normalizeString(userRow.status_onboarding, 'pendente'),\n  criado_em: normalizeString(userRow.criado_em, new Date().toISOString()),\n};\n\n// Gamificação\nconst gamificacaoRow = findRow(row => {\n  if (!row || typeof row !== 'object') return false;\n  if ('gamificacao' in row && row.gamificacao) return true;\n  return ('xp_total' in row && 'nivel_atual' in row);\n});\nconst gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};\n\nconst gamificacao = {\n  xp_total: parseNullableNumber(gamificacaoSource?.xp_total) ?? 0,\n  xp_proximo_nivel: parseNullableNumber(gamificacaoSource?.xp_proximo_nivel) ?? 400,\n  nivel_atual: parseNullableNumber(gamificacaoSource?.nivel_atual) ?? 1,\n  titulo_nivel: normalizeString(gamificacaoSource?.titulo_nivel, 'Nível 1'),\n  streak_conversas_dias: parseNullableNumber(gamificacaoSource?.streak_conversas_dias) ?? 0,\n  streak_protecao_usada: parseNullableBoolean(gamificacaoSource?.streak_protecao_usada) ?? false,\n  streak_protecao_resetada_em: normalizeString(gamificacaoSource?.streak_protecao_resetada_em),\n  ultima_conversa_data: normalizeString(gamificacaoSource?.ultima_conversa_data),\n  melhor_streak: parseNullableNumber(gamificacaoSource?.melhor_streak) ?? 0,\n  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status, 'pendente'),\n  quest_diaria_progresso: parseNullableNumber(gamificacaoSource?.quest_diaria_progresso) ?? 0,\n  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao, 'Complete sua conversa diária'),\n  quest_diaria_data: normalizeString(gamificacaoSource?.quest_diaria_data),\n  quest_streak_dias: parseNullableNumber(gamificacaoSource?.quest_streak_dias) ?? 0,\n  conquistas_desbloqueadas: (() => {\n    const conquistas = gamificacaoSource?.conquistas_desbloqueadas;\n    if (Array.isArray(conquistas)) return conquistas;\n    const parsed = parseJsonSafe(conquistas, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  conquistas_proximas: (() => {\n    const futuras = gamificacaoSource?.conquistas_proximas;\n    if (Array.isArray(futuras)) return futuras;\n    const parsed = parseJsonSafe(futuras, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  total_conversas: parseNullableNumber(gamificacaoSource?.total_conversas) ?? 0,\n  total_reflexoes: parseNullableNumber(gamificacaoSource?.total_reflexoes) ?? 0,\n  total_xp_ganho_hoje: parseNullableNumber(gamificacaoSource?.total_xp_ganho_hoje) ?? 0,\n  ultima_conquista_id: normalizeString(gamificacaoSource?.ultima_conquista_id),\n  ultima_conquista_data: normalizeString(gamificacaoSource?.ultima_conquista_data),\n  ultima_atualizacao: normalizeString(gamificacaoSource?.ultima_atualizacao ?? gamificacaoSource?.atualizado_em),\n  criado_em: normalizeString(gamificacaoSource?.criado_em),\n};\n\n// Sabotador\nconst sabotadorRow = findRow(row => 'sabotador_id' in row || 'total_deteccoes' in row);\nconst sabotador = {\n  id: normalizeString(sabotadorRow.sabotador_id),\n  nome: normalizeString(sabotadorRow.nome),\n  emoji: normalizeString(sabotadorRow.emoji),\n  apelido_personalizado: normalizeString(sabotadorRow.apelido_personalizado ?? sabotadorRow.apelido),\n  total_deteccoes: normalizeString(sabotadorRow.total_deteccoes),\n  contexto_principal: normalizeString(sabotadorRow.contexto_principal),\n  insight_atual: normalizeString(sabotadorRow.insight_atual),\n  contramedida_ativa: normalizeString(sabotadorRow.contramedida_ativa),\n  intensidade_media: normalizeString(sabotadorRow.intensidade_media),\n  total_conversas: normalizeString(sabotadorRow.total_conversas ?? sabotadorRow.totalConversas),\n};\n\n// Humor\nconst humorRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'humor_atual'));\nconst humor = {\n  humor_atual: parseNullableNumber(humorRow.humor_atual),\n  humor_medio: parseNullableNumber(humorRow.humor_medio_7d ?? humorRow.humor_medio),\n  diferenca_percentual: parseNullableNumber(humorRow.diferenca_percentual),\n  conversas_total: parseNullableNumber(humorRow.conversas_total) ?? 0,\n  ultima_conversa: {\n    data: normalizeString(humorRow.ultima_data),\n    hora: normalizeString(humorRow.ultima_hora),\n    emoji: normalizeString(humorRow.ultima_emoji),\n    emocao: normalizeString(humorRow.ultima_emocao),\n  }\n};\n\n// Emoções\nconst emocoesRow = findRow(row => 'emocoes_contagem' in row || 'roda_emocoes' in row);\nconst distribuicaoEmocoes = (() => {\n  const source = emocoesRow.emocoes_contagem ?? emocoesRow.roda_emocoes;\n  const parsed = parseJsonSafe(source, emocoesRow.roda_emocoes || {});\n  const defaults = {\n    alegria: 0,\n    confianca: 0,\n    medo: 0,\n    surpresa: 0,\n    tristeza: 0,\n    angustia: 0,\n    raiva: 0,\n    expectativa: 0,\n  };\n  for (const key of Object.keys(defaults)) {\n    const valor = parsed?.[key];\n    defaults[key] = parseNullableNumber(valor) ?? defaults[key];\n  }\n  return defaults;\n})();\n\n// PANAS\nconst panasRow = findRow(row => 'positivas' in row && 'negativas' in row);\nconst panas = {\n  positivas: parseNullableNumber(panasRow.positivas) ?? 0,\n  negativas: parseNullableNumber(panasRow.negativas) ?? 0,\n  neutras: parseNullableNumber(panasRow.neutras) ?? 0,\n  total: parseNullableNumber(panasRow.total) ?? 0,\n  percentual_positivas: parseNullableNumber(panasRow.percentual_positivas) ?? 0,\n  percentual_negativas: parseNullableNumber(panasRow.percentual_negativas) ?? 0,\n  percentual_neutras: parseNullableNumber(panasRow.percentual_neutras) ?? 0,\n};\n\n// Histórico\nconst historicoAggregateRow = rows.find(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    row.jsonb_build_object &&\n    typeof row.jsonb_build_object === 'object' &&\n    row.jsonb_build_object.historico_diario\n);\n\nconst historicoRawRows = rows.filter(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    'data' in row &&\n    (\n      'humor_medio' in row ||\n      'energia_media' in row ||\n      'justificativa_humor' in row ||\n      'chat_id' in row\n    )\n);\n\nconst toDateKey = (value) => {\n  const raw = normalizeString(value);\n  if (!raw) return null;\n  if (raw.includes('T')) return raw.slice(0, 10);\n  return raw;\n};\n\nconst toLabel = (dateKey) => {\n  if (!dateKey) return null;\n  const parts = dateKey.split('-');\n  if (parts.length === 3) {\n    const [year, month, day] = parts;\n    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}`;\n  }\n  try {\n    const parsed = new Date(dateKey);\n    if (!Number.isNaN(parsed.getTime())) {\n      return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });\n    }\n  } catch (_) {\n    // ignore\n  }\n  return dateKey;\n};\n\nconst parseHora = (value) => {\n  const time = normalizeString(value);\n  if (!time) return null;\n  return time.length > 8 ? time.slice(0, 8) : time;\n};\n\nconst createHistoricoEntry = (dateKey) => ({\n  data: dateKey,\n  label: toLabel(dateKey),\n  tem_conversa: false,\n  conversas: 0,\n  emoji: null,\n  humor: null,\n  ultima_hora: null,\n  _humorSum: 0,\n  _humorWeight: 0,\n});\n\nconst historicoDataMap = new Map();\n\nconst getOrCreateHistoricoEntry = (dateKey) => {\n  if (!historicoDataMap.has(dateKey)) {\n    historicoDataMap.set(dateKey, createHistoricoEntry(dateKey));\n  }\n  return historicoDataMap.get(dateKey);\n};\n\nconst updateUltimaHora = (entry, hora) => {\n  if (!hora) return;\n  if (!entry.ultima_hora || entry.ultima_hora < hora) {\n    entry.ultima_hora = hora;\n  }\n};\n\nlet historicoResumo = {\n  total_conversas: 0,\n  humor_medio: 0,\n  sequencia_ativa: 0,\n  ultima_conversa_data: null,\n  ultima_conversa_hora: null,\n  periodo_inicio: null,\n  periodo_fim: null\n};\n\nif (historicoAggregateRow?.jsonb_build_object?.historico_diario) {\n  for (const item of historicoAggregateRow.jsonb_build_object.historico_diario) {\n    const dateKey = toDateKey(item.data);\n    if (!dateKey) continue;\n    const entry = getOrCreateHistoricoEntry(dateKey);\n    entry.label = normalizeString(item.label) ?? entry.label;\n\n    const conversasParsed = parseNullableNumber(item.conversas);\n    if (Number.isFinite(conversasParsed) && conversasParsed > 0) {\n      entry.conversas = conversasParsed;\n      entry.tem_conversa = true;\n    } else if (typeof item.tem_conversa === 'boolean') {\n      entry.tem_conversa = item.tem_conversa;\n    }\n\n    const emoji = normalizeString(item.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    const humorValue = parseNullableNumber(item.humor);\n    if (Number.isFinite(humorValue)) {\n      entry.humor = humorValue;\n      entry._humorSum = humorValue;\n      entry._humorWeight = 1;\n    }\n\n    updateUltimaHora(entry, parseHora(item.ultima_hora));\n  }\n\n  if (historicoAggregateRow.jsonb_build_object.resumo) {\n    const resumoDb = historicoAggregateRow.jsonb_build_object.resumo;\n    historicoResumo = {\n      total_conversas: parseNullableNumber(resumoDb.total_conversas) ?? 0,\n      humor_medio: parseNullableNumber(resumoDb.humor_medio) ?? 0,\n      sequencia_ativa: parseNullableNumber(resumoDb.sequencia_ativa) ?? 0,\n      ultima_conversa_data: normalizeString(resumoDb.ultima_conversa_data),\n      ultima_conversa_hora: normalizeString(resumoDb.ultima_conversa_hora),\n      periodo_inicio: normalizeString(resumoDb.periodo_inicio),\n      periodo_fim: normalizeString(resumoDb.periodo_fim)\n    };\n  }\n} else if (historicoRawRows.length > 0) {\n  for (const row of historicoRawRows) {\n    const dateKey = toDateKey(row.data);\n    if (!dateKey) continue;\n\n    const entry = getOrCreateHistoricoEntry(dateKey);\n\n    const explicitConversas = parseNullableNumber(row.conversas ?? row.total_conversas ?? row.qtd_conversas);\n    const statusNormalized = normalizeString(row.status)?.toLowerCase();\n    const hasChat = Boolean(normalizeString(row.chat_id));\n    let conversas = Number.isFinite(explicitConversas) && explicitConversas > 0 ? explicitConversas : 0;\n    if (conversas === 0 && (hasChat || statusNormalized === 'completa')) {\n      conversas = 1;\n    }\n\n    entry.conversas += conversas;\n    if (entry.conversas > 0 || conversas > 0) {\n      entry.tem_conversa = true;\n    }\n\n    const humorValue = parseNullableNumber(row.humor_medio);\n    if (Number.isFinite(humorValue)) {\n      const weight = conversas > 0 ? conversas : 1;\n      entry._humorSum += humorValue * weight;\n      entry._humorWeight += weight;\n    }\n\n    const emoji = normalizeString(row.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    updateUltimaHora(entry, parseHora(row.horario_fim ?? row.horario_inicio ?? row.ultima_hora));\n  }\n}\n\nfor (const entry of historicoDataMap.values()) {\n  if (entry._humorWeight > 0) {\n    entry.humor = entry._humorSum / entry._humorWeight;\n  }\n  if (!Number.isFinite(entry.humor)) {\n    entry.humor = null;\n  }\n  delete entry._humorSum;\n  delete entry._humorWeight;\n}\n\nconst shiftDate = (dateKey, offset) => {\n  const key = toDateKey(dateKey);\n  if (!key) return null;\n  const base = new Date(`${key}T00:00:00Z`);\n  if (Number.isNaN(base.getTime())) return null;\n  base.setUTCDate(base.getUTCDate() + offset);\n  return base.toISOString().slice(0, 10);\n};\n\nconst sortedKeys = Array.from(historicoDataMap.keys()).sort((a, b) => {\n  const timeA = a ? new Date(a).getTime() : 0;\n  const timeB = b ? new Date(b).getTime() : 0;\n  return timeA - timeB;\n});\n\nlet lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKeys.length - 1];\nif (!lastDateKey) {\n  lastDateKey = new Date().toISOString().slice(0, 10);\n}\n\nconst windowSize = 7;\nconst windowRawEntries = [];\nfor (let offset = windowSize - 1; offset >= 0; offset -= 1) {\n  const dateKey = shiftDate(lastDateKey, -offset);\n  if (!dateKey) continue;\n  const sourceEntry = historicoDataMap.get(dateKey);\n  const conversasCount = Number.isFinite(sourceEntry?.conversas)\n    ? Number(sourceEntry.conversas)\n    : (sourceEntry?.tem_conversa ? 1 : 0);\n  const temConversa = Boolean(sourceEntry?.tem_conversa) || conversasCount > 0;\n\n  windowRawEntries.push({\n    data: dateKey,\n    label: toLabel(dateKey),\n    tem_conversa: temConversa,\n    conversas: conversasCount,\n    emoji: normalizeString(sourceEntry?.emoji),\n    humor: Number.isFinite(sourceEntry?.humor) ? sourceEntry.humor : null,\n    ultima_hora: normalizeString(sourceEntry?.ultima_hora)\n  });\n}\n\nconst diasComConversas = windowRawEntries.filter((entry) => entry.conversas > 0 || entry.tem_conversa).length;\n\nlet ultimaConversaData = historicoResumo.ultima_conversa_data;\nlet ultimaConversaHora = historicoResumo.ultima_conversa_hora;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) continue;\n  ultimaConversaData = entry.data;\n  if (entry.ultima_hora) {\n    ultimaConversaHora = entry.ultima_hora;\n  }\n  break;\n}\n\nlet sequenciaAtiva = 0;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) break;\n  sequenciaAtiva += 1;\n}\n\nconst periodoInicio = windowRawEntries[0]?.data ?? historicoResumo.periodo_inicio ?? null;\nconst periodoFim = windowRawEntries[windowRawEntries.length - 1]?.data ?? historicoResumo.periodo_fim ?? null;\n\nconst humorMedioGlobal = parseNullableNumber(humor.humor_medio);\nhistoricoResumo = {\n  total_conversas: diasComConversas,\n  humor_medio: humorMedioGlobal ?? historicoResumo.humor_medio ?? 0,\n  sequencia_ativa: sequenciaAtiva,\n  ultima_conversa_data: ultimaConversaData ?? null,\n  ultima_conversa_hora: ultimaConversaHora ?? null,\n  periodo_inicio: periodoInicio,\n  periodo_fim: periodoFim\n};\n\nconst historicoDiario = windowRawEntries.map((entry) => ({\n  data: entry.data,\n  label: entry.label,\n  tem_conversa: entry.tem_conversa,\n  conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,\n  emoji: entry.emoji ?? null,\n  humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,\n  ultima_hora: entry.ultima_hora ?? null\n}));\n\n\n// Insights - AJUSTE CORRETO\nconst insightsRows = rows.filter(row => \n  row && typeof row === 'object' && (\n    'id' in row && \n    'tipo' in row && \n    'categoria' in row && \n    'titulo' in row\n  )\n);\n\nconst insights = insightsRows.length > 0 \n? insightsRows.map(insight => ({\n    id: normalizeString(insight.id) ?? undefined,\n    tipo: normalizeString(insight.tipo) ?? undefined,\n    categoria: normalizeString(insight.categoria) ?? undefined,\n    titulo: normalizeString(insight.titulo) ?? undefined,\n    descricao: normalizeString(insight.descricao) ?? undefined,\n    icone: normalizeString(insight.icone) ?? undefined,\n    prioridade: normalizeString(insight.prioridade) ?? undefined,\n    data_criacao: normalizeString(insight.data_criacao) ?? undefined,\n  }))\n: [];\n\nreturn [\n  {\n    json: {\n      response: {\n        success: true,\n        humor,\n        user,\n        perfil_big_five: perfilBigFive,\n        gamificacao,\n        sabotador,\n        roda_emocoes: distribuicaoEmocoes,\n        panas,\n        historico_diario: historicoDiario,\n        historico_resumo: {\n          total_conversas: parseNullableNumber(historicoResumo.total_conversas) ?? 0,\n          humor_medio: parseNullableNumber(historicoResumo.humor_medio) ?? 0,\n          sequencia_ativa: parseNullableNumber(historicoResumo.sequencia_ativa) ?? 0,\n          ultima_conversa_data: normalizeString(historicoResumo.ultima_conversa_data),\n          ultima_conversa_hora: normalizeString(historicoResumo.ultima_conversa_hora),\n          periodo_inicio: normalizeString(historicoResumo.periodo_inicio),\n          periodo_fim: normalizeString(historicoResumo.periodo_fim)\n        },\n        insights,\n        timestamp: new Date().toISOString(),\n      },\n    },\n  },\n];\n"
+        "jsCode": "const items = $input.all();\n\n\nconst rows = items.map(item => {\n  const json = item.json || {};\n  if (json.jsonb_build_object) return json.jsonb_build_object;\n  if (json.json_build_object) return json.json_build_object;\n  return json;\n});\n\n\n\nfunction findRow(predicate) {\n  return rows.find(predicate) ?? {};\n}\n\nfunction parseJsonSafe(value, fallback) {\n  if (typeof value === 'string') {\n    try {\n      return JSON.parse(value);\n    } catch (error) {\n      console.warn('[Code Node] Erro ao parsear JSON:', error);\n      return fallback;\n    }\n  }\n  if (value && typeof value === 'object') return value;\n  return fallback;\n}\n\nfunction parseNullableNumber(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : null;\n}\n\nfunction parseNullableBoolean(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  if (typeof value === 'boolean') return value;\n  if (typeof value === 'number') {\n    if (value === 1) return true;\n    if (value === 0) return false;\n  }\n  if (typeof value === 'string') {\n    const normalized = value.trim().toLowerCase();\n    if (normalized === 'true' || normalized === '1') return true;\n    if (normalized === 'false' || normalized === '0') return false;\n  }\n  return null;\n}\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Perfil Big Five\nconst perfilRow = findRow(row => 'openness' in row && 'perfil_primario' in row);\nconst perfilBigFive = {\n  openness: normalizeString(perfilRow.openness),\n  conscientiousness: normalizeString(perfilRow.conscientiousness),\n  extraversion: normalizeString(perfilRow.extraversion),\n  agreeableness: normalizeString(perfilRow.agreeableness),\n  neuroticism: normalizeString(perfilRow.neuroticism),\n  confiabilidade: normalizeString(perfilRow.confiabilidade),\n  perfil_primario: normalizeString(perfilRow.perfil_primario),\n  perfil_secundario: normalizeString(perfilRow.perfil_secundario),\n};\n\n// Usuário\nconst userRow = findRow(row => 'nome' in row && ('user_id' in row || 'usuario_id' in row));\nconst user = {\n  id: normalizeString(userRow.user_id ?? userRow.usuario_id ?? perfilRow.usuario_id, 'usuario_desconhecido'),\n  nome: normalizeString(userRow.nome, 'Usuário MindQuest'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, 'Usuário'),\n  whatsapp_numero: normalizeString(userRow.whatsapp_numero, ''),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, 'matutino'),\n  status_onboarding: normalizeString(userRow.status_onboarding, 'pendente'),\n  criado_em: normalizeString(userRow.criado_em, new Date().toISOString()),\n};\n\n// Gamificação\nconst gamificacaoRow = findRow(row => {\n  if (!row || typeof row !== 'object') return false;\n  if ('gamificacao' in row && row.gamificacao) return true;\n  return ('xp_total' in row && 'nivel_atual' in row);\n});\nconst gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};\n\nconst gamificacao = {\n  xp_total: parseNullableNumber(gamificacaoSource?.xp_total) ?? 0,\n  xp_proximo_nivel: parseNullableNumber(gamificacaoSource?.xp_proximo_nivel) ?? 400,\n  nivel_atual: parseNullableNumber(gamificacaoSource?.nivel_atual) ?? 1,\n  titulo_nivel: normalizeString(gamificacaoSource?.titulo_nivel, 'Nível 1'),\n  streak_conversas_dias: parseNullableNumber(gamificacaoSource?.streak_conversas_dias) ?? 0,\n  streak_protecao_usada: parseNullableBoolean(gamificacaoSource?.streak_protecao_usada) ?? false,\n  streak_protecao_resetada_em: normalizeString(gamificacaoSource?.streak_protecao_resetada_em),\n  ultima_conversa_data: normalizeString(gamificacaoSource?.ultima_conversa_data),\n  melhor_streak: parseNullableNumber(gamificacaoSource?.melhor_streak) ?? 0,\n  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status, 'pendente'),\n  quest_diaria_progresso: parseNullableNumber(gamificacaoSource?.quest_diaria_progresso) ?? 0,\n  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao, 'Complete sua conversa diária'),\n  quest_diaria_data: normalizeString(gamificacaoSource?.quest_diaria_data),\n  quest_streak_dias: parseNullableNumber(gamificacaoSource?.quest_streak_dias) ?? 0,\n  conquistas_desbloqueadas: (() => {\n    const conquistas = gamificacaoSource?.conquistas_desbloqueadas;\n    if (Array.isArray(conquistas)) return conquistas;\n    const parsed = parseJsonSafe(conquistas, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  conquistas_proximas: (() => {\n    const futuras = gamificacaoSource?.conquistas_proximas;\n    if (Array.isArray(futuras)) return futuras;\n    const parsed = parseJsonSafe(futuras, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  total_conversas: parseNullableNumber(gamificacaoSource?.total_conversas) ?? 0,\n  total_reflexoes: parseNullableNumber(gamificacaoSource?.total_reflexoes) ?? 0,\n  total_xp_ganho_hoje: parseNullableNumber(gamificacaoSource?.total_xp_ganho_hoje) ?? 0,\n  ultima_conquista_id: normalizeString(gamificacaoSource?.ultima_conquista_id),\n  ultima_conquista_data: normalizeString(gamificacaoSource?.ultima_conquista_data),\n  ultima_atualizacao: normalizeString(gamificacaoSource?.ultima_atualizacao ?? gamificacaoSource?.atualizado_em),\n  criado_em: normalizeString(gamificacaoSource?.criado_em),\n};\n\n// Próxima Jornada\nconst jornadaRow = findRow(row => row.proxima_jornada);\nconst jornadaSource = jornadaRow.proxima_jornada ?? {};\nconst proximoNivelSource = jornadaSource.proximo_nivel ?? null;\nconst proximaJornada = {\n  xp_total: parseNullableNumber(jornadaSource.xp_total) ?? 0,\n  nivel_atual: parseNullableNumber(jornadaSource.nivel_atual),\n  titulo_atual: normalizeString(jornadaSource.titulo_atual),\n  proximo_nivel: proximoNivelSource ? {\n    nivel: parseNullableNumber(proximoNivelSource.nivel),\n    titulo: normalizeString(proximoNivelSource.titulo),\n    xp_minimo: parseNullableNumber(proximoNivelSource.xp_minimo),\n    xp_restante: parseNullableNumber(proximoNivelSource.xp_restante),\n    descricao: normalizeString(proximoNivelSource.descricao),\n  } : null,\n  desafios: Array.isArray(jornadaSource.desafios)\n    ? jornadaSource.desafios.map(desafio => ({\n        usuario_quest_id: normalizeString(desafio.usuario_quest_id),\n        titulo: normalizeString(desafio.titulo),\n        categoria: normalizeString(desafio.categoria),\n        xp_recompensa: parseNullableNumber(desafio.xp_recompensa),\n        status: normalizeString(desafio.status),\n        progresso_percentual: parseNullableNumber(desafio.progresso_percentual),\n        progresso_atual: parseNullableNumber(desafio.progresso_atual),\n        progresso_meta: parseNullableNumber(desafio.progresso_meta),\n      }))\n    : [],\n};\n\n// Sabotador\nconst sabotadorRow = findRow(row => 'sabotador_id' in row || 'total_deteccoes' in row);\nconst sabotador = {\n  id: normalizeString(sabotadorRow.sabotador_id),\n  nome: normalizeString(sabotadorRow.nome),\n  emoji: normalizeString(sabotadorRow.emoji),\n  apelido_personalizado: normalizeString(sabotadorRow.apelido_personalizado ?? sabotadorRow.apelido),\n  total_deteccoes: normalizeString(sabotadorRow.total_deteccoes),\n  contexto_principal: normalizeString(sabotadorRow.contexto_principal),\n  insight_atual: normalizeString(sabotadorRow.insight_atual),\n  contramedida_ativa: normalizeString(sabotadorRow.contramedida_ativa),\n  intensidade_media: normalizeString(sabotadorRow.intensidade_media),\n  total_conversas: normalizeString(sabotadorRow.total_conversas ?? sabotadorRow.totalConversas),\n};\n\n// Humor\nconst humorRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'humor_atual'));\nconst humor = {\n  humor_atual: parseNullableNumber(humorRow.humor_atual),\n  humor_medio: parseNullableNumber(humorRow.humor_medio_7d ?? humorRow.humor_medio),\n  diferenca_percentual: parseNullableNumber(humorRow.diferenca_percentual),\n  conversas_total: parseNullableNumber(humorRow.conversas_total) ?? 0,\n  ultima_conversa: {\n    data: normalizeString(humorRow.ultima_data),\n    hora: normalizeString(humorRow.ultima_hora),\n    emoji: normalizeString(humorRow.ultima_emoji),\n    emocao: normalizeString(humorRow.ultima_emocao),\n  }\n};\n\n// Emoções\nconst emocoesRow = findRow(row => 'emocoes_contagem' in row || 'roda_emocoes' in row);\nconst distribuicaoEmocoes = (() => {\n  const source = emocoesRow.emocoes_contagem ?? emocoesRow.roda_emocoes;\n  const parsed = parseJsonSafe(source, emocoesRow.roda_emocoes || {});\n  const defaults = {\n    alegria: 0,\n    confianca: 0,\n    medo: 0,\n    surpresa: 0,\n    tristeza: 0,\n    angustia: 0,\n    raiva: 0,\n    expectativa: 0,\n  };\n  for (const key of Object.keys(defaults)) {\n    const valor = parsed?.[key];\n    defaults[key] = parseNullableNumber(valor) ?? defaults[key];\n  }\n  return defaults;\n})();\n\n// PANAS\nconst panasRow = findRow(row => 'positivas' in row && 'negativas' in row);\nconst panas = {\n  positivas: parseNullableNumber(panasRow.positivas) ?? 0,\n  negativas: parseNullableNumber(panasRow.negativas) ?? 0,\n  neutras: parseNullableNumber(panasRow.neutras) ?? 0,\n  total: parseNullableNumber(panasRow.total) ?? 0,\n  percentual_positivas: parseNullableNumber(panasRow.percentual_positivas) ?? 0,\n  percentual_negativas: parseNullableNumber(panasRow.percentual_negativas) ?? 0,\n  percentual_neutras: parseNullableNumber(panasRow.percentual_neutras) ?? 0,\n};\n\n// Histórico\nconst historicoAggregateRow = rows.find(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    row.jsonb_build_object &&\n    typeof row.jsonb_build_object === 'object' &&\n    row.jsonb_build_object.historico_diario\n);\n\nconst historicoRawRows = rows.filter(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    'data' in row &&\n    (\n      'humor_medio' in row ||\n      'energia_media' in row ||\n      'justificativa_humor' in row ||\n      'chat_id' in row\n    )\n);\n\nconst toDateKey = (value) => {\n  const raw = normalizeString(value);\n  if (!raw) return null;\n  if (raw.includes('T')) return raw.slice(0, 10);\n  return raw;\n};\n\nconst toLabel = (dateKey) => {\n  if (!dateKey) return null;\n  const parts = dateKey.split('-');\n  if (parts.length === 3) {\n    const [year, month, day] = parts;\n    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}`;\n  }\n  try {\n    const parsed = new Date(dateKey);\n    if (!Number.isNaN(parsed.getTime())) {\n      return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });\n    }\n  } catch (_) {\n    // ignore\n  }\n  return dateKey;\n};\n\nconst parseHora = (value) => {\n  const time = normalizeString(value);\n  if (!time) return null;\n  return time.length > 8 ? time.slice(0, 8) : time;\n};\n\nconst createHistoricoEntry = (dateKey) => ({\n  data: dateKey,\n  label: toLabel(dateKey),\n  tem_conversa: false,\n  conversas: 0,\n  emoji: null,\n  humor: null,\n  ultima_hora: null,\n  _humorSum: 0,\n  _humorWeight: 0,\n});\n\nconst historicoDataMap = new Map();\n\nconst getOrCreateHistoricoEntry = (dateKey) => {\n  if (!historicoDataMap.has(dateKey)) {\n    historicoDataMap.set(dateKey, createHistoricoEntry(dateKey));\n  }\n  return historicoDataMap.get(dateKey);\n};\n\nconst updateUltimaHora = (entry, hora) => {\n  if (!hora) return;\n  if (!entry.ultima_hora || entry.ultima_hora < hora) {\n    entry.ultima_hora = hora;\n  }\n};\n\nlet historicoResumo = {\n  total_conversas: 0,\n  humor_medio: 0,\n  sequencia_ativa: 0,\n  ultima_conversa_data: null,\n  ultima_conversa_hora: null,\n  periodo_inicio: null,\n  periodo_fim: null\n};\n\nif (historicoAggregateRow?.jsonb_build_object?.historico_diario) {\n  for (const item of historicoAggregateRow.jsonb_build_object.historico_diario) {\n    const dateKey = toDateKey(item.data);\n    if (!dateKey) continue;\n    const entry = getOrCreateHistoricoEntry(dateKey);\n    entry.label = normalizeString(item.label) ?? entry.label;\n\n    const conversasParsed = parseNullableNumber(item.conversas);\n    if (Number.isFinite(conversasParsed) && conversasParsed > 0) {\n      entry.conversas = conversasParsed;\n      entry.tem_conversa = true;\n    } else if (typeof item.tem_conversa === 'boolean') {\n      entry.tem_conversa = item.tem_conversa;\n    }\n\n    const emoji = normalizeString(item.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    const humorValue = parseNullableNumber(item.humor);\n    if (Number.isFinite(humorValue)) {\n      entry.humor = humorValue;\n      entry._humorSum = humorValue;\n      entry._humorWeight = 1;\n    }\n\n    updateUltimaHora(entry, parseHora(item.ultima_hora));\n  }\n\n  if (historicoAggregateRow.jsonb_build_object.resumo) {\n    const resumoDb = historicoAggregateRow.jsonb_build_object.resumo;\n    historicoResumo = {\n      total_conversas: parseNullableNumber(resumoDb.total_conversas) ?? 0,\n      humor_medio: parseNullableNumber(resumoDb.humor_medio) ?? 0,\n      sequencia_ativa: parseNullableNumber(resumoDb.sequencia_ativa) ?? 0,\n      ultima_conversa_data: normalizeString(resumoDb.ultima_conversa_data),\n      ultima_conversa_hora: normalizeString(resumoDb.ultima_conversa_hora),\n      periodo_inicio: normalizeString(resumoDb.periodo_inicio),\n      periodo_fim: normalizeString(resumoDb.periodo_fim)\n    };\n  }\n} else if (historicoRawRows.length > 0) {\n  for (const row of historicoRawRows) {\n    const dateKey = toDateKey(row.data);\n    if (!dateKey) continue;\n\n    const entry = getOrCreateHistoricoEntry(dateKey);\n\n    const explicitConversas = parseNullableNumber(row.conversas ?? row.total_conversas ?? row.qtd_conversas);\n    const statusNormalized = normalizeString(row.status)?.toLowerCase();\n    const hasChat = Boolean(normalizeString(row.chat_id));\n    let conversas = Number.isFinite(explicitConversas) && explicitConversas > 0 ? explicitConversas : 0;\n    if (conversas === 0 && (hasChat || statusNormalized === 'completa')) {\n      conversas = 1;\n    }\n\n    entry.conversas += conversas;\n    if (entry.conversas > 0 || conversas > 0) {\n      entry.tem_conversa = true;\n    }\n\n    const humorValue = parseNullableNumber(row.humor_medio);\n    if (Number.isFinite(humorValue)) {\n      const weight = conversas > 0 ? conversas : 1;\n      entry._humorSum += humorValue * weight;\n      entry._humorWeight += weight;\n    }\n\n    const emoji = normalizeString(row.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    updateUltimaHora(entry, parseHora(row.horario_fim ?? row.horario_inicio ?? row.ultima_hora));\n  }\n}\n\nfor (const entry of historicoDataMap.values()) {\n  if (entry._humorWeight > 0) {\n    entry.humor = entry._humorSum / entry._humorWeight;\n  }\n  if (!Number.isFinite(entry.humor)) {\n    entry.humor = null;\n  }\n  delete entry._humorSum;\n  delete entry._humorWeight;\n}\n\nconst shiftDate = (dateKey, offset) => {\n  const key = toDateKey(dateKey);\n  if (!key) return null;\n  const base = new Date(`${key}T00:00:00Z`);\n  if (Number.isNaN(base.getTime())) return null;\n  base.setUTCDate(base.getUTCDate() + offset);\n  return base.toISOString().slice(0, 10);\n};\n\nconst sortedKeys = Array.from(historicoDataMap.keys()).sort((a, b) => {\n  const timeA = a ? new Date(a).getTime() : 0;\n  const timeB = b ? new Date(b).getTime() : 0;\n  return timeA - timeB;\n});\n\nlet lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKeys.length - 1];\nif (!lastDateKey) {\n  lastDateKey = new Date().toISOString().slice(0, 10);\n}\n\nconst windowSize = 7;\nconst windowRawEntries = [];\nfor (let offset = windowSize - 1; offset >= 0; offset -= 1) {\n  const dateKey = shiftDate(lastDateKey, -offset);\n  if (!dateKey) continue;\n  const sourceEntry = historicoDataMap.get(dateKey);\n  const conversasCount = Number.isFinite(sourceEntry?.conversas)\n    ? Number(sourceEntry.conversas)\n    : (sourceEntry?.tem_conversa ? 1 : 0);\n  const temConversa = Boolean(sourceEntry?.tem_conversa) || conversasCount > 0;\n\n  windowRawEntries.push({\n    data: dateKey,\n    label: toLabel(dateKey),\n    tem_conversa: temConversa,\n    conversas: conversasCount,\n    emoji: normalizeString(sourceEntry?.emoji),\n    humor: Number.isFinite(sourceEntry?.humor) ? sourceEntry.humor : null,\n    ultima_hora: normalizeString(sourceEntry?.ultima_hora)\n  });\n}\n\nconst diasComConversas = windowRawEntries.filter((entry) => entry.conversas > 0 || entry.tem_conversa).length;\n\nlet ultimaConversaData = historicoResumo.ultima_conversa_data;\nlet ultimaConversaHora = historicoResumo.ultima_conversa_hora;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) continue;\n  ultimaConversaData = entry.data;\n  if (entry.ultima_hora) {\n    ultimaConversaHora = entry.ultima_hora;\n  }\n  break;\n}\n\nlet sequenciaAtiva = 0;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) break;\n  sequenciaAtiva += 1;\n}\n\nconst periodoInicio = windowRawEntries[0]?.data ?? historicoResumo.periodo_inicio ?? null;\nconst periodoFim = windowRawEntries[windowRawEntries.length - 1]?.data ?? historicoResumo.periodo_fim ?? null;\n\nconst humorMedioGlobal = parseNullableNumber(humor.humor_medio);\nhistoricoResumo = {\n  total_conversas: diasComConversas,\n  humor_medio: humorMedioGlobal ?? historicoResumo.humor_medio ?? 0,\n  sequencia_ativa: sequenciaAtiva,\n  ultima_conversa_data: ultimaConversaData ?? null,\n  ultima_conversa_hora: ultimaConversaHora ?? null,\n  periodo_inicio: periodoInicio,\n  periodo_fim: periodoFim\n};\n\nconst historicoDiario = windowRawEntries.map((entry) => ({\n  data: entry.data,\n  label: entry.label,\n  tem_conversa: entry.tem_conversa,\n  conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,\n  emoji: entry.emoji ?? null,\n  humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,\n  ultima_hora: entry.ultima_hora ?? null\n}));\n\n\n// Insights - AJUSTE CORRETO\nconst insightsRows = rows.filter(row => \n  row && typeof row === 'object' && (\n    'id' in row && \n    'tipo' in row && \n    'categoria' in row && \n    'titulo' in row\n  )\n);\n\nconst insights = insightsRows.length > 0 \n? insightsRows.map(insight => ({\n    id: normalizeString(insight.id) ?? undefined,\n    tipo: normalizeString(insight.tipo) ?? undefined,\n    categoria: normalizeString(insight.categoria) ?? undefined,\n    titulo: normalizeString(insight.titulo) ?? undefined,\n    descricao: normalizeString(insight.descricao) ?? undefined,\n    icone: normalizeString(insight.icone) ?? undefined,\n    prioridade: normalizeString(insight.prioridade) ?? undefined,\n    data_criacao: normalizeString(insight.data_criacao) ?? undefined,\n  }))\n: [];\n\nreturn [\n  {\n    json: {\n      response: {\n        success: true,\n        humor,\n        user,\n        perfil_big_five: perfilBigFive,\n        gamificacao,\n        proxima_jornada: proximaJornada,\n        sabotador,\n        roda_emocoes: distribuicaoEmocoes,\n        panas,\n        historico_diario: historicoDiario,\n        historico_resumo: {\n          total_conversas: parseNullableNumber(historicoResumo.total_conversas) ?? 0,\n          humor_medio: parseNullableNumber(historicoResumo.humor_medio) ?? 0,\n          sequencia_ativa: parseNullableNumber(historicoResumo.sequencia_ativa) ?? 0,\n          ultima_conversa_data: normalizeString(historicoResumo.ultima_conversa_data),\n          ultima_conversa_hora: normalizeString(historicoResumo.ultima_conversa_hora),\n          periodo_inicio: normalizeString(historicoResumo.periodo_inicio),\n          periodo_fim: normalizeString(historicoResumo.periodo_fim)\n        },\n        insights,\n        timestamp: new Date().toISOString(),\n      },\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        736
+        384,
+        304
       ],
-      "id": "c7e54faf-d60f-4e54-9c3e-6a37621c3075",
+      "id": "24e6138f-d936-4716-bc58-3b13dbd5a417",
       "name": "organiza_dados"
     },
     {
@@ -190,10 +190,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        528
+        -448,
+        96
       ],
-      "id": "cbfa2431-f341-47ea-be2d-445893d8801d",
+      "id": "4363f440-93d1-4120-86da-854cd9eea89d",
       "name": "Big_five",
       "alwaysOutputData": true,
       "credentials": {
@@ -211,13 +211,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "7c89f079-bda0-40ed-89d3-1b1f1cbca61b",
+      "id": "137534f7-d65e-4248-a697-234955d16408",
       "name": "roda_emocoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        352
+        -448,
+        -80
       ],
       "credentials": {
         "postgres": {
@@ -238,10 +238,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        176
+        -448,
+        -272
       ],
-      "id": "3b7d0ace-bc41-4b78-88cc-f8d9b01beb48",
+      "id": "3efe6509-8da9-45fe-8e9c-c1284b1caf5a",
       "name": "Humor",
       "credentials": {
         "postgres": {
@@ -258,13 +258,37 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "045d9ba7-7c17-4356-9932-d426518a348f",
+      "id": "0cc7ac64-7976-4bb8-a222-e86f133028f5",
       "name": "Gameficacao",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        752,
-        896
+        -448,
+        464
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH base AS (\n  SELECT $1::uuid AS usuario_id\n),\nxp_total AS (\n  SELECT COALESCE(SUM(uq.xp_concedido), 0) AS xp_total\n  FROM usuarios_quest uq\n  JOIN base ON base.usuario_id = uq.usuario_id\n),\nnivel_atual AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_total xt ON xt.xp_total >= gn.xp_minimo\n  ORDER BY gn.xp_minimo DESC\n  LIMIT 1\n),\nproximo_nivel AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_total xt ON gn.xp_minimo > xt.xp_total\n  ORDER BY gn.xp_minimo\n  LIMIT 1\n),\ndesafios AS (\n  SELECT\n    uq.id AS usuario_quest_id,\n    qc.titulo,\n    qc.categoria,\n    qc.xp_recompensa,\n    uq.status,\n    uq.progresso_percentual,\n    uq.progresso_atual,\n    uq.progresso_meta,\n    uq.ativado_em,\n    ROW_NUMBER() OVER (\n      ORDER BY\n        CASE uq.status WHEN 'ativa' THEN 0 ELSE 1 END,\n        uq.progresso_percentual DESC,\n        qc.sequencia,\n        qc.ordem_inicial NULLS LAST,\n        uq.ativado_em\n    ) AS ordem\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status IN ('pendente', 'ativa')\n),\ndesafios_top AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'usuario_quest_id', d.usuario_quest_id,\n      'titulo', d.titulo,\n      'categoria', d.categoria,\n      'xp_recompensa', d.xp_recompensa,\n      'status', d.status,\n      'progresso_percentual', d.progresso_percentual,\n      'progresso_atual', d.progresso_atual,\n      'progresso_meta', d.progresso_meta\n    )\n    ORDER BY d.ordem\n  ) AS desafios\n  FROM desafios d\n  WHERE d.ordem <= 5\n)\nSELECT jsonb_build_object(\n  'xp_total', xt.xp_total,\n  'nivel_atual', na.nivel,\n  'titulo_atual', na.titulo,\n  'proximo_nivel', CASE\n    WHEN pn.nivel IS NULL THEN NULL\n    ELSE jsonb_build_object(\n      'nivel', pn.nivel,\n      'titulo', pn.titulo,\n      'xp_minimo', pn.xp_minimo,\n      'xp_restante', GREATEST(pn.xp_minimo - xt.xp_total, 0),\n      'descricao', pn.descricao\n    )\n  END,\n  'desafios', COALESCE(dt.desafios, '[]'::jsonb)\n) AS proxima_jornada\nFROM xp_total xt\nLEFT JOIN nivel_atual na ON TRUE\nLEFT JOIN proximo_nivel pn ON TRUE\nLEFT JOIN desafios_top dt ON TRUE;",
+        "options": {
+          "queryReplacement": "={{ $('01_Validar_Usuario').item.json.user_id }}"
+        }
+      },
+      "id": "a0917f24-2fd3-4ee8-a342-95ac918941df",
+      "name": "Proxima_Jornada",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -240,
+        480
       ],
       "credentials": {
         "postgres": {
@@ -289,7 +313,7 @@
             "cdn-loop": "cloudflare; loops=1",
             "cf-connecting-ip": "2001:818:e374:a600:8800:fa96:bcdd:91c0",
             "cf-ipcountry": "PT",
-            "cf-ray": "99855c18cb1be3c0-LIS",
+            "cf-ray": "9985c0601ded3a95-LIS",
             "cf-visitor": "{\"scheme\":\"https\"}",
             "content-type": "application/json",
             "origin": "https://mindquest.pt",
@@ -481,9 +505,25 @@
       "main": [
         [
           {
+            "node": "Proxima_Jornada",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Merge",
             "type": "main",
             "index": 5
+          }
+        ]
+      ]
+    },
+    "Proxima_Jornada": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 9
           }
         ]
       ]
@@ -493,7 +533,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4266fbcf-f1b6-4c1d-9a21-2a1908ed7d25",
+  "versionId": "2c45d5c7-23bc-4a27-a320-7a08b2f12771",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
