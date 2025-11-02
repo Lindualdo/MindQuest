@@ -1,10 +1,5 @@
 {
-  "updatedAt": "2025-11-01T16:32:26.311Z",
-  "createdAt": "2025-10-10T11:10:56.623Z",
-  "id": "agXJK8Dd49If1eFx",
   "name": "sw_experts_gamification",
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -36,10 +31,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -304,
-        256
+        -640,
+        240
       ],
-      "id": "44a0cf36-d8c2-4e6b-ab98-fd55756766e9",
+      "id": "faf86f35-a536-447a-a309-7988f0859b3b",
       "name": "start"
     },
     {
@@ -53,10 +48,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -48,
-        256
+        -384,
+        240
       ],
-      "id": "580df701-2a45-4f31-928a-a1356484e2b9",
+      "id": "cebd987b-fb05-4501-93ea-8438ac5d49e4",
       "name": "Buscar Estado Atual",
       "credentials": {
         "postgres": {
@@ -76,10 +71,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        80
+        -176,
+        240
       ],
-      "id": "d8f1f224-5dba-4d91-a7bb-3f8b40ad7c98",
+      "id": "c9736b78-01f1-43ce-baac-13f4962d3209",
       "name": "Garantir Quests",
       "credentials": {
         "postgres": {
@@ -95,25 +90,27 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        352,
-        256
+        224,
+        240
       ],
-      "id": "4a291762-7a90-4c94-936b-cd960f9a4559",
+      "id": "238980e0-8a5b-4a12-bfd3-98b33b192dc9",
       "name": "Calcular Gamificação"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE gamificacao SET\n  xp_total = {{ Number($json.xp_total ?? 0) }}::integer,\n  nivel_atual = {{ Number($json.nivel_atual ?? 1) }}::integer,\n  xp_proximo_nivel = {{ Number($json.xp_proximo_nivel ?? 200) }}::integer,\n  titulo_nivel = '{{ ($json.titulo_nivel ?? \"Explorador\").replace(/'/g, \"''\") }}'::varchar(50),\n  streak_conversas_dias = {{ Number($json.streak_conversas_dias ?? 0) }}::integer,\n  melhor_streak = {{ Number($json.melhor_streak ?? 0) }}::integer,\n  ultima_conversa_data = '{{ $json.ultima_conversa_data ?? (new Date().toISOString().split('T')[0]) }}'::date,\n  quest_diaria_status = '{{ ($json.quest_diaria_status ?? \"pendente\").replace(/'/g, \"''\") }}'::varchar(20),\n  quest_diaria_progresso = {{ Number($json.quest_diaria_progresso ?? 0) }}::integer,\n  quest_diaria_descricao = NULLIF('{{ ($json.quest_diaria_descricao ?? \"\").replace(/'/g, \"''\") }}', '')::text,\n  quest_diaria_data = '{{ $json.quest_diaria_data ?? (new Date().toISOString().split('T')[0]) }}'::date,\n  total_conversas = {{ Number($json.total_conversas ?? 0) }}::integer,\n  total_reflexoes = {{ Number($json.total_reflexoes ?? 0) }}::integer,\n  total_xp_ganho_hoje = {{ Number($json.total_xp_ganho_hoje ?? 0) }}::integer,\n  ultima_conquista_id = NULLIF('{{ ($json.ultima_conquista_id ?? \"\").replace(/'/g, \"''\") }}', '')::varchar(50),\n  ultima_conquista_data = NULLIF('{{ ($json.ultima_conquista_data ?? \"\").replace(/'/g, \"''\") }}', '')::timestamp,\n  atualizado_em = NOW()\nWHERE usuario_id = '{{ $json.usuario_id }}'::uuid\nRETURNING *;",
-        "options": {}
+        "query": "UPDATE gamificacao SET\n  xp_total = {{ Number($json.xp_total ?? 0) }}::integer,\n  nivel_atual = {{ Number($json.nivel_atual ?? 1) }}::integer,\n  xp_proximo_nivel = {{ Number($json.xp_proximo_nivel ?? 200) }}::integer,\n  titulo_nivel = '{{ ($json.titulo_nivel ?? \"Explorador\").replace(/'/g, \"''\") }}'::varchar(50),\n  streak_conversas_dias = {{ Number($json.streak_conversas_dias ?? 0) }}::integer,\n  melhor_streak = {{ Number($json.melhor_streak ?? 0) }}::integer,\n  ultima_conversa_data = '{{ $json.ultima_conversa_data ?? (new Date().toISOString().split('T')[0]) }}'::date,\n  quest_diaria_status = '{{ ($json.quest_diaria_status ?? \"pendente\").replace(/'/g, \"''\") }}'::varchar(20),\n  quest_diaria_progresso = {{ Number($json.quest_diaria_progresso ?? 0) }}::integer,\n  quest_diaria_descricao = NULLIF('{{ ($json.quest_diaria_descricao ?? \"\").replace(/'/g, \"''\") }}', '')::text,\n  quest_diaria_data = '{{ $json.quest_diaria_data ?? (new Date().toISOString().split('T')[0]) }}'::date,\n  total_conversas = {{ Number($json.total_conversas ?? 0) }}::integer,\n  total_reflexoes = {{ Number($json.total_reflexoes ?? 0) }}::integer,\n  total_xp_ganho_hoje = {{ Number($json.total_xp_ganho_hoje ?? 0) }}::integer,\n  ultima_conquista_id = NULLIF('{{ ($json.ultima_conquista_id ?? \"\").replace(/'/g, \"''\") }}', '')::varchar(50),\n  ultima_conquista_data = NULLIF('{{ ($json.ultima_conquista_data ?? \"\").replace(/'/g, \"''\") }}', '')::timestamp,\n  atualizado_em = NOW()\nWHERE usuario_id = $1::uuid\nRETURNING *;",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        736,
-        256
+        608,
+        240
       ],
-      "id": "49577de0-10d4-4818-8649-9f6d08123480",
+      "id": "682d8314-829a-4299-b55d-53678768375e",
       "name": "Atualizar Gamificação",
       "credentials": {
         "postgres": {
@@ -129,10 +126,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        960,
-        256
+        832,
+        240
       ],
-      "id": "e9e7d2a8-8392-4301-83b4-6a927fb1f2c5",
+      "id": "8580fe62-6154-4b9d-aedf-c4be704a4a2d",
       "name": "Preparar Resultado"
     },
     {
@@ -145,10 +142,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1200,
-        16
+        -1328,
+        0
       ],
-      "id": "d78db502-2fa2-4daa-a21f-0c8fcaae6bde",
+      "id": "4c6a6fdd-58df-4354-82b3-5504168e1207",
       "name": "Sticky Note - Info"
     },
     {
@@ -162,10 +159,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        256
+        32,
+        240
       ],
-      "id": "af6ff8d4-e367-4830-a215-e6b16ca6dcee",
+      "id": "6f195e90-88d0-4710-91eb-175b38f78866",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -183,10 +180,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        528,
-        256
+        400,
+        240
       ],
-      "id": "b2548aa2-d161-429c-9a3d-e15a292e3110",
+      "id": "a47b1a7a-212b-473f-a87b-b0fe6094eee5",
       "name": "Atualizar Quests",
       "credentials": {
         "postgres": {
@@ -196,6 +193,20 @@
       }
     }
   ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "1308015b-7753-461c-ae2c-6bff47a25b89",
+          "chat_id": "b48b6179-0f9f-4385-b15c-5b1965b58c57",
+          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "tem_reflexao": true,
+          "justificativa_reflexao": "Aldo demonstra reflexão profunda ao analisar suas oscilações de energia e motivação, relacionando-as a eventos específicos, como a desistência do projeto do curso. Ele conecta suas emoções ao contexto financeiro e à percepção de risco, mostrando autoconhecimento ao reconhecer suas limitações e aprendizados. Também questiona seus padrões de comparação com outras pessoas e como isso impacta sua motivação, além de refletir sobre suas experiências e desejos pessoais em perspectiva.",
+          "total_palavras_usuario": 223
+        }
+      }
+    ]
+  },
   "connections": {
     "start": {
       "main": [
@@ -275,84 +286,15 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "versionId": "3b79daf3-9888-433a-ac75-e79735fb3bc7",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
   },
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "dd66a9b3-d455-4730-a683-b58ca8bb4a31",
-          "data_conversa": "Fri Oct 31 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo demonstra reflexão profunda ao analisar como a ansiedade interfere em suas decisões, diferenciando os momentos em que consegue ou não fazer pausas. Ele conecta seus sentimentos com estratégias práticas para controlar o medo e insegurança no mercado, reconhecendo sucessos pessoais e buscando adaptar ferramentas para seu processo emocional.",
-          "total_palavras_usuario": 216
-        }
-      }
-    ]
-  },
-  "versionId": "54a9100f-a5e2-4d84-a19e-842d4d3ff53c",
-  "triggerCount": 0,
-  "shared": [
-    {
-      "updatedAt": "2025-10-10T11:10:56.623Z",
-      "createdAt": "2025-10-10T11:10:56.623Z",
-      "role": "workflow:owner",
-      "workflowId": "agXJK8Dd49If1eFx",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "updatedAt": "2025-11-02T07:12:45.501Z",
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-11-02",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
+  "id": "agXJK8Dd49If1eFx",
   "tags": []
 }
