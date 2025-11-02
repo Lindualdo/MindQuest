@@ -1,6 +1,6 @@
 {
+  "updatedAt": "2025-11-02T07:23:07.360Z",
   "createdAt": "2025-10-22T18:20:20.342Z",
-  "updatedAt": "2025-11-01T16:13:28.261Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
   "active": false,
@@ -38,7 +38,8 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": "={{ 2000 }}"
+          "delay": "={{ 2000 }}",
+          "linkPreview": false
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -93,7 +94,8 @@
         "remoteJid": "={{ $('start').item.json.remoteJid }}",
         "messageText": "={{ $('start').item.json.messageText }}",
         "options_message": {
-          "delay": "={{ 2000 }}"
+          "delay": "={{ 2000 }}",
+          "linkPreview": false
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -402,18 +404,18 @@
       }
     ]
   },
-  "versionId": "b0db9ff8-4d5c-49d2-8585-d587d9a854fe",
+  "versionId": "72a99be1-45c8-4510-b9b7-52c73c537b93",
   "triggerCount": 0,
   "shared": [
     {
-      "createdAt": "2025-10-22T18:20:20.342Z",
       "updatedAt": "2025-10-22T18:20:20.342Z",
+      "createdAt": "2025-10-22T18:20:20.342Z",
       "role": "workflow:owner",
       "workflowId": "U44ZfEwFU77EUthb",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
         "updatedAt": "2025-09-25T16:38:18.729Z",
+        "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
         "type": "personal",
@@ -421,13 +423,13 @@
         "description": null,
         "projectRelations": [
           {
-            "createdAt": "2025-09-16T16:13:20.606Z",
             "updatedAt": "2025-09-16T16:13:20.606Z",
+            "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
+              "updatedAt": "2025-11-02T07:12:45.501Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-11-01T08:00:06.881Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -452,7 +454,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-01",
+              "lastActiveAt": "2025-11-02",
               "isPending": false
             }
           }

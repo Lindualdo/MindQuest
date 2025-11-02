@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-09-30T11:31:35.749Z",
   "updatedAt": "2025-11-01T20:48:09.414Z",
+  "createdAt": "2025-09-30T11:31:35.749Z",
   "id": "2LwxT1Pnnaheh10M",
   "name": "chat_onboarding",
   "active": false,
@@ -670,14 +670,14 @@
   "triggerCount": 1,
   "shared": [
     {
-      "createdAt": "2025-09-30T11:31:35.749Z",
       "updatedAt": "2025-09-30T11:31:35.749Z",
+      "createdAt": "2025-09-30T11:31:35.749Z",
       "role": "workflow:owner",
       "workflowId": "2LwxT1Pnnaheh10M",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
         "updatedAt": "2025-09-25T16:38:18.729Z",
+        "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
         "type": "personal",
@@ -685,13 +685,13 @@
         "description": null,
         "projectRelations": [
           {
-            "createdAt": "2025-09-16T16:13:20.606Z",
             "updatedAt": "2025-09-16T16:13:20.606Z",
+            "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
+              "updatedAt": "2025-11-02T07:12:45.501Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-11-01T08:00:06.881Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -716,7 +716,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-01",
+              "lastActiveAt": "2025-11-02",
               "isPending": false
             }
           }

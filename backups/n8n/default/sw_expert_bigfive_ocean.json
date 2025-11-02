@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-10-19T20:04:57.978Z",
   "updatedAt": "2025-10-27T17:27:16.025Z",
+  "createdAt": "2025-10-19T20:04:57.978Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
   "active": false,
@@ -293,14 +293,14 @@
   "triggerCount": 0,
   "shared": [
     {
-      "createdAt": "2025-10-19T20:04:57.978Z",
       "updatedAt": "2025-10-19T20:04:57.978Z",
+      "createdAt": "2025-10-19T20:04:57.978Z",
       "role": "workflow:owner",
       "workflowId": "nOl6lnaGMpyg9S9J",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
         "updatedAt": "2025-09-25T16:38:18.729Z",
+        "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
         "type": "personal",
@@ -308,13 +308,13 @@
         "description": null,
         "projectRelations": [
           {
-            "createdAt": "2025-09-16T16:13:20.606Z",
             "updatedAt": "2025-09-16T16:13:20.606Z",
+            "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
+              "updatedAt": "2025-11-02T07:12:45.501Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
-              "updatedAt": "2025-11-01T08:00:06.881Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
               "firstName": "Aldo",
@@ -339,7 +339,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-01",
+              "lastActiveAt": "2025-11-02",
               "isPending": false
             }
           }
