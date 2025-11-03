@@ -269,6 +269,68 @@ const gamificacao: Gamificacao = {
       desbloqueada_em: '2025-10-10T08:30:00Z'
     }
   ],
+  conquistas_proximas: [
+    {
+      id: 'streak_30_dias',
+      nome: 'Streak 30 Dias',
+      emoji: '🔒',
+      status: 'pendente',
+      xp_bonus: 300,
+      categoria: 'consistencia',
+      categoria_codigo: 'consistencia',
+      progresso_meta: 30,
+      progresso_atual: 12,
+      progresso_percentual: 40,
+      ultima_atualizacao: '2025-10-10T09:00:00Z'
+    },
+    {
+      id: 'reflexoes_20',
+      nome: '20 Reflexões',
+      emoji: '🔮',
+      status: 'parcial',
+      xp_bonus: 220,
+      categoria: 'reflexao',
+      categoria_codigo: 'reflexao',
+      progresso_meta: 20,
+      progresso_atual: 14,
+      progresso_percentual: 70,
+      ultima_atualizacao: '2025-10-10T09:00:00Z'
+    }
+  ],
+  proximo_nivel: {
+    nivel: 9,
+    titulo: 'Ascendente',
+    xp_minimo: 5800,
+    xp_maximo: 7200,
+    xp_restante: 4560,
+    descricao: 'Eleva a prática a um novo patamar de consistência.'
+  },
+  proximos_niveis: [
+    {
+      nivel: 9,
+      titulo: 'Ascendente',
+      xp_minimo: 5800,
+      xp_maximo: 7200,
+      xp_restante: 4560,
+      descricao: 'Eleva a prática a um novo patamar de consistência.'
+    },
+    {
+      nivel: 10,
+      titulo: 'Mestre',
+      xp_minimo: 7200,
+      xp_maximo: 9000,
+      xp_restante: 5960,
+      descricao: 'Domina a jornada e serve de referência.'
+    },
+    {
+      nivel: 11,
+      titulo: 'Mentor',
+      xp_minimo: 9000,
+      xp_maximo: 12000,
+      xp_restante: 7760,
+      descricao: 'Compartilha aprendizados e amplia impacto.'
+    }
+  ],
   total_conversas: 42,
   total_reflexoes: 18,
   total_xp_ganho_hoje: 120,

@@ -13,6 +13,7 @@ import type {
   SabotadorPadrao, 
   Insight
 } from '../types/emotions';
+import { gamificacaoLevels } from '../data/gamificacaoLevels';
 
 interface ApiData {
   success?: boolean;
@@ -71,6 +72,7 @@ interface ApiData {
     quest_diaria_data: string | null;
     quest_streak_dias: string | number | null;
     conquistas_desbloqueadas: string | Array<Record<string, unknown>> | null;
+    conquistas_proximas?: string | Array<Record<string, unknown>> | null;
     total_conversas: string | number | null;
     total_reflexoes: string | number | null;
     total_xp_ganho_hoje: string | number | null;
@@ -78,6 +80,20 @@ interface ApiData {
     ultima_conquista_data: string | null;
     ultima_atualizacao: string | null;
     criado_em: string | null;
+  };
+  proxima_jornada?: {
+    xp_total: string | number | null;
+    nivel_atual: string | number | null;
+    titulo_atual: string | null;
+    proximo_nivel?: {
+      nivel: string | number | null;
+      titulo: string | null;
+      xp_minimo: string | number | null;
+      xp_restante: string | number | null;
+      descricao: string | null;
+    } | null;
+    proximos_niveis?: string | Array<Record<string, unknown>> | null;
+    desafios?: string | Array<Record<string, unknown>> | null;
   };
   sabotador: {
     id: string | null;
@@ -247,6 +263,14 @@ class DataAdapter {
         ultima_conquista_data: null,
         ultima_atualizacao: null,
         criado_em: null
+      },
+      proxima_jornada: {
+        xp_total: null,
+        nivel_atual: null,
+        titulo_atual: null,
+        proximo_nivel: null,
+        proximos_niveis: null,
+        desafios: null
       },
       sabotador: {
         id: null,
@@ -435,6 +459,7 @@ class DataAdapter {
 
     const perfil = safeJsonParse<Record<string, unknown>>(payload.Perfil_BigFive);
     const gamificacaoBlock = safeJsonParse<Record<string, unknown>>(payload.Gameficacao ?? payload.Gamificacao);
+    const proximaJornadaBlock = safeJsonParse<Record<string, unknown>>(payload.Proxima_Jornada ?? payload.proxima_jornada);
     const sabotadorBlock = safeJsonParse<Record<string, unknown>>(payload.Sabotador);
     const distribuicaoBlock = safeJsonParse<Record<string, unknown>>(payload.Distribuicao_Emocoes);
     const rodaEmocoesBlock = payload.roda_emocoes
@@ -448,6 +473,8 @@ class DataAdapter {
 
     const historicoArray = safeJsonParse<Array<Record<string, unknown>>>(historicoWrapper?.historico ?? historicoWrapper);
     const insightsArray = safeJsonParse<Array<Record<string, unknown>>>(insightsWrapper?.insights_lista ?? insightsWrapper);
+    const proximosNiveisArray = safeJsonParse<Array<Record<string, unknown>>>(proximaJornadaBlock?.proximos_niveis ?? proximaJornadaBlock?.Proximos_Niveis);
+    const desafiosProximaJornadaArray = safeJsonParse<Array<Record<string, unknown>>>(proximaJornadaBlock?.desafios ?? proximaJornadaBlock?.Desafios);
 
     const distribuicaoRaw = safeJsonParse<Record<string, number | string>>(distribuicaoBlock?.emocoes_contagem ?? distribuicaoBlock);
 
@@ -649,11 +676,50 @@ class DataAdapter {
       ? { ...this.getDefaultApiData().user, ...partialUser }
       : undefined;
 
+    const proximoNivelBlock = proximaJornadaBlock
+      ? safeJsonParse<Record<string, unknown>>(proximaJornadaBlock.proximo_nivel ?? proximaJornadaBlock.Proximo_Nivel)
+      : null;
+
+    const proximaJornada: Partial<ApiData['proxima_jornada']> = {};
+    if (proximaJornadaBlock) {
+      const setProximaValue = (key: keyof ApiData['proxima_jornada'], value: unknown) => {
+        if (value === undefined) return;
+        if (Array.isArray(value) || typeof value === 'object' || value === null) {
+          proximaJornada[key] = value as any;
+          return;
+        }
+        const parsed = this.parseNullString<string>(value as string | null | undefined);
+        if (parsed !== null && parsed !== undefined) {
+          proximaJornada[key] = parsed as any;
+        }
+      };
+
+      setProximaValue('xp_total', proximaJornadaBlock.xp_total);
+      setProximaValue('nivel_atual', proximaJornadaBlock.nivel_atual);
+      setProximaValue('titulo_atual', proximaJornadaBlock.titulo_atual ?? proximaJornadaBlock.tituloAtual);
+      if (proximoNivelBlock) {
+        proximaJornada.proximo_nivel = {
+          nivel: proximoNivelBlock.nivel ?? proximoNivelBlock.Nivel ?? null,
+          titulo: proximoNivelBlock.titulo ?? proximoNivelBlock.Titulo ?? null,
+          xp_minimo: proximoNivelBlock.xp_minimo ?? proximoNivelBlock.XP_Minimo ?? null,
+          xp_restante: proximoNivelBlock.xp_restante ?? proximoNivelBlock.XP_Restante ?? null,
+          descricao: proximoNivelBlock.descricao ?? proximoNivelBlock.Descricao ?? null
+        };
+      }
+      if (proximosNiveisArray) {
+        proximaJornada.proximos_niveis = proximosNiveisArray as any;
+      }
+      if (desafiosProximaJornadaArray) {
+        proximaJornada.desafios = desafiosProximaJornadaArray as any;
+      }
+    }
+
     const partialData: Partial<ApiData> = {
       success: true,
       user: partialUserData,
       perfil_big_five: Object.keys(perfilBigFive).length > 0 ? (perfilBigFive as ApiData['perfil_big_five']) : undefined,
       gamificacao: Object.keys(gamificacao).length > 0 ? (gamificacao as ApiData['gamificacao']) : undefined,
+      proxima_jornada: Object.keys(proximaJornada).length > 0 ? (proximaJornada as ApiData['proxima_jornada']) : undefined,
       sabotador: Object.keys(sabotador).length > 0 ? (sabotador as ApiData['sabotador']) : undefined,
       distribuicao_emocoes: Object.keys(distribuicao).length > 0 ? (distribuicao as ApiData['distribuicao_emocoes']) : undefined,
       panas: Object.keys(panas).length > 0 ? (panas as ApiData['panas']) : undefined,
@@ -704,6 +770,10 @@ class DataAdapter {
       gamificacao: {
         ...defaults.gamificacao,
         ...(safeData.gamificacao || {})
+      },
+      proxima_jornada: {
+        ...defaults.proxima_jornada,
+        ...(safeData.proxima_jornada || {})
       },
       sabotador: {
         ...defaults.sabotador,
@@ -994,7 +1064,8 @@ class DataAdapter {
 
   private convertGamificacao(
     gamificacao: ApiData['gamificacao'],
-    historicoResumo?: ApiData['historico_resumo']
+    historicoResumo?: ApiData['historico_resumo'],
+    proximaJornada?: ApiData['proxima_jornada']
   ): Gamificacao {
     const toBoolean = (value: string | boolean | null | undefined): boolean => {
       if (typeof value === 'boolean') return value;
@@ -1052,6 +1123,37 @@ class DataAdapter {
       };
     };
 
+    const parseConquistaProximaEntry = (entry: unknown) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const data = entry as Record<string, unknown>;
+      const id = this.parseNullString<string>(data.id as string | null | undefined);
+      const nome = this.parseNullString<string>(data.nome as string | null | undefined) ?? 'Próxima conquista';
+      if (!id) return null;
+      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🔒';
+      const status = this.parseNullString<string>(data.status as string | null | undefined) ?? 'pendente';
+      const xpBonus = this.parseNumber(data.xp_bonus) ?? 0;
+      const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
+      const categoriaCodigo = this.parseNullString<string>(data.categoria_codigo as string | null | undefined);
+      const progressoMeta = this.parseNumber(data.progresso_meta) ?? 0;
+      const progressoAtual = this.parseNumber(data.progresso_atual) ?? 0;
+      const progressoPercentual = clamp(this.parseNumber(data.progresso_percentual) ?? 0);
+      const ultimaAtualizacaoEntrada = this.parseNullString<string>(data.ultima_atualizacao as string | null | undefined);
+
+      return {
+        id,
+        nome,
+        emoji,
+        status,
+        xp_bonus: xpBonus,
+        categoria,
+        categoria_codigo: categoriaCodigo,
+        progresso_meta: progressoMeta,
+        progresso_atual: progressoAtual,
+        progresso_percentual: progressoPercentual,
+        ultima_atualizacao: ultimaAtualizacaoEntrada ?? null
+      };
+    };
+
     let conquistas: Gamificacao['conquistas_desbloqueadas'] = [];
     if (Array.isArray(gamificacao.conquistas_desbloqueadas)) {
       conquistas = gamificacao.conquistas_desbloqueadas
@@ -1073,6 +1175,28 @@ class DataAdapter {
       }
     }
 
+    let conquistasProximas: Gamificacao['conquistas_proximas'] = [];
+    const proximasFonte = gamificacao.conquistas_proximas;
+    if (Array.isArray(proximasFonte)) {
+      conquistasProximas = proximasFonte
+        .map(parseConquistaProximaEntry)
+        .filter((item): item is Gamificacao['conquistas_proximas'][number] => item !== null);
+    } else {
+      const proximasStr = this.parseNullString<string>(proximasFonte as string | null | undefined);
+      if (proximasStr) {
+        try {
+          const parsed = JSON.parse(proximasStr);
+          if (Array.isArray(parsed)) {
+            conquistasProximas = parsed
+              .map(parseConquistaProximaEntry)
+              .filter((item): item is Gamificacao['conquistas_proximas'][number] => item !== null);
+          }
+        } catch (error) {
+          console.error('Erro ao parsear conquistas futuras:', error);
+        }
+      }
+    }
+
     const melhorStreak = this.parseNumber(gamificacao.melhor_streak);
     const questProgresso = clamp(this.parseNumber(gamificacao.quest_diaria_progresso) ?? 0);
     const questDescricao = this.parseNullString<string>(gamificacao.quest_diaria_descricao) ?? 'Complete sua conversa diária';
@@ -1086,6 +1210,87 @@ class DataAdapter {
     const totalConversas = this.parseNumber(gamificacao.total_conversas) ?? 0;
     const totalReflexoes = this.parseNumber(gamificacao.total_reflexoes) ?? 0;
     const totalXpHoje = this.parseNumber(gamificacao.total_xp_ganho_hoje) ?? 0;
+
+    const upcomingLevelsBase = gamificacaoLevels
+      .filter((level) => level.nivel > nivelAtual)
+      .slice(0, 3)
+      .map((level) => ({
+        nivel: level.nivel,
+        titulo: level.titulo,
+        xp_minimo: level.xp_minimo,
+        xp_maximo: level.xp_proximo_nivel,
+        xp_restante: Math.max(level.xp_minimo - xpTotal, 0),
+        descricao: level.descricao
+      }));
+
+    let proximosNiveis: Gamificacao['proximos_niveis'] = upcomingLevelsBase;
+    let proximoNivel: Gamificacao['proximo_nivel'] =
+      proximosNiveis.length > 0 ? { ...proximosNiveis[0] } : null;
+
+    const proximoNivelRaw = proximaJornada?.proximo_nivel;
+    if (proximoNivelRaw) {
+      const proximoNivelNumero = this.parseNumber(proximoNivelRaw.nivel) ?? proximoNivel?.nivel ?? (nivelAtual + 1);
+      const proximoNivelTitulo =
+        this.parseNullString<string>(proximoNivelRaw.titulo as string | null | undefined) ??
+        (proximoNivel?.titulo ?? `Nível ${proximoNivelNumero}`);
+      const proximoNivelXpMinimo =
+        this.parseNumber(proximoNivelRaw.xp_minimo) ??
+        proximoNivel?.xp_minimo ??
+        xpProximoNivel;
+      const proximoNivelDescricao =
+        this.parseNullString<string>(proximoNivelRaw.descricao as string | null | undefined) ??
+        proximoNivel?.descricao ??
+        null;
+      const proximoNivelXpRestante = (() => {
+        const parsed = this.parseNumber(proximoNivelRaw.xp_restante);
+        if (parsed !== null && Number.isFinite(parsed)) return Math.max(parsed, 0);
+        return Math.max(proximoNivelXpMinimo - xpTotal, 0);
+      })();
+
+      proximoNivel = {
+        nivel: proximoNivelNumero,
+        titulo: proximoNivelTitulo,
+        xp_minimo: proximoNivelXpMinimo,
+        xp_maximo: proximoNivel?.xp_maximo ?? null,
+        xp_restante: proximoNivelXpRestante,
+        descricao: proximoNivelDescricao
+      };
+
+      if (proximosNiveis.length > 0 && proximosNiveis[0].nivel === proximoNivelNumero) {
+        proximosNiveis = [
+          {
+            ...proximoNivel,
+            xp_maximo: proximosNiveis[0].xp_maximo ?? proximoNivel?.xp_maximo ?? null
+          },
+          ...proximosNiveis.slice(1)
+        ];
+      } else if (proximoNivel) {
+        proximosNiveis = [proximoNivel, ...proximosNiveis].slice(0, 3);
+      }
+    }
+
+    if ((!proximoNivel || proximosNiveis.length === 0) && Array.isArray(proximaJornada?.proximos_niveis)) {
+      const proximosComplementares = (proximaJornada?.proximos_niveis as Array<Record<string, unknown>>)
+        .map((entry) => {
+          const nivel = this.parseNumber(entry.nivel) ?? null;
+          if (nivel === null) return null;
+          const xpMinimo = this.parseNumber(entry.xp_minimo) ?? 0;
+          const xpMaximo = this.parseNumber(entry.xp_proximo_nivel) ?? null;
+          return {
+            nivel,
+            titulo: this.parseNullString<string>(entry.titulo as string | null | undefined) ?? `Nível ${nivel}`,
+            xp_minimo: xpMinimo,
+            xp_maximo: xpMaximo,
+            xp_restante: Math.max(xpMinimo - xpTotal, 0),
+            descricao: this.parseNullString<string>(entry.descricao as string | null | undefined)
+          };
+        })
+        .filter((item): item is Gamificacao['proximos_niveis'][number] => item !== null);
+      if (proximosComplementares.length > 0) {
+        proximosNiveis = proximosComplementares.slice(0, 3);
+        proximoNivel = { ...proximosNiveis[0] };
+      }
+    }
 
     return {
       xp_total: xpTotal,
@@ -1109,7 +1314,10 @@ class DataAdapter {
       ultima_conquista_id: this.parseNullString<string>(gamificacao.ultima_conquista_id),
       ultima_conquista_data: ultimaConquistaData,
       ultima_atualizacao: ultimaAtualizacao,
-      criado_em: criadoEm
+      criado_em: criadoEm,
+      conquistas_proximas: conquistasProximas,
+      proximo_nivel: proximoNivel,
+      proximos_niveis: proximosNiveis
     };
   }
 
@@ -1268,7 +1476,7 @@ class DataAdapter {
       checkins_historico: this.processHistoricoDiario(apiData),
       roda_emocoes: this.processDistribuicaoEmocoes(apiData),
       distribuicao_panas: this.processPanas(apiData),
-      gamificacao: this.convertGamificacao(apiData.gamificacao, apiData.historico_resumo),
+      gamificacao: this.convertGamificacao(apiData.gamificacao, apiData.historico_resumo, apiData.proxima_jornada),
       
       sabotadores: {
         padrao_principal: this.convertSabotador(apiData.sabotador)

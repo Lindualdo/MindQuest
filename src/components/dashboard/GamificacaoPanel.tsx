@@ -1,183 +1,162 @@
-/**
- * ARQUIVO: src/components/dashboard/GamificacaoPanel.tsx
- * AÇÃO: CRIAR novo componente
- * 
- * Sistema de gamificação completo conforme especificação v1.1
- * XP, níveis, streaks, conquistas e quest diária
- */
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Target, Star, Flame, Award, ArrowRight } from 'lucide-react';
-import { useDashboard } from '../../store/useStore';
-import type { GamificacaoConquista } from '../../types/emotions';
-import Card from '../ui/Card';
+import { Trophy, ArrowRight, Flame, Target } from 'lucide-react';
+
+import Card from '@/components/ui/Card';
+import { useDashboard } from '@/store/useStore';
+import { gamificacaoLevels } from '@/data/gamificacaoLevels';
 
 const GamificacaoPanel: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
   const { gamificacao } = dashboardData;
 
-  // Calcular progresso para próximo nível
-  const xpTarget = Math.max(gamificacao.xp_proximo_nivel, gamificacao.xp_total || 0, 1);
-  const xpParaProximoNivel = Math.max(xpTarget - gamificacao.xp_total, 0);
-  const progressoNivel = (gamificacao.xp_total / xpTarget) * 100;
+  const currentLevel = gamificacaoLevels.find(
+    (level) => level.nivel === gamificacao.nivel_atual
+  );
 
-  const conquistasRecentes = useMemo(() => {
-    const ordenar = (entradaA: GamificacaoConquista, entradaB: GamificacaoConquista) => {
-      const dataA = entradaA.desbloqueada_em ? new Date(entradaA.desbloqueada_em).getTime() : 0;
-      const dataB = entradaB.desbloqueada_em ? new Date(entradaB.desbloqueada_em).getTime() : 0;
-      return dataB - dataA;
-    };
+  const nextLevel = gamificacao.proximo_nivel;
+  const xpFaltante = nextLevel
+    ? Math.max(
+        nextLevel.xp_restante ??
+          nextLevel.xp_minimo - (gamificacao.xp_total ?? 0),
+        0
+      )
+    : 0;
 
-    return [...(gamificacao.conquistas_desbloqueadas || [])]
-      .sort(ordenar)
-      .slice(0, 4);
-  }, [gamificacao.conquistas_desbloqueadas]);
-
-  const getQuestStatusColor = (status: string) => {
-    switch (status) {
-      case 'completa': return 'bg-green-500';
-      case 'parcial': return 'bg-yellow-500';
-      case 'pendente': return 'bg-gray-400';
-      default: return 'bg-gray-400';
+  const progressoNivel = (() => {
+    if (!currentLevel || !nextLevel) {
+      const alvo = gamificacao.xp_proximo_nivel || 1;
+      return Math.min((gamificacao.xp_total / alvo) * 100, 100);
     }
+    const faixa =
+      (nextLevel.xp_minimo ?? gamificacao.xp_proximo_nivel) -
+      currentLevel.xp_minimo;
+    if (!faixa || faixa <= 0) return 0;
+    const ganho = gamificacao.xp_total - currentLevel.xp_minimo;
+    return Math.min(Math.max((ganho / faixa) * 100, 0), 100);
+  })();
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return 'Data não disponível';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatXP = (value?: number | null) => {
+    if (!value || Number.isNaN(value)) return '0';
+    return value.toLocaleString('pt-BR');
   };
 
   return (
-    <Card>
-      <div className="flex items-center gap-2 mb-6">
-        <Trophy className="text-yellow-600" size={24} />
-        <h3 className="text-xl font-semibold text-gray-800">Gamificação</h3>
+    <Card hover={false} className="bg-[#FFE4FA] shadow-lg">
+      <div className="flex items-center gap-2">
+        <div className="rounded-full bg-[#1C2541] p-2">
+          <Trophy size={20} className="text-[#FFE4FA]" />
+        </div>
+        <h3 className="text-xl font-semibold text-[#1C2541]">Gamificação</h3>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          {/* XP e Nível */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Star className="text-purple-600" size={20} />
-                <span className="font-semibold text-gray-800">
-                  {gamificacao.titulo_nivel || `Nível ${gamificacao.nivel_atual}`}
+      <div className="mt-6 space-y-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-[#3083DC]/20 bg-gradient-to-br from-[#3083DC]/15 via-white to-[#7EBDC2]/20 p-5 text-[#1C2541] shadow-md">
+            <p className="text-sm uppercase tracking-wide text-[#3083DC]">
+              Nível atual
+            </p>
+            <h4 className="mt-2 text-2xl font-semibold">
+              {currentLevel?.titulo || `Nível ${gamificacao.nivel_atual}`}
+            </h4>
+            <p className="mt-3 text-sm text-[#1C2541]/70">
+              {currentLevel?.descricao ||
+                'Avance completando reflexões, desafios e mantendo sua consistência.'}
+            </p>
+
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#3083DC] shadow-sm">
+                  <Flame size={14} strokeWidth={2} />
+                </span>
+                <span>
+                  Streak ativo:{' '}
+                  <strong>{gamificacao.streak_conversas_dias}</strong> dia(s)
                 </span>
               </div>
-              <div className="text-sm text-gray-600">
-                {gamificacao.xp_total} XP
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#3083DC] shadow-sm">
+                  <Target size={14} strokeWidth={2} />
+                </span>
+                <span>
+                  XP total: <strong>{formatXP(gamificacao.xp_total)} XP</strong>
+                </span>
               </div>
-            </div>
-            
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(progressoNivel, 100)}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-              />
-            </div>
-            
-            <div className="text-xs text-gray-500 mt-1 text-center">
-              {xpParaProximoNivel} XP para o próximo nível
             </div>
           </div>
 
-          {/* Quest Diária */}
-          <div className="p-4 bg-blue-50 rounded-xl">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="text-blue-600" size={20} />
-              <span className="font-semibold text-gray-800">Quest Diária</span>
-              <div className={`w-3 h-3 rounded-full ${getQuestStatusColor(gamificacao.quest_diaria_status)}`} />
+          <div className="rounded-2xl border border-[#7EBDC2]/40 bg-[#E8F3F5] p-5 shadow-inner">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[#1C2541] uppercase tracking-wide">
+                  Barra de progresso
+                </p>
+                <p className="text-xs text-[#1C2541]/70">
+                  Falta {formatXP(xpFaltante)} XP para o próximo nível
+                </p>
+              </div>
+              <span className="rounded-full bg-[#3083DC]/10 px-3 py-1 text-xs font-semibold text-[#3083DC]">
+                {Math.round(progressoNivel)}%
+              </span>
             </div>
-            
-            <div className="text-sm text-gray-700 mb-3">
-              {gamificacao.quest_diaria_descricao}
-            </div>
-            
-            <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+
+            <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-[#7EBDC2]/30">
               <motion.div
-                className="h-full bg-blue-600 rounded-full"
+                className="h-full rounded-full bg-gradient-to-r from-[#3083DC] via-[#7EBDC2] to-[#7EBDC2]"
                 initial={{ width: 0 }}
-                animate={{ width: `${gamificacao.quest_diaria_progresso}%` }}
-                transition={{ duration: 1, delay: 0.5 }}
+                animate={{ width: `${progressoNivel}%` }}
+                transition={{ duration: 1.4, ease: 'easeOut' }}
               />
             </div>
-            
-            <div className="text-xs text-blue-600 mt-2 text-center">
-              {gamificacao.quest_diaria_progresso}% completa
-            </div>
+
+            {nextLevel && (
+              <div className="mt-4 rounded-xl border border-[#3083DC]/20 bg-white/80 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[#1C2541]">
+                      Próximo nível · {nextLevel.titulo}
+                    </p>
+                    <p className="text-xs text-[#1C2541]/70">
+                      Desbloqueia aos {formatXP(nextLevel.xp_minimo)} XP
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold text-[#3083DC]">
+                    Falta {formatXP(xpFaltante)} XP
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Streak */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl"
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setView('conquistas')}
+            className="inline-flex items-center gap-2 rounded-full border border-[#7EBDC2]/40 bg-white px-4 py-2 text-sm font-semibold text-[#1C2541] shadow-sm transition-colors hover:border-[#7EBDC2]"
           >
-            <Flame className="text-orange-600" size={24} />
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
-                {gamificacao.streak_conversas_dias}
-              </div>
-              <div className="text-sm text-gray-600">Dias seguidos</div>
-            </div>
-          </motion.div>
-
-          {/* Conquistas */}
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2">
-                <Award className="text-yellow-600" size={20} />
-                <span className="font-semibold text-gray-800">Conquistas Recentes</span>
-              </div>
-              {gamificacao.conquistas_desbloqueadas.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setView('conquistas')}
-                  className="flex items-center gap-1 text-xs font-semibold transition-colors mq-link"
-                >
-                  Ver todas
-                  <ArrowRight size={14} />
-                </button>
-              )}
-            </div>
-            
-            {gamificacao.conquistas_desbloqueadas.length === 0 ? (
-              <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 text-center">
-                Nenhuma conquista desbloqueada ainda. Complete a quest diária para começar!
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-                {conquistasRecentes.map((conquista, index) => (
-                  <motion.div
-                    key={conquista.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 + 0.6 }}
-                    className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors"
-                  >
-                    <div className="text-center space-y-1">
-                      <div className="text-xl">{conquista.emoji || '🏆'}</div>
-                      <div className="text-xs font-semibold text-gray-800">
-                        {conquista.nome}
-                      </div>
-                      <div className="text-[11px] text-gray-600">
-                        +{conquista.xp_bonus} XP • {conquista.desbloqueada_em ? new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR') : 'Data pendente'}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-            
-            {/* Contador total de conquistas */}
-            <div className="text-center mt-4 p-2 bg-gray-50 rounded-lg">
-              <span className="text-sm text-gray-600">
-                <strong>{gamificacao.conquistas_desbloqueadas.length}</strong> conquistas desbloqueadas
-              </span>
-            </div>
-          </div>
+            Abrir histórico
+            <ArrowRight size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('proximosNiveis')}
+            className="inline-flex items-center gap-2 rounded-full bg-[#3083DC] px-5 py-2 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-[#2567B5]"
+          >
+            Ver próximos níveis
+            <ArrowRight size={16} />
+          </button>
         </div>
       </div>
     </Card>

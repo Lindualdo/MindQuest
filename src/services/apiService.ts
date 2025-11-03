@@ -26,6 +26,20 @@ interface DashboardApiResponse {
     status_onboarding: string;
     criado_em: string;
   };
+  proxima_jornada?: {
+    xp_total?: number | string | null;
+    nivel_atual?: number | string | null;
+    titulo_atual?: string | null;
+    proximo_nivel?: {
+      nivel?: number | string | null;
+      titulo?: string | null;
+      xp_minimo?: number | string | null;
+      xp_restante?: number | string | null;
+      descricao?: string | null;
+    } | null;
+    proximos_niveis?: Array<Record<string, unknown>> | string | null;
+    desafios?: Array<Record<string, unknown>> | string | null;
+  };
   perfil_big_five: {
     openness: string | null;
     conscientiousness: string | null;
@@ -52,6 +66,7 @@ interface DashboardApiResponse {
     quest_diaria_data?: string | null;
     quest_streak_dias?: number | string | null;
     conquistas_desbloqueadas?: Array<Record<string, unknown>> | string | null;
+    conquistas_proximas?: Array<Record<string, unknown>> | string | null;
     total_conversas?: number | string | null;
     total_reflexoes?: number | string | null;
     total_xp_ganho_hoje?: number | string | null;

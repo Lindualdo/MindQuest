@@ -15,6 +15,7 @@ import FullChatPage from './pages/App/FullChatPage';
 import InsightDetailPage from './pages/App/InsightDetailPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/App/ConquistasPage';
+import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
 import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
@@ -201,6 +202,14 @@ function App() {
     return (
       <AuthGuard>
         <ConquistasPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'proximosNiveis') {
+    return (
+      <AuthGuard>
+        <ProximosNiveisPage />
       </AuthGuard>
     );
   }

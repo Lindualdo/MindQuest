@@ -117,6 +117,29 @@ export interface GamificacaoConquista {
   desbloqueada_em: string;
 }
 
+export interface GamificacaoConquistaProxima {
+  id: string;
+  nome: string;
+  emoji: string;
+  status: 'pendente' | 'parcial' | 'completa' | 'bloqueada' | 'em_andamento' | 'disponivel' | string;
+  xp_bonus: number;
+  categoria: string;
+  categoria_codigo?: string | null;
+  progresso_meta: number;
+  progresso_atual: number;
+  progresso_percentual: number;
+  ultima_atualizacao?: string | null;
+}
+
+export interface GamificacaoNivelPreview {
+  nivel: number;
+  titulo: string;
+  xp_minimo: number;
+  xp_maximo?: number | null;
+  xp_restante?: number;
+  descricao?: string | null;
+}
+
 export interface Gamificacao {
   xp_total: number;
   xp_proximo_nivel: number;
@@ -140,6 +163,9 @@ export interface Gamificacao {
   ultima_conquista_data: string | null;
   ultima_atualizacao: string | null;
   criado_em: string | null;
+  conquistas_proximas: GamificacaoConquistaProxima[];
+  proximo_nivel: GamificacaoNivelPreview | null;
+  proximos_niveis: GamificacaoNivelPreview[];
 }
 
 // Sabotadores internos
@@ -285,7 +311,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -309,7 +335,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
