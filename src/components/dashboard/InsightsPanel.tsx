@@ -7,7 +7,7 @@
  * ser compartilhada com o painel completo de Insights.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Microscope } from 'lucide-react';
 
@@ -52,6 +52,7 @@ const InsightsPanel: React.FC = () => {
     insightEmFoco,
     demaisInsights,
     resumoOptions,
+    countsByTipo,
     insightsFiltrados,
   } = useInsightsFilters(insights);
 
@@ -63,15 +64,6 @@ const InsightsPanel: React.FC = () => {
     const next = PRIORIDADE_CYCLE_ORDER[(currentIndex + 1) % PRIORIDADE_CYCLE_ORDER.length];
     setPrioridadeFiltro(next);
   };
-
-  const tipoResumo = useMemo(() => {
-    const counts: Record<string, number> = insights.reduce((acc, insight) => {
-      acc[insight.tipo] = (acc[insight.tipo] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    counts.todos = insights.length;
-    return counts;
-  }, [insights]);
 
   const renderInsightCard = (
     insight: Insight,
@@ -243,7 +235,7 @@ const InsightsPanel: React.FC = () => {
               tipoFiltro={tipoFiltro as TipoFiltroValue}
               prioridadeFiltro={prioridadeFiltro as PrioridadeFiltroValue}
               categoriaFiltro={categoriaFiltro as CategoriaFiltroValue}
-              tipoResumo={tipoResumo}
+              countsByTipo={countsByTipo}
               resumoOptions={resumoOptions}
               onTipoFiltroChange={(value) => setTipoFiltro(value)}
               onPrioridadeFiltroChange={(value) => setPrioridadeFiltro(value)}
@@ -306,7 +298,7 @@ const InsightsPanel: React.FC = () => {
               tipoFiltro={tipoFiltro as TipoFiltroValue}
               prioridadeFiltro={prioridadeFiltro as PrioridadeFiltroValue}
               categoriaFiltro={categoriaFiltro as CategoriaFiltroValue}
-              tipoResumo={tipoResumo}
+              countsByTipo={countsByTipo}
               resumoOptions={resumoOptions}
               onTipoFiltroChange={(value) => setTipoFiltro(value)}
               onPrioridadeFiltroChange={(value) => setPrioridadeFiltro(value)}

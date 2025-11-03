@@ -10,6 +10,7 @@ export interface InsightFilterState {
   prioridadeFiltro: Prioridade;
   categoriaFiltro: Categoria;
   searchTerm: string;
+  countsByTipo: Record<'todos' | Insight['tipo'], number>;
   setTipoFiltro: (value: TipoFiltro) => void;
   setPrioridadeFiltro: (value: Prioridade) => void;
   setCategoriaFiltro: (value: Categoria) => void;
@@ -18,6 +19,7 @@ export interface InsightFilterState {
   hasActiveFilters: boolean;
   summaryText: string;
   insightsOrdenados: Insight[];
+  baseInsightsFiltrados: Insight[];
   insightsFiltrados: Insight[];
   insightEmFoco: Insight | null;
   demaisInsights: Insight[];
@@ -145,18 +147,22 @@ export const useInsightsFilters = (
 
   const normalizedSearch = normalizeText(searchTerm.trim());
 
-  const insightsFiltrados = useMemo(() => {
-    const categoriaOk = (insight: Insight) =>
-      categoriaFiltro === 'todos' || insight.categoria === categoriaFiltro;
-    const tipoOk = (insight: Insight) => tipoFiltro === 'todos' || insight.tipo === tipoFiltro;
-    const prioridadeOk = (insight: Insight) =>
-      prioridadeFiltro === 'todas' || insight.prioridade === prioridadeFiltro;
+  const {
+    baseInsightsFiltrados,
+    insightsFiltrados,
+    countsByTipo,
+  } = useMemo(() => {
+    const baseList: Insight[] = [];
+    const filteredList: Insight[] = [];
+    const counts: Record<'todos' | Insight['tipo'], number> = {
+      todos: 0,
+      alerta: 0,
+      melhoria: 0,
+      padrao: 0,
+      positivo: 0,
+    };
 
-    return insightsOrdenados.filter((insight) => {
-      if (!categoriaOk(insight) || !tipoOk(insight) || !prioridadeOk(insight)) {
-        return false;
-      }
-
+    const matchesSearch = (insight: Insight) => {
       if (!normalizedSearch) return true;
 
       const haystack = [
@@ -172,8 +178,39 @@ export const useInsightsFilters = (
         .map((value) => normalizeText(String(value)));
 
       return haystack.some((value) => value.includes(normalizedSearch));
+    };
+
+    insightsOrdenados.forEach((insight) => {
+      const categoriaOk = categoriaFiltro === 'todos' || insight.categoria === categoriaFiltro;
+      const prioridadeOk =
+        prioridadeFiltro === 'todas' || insight.prioridade === prioridadeFiltro;
+
+      if (!categoriaOk || !prioridadeOk || !matchesSearch(insight)) {
+        return;
+      }
+
+      baseList.push(insight);
+      counts.todos += 1;
+      counts[insight.tipo] += 1;
+
+      const tipoOk = tipoFiltro === 'todos' || insight.tipo === tipoFiltro;
+      if (tipoOk) {
+        filteredList.push(insight);
+      }
     });
-  }, [categoriaFiltro, insightsOrdenados, normalizedSearch, prioridadeFiltro, tipoFiltro]);
+
+    return {
+      baseInsightsFiltrados: baseList,
+      insightsFiltrados: filteredList,
+      countsByTipo: counts,
+    };
+  }, [
+    categoriaFiltro,
+    insightsOrdenados,
+    normalizedSearch,
+    prioridadeFiltro,
+    tipoFiltro,
+  ]);
 
   const hasActiveFilters =
     categoriaFiltro !== 'todos' ||
@@ -208,7 +245,7 @@ export const useInsightsFilters = (
   ]);
 
   const categoriaResumo = useMemo(() => {
-    const counts = insights.reduce<Record<string, number>>((acc, insight) => {
+    const counts = baseInsightsFiltrados.reduce<Record<string, number>>((acc, insight) => {
       const categoria = insight.categoria || 'indefinido';
       acc[categoria] = (acc[categoria] || 0) + 1;
       return acc;
@@ -238,18 +275,21 @@ export const useInsightsFilters = (
       }));
 
     return [...ordered, ...extras];
-  }, [insights]);
+  }, [baseInsightsFiltrados]);
 
   const resumoOptions = useMemo(
-    () => [
-      {
-        key: 'todos',
-        total: insights.length,
-        label: 'Todos',
-      },
-      ...categoriaResumo,
-    ],
-    [categoriaResumo, insights.length]
+    () => {
+      const total = baseInsightsFiltrados.length;
+      return [
+        {
+          key: 'todos',
+          total,
+          label: 'Todos',
+        },
+        ...categoriaResumo,
+      ];
+    },
+    [baseInsightsFiltrados.length, categoriaResumo]
   );
 
   const tipoSummaryLabel = (() => {
@@ -326,6 +366,7 @@ export const useInsightsFilters = (
     prioridadeFiltro,
     categoriaFiltro,
     searchTerm,
+    countsByTipo,
     setTipoFiltro,
     setPrioridadeFiltro,
     setCategoriaFiltro,
@@ -334,6 +375,7 @@ export const useInsightsFilters = (
     hasActiveFilters,
     summaryText,
     insightsOrdenados,
+    baseInsightsFiltrados,
     insightsFiltrados,
     insightEmFoco,
     demaisInsights,

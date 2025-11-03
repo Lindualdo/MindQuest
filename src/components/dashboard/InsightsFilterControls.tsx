@@ -25,7 +25,7 @@ type Props = {
   tipoFiltro: TipoFiltroValue;
   prioridadeFiltro: PrioridadeFiltroValue;
   categoriaFiltro: CategoriaFiltroValue;
-  tipoResumo: Record<string, number>;
+  countsByTipo: Record<'todos' | Insight['tipo'], number>;
   resumoOptions: Array<{ key: string; total: number; label: string }>;
   onTipoFiltroChange: (value: TipoFiltroValue) => void;
   onPrioridadeFiltroChange: (value: PrioridadeFiltroValue) => void;
@@ -37,7 +37,7 @@ const InsightsFilterControls: React.FC<Props> = ({
   tipoFiltro,
   prioridadeFiltro,
   categoriaFiltro,
-  tipoResumo,
+  countsByTipo,
   resumoOptions,
   onTipoFiltroChange,
   onPrioridadeFiltroChange,
@@ -65,14 +65,14 @@ const InsightsFilterControls: React.FC<Props> = ({
                   : 'bg-white text-slate-600 border-slate-200 hover:border-blue-200'
               }`}
               aria-pressed={isActive}
-            >
-              {label}
-              <span className="rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold">
-                {tipoResumo[key] ?? 0}
-              </span>
-            </button>
-          );
-        })}
+              >
+                {label}
+                <span className="rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold">
+                  {countsByTipo[key] ?? 0}
+                </span>
+              </button>
+            );
+          })}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

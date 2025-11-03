@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -51,16 +51,8 @@ const InsightsDashboardPage: React.FC = () => {
     demaisInsights,
     insightsFiltrados,
     resumoOptions,
+    countsByTipo,
   } = useInsightsFilters(insights);
-
-  const tipoResumo = useMemo(() => {
-    const counts: Record<string, number> = insights.reduce((acc, insight) => {
-      acc[insight.tipo] = (acc[insight.tipo] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    counts.todos = insights.length;
-    return counts;
-  }, [insights]);
 
   const prioridadeCycleLabel =
     PRIORIDADE_OPTIONS.find(({ key }) => key === prioridadeFiltro)?.label ?? 'Todas';
@@ -162,7 +154,7 @@ const InsightsDashboardPage: React.FC = () => {
       tipoFiltro={tipoFiltro as TipoFiltroValue}
       prioridadeFiltro={prioridadeFiltro as PrioridadeFiltroValue}
       categoriaFiltro={categoriaFiltro as CategoriaFiltroValue}
-      tipoResumo={tipoResumo}
+      countsByTipo={countsByTipo}
       resumoOptions={resumoOptions}
       onTipoFiltroChange={(value) => setTipoFiltro(value)}
       onPrioridadeFiltroChange={(value) => setPrioridadeFiltro(value)}
@@ -248,7 +240,7 @@ const InsightsDashboardPage: React.FC = () => {
                 >
                   {label}
                   <span className="ml-2 rounded-full bg-white/30 px-2 py-0.5 text-xs font-semibold">
-                    {tipoResumo[key] ?? 0}
+                    {countsByTipo[key] ?? 0}
                   </span>
                 </button>
               );
@@ -400,7 +392,7 @@ const InsightsDashboardPage: React.FC = () => {
               tipoFiltro={tipoFiltro as TipoFiltroValue}
               prioridadeFiltro={prioridadeFiltro as PrioridadeFiltroValue}
               categoriaFiltro={categoriaFiltro as CategoriaFiltroValue}
-              tipoResumo={tipoResumo}
+              countsByTipo={countsByTipo}
               resumoOptions={resumoOptions}
               onTipoFiltroChange={(value) => setTipoFiltro(value)}
               onPrioridadeFiltroChange={(value) => setPrioridadeFiltro(value)}
