@@ -116,7 +116,7 @@ const CheckInsHistorico: React.FC = () => {
       </div>
 
       {/* Grid dos dias */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7 mb-6">
+      <div className="mb-6 grid grid-cols-7 gap-3">
         {ultimosSeteDias.map(({ checkin, label, dataLabel }, index) => {
           const statusConfig = checkin
             ? STATUS_CONFIG[checkin.status_resposta as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.default
