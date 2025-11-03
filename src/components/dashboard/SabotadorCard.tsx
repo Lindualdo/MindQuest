@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Lightbulb, Target, ShieldCheck, Compass } from 'lucide-react';
+import { Lightbulb, Target, ShieldCheck, Compass } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 import Card from '../ui/Card';
 import { getSabotadorById } from '../../data/sabotadoresCatalogo';
 
 const SabotadorCard: React.FC = () => {
-  const { dashboardData, openSabotadorDetail } = useDashboard();
+  const { dashboardData } = useDashboard();
   const principal = dashboardData?.sabotadores?.padrao_principal;
   const catalogInfo = principal?.id ? getSabotadorById(principal.id) : null;
 
@@ -76,8 +76,6 @@ const SabotadorCard: React.FC = () => {
     );
   }
 
-  const handleOpenDetail = () => openSabotadorDetail(principal.id);
-
   return (
     <Card className="h-full flex flex-col overflow-visible">
       <motion.div
@@ -128,17 +126,6 @@ const SabotadorCard: React.FC = () => {
             </div>
           )}
         </div>
-
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handleOpenDetail}
-          className="mt-auto self-center inline-flex w-fit items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white mq-btn-primary"
-          type="button"
-        >
-          Saiba mais sobre o sabotador
-          <ArrowRight size={16} className="text-white/80" />
-        </motion.button>
       </motion.div>
     </Card>
   );

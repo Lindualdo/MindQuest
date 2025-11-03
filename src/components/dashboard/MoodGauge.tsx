@@ -53,7 +53,6 @@ const MoodGauge: React.FC = () => {
   const humorMedio = dashboardData.metricas_periodo?.humor_medio ?? null;
 
   const handleOpenHistory = async () => {
-    console.log('[MoodGauge] abrindo histórico');
     setView('humorHistorico');
 
     const currentState = typeof useStore.getState === 'function' ? useStore.getState() : null;
@@ -65,7 +64,6 @@ const MoodGauge: React.FC = () => {
     }
 
     try {
-      console.log('[MoodGauge] requisitando histórico para', userId);
       await loadHumorHistorico();
     } catch (error) {
       console.error('Erro ao carregar histórico de humor:', error);

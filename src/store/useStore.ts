@@ -312,7 +312,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
 
   closeInsightDetail: () => {
     set({
-      view: 'dashboard',
+      view: 'dashInsights',
       selectedInsightId: null,
       insightDetail: null,
       insightDetailError: null,

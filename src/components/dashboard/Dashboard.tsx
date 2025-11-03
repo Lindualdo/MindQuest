@@ -15,40 +15,35 @@ import {
   AlertTriangle,
   Lightbulb,
   ArrowRight,
+  ChevronRight,
 } from 'lucide-react';
 import GamificacaoPanel from './GamificacaoPanel';
 import { useDashboard } from '../../store/useStore';
 
 type SectionVisual = {
   border: string;
-  background: string;
   iconColor: string;
 };
 
 const SECTION_STYLES: Record<string, SectionVisual> = {
   conversations: {
     border: '#AFC9FF',
-    background: '#F5F8FF',
     iconColor: '#3083DC',
   },
   gamification: {
     border: '#CDB5FF',
-    background: '#F6F1FF',
     iconColor: '#8B5CF6',
   },
   emotions: {
     border: '#F8B7DA',
-    background: '#FDEFF7',
     iconColor: '#EC4899',
   },
   sabotadores: {
     border: '#F9D97E',
-    background: '#FFF6E4',
     iconColor: '#F59E0B',
   },
   insights: {
     border: '#9FDBB5',
-    background: '#EAF8F0',
     iconColor: '#10B981',
   },
 };
@@ -59,8 +54,6 @@ const Dashboard: React.FC = () => {
     dashboardData,
     setView,
     openResumoConversas,
-    openSabotadorDetail,
-    openInsightDetail,
   } = useDashboard();
 
   const { checkins_historico, gamificacao, mood_gauge, metricas_periodo, sabotadores, insights } =
@@ -109,14 +102,9 @@ const Dashboard: React.FC = () => {
   const totalConversas = metricas_periodo?.total_checkins ?? checkins_historico.length;
   const melhorStreak = gamificacao.streak_conversas_dias ?? 0;
 
-  const topEmotion = (() => {
-    if (!dashboardData.roda_emocoes?.length) return null;
-    const sorted = [...dashboardData.roda_emocoes].sort((a, b) => b.intensidade - a.intensidade);
-    return sorted[0];
-  })();
-
   const activeSabotador = sabotadores?.padrao_principal;
   const primaryInsight = insights[0];
+  const alertInsightsCount = insights.filter((insight) => insight.tipo === 'alerta').length;
 
   if (isLoading) {
     return (
@@ -146,7 +134,7 @@ const Dashboard: React.FC = () => {
           id="conversas"
           style={{
             border: `2px dashed ${SECTION_STYLES.conversations.border}`,
-            background: SECTION_STYLES.conversations.background,
+            backgroundColor: '#FFFFFF',
           }}
           className="rounded-[24px] p-6 shadow-sm"
         >
@@ -251,7 +239,7 @@ const Dashboard: React.FC = () => {
           id="gamificacao"
           style={{
             border: `2px dashed ${SECTION_STYLES.gamification.border}`,
-            background: SECTION_STYLES.gamification.background,
+            backgroundColor: '#FFFFFF',
           }}
           className="rounded-[24px] p-6 shadow-sm"
         >
@@ -277,201 +265,81 @@ const Dashboard: React.FC = () => {
           id="emocoes"
           style={{
             border: `2px dashed ${SECTION_STYLES.emotions.border}`,
-            background: SECTION_STYLES.emotions.background,
+            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-6 shadow-sm"
+          className="rounded-[24px] p-1"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${SECTION_STYLES.emotions.iconColor}1a` }}
-              >
-                <Heart color={SECTION_STYLES.emotions.iconColor} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-[#1C2541]">Emoções</h3>
-                <p className="text-xs text-[#1C2541]/60">
-                  Humor atual e emoções dominantes
-                </p>
+          <button
+            type="button"
+            onClick={() => setView('dashEmocoes')}
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+          >
+            <div className="flex items-center gap-4">
+              <Heart color={SECTION_STYLES.emotions.iconColor} />
+              <div className="text-left">
+                <h3 className="text-base font-semibold text-[#1C2541]">Emoções</h3>
+                <p className="text-sm text-[#1C2541]/60">Humor · Roda das Emoções · PANAS</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setView('panasDetail')}
-              className="inline-flex items-center gap-1 rounded-full border border-[#EC489933] bg-white/85 px-4 py-2 text-xs font-semibold text-[#EC4899] shadow-sm transition hover:bg-[#ec48990d]"
-            >
-              Abrir painel de emoções
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-              <div className="text-xs text-[#1C2541]/60 uppercase font-semibold">
-                Humor atual
-              </div>
-              <div className="mt-1 text-xl font-semibold text-[#1C2541]">
-                {mood_gauge?.emoji_atual ? `${mood_gauge.emoji_atual} ` : ''}
-                {mood_gauge?.nivel_atual ?? '—'}/10
-              </div>
-              <div className="text-xs text-[#1C2541]/50">
-                Tendência semanal: {metricas_periodo?.humor_medio ?? '—'}
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-              <div className="text-xs text-[#1C2541]/60 uppercase font-semibold">
-                Emoção dominante
-              </div>
-              <div className="mt-1 text-xl font-semibold text-[#1C2541]">
-                {metricas_periodo?.emocao_dominante ?? topEmotion?.nome ?? '—'}
-              </div>
-              <div className="text-xs text-[#1C2541]/50">
-                Intensidade:{' '}
-                {topEmotion ? `${Math.round(topEmotion.intensidade)}%` : 'n/d'}
-              </div>
-            </div>
-          </div>
+            <ChevronRight size={18} className="text-[#94A3B8]" />
+          </button>
         </section>
 
-        {/* Sabotadores */}
         <section
           id="sabotadores"
           style={{
             border: `2px dashed ${SECTION_STYLES.sabotadores.border}`,
-            background: SECTION_STYLES.sabotadores.background,
+            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-6 shadow-sm"
+          className="rounded-[24px] p-1"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${SECTION_STYLES.sabotadores.iconColor}1a` }}
-              >
-                <AlertTriangle color={SECTION_STYLES.sabotadores.iconColor} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-[#1C2541]">Sabotadores</h3>
-                <p className="text-xs text-[#1C2541]/60">
-                  Padrão mental predominante no período
-                </p>
+          <button
+            type="button"
+            onClick={() => setView('dashSabotadores')}
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+          >
+            <div className="flex items-center gap-4">
+              <AlertTriangle color={SECTION_STYLES.sabotadores.iconColor} />
+              <div className="text-left">
+                <h3 className="text-base font-semibold text-[#1C2541]">Sabotadores</h3>
+                <p className="text-sm text-[#1C2541]/60">Padrões mentais ativos</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (activeSabotador?.id && activeSabotador.id !== 'none') {
-                  openSabotadorDetail(activeSabotador.id);
-                } else {
-                  setView('sabotadorDetail');
-                }
-              }}
-              className="inline-flex items-center gap-1 rounded-full border border-[#F59E0B33] bg-white/85 px-4 py-2 text-xs font-semibold text-[#F59E0B] shadow-sm transition hover:bg-[#f59e0b0d]"
-            >
-              Abrir painel de sabotadores
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {activeSabotador ? (
-            <div className="rounded-2xl bg-white/80 px-4 py-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{activeSabotador.emoji ?? '🧠'}</span>
-                <div>
-                  <p className="text-sm font-semibold text-[#1C2541] uppercase tracking-wide">
-                    {activeSabotador.nome}
-                  </p>
-                  <p className="text-xs text-[#1C2541]/60">
-                    {activeSabotador.insight_contexto}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 grid gap-3 text-xs text-[#1C2541]/70 sm:grid-cols-3">
-                <div className="rounded-xl bg-[#FFF7E5] px-3 py-2 font-semibold text-[#9A6B00]">
-                  Detectado em {activeSabotador.detectado_em ?? 0} conversa(s)
-                </div>
-                <div className="rounded-xl bg-[#E8F7F5] px-3 py-2 font-semibold text-[#0F766E]">
-                  Total conversas: {activeSabotador.total_conversas ?? 0}
-                </div>
-                <div className="rounded-xl bg-[#FDF1D8] px-3 py-2 font-semibold text-[#92400E]">
-                  Contramedida: {activeSabotador.contramedida}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-[#1C2541]/60">
-              Nenhum padrão crítico detectado recentemente.
-            </p>
-          )}
+            <ChevronRight size={18} className="text-[#94A3B8]" />
+          </button>
         </section>
 
-        {/* Insights */}
         <section
           id="insights"
           style={{
             border: `2px dashed ${SECTION_STYLES.insights.border}`,
-            background: SECTION_STYLES.insights.background,
+            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-6 shadow-sm"
+          className="rounded-[24px] p-1"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${SECTION_STYLES.insights.iconColor}1a` }}
-              >
-                <Lightbulb color={SECTION_STYLES.insights.iconColor} />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-[#1C2541]">Insights</h3>
-                <p className="text-xs text-[#1C2541]/60">
-                  Sugestões prontas para virar novas missões
+          <button
+            type="button"
+            onClick={() => setView('dashInsights')}
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+          >
+            <div className="flex items-center gap-4">
+              <Lightbulb color={SECTION_STYLES.insights.iconColor} />
+              <div className="text-left">
+                <h3 className="text-base font-semibold text-[#1C2541]">Insights</h3>
+                <p className="text-sm text-[#1C2541]/60">
+                  {insights.length}/75 insights disponíveis
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (primaryInsight?.id) {
-                  openInsightDetail(primaryInsight.id).catch(() => null);
-                } else {
-                  setView('insightDetail');
-                }
-              }}
-              className="inline-flex items-center gap-1 rounded-full border border-[#10B98133] bg-white/85 px-4 py-2 text-xs font-semibold text-[#10B981] shadow-sm transition hover:bg-[#10b9810d]"
-            >
-              Abrir painel de insights
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          <div className="rounded-2xl bg-white/85 px-4 py-4 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs text-[#1C2541]/60 uppercase font-semibold">
-                  Insights disponíveis
-                </p>
-                <div className="text-2xl font-semibold text-[#10B981]">
-                  {insights.length}
-                </div>
-              </div>
-              {primaryInsight && (
-                <div className="max-w-md text-sm text-[#1C2541]/70">
-                  <strong className="block text-[#1C2541]">
-                    {primaryInsight.titulo}
-                  </strong>
-                  <span className="text-xs uppercase text-[#1C2541]/50">
-                    {primaryInsight.tipo} • {primaryInsight.categoria}
-                  </span>
-                  <p className="mt-1 text-xs text-[#1C2541]/60">
-                    {primaryInsight.descricao}
-                  </p>
-                </div>
+            <div className="flex items-center gap-4">
+              {alertInsightsCount > 0 && (
+                <span className="rounded-full bg-[#FEE2E2] px-3 py-1 text-xs font-semibold text-[#DC2626]">
+                  {alertInsightsCount} alerta{alertInsightsCount > 1 ? 's' : ''}
+                </span>
               )}
+              <ChevronRight size={18} className="text-[#94A3B8]" />
             </div>
-          </div>
+          </button>
         </section>
       </div>
     </motion.div>

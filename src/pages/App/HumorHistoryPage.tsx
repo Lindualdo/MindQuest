@@ -162,7 +162,7 @@ const HumorHistoryPage: React.FC = () => {
     'Cada ponto registra uma leitura de humor/energia (geralmente por conversa). Use o gráfico para observar oscilações no período e a lista para ver justificativas e conversas associadas.';
 
   const handleBack = () => {
-    setView('dashboard');
+    setView('dashEmocoes');
   };
 
   return (

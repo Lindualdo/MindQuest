@@ -19,6 +19,9 @@ import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
 import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
+import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
+import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
+import InsightsDashboardPage from './pages/App/InsightsDashboardPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
@@ -210,6 +213,30 @@ function App() {
     return (
       <AuthGuard>
         <ProximosNiveisPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'dashEmocoes') {
+    return (
+      <AuthGuard>
+        <EmocoesDashboardPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'dashSabotadores') {
+    return (
+      <AuthGuard>
+        <SabotadoresDashboardPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'dashInsights') {
+    return (
+      <AuthGuard>
+        <InsightsDashboardPage />
       </AuthGuard>
     );
   }

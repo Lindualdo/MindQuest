@@ -35,7 +35,7 @@ const PanasDetailPage: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
   const { distribuicao_panas, roda_emocoes } = dashboardData ?? {};
 
-  const handleBack = () => setView('dashboard');
+  const handleBack = () => setView('dashEmocoes');
 
   if (!distribuicao_panas) {
     return (
