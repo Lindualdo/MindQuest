@@ -25,6 +25,10 @@ type SectionVisual = {
 };
 
 const SECTION_STYLES: Record<string, SectionVisual> = {
+  conversations: {
+    border: '#AFC9FF',
+    iconColor: '#3083DC',
+  },
   gamification: {
     border: '#CDB5FF',
     iconColor: '#8B5CF6',
@@ -78,14 +82,18 @@ const Dashboard: React.FC = () => {
     >
       <div className="space-y-6">
         {/* Histórico de conversas */}
-        <motion.div
+        <motion.section
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.35 }}
-          className="rounded-[28px]"
+          style={{
+            border: `2px dashed ${SECTION_STYLES.conversations.border}`,
+            backgroundColor: '#FFFFFF',
+          }}
+          className="rounded-[24px] p-6 shadow-sm"
         >
           <CheckInsHistorico />
-        </motion.div>
+        </motion.section>
 
         {/* Gamificação */}
         <section
