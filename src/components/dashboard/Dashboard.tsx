@@ -265,9 +265,8 @@ const Dashboard: React.FC = () => {
           id="emocoes"
           style={{
             border: `2px dashed ${SECTION_STYLES.emotions.border}`,
-            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-1"
+          className="rounded-[24px] bg-white"
         >
           <button
             type="button"
@@ -289,9 +288,8 @@ const Dashboard: React.FC = () => {
           id="sabotadores"
           style={{
             border: `2px dashed ${SECTION_STYLES.sabotadores.border}`,
-            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-1"
+          className="rounded-[24px] bg-white"
         >
           <button
             type="button"
@@ -313,9 +311,8 @@ const Dashboard: React.FC = () => {
           id="insights"
           style={{
             border: `2px dashed ${SECTION_STYLES.insights.border}`,
-            backgroundColor: '#FFFFFF',
           }}
-          className="rounded-[24px] p-1"
+          className="rounded-[24px] bg-white"
         >
           <button
             type="button"
