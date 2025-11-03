@@ -194,7 +194,7 @@ const InsightsDashboardPage: React.FC = () => {
   return (
     <div className="mindquest-dashboard min-h-screen pb-12">
       <header className="sticky top-0 z-40 border-b border-white/50 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={handleBack}
@@ -204,7 +204,7 @@ const InsightsDashboardPage: React.FC = () => {
             >
               <ArrowLeft size={18} className="text-slate-600" />
             </button>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-[#3083DC]">
                 Painel de insights
               </p>
@@ -213,7 +213,7 @@ const InsightsDashboardPage: React.FC = () => {
               </h1>
             </div>
           </div>
-          <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm">
+          <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm sm:self-start">
             {insightsFiltrados.length} de {baseInsightsFiltrados.length} insights exibidos
           </div>
         </div>
@@ -223,9 +223,9 @@ const InsightsDashboardPage: React.FC = () => {
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="space-y-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="-mx-2 flex items-center gap-2 overflow-x-auto px-2 pb-1 sm:mx-0 sm:px-0 sm:pb-0">
             {TAB_OPTIONS.map(({ key, label }) => {
               const isActive = tipoFiltro === key;
               return (
@@ -233,7 +233,7 @@ const InsightsDashboardPage: React.FC = () => {
                   key={key}
                   type="button"
                   onClick={() => setTipoFiltro(key)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
                     isActive
                       ? 'bg-[#3083DC] text-white shadow'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -249,7 +249,7 @@ const InsightsDashboardPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1">
+            <div className="relative w-full md:max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="search"
@@ -269,11 +269,11 @@ const InsightsDashboardPage: React.FC = () => {
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <button
                 type="button"
                 onClick={handlePrioridadeCycle}
-                className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm hover:bg-amber-100 transition"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm transition hover:bg-amber-100 sm:w-auto"
               >
                 <Filter size={14} />
                 Prioridade: {prioridadeCycleLabel}
@@ -281,7 +281,7 @@ const InsightsDashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-100 transition"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 sm:w-auto"
               >
                 <ListFilter size={14} />
                 {showAdvancedFilters ? 'Ocultar filtros avançados' : 'Filtros avançados'}
@@ -289,7 +289,7 @@ const InsightsDashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterSheetOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-100 transition md:hidden"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 md:hidden"
               >
                 Painel completo
               </button>

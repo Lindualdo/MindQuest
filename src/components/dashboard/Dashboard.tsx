@@ -9,14 +9,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  CalendarDays,
   Trophy,
   Heart,
   AlertTriangle,
   Lightbulb,
-  ArrowRight,
   ChevronRight,
 } from 'lucide-react';
+import CheckInsHistorico from './CheckInsHistorico';
 import GamificacaoPanel from './GamificacaoPanel';
 import { useDashboard } from '../../store/useStore';
 
@@ -53,11 +52,9 @@ const Dashboard: React.FC = () => {
     isLoading,
     dashboardData,
     setView,
-    openResumoConversas,
   } = useDashboard();
 
-  const { checkins_historico, gamificacao, mood_gauge, metricas_periodo, sabotadores, insights } =
-    dashboardData;
+  const insights = dashboardData.insights ?? [];
 
   const parseDate = (value?: string | null) => {
     if (!value) return null;
@@ -132,104 +129,97 @@ const Dashboard: React.FC = () => {
         {/* Histórico de conversas */}
         <section
           id="conversas"
-          style={{
-            border: `2px dashed ${SECTION_STYLES.conversations.border}`,
-            backgroundColor: '#FFFFFF',
-          }}
-          className="rounded-[24px] p-6 shadow-sm"
+          className="rounded-[28px] border border-dashed border-[#3083DC33] bg-white p-6 shadow-sm sm:p-8"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full"
-                style={{ backgroundColor: `${SECTION_STYLES.conversations.iconColor}1a` }}
-              >
-                <CalendarDays
-                  className="h-5 w-5"
-                  color={SECTION_STYLES.conversations.iconColor}
-                />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-[#1C2541]">
-                  Histórico de conversas
-                </h3>
-                <p className="text-xs text-[#1C2541]/60">
-                  Últimos 7 dias de interação com o assistente
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3083DC1A] text-[#3083DC]">
+                <CalendarDays size={20} />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-[#101828]">Histórico de conversas</h3>
+                <p className="text-xs font-medium text-[#475467]">
+                  Acompanhamento dos últimos 7 dias
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => openResumoConversas().catch(() => null)}
-              className="inline-flex items-center gap-1 rounded-full border border-[#3083DC33] bg-white/80 px-4 py-2 text-xs font-semibold text-[#3083DC] shadow-sm transition hover:bg-[#3083DC0d]"
+              className="inline-flex items-center gap-1 rounded-full border border-[#3083DC33] bg-white px-4 py-2 text-xs font-semibold text-[#3083DC] shadow-sm transition hover:bg-[#3083DC0d]"
             >
-              Ver resumo
+              Resumo
               <ArrowRight size={14} />
             </button>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 place-items-center">
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {lastSevenDays.map((day, idx) => {
-              const statusClasses = (() => {
+              const statusConfig = (() => {
                 switch (day.status) {
                   case 'respondido':
-                    return 'bg-[#E2F8ED] border-[#8AD9B5] text-[#166534]';
+                    return {
+                      wrapper: 'border-[#3CC96E] bg-[#E6F8ED]',
+                      icon: '✓',
+                      iconColor: 'text-[#17803B]',
+                    };
                   case 'perdido':
-                    return 'bg-[#FCE2E5] border-[#F08DA0] text-[#9F1239]';
+                    return {
+                      wrapper: 'border-[#CBD5E1] bg-white',
+                      icon: '✕',
+                      iconColor: 'text-[#64748B]',
+                    };
                   case 'pendente':
-                    return 'bg-[#FDF1D8] border-[#F4C670] text-[#92400E]';
+                    return {
+                      wrapper: 'border-[#F4C670] bg-[#FFF6E6]',
+                      icon: '…',
+                      iconColor: 'text-[#92400E]',
+                    };
                   default:
-                    return 'bg-white border-[#E2E8F0] text-[#94A3B8]';
-                }
-              })();
-
-              const statusSymbol = (() => {
-                switch (day.status) {
-                  case 'respondido':
-                    return '✓';
-                  case 'perdido':
-                    return '✗';
-                  case 'pendente':
-                    return '…';
-                  default:
-                    return '—';
+                    return {
+                      wrapper: 'border-[#E2E8F0] bg-white',
+                      icon: '—',
+                      iconColor: 'text-[#94A3B8]',
+                    };
                 }
               })();
 
               return (
-                <div
-                  key={`${day.label}-${idx}`}
-                  className={`w-full max-w-[120px] rounded-3xl border-2 px-3 py-4 text-center transition ${statusClasses}`}
-                  style={{ borderStyle: 'dashed' }}
-                >
-                  <div className="text-xs font-semibold text-[#1C2541]/60 uppercase tracking-wide">
-                    {day.label}
+                <div key={`dia-${idx}-${day.date}`} className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-transparent bg-white px-2 py-3 text-center shadow-sm lg:px-3">
+                  <div
+                    className={`flex h-16 w-16 items-center justify-center rounded-2xl border-2 ${statusConfig.wrapper}`}
+                  >
+                    <span className={`text-lg font-semibold ${statusConfig.iconColor}`}>
+                      {statusConfig.icon}
+                    </span>
                   </div>
-                  <div className="mt-1 text-base font-semibold">{statusSymbol}</div>
-                  <div className="mt-1 text-[11px] text-[#1C2541]/50">{day.date}</div>
+                  <div className="text-xs text-[#475467]">
+                    <div className="font-semibold uppercase tracking-wide">{day.label}</div>
+                    <div className="text-[11px] text-[#98A2B3]">{day.date}</div>
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-5 grid gap-3 text-center sm:grid-cols-3">
-            <div className="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-              <div className="text-2xl font-semibold text-[#3083DC]">
-                {daysWithConversations}
-              </div>
-              <div className="text-xs text-[#1C2541]/60">Dias com conversa</div>
+          <div className="mt-6 grid gap-4 border-t border-[#E4E7EC] pt-5 text-center text-sm text-[#475467] sm:grid-cols-3">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-semibold text-[#3083DC]">{daysWithConversations}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#98A2B3]">
+                Dias com conversas
+              </span>
             </div>
-            <div className="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-              <div className="text-2xl font-semibold text-[#3083DC]">
-                {totalConversas}
-              </div>
-              <div className="text-xs text-[#1C2541]/60">Total de conversas</div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-semibold text-[#3083DC]">{totalConversas}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#98A2B3]">
+                Total de conversas
+              </span>
             </div>
-            <div className="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-              <div className="text-2xl font-semibold text-[#3083DC]">
-                {melhorStreak}
-              </div>
-              <div className="text-xs text-[#1C2541]/60">Dias seguidos</div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-semibold text-[#3083DC]">{melhorStreak}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#98A2B3]">
+                Dias seguidos
+              </span>
             </div>
           </div>
         </section>
