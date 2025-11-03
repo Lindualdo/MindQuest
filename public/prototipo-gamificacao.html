@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindQuest • Protótipo Gamificação</title>
+    <style>
+      :root {
+        --dogwood-rose: #d90368;
+        --bleu-france: #3083dc;
+        --space-cadet: #1c2541;
+        --pale-purple: #ffe4fa;
+        --verdigris: #7ebdc2;
+        --verdigris-mist: #e8f3f5;
+        --card-radius: 22px;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, var(--pale-purple) 0%, #f9f0fc 100%);
+        color: var(--space-cadet);
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        background: rgba(255, 228, 250, 0.85);
+        border-bottom: 1px solid rgba(48, 131, 220, 0.1);
+        padding: 14px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      header .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        font-size: 18px;
+      }
+
+      header nav {
+        display: flex;
+        gap: 16px;
+        font-size: 14px;
+      }
+
+      header nav span {
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      header nav span.active {
+        background: rgba(48, 131, 220, 0.15);
+        color: var(--bleu-france);
+        font-weight: 600;
+      }
+
+      header nav span:hover {
+        background: rgba(124, 173, 255, 0.25);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 32px;
+        gap: 32px;
+      }
+
+      aside {
+        position: sticky;
+        top: 92px;
+        align-self: start;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: var(--card-radius);
+        padding: 24px 20px;
+        border: 1px solid rgba(48, 131, 220, 0.12);
+        box-shadow: 0 16px 40px -24px rgba(28, 37, 65, 0.4);
+      }
+
+      aside h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(28, 37, 65, 0.5);
+        margin: 0 0 12px;
+      }
+
+      aside nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 14px;
+      }
+
+      aside nav a {
+        text-decoration: none;
+        color: rgba(28, 37, 65, 0.72);
+        padding: 8px 12px;
+        border-radius: 10px;
+        transition: all 0.2s;
+      }
+
+      aside nav a:hover,
+      aside nav a.active {
+        background: rgba(48, 131, 220, 0.15);
+        color: var(--bleu-france);
+        font-weight: 600;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      section {
+        background: rgba(255, 255, 255, 0.72);
+        border-radius: var(--card-radius);
+        border: 1px solid rgba(48, 131, 220, 0.12);
+        padding: 28px;
+        box-shadow: 0 18px 46px -28px rgba(28, 37, 65, 0.45);
+      }
+
+      section h3 {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      section p.description {
+        margin: 0 0 18px;
+        font-size: 14px;
+        color: rgba(28, 37, 65, 0.6);
+      }
+
+      .emotional-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      .emotional-card .highlight {
+        background: linear-gradient(135deg, rgba(48, 131, 220, 0.12), rgba(126, 189, 194, 0.25));
+        border-radius: var(--card-radius);
+        padding: 22px;
+        border: 1px solid rgba(48, 131, 220, 0.2);
+      }
+
+      .emotional-card .insight {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: var(--card-radius);
+        padding: 22px;
+        border: 1px solid rgba(48, 131, 220, 0.15);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(48, 131, 220, 0.1);
+        color: var(--bleu-france);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .mission-card {
+        background: linear-gradient(135deg, rgba(48, 131, 220, 0.22), rgba(255, 255, 255, 0.8));
+        border-radius: var(--card-radius);
+        padding: 26px;
+        border: 1px solid rgba(48, 131, 220, 0.18);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .mission-card header {
+        position: relative;
+        backdrop-filter: none;
+        background: transparent;
+        border: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .mission-card h4 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--space-cadet);
+      }
+
+      .mission-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 13px;
+        color: rgba(28, 37, 65, 0.7);
+      }
+
+      .mission-meta .pill {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 6px 12px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .mission-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        padding: 10px 18px;
+        border-radius: 14px;
+        border: none;
+        background: var(--bleu-france);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 12px 20px -12px rgba(48, 131, 220, 0.8);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px -16px rgba(48, 131, 220, 0.7);
+      }
+
+      .btn-secondary {
+        padding: 10px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(48, 131, 220, 0.35);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--bleu-france);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-secondary:hover {
+        background: rgba(48, 131, 220, 0.12);
+      }
+
+      .accordion {
+        border: 1px solid rgba(48, 131, 220, 0.15);
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      .accordion-item + .accordion-item {
+        border-top: 1px solid rgba(48, 131, 220, 0.15);
+      }
+
+      .accordion summary {
+        padding: 16px 20px;
+        font-weight: 600;
+        color: var(--bleu-france);
+        cursor: pointer;
+      }
+
+      .accordion .content {
+        padding: 0 20px 20px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .mini-card {
+        border: 1px solid rgba(48, 131, 220, 0.18);
+        background: rgba(232, 243, 245, 0.6);
+        border-radius: 16px;
+        padding: 14px 16px;
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+      }
+
+      .mini-card .title {
+        font-weight: 600;
+        color: var(--space-cadet);
+      }
+
+      .mini-card footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: rgba(28, 37, 65, 0.55);
+      }
+
+      .progress-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .progress-card {
+        border-radius: var(--card-radius);
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(48, 131, 220, 0.12);
+      }
+
+      .progress-card h4 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .progress-bar {
+        margin-top: 14px;
+        height: 10px;
+        background: rgba(48, 131, 220, 0.15);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .progress-bar span {
+        height: 100%;
+        display: block;
+        border-radius: 8px;
+        background: linear-gradient(90deg, var(--bleu-france), var(--verdigris));
+      }
+
+      .conquests-slider {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(220px, 1fr);
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .conquest-card {
+        background: rgba(48, 131, 220, 0.08);
+        border-radius: 18px;
+        padding: 16px;
+        border: 1px solid rgba(48, 131, 220, 0.15);
+        min-height: 140px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .conquest-card .xp {
+        color: var(--bleu-france);
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .section-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      @media (max-width: 992px) {
+        .layout {
+          grid-template-columns: 1fr;
+          padding: 24px 20px 32px;
+        }
+
+        aside {
+          position: static;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        aside nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .emotional-card {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          padding: 12px 20px;
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span style="font-size: 20px">🧭</span>
+        MindQuest • Protótipo
+      </div>
+      <nav>
+        <span class="active">Gamificação</span>
+        <span>Insights</span>
+        <span>Diário emocional</span>
+        <span>Configurações</span>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <h2>Seções</h2>
+        <nav>
+          <a class="active" href="#panorama">Panorama emocional</a>
+          <a href="#missao">Missão personalizada</a>
+          <a href="#fila">Fila de missões</a>
+          <a href="#progresso">Progresso de nível</a>
+          <a href="#conquistas">Conquistas</a>
+          <a href="#proximos">Próximos níveis</a>
+        </nav>
+      </aside>
+
+      <main>
+        <section id="panorama">
+          <h3>Panorama emocional</h3>
+          <p class="description">
+            Resumo do estado emocional e insight prioritário para orientar as próximas ações.
+          </p>
+          <div class="emotional-card">
+            <div class="highlight">
+              <div class="chip">Emoção foco • Ansiedade matinal</div>
+              <h4 style="margin: 16px 0 6px; font-size: 20px;">
+                “A mente acelera ao acordar e dificulta seu dia.”
+              </h4>
+              <p style="margin: 0; font-size: 14px; color: rgba(28, 37, 65, 0.7);">
+                Você relatou tensão ao iniciar a manhã. Vamos trabalhar uma missão curta para reequilibrar a respiração e preparar o corpo.
+              </p>
+            </div>
+            <div class="insight">
+              <strong>Insight chave da semana</strong>
+              <p style="margin: 8px 0 18px; font-size: 14px;">
+                “Quando inicio com metas grandes, fico travado. Pequenos ajustes me ajudam a manter clareza.”
+              </p>
+              <button class="btn-secondary">Ver detalhes do insight</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="missao">
+          <h3>Missão personalizada</h3>
+          <p class="description">
+            Missão ativa criada a partir do insight selecionado. Apenas uma missão principal é exibida para evitar sobrecarga.
+          </p>
+
+          <div class="mission-card">
+            <header>
+              <div class="chip">Manual • Insight aprovado</div>
+              <span style="font-size: 12px; color: rgba(28, 37, 65, 0.6);">
+                Prazo: até 08h de amanhã
+              </span>
+            </header>
+
+            <div>
+              <h4>Respiração consciente por 5 minutos ao acordar</h4>
+              <p style="margin: 6px 0 0; font-size: 14px; color: rgba(28, 37, 65, 0.75);">
+                Objetivo: reduzir a ansiedade matinal e iniciar o dia com foco.
+              </p>
+            </div>
+
+            <div class="mission-meta">
+              <span class="pill">🎯 Emoção alvo: ansiedade</span>
+              <span class="pill">⏱ Duração: 5 minutos</span>
+              <span class="pill">✨ XP: +120</span>
+            </div>
+
+            <div class="mission-actions">
+              <button class="btn-primary">Registrar como concluída</button>
+              <button class="btn-secondary">Adiar para amanhã</button>
+              <button class="btn-secondary">Trocar missão</button>
+            </div>
+
+            <a href="#" style="font-size: 12px; color: var(--bleu-france); font-weight: 600; text-decoration: none;">
+              Ver insight relacionado →
+            </a>
+          </div>
+        </section>
+
+        <section id="fila">
+          <h3>Fila de missões personalizadas</h3>
+          <p class="description">
+            Limite de até duas missões visíveis para manter foco. Sugestões da IA só aparecem após a missão principal ser concluída.
+          </p>
+
+          <div class="accordion">
+            <details class="accordion-item" open>
+              <summary>Próximas sugestões do assistente</summary>
+              <div class="content">
+                <div class="mini-card">
+                  <div class="title">Alongamento rápido ao meio-dia</div>
+                  <div style="font-size: 12px;">
+                    Origem: IA • Objetivo: aliviar tensão corporal acumulada ao trabalhar sentado.
+                  </div>
+                  <footer>
+                    <span>XP +90</span>
+                    <a href="#" style="color: var(--bleu-france); text-decoration: none;">Aceitar missão</a>
+                  </footer>
+                </div>
+
+                <div class="mini-card">
+                  <div class="title">Registrar 3 pensamentos positivos</div>
+                  <div style="font-size: 12px;">
+                    Origem: Insight “Reforçar autoestima”.
+                  </div>
+                  <footer>
+                    <span>XP +80</span>
+                    <a href="#" style="color: var(--bleu-france); text-decoration: none;">Aceitar missão</a>
+                  </footer>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion-item">
+              <summary>Concluídas recentemente</summary>
+              <div class="content">
+                <div class="mini-card">
+                  <div class="title">Diário de respiração noite</div>
+                  <div style="font-size: 12px;">
+                    Concluída ontem • Como você se sentiu? “Mais leve”.
+                  </div>
+                  <footer>
+                    <span>XP +110</span>
+                    <span>Feedback registrado</span>
+                  </footer>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section id="progresso">
+          <h3>Progresso de nível</h3>
+          <p class="description">
+            Indicadores gamificados continuam visíveis, mas após as missões personalizadas.
+          </p>
+
+          <div class="progress-grid">
+            <div class="progress-card">
+              <h4>Nível atual</h4>
+              <p style="margin: 6px 0; font-size: 14px; color: rgba(28, 37, 65, 0.7);">
+                Observador • Você reconhece padrões e responde com consciência.
+              </p>
+              <div style="display: flex; gap: 12px; font-size: 13px; color: rgba(28, 37, 65, 0.6);">
+                <span>Streak: 3 dias</span>
+                <span>|</span>
+                <span>Total XP: 790</span>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <h4>Rumo ao próximo nível</h4>
+              <div class="progress-bar">
+                <span style="width: 62%;"></span>
+              </div>
+              <p style="font-size: 13px; color: rgba(28, 37, 65, 0.6); margin-top: 10px;">
+                Falta(m) 260 XP para desbloquear “Focado”.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="conquistas">
+          <h3>Conquistas do sistema</h3>
+          <p class="description">
+            Mantemos a visibilidade das conquistas automáticas, em carrossel compacto.
+          </p>
+
+          <div class="conquests-slider">
+            <div class="conquest-card">
+              <div style="font-size: 22px;">🏆</div>
+              <strong>Quest: Streak 3 dias</strong>
+              <span class="xp">+150 XP</span>
+              <small style="color: rgba(28, 37, 65, 0.55);">17/10, 14:55</small>
+            </div>
+            <div class="conquest-card">
+              <div style="font-size: 22px;">🏆</div>
+              <strong>Quest: 10 Reflexões</strong>
+              <span class="xp">+200 XP</span>
+              <small style="color: rgba(28, 37, 65, 0.55);">16/10, 10:03</small>
+            </div>
+            <div class="conquest-card">
+              <div style="font-size: 22px;">🏆</div>
+              <strong>Quest: Primeira Conversa</strong>
+              <span class="xp">+50 XP</span>
+              <small style="color: rgba(28, 37, 65, 0.55);">12/10, 07:50</small>
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button class="btn-secondary">Ver histórico completo</button>
+            <button class="btn-primary">Ver próximos níveis</button>
+          </div>
+        </section>
+
+        <section id="proximos">
+          <h3>Próximos níveis</h3>
+          <p class="description">
+            Resumo compacto com CTA para página dedicada.
+          </p>
+
+          <div class="progress-grid">
+            <div class="progress-card">
+              <h4>Próximo • Nível 4 “Focado”</h4>
+              <p style="font-size: 13px; color: rgba(28, 37, 65, 0.7);">
+                Mantém consistência e aprofunda reflexões. Falta 260 XP.
+              </p>
+            </div>
+            <div class="progress-card">
+              <h4>A seguir • Nível 5 “Praticante”</h4>
+              <p style="font-size: 13px; color: rgba(28, 37, 65, 0.7);">
+                Transforma insights em ações práticas. Falta 1010 XP.
+              </p>
+            </div>
+          </div>
+
+          <div class="section-actions">
+            <button class="btn-primary">Abrir visão completa de níveis</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
