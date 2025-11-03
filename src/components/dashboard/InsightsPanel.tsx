@@ -52,6 +52,7 @@ const InsightsPanel: React.FC = () => {
     insightEmFoco,
     demaisInsights,
     resumoOptions,
+    baseInsightsFiltrados,
     countsByTipo,
     insightsFiltrados,
   } = useInsightsFilters(insights);
@@ -161,7 +162,7 @@ const InsightsPanel: React.FC = () => {
           <div className="ml-auto rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">
             {!hasActiveFilters
               ? `${insights.length} insights`
-              : `${insightsFiltrados.length}/${insights.length} filtrados`}
+              : `${insightsFiltrados.length}/${baseInsightsFiltrados.length} filtrados`}
           </div>
         </div>
 

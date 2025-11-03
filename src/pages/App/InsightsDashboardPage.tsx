@@ -52,6 +52,7 @@ const InsightsDashboardPage: React.FC = () => {
     insightsFiltrados,
     resumoOptions,
     countsByTipo,
+    baseInsightsFiltrados,
   } = useInsightsFilters(insights);
 
   const prioridadeCycleLabel =
@@ -213,7 +214,7 @@ const InsightsDashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm">
-            {insightsFiltrados.length} de {insights.length} insights exibidos
+            {insightsFiltrados.length} de {baseInsightsFiltrados.length} insights exibidos
           </div>
         </div>
       </header>
