@@ -1,5 +1,10 @@
 {
+  "updatedAt": "2025-11-02T19:42:54.046Z",
+  "createdAt": "2025-09-24T12:07:20.876Z",
+  "id": "r0CuG6F3S1TR8ohs",
   "name": "dash_authentication",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -8,13 +13,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "bb42681b-fc6b-4092-85e4-0ca1bc8c5cd9",
+      "id": "fb1bfc06-1c8e-4a84-b782-5172c5754f8a",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1568,
-        464
+        -672,
+        608
       ],
       "webhookId": "9d6b39b5-4dde-442c-a4d6-8fb799ba9705"
     },
@@ -26,13 +31,13 @@
           "queryReplacement": "={{ $json.body.token }}"
         }
       },
-      "id": "5242f810-4419-4e05-b68d-e0276ca46324",
+      "id": "a5614dae-39b2-4f6e-87fd-79e7fbd7a013",
       "name": "01_Validar_Usuario",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1344,
-        464
+        -448,
+        608
       ],
       "credentials": {
         "postgres": {
@@ -49,13 +54,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "2cfac257-6d55-42bb-939e-050d5b1596a4",
+      "id": "efc0d606-002f-4150-8763-be5f26ed1c14",
       "name": "04_Sabotador",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        656
+        448,
+        800
       ],
       "credentials": {
         "postgres": {
@@ -73,13 +78,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "e088159f-0d01-4ac4-8eb1-cb7f0deefac5",
+      "id": "1896edd1-e485-440a-b3b6-90408eb87d4f",
       "name": "07_Analise_PANAS",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        256
+        448,
+        400
       ],
       "credentials": {
         "postgres": {
@@ -97,13 +102,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "349a7f3a-4eb4-4c66-9465-6bb7b96bf7d5",
+      "id": "c6410005-1d57-4d29-a820-32f5848a8167",
       "name": "08_Historico_Diario",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        832
+        448,
+        976
       ],
       "credentials": {
         "postgres": {
@@ -121,13 +126,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "0de0cae9-4182-467f-8173-309bf417f93f",
+      "id": "6778149b-33b6-4546-8b0c-fa70a0ebefa6",
       "name": "09_Insights",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        1008
+        448,
+        1152
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -144,13 +149,13 @@
         "responseBody": "={{ $json.response }}",
         "options": {}
       },
-      "id": "b433becb-52ff-47d3-a8bf-8ec21eb891f2",
+      "id": "59b1c8c2-4559-422d-9f08-a40c7a8d47db",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        640,
-        304
+        1536,
+        448
       ]
     },
     {
@@ -160,23 +165,23 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        144,
-        208
+        1040,
+        352
       ],
-      "id": "ca562b75-f96d-4a6f-8d1d-8216de5cedd2",
+      "id": "a3b67a00-97eb-4d1e-bbfb-0417590e9f6d",
       "name": "Merge"
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\n\nconst rows = items.map(item => {\n  const json = item.json || {};\n  if (json.jsonb_build_object) return json.jsonb_build_object;\n  if (json.json_build_object) return json.json_build_object;\n  return json;\n});\n\n\n\nfunction findRow(predicate) {\n  return rows.find(predicate) ?? {};\n}\n\nfunction parseJsonSafe(value, fallback) {\n  if (typeof value === 'string') {\n    try {\n      return JSON.parse(value);\n    } catch (error) {\n      console.warn('[Code Node] Erro ao parsear JSON:', error);\n      return fallback;\n    }\n  }\n  if (value && typeof value === 'object') return value;\n  return fallback;\n}\n\nfunction parseNullableNumber(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : null;\n}\n\nfunction parseNullableBoolean(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  if (typeof value === 'boolean') return value;\n  if (typeof value === 'number') {\n    if (value === 1) return true;\n    if (value === 0) return false;\n  }\n  if (typeof value === 'string') {\n    const normalized = value.trim().toLowerCase();\n    if (normalized === 'true' || normalized === '1') return true;\n    if (normalized === 'false' || normalized === '0') return false;\n  }\n  return null;\n}\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Perfil Big Five\nconst perfilRow = findRow(row => 'openness' in row && 'perfil_primario' in row);\nconst perfilBigFive = {\n  openness: normalizeString(perfilRow.openness),\n  conscientiousness: normalizeString(perfilRow.conscientiousness),\n  extraversion: normalizeString(perfilRow.extraversion),\n  agreeableness: normalizeString(perfilRow.agreeableness),\n  neuroticism: normalizeString(perfilRow.neuroticism),\n  confiabilidade: normalizeString(perfilRow.confiabilidade),\n  perfil_primario: normalizeString(perfilRow.perfil_primario),\n  perfil_secundario: normalizeString(perfilRow.perfil_secundario),\n};\n\n// Usuário\nconst userRow = findRow(row => 'nome' in row && ('user_id' in row || 'usuario_id' in row));\nconst user = {\n  id: normalizeString(userRow.user_id ?? userRow.usuario_id ?? perfilRow.usuario_id, 'usuario_desconhecido'),\n  nome: normalizeString(userRow.nome, 'Usuário MindQuest'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, 'Usuário'),\n  whatsapp_numero: normalizeString(userRow.whatsapp_numero, ''),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, 'matutino'),\n  status_onboarding: normalizeString(userRow.status_onboarding, 'pendente'),\n  criado_em: normalizeString(userRow.criado_em, new Date().toISOString()),\n};\n\n// Gamificação\nconst gamificacaoRow = findRow(row => {\n  if (!row || typeof row !== 'object') return false;\n  if ('gamificacao' in row && row.gamificacao) return true;\n  return ('xp_total' in row && 'nivel_atual' in row);\n});\nconst gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};\n\nconst gamificacao = {\n  xp_total: parseNullableNumber(gamificacaoSource?.xp_total) ?? 0,\n  xp_proximo_nivel: parseNullableNumber(gamificacaoSource?.xp_proximo_nivel) ?? 400,\n  nivel_atual: parseNullableNumber(gamificacaoSource?.nivel_atual) ?? 1,\n  titulo_nivel: normalizeString(gamificacaoSource?.titulo_nivel, 'Nível 1'),\n  streak_conversas_dias: parseNullableNumber(gamificacaoSource?.streak_conversas_dias) ?? 0,\n  streak_protecao_usada: parseNullableBoolean(gamificacaoSource?.streak_protecao_usada) ?? false,\n  streak_protecao_resetada_em: normalizeString(gamificacaoSource?.streak_protecao_resetada_em),\n  ultima_conversa_data: normalizeString(gamificacaoSource?.ultima_conversa_data),\n  melhor_streak: parseNullableNumber(gamificacaoSource?.melhor_streak) ?? 0,\n  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status, 'pendente'),\n  quest_diaria_progresso: parseNullableNumber(gamificacaoSource?.quest_diaria_progresso) ?? 0,\n  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao, 'Complete sua conversa diária'),\n  quest_diaria_data: normalizeString(gamificacaoSource?.quest_diaria_data),\n  quest_streak_dias: parseNullableNumber(gamificacaoSource?.quest_streak_dias) ?? 0,\n  conquistas_desbloqueadas: (() => {\n    const conquistas = gamificacaoSource?.conquistas_desbloqueadas;\n    if (Array.isArray(conquistas)) return conquistas;\n    const parsed = parseJsonSafe(conquistas, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  conquistas_proximas: (() => {\n    const futuras = gamificacaoSource?.conquistas_proximas;\n    if (Array.isArray(futuras)) return futuras;\n    const parsed = parseJsonSafe(futuras, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  total_conversas: parseNullableNumber(gamificacaoSource?.total_conversas) ?? 0,\n  total_reflexoes: parseNullableNumber(gamificacaoSource?.total_reflexoes) ?? 0,\n  total_xp_ganho_hoje: parseNullableNumber(gamificacaoSource?.total_xp_ganho_hoje) ?? 0,\n  ultima_conquista_id: normalizeString(gamificacaoSource?.ultima_conquista_id),\n  ultima_conquista_data: normalizeString(gamificacaoSource?.ultima_conquista_data),\n  ultima_atualizacao: normalizeString(gamificacaoSource?.ultima_atualizacao ?? gamificacaoSource?.atualizado_em),\n  criado_em: normalizeString(gamificacaoSource?.criado_em),\n};\n\n// Próxima Jornada\nconst jornadaRow = findRow(row => row.proxima_jornada);\nconst jornadaSource = jornadaRow.proxima_jornada ?? {};\nconst proximoNivelSource = jornadaSource.proximo_nivel ?? null;\nconst proximaJornada = {\n  xp_total: parseNullableNumber(jornadaSource.xp_total) ?? 0,\n  nivel_atual: parseNullableNumber(jornadaSource.nivel_atual),\n  titulo_atual: normalizeString(jornadaSource.titulo_atual),\n  proximo_nivel: proximoNivelSource ? {\n    nivel: parseNullableNumber(proximoNivelSource.nivel),\n    titulo: normalizeString(proximoNivelSource.titulo),\n    xp_minimo: parseNullableNumber(proximoNivelSource.xp_minimo),\n    xp_restante: parseNullableNumber(proximoNivelSource.xp_restante),\n    descricao: normalizeString(proximoNivelSource.descricao),\n  } : null,\n  desafios: Array.isArray(jornadaSource.desafios)\n    ? jornadaSource.desafios.map(desafio => ({\n        usuario_quest_id: normalizeString(desafio.usuario_quest_id),\n        titulo: normalizeString(desafio.titulo),\n        categoria: normalizeString(desafio.categoria),\n        xp_recompensa: parseNullableNumber(desafio.xp_recompensa),\n        status: normalizeString(desafio.status),\n        progresso_percentual: parseNullableNumber(desafio.progresso_percentual),\n        progresso_atual: parseNullableNumber(desafio.progresso_atual),\n        progresso_meta: parseNullableNumber(desafio.progresso_meta),\n      }))\n    : [],\n};\n\n// Sabotador\nconst sabotadorRow = findRow(row => 'sabotador_id' in row || 'total_deteccoes' in row);\nconst sabotador = {\n  id: normalizeString(sabotadorRow.sabotador_id),\n  nome: normalizeString(sabotadorRow.nome),\n  emoji: normalizeString(sabotadorRow.emoji),\n  apelido_personalizado: normalizeString(sabotadorRow.apelido_personalizado ?? sabotadorRow.apelido),\n  total_deteccoes: normalizeString(sabotadorRow.total_deteccoes),\n  contexto_principal: normalizeString(sabotadorRow.contexto_principal),\n  insight_atual: normalizeString(sabotadorRow.insight_atual),\n  contramedida_ativa: normalizeString(sabotadorRow.contramedida_ativa),\n  intensidade_media: normalizeString(sabotadorRow.intensidade_media),\n  total_conversas: normalizeString(sabotadorRow.total_conversas ?? sabotadorRow.totalConversas),\n};\n\n// Humor\nconst humorRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'humor_atual'));\nconst humor = {\n  humor_atual: parseNullableNumber(humorRow.humor_atual),\n  humor_medio: parseNullableNumber(humorRow.humor_medio_7d ?? humorRow.humor_medio),\n  diferenca_percentual: parseNullableNumber(humorRow.diferenca_percentual),\n  conversas_total: parseNullableNumber(humorRow.conversas_total) ?? 0,\n  ultima_conversa: {\n    data: normalizeString(humorRow.ultima_data),\n    hora: normalizeString(humorRow.ultima_hora),\n    emoji: normalizeString(humorRow.ultima_emoji),\n    emocao: normalizeString(humorRow.ultima_emocao),\n  }\n};\n\n// Emoções\nconst emocoesRow = findRow(row => 'emocoes_contagem' in row || 'roda_emocoes' in row);\nconst distribuicaoEmocoes = (() => {\n  const source = emocoesRow.emocoes_contagem ?? emocoesRow.roda_emocoes;\n  const parsed = parseJsonSafe(source, emocoesRow.roda_emocoes || {});\n  const defaults = {\n    alegria: 0,\n    confianca: 0,\n    medo: 0,\n    surpresa: 0,\n    tristeza: 0,\n    angustia: 0,\n    raiva: 0,\n    expectativa: 0,\n  };\n  for (const key of Object.keys(defaults)) {\n    const valor = parsed?.[key];\n    defaults[key] = parseNullableNumber(valor) ?? defaults[key];\n  }\n  return defaults;\n})();\n\n// PANAS\nconst panasRow = findRow(row => 'positivas' in row && 'negativas' in row);\nconst panas = {\n  positivas: parseNullableNumber(panasRow.positivas) ?? 0,\n  negativas: parseNullableNumber(panasRow.negativas) ?? 0,\n  neutras: parseNullableNumber(panasRow.neutras) ?? 0,\n  total: parseNullableNumber(panasRow.total) ?? 0,\n  percentual_positivas: parseNullableNumber(panasRow.percentual_positivas) ?? 0,\n  percentual_negativas: parseNullableNumber(panasRow.percentual_negativas) ?? 0,\n  percentual_neutras: parseNullableNumber(panasRow.percentual_neutras) ?? 0,\n};\n\n// Histórico\nconst historicoAggregateRow = rows.find(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    row.jsonb_build_object &&\n    typeof row.jsonb_build_object === 'object' &&\n    row.jsonb_build_object.historico_diario\n);\n\nconst historicoRawRows = rows.filter(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    'data' in row &&\n    (\n      'humor_medio' in row ||\n      'energia_media' in row ||\n      'justificativa_humor' in row ||\n      'chat_id' in row\n    )\n);\n\nconst toDateKey = (value) => {\n  const raw = normalizeString(value);\n  if (!raw) return null;\n  if (raw.includes('T')) return raw.slice(0, 10);\n  return raw;\n};\n\nconst toLabel = (dateKey) => {\n  if (!dateKey) return null;\n  const parts = dateKey.split('-');\n  if (parts.length === 3) {\n    const [year, month, day] = parts;\n    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}`;\n  }\n  try {\n    const parsed = new Date(dateKey);\n    if (!Number.isNaN(parsed.getTime())) {\n      return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });\n    }\n  } catch (_) {\n    // ignore\n  }\n  return dateKey;\n};\n\nconst parseHora = (value) => {\n  const time = normalizeString(value);\n  if (!time) return null;\n  return time.length > 8 ? time.slice(0, 8) : time;\n};\n\nconst createHistoricoEntry = (dateKey) => ({\n  data: dateKey,\n  label: toLabel(dateKey),\n  tem_conversa: false,\n  conversas: 0,\n  emoji: null,\n  humor: null,\n  ultima_hora: null,\n  _humorSum: 0,\n  _humorWeight: 0,\n});\n\nconst historicoDataMap = new Map();\n\nconst getOrCreateHistoricoEntry = (dateKey) => {\n  if (!historicoDataMap.has(dateKey)) {\n    historicoDataMap.set(dateKey, createHistoricoEntry(dateKey));\n  }\n  return historicoDataMap.get(dateKey);\n};\n\nconst updateUltimaHora = (entry, hora) => {\n  if (!hora) return;\n  if (!entry.ultima_hora || entry.ultima_hora < hora) {\n    entry.ultima_hora = hora;\n  }\n};\n\nlet historicoResumo = {\n  total_conversas: 0,\n  humor_medio: 0,\n  sequencia_ativa: 0,\n  ultima_conversa_data: null,\n  ultima_conversa_hora: null,\n  periodo_inicio: null,\n  periodo_fim: null\n};\n\nif (historicoAggregateRow?.jsonb_build_object?.historico_diario) {\n  for (const item of historicoAggregateRow.jsonb_build_object.historico_diario) {\n    const dateKey = toDateKey(item.data);\n    if (!dateKey) continue;\n    const entry = getOrCreateHistoricoEntry(dateKey);\n    entry.label = normalizeString(item.label) ?? entry.label;\n\n    const conversasParsed = parseNullableNumber(item.conversas);\n    if (Number.isFinite(conversasParsed) && conversasParsed > 0) {\n      entry.conversas = conversasParsed;\n      entry.tem_conversa = true;\n    } else if (typeof item.tem_conversa === 'boolean') {\n      entry.tem_conversa = item.tem_conversa;\n    }\n\n    const emoji = normalizeString(item.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    const humorValue = parseNullableNumber(item.humor);\n    if (Number.isFinite(humorValue)) {\n      entry.humor = humorValue;\n      entry._humorSum = humorValue;\n      entry._humorWeight = 1;\n    }\n\n    updateUltimaHora(entry, parseHora(item.ultima_hora));\n  }\n\n  if (historicoAggregateRow.jsonb_build_object.resumo) {\n    const resumoDb = historicoAggregateRow.jsonb_build_object.resumo;\n    historicoResumo = {\n      total_conversas: parseNullableNumber(resumoDb.total_conversas) ?? 0,\n      humor_medio: parseNullableNumber(resumoDb.humor_medio) ?? 0,\n      sequencia_ativa: parseNullableNumber(resumoDb.sequencia_ativa) ?? 0,\n      ultima_conversa_data: normalizeString(resumoDb.ultima_conversa_data),\n      ultima_conversa_hora: normalizeString(resumoDb.ultima_conversa_hora),\n      periodo_inicio: normalizeString(resumoDb.periodo_inicio),\n      periodo_fim: normalizeString(resumoDb.periodo_fim)\n    };\n  }\n} else if (historicoRawRows.length > 0) {\n  for (const row of historicoRawRows) {\n    const dateKey = toDateKey(row.data);\n    if (!dateKey) continue;\n\n    const entry = getOrCreateHistoricoEntry(dateKey);\n\n    const explicitConversas = parseNullableNumber(row.conversas ?? row.total_conversas ?? row.qtd_conversas);\n    const statusNormalized = normalizeString(row.status)?.toLowerCase();\n    const hasChat = Boolean(normalizeString(row.chat_id));\n    let conversas = Number.isFinite(explicitConversas) && explicitConversas > 0 ? explicitConversas : 0;\n    if (conversas === 0 && (hasChat || statusNormalized === 'completa')) {\n      conversas = 1;\n    }\n\n    entry.conversas += conversas;\n    if (entry.conversas > 0 || conversas > 0) {\n      entry.tem_conversa = true;\n    }\n\n    const humorValue = parseNullableNumber(row.humor_medio);\n    if (Number.isFinite(humorValue)) {\n      const weight = conversas > 0 ? conversas : 1;\n      entry._humorSum += humorValue * weight;\n      entry._humorWeight += weight;\n    }\n\n    const emoji = normalizeString(row.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    updateUltimaHora(entry, parseHora(row.horario_fim ?? row.horario_inicio ?? row.ultima_hora));\n  }\n}\n\nfor (const entry of historicoDataMap.values()) {\n  if (entry._humorWeight > 0) {\n    entry.humor = entry._humorSum / entry._humorWeight;\n  }\n  if (!Number.isFinite(entry.humor)) {\n    entry.humor = null;\n  }\n  delete entry._humorSum;\n  delete entry._humorWeight;\n}\n\nconst shiftDate = (dateKey, offset) => {\n  const key = toDateKey(dateKey);\n  if (!key) return null;\n  const base = new Date(`${key}T00:00:00Z`);\n  if (Number.isNaN(base.getTime())) return null;\n  base.setUTCDate(base.getUTCDate() + offset);\n  return base.toISOString().slice(0, 10);\n};\n\nconst sortedKeys = Array.from(historicoDataMap.keys()).sort((a, b) => {\n  const timeA = a ? new Date(a).getTime() : 0;\n  const timeB = b ? new Date(b).getTime() : 0;\n  return timeA - timeB;\n});\n\nlet lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKeys.length - 1];\nif (!lastDateKey) {\n  lastDateKey = new Date().toISOString().slice(0, 10);\n}\n\nconst windowSize = 7;\nconst windowRawEntries = [];\nfor (let offset = windowSize - 1; offset >= 0; offset -= 1) {\n  const dateKey = shiftDate(lastDateKey, -offset);\n  if (!dateKey) continue;\n  const sourceEntry = historicoDataMap.get(dateKey);\n  const conversasCount = Number.isFinite(sourceEntry?.conversas)\n    ? Number(sourceEntry.conversas)\n    : (sourceEntry?.tem_conversa ? 1 : 0);\n  const temConversa = Boolean(sourceEntry?.tem_conversa) || conversasCount > 0;\n\n  windowRawEntries.push({\n    data: dateKey,\n    label: toLabel(dateKey),\n    tem_conversa: temConversa,\n    conversas: conversasCount,\n    emoji: normalizeString(sourceEntry?.emoji),\n    humor: Number.isFinite(sourceEntry?.humor) ? sourceEntry.humor : null,\n    ultima_hora: normalizeString(sourceEntry?.ultima_hora)\n  });\n}\n\nconst diasComConversas = windowRawEntries.filter((entry) => entry.conversas > 0 || entry.tem_conversa).length;\n\nlet ultimaConversaData = historicoResumo.ultima_conversa_data;\nlet ultimaConversaHora = historicoResumo.ultima_conversa_hora;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) continue;\n  ultimaConversaData = entry.data;\n  if (entry.ultima_hora) {\n    ultimaConversaHora = entry.ultima_hora;\n  }\n  break;\n}\n\nlet sequenciaAtiva = 0;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) break;\n  sequenciaAtiva += 1;\n}\n\nconst periodoInicio = windowRawEntries[0]?.data ?? historicoResumo.periodo_inicio ?? null;\nconst periodoFim = windowRawEntries[windowRawEntries.length - 1]?.data ?? historicoResumo.periodo_fim ?? null;\n\nconst humorMedioGlobal = parseNullableNumber(humor.humor_medio);\nhistoricoResumo = {\n  total_conversas: diasComConversas,\n  humor_medio: humorMedioGlobal ?? historicoResumo.humor_medio ?? 0,\n  sequencia_ativa: sequenciaAtiva,\n  ultima_conversa_data: ultimaConversaData ?? null,\n  ultima_conversa_hora: ultimaConversaHora ?? null,\n  periodo_inicio: periodoInicio,\n  periodo_fim: periodoFim\n};\n\nconst historicoDiario = windowRawEntries.map((entry) => ({\n  data: entry.data,\n  label: entry.label,\n  tem_conversa: entry.tem_conversa,\n  conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,\n  emoji: entry.emoji ?? null,\n  humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,\n  ultima_hora: entry.ultima_hora ?? null\n}));\n\n\n// Insights - AJUSTE CORRETO\nconst insightsRows = rows.filter(row => \n  row && typeof row === 'object' && (\n    'id' in row && \n    'tipo' in row && \n    'categoria' in row && \n    'titulo' in row\n  )\n);\n\nconst insights = insightsRows.length > 0 \n? insightsRows.map(insight => ({\n    id: normalizeString(insight.id) ?? undefined,\n    tipo: normalizeString(insight.tipo) ?? undefined,\n    categoria: normalizeString(insight.categoria) ?? undefined,\n    titulo: normalizeString(insight.titulo) ?? undefined,\n    descricao: normalizeString(insight.descricao) ?? undefined,\n    icone: normalizeString(insight.icone) ?? undefined,\n    prioridade: normalizeString(insight.prioridade) ?? undefined,\n    data_criacao: normalizeString(insight.data_criacao) ?? undefined,\n  }))\n: [];\n\nreturn [\n  {\n    json: {\n      response: {\n        success: true,\n        humor,\n        user,\n        perfil_big_five: perfilBigFive,\n        gamificacao,\n        proxima_jornada: proximaJornada,\n        sabotador,\n        roda_emocoes: distribuicaoEmocoes,\n        panas,\n        historico_diario: historicoDiario,\n        historico_resumo: {\n          total_conversas: parseNullableNumber(historicoResumo.total_conversas) ?? 0,\n          humor_medio: parseNullableNumber(historicoResumo.humor_medio) ?? 0,\n          sequencia_ativa: parseNullableNumber(historicoResumo.sequencia_ativa) ?? 0,\n          ultima_conversa_data: normalizeString(historicoResumo.ultima_conversa_data),\n          ultima_conversa_hora: normalizeString(historicoResumo.ultima_conversa_hora),\n          periodo_inicio: normalizeString(historicoResumo.periodo_inicio),\n          periodo_fim: normalizeString(historicoResumo.periodo_fim)\n        },\n        insights,\n        timestamp: new Date().toISOString(),\n      },\n    },\n  },\n];\n"
+        "jsCode": "const items = $input.all();\n\nconst rows = items.map(item => {\n  const json = item.json || {};\n  if (json.jsonb_build_object) return json.jsonb_build_object;\n  if (json.json_build_object) return json.json_build_object;\n  return json;\n});\n\n\n\nfunction findRow(predicate) {\n  return rows.find(predicate) ?? {};\n}\n\nfunction parseJsonSafe(value, fallback) {\n  if (typeof value === 'string') {\n    try {\n      return JSON.parse(value);\n    } catch (error) {\n      console.warn('[Code Node] Erro ao parsear JSON:', error);\n      return fallback;\n    }\n  }\n  if (value && typeof value === 'object') return value;\n  return fallback;\n}\n\nfunction parseNullableNumber(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : null;\n}\n\nfunction parseNullableBoolean(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  if (typeof value === 'boolean') return value;\n  if (typeof value === 'number') {\n    if (value === 1) return true;\n    if (value === 0) return false;\n  }\n  if (typeof value === 'string') {\n    const normalized = value.trim().toLowerCase();\n    if (normalized === 'true' || normalized === '1') return true;\n    if (normalized === 'false' || normalized === '0') return false;\n  }\n  return null;\n}\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\nfunction formatCategoria(value) {\n  const codigo = normalizeString(value);\n  if (!codigo) {\n    return { codigo: null, nome: null };\n  }\n  const normalizedCodigo = codigo.toLowerCase();\n  const nome = normalizedCodigo\n    .split('_')\n    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))\n    .join(' ');\n  return { codigo: normalizedCodigo, nome };\n}\n\nfunction decorateCategorias(lista) {\n  if (!Array.isArray(lista)) return [];\n  return lista.map((item) => {\n    if (!item || typeof item !== 'object') return item;\n    const { codigo, nome } = formatCategoria(item.categoria);\n    return {\n      ...item,\n      categoria: nome ?? codigo ?? null,\n      categoria_codigo: codigo,\n    };\n  });\n}\n\n// Perfil Big Five\nconst perfilRow = findRow(row => 'openness' in row && 'perfil_primario' in row);\nconst perfilBigFive = {\n  openness: normalizeString(perfilRow.openness),\n  conscientiousness: normalizeString(perfilRow.conscientiousness),\n  extraversion: normalizeString(perfilRow.extraversion),\n  agreeableness: normalizeString(perfilRow.agreeableness),\n  neuroticism: normalizeString(perfilRow.neuroticism),\n  confiabilidade: normalizeString(perfilRow.confiabilidade),\n  perfil_primario: normalizeString(perfilRow.perfil_primario),\n  perfil_secundario: normalizeString(perfilRow.perfil_secundario),\n};\n\n// Usuário\nconst userRow = findRow(row => 'nome' in row && ('user_id' in row || 'usuario_id' in row));\nconst user = {\n  id: normalizeString(userRow.user_id ?? userRow.usuario_id ?? perfilRow.usuario_id, 'usuario_desconhecido'),\n  nome: normalizeString(userRow.nome, 'Usuário MindQuest'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, 'Usuário'),\n  whatsapp_numero: normalizeString(userRow.whatsapp_numero, ''),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, 'matutino'),\n  status_onboarding: normalizeString(userRow.status_onboarding, 'pendente'),\n  criado_em: normalizeString(userRow.criado_em, new Date().toISOString()),\n};\n\n// Gamificação\nconst gamificacaoRow = findRow(row => {\n  if (!row || typeof row !== 'object') return false;\n  if ('gamificacao' in row && row.gamificacao) return true;\n  return ('xp_total' in row && 'nivel_atual' in row);\n});\nconst gamificacaoSource = gamificacaoRow?.gamificacao ?? gamificacaoRow ?? {};\n\nconst gamificacao = {\n  xp_total: parseNullableNumber(gamificacaoSource?.xp_total) ?? 0,\n  xp_proximo_nivel: parseNullableNumber(gamificacaoSource?.xp_proximo_nivel) ?? 400,\n  nivel_atual: parseNullableNumber(gamificacaoSource?.nivel_atual) ?? 1,\n  titulo_nivel: normalizeString(gamificacaoSource?.titulo_nivel, 'Nível 1'),\n  streak_conversas_dias: parseNullableNumber(gamificacaoSource?.streak_conversas_dias) ?? 0,\n  streak_protecao_usada: parseNullableBoolean(gamificacaoSource?.streak_protecao_usada) ?? false,\n  streak_protecao_resetada_em: normalizeString(gamificacaoSource?.streak_protecao_resetada_em),\n  ultima_conversa_data: normalizeString(gamificacaoSource?.ultima_conversa_data),\n  melhor_streak: parseNullableNumber(gamificacaoSource?.melhor_streak) ?? 0,\n  quest_diaria_status: normalizeString(gamificacaoSource?.quest_diaria_status, 'pendente'),\n  quest_diaria_progresso: parseNullableNumber(gamificacaoSource?.quest_diaria_progresso) ?? 0,\n  quest_diaria_descricao: normalizeString(gamificacaoSource?.quest_diaria_descricao, 'Complete sua conversa diária'),\n  quest_diaria_data: normalizeString(gamificacaoSource?.quest_diaria_data),\n  quest_streak_dias: parseNullableNumber(gamificacaoSource?.quest_streak_dias) ?? 0,\n  conquistas_desbloqueadas: (() => {\n    const conquistas = gamificacaoSource?.conquistas_desbloqueadas;\n    if (Array.isArray(conquistas)) return conquistas;\n    const parsed = parseJsonSafe(conquistas, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  conquistas_proximas: (() => {\n    const futuras = gamificacaoSource?.conquistas_proximas;\n    if (Array.isArray(futuras)) return futuras;\n    const parsed = parseJsonSafe(futuras, null);\n    if (Array.isArray(parsed)) return parsed;\n    return [];\n  })(),\n  total_conversas: parseNullableNumber(gamificacaoSource?.total_conversas) ?? 0,\n  total_reflexoes: parseNullableNumber(gamificacaoSource?.total_reflexoes) ?? 0,\n  total_xp_ganho_hoje: parseNullableNumber(gamificacaoSource?.total_xp_ganho_hoje) ?? 0,\n  ultima_conquista_id: normalizeString(gamificacaoSource?.ultima_conquista_id),\n  ultima_conquista_data: normalizeString(gamificacaoSource?.ultima_conquista_data),\n  ultima_atualizacao: normalizeString(gamificacaoSource?.ultima_atualizacao ?? gamificacaoSource?.atualizado_em),\n  criado_em: normalizeString(gamificacaoSource?.criado_em),\n};\n\ngamificacao.conquistas_desbloqueadas = decorateCategorias(gamificacao.conquistas_desbloqueadas);\ngamificacao.conquistas_proximas = decorateCategorias(gamificacao.conquistas_proximas);\nconst dailyConcluidasBrutas = Array.isArray(gamificacaoSource?.daily_concluidas)\n  ? gamificacaoSource.daily_concluidas\n  : [];\nconst dailyConcluidasDecoradas = decorateCategorias(dailyConcluidasBrutas);\nconst dailyConcluidas = dailyConcluidasDecoradas.map((item) => ({\n  usuario_quest_id: normalizeString(item.usuario_quest_id),\n  codigo: normalizeString(item.codigo),\n  titulo: normalizeString(item.titulo),\n  categoria: normalizeString(item.categoria),\n  categoria_codigo: normalizeString(item.categoria_codigo),\n  xp_bonus: parseNullableNumber(item.xp_bonus),\n  concluido_em: normalizeString(item.concluido_em),\n  atualizado_em: normalizeString(item.atualizado_em),\n  referencia_data: normalizeString(item.referencia_data),\n}));\n\nconst categoriasEvolucaoSource = Array.isArray(gamificacaoSource?.categorias_evolucao)\n  ? gamificacaoSource.categorias_evolucao\n  : [];\nconst categoriasEvolucao = categoriasEvolucaoSource.map((item) => {\n  const formatted = formatCategoria(item.codigo ?? item.categoria);\n  return {\n    codigo: normalizeString(item.codigo ?? formatted.codigo),\n    nome: normalizeString(item.nome) ?? formatted.nome,\n    total_conquistas: parseNullableNumber(item.total_conquistas) ?? 0,\n    ultima_atualizacao: normalizeString(item.ultima_atualizacao),\n    ultima_conclusao: normalizeString(item.ultima_conclusao),\n  };\n});\n\ngamificacao.complementos = {\n  daily: dailyConcluidas,\n  categorias: categoriasEvolucao,\n};\n\n// Próxima Jornada\nconst jornadaRow = findRow(row => row.proxima_jornada);\nconst jornadaSource = jornadaRow.proxima_jornada ?? {};\nconst proximoNivelSource = jornadaSource.proximo_nivel ?? null;\nconst proximaJornada = {\n  xp_total: parseNullableNumber(jornadaSource.xp_total) ?? 0,\n  nivel_atual: parseNullableNumber(jornadaSource.nivel_atual),\n  titulo_atual: normalizeString(jornadaSource.titulo_atual),\n  proximo_nivel: proximoNivelSource ? {\n    nivel: parseNullableNumber(proximoNivelSource.nivel),\n    titulo: normalizeString(proximoNivelSource.titulo),\n    xp_minimo: parseNullableNumber(proximoNivelSource.xp_minimo),\n    xp_restante: parseNullableNumber(proximoNivelSource.xp_restante),\n    descricao: normalizeString(proximoNivelSource.descricao),\n  } : null,\n  desafios: Array.isArray(jornadaSource.desafios)\n    ? jornadaSource.desafios.map(desafio => ({\n        usuario_quest_id: normalizeString(desafio.usuario_quest_id),\n        titulo: normalizeString(desafio.titulo),\n        categoria: normalizeString(desafio.categoria),\n        xp_recompensa: parseNullableNumber(desafio.xp_recompensa),\n        status: normalizeString(desafio.status),\n        progresso_percentual: parseNullableNumber(desafio.progresso_percentual),\n        progresso_atual: parseNullableNumber(desafio.progresso_atual),\n        progresso_meta: parseNullableNumber(desafio.progresso_meta),\n      }))\n    : [],\n};\n\nproximaJornada.desafios = decorateCategorias(proximaJornada.desafios);\n\n// Sabotador\nconst sabotadorRow = findRow(row => 'sabotador_id' in row || 'total_deteccoes' in row);\nconst sabotador = {\n  id: normalizeString(sabotadorRow.sabotador_id),\n  nome: normalizeString(sabotadorRow.nome),\n  emoji: normalizeString(sabotadorRow.emoji),\n  apelido_personalizado: normalizeString(sabotadorRow.apelido_personalizado ?? sabotadorRow.apelido),\n  total_deteccoes: normalizeString(sabotadorRow.total_deteccoes),\n  contexto_principal: normalizeString(sabotadorRow.contexto_principal),\n  insight_atual: normalizeString(sabotadorRow.insight_atual),\n  contramedida_ativa: normalizeString(sabotadorRow.contramedida_ativa),\n  intensidade_media: normalizeString(sabotadorRow.intensidade_media),\n  total_conversas: normalizeString(sabotadorRow.total_conversas ?? sabotadorRow.totalConversas),\n};\n\n// Humor\nconst humorRow = findRow(row => Object.prototype.hasOwnProperty.call(row, 'humor_atual'));\nconst humor = {\n  humor_atual: parseNullableNumber(humorRow.humor_atual),\n  humor_medio: parseNullableNumber(humorRow.humor_medio_7d ?? humorRow.humor_medio),\n  diferenca_percentual: parseNullableNumber(humorRow.diferenca_percentual),\n  conversas_total: parseNullableNumber(humorRow.conversas_total) ?? 0,\n  ultima_conversa: {\n    data: normalizeString(humorRow.ultima_data),\n    hora: normalizeString(humorRow.ultima_hora),\n    emoji: normalizeString(humorRow.ultima_emoji),\n    emocao: normalizeString(humorRow.ultima_emocao),\n  }\n};\n\n// Emoções\nconst emocoesRow = findRow(row => 'emocoes_contagem' in row || 'roda_emocoes' in row);\nconst distribuicaoEmocoes = (() => {\n  const source = emocoesRow.emocoes_contagem ?? emocoesRow.roda_emocoes;\n  const parsed = parseJsonSafe(source, emocoesRow.roda_emocoes || {});\n  const defaults = {\n    alegria: 0,\n    confianca: 0,\n    medo: 0,\n    surpresa: 0,\n    tristeza: 0,\n    angustia: 0,\n    raiva: 0,\n    expectativa: 0,\n  };\n  for (const key of Object.keys(defaults)) {\n    const valor = parsed?.[key];\n    defaults[key] = parseNullableNumber(valor) ?? defaults[key];\n  }\n  return defaults;\n})();\n\n// PANAS\nconst panasRow = findRow(row => 'positivas' in row && 'negativas' in row);\nconst panas = {\n  positivas: parseNullableNumber(panasRow.positivas) ?? 0,\n  negativas: parseNullableNumber(panasRow.negativas) ?? 0,\n  neutras: parseNullableNumber(panasRow.neutras) ?? 0,\n  total: parseNullableNumber(panasRow.total) ?? 0,\n  percentual_positivas: parseNullableNumber(panasRow.percentual_positivas) ?? 0,\n  percentual_negativas: parseNullableNumber(panasRow.percentual_negativas) ?? 0,\n  percentual_neutras: parseNullableNumber(panasRow.percentual_neutras) ?? 0,\n};\n\n// Histórico\nconst historicoAggregateRow = rows.find(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    row.jsonb_build_object &&\n    typeof row.jsonb_build_object === 'object' &&\n    row.jsonb_build_object.historico_diario\n);\n\nconst historicoRawRows = rows.filter(\n  (row) =>\n    row &&\n    typeof row === 'object' &&\n    'data' in row &&\n    (\n      'humor_medio' in row ||\n      'energia_media' in row ||\n      'justificativa_humor' in row ||\n      'chat_id' in row\n    )\n);\n\nconst toDateKey = (value) => {\n  const raw = normalizeString(value);\n  if (!raw) return null;\n  if (raw.includes('T')) return raw.slice(0, 10);\n  return raw;\n};\n\nconst toLabel = (dateKey) => {\n  if (!dateKey) return null;\n  const parts = dateKey.split('-');\n  if (parts.length === 3) {\n    const [year, month, day] = parts;\n    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}`;\n  }\n  try {\n    const parsed = new Date(dateKey);\n    if (!Number.isNaN(parsed.getTime())) {\n      return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });\n    }\n  } catch (_) {\n    // ignore\n  }\n  return dateKey;\n};\n\nconst parseHora = (value) => {\n  const time = normalizeString(value);\n  if (!time) return null;\n  return time.length > 8 ? time.slice(0, 8) : time;\n};\n\nconst createHistoricoEntry = (dateKey) => ({\n  data: dateKey,\n  label: toLabel(dateKey),\n  tem_conversa: false,\n  conversas: 0,\n  emoji: null,\n  humor: null,\n  ultima_hora: null,\n  _humorSum: 0,\n  _humorWeight: 0,\n});\n\nconst historicoDataMap = new Map();\n\nconst getOrCreateHistoricoEntry = (dateKey) => {\n  if (!historicoDataMap.has(dateKey)) {\n    historicoDataMap.set(dateKey, createHistoricoEntry(dateKey));\n  }\n  return historicoDataMap.get(dateKey);\n};\n\nconst updateUltimaHora = (entry, hora) => {\n  if (!hora) return;\n  if (!entry.ultima_hora || entry.ultima_hora < hora) {\n    entry.ultima_hora = hora;\n  }\n};\n\nlet historicoResumo = {\n  total_conversas: 0,\n  humor_medio: 0,\n  sequencia_ativa: 0,\n  ultima_conversa_data: null,\n  ultima_conversa_hora: null,\n  periodo_inicio: null,\n  periodo_fim: null\n};\n\nif (historicoAggregateRow?.jsonb_build_object?.historico_diario) {\n  for (const item of historicoAggregateRow.jsonb_build_object.historico_diario) {\n    const dateKey = toDateKey(item.data);\n    if (!dateKey) continue;\n    const entry = getOrCreateHistoricoEntry(dateKey);\n    entry.label = normalizeString(item.label) ?? entry.label;\n\n    const conversasParsed = parseNullableNumber(item.conversas);\n    if (Number.isFinite(conversasParsed) && conversasParsed > 0) {\n      entry.conversas = conversasParsed;\n      entry.tem_conversa = true;\n    } else if (typeof item.tem_conversa === 'boolean') {\n      entry.tem_conversa = item.tem_conversa;\n    }\n\n    const emoji = normalizeString(item.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    const humorValue = parseNullableNumber(item.humor);\n    if (Number.isFinite(humorValue)) {\n      entry.humor = humorValue;\n      entry._humorSum = humorValue;\n      entry._humorWeight = 1;\n    }\n\n    updateUltimaHora(entry, parseHora(item.ultima_hora));\n  }\n\n  if (historicoAggregateRow.jsonb_build_object.resumo) {\n    const resumoDb = historicoAggregateRow.jsonb_build_object.resumo;\n    historicoResumo = {\n      total_conversas: parseNullableNumber(resumoDb.total_conversas) ?? 0,\n      humor_medio: parseNullableNumber(resumoDb.humor_medio) ?? 0,\n      sequencia_ativa: parseNullableNumber(resumoDb.sequencia_ativa) ?? 0,\n      ultima_conversa_data: normalizeString(resumoDb.ultima_conversa_data),\n      ultima_conversa_hora: normalizeString(resumoDb.ultima_conversa_hora),\n      periodo_inicio: normalizeString(resumoDb.periodo_inicio),\n      periodo_fim: normalizeString(resumoDb.periodo_fim)\n    };\n  }\n} else if (historicoRawRows.length > 0) {\n  for (const row of historicoRawRows) {\n    const dateKey = toDateKey(row.data);\n    if (!dateKey) continue;\n\n    const entry = getOrCreateHistoricoEntry(dateKey);\n\n    const explicitConversas = parseNullableNumber(row.conversas ?? row.total_conversas ?? row.qtd_conversas);\n    const statusNormalized = normalizeString(row.status)?.toLowerCase();\n    const hasChat = Boolean(normalizeString(row.chat_id));\n    let conversas = Number.isFinite(explicitConversas) && explicitConversas > 0 ? explicitConversas : 0;\n    if (conversas === 0 && (hasChat || statusNormalized === 'completa')) {\n      conversas = 1;\n    }\n\n    entry.conversas += conversas;\n    if (entry.conversas > 0 || conversas > 0) {\n      entry.tem_conversa = true;\n    }\n\n    const humorValue = parseNullableNumber(row.humor_medio);\n    if (Number.isFinite(humorValue)) {\n      const weight = conversas > 0 ? conversas : 1;\n      entry._humorSum += humorValue * weight;\n      entry._humorWeight += weight;\n    }\n\n    const emoji = normalizeString(row.emoji);\n    if (emoji) entry.emoji = emoji;\n\n    updateUltimaHora(entry, parseHora(row.horario_fim ?? row.horario_inicio ?? row.ultima_hora));\n  }\n}\n\nfor (const entry of historicoDataMap.values()) {\n  if (entry._humorWeight > 0) {\n    entry.humor = entry._humorSum / entry._humorWeight;\n  }\n  if (!Number.isFinite(entry.humor)) {\n    entry.humor = null;\n  }\n  delete entry._humorSum;\n  delete entry._humorWeight;\n}\n\nconst shiftDate = (dateKey, offset) => {\n  const key = toDateKey(dateKey);\n  if (!key) return null;\n  const base = new Date(`${key}T00:00:00Z`);\n  if (Number.isNaN(base.getTime())) return null;\n  base.setUTCDate(base.getUTCDate() + offset);\n  return base.toISOString().slice(0, 10);\n};\n\nconst sortedKeys = Array.from(historicoDataMap.keys()).sort((a, b) => {\n  const timeA = a ? new Date(a).getTime() : 0;\n  const timeB = b ? new Date(b).getTime() : 0;\n  return timeA - timeB;\n});\n\nlet lastDateKey = toDateKey(historicoResumo.periodo_fim) ?? sortedKeys[sortedKeys.length - 1];\nif (!lastDateKey) {\n  lastDateKey = new Date().toISOString().slice(0, 10);\n}\n\nconst windowSize = 7;\nconst windowRawEntries = [];\nfor (let offset = windowSize - 1; offset >= 0; offset -= 1) {\n  const dateKey = shiftDate(lastDateKey, -offset);\n  if (!dateKey) continue;\n  const sourceEntry = historicoDataMap.get(dateKey);\n  const conversasCount = Number.isFinite(sourceEntry?.conversas)\n    ? Number(sourceEntry.conversas)\n    : (sourceEntry?.tem_conversa ? 1 : 0);\n  const temConversa = Boolean(sourceEntry?.tem_conversa) || conversasCount > 0;\n\n  windowRawEntries.push({\n    data: dateKey,\n    label: toLabel(dateKey),\n    tem_conversa: temConversa,\n    conversas: conversasCount,\n    emoji: normalizeString(sourceEntry?.emoji),\n    humor: Number.isFinite(sourceEntry?.humor) ? sourceEntry.humor : null,\n    ultima_hora: normalizeString(sourceEntry?.ultima_hora)\n  });\n}\n\nconst diasComConversas = windowRawEntries.filter((entry) => entry.conversas > 0 || entry.tem_conversa).length;\n\nlet ultimaConversaData = historicoResumo.ultima_conversa_data;\nlet ultimaConversaHora = historicoResumo.ultima_conversa_hora;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) continue;\n  ultimaConversaData = entry.data;\n  if (entry.ultima_hora) {\n    ultimaConversaHora = entry.ultima_hora;\n  }\n  break;\n}\n\nlet sequenciaAtiva = 0;\nfor (let i = windowRawEntries.length - 1; i >= 0; i -= 1) {\n  const entry = windowRawEntries[i];\n  if (!entry.tem_conversa) break;\n  sequenciaAtiva += 1;\n}\n\nconst periodoInicio = windowRawEntries[0]?.data ?? historicoResumo.periodo_inicio ?? null;\nconst periodoFim = windowRawEntries[windowRawEntries.length - 1]?.data ?? historicoResumo.periodo_fim ?? null;\n\nconst humorMedioGlobal = parseNullableNumber(humor.humor_medio);\nhistoricoResumo = {\n  total_conversas: diasComConversas,\n  humor_medio: humorMedioGlobal ?? historicoResumo.humor_medio ?? 0,\n  sequencia_ativa: sequenciaAtiva,\n  ultima_conversa_data: ultimaConversaData ?? null,\n  ultima_conversa_hora: ultimaConversaHora ?? null,\n  periodo_inicio: periodoInicio,\n  periodo_fim: periodoFim\n};\n\nconst historicoDiario = windowRawEntries.map((entry) => ({\n  data: entry.data,\n  label: entry.label,\n  tem_conversa: entry.tem_conversa,\n  conversas: Number.isFinite(entry.conversas) ? entry.conversas : 0,\n  emoji: entry.emoji ?? null,\n  humor: entry.tem_conversa && Number.isFinite(entry.humor) ? entry.humor : null,\n  ultima_hora: entry.ultima_hora ?? null\n}));\n\n\n// Insights - AJUSTE CORRETO\nconst insightsRows = rows.filter(row => \n  row && typeof row === 'object' && (\n    'id' in row && \n    'tipo' in row && \n    'categoria' in row && \n    'titulo' in row\n  )\n);\n\nconst insights = insightsRows.length > 0 \n? insightsRows.map(insight => ({\n    id: normalizeString(insight.id) ?? undefined,\n    tipo: normalizeString(insight.tipo) ?? undefined,\n    categoria: normalizeString(insight.categoria) ?? undefined,\n    titulo: normalizeString(insight.titulo) ?? undefined,\n    descricao: normalizeString(insight.descricao) ?? undefined,\n    icone: normalizeString(insight.icone) ?? undefined,\n    prioridade: normalizeString(insight.prioridade) ?? undefined,\n    data_criacao: normalizeString(insight.data_criacao) ?? undefined,\n  }))\n: [];\n\nreturn [\n  {\n    json: {\n      response: {\n        success: true,\n        humor,\n        user,\n        perfil_big_five: perfilBigFive,\n        gamificacao,\n        proxima_jornada: proximaJornada,\n        sabotador,\n        roda_emocoes: distribuicaoEmocoes,\n        panas,\n        historico_diario: historicoDiario,\n        historico_resumo: {\n          total_conversas: parseNullableNumber(historicoResumo.total_conversas) ?? 0,\n          humor_medio: parseNullableNumber(historicoResumo.humor_medio) ?? 0,\n          sequencia_ativa: parseNullableNumber(historicoResumo.sequencia_ativa) ?? 0,\n          ultima_conversa_data: normalizeString(historicoResumo.ultima_conversa_data),\n          ultima_conversa_hora: normalizeString(historicoResumo.ultima_conversa_hora),\n          periodo_inicio: normalizeString(historicoResumo.periodo_inicio),\n          periodo_fim: normalizeString(historicoResumo.periodo_fim)\n        },\n        insights,\n        timestamp: new Date().toISOString(),\n      },\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        304
+        1280,
+        448
       ],
-      "id": "24e6138f-d936-4716-bc58-3b13dbd5a417",
+      "id": "08333d7e-8b88-4e64-8675-5e3a2401672f",
       "name": "organiza_dados"
     },
     {
@@ -190,10 +195,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        96
+        448,
+        240
       ],
-      "id": "4363f440-93d1-4120-86da-854cd9eea89d",
+      "id": "e1900916-a2a1-4f43-ae88-aeffcd5c78a7",
       "name": "Big_five",
       "alwaysOutputData": true,
       "credentials": {
@@ -211,13 +216,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "137534f7-d65e-4248-a697-234955d16408",
+      "id": "35441b15-f508-4054-b6e4-eb57e175ce04",
       "name": "roda_emocoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        -80
+        448,
+        64
       ],
       "credentials": {
         "postgres": {
@@ -238,10 +243,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        -272
+        448,
+        -128
       ],
-      "id": "3efe6509-8da9-45fe-8e9c-c1284b1caf5a",
+      "id": "217536c0-f327-4afd-9337-b0d2104828a0",
       "name": "Humor",
       "credentials": {
         "postgres": {
@@ -253,18 +258,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT $1::uuid AS usuario_id\n),\nraw AS (\n  SELECT *\n  FROM public.gamificacao g\n  JOIN base ON base.usuario_id = g.usuario_id\n  ORDER BY g.atualizado_em DESC NULLS LAST, g.criado_em DESC NULLS LAST\n  LIMIT 1\n),\nnormalized AS (\n  SELECT\n    r.*,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN 'pendente'\n      ELSE COALESCE(r.quest_diaria_status, 'pendente')\n    END AS quest_status_norm,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN 0\n      ELSE COALESCE(r.quest_diaria_progresso, 0)\n    END AS quest_progresso_norm,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN CURRENT_DATE\n      ELSE r.quest_diaria_data\n    END AS quest_data_norm\n  FROM raw r\n),\ndefaults AS (\n  SELECT\n    0::int AS xp_total,\n    400::int AS xp_proximo_nivel,\n    1::int AS nivel_atual,\n    'Nível 1'::varchar AS titulo_nivel,\n    0::int AS streak_conversas_dias,\n    false::boolean AS streak_protecao_usada,\n    NULL::date AS streak_protecao_resetada_em,\n    NULL::date AS ultima_conversa_data,\n    0::int AS melhor_streak,\n    'pendente'::varchar AS quest_diaria_status,\n    0::int AS quest_diaria_progresso,\n    'Complete sua conversa diária'::text AS quest_diaria_descricao,\n    CURRENT_DATE AS quest_diaria_data,\n    0::int AS quest_streak_dias,\n    '[]'::jsonb AS conquistas_desbloqueadas,\n    '[]'::jsonb AS conquistas_proximas,\n    0::int AS total_conversas,\n    0::int AS total_reflexoes,\n    0::int AS total_xp_ganho_hoje,\n    NULL::varchar AS ultima_conquista_id,\n    NULL::timestamp AS ultima_conquista_data,\n    NOW()::timestamp AS criado_em,\n    NOW()::timestamp AS atualizado_em\n),\nstats AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(SUM(uq.xp_concedido), 0) AS xp_total,\n    COALESCE(SUM(uq.xp_concedido) FILTER (\n      WHERE uq.concluido_em IS NOT NULL\n        AND uq.concluido_em::date = CURRENT_DATE\n    ), 0) AS xp_total_hoje,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_conversas'), 0) AS total_conversas,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_reflexoes'), 0) AS total_reflexoes,\n    COALESCE(MAX(uq.atualizado_em)::date, NULL) AS ultima_conversa_data\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\ndaily AS (\n  SELECT\n    COALESCE(sub.status, 'pendente') AS status_norm,\n    COALESCE(sub.progresso_percentual, 0) AS progresso_norm,\n    sub.descricao,\n    sub.usuario_quest_id\n  FROM (\n    SELECT\n      uq.id AS usuario_quest_id,\n      uq.status,\n      uq.progresso_percentual,\n      COALESCE(NULLIF(qc.descricao, ''), qc.titulo) AS descricao\n    FROM usuarios_quest uq\n    JOIN quest_catalog qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE qc.tipo = 'diaria'\n      AND uq.referencia_data = CURRENT_DATE\n    ORDER BY uq.atualizado_em DESC\n    LIMIT 1\n  ) sub\n),\nultima AS (\n  SELECT\n    qc.codigo,\n    uq.concluido_em\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n    AND qc.tipo <> 'diaria'\n  ORDER BY uq.concluido_em DESC\n  LIMIT 1\n),\nconquistas_completas AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', qc.codigo,\n      'nome', qc.titulo,\n      'emoji', '🏆',\n      'xp_bonus', qc.xp_recompensa,\n      'categoria', qc.categoria,\n      'desbloqueada_em', uq.concluido_em\n    )\n    ORDER BY uq.concluido_em DESC\n  ) AS conquistas\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n    AND qc.tipo <> 'diaria'\n),\nproximas_raw AS (\n  SELECT\n    qc.codigo,\n    qc.titulo AS nome,\n    '🔒' AS emoji,\n    qc.xp_recompensa,\n    qc.categoria,\n    uq.status,\n    uq.progresso_percentual,\n    uq.progresso_atual,\n    uq.progresso_meta,\n    qc.sequencia,\n    qc.ordem_inicial,\n    uq.ativado_em\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE qc.tipo <> 'diaria'\n    AND uq.status <> 'completa'\n),\nproximas AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', pr.codigo,\n      'nome', pr.nome,\n      'emoji', pr.emoji,\n      'xp_bonus', pr.xp_recompensa,\n      'categoria', pr.categoria,\n      'status', pr.status,\n      'progresso_percentual', pr.progresso_percentual,\n      'progresso_atual', pr.progresso_atual,\n      'progresso_meta', pr.progresso_meta\n    )\n    ORDER BY (CASE pr.status WHEN 'ativa' THEN 0 ELSE 1 END), pr.sequencia, pr.ordem_inicial NULLS LAST, pr.ativado_em\n  ) AS conquistas\n  FROM proximas_raw pr\n),\nxp_base AS (\n  SELECT COALESCE(s.xp_total, n.xp_total, d.xp_total) AS xp_total_resolve\n  FROM defaults d\n  LEFT JOIN normalized n ON TRUE\n  LEFT JOIN stats s ON TRUE\n  LIMIT 1\n),\nnivel_info AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_base xb ON xb.xp_total_resolve >= gn.xp_minimo\n  ORDER BY gn.xp_minimo DESC\n  LIMIT 1\n),\nproximo_nivel_info AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_base xb ON gn.xp_minimo > xb.xp_total_resolve\n  ORDER BY gn.xp_minimo\n  LIMIT 1\n)\nSELECT jsonb_build_object(\n  'xp_total', COALESCE(s.xp_total, n.xp_total, d.xp_total),\n  'xp_proximo_nivel', COALESCE(prox.xp_minimo, nivel.xp_proximo_nivel, n.xp_proximo_nivel, d.xp_proximo_nivel),\n  'nivel_atual', COALESCE(nivel.nivel, n.nivel_atual, d.nivel_atual),\n  'titulo_nivel', COALESCE(nivel.titulo, n.titulo_nivel, d.titulo_nivel),\n  'streak_conversas_dias', COALESCE(n.streak_conversas_dias, d.streak_conversas_dias),\n  'streak_protecao_usada', COALESCE(n.streak_protecao_usada, d.streak_protecao_usada),\n  'streak_protecao_resetada_em', COALESCE(n.streak_protecao_resetada_em, d.streak_protecao_resetada_em),\n  'ultima_conversa_data', COALESCE(s.ultima_conversa_data, n.ultima_conversa_data, d.ultima_conversa_data),\n  'melhor_streak', COALESCE(n.melhor_streak, d.melhor_streak),\n  'quest_diaria_status', COALESCE(dy.status_norm, n.quest_status_norm, d.quest_diaria_status),\n  'quest_diaria_progresso', COALESCE(dy.progresso_norm, n.quest_progresso_norm, d.quest_diaria_progresso),\n  'quest_diaria_descricao', COALESCE(dy.descricao, n.quest_diaria_descricao, d.quest_diaria_descricao),\n  'quest_diaria_data', COALESCE(n.quest_data_norm, d.quest_diaria_data),\n  'quest_streak_dias', COALESCE(n.quest_streak_dias, d.quest_streak_dias),\n  'conquistas_desbloqueadas', COALESCE(cc.conquistas, '[]'::jsonb),\n  'conquistas_proximas', COALESCE(pr.conquistas, '[]'::jsonb),\n  'total_conversas', COALESCE(s.total_conversas, d.total_conversas),\n  'total_reflexoes', COALESCE(s.total_reflexoes, d.total_reflexoes),\n  'total_xp_ganho_hoje', COALESCE(s.xp_total_hoje, d.total_xp_ganho_hoje),\n  'ultima_conquista_id', COALESCE(u.codigo, n.ultima_conquista_id, d.ultima_conquista_id),\n  'ultima_conquista_data', COALESCE(u.concluido_em, n.ultima_conquista_data, d.ultima_conquista_data),\n  'ultima_atualizacao', COALESCE(n.atualizado_em, d.atualizado_em),\n  'criado_em', COALESCE(n.criado_em, d.criado_em)\n) AS gamificacao\nFROM defaults d\nLEFT JOIN normalized n ON TRUE\nLEFT JOIN stats s ON TRUE\nLEFT JOIN daily dy ON TRUE\nLEFT JOIN ultima u ON TRUE\nLEFT JOIN conquistas_completas cc ON TRUE\nLEFT JOIN proximas pr ON TRUE\nLEFT JOIN nivel_info nivel ON TRUE\nLEFT JOIN proximo_nivel_info prox ON TRUE;",
+        "query": "WITH base AS (\n  SELECT $1::uuid AS usuario_id\n),\nraw AS (\n  SELECT *\n  FROM public.gamificacao g\n  JOIN base ON base.usuario_id = g.usuario_id\n  ORDER BY g.atualizado_em DESC NULLS LAST, g.criado_em DESC NULLS LAST\n  LIMIT 1\n),\nnormalized AS (\n  SELECT\n    r.*,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN 'pendente'\n      ELSE COALESCE(r.quest_diaria_status, 'pendente')\n    END AS quest_status_norm,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN 0\n      ELSE COALESCE(r.quest_diaria_progresso, 0)\n    END AS quest_progresso_norm,\n    CASE\n      WHEN r.quest_diaria_data IS NULL OR r.quest_diaria_data < CURRENT_DATE\n        THEN CURRENT_DATE\n      ELSE r.quest_diaria_data\n    END AS quest_data_norm\n  FROM raw r\n),\ndefaults AS (\n  SELECT\n    0::int AS xp_total,\n    400::int AS xp_proximo_nivel,\n    1::int AS nivel_atual,\n    'Nível 1'::varchar AS titulo_nivel,\n    0::int AS streak_conversas_dias,\n    false::boolean AS streak_protecao_usada,\n    NULL::date AS streak_protecao_resetada_em,\n    NULL::date AS ultima_conversa_data,\n    0::int AS melhor_streak,\n    'pendente'::varchar AS quest_diaria_status,\n    0::int AS quest_diaria_progresso,\n    'Complete sua conversa diária'::text AS quest_diaria_descricao,\n    CURRENT_DATE AS quest_diaria_data,\n    0::int AS quest_streak_dias,\n    '[]'::jsonb AS conquistas_desbloqueadas,\n    '[]'::jsonb AS conquistas_proximas,\n    0::int AS total_conversas,\n    0::int AS total_reflexoes,\n    0::int AS total_xp_ganho_hoje,\n    NULL::varchar AS ultima_conquista_id,\n    NULL::timestamp AS ultima_conquista_data,\n    NOW()::timestamp AS criado_em,\n    NOW()::timestamp AS atualizado_em\n),\nstats AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(SUM(uq.xp_concedido), 0) AS xp_total,\n    COALESCE(SUM(uq.xp_concedido) FILTER (\n      WHERE uq.concluido_em IS NOT NULL\n        AND uq.concluido_em::date = CURRENT_DATE\n    ), 0) AS xp_total_hoje,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_conversas'), 0) AS total_conversas,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_reflexoes'), 0) AS total_reflexoes,\n    COALESCE(MAX(uq.atualizado_em)::date, NULL) AS ultima_conversa_data\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\ndaily AS (\n  SELECT\n    COALESCE(sub.status, 'pendente') AS status_norm,\n    COALESCE(sub.progresso_percentual, 0) AS progresso_norm,\n    sub.descricao,\n    sub.usuario_quest_id\n  FROM (\n    SELECT\n      uq.id AS usuario_quest_id,\n      uq.status,\n      uq.progresso_percentual,\n      COALESCE(NULLIF(qc.descricao, ''), qc.titulo) AS descricao\n    FROM usuarios_quest uq\n    JOIN quest_catalog qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE qc.tipo = 'diaria'\n      AND uq.referencia_data = CURRENT_DATE\n    ORDER BY uq.atualizado_em DESC\n    LIMIT 1\n  ) sub\n),\ncompleted_quests AS (\n  SELECT\n    uq.id,\n    qc.codigo,\n    qc.titulo,\n    qc.categoria,\n    qc.tipo,\n    qc.xp_recompensa,\n    uq.concluido_em,\n    uq.atualizado_em,\n    uq.referencia_data\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n),\nultima AS (\n  SELECT\n    cq.codigo,\n    cq.concluido_em\n  FROM completed_quests cq\n  WHERE cq.tipo <> 'diaria'\n  ORDER BY cq.concluido_em DESC\n  LIMIT 1\n),\nconquistas_completas AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', cq.codigo,\n      'nome', cq.titulo,\n      'emoji', '🏆',\n      'xp_bonus', cq.xp_recompensa,\n      'categoria', cq.categoria,\n      'desbloqueada_em', cq.concluido_em\n    )\n    ORDER BY cq.concluido_em DESC\n  ) AS conquistas\n  FROM completed_quests cq\n  WHERE cq.tipo <> 'diaria'\n),\ndaily_concluidas AS (\n  SELECT COALESCE(jsonb_agg(\n    jsonb_build_object(\n      'usuario_quest_id', cq.id,\n      'codigo', cq.codigo,\n      'titulo', cq.titulo,\n      'categoria', cq.categoria,\n      'categoria_nome', initcap(replace(cq.categoria, '_', ' ')),\n      'xp_bonus', cq.xp_recompensa,\n      'concluido_em', cq.concluido_em,\n      'atualizado_em', cq.atualizado_em,\n      'referencia_data', cq.referencia_data\n    )\n    ORDER BY cq.concluido_em DESC NULLS LAST, cq.atualizado_em DESC NULLS LAST\n  ), '[]'::jsonb) AS itens\n  FROM completed_quests cq\n  WHERE cq.tipo = 'diaria'\n),\ncategorias_evolucao AS (\n  SELECT COALESCE(jsonb_agg(\n    jsonb_build_object(\n      'codigo', stats.categoria,\n      'nome', initcap(replace(stats.categoria, '_', ' ')),\n      'total_conquistas', stats.total_conquistas,\n      'ultima_atualizacao', stats.ultima_atualizacao,\n      'ultima_conclusao', stats.ultima_conclusao\n    )\n    ORDER BY stats.categoria\n  ), '[]'::jsonb) AS itens\n  FROM (\n    SELECT\n      cq.categoria,\n      COUNT(*) AS total_conquistas,\n      MAX(cq.atualizado_em) AS ultima_atualizacao,\n      MAX(cq.concluido_em) AS ultima_conclusao\n    FROM completed_quests cq\n    GROUP BY cq.categoria\n  ) stats\n),\nproximas_raw AS (\n  SELECT\n    qc.codigo,\n    qc.titulo AS nome,\n    '🔒' AS emoji,\n    qc.xp_recompensa,\n    qc.categoria,\n    uq.status,\n    uq.progresso_percentual,\n    uq.progresso_atual,\n    uq.progresso_meta,\n    qc.sequencia,\n    qc.ordem_inicial,\n    uq.ativado_em\n  FROM usuarios_quest uq\n  JOIN quest_catalog qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE qc.tipo <> 'diaria'\n    AND uq.status <> 'completa'\n),\nproximas AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', pr.codigo,\n      'nome', pr.nome,\n      'emoji', pr.emoji,\n      'xp_bonus', pr.xp_recompensa,\n      'categoria', pr.categoria,\n      'status', pr.status,\n      'progresso_percentual', pr.progresso_percentual,\n      'progresso_atual', pr.progresso_atual,\n      'progresso_meta', pr.progresso_meta\n    )\n    ORDER BY (CASE pr.status WHEN 'ativa' THEN 0 ELSE 1 END), pr.sequencia, pr.ordem_inicial NULLS LAST, pr.ativado_em\n  ) AS conquistas\n  FROM proximas_raw pr\n),\nxp_base AS (\n  SELECT COALESCE(s.xp_total, n.xp_total, d.xp_total) AS xp_total_resolve\n  FROM defaults d\n  LEFT JOIN normalized n ON TRUE\n  LEFT JOIN stats s ON TRUE\n  LIMIT 1\n),\nnivel_info AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_base xb ON xb.xp_total_resolve >= gn.xp_minimo\n  ORDER BY gn.xp_minimo DESC\n  LIMIT 1\n),\nproximo_nivel_info AS (\n  SELECT gn.*\n  FROM gamificacao_niveis gn\n  JOIN xp_base xb ON gn.xp_minimo > xb.xp_total_resolve\n  ORDER BY gn.xp_minimo\n  LIMIT 1\n)\nSELECT jsonb_build_object(\n  'xp_total', COALESCE(s.xp_total, n.xp_total, d.xp_total),\n  'xp_proximo_nivel', COALESCE(prox.xp_minimo, nivel.xp_proximo_nivel, n.xp_proximo_nivel, d.xp_proximo_nivel),\n  'nivel_atual', COALESCE(nivel.nivel, n.nivel_atual, d.nivel_atual),\n  'titulo_nivel', COALESCE(nivel.titulo, n.titulo_nivel, d.titulo_nivel),\n  'streak_conversas_dias', COALESCE(n.streak_conversas_dias, d.streak_conversas_dias),\n  'streak_protecao_usada', COALESCE(n.streak_protecao_usada, d.streak_protecao_usada),\n  'streak_protecao_resetada_em', COALESCE(n.streak_protecao_resetada_em, d.streak_protecao_resetada_em),\n  'ultima_conversa_data', COALESCE(s.ultima_conversa_data, n.ultima_conversa_data, d.ultima_conversa_data),\n  'melhor_streak', COALESCE(n.melhor_streak, d.melhor_streak),\n  'quest_diaria_status', COALESCE(dy.status_norm, n.quest_status_norm, d.quest_diaria_status),\n  'quest_diaria_progresso', COALESCE(dy.progresso_norm, n.quest_progresso_norm, d.quest_diaria_progresso),\n  'quest_diaria_descricao', COALESCE(dy.descricao, n.quest_diaria_descricao, d.quest_diaria_descricao),\n  'quest_diaria_data', COALESCE(n.quest_data_norm, d.quest_diaria_data),\n  'quest_streak_dias', COALESCE(n.quest_streak_dias, d.quest_streak_dias),\n  'conquistas_desbloqueadas', COALESCE(cc.conquistas, '[]'::jsonb),\n  'conquistas_proximas', COALESCE(pr.conquistas, '[]'::jsonb),\n  'daily_concluidas', COALESCE(dc.itens, '[]'::jsonb),\n  'categorias_evolucao', COALESCE(ce.itens, '[]'::jsonb),\n  'total_conversas', COALESCE(s.total_conversas, d.total_conversas),\n  'total_reflexoes', COALESCE(s.total_reflexoes, d.total_reflexoes),\n  'total_xp_ganho_hoje', COALESCE(s.xp_total_hoje, d.total_xp_ganho_hoje),\n  'ultima_conquista_id', COALESCE(u.codigo, n.ultima_conquista_id, d.ultima_conquista_id),\n  'ultima_conquista_data', COALESCE(u.concluido_em, n.ultima_conquista_data, d.ultima_conquista_data),\n  'ultima_atualizacao', COALESCE(n.atualizado_em, d.atualizado_em),\n  'criado_em', COALESCE(n.criado_em, d.criado_em)\n) AS gamificacao\nFROM defaults d\nLEFT JOIN normalized n ON TRUE\nLEFT JOIN stats s ON TRUE\nLEFT JOIN daily dy ON TRUE\nLEFT JOIN ultima u ON TRUE\nLEFT JOIN conquistas_completas cc ON TRUE\nLEFT JOIN proximas pr ON TRUE\nLEFT JOIN nivel_info nivel ON TRUE\nLEFT JOIN proximo_nivel_info prox ON TRUE\nLEFT JOIN daily_concluidas dc ON TRUE\nLEFT JOIN categorias_evolucao ce ON TRUE;",
         "options": {
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "0cc7ac64-7976-4bb8-a222-e86f133028f5",
+      "id": "19a7eb04-50c4-4c49-9685-17a650bf75c1",
       "name": "Gameficacao",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        464
+        448,
+        608
       ],
       "credentials": {
         "postgres": {
@@ -282,13 +287,13 @@
           "queryReplacement": "={{ $('01_Validar_Usuario').item.json.user_id }}"
         }
       },
-      "id": "a0917f24-2fd3-4ee8-a342-95ac918941df",
+      "id": "e65c8ef8-3fa5-49fd-9bf0-3fe2e3783233",
       "name": "Proxima_Jornada",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -240,
-        480
+        656,
+        624
       ],
       "credentials": {
         "postgres": {
@@ -299,46 +304,6 @@
       "continueOnFail": true
     }
   ],
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "mindquest-n8n.cloudfy.live",
-            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/138.0.7204.156 Mobile/15E148 Safari/604.1",
-            "content-length": "94",
-            "accept": "*/*",
-            "accept-encoding": "gzip, br",
-            "accept-language": "pt-BR,pt;q=0.9",
-            "cdn-loop": "cloudflare; loops=1",
-            "cf-connecting-ip": "2001:818:e374:a600:8800:fa96:bcdd:91c0",
-            "cf-ipcountry": "PT",
-            "cf-ray": "9985c0601ded3a95-LIS",
-            "cf-visitor": "{\"scheme\":\"https\"}",
-            "content-type": "application/json",
-            "origin": "https://mindquest.pt",
-            "referer": "https://mindquest.pt/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "cross-site",
-            "x-forwarded-for": "172.68.103.43",
-            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
-            "x-forwarded-port": "443",
-            "x-forwarded-proto": "https",
-            "x-forwarded-server": "d49265bfcab0",
-            "x-real-ip": "172.68.103.43"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "token": "89d002f0-973d-4927-8634-92993f188f498c6046bf-cf23-4da4-9689-a46b9e154b901762100759"
-          },
-          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/auth/validate",
-          "executionMode": "production"
-        }
-      }
-    ]
-  },
   "connections": {
     "Webhook": {
       "main": [
@@ -529,15 +494,110 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "2c45d5c7-23bc-4a27-a320-7a08b2f12771",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+    "templateCredsSetupCompleted": true
   },
-  "id": "r0CuG6F3S1TR8ohs",
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/138.0.7204.156 Mobile/15E148 Safari/604.1",
+            "content-length": "94",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "pt-BR,pt;q=0.9",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:8800:fa96:bcdd:91c0",
+            "cf-ipcountry": "PT",
+            "cf-ray": "9985c0601ded3a95-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "origin": "https://mindquest.pt",
+            "referer": "https://mindquest.pt/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.68.103.43",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.43"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "token": "89d002f0-973d-4927-8634-92993f188f498c6046bf-cf23-4da4-9689-a46b9e154b901762100759"
+          },
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/auth/validate",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "42aae1df-037c-43af-841c-daab394dd6bd",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-09-24T12:07:20.876Z",
+      "createdAt": "2025-09-24T12:07:20.876Z",
+      "role": "workflow:owner",
+      "workflowId": "r0CuG6F3S1TR8ohs",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "updatedAt": "2025-11-03T08:00:04.654Z",
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-03",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

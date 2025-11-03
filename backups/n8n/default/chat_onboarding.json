@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2025-11-01T20:48:09.414Z",
-  "createdAt": "2025-09-30T11:31:35.749Z",
-  "id": "2LwxT1Pnnaheh10M",
+  "updatedAt": "2025-11-02T19:07:09.690Z",
+  "createdAt": "2025-11-02T13:31:36.212Z",
+  "id": "UlInW9nmQs7vnPIP",
   "name": "chat_onboarding",
   "active": false,
   "isArchived": false,
@@ -31,13 +31,13 @@
           ]
         }
       },
-      "id": "8f1b2143-b0f3-472e-a5ec-debeb8de4148",
+      "id": "569fb1ed-c56a-471f-9b87-2720273bbe6c",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1776,
-        48
+        -1984,
+        352
       ]
     },
     {
@@ -47,13 +47,13 @@
         "key": "=onboard:memory{{ $('start').first().json.evolution_instancia }}{{ $('start').first().json.whatsapp_number }}",
         "options": {}
       },
-      "id": "250f07b9-7fb6-4eea-9946-b90f720e9223",
+      "id": "4b257151-017c-4bb7-9f88-490f93423fcd",
       "name": "Redis Get",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -1424,
-        -112
+        -1632,
+        192
       ],
       "credentials": {
         "redis": {
@@ -66,13 +66,13 @@
       "parameters": {
         "jsCode": "const raw = $input.item.json.sessionData;\nlet session = {};\ntry {\n  if (raw) session = JSON.parse(raw);\n} catch (error) {\n  session = {};\n}\n\nconst hasNome = typeof session.nome_preferido === 'string' && session.nome_preferido.trim().length >= 2;\n\nconst normalizeEstado = (value) => {\n  if (value === 'completo') return 'completo';\n  if (hasNome) return 'completo';\n  if (value === 'esperando_nome') return 'esperando_nome';\n  return 'inicio';\n};\n\nconst estado = normalizeEstado(session.estado);\nconst nome_preferido = hasNome ? session.nome_preferido.trim() : null;\n\nconst interactionCountMap = {\n  inicio: 1,\n  esperando_nome: 2,\n  completo: 3,\n};\n\nconst interaction_count = interactionCountMap[estado] ?? 2;\n\nlet next_focus = '';\nif (estado === 'completo') {\n  next_focus = 'ONBOARDING#FINAL: Agradeça e confirme que o acesso será liberado em seguida. Não faça novas perguntas.';\n} else {\n  next_focus = 'ONBOARDING#NOME: Cumprimente brevemente e pergunte apenas COMO A PESSOA PREFERE SER CHAMADA.';\n}\n\nconst is_last_interaction = estado === 'completo';\n\nreturn {\n  json: {\n    estado,\n    nome_preferido,\n    interaction_count,\n    next_focus,\n    is_last_interaction,\n  },\n};\n"
       },
-      "id": "d3a3784b-5898-48a4-91f4-c2401a7c24d2",
+      "id": "ff5862d0-aa91-4c5d-86bf-073801f94dd1",
       "name": "Code - Controller (interations-style)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1200,
-        -112
+        -1408,
+        192
       ]
     },
     {
@@ -83,26 +83,26 @@
           "systemMessage": "=# SYSTEM\n- Fale PT-BR.\n- Obedeça ao next_focus sem inventar novas perguntas.\n- Não peça dados além do nome.\n- Direto, cordial e breve."
         }
       },
-      "id": "ee087705-66a6-49ac-8bbc-e8f7b697fe80",
+      "id": "e48925f6-2259-4561-a048-1da805e8229c",
       "name": "Agent AI (interations-style)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -960,
-        -112
+        -1168,
+        192
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "13473f2a-8442-4ba3-835c-7b98d2693382",
+      "id": "537e59fa-f4e4-49aa-9371-343d48c2eb8c",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -960,
-        80
+        -1168,
+        384
       ],
       "credentials": {
         "openRouterApi": {
@@ -115,13 +115,13 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.output || '';\nconst controller = $('Code - Controller (interations-style)').first().json || {};\nconst startPayload = $('start').first().json || {};\nconst incomingMessage = String(startPayload.menssagem || '').trim();\nconst pushName = String(startPayload.pushName || '').trim();\n\nlet out_text = String(raw || '').trim();\nconst estadoAtual = controller.estado || 'inicio';\nconst nomeAnterior = controller.nome_preferido || null;\n\nconst limparNome = (valor) => {\n  if (typeof valor !== 'string') return null;\n  const limpo = valor\n    .replace(/^[\\\"'\\s]+/g, '')\n    .replace(/[\\\"'\\s]+$/g, '')\n    .replace(/\\s+/g, ' ')\n    .trim();\n  return limpo.length > 0 ? limpo : null;\n};\n\nconst mensagemSolicitarNome = 'Pra seguir, preciso saber como você prefere ser chamado(a). Pode me contar?';\nconst fallbackNome = () => limparNome(pushName) || limparNome(nomeAnterior) || 'você';\n\nlet proximo_estado = estadoAtual;\nlet tipo = 'mensagem';\nlet nome_usuario = limparNome(nomeAnterior) || limparNome(pushName);\nconst nomeInformado = limparNome(incomingMessage);\n\nif (estadoAtual === 'inicio') {\n  proximo_estado = 'esperando_nome';\n  if (!out_text) {\n    out_text = mensagemSolicitarNome;\n  }\n} else if (estadoAtual === 'esperando_nome') {\n  nome_usuario = nomeInformado || fallbackNome();\n  proximo_estado = 'completo';\n  tipo = 'finalizado';\n  if (!out_text) {\n    out_text = `Perfeito, ${nome_usuario}! Vou liberar seu acesso agora. 🙌`;\n  }\n} else {\n  nome_usuario = nomeInformado || nome_usuario || fallbackNome();\n  proximo_estado = 'completo';\n  tipo = 'finalizado';\n  if (!out_text) {\n    out_text = nome_usuario\n      ? `Perfeito, ${nome_usuario}! Vou liberar seu acesso agora. 🙌`\n      : 'Perfeito! Vou liberar seu acesso agora. 🙌';\n  }\n}\n\nreturn {\n  json: {\n    tipo,\n    texto: out_text,\n    proximo_estado,\n    nome_usuario,\n    email_usuario: null,\n    faixa_etaria: null,\n    faixa_etaria_codigo: null,\n    nome_assistente: 'assistente',\n  },\n};\n"
       },
-      "id": "907fd40d-b3c5-4336-ace4-aeb6b485695f",
+      "id": "d38d9c38-bb09-4f70-9a7d-e76d2b295f33",
       "name": "Code - Parse Determinístico",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -592,
-        -112
+        -800,
+        192
       ]
     },
     {
@@ -148,13 +148,13 @@
         },
         "options": {}
       },
-      "id": "b380754b-4f60-44a6-b1e2-50e32802599a",
+      "id": "8dac5065-e211-4cf1-8397-b7053859a5cc",
       "name": "IF Finalizado",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -400,
-        -112
+        -608,
+        192
       ]
     },
     {
@@ -165,13 +165,13 @@
         "expire": true,
         "ttl": 86400
       },
-      "id": "b84ad144-d741-4e84-b17b-2f4ce650faa4",
+      "id": "118c954d-7628-4e79-944a-a2416e265061",
       "name": "Redis Update",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        64,
-        -16
+        -144,
+        288
       ],
       "credentials": {
         "redis": {
@@ -188,13 +188,13 @@
           "queryReplacement": "={{ [\n  $('start').first().json.whatsapp_number,\n  $('start').item.json.pushName,\n  $('Code - Parse Determinístico').item.json.nome_usuario,\n  $('start').item.json.id\n] }}"
         }
       },
-      "id": "390a765f-bc53-4176-9a4c-abab28a1a820",
+      "id": "b9a59930-45da-4249-97ef-be9770274299",
       "name": "Insert User",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -160,
-        -272
+        -368,
+        32
       ],
       "credentials": {
         "postgres": {
@@ -211,13 +211,13 @@
           "queryReplacement": "={{ [$json.id] }}"
         }
       },
-      "id": "28018c18-d374-4d3f-a5d9-0dedc6eb41c2",
+      "id": "5443cd22-640f-44f7-8ca1-8402e4a99220",
       "name": "Insert Gamif",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        48,
-        -272
+        -160,
+        32
       ],
       "credentials": {
         "postgres": {
@@ -230,13 +230,13 @@
       "parameters": {
         "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url}\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.\n\nSe quiser um guia rápido pra aproveitar melhor, visite https://mindquest.pt/suporte/conversation-guide.\n\nQuando quiser, é só me contar o que está acontecendo por aí.`;\n\nreturn { json: { mensagem } };"
       },
-      "id": "ed32235c-07d8-4b4f-a61a-d5baa73b2c30",
+      "id": "d0abdb6a-29d7-44c9-a8f0-3b414e21083a",
       "name": "monta link para usuario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        -272
+        32,
+        32
       ]
     },
     {
@@ -246,13 +246,13 @@
         "sessionTTL": 86400,
         "contextWindowLength": 20
       },
-      "id": "c91abce1-ca26-432d-b4b3-a3bfd61aab1e",
+      "id": "8db906af-811b-4904-a018-04910128c1b9",
       "name": "Redis Chat Memory1",
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -224,
-        752
+        -432,
+        1056
       ],
       "credentials": {
         "redis": {
@@ -320,10 +320,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        448,
-        -272
+        240,
+        32
       ],
-      "id": "2403ac18-f31a-4e54-90f2-fabb4ab0bc43",
+      "id": "48950db3-388a-41dd-8481-26af0bec3c54",
       "name": "Call 'sw_send_message_with_retry'"
     },
     {
@@ -385,10 +385,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -160,
-        -16
+        -368,
+        288
       ],
-      "id": "feaf7cd8-2fbc-4a0b-b27f-9d1f0771fe69",
+      "id": "33cf461e-06b4-47a8-ba5a-f7e204244dc5",
       "name": "Call 'sw_send_message_with_retry'1"
     },
     {
@@ -396,13 +396,13 @@
         "operation": "delete",
         "key": "=onboard:memory{{ $('start').first().json.evolution_instancia }}{{ $('start').first().json.whatsapp_number }}"
       },
-      "id": "770e639e-c9a6-457c-95c8-a166edcba64d",
+      "id": "4e68daf9-b7f0-4543-b2df-ebd1ad964bf3",
       "name": "Redis Delete",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        656,
-        -272
+        448,
+        32
       ],
       "credentials": {
         "redis": {
@@ -416,13 +416,13 @@
         "operation": "delete",
         "key": "=onboard:memory{{ $('start').first().json.evolution_instancia }}{{ $('start').first().json.whatsapp_number }}"
       },
-      "id": "d8136c29-fe72-4508-a90b-e0bd5edc6851",
+      "id": "aee7bb8e-b3f9-42f4-aa6b-3225898b9369",
       "name": "Redis Delete1",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        -1424,
-        80
+        -1632,
+        384
       ],
       "credentials": {
         "redis": {
@@ -440,10 +440,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -1472,
-        288
+        -1680,
+        592
       ],
-      "id": "4e4a604e-29bf-472e-a7ed-0a1e099c6eb7",
+      "id": "7c55f4f0-2b9b-4474-baba-d0138072b30a",
       "name": "Chat Memory Manager",
       "disabled": true
     },
@@ -455,10 +455,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        832,
-        64
+        624,
+        368
       ],
-      "id": "c38ca66c-594c-4b64-a9e7-635ab8cbf6b3",
+      "id": "a654bb4d-240d-493a-9c68-8c723bd78df7",
       "name": "Chat Memory Manager1"
     }
   ],
@@ -649,9 +649,7 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
   "pinData": {
     "start": [
       {
@@ -666,14 +664,14 @@
       }
     ]
   },
-  "versionId": "b1ac8062-8729-4579-b7d3-282ec5e9efa1",
-  "triggerCount": 1,
+  "versionId": "c8a89740-eb3d-450a-93aa-57309ecba274",
+  "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-09-30T11:31:35.749Z",
-      "createdAt": "2025-09-30T11:31:35.749Z",
+      "updatedAt": "2025-11-02T13:31:36.212Z",
+      "createdAt": "2025-11-02T13:31:36.212Z",
       "role": "workflow:owner",
-      "workflowId": "2LwxT1Pnnaheh10M",
+      "workflowId": "UlInW9nmQs7vnPIP",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "updatedAt": "2025-09-25T16:38:18.729Z",
@@ -690,7 +688,7 @@
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-02T07:12:45.501Z",
+              "updatedAt": "2025-11-03T08:00:04.654Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -716,7 +714,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-02",
+              "lastActiveAt": "2025-11-03",
               "isPending": false
             }
           }

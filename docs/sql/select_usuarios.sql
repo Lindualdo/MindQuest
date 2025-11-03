@@ -1,0 +1,1 @@
+select * from usuarios order by criado_em desc

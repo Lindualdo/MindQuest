@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-02T07:23:07.360Z",
+  "updatedAt": "2025-11-02T12:07:44.652Z",
   "createdAt": "2025-10-22T18:20:20.342Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2736,
-        64
+        -1360,
+        192
       ],
       "id": "3ec0cd09-24db-475e-95c9-81f069215fd0",
       "name": "start"
@@ -45,8 +45,8 @@
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -2512,
-        64
+        -1152,
+        192
       ],
       "id": "de1c024a-c02f-4c4a-ad83-6dbdc3714c59",
       "name": "Send Message",
@@ -67,15 +67,15 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2320,
-        64
+        -2304,
+        -48
       ],
       "id": "2ebddf4b-792c-42e7-9a08-c0cb9dfe3298",
       "name": "Check Initial"
     },
     {
       "parameters": {
-        "amount": "={{ 5 }}"
+        "amount": "={{ 3 }}"
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -194,8 +194,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2096,
-        64
+        -2080,
+        -48
       ],
       "id": "acc5936a-dd6a-45df-8d20-985ddaa9d585",
       "name": "shouldRetry"
@@ -233,20 +233,6 @@
       ],
       "id": "6f49f48f-1c3d-4a5a-93b5-924a8fac4621",
       "name": "Retry failed?"
-    },
-    {
-      "parameters": {
-        "amount": "={{ 4 }}"
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        -1808,
-        192
-      ],
-      "id": "812dd08c-833a-4b59-ab38-2ad56b2cbe68",
-      "name": "Wait",
-      "webhookId": "656c33df-2b6b-42f2-b1ad-9cac02bd9b77"
     }
   ],
   "connections": {
@@ -265,7 +251,7 @@
       "main": [
         [
           {
-            "node": "Check Initial",
+            "node": "No Operation, do nothing",
             "type": "main",
             "index": 0
           }
@@ -347,13 +333,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Retry failed?": {
@@ -365,17 +345,6 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "No Operation, do nothing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
         [
           {
             "node": "No Operation, do nothing",
@@ -399,12 +368,12 @@
         "json": {
           "instanceName": "MindQuest",
           "remoteJid": "5512982389360@s.whatsapp.net",
-          "messageText": "Perfeito, Aldo! Agora, informe um e-mail para recuperar seus dados caso perca esse número do WhatsApp. Por favor, use um endereço válido."
+          "messageText": "Ótimo! Pra personalizar ainda mais, me conta sua faixa etária. Responda apenas com o número correspondente:\n\n1️⃣ 13 a 17 anos  \n2️⃣ 18 a 24 anos  \n3️⃣ 25 a 34 anos  \n4️⃣ 35 a 44 anos  \n5️⃣ 45 a 54 anos  \n6️⃣ 55 a 64 anos  \n7️⃣ 65 anos ou mais"
         }
       }
     ]
   },
-  "versionId": "72a99be1-45c8-4510-b9b7-52c73c537b93",
+  "versionId": "cb6ff675-556b-494d-9d3e-bba4bfe4637d",
   "triggerCount": 0,
   "shared": [
     {
@@ -428,7 +397,7 @@
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-02T07:12:45.501Z",
+              "updatedAt": "2025-11-03T08:00:04.654Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -454,7 +423,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-02",
+              "lastActiveAt": "2025-11-03",
               "isPending": false
             }
           }

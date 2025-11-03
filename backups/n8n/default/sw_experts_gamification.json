@@ -1,5 +1,10 @@
 {
+  "updatedAt": "2025-11-02T16:35:27.148Z",
+  "createdAt": "2025-10-10T11:10:56.623Z",
+  "id": "agXJK8Dd49If1eFx",
   "name": "sw_experts_gamification",
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -227,20 +232,6 @@
       "name": "Montar Resumo"
     }
   ],
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usuario_id": "8c6046bf-cf23-4da4-9689-a46b9e154b90",
-          "chat_id": "eab0eba6-d26b-4356-ba14-3c3dcf59798b",
-          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar suas emoções complexas e oscilantes, compreendendo como o hiperfoco e a calmaria influenciam seu estado emocional. Ele fez conexões claras entre os eventos da separação, seus sentimentos atuais e as estratégias que usa para lidar com o vazio. Revelou autoconhecimento ao reconhecer tanto o alívio quanto a angústia, e questionou seus próprios padrões de enfrentamento, mostrando aprendizado e compreensão de sua situação interna.",
-          "total_palavras_usuario": 195
-        }
-      }
-    ]
-  },
   "connections": {
     "start": {
       "main": [
@@ -342,15 +333,84 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "746cc9b0-7129-429f-839a-dc53a8f348eb",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+    "templateCredsSetupCompleted": true
   },
-  "id": "agXJK8Dd49If1eFx",
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "8c6046bf-cf23-4da4-9689-a46b9e154b90",
+          "chat_id": "eab0eba6-d26b-4356-ba14-3c3dcf59798b",
+          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "tem_reflexao": true,
+          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar suas emoções complexas e oscilantes, compreendendo como o hiperfoco e a calmaria influenciam seu estado emocional. Ele fez conexões claras entre os eventos da separação, seus sentimentos atuais e as estratégias que usa para lidar com o vazio. Revelou autoconhecimento ao reconhecer tanto o alívio quanto a angústia, e questionou seus próprios padrões de enfrentamento, mostrando aprendizado e compreensão de sua situação interna.",
+          "total_palavras_usuario": 195
+        }
+      }
+    ]
+  },
+  "versionId": "746cc9b0-7129-429f-839a-dc53a8f348eb",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-10T11:10:56.623Z",
+      "createdAt": "2025-10-10T11:10:56.623Z",
+      "role": "workflow:owner",
+      "workflowId": "agXJK8Dd49If1eFx",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "updatedAt": "2025-09-25T16:38:18.729Z",
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-09-16T16:13:20.606Z",
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "updatedAt": "2025-11-03T08:00:04.654Z",
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-03",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }
