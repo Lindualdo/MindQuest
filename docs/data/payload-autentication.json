@@ -3,25 +3,25 @@
     "response": {
       "success": true,
       "humor": {
-        "humor_atual": 7,
-        "humor_medio": 6,
-        "diferenca_percentual": 16.7,
-        "conversas_total": 3,
+        "humor_atual": 4,
+        "humor_medio": 4,
+        "diferenca_percentual": 0,
+        "conversas_total": 1,
         "ultima_conversa": {
-          "data": "2025-10-31T00:00:00.000Z",
-          "hora": "13:37:41.218651",
+          "data": "2025-11-04T00:00:00.000Z",
+          "hora": "21:19:15.830655",
           "emoji": null,
           "emocao": null
         }
       },
       "user": {
-        "id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-        "nome": "Aldo - pt",
+        "id": "5a1c2b28-9ebb-4650-acb8-06c32f59390b",
+        "nome": "Aldo",
         "nome_preferencia": "Aldo",
-        "whatsapp_numero": "351932786582",
+        "whatsapp_numero": "5512982389360",
         "cronotipo_detectado": "matutino",
         "status_onboarding": "completo",
-        "criado_em": "2025-10-10T10:51:35.372Z"
+        "criado_em": "2025-11-04T18:02:06.828Z"
       },
       "perfil_big_five": {
         "openness": null,
@@ -34,219 +34,76 @@
         "perfil_secundario": null
       },
       "gamificacao": {
-        "xp_total": 550,
-        "xp_proximo_nivel": 1050,
-        "nivel_atual": 3,
-        "titulo_nivel": "Observador",
-        "streak_conversas_dias": 3,
-        "streak_protecao_usada": true,
+        "xp_total": 0,
+        "xp_proximo_nivel": 400,
+        "nivel_atual": 1,
+        "titulo_nivel": "Nível 1",
+        "streak_conversas_dias": 0,
+        "streak_protecao_usada": false,
         "streak_protecao_resetada_em": null,
-        "ultima_conversa_data": "2025-11-02",
-        "melhor_streak": 7,
+        "ultima_conversa_data": null,
+        "melhor_streak": 0,
         "quest_diaria_status": "pendente",
         "quest_diaria_progresso": 0,
-        "quest_diaria_descricao": "Compartilhe como você está se sentindo hoje e o que te trouxe energia",
-        "quest_diaria_data": "2025-11-03",
+        "quest_diaria_descricao": "Complete sua conversa diária",
+        "quest_diaria_data": null,
         "quest_streak_dias": 0,
-        "conquistas_desbloqueadas": [
-          {
-            "id": "streak_3_dias",
-            "nome": "Quest: Streak 3 Dias",
-            "emoji": "🏆",
-            "xp_bonus": 150,
-            "categoria": "Consistencia",
-            "desbloqueada_em": "2025-10-17T14:55:20.947",
-            "categoria_codigo": "consistencia"
-          },
-          {
-            "id": "reflexao_profunda",
-            "nome": "Quest: 10 Reflexões",
-            "emoji": "🏆",
-            "xp_bonus": 200,
-            "categoria": "Profundidade",
-            "desbloqueada_em": "2025-10-16T10:03:32.214",
-            "categoria_codigo": "profundidade"
-          },
-          {
-            "id": "primeira_semana",
-            "nome": "Quest: Semana Completa",
-            "emoji": "🏆",
-            "xp_bonus": 100,
-            "categoria": "Primeiros Passos",
-            "desbloqueada_em": "2025-10-14T07:02:28.99",
-            "categoria_codigo": "primeiros_passos"
-          },
-          {
-            "id": "primeira_reflexao",
-            "nome": "Quest: Primeira Reflexão",
-            "emoji": "🏆",
-            "xp_bonus": 50,
-            "categoria": "Primeiros Passos",
-            "desbloqueada_em": "2025-10-12T07:50:14.367",
-            "categoria_codigo": "primeiros_passos"
-          },
-          {
-            "id": "primeira_conversa",
-            "nome": "Quest: Primeira Conversa",
-            "emoji": "🏆",
-            "xp_bonus": 50,
-            "categoria": "Primeiros Passos",
-            "desbloqueada_em": "2025-10-12T07:50:14.366",
-            "categoria_codigo": "primeiros_passos"
-          }
-        ],
-        "conquistas_proximas": [
-          {
-            "id": "streak_30_dias",
-            "nome": "Quest: Streak 30 Dias",
-            "emoji": "🔒",
-            "status": "pendente",
-            "xp_bonus": 300,
-            "categoria": "Consistencia",
-            "progresso_meta": 30,
-            "progresso_atual": 0,
-            "progresso_percentual": 0,
-            "categoria_codigo": "consistencia"
-          }
-        ],
-        "total_conversas": 7,
-        "total_reflexoes": 10,
+        "conquistas_desbloqueadas": [],
+        "conquistas_proximas": [],
+        "total_conversas": 0,
+        "total_reflexoes": 0,
         "total_xp_ganho_hoje": 0,
-        "ultima_conquista_id": "streak_3_dias",
-        "ultima_conquista_data": "2025-10-17T14:55:20.947",
-        "ultima_atualizacao": "2025-10-31T13:37:40.255125",
-        "criado_em": "2025-10-10T10:51:35.378786",
+        "ultima_conquista_id": null,
+        "ultima_conquista_data": null,
+        "ultima_atualizacao": null,
+        "criado_em": null,
         "complementos": {
           "daily": [],
-          "categorias": [
-            {
-              "codigo": "consistencia",
-              "nome": "Consistencia",
-              "total_conquistas": 1,
-              "ultima_atualizacao": "2025-11-02T20:05:33.281488",
-              "ultima_conclusao": "2025-10-17T14:55:20.947"
-            },
-            {
-              "codigo": "primeiros_passos",
-              "nome": "Primeiros Passos",
-              "total_conquistas": 3,
-              "ultima_atualizacao": "2025-11-02T20:05:33.281488",
-              "ultima_conclusao": "2025-10-14T07:02:28.99"
-            },
-            {
-              "codigo": "profundidade",
-              "nome": "Profundidade",
-              "total_conquistas": 1,
-              "ultima_atualizacao": "2025-11-02T20:05:33.281488",
-              "ultima_conclusao": "2025-10-16T10:03:32.214"
-            }
-          ]
+          "categorias": []
         }
       },
       "proxima_jornada": {
-        "xp_total": 550,
-        "nivel_atual": 3,
-        "titulo_atual": "Observador",
-        "proximo_nivel": {
-          "nivel": 4,
-          "titulo": "Focado",
-          "xp_minimo": 1050,
-          "xp_restante": 500,
-          "descricao": "Mantém consistência e amplia a profundidade das reflexões."
-        },
-        "desafios": [
-          {
-            "usuario_quest_id": "7267516c-f8b1-496f-87fa-402e734de8c9",
-            "titulo": "Quest: Streak 30 Dias",
-            "categoria": "Consistencia",
-            "xp_recompensa": 300,
-            "status": "pendente",
-            "progresso_percentual": 0,
-            "progresso_atual": 0,
-            "progresso_meta": 30,
-            "categoria_codigo": "consistencia"
-          },
-          {
-            "usuario_quest_id": "956e7b44-237e-4e47-b404-8b83cf8a9f38",
-            "titulo": "Daily: Reflexão Profunda",
-            "categoria": "Diaria",
-            "xp_recompensa": 30,
-            "status": "pendente",
-            "progresso_percentual": 0,
-            "progresso_atual": 0,
-            "progresso_meta": 1,
-            "categoria_codigo": "diaria"
-          },
-          {
-            "usuario_quest_id": "ff32287c-4230-4645-ba17-7c4a07583bb9",
-            "titulo": "Daily: Sentimentos do Dia",
-            "categoria": "Diaria",
-            "xp_recompensa": 30,
-            "status": "pendente",
-            "progresso_percentual": 0,
-            "progresso_atual": 0,
-            "progresso_meta": 1,
-            "categoria_codigo": "diaria"
-          },
-          {
-            "usuario_quest_id": "7efe0397-fecd-4ab4-b2a8-a68521ee7916",
-            "titulo": "Daily: Pequena Vitória",
-            "categoria": "Diaria",
-            "xp_recompensa": 30,
-            "status": "pendente",
-            "progresso_percentual": 0,
-            "progresso_atual": 0,
-            "progresso_meta": 1,
-            "categoria_codigo": "diaria"
-          },
-          {
-            "usuario_quest_id": "677323cd-54b4-4c5b-9d16-7f746775d3ee",
-            "titulo": "Daily: Emoção em Foco",
-            "categoria": "Diaria",
-            "xp_recompensa": 30,
-            "status": "pendente",
-            "progresso_percentual": 0,
-            "progresso_atual": 0,
-            "progresso_meta": 1,
-            "categoria_codigo": "diaria"
-          }
-        ]
+        "xp_total": 0,
+        "nivel_atual": null,
+        "titulo_atual": null,
+        "proximo_nivel": null,
+        "desafios": []
       },
       "sabotador": {
-        "id": "inquieto",
-        "nome": "Inquieto",
-        "emoji": "⚡",
-        "apelido_personalizado": "Sr. Cansaço",
-        "total_deteccoes": "3",
+        "id": "critico",
+        "nome": "Crítico",
+        "emoji": "🎭",
+        "apelido_personalizado": "Voz Crítica",
+        "total_deteccoes": "1",
         "contexto_principal": "vida_pessoal",
-        "insight_atual": "O usuário demonstra ansiedade e incerteza sobre suas decisões financeiras, o que gera paralisia e dificuldade para agir com clareza.",
-        "contramedida_ativa": "Praticar uma caminhada diária com música para ajudar a desacelerar e renovar a mente.",
-        "intensidade_media": "85",
-        "total_conversas": "3"
+        "insight_atual": "Aldo carrega uma voz interna crítica que questiona seu valor e potencial, o que pode minar sua autoconfiança e aumentar a pressão interna.",
+        "contramedida_ativa": "Praticar afirmações positivas diárias para reconhecer suas conquistas e valor pessoal.",
+        "intensidade_media": "60",
+        "total_conversas": "1"
       },
       "roda_emocoes": {
-        "alegria": 195,
-        "confianca": 250,
-        "medo": 225,
-        "surpresa": 45,
-        "tristeza": 190,
+        "alegria": 0,
+        "confianca": 60,
+        "medo": 0,
+        "surpresa": 0,
+        "tristeza": 85,
         "angustia": 0,
-        "raiva": 70,
-        "expectativa": 200
+        "raiva": 45,
+        "expectativa": 50
       },
       "panas": {
-        "positivas": 10,
-        "negativas": 8,
-        "neutras": 1,
-        "total": 19,
-        "percentual_positivas": 52.6,
-        "percentual_negativas": 42.1,
-        "percentual_neutras": 5.3
+        "positivas": 2,
+        "negativas": 2,
+        "neutras": 0,
+        "total": 4,
+        "percentual_positivas": 50,
+        "percentual_negativas": 50,
+        "percentual_neutras": 0
       },
       "historico_diario": [
         {
-          "data": "2025-10-28",
-          "label": "28/10",
+          "data": "2025-10-29",
+          "label": "29/10",
           "tem_conversa": false,
           "conversas": 0,
           "emoji": null,
@@ -254,31 +111,22 @@
           "ultima_hora": null
         },
         {
-          "data": "2025-10-29",
-          "label": "29/10",
-          "tem_conversa": true,
-          "conversas": 1,
-          "emoji": "😊",
-          "humor": 7,
-          "ultima_hora": "17:22:06"
-        },
-        {
           "data": "2025-10-30",
           "label": "30/10",
-          "tem_conversa": true,
-          "conversas": 1,
-          "emoji": "😠",
-          "humor": 4,
-          "ultima_hora": "15:06:21"
+          "tem_conversa": false,
+          "conversas": 0,
+          "emoji": null,
+          "humor": null,
+          "ultima_hora": null
         },
         {
           "data": "2025-10-31",
           "label": "31/10",
-          "tem_conversa": true,
-          "conversas": 1,
-          "emoji": "🤔",
-          "humor": 7,
-          "ultima_hora": "13:37:33"
+          "tem_conversa": false,
+          "conversas": 0,
+          "emoji": null,
+          "humor": null,
+          "ultima_hora": null
         },
         {
           "data": "2025-11-01",
@@ -306,740 +154,59 @@
           "emoji": null,
           "humor": null,
           "ultima_hora": null
+        },
+        {
+          "data": "2025-11-04",
+          "label": "04/11",
+          "tem_conversa": true,
+          "conversas": 1,
+          "emoji": "😢",
+          "humor": 4,
+          "ultima_hora": "21:19:02"
         }
       ],
       "historico_resumo": {
-        "total_conversas": 3,
-        "humor_medio": 6,
-        "sequencia_ativa": 0,
-        "ultima_conversa_data": "2025-10-31",
-        "ultima_conversa_hora": "13:37:33",
-        "periodo_inicio": "2025-10-28",
-        "periodo_fim": "2025-11-03"
+        "total_conversas": 1,
+        "humor_medio": 4,
+        "sequencia_ativa": 1,
+        "ultima_conversa_data": "2025-11-04",
+        "ultima_conversa_hora": "21:19:02",
+        "periodo_inicio": "2025-10-29",
+        "periodo_fim": "2025-11-04"
       },
       "insights": [
         {
-          "id": "aab8d57f-5ecd-4962-98e0-b9af643c5448",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Gestão da ansiedade em momentos de alta pressão",
-          "descricao": "Aldo enfrenta ansiedade intensa especialmente ao operar no mercado financeiro, com mente acelerada e dificuldade para pausas prolongadas durante momentos críticos.",
-          "icone": "🧘‍♂️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-31T13:37:47.587Z"
-        },
-        {
-          "id": "83af1739-5224-4a05-b85e-b447fa9e44be",
+          "id": "e0a5074c-4334-46ee-903a-ad992725667a",
           "tipo": "padrao",
           "categoria": "emocional",
-          "titulo": "Reconhecimento e Gerenciamento do Sabotador Inquieto",
-          "descricao": "Aldo enfrenta luta constante contra impulsos e ansiedade no mercado financeiro, que desencadeiam ações apressadas e arrependimentos subsequentes.",
-          "icone": "⚠️",
+          "titulo": "Reconhecendo o Cansaço Emocional e a Importância da Autocompaixão",
+          "descricao": "Você sente um cansaço profundo devido a anos de esforço contínuo, dedicação intensa e sacrifícios pessoais, o que gera frustração e desgaste emocional.",
+          "icone": "😔",
           "prioridade": "alta",
-          "data_criacao": "2025-10-30T15:06:39.883Z"
+          "data_criacao": "2025-11-04T21:19:19.521Z"
         },
         {
-          "id": "01805e20-c99b-46eb-8e88-05e71171b8e8",
+          "id": "6b5a37b8-794c-47a1-9abc-d114f7fc245b",
           "tipo": "melhoria",
           "categoria": "comportamental",
-          "titulo": "Construção Gradual de Persistência e Disciplina",
-          "descricao": "Aldo relata baixa realização e pouca persistência, dificultando a manutenção das metas financeiras e o controle emocional em situações de estresse.",
-          "icone": "⏳",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-30T15:06:39.883Z"
-        },
-        {
-          "id": "171fdbd2-cdbc-41b6-9a5f-826b7e3291b4",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Reconhecer e equilibrar a necessidade de atenção e autonomia",
-          "descricao": "Você carrega uma profunda carência afetiva derivada da infância e relações anteriores, alternando entre desejo de atenção e necessidade de isolamento para foco e recuperação.",
+          "titulo": "Equilibrar Trabalho e Vida Pessoal para Melhor Qualidade de Vida",
+          "descricao": "A longa trajetória de trabalho intenso e sacrifícios pessoais está associada a pouca disponibilidade de tempo para si, gerando um ciclo repetitivo de esforço e frustração.",
           "icone": "⚖️",
           "prioridade": "alta",
-          "data_criacao": "2025-10-29T17:22:21.552Z"
+          "data_criacao": "2025-11-04T21:19:19.521Z"
         },
         {
-          "id": "b621b331-0ef2-4c32-aced-5cabfd21b604",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Disciplinaridade em práticas de autocuidado mental",
-          "descricao": "Apesar de reconhecer os benefícios da meditação e respiração consciente, Aldo enfrenta dificuldade em manter a disciplina para fazer essas práticas de forma consistente.",
-          "icone": "🧘",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-27T23:58:55.210Z"
-        },
-        {
-          "id": "a7015161-1aa4-46fe-88d4-e2629d683d89",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Empolgação e Propósito Alinhados",
-          "descricao": "Aldo demonstra uma disposição e entusiasmo elevados, motivado pela clareza de seu propósito e pelo progresso significativo no desenvolvimento do app focado em desenvolvimento pessoal.",
-          "icone": "🌟",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-26T07:55:12.516Z"
-        },
-        {
-          "id": "36e15e1a-edd1-4cd3-a2f3-0f7a681669cf",
+          "id": "f2653a53-7294-493a-b428-f82fb0216cc5",
           "tipo": "melhoria",
           "categoria": "cognitivo",
-          "titulo": "Gerenciamento da Mente e Auto-sabotagem",
-          "descricao": "Aldo reconhece que as dificuldades mentais e a auto-sabotagem são barreiras comuns que impedem a execução dos planos, tanto para ele quanto para outras pessoas.",
-          "icone": "🧠",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-26T07:55:12.516Z"
-        },
-        {
-          "id": "f68f3e8d-b07d-4a23-ad9e-1f9c3aac3d70",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Gerenciar a solidão para fortalecer seu bem-estar",
-          "descricao": "A solidão tem sido um peso emocional significativo para Aldo, decorrente de focos intensos no crescimento profissional e financeiro que deixaram outras áreas da vida desassistidas.",
-          "icone": "🤝",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-25T11:16:14.021Z"
-        },
-        {
-          "id": "3e6add7c-cc3a-401f-931d-61bcc5c7d43a",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento e clareza emocional impulsionam a motivação",
-          "descricao": "Aldo despertou com energia e motivação raras, mostrando clareza sobre a necessidade urgente de mudança para equilibrar sua vida pessoal e financeira.",
-          "icone": "🌟",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-25T11:16:14.021Z"
-        },
-        {
-          "id": "0cf95a3b-7854-4d34-a450-22cf4d3a8a7e",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento da Ansiedade e Pressão no Mercado",
-          "descricao": "Aldo sente ansiedade intensa devido à alta alavancagem e medo de quedas bruscas no mercado financeiro, impactando seu bem-estar emocional apesar da convicção nos fundamentos do Bitcoin.",
-          "icone": "🧠",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-24T22:00:55.600Z"
-        },
-        {
-          "id": "cf7a2a80-2f8b-4ede-a140-0990479d850c",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Dilema entre Recuperação Financeira e Paz Interior",
-          "descricao": "Aldo enfrenta um conflito interno grande entre continuar no mercado para tentar recuperar perdas e aceitar o prejuízo para preservar seu bem-estar mental, ocasionando desgaste emocional significativo.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-24T22:00:55.600Z"
-        },
-        {
-          "id": "35ba519e-3646-4548-afd0-852e1f843f76",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Impacto da alavancagem na pressão emocional e medo",
-          "descricao": "Aldo enfrenta uma pressão intensa por causa da alavancagem, que multiplica ganhos e perdas, aumentando o medo constante de perda e a tensão emocional em suas decisões.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-23T23:46:42.882Z"
-        },
-        {
-          "id": "4efa88fc-b653-426a-a1ac-f296830e06c9",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento do padrão de indecisão e medo na experiência de investimento",
-          "descricao": "Aldo vivencia uma constante indecisão entre medo da perda e otimismo exagerado que interfere na disciplina para seguir sua estratégia no mercado financeiro, gerando um ciclo emocional conflituoso.",
-          "icone": "🔄",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-23T23:46:42.882Z"
-        },
-        {
-          "id": "146c23e6-9fbd-4504-88ec-83e44d546516",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Sensação de estar preso em um loop emocional e financeiro",
-          "descricao": "Aldo sente-se preso em um ciclo infinito de esforço, conquista, risco excessivo e perda, que gera angústia e tristeza contínuas.",
-          "icone": "🔗",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-22T15:31:36.227Z"
-        },
-        {
-          "id": "21b85969-256e-451a-a8dc-0a830a1b71ef",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Dificuldade em seguir estratégias financeiras por influência emocional",
-          "descricao": "Aldo relata dificuldade em executar limites financeiros como stop loss ou realização de lucro devido a oscilações emocionais entre otimismo e medo.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-22T15:31:36.227Z"
-        },
-        {
-          "id": "4c703e21-ab85-4020-8811-57f4bbe58074",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Ciclo repetitivo de risco e perda emocional",
-          "descricao": "Aldo vive um ciclo emocional intenso de altos e baixos financeiros, que gera angústia e tristeza, prendendo-o em padrões repetitivos de risco excessivo e perda.",
-          "icone": "🔄",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-22T15:31:36.227Z"
-        },
-        {
-          "id": "1a5c41d9-ead9-4d61-97ba-94b10fcf7972",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Equilíbrio entre foco e autocuidado",
-          "descricao": "Aldo reconhece a importância de equilibrar o foco intenso no desenvolvimento do app com momentos de descanso e atividades físicas para cuidar da mente e do corpo.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-22T00:26:22.887Z"
-        },
-        {
-          "id": "424b880d-d030-4920-abfe-6fdf0e337a3d",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Impacto emocional da autocrítica e frustração",
-          "descricao": "Aldo sente frustração e autocrítica por não ter seguido sua estratégia de realização de lucro, o que gerou tensão emocional e impacto negativo no seu humor e disposição.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-21T09:48:20.026Z"
-        },
-        {
-          "id": "74a65aa7-9e31-447a-9420-23a3b19c6f80",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento da tensão emocional frente à volatilidade do mercado",
-          "descricao": "Aldo apresenta uma tensão emocional significativa devido à oscilação do mercado financeiro, especialmente com o Bitcoin, manifestando preocupação, medo e frustração, mas mantém certa serenidade e racionalidade ao seguir suas estratégias.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-21T09:48:20.026Z"
-        },
-        {
-          "id": "f9371142-d481-4f84-b2cb-6154aaa5d213",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento da Ansiedade Ligada ao Mercado Financeiro",
-          "descricao": "Aldo sente angústia e medo intensos relacionados às perdas financeiras passadas, o que afeta sua energia e ânimo para outras áreas da vida, mesmo tendo estratégias claras para o mercado.",
-          "icone": "🔄",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-19T19:31:29.840Z"
-        },
-        {
-          "id": "d087a3fc-35a7-4b3d-b981-ce7a5f451d02",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Gestão da Ansiedade no Mercado Financeiro",
-          "descricao": "Aldo enfrenta ansiedade relacionada ao mercado financeiro, mas utiliza estratégias técnicas e emocionais para controlar o estresse e manter a disciplina nas operações.",
-          "icone": "📉",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-18T09:49:28.842Z"
-        },
-        {
-          "id": "e8c2a129-f438-4fc5-9b45-2fcf8a03a9f5",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Resiliência e Autocompaixão Fortalecidas",
-          "descricao": "Aldo demonstra elevada resiliência emocional e autocompaixão, reconhecendo suas conquistas e aceitando suas limitações com empatia, o que contribui para manter equilíbrio diante de desafios pessoais e financeiros.",
-          "icone": "💪",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-18T09:49:28.842Z"
-        },
-        {
-          "id": "31861251-62ac-47f2-a308-5d728b0dd7b8",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Medo persistente de perdas financeiras e impacto emocional",
-          "descricao": "O medo de perder o patrimônio acumulado ao longo da vida gera ansiedade constante e limita a sensação de segurança emocional de Aldo.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-17T14:56:17.863Z"
-        },
-        {
-          "id": "11075251-42df-498d-9f80-1fff94dd9d2b",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Resiliência e busca ativa por suporte emocional",
-          "descricao": "Aldo demonstra resiliência significativa ao enfrentar desafios financeiros persistentes e busca apoio terapêutico e coaching para manter seu equilíbrio emocional.",
-          "icone": "💪",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-17T14:56:17.863Z"
-        },
-        {
-          "id": "b6f18596-aa07-42c7-81fa-b37b018bc90d",
-          "tipo": "padrao",
-          "categoria": "comportamental",
-          "titulo": "Foco intenso no mercado e impacto no equilíbrio de vida",
-          "descricao": "O foco prioritário nas finanças e no desenvolvimento do app tem consumido tempo e energia, afetando outras áreas da vida, como relacionamentos e planos pessoais.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-17T14:56:17.863Z"
-        },
-        {
-          "id": "b38fa4da-d16e-45a3-ac62-284fea1ecc20",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento e Gestão de Gatilhos Emocionais",
-          "descricao": "Aldo reconhece a importância de identificar gatilhos e sabotadores emocionais para evitar armadilhas mentais que possam prejudicar seu desenvolvimento pessoal e alcançar seus objetivos.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-16T10:03:48.012Z"
-        },
-        {
-          "id": "e3866719-9d59-43ca-9cdf-25a660c88a11",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Cuidado com o sono para melhorar energia e disposição",
-          "descricao": "Aldo enfrentou dificuldades com o sono, o que impactou sua energia e produtividade durante o dia, resultando em sensação de cansaço moderado.",
-          "icone": "🌙",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-15T23:20:16.792Z"
-        },
-        {
-          "id": "f34cb9d9-7d27-4c33-a8b4-96387ff57fda",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Equilíbrio entre motivação e disciplina",
-          "descricao": "Aldo demonstra um equilíbrio saudável entre entusiasmo criativo e disciplina para enfrentar desafios burocráticos, mantendo-se motivado e focado mesmo diante de tarefas menos agradáveis.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-14T10:07:16.388Z"
-        },
-        {
-          "id": "f9368378-9402-4959-b42f-3000ca7399dd",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento do Desânimo Relacionado à Burocracia",
-          "descricao": "A burocracia e as questões jurídicas geram desânimo e fadiga em Aldo, impactando sua energia e motivação para avançar nas etapas administrativas do projeto.",
-          "icone": "⚙️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-14T07:02:48.521Z"
-        },
-        {
-          "id": "2b1ee48a-e7a8-4bcb-85f4-3ec874ecbfc9",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Superando o Perfeccionismo para Avançar",
-          "descricao": "Aldo enfrenta o desafio do perfeccionismo que dificulta o lançamento do app, apesar de já ter estratégias para avançar com prazos e compromissos assumidos.",
-          "icone": "🚀",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-13T09:15:17.273Z"
-        },
-        {
-          "id": "f7f58381-8578-412e-9aac-9d2e86890976",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Controle emocional equilibrado em momentos de crise",
-          "descricao": "Aldo demonstrou serenidade e controle emocional diante das quedas no mercado, mantendo calma e racionalidade mesmo em situações de alta pressão e perdas financeiras.",
-          "icone": "🧘‍♂️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T15:46:45.758Z"
-        },
-        {
-          "id": "9f665256-84e7-4a19-beda-620caa5b746b",
-          "tipo": "padrao",
-          "categoria": "cognitivo",
-          "titulo": "Estratégias estruturadas para antecipação de cenários",
-          "descricao": "Aldo desenvolveu estratégias claras e estruturadas para agir conforme diferentes cenários do mercado, usando alertas para antecipar movimentos e controlar suas ações.",
-          "icone": "📊",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T15:46:45.758Z"
-        },
-        {
-          "id": "73038871-4e0b-4196-9ff5-295bcc43818c",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Necessidade de estratégias personalizadas para controle emocional sob pressão",
-          "descricao": "Aldo rejeita técnicas tradicionais de controle emocional por não se adequarem à urgência do mercado, buscando métodos que combinem agilidade e controle.",
-          "icone": "🛠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T11:10:53.943Z"
-        },
-        {
-          "id": "13227f11-f75d-4541-a592-723f8d0d8509",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Ansiedade e impulsividade interferem na disciplina do plano",
-          "descricao": "Aldo enfrenta ansiedade intensa e otimismo exagerado que o levam a agir impulsivamente, prejudicando a execução disciplinada do seu plano de investimentos.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T11:10:53.943Z"
-        },
-        {
-          "id": "c4cf483d-e846-4829-9dda-5543496b33bf",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Impacto Emocional das Perdas Financeiras",
-          "descricao": "As perdas financeiras significativas têm um impacto emocional profundo, gerando ansiedade, dúvidas e um ciclo repetitivo de busca por segurança financeira que afeta outras áreas da vida.",
-          "icone": "⚠️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T09:02:30.464Z"
-        },
-        {
-          "id": "e01496a7-4cc3-4100-b1db-47792883d12c",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Equilíbrio Emocional em Meio à Adversidade",
-          "descricao": "Aldo mantém um equilíbrio emocional notável apesar das perdas financeiras significativas e da ansiedade associada, demonstrando resiliência diante dos desafios atuais.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T09:02:30.464Z"
-        },
-        {
-          "id": "55d914e5-4b8b-4cfb-8884-db48d4e18fde",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Equilíbrio entre Risco e Proteção",
-          "descricao": "Aldo enfrenta um dilema entre continuar assumindo riscos elevados para recuperar perdas financeiras rapidamente ou adotar uma postura mais conservadora, o que impacta seu tempo e outras áreas da vida.",
-          "icone": "⚖️",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-12T09:02:30.464Z"
-        },
-        {
-          "id": "f1e32dc7-5629-457e-9ad6-8eb4fb8b429f",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Gestão do tempo entre desafios financeiros e autocuidado",
-          "descricao": "Aldo está dedicando grande parte do seu tempo para resolver questões financeiras, o que limita seu tempo para autocuidado e lazer, especialmente em momentos de solidão.",
-          "icone": "⏳",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-11T18:13:49.996Z"
-        },
-        {
-          "id": "e3914a08-2e73-4dc5-ba8c-682f36b50379",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Oscilação emocional e impacto da solidão",
-          "descricao": "Aldo apresenta oscilações emocionais frequentes, influenciadas por fatores variados e pela solidão que acompanha desde a infância, agravada pelas recentes mudanças e desafios financeiros.",
-          "icone": "🔄",
-          "prioridade": "alta",
-          "data_criacao": "2025-10-11T18:13:49.996Z"
-        },
-        {
-          "id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
-          "tipo": "melhoria",
-          "categoria": "cognitivo",
-          "titulo": "Criação e ajuste de checklist personalizado de ancoragem",
-          "descricao": "Aldo solicitou um checklist de ancoragem para controle da ansiedade, mas rejeitou uma primeira versão por não se adequar bem às suas necessidades.",
-          "icone": "📝",
-          "prioridade": "media",
-          "data_criacao": "2025-10-31T13:37:47.587Z"
-        },
-        {
-          "id": "9e098817-2193-421b-9b6e-f2704582fa96",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento da capacidade de autogerenciamento emocional",
-          "descricao": "Aldo demonstra momentos claros de autocontrole e uso de estratégias cognitivas para gerenciar sua ansiedade no mercado financeiro.",
-          "icone": "🌟",
-          "prioridade": "media",
-          "data_criacao": "2025-10-31T13:37:47.587Z"
-        },
-        {
-          "id": "07ad2c89-7981-4796-8fcb-ccc53671f5de",
-          "tipo": "alerta",
-          "categoria": "emocional",
-          "titulo": "Autoempatia e Gestão da Frustração",
-          "descricao": "Aldo sente raiva e frustração por não conseguir seguir o próprio plano, o que aumenta a autocrítica e o medo de repetir erros.",
-          "icone": "❤️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-30T15:06:39.883Z"
-        },
-        {
-          "id": "fa48edba-7c5e-48bb-9bbe-f3ba0b128559",
-          "tipo": "melhoria",
-          "categoria": "social",
-          "titulo": "Comunicar suas necessidades de forma clara e gentil",
-          "descricao": "Você vive um conflito ao equilibrar seu foco intenso em projetos e a necessidade de manter conexões afetivas, que às vezes se chocam gerando desencontros.",
-          "icone": "💬",
-          "prioridade": "media",
-          "data_criacao": "2025-10-29T17:22:21.552Z"
-        },
-        {
-          "id": "974fe1e5-6677-4cb8-874d-63e60f0f955d",
-          "tipo": "positivo",
-          "categoria": "comportamental",
-          "titulo": "Cultivar hábitos saudáveis de autocuidado",
-          "descricao": "Você tem mantido uma rotina de cuidados pessoais como exercícios físicos, alimentação equilibrada e momentos de relaxamento, que recarregam sua energia e promovem bem-estar.",
-          "icone": "🌿",
-          "prioridade": "media",
-          "data_criacao": "2025-10-29T17:22:21.552Z"
-        },
-        {
-          "id": "277fef70-eaeb-4ba2-8d86-01a2287d3f02",
-          "tipo": "melhoria",
-          "categoria": "social",
-          "titulo": "Construção de conexões afetivas significativas",
-          "descricao": "Aldo valoriza profundamente o contato afetivo e o aprendizado mútuo em relações próximas, mas sente falta de momentos mais frequentes de intimidade e proximidade.",
-          "icone": "🤝",
-          "prioridade": "media",
-          "data_criacao": "2025-10-27T23:58:55.210Z"
-        },
-        {
-          "id": "291e19c9-e91e-4452-96c2-1a60418c3e4d",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento do equilíbrio entre trabalho e descanso",
-          "descricao": "Aldo demonstra motivação forte pelo seu projeto e pelo mercado financeiro, equilibrando com momentos importantes de pausa e descanso para recarregar energias.",
-          "icone": "⚖️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-27T23:58:55.210Z"
-        },
-        {
-          "id": "81c9fe35-1847-4b99-a8e5-cacc85fc98cc",
-          "tipo": "positivo",
-          "categoria": "comportamental",
-          "titulo": "Alinhamento entre Vida Pessoal e Projeto Profissional",
-          "descricao": "Aldo integra sua jornada de autoconhecimento, filosofia e terapia ao desenvolvimento do app, criando uma harmonia produtiva entre crescimento interno e trabalho técnico.",
-          "icone": "🔄",
-          "prioridade": "media",
-          "data_criacao": "2025-10-26T07:55:12.516Z"
-        },
-        {
-          "id": "cbe4c9ac-33b1-483f-b9b4-be5989f109a2",
-          "tipo": "padrao",
-          "categoria": "comportamental",
-          "titulo": "Estruturação e priorização clara das metas",
-          "descricao": "Aldo estabeleceu uma sequência clara para cuidar das áreas essenciais: finanças, proximidade com filhos, negócios próprios e relacionamento, tudo de forma progressiva e intencional.",
-          "icone": "🗂️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-25T11:16:14.021Z"
-        },
-        {
-          "id": "f901d4c1-b95a-43f0-a06d-b0b791848846",
-          "tipo": "melhoria",
-          "categoria": "cognitivo",
-          "titulo": "Apoio nos Processos de Decisão Sob Pressão",
-          "descricao": "Aldo utiliza análises técnicas para definir zonas de suporte e calcular riscos, mas quedas inesperadas no mercado geram surpresa e dificultam a confiança nas decisões.",
-          "icone": "💡",
-          "prioridade": "media",
-          "data_criacao": "2025-10-24T22:00:55.600Z"
-        },
-        {
-          "id": "17ec9d06-2b66-4eb8-a797-7fb405e7adf0",
-          "tipo": "melhoria",
-          "categoria": "cognitivo",
-          "titulo": "Fortalecimento da confiança na estratégia técnica",
-          "descricao": "Aldo percebe que sua insegurança diminui quando tem mais certeza técnica, mas reconhece que o mercado é incerto e suas decisões se baseiam em hipóteses, o que alimenta a dúvida e indecisão.",
-          "icone": "🧠",
-          "prioridade": "media",
-          "data_criacao": "2025-10-23T23:46:42.882Z"
-        },
-        {
-          "id": "12bfaef2-5b86-4d60-8043-954b29d25e44",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento da tensão e insegurança",
-          "descricao": "Aldo reconhece que a insegurança pode atrapalhar suas decisões, mas usa suas técnicas e experiência para manter a segurança e controle emocional.",
-          "icone": "🔄",
-          "prioridade": "media",
-          "data_criacao": "2025-10-22T00:26:22.887Z"
-        },
-        {
-          "id": "6a90bbb1-243f-4df3-9dd4-ad422763dfc3",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Confiança fundamentada e otimismo equilibrado",
-          "descricao": "Aldo demonstra uma confiança sólida baseada em sua experiência e técnicas consolidadas, mantendo um otimismo realista quanto às condições do mercado financeiro.",
-          "icone": "🌟",
-          "prioridade": "media",
-          "data_criacao": "2025-10-22T00:26:22.887Z"
-        },
-        {
-          "id": "9c6a81a6-893f-4050-915f-55b22db36fa5",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Equilíbrio entre foco no trabalho e autocuidado",
-          "descricao": "Aldo está muito focado no mercado financeiro e no desenvolvimento do seu app, o que consome grande parte da sua atenção e energia, gerando uma carga mental pesada apesar do corpo estar descansado.",
-          "icone": "⚖️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-21T09:48:20.026Z"
-        },
-        {
-          "id": "2facef95-324c-4623-a5b9-9c0c7dce75ee",
-          "tipo": "padrao",
-          "categoria": "cognitivo",
-          "titulo": "Repetição de perguntas e necessidade de inovação na abordagem",
-          "descricao": "Aldo percebe repetição nas perguntas feitas pelo agente, o que gera irritação e indica necessidade de abordagens mais criativas e variadas.",
-          "icone": "🔄",
-          "prioridade": "media",
-          "data_criacao": "2025-10-20T06:18:53.809Z"
-        },
-        {
-          "id": "813e0cf6-df6f-46a1-8072-b3c626503ee0",
-          "tipo": "melhoria",
-          "categoria": "social",
-          "titulo": "Fortalecimento das conexões familiares para suporte emocional",
-          "descricao": "Aldo valoriza momentos de conexão com a família, como conversas e jogos com o filho, e se alegra com o progresso da sobrinha em saúde e bem-estar.",
-          "icone": "🤝",
-          "prioridade": "media",
-          "data_criacao": "2025-10-20T06:18:53.809Z"
-        },
-        {
-          "id": "30d2befb-1ee0-487d-92d4-60f30483b23a",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Resiliência emocional diante das oscilações do mercado",
-          "descricao": "Aldo demonstra resiliência emocional ao lidar com as oscilações do mercado financeiro, mantendo energia e disposição mesmo após noites de pouco sono.",
-          "icone": "💪",
-          "prioridade": "media",
-          "data_criacao": "2025-10-20T06:18:53.809Z"
-        },
-        {
-          "id": "e28d2a94-c7e0-4ece-93ac-bb2038eb86e7",
-          "tipo": "melhoria",
-          "categoria": "cognitivo",
-          "titulo": "Fortalecimento do Foco e Controle Mental",
-          "descricao": "Aldo reconhece que o maior desafio durante a ansiedade é manter energia e foco para continuar suas atividades diárias, sentindo-se desanimado e com pensamentos negativos recorrentes.",
-          "icone": "🎯",
-          "prioridade": "media",
-          "data_criacao": "2025-10-19T19:31:29.840Z"
-        },
-        {
-          "id": "2fd9685c-b071-4054-96cb-e9255892ee38",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Uso Estratégico de Rotinas para Redução da Ansiedade",
-          "descricao": "Aldo tem buscado estratégias comportamentais como sair para caminhar e treinar na academia para aliviar a ansiedade e recuperar o ânimo, o que tem gerado emoções positivas e esperança.",
-          "icone": "🛠️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-19T19:31:29.840Z"
-        },
-        {
-          "id": "76c5d058-598a-4809-92f2-eebadd725e5d",
-          "tipo": "positivo",
-          "categoria": "comportamental",
-          "titulo": "Uso Eficaz do Autoconhecimento para Decisões",
-          "descricao": "Aldo utiliza o autoconhecimento adquirido pelo app para identificar gatilhos emocionais e sabotadores, o que melhora sua clareza mental e qualidade das decisões.",
-          "icone": "🧠",
-          "prioridade": "media",
-          "data_criacao": "2025-10-18T09:49:28.842Z"
-        },
-        {
-          "id": "52bf96bf-a213-416a-8b40-b1b3ec970ac4",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Equilíbrio Emocional e Autoconhecimento",
-          "descricao": "Aldo apresenta um estado emocional sereno, calmo e motivado, utilizando seu próprio app para monitorar e entender suas emoções, o que contribui para um equilíbrio saudável entre trabalho e vida pessoal.",
-          "icone": "🧘‍♂️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-16T10:03:48.012Z"
-        },
-        {
-          "id": "0d27e0a1-abcc-41e0-937a-8dd1d0c04d01",
-          "tipo": "padrao",
-          "categoria": "comportamental",
-          "titulo": "Gestão de Tarefas e Progresso",
-          "descricao": "Aldo utiliza estratégias como dividir tarefas em partes menores e acompanhar seu progresso, o que tem ajudado a manter a disciplina e foco no desenvolvimento do app e em outras áreas.",
-          "icone": "📋",
-          "prioridade": "media",
-          "data_criacao": "2025-10-16T10:03:48.012Z"
-        },
-        {
-          "id": "d073e166-59f5-4f15-9371-9d72f789c108",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Aceitação das variações naturais do humor e energia",
-          "descricao": "Aldo reconhece que os dias variam em energia, humor e produtividade, aceitando essas oscilações como parte natural da vida, sem autocrítica excessiva.",
-          "icone": "🔄",
-          "prioridade": "media",
-          "data_criacao": "2025-10-15T23:20:16.792Z"
-        },
-        {
-          "id": "7177abf9-24f6-4d71-82a1-f0c31a3f1af8",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Organização para lidar com desafios diários",
-          "descricao": "Aldo tem se organizado para enfrentar desafios no desenvolvimento do app e no mercado financeiro, adotando precauções para minimizar riscos e manter o controle.",
-          "icone": "📅",
-          "prioridade": "media",
-          "data_criacao": "2025-10-15T23:20:16.792Z"
-        },
-        {
-          "id": "1fcad5b2-cd75-4be1-9dd8-52b59ffe4c75",
-          "tipo": "positivo",
-          "categoria": "cognitivo",
-          "titulo": "Uso eficaz de listas para foco e produtividade",
-          "descricao": "Aldo utiliza listas de tarefas que contemplam objetivos de médio prazo e ações diárias, o que ajuda a manter o foco e evitar dispersão, alimentando sua motivação com metas claras.",
-          "icone": "📝",
-          "prioridade": "media",
-          "data_criacao": "2025-10-14T10:07:16.388Z"
-        },
-        {
-          "id": "51a86d30-bcd0-4881-b351-6a8f7c9df2f6",
-          "tipo": "melhoria",
-          "categoria": "comportamental",
-          "titulo": "Manutenção da disciplina na atividade física",
-          "descricao": "Aldo reconhece que a atividade física é uma importante fonte de energia e motivação, mas enfrenta dificuldades para manter a frequência desejada na academia.",
-          "icone": "🏋️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-14T10:07:16.388Z"
-        },
-        {
-          "id": "3ce91943-777e-4e07-8d9a-c0a9324dc497",
-          "tipo": "padrao",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento do Autoconhecimento e Busca por Apoio",
-          "descricao": "Aldo demonstra bom autoconhecimento ao identificar claramente suas forças e desafios, além de buscar apoio estratégico para minimizar impactos negativos.",
+          "titulo": "Reavaliar o Conceito de 'Ser Alguém' e Legado Pessoal",
+          "descricao": "Você tem uma forte motivação para provar seu valor e deixar um legado através do trabalho e superação, mas isso gera uma pressão contínua que pode limitar sua sensação de liberdade.",
           "icone": "🔍",
           "prioridade": "media",
-          "data_criacao": "2025-10-14T07:02:48.521Z"
-        },
-        {
-          "id": "c594ef2b-cdb2-4d12-a892-f4556d1f7238",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Reconhecimento da Energia Criativa",
-          "descricao": "Aldo demonstra entusiasmo e energia ao desenvolver a parte criativa do app, o que é um ponto forte para manter sua motivação e foco no projeto.",
-          "icone": "✨",
-          "prioridade": "media",
-          "data_criacao": "2025-10-14T07:02:48.521Z"
-        },
-        {
-          "id": "62642d44-4d2f-4185-b7c8-4ba190b54473",
-          "tipo": "positivo",
-          "categoria": "social",
-          "titulo": "Apoio Social e Relações Positivas",
-          "descricao": "Aldo mantém relações próximas e positivas com familiares e pessoas importantes, como a ex-mulher, filhos e terapeuta, o que contribui para seu suporte emocional.",
-          "icone": "🤝",
-          "prioridade": "media",
-          "data_criacao": "2025-10-13T09:15:17.273Z"
-        },
-        {
-          "id": "5a602d46-e440-4241-90f7-2fa748e19d83",
-          "tipo": "positivo",
-          "categoria": "emocional",
-          "titulo": "Serenidade e Otimismo Equilibrados",
-          "descricao": "Aldo demonstra um estado emocional sereno, otimista e motivado, mantendo equilíbrio entre desafios pessoais e profissionais, o que sustenta seu bem-estar geral.",
-          "icone": "😊",
-          "prioridade": "media",
-          "data_criacao": "2025-10-13T09:15:17.273Z"
-        },
-        {
-          "id": "e218ad71-ac0d-41e8-8c70-d71cb8f25c70",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Gerenciamento da ansiedade diante da incerteza",
-          "descricao": "Aldo reconhece que a ansiedade surge da incerteza sobre a extensão das quedas no mercado, o que pode gerar medo e desespero momentâneos.",
-          "icone": "⚖️",
-          "prioridade": "media",
-          "data_criacao": "2025-10-12T15:46:45.758Z"
-        },
-        {
-          "id": "021ecb43-0e63-4008-8d20-1cfabcd83be3",
-          "tipo": "melhoria",
-          "categoria": "emocional",
-          "titulo": "Desconfiança na própria estratégia devido à falta de controle emocional",
-          "descricao": "Aldo reconhece que seu plano é eficaz, mas a falta de controle emocional na hora da decisão gera frustração e perda de confiança.",
-          "icone": "🔄",
-          "prioridade": "media",
-          "data_criacao": "2025-10-12T11:10:53.943Z"
-        },
-        {
-          "id": "9ee9eb37-8672-42b9-a514-0578739289f6",
-          "tipo": "melhoria",
-          "categoria": "cognitivo",
-          "titulo": "Compreensão e aceitação da solidão pessoal",
-          "descricao": "Aldo relata uma relação complexa com a solidão, presente desde a infância, sem clareza se é por escolha ou incômodo, o que impacta seu estado emocional atual.",
-          "icone": "🧠",
-          "prioridade": "media",
-          "data_criacao": "2025-10-11T18:13:49.996Z"
+          "data_criacao": "2025-11-04T21:19:19.521Z"
         }
       ],
-      "timestamp": "2025-11-03T09:00:35.716Z"
+      "timestamp": "2025-11-04T22:01:41.400Z"
     }
   }
 ]

@@ -1,7 +1,6 @@
 [
   {
     "id": "a1b1c736-77d1-4a67-9c14-9bf1a4d6f301",
-    "sequencia": "001",
     "codigo": "onboarding_primeira_conversa",
     "titulo": "Onboarding · Primeira Conversa",
     "descricao": "Complete a primeira conversa guiada para iniciar a jornada.",
@@ -19,7 +18,6 @@
   },
   {
     "id": "b2d3f2c8-8c3a-4f59-9a5e-51ae9fd5b6bb",
-    "sequencia": "002",
     "codigo": "onboarding_primeira_semana",
     "titulo": "Onboarding · Primeira Semana",
     "descricao": "Conclua sete conversas no total para fechar a primeira semana.",
@@ -37,7 +35,6 @@
   },
   {
     "id": "c3128577-a8bb-4227-9f36-4eeef25cf2e3",
-    "sequencia": "101",
     "codigo": "streak_003",
     "titulo": "Sequência · 3 Dias",
     "descricao": "Mantenha 3 dias consecutivos de conversa.",
@@ -57,7 +54,6 @@
   },
   {
     "id": "df91c9af-7a71-46b9-9b52-2eab3a908236",
-    "sequencia": "102",
     "codigo": "streak_005",
     "titulo": "Sequência · 5 Dias",
     "descricao": "Alcance 5 dias seguidos de conversa.",
@@ -77,7 +73,6 @@
   },
   {
     "id": "ed284f23-c63f-4c0a-9b4f-379c92f4e24c",
-    "sequencia": "103",
     "codigo": "streak_007",
     "titulo": "Sequência · 7 Dias",
     "descricao": "Complete uma semana inteira de conversas.",
@@ -97,7 +92,6 @@
   },
   {
     "id": "f6a6347c-74f8-4423-9a3d-965a753cce5d",
-    "sequencia": "104",
     "codigo": "streak_010",
     "titulo": "Sequência · 10 Dias",
     "descricao": "Mantenha 10 dias consecutivos ativos.",
@@ -117,7 +111,6 @@
   },
   {
     "id": "09a9ff6c-1c84-4a30-a75a-2189d7adf7ce",
-    "sequencia": "105",
     "codigo": "streak_015",
     "titulo": "Sequência · 15 Dias",
     "descricao": "Chegue a 15 dias seguidos de conversa.",
@@ -137,7 +130,6 @@
   },
   {
     "id": "1ddcc785-5305-454c-a4aa-0ad65dabc88b",
-    "sequencia": "106",
     "codigo": "streak_020",
     "titulo": "Sequência · 20 Dias",
     "descricao": "Sustente 20 dias consecutivos.",
@@ -157,7 +149,6 @@
   },
   {
     "id": "2b61a6c4-1ca8-4dd1-92ea-828419684371",
-    "sequencia": "107",
     "codigo": "streak_025",
     "titulo": "Sequência · 25 Dias",
     "descricao": "Mantenha 25 dias seguidos para consolidar a rotina.",
@@ -177,7 +168,6 @@
   },
   {
     "id": "3fdfa6d7-f48a-4724-b854-7d24b2d4a175",
-    "sequencia": "108",
     "codigo": "streak_030",
     "titulo": "Sequência · 30 Dias",
     "descricao": "Chegue ao marco de 30 dias consecutivos de conversa.",
@@ -197,7 +187,6 @@
   },
   {
     "id": "d564d23f-7345-4b25-88f3-62c6a2f544d7",
-    "sequencia": "201",
     "codigo": "habit_diaria_conversa",
     "titulo": "Conversa diária concluída",
     "descricao": "Finalize pelo menos uma conversa guiada hoje.",
@@ -210,8 +199,8 @@
     "ordem_inicial": 201,
     "ativo": true,
     "config": {
-      "prazo": "dia",
       "meta": 1,
+      "prazo": "dia",
       "autoComplete": "conversa"
     },
     "criado_em": "2025-11-05T00:00:00.000Z",
@@ -219,7 +208,6 @@
   },
   {
     "id": "ef3befe6-4470-4dc1-a53d-7f42724cb574",
-    "sequencia": "202",
     "codigo": "habit_diaria_reflexao",
     "titulo": "Reflexão profunda registrada",
     "descricao": "Complete a conversa com uma reflexão final do dia.",
@@ -232,8 +220,8 @@
     "ordem_inicial": 202,
     "ativo": true,
     "config": {
-      "prazo": "dia",
       "meta": 1,
+      "prazo": "dia",
       "autoComplete": "reflexao"
     },
     "criado_em": "2025-11-05T00:00:00.000Z",
@@ -241,7 +229,6 @@
   },
   {
     "id": "c8900b61-7dc8-4d8f-bdf0-1fc27aef7722",
-    "sequencia": "203",
     "codigo": "habit_diaria_respiracao",
     "titulo": "Respiração consciente",
     "descricao": "Pratique uma sequência de respiração consciente ao longo do dia.",
@@ -254,8 +241,8 @@
     "ordem_inicial": 203,
     "ativo": true,
     "config": {
-      "prazo": "dia",
       "meta": 1,
+      "prazo": "dia",
       "autoComplete": "manual"
     },
     "criado_em": "2025-11-05T00:00:00.000Z",

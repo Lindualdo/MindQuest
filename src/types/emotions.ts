@@ -140,6 +140,17 @@ export interface GamificacaoNivelPreview {
   descricao?: string | null;
 }
 
+export interface GamificacaoHabitSnapshot {
+  quest_id: string | null;
+  codigo: string | null;
+  titulo: string;
+  status: 'pendente' | 'ativa' | 'completa' | 'expirada' | string;
+  vence_em: string | null;
+  progresso_atual: number;
+  progresso_meta: number;
+  atualizado_em: string | null;
+}
+
 export interface Gamificacao {
   xp_total: number;
   xp_proximo_nivel: number;
@@ -166,6 +177,7 @@ export interface Gamificacao {
   conquistas_proximas: GamificacaoConquistaProxima[];
   proximo_nivel: GamificacaoNivelPreview | null;
   proximos_niveis: GamificacaoNivelPreview[];
+  habitos_ativos?: GamificacaoHabitSnapshot[] | null;
 }
 
 // Sabotadores internos
