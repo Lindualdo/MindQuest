@@ -1,10 +1,5 @@
 {
-  "updatedAt": "2025-11-02T16:35:27.148Z",
-  "createdAt": "2025-10-10T11:10:56.623Z",
-  "id": "agXJK8Dd49If1eFx",
   "name": "sw_experts_gamification",
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -36,10 +31,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -640,
-        320
+        -1024,
+        144
       ],
-      "id": "2c8cb608-ad0b-4b40-b689-da3aab1472d2",
+      "id": "9ca9f72b-72f8-4a0e-bd2a-f945efa02fdd",
       "name": "start"
     },
     {
@@ -53,10 +48,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -384,
-        320
+        -768,
+        144
       ],
-      "id": "f26b296e-df1b-4e56-a5db-70199d2b7c55",
+      "id": "2a25562a-8ef0-43e7-90f2-edf3ef19ade1",
       "name": "Buscar Estado Atual",
       "credentials": {
         "postgres": {
@@ -76,10 +71,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -176,
-        320
+        -560,
+        144
       ],
-      "id": "b6c7776e-ec16-459e-a67d-16bcd9dfe28a",
+      "id": "cd46f473-8b79-471b-8456-7e394d5d2051",
       "name": "Garantir Quests",
       "credentials": {
         "postgres": {
@@ -95,10 +90,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        128,
-        320
+        -256,
+        144
       ],
-      "id": "2ae5c5e2-7cd0-4de9-9a52-4c1ac9f1b444",
+      "id": "9788d191-08bc-4eba-8dc3-e84526fe7e9f",
       "name": "Preparar Contexto"
     },
     {
@@ -108,10 +103,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        192,
-        320
+        -192,
+        144
       ],
-      "id": "c1a4f216-2f36-4d8a-8a2a-0f180f1af2f1",
+      "id": "30eeeedb-5cb8-472d-92d2-36537521173f",
       "name": "Resolver Streak"
     },
     {
@@ -121,10 +116,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        320
+        -128,
+        144
       ],
-      "id": "2eda95ee-231d-4b62-ad3a-7816c49d94b3",
+      "id": "15cb4f62-7551-4edb-9696-5030994ab932",
       "name": "Calcular Gamificação"
     },
     {
@@ -138,10 +133,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1008,
-        320
+        624,
+        144
       ],
-      "id": "59cfed24-efe9-4a56-bfe3-ad799bf49eda",
+      "id": "bad2bb0a-1944-4b8b-9aca-6d2a6a405d17",
       "name": "Atualizar Gamificação",
       "credentials": {
         "postgres": {
@@ -157,10 +152,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1216,
-        320
+        832,
+        144
       ],
-      "id": "14a5197c-37cc-4cad-a166-f07547d5a734",
+      "id": "9c50939f-a9e0-4137-bb81-0130b7a4812d",
       "name": "Preparar Resultado"
     },
     {
@@ -173,10 +168,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1328,
-        80
+        -1712,
+        -112
       ],
-      "id": "a6b040ee-cb39-475d-a2b0-c6c8fc46ae16",
+      "id": "a703b728-fa25-4dfb-b825-1d879747dc4f",
       "name": "Sticky Note - Info"
     },
     {
@@ -190,10 +185,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        32,
-        320
+        -352,
+        144
       ],
-      "id": "37a9ac1d-966b-4fad-bdab-3db4f05c87f9",
+      "id": "5e5d96ec-2bba-4fb6-9b4b-9b11a820a88a",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -205,16 +200,16 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH updates AS (\n  SELECT\n    (item->>'quest_record_id')::uuid AS quest_record_id,\n    NULLIF(item->>'status', '') AS status,\n    COALESCE((item->>'progresso_atual')::integer, 0) AS progresso_atual,\n    COALESCE((item->>'progresso_percentual')::integer, 0) AS progresso_percentual,\n    COALESCE((item->>'xp_concedido')::integer, 0) AS xp_concedido,\n    COALESCE((item->>'tentativas')::integer, NULL) AS tentativas,\n    NULLIF(item->>'concluido_em', '')::timestamp AS concluido_em,\n    NULLIF(item->>'reiniciada_em', '')::timestamp AS reiniciada_em,\n    NULLIF(item->>'dados_extras', '') AS dados_extras_raw\n  FROM jsonb_array_elements('{{ JSON.stringify($json.quest_updates ?? []).replace(/'/g, \"''\") }}'::jsonb) AS item\n)\nUPDATE usuarios_quest uq\nSET\n  status = COALESCE(updates.status, uq.status),\n  progresso_atual = updates.progresso_atual,\n  progresso_percentual = updates.progresso_percentual,\n  xp_concedido = updates.xp_concedido,\n  tentativas = COALESCE(updates.tentativas, uq.tentativas),\n  concluido_em = updates.concluido_em,\n    reiniciada_em = updates.reiniciada_em,\n    dados_extras = CASE\n    WHEN updates.dados_extras_raw IS NULL THEN uq.dados_extras\n    ELSE updates.dados_extras_raw::jsonb\n  END,\n  atualizado_em = NOW()\nFROM updates\nWHERE uq.id = updates.quest_record_id;",
+        "query": "WITH updates AS (\n  SELECT\n    (item->>'quest_record_id')::uuid AS quest_record_id,\n    NULLIF(item->>'status', '') AS status,\n    COALESCE((item->>'progresso_atual')::integer, 0) AS progresso_atual,\n    COALESCE((item->>'progresso_percentual')::integer, 0) AS progresso_percentual,\n    COALESCE((item->>'xp_concedido')::integer, 0) AS xp_concedido,\n    COALESCE((item->>'tentativas')::integer, NULL) AS tentativas,\n    NULLIF(item->>'concluido_em', '')::timestamp AS concluido_em,\n    NULLIF(item->>'reiniciada_em', '')::timestamp AS reiniciada_em,\n    NULLIF(item->>'dados_extras', '') AS dados_extras_raw\n  FROM jsonb_array_elements('{{ JSON.stringify($json.quest_updates ?? []).replace(/'/g, \"''\") }}'::jsonb) AS item\n)\nUPDATE usuarios_quest uq\nSET\n  status = COALESCE(updates.status, uq.status),\n  progresso_atual = updates.progresso_atual,\n  progresso_percentual = updates.progresso_percentual,\n  xp_concedido = updates.xp_concedido,\n  tentativas = COALESCE(updates.tentativas, uq.tentativas),\n  concluido_em = updates.concluido_em,\n  reiniciada_em = updates.reiniciada_em,\n  dados_extras = CASE\n    WHEN updates.dados_extras_raw IS NULL THEN uq.dados_extras\n    ELSE updates.dados_extras_raw::jsonb\n  END,\n  atualizado_em = NOW()\nFROM updates\nWHERE uq.id = updates.quest_record_id;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        400,
-        320
+        16,
+        144
       ],
-      "id": "04a4be39-c9ae-4d32-b20c-1fc03def4679",
+      "id": "f5fd4b15-6896-4bbc-9851-85b949a5ba1b",
       "name": "Atualizar Quests",
       "credentials": {
         "postgres": {
@@ -232,10 +227,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        608,
-        320
+        224,
+        144
       ],
-      "id": "bb1758b6-bb84-4491-897b-8405dd032986",
+      "id": "c58ecccb-4379-49a3-8296-02e0a1466e7f",
       "name": "Consolidar Estatísticas",
       "credentials": {
         "postgres": {
@@ -251,13 +246,27 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        320
+        416,
+        144
       ],
-      "id": "ce6c1ee1-199b-4c7f-a72e-8f237f1f3460",
+      "id": "8980aefe-397c-4374-a23c-8d99f10b6566",
       "name": "Montar Resumo"
     }
   ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "8c6046bf-cf23-4da4-9689-a46b9e154b90",
+          "chat_id": "eab0eba6-d26b-4356-ba14-3c3dcf59798b",
+          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "tem_reflexao": true,
+          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar suas emoções complexas e oscilantes, compreendendo como o hiperfoco e a calmaria influenciam seu estado emocional. Ele fez conexões claras entre os eventos da separação, seus sentimentos atuais e as estratégias que usa para lidar com o vazio. Revelou autoconhecimento ao reconhecer tanto o alívio quanto a angústia, e questionou seus próprios padrões de enfrentamento, mostrando aprendizado e compreensão de sua situação interna.",
+          "total_palavras_usuario": 195
+        }
+      }
+    ]
+  },
   "connections": {
     "start": {
       "main": [
@@ -381,84 +390,15 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "versionId": "441b328e-d179-42e6-8c2d-ea4d59634b64",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
   },
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usuario_id": "8c6046bf-cf23-4da4-9689-a46b9e154b90",
-          "chat_id": "eab0eba6-d26b-4356-ba14-3c3dcf59798b",
-          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar suas emoções complexas e oscilantes, compreendendo como o hiperfoco e a calmaria influenciam seu estado emocional. Ele fez conexões claras entre os eventos da separação, seus sentimentos atuais e as estratégias que usa para lidar com o vazio. Revelou autoconhecimento ao reconhecer tanto o alívio quanto a angústia, e questionou seus próprios padrões de enfrentamento, mostrando aprendizado e compreensão de sua situação interna.",
-          "total_palavras_usuario": 195
-        }
-      }
-    ]
-  },
-  "versionId": "746cc9b0-7129-429f-839a-dc53a8f348eb",
-  "triggerCount": 0,
-  "shared": [
-    {
-      "updatedAt": "2025-10-10T11:10:56.623Z",
-      "createdAt": "2025-10-10T11:10:56.623Z",
-      "role": "workflow:owner",
-      "workflowId": "agXJK8Dd49If1eFx",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
+  "id": "agXJK8Dd49If1eFx",
   "tags": []
 }

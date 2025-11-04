@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Flame, Target, Sparkles, ArrowRight } from 'lucide-react';
+import { Trophy, Flame, Sparkles, CheckCircle2, Circle, AlertTriangle } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 
 const LIGHT_PURPLE_BORDER = '#D4C5FF';
@@ -35,10 +35,37 @@ const GamificacaoPanel: React.FC = () => {
     return null;
   }
 
-  const questDescricao = gamificacao.quest_diaria_descricao ?? 'Nenhuma missão ativa';
-  const questProgresso = clampToPercent(gamificacao.quest_diaria_progresso ?? 0);
-  const questDiasAtivos = gamificacao.quest_streak_dias ?? 0;
-
+  const habitosAtivos = Array.isArray(gamificacao.habitos_ativos)
+    ? gamificacao.habitos_ativos
+    : [];
+  const HABIT_STATUS_STYLES: Record<
+    string,
+    { icon: React.ComponentType<{ size?: number }>; color: string; bg: string; label: string }
+  > = {
+    completa: { icon: CheckCircle2, color: '#16A34A', bg: '#DCFCE7', label: 'Concluído' },
+    expirada: { icon: AlertTriangle, color: '#F04438', bg: '#FEE4E2', label: 'Vencido' },
+    pendente: { icon: Circle, color: '#3083DC', bg: '#E0F2FE', label: 'Pendente' },
+    ativa: { icon: Circle, color: '#3083DC', bg: '#E0F2FE', label: 'Em andamento' },
+  };
+  const today = new Date();
+  const todayISO = today.toISOString().split('T')[0];
+  const formatDueDate = (value?: string | null) => {
+    if (!value) {
+      return null;
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    const parsedISO = parsed.toISOString().split('T')[0];
+    if (parsedISO === todayISO) {
+      return 'Hoje';
+    }
+    if (parsedISO < todayISO) {
+      return `Venceu ${parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`;
+    }
+    return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  };
   const nivelAtual = gamificacao.nivel_atual ?? 0;
   const tituloNivel = gamificacao.titulo_nivel ?? '—';
 
@@ -91,18 +118,7 @@ const GamificacaoPanel: React.FC = () => {
     nextStreakGoal > 0
       ? clampToPercent((streakDias / nextStreakGoal) * 100)
       : 0;
-  const reflexoesMeta = 10;
-  const totalReflexoes = gamificacao.total_reflexoes ?? 0;
-  const reflexoesCiclo =
-    totalReflexoes === 0
-      ? 0
-      : totalReflexoes % reflexoesMeta === 0
-        ? reflexoesMeta
-        : totalReflexoes % reflexoesMeta;
-  const reflexoesProgresso =
-    reflexoesMeta > 0 ? clampToPercent((reflexoesCiclo / reflexoesMeta) * 100) : 0;
-  const questDiasAtivosLabel =
-    questDiasAtivos > 0 ? `${questDiasAtivos} dia${questDiasAtivos === 1 ? '' : 's'}` : 'Hoje';
+  const habitosConcluidos = habitosAtivos.filter((habit: any) => habit?.status === 'completa').length;
 
   return (
     <div
@@ -125,12 +141,12 @@ const GamificacaoPanel: React.FC = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 text-sm font-medium text-[#475467]">
               <Flame size={18} className="text-[#E86114]" />
-              Dias seguidos
+              Conversas seguidas
             </div>
             <div className="text-right">
               <p className="text-xs font-medium text-[#98A2B3]">Max</p>
               <p className="text-sm font-semibold text-[#E86114]">
-                {melhorStreak > 0 ? `${melhorStreak} dias` : 'Novo recorde'}
+                {melhorStreak > 0 ? `${melhorStreak} conversa${melhorStreak === 1 ? '' : 's'}` : '—'}
               </p>
             </div>
           </div>
@@ -151,35 +167,8 @@ const GamificacaoPanel: React.FC = () => {
                 {streakDias} dia{streakDias === 1 ? '' : 's'}
               </span>
               <span>
-                Meta {nextStreakGoal} dia{nextStreakGoal === 1 ? '' : 's'}
+                Meta {nextStreakGoal} conversas{nextStreakGoal === 1 ? '' : 's'}
               </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5" style={{ borderColor: '#C3D8FF', backgroundColor: '#E8F3F5' }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#3083DC]">
-              <Target size={16} className="text-[#3083DC]" />
-              Desenvolvimento
-            </div>
-            <p className="text-xs font-semibold text-[#3083DC]">
-              {reflexoesCiclo}/{reflexoesMeta}
-            </p>
-          </div>
-
-          <p className="mt-3 text-xl font-semibold text-[#1C2541]">
-            {reflexoesCiclo} Reflexões
-          </p>
-
-          <div className="mt-4">
-            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
-              <motion.div
-                className="h-1.5 rounded-full bg-[#3083DC]"
-                initial={{ width: 0 }}
-                animate={{ width: `${reflexoesProgresso}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              />
             </div>
           </div>
         </div>
@@ -188,25 +177,67 @@ const GamificacaoPanel: React.FC = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#8B5CF6]">
               <Sparkles size={16} className="text-[#8B5CF6]" />
-              Quest do dia
+              Hábitos do dia
             </div>
-            <p className="text-xs font-semibold text-[#8B5CF6]">{questDiasAtivosLabel}</p>
+            <p className="text-xs font-semibold text-[#8B5CF6]">
+              {habitosAtivos.length > 0 ? `${habitosConcluidos}/${habitosAtivos.length}` : '—'}
+            </p>
           </div>
 
-          <p className="mt-3 text-base font-semibold text-[#1C2541] leading-snug">
-            {questDescricao}
-          </p>
+          {habitosAtivos.length > 0 ? (
+            <ul className="mt-4 space-y-3">
+              {habitosAtivos.map((habit: any, index: number) => {
+                const statusKey = habit.status ?? 'pendente';
+                const style = HABIT_STATUS_STYLES[statusKey] ?? HABIT_STATUS_STYLES.pendente;
+                const StatusIcon = style.icon;
+                const meta = Number(habit.progresso_meta ?? 1) || 1;
+                const progressoAtual = Number(habit.progresso_atual ?? 0) || 0;
+                const progressoLabel = meta > 1 ? `${Math.min(progressoAtual, meta)}/${meta}` : null;
+                const venceLabel = formatDueDate(habit.vence_em);
+                const itemKey = `${habit.quest_id ?? habit.codigo ?? habit.titulo ?? 'habit'}-${index}`;
 
-          <div className="mt-4">
-            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
-              <motion.div
-                className="h-1.5 rounded-full bg-[#8B5CF6]"
-                initial={{ width: 0 }}
-                animate={{ width: `${questProgresso}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
+                return (
+                  <li
+                    key={itemKey}
+                    className="flex items-start justify-between gap-3 rounded-2xl bg-white/50 px-3 py-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full"
+                        style={{ backgroundColor: style.bg, color: style.color }}
+                      >
+                        <StatusIcon size={16} />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-[#1C2541]">
+                          {habit.titulo ?? 'Hábito diário'}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#475467]">
+                          <span className="font-semibold" style={{ color: style.color }}>
+                            {style.label}
+                          </span>
+                          {progressoLabel && (
+                            <span className="rounded-full bg-[#E8F3F5] px-2 py-0.5 text-xs text-[#1C2541]">
+                              {progressoLabel}
+                            </span>
+                          )}
+                          {venceLabel && (
+                            <span className="text-[#98A2B3]">
+                              {venceLabel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="mt-4 text-sm text-[#475467]">
+              Nenhum hábito ativo hoje. Complete a conversa para desbloquear sugestões diárias.
+            </p>
+          )}
         </div>
       </div>
 

@@ -10,7 +10,7 @@ CREATE TABLE public.quest_catalogo (
   codigo TEXT NOT NULL UNIQUE,
   titulo TEXT NOT NULL,
   descricao TEXT,
-  categoria TEXT NOT NULL CHECK (categoria IN ('habit_core', 'habit_deep', 'onboarding', 'event')),
+  categoria TEXT NOT NULL CHECK (categoria IN ('habit_core', 'habit_deep', 'habit_daily', 'onboarding', 'event')),
   tipo TEXT NOT NULL CHECK (tipo IN ('sistema', 'personalizada', 'eventual')),
   gatilho_tipo TEXT NOT NULL,
   gatilho_valor INTEGER,

@@ -26,6 +26,11 @@ Este documento consolida as decisões de gamificação para o novo ciclo de test
   - São geradas após cada conversa com base no sabotador dominante ou insight detectado.
   - Estrutura: gatilho claro (situação/emoção), comportamento esperado, duração curta (3, 5 ou 7 dias), feedback diário.
   - Não competem com a trilha principal; complementam o hábito diário.
+- **Hábitos diários padrão**:
+  - Conjunto inicial: `habit_diaria_conversa`, `habit_diaria_reflexao`, `habit_diaria_respiracao` (expansível pelo catálogo).
+  - Cada hábito vira um item do checklist no painel; status possíveis: `pendente`, `concluido`, `vencido`.
+  - O workflow mantém uma instância ativa por hábito; só gera uma nova quando a anterior é concluída. Se vencer sem conclusão, permanece visível como `vencido`.
+  - Os dados voltam em `habitos_ativos` para alimentar o cartão e permitir que um agente de lembretes identifique tarefas atrasadas.
 - **Eventos especiais** (opcionais):
   - Desafios temáticos de duração limitada, sem impacto na escada principal. Pautados por campanhas ou datas-chave.
 
@@ -40,9 +45,9 @@ Este documento consolida as decisões de gamificação para o novo ciclo de test
   - Indicadores complementares: quantidade de metas concluídas por faixa, tempo até retomada após quebra, adesão às quests personalizadas.
   - Segmentação: identificar padrões de sabotador mais recorrentes e efeito das missões personalizadas na manutenção do streak.
 - **Diretrizes de experiência**:
-  - O painel deve mostrar três números principais: streak atual, recorde histórico e meta vigente.
-  - Conquistas repetidas são agregadas (ex.: “Streak 7 dias · alcançada 3 vezes”).
-  - Quando o usuário quebra a sequência, mensagem motivadora + sugestão da Meta 1 (“volte para 3 dias seguidos”) mantendo atalho para retomar desafios longos se desejar.
+  - O painel mostra streak atual/recorde/meta e, logo abaixo, checklist com hábitos diários (ícone de status + prazo).
+  - Conquistas repetidas são agregadas (ex.: “Streak 7 dias · alcançada 3 vezes”) e os hábitos exibem contador de repetições.
+  - Quando o usuário quebra a sequência, mensagem motivadora + sugestão da meta básica (“volte para 3 conversas seguidas”) mantendo atalho para desafios longos se desejar.
 
 ## Espec Técnica
 
@@ -50,7 +55,8 @@ Este documento consolida as decisões de gamificação para o novo ciclo de test
 - Atualizar categorias para `habit_core` (streaks), `habit_deep` (personalizadas), `onboarding`, `event`.
 - Registrar as oito metas como entradas `streak_003`, `streak_005`, …, `streak_030` com `gatilho_tipo = "dias_consecutivos"`, `repeticao = "unica"`, `ordem_inicial` crescente, `xp_recompensa` conforme tabela.
 - Quests personalizadas terão `tipo = "personalizada"`, `gatilho_tipo` conforme a ação (ex.: `habito_repeticoes`, `contexto_emocional`), e parâmetros extras em um campo `config`.
-- Arquivar ou comentar quests “daily_*” enquanto o assistente de reflexão já cobre esse fluxo.
+- Adicionar hábitos diários padrão com `categoria = 'habit_daily'`, `tipo = 'sistema'`, `gatilho_tipo = 'diario'`, `gatilho_valor = 1`, `repeticao = 'diaria'` e configuração `{ "prazo": "dia", "meta": 1 }`.
+- Arquivar ou comentar quests “daily_*” antigas para evitar duplicidade.
 
 ### Relação Usuário × Quest (`docs/data/usuarios_quest.json`)
 - Manter campos atuais e incluir:
@@ -66,14 +72,14 @@ Este documento consolida as decisões de gamificação para o novo ciclo de test
   - `streak_meta_atual`: código da meta ativa (ex.: `streak_003`).
   - `streak_meta_proximo`: próximo alvo caso conclua a atual (ex.: `streak_005`).
   - `streak_meta_status`: objeto simples `{ alvoDias: 5, estado: "ativo", reinicios: 2, completado_em: null }`.
-  - `habitos_ativos`: lista com `id_quest`, `titulo`, `progresso_pct`.
+  - `habitos_ativos`: lista com itens `{ quest_id, codigo, titulo, status, vence_em, progresso_atual, progresso_meta, atualizado_em }`.
 - `conquistas_desbloqueadas` passa a incluir `tipo_meta` e `valor_meta` para reconstruir dashboards sem depender do nome textual.
 - XP e níveis continuam, mas os bônus das novas metas devem ser refletidos em `total_xp_ganho_hoje` e históricos.
 
 ### Outras Considerações
 - **Reset da sequência**: serviços que calculam o streak devem atualizar `usuarios_quest`, `gamificacao` e gerar evento de auditoria.
 - **APIs**: endpoints que alimentam o dashboard devem retornar `streak_meta_atual`, `streak_meta_proximo`, contagem de conquistas de streak (agrupada) e quests personalizadas ativas.
-- **Dashboard**: o componente de gamificação mostrará barra com alvo alinhado a `streak_meta_atual`, além de resumo das missões personalizadas.
+- **Dashboard**: o componente de gamificação mostrará barra com alvo alinhado a `streak_meta_atual`, o checklist diário (status + vencimento) e resumo das missões personalizadas.
 - **Backups**: como o ambiente está em teste, manter exportação automática após aplicar as alterações estruturais para permitir rollback rápido.
 
 ---
