@@ -10,7 +10,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import Card from '../ui/Card';
 
 const CheckInsHistorico: React.FC = () => {
   const { dashboardData, openResumoConversas } = useStore();
@@ -105,10 +104,13 @@ const CheckInsHistorico: React.FC = () => {
   } as const;
 
   return (
-    <div className="space-y-6">
+    <div
+      className="rounded-[28px] border bg-[#E8F3F5] p-5 sm:p-6 lg:p-7 space-y-6 shadow-sm"
+      style={{ borderColor: '#AFC9FF' }}
+    >
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3083DC1A] text-[#3083DC]">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#D0E4FF] text-[#3083DC]">
             <Calendar size={20} />
           </span>
           <h3 className="text-xl font-semibold text-[#101828]">Diário de conversas</h3>
@@ -151,7 +153,10 @@ const CheckInsHistorico: React.FC = () => {
         })}
       </div>
 
-      <div className="flex justify-end border-t border-[#E4E7EC] pt-4">
+      <div
+        className="flex justify-end border-t pt-4"
+        style={{ borderColor: 'rgba(48, 131, 220, 0.22)' }}
+      >
         <button
           type="button"
           onClick={() => openResumoConversas().catch(() => null)}

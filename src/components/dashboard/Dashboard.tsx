@@ -81,11 +81,7 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.35 }}
-          style={{
-            border: `2px dashed ${SECTION_STYLES.conversations.border}`,
-            backgroundColor: '#FFFFFF',
-          }}
-          className="rounded-[24px] p-6 shadow-sm"
+          className="rounded-[28px]"
         >
           <CheckInsHistorico />
         </motion.section>
@@ -98,15 +94,13 @@ const Dashboard: React.FC = () => {
         {/* Emoções */}
         <section
           id="emocoes"
-          style={{
-            border: `2px dashed ${SECTION_STYLES.emotions.border}`,
-          }}
-          className="rounded-[24px] bg-white"
+          style={{ borderColor: SECTION_STYLES.emotions.border }}
+          className="rounded-[28px] border bg-[#E8F3F5] p-4 sm:p-5"
         >
           <button
             type="button"
             onClick={() => setView('dashEmocoes')}
-            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-[#E8F3F5] px-5 py-4 transition-colors hover:bg-[#DAE9EE]"
           >
             <div className="flex items-center gap-4">
               <Heart color={SECTION_STYLES.emotions.iconColor} />
@@ -121,15 +115,13 @@ const Dashboard: React.FC = () => {
 
         <section
           id="sabotadores"
-          style={{
-            border: `2px dashed ${SECTION_STYLES.sabotadores.border}`,
-          }}
-          className="rounded-[24px] bg-white"
+          style={{ borderColor: SECTION_STYLES.sabotadores.border }}
+          className="rounded-[28px] border bg-[#E8F3F5] p-4 sm:p-5"
         >
           <button
             type="button"
             onClick={() => setView('dashSabotadores')}
-            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-[#E8F3F5] px-5 py-4 transition-colors hover:bg-[#DAE9EE]"
           >
             <div className="flex items-center gap-4">
               <AlertTriangle color={SECTION_STYLES.sabotadores.iconColor} />
@@ -144,15 +136,13 @@ const Dashboard: React.FC = () => {
 
         <section
           id="insights"
-          style={{
-            border: `2px dashed ${SECTION_STYLES.insights.border}`,
-          }}
-          className="rounded-[24px] bg-white"
+          style={{ borderColor: SECTION_STYLES.insights.border }}
+          className="rounded-[28px] border bg-[#E8F3F5] p-4 sm:p-5"
         >
           <button
             type="button"
             onClick={() => setView('dashInsights')}
-            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-white px-5 py-4"
+            className="flex w-full items-center justify-between gap-4 rounded-[22px] bg-[#E8F3F5] px-5 py-4 transition-colors hover:bg-[#DAE9EE]"
           >
             <div className="flex items-center gap-4">
               <Lightbulb color={SECTION_STYLES.insights.iconColor} />
