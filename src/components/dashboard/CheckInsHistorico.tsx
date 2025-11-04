@@ -162,7 +162,7 @@ const CheckInsHistorico: React.FC = () => {
           onClick={() => openResumoConversas().catch(() => null)}
           className="inline-flex items-center gap-1 text-sm font-semibold text-[#3083DC] transition hover:text-[#2563EB]"
         >
-          Resumo
+          Resumos
           <ArrowRight size={14} />
         </button>
       </div>

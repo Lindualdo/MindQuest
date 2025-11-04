@@ -1,69 +1,38 @@
 [
   {
-    "id": "82f8e3a6-e3fc-4ce9-9972-b5ef1865c792",
+    "id": "532d4280-3d53-4cbb-b0cb-1c34c6b2f600",
     "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-    "xp_total": 790,
-    "nivel_atual": 3,
-    "xp_proximo_nivel": 1050,
-    "titulo_nivel": "Observador",
-    "streak_conversas_dias": 1,
-    "streak_protecao_usada": true,
+    "xp_total": 0,
+    "xp_proximo_nivel": 200,
+    "nivel_atual": 1,
+    "titulo_nivel": "Explorador",
+    "streak_conversas_dias": 0,
+    "melhor_streak": 0,
+    "streak_meta_atual": "streak_003",
+    "streak_meta_proximo": "streak_005",
+    "streak_meta_status": {
+      "alvoDias": 3,
+      "estado": "ativo",
+      "reinicios": 0,
+      "completado_em": null
+    },
+    "streak_protecao_usada": false,
     "streak_protecao_resetada_em": null,
-    "ultima_conversa_data": "2025-11-03T00:00:00.000Z",
-    "melhor_streak": 7,
-    "quest_diaria_status": "completa",
-    "quest_diaria_progresso": 100,
-    "quest_diaria_descricao": "No check-in de hoje, conclua a conversa com uma reflexão detalhada sobre o dia.",
-    "quest_diaria_data": "2025-11-03T00:00:00.000Z",
+    "total_conversas": 0,
+    "total_reflexoes": 0,
+    "total_xp_ganho_hoje": 0,
+    "quest_diaria_status": null,
+    "quest_diaria_progresso": 0,
+    "quest_diaria_descricao": "Complete a conversa guiada de hoje para avançar.",
+    "quest_diaria_data": null,
     "quest_streak_dias": 0,
-    "conquistas_desbloqueadas": [
-      {
-        "id": "primeira_conversa",
-        "nome": "Primeira Semente",
-        "emoji": "🌱",
-        "xp_bonus": 50,
-        "categoria": "primeiros_passos",
-        "desbloqueada_em": "2025-10-12T07:50:14.366Z"
-      },
-      {
-        "id": "primeira_reflexao",
-        "nome": "Pensador",
-        "emoji": "💭",
-        "xp_bonus": 50,
-        "categoria": "primeiros_passos",
-        "desbloqueada_em": "2025-10-12T07:50:14.367Z"
-      },
-      {
-        "id": "primeira_semana",
-        "nome": "Semana Completa",
-        "emoji": "🎯",
-        "xp_bonus": 100,
-        "categoria": "primeiros_passos",
-        "desbloqueada_em": "2025-10-14T07:02:28.990Z"
-      },
-      {
-        "id": "reflexao_profunda",
-        "nome": "Reflexão Profunda",
-        "emoji": "🧠",
-        "xp_bonus": 200,
-        "categoria": "profundidade",
-        "desbloqueada_em": "2025-10-16T10:03:32.214Z"
-      },
-      {
-        "id": "streak_7_dias",
-        "nome": "Chama Acesa",
-        "emoji": "🔥",
-        "xp_bonus": 150,
-        "categoria": "consistencia",
-        "desbloqueada_em": "2025-10-17T14:55:20.947Z"
-      }
-    ],
-    "total_conversas": 34,
-    "total_reflexoes": 34,
-    "total_xp_ganho_hoje": 240,
-    "ultima_conquista_id": "542ab728-2d79-4a9c-99a9-cbf74ea7577a",
-    "ultima_conquista_data": "2025-11-03T09:04:27.385Z",
-    "criado_em": "2025-10-10T10:51:35.378Z",
-    "atualizado_em": "2025-11-03T09:04:27.444Z"
+    "habitos_ativos": [],
+    "conquistas_desbloqueadas": [],
+    "ultima_conquista_id": null,
+    "ultima_conquista_data": null,
+    "ultima_conversa_data": null,
+    "ultima_atualizacao": null,
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
   }
 ]
