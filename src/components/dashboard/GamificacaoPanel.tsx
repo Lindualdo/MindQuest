@@ -38,9 +38,6 @@ const GamificacaoPanel: React.FC = () => {
   const melhorStreak = Math.max(gamificacao.melhor_streak ?? 0, streakDias);
   const streakProgress =
     melhorStreak > 0 ? clampToPercent((streakDias / melhorStreak) * 100) : 0;
-  const melhorStreakLabel =
-    melhorStreak > 0 ? `${melhorStreak} dia${melhorStreak === 1 ? '' : 's'}` : 'Novo recorde';
-
   const reflexoesMeta = 10;
   const totalReflexoes = gamificacao.total_reflexoes ?? 0;
   const reflexoesCiclo =
@@ -85,14 +82,19 @@ const GamificacaoPanel: React.FC = () => {
       <div className="space-y-4">
         <div className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5" style={{ borderColor: '#F2D2B3', backgroundColor: '#E8F3F5' }}>
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#E86114]">
-              <Flame size={16} className="text-[#E86114]" />
+            <div className="flex items-center gap-2 text-sm font-medium text-[#475467]">
+              <Flame size={18} className="text-[#E86114]" />
               Dias seguidos
             </div>
-            <p className="text-xs font-semibold text-[#E86114]">{melhorStreakLabel}</p>
+            <div className="text-right">
+              <p className="text-xs font-medium text-[#98A2B3]">Max</p>
+              <p className="text-sm font-semibold text-[#E86114]">
+                {melhorStreak > 0 ? `${melhorStreak} dias` : 'Novo recorde'}
+              </p>
+            </div>
           </div>
 
-          <p className="mt-3 text-3xl font-bold text-[#1C2541]">{streakDias}</p>
+          <p className="mt-4 text-4xl font-bold text-[#1C2541] leading-none">{streakDias}</p>
 
           <div className="mt-4">
             <div className="h-1.5 rounded-full bg-[#D9E0E8]">
