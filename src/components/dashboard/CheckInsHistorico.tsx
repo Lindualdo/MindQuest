@@ -113,18 +113,9 @@ const CheckInsHistorico: React.FC = () => {
           </span>
           <h3 className="text-xl font-semibold text-[#101828]">Histórico de conversas</h3>
         </div>
-
-        <button
-          type="button"
-          onClick={() => openResumoConversas().catch(() => null)}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-[#3083DC] transition hover:text-[#2563EB]"
-        >
-          Resumo
-          <ArrowRight size={14} />
-        </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-3">
+      <div className="grid grid-cols-7 gap-2">
         {ultimosSeteDias.map(({ checkin, label, dataLabel }, index) => {
           const statusConfig = checkin
             ? STATUS_CONFIG[checkin.status_resposta as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.default
@@ -140,7 +131,7 @@ const CheckInsHistorico: React.FC = () => {
             >
               <div
                 className={`
-                  flex h-14 w-14 items-center justify-center rounded-2xl border-2
+                  flex h-12 w-12 items-center justify-center rounded-xl border-2
                   transition-all duration-200
                   ${statusConfig.wrapper}
                 `}
@@ -158,6 +149,17 @@ const CheckInsHistorico: React.FC = () => {
             </motion.div>
           );
         })}
+      </div>
+
+      <div className="flex justify-end border-t border-[#E4E7EC] pt-4">
+        <button
+          type="button"
+          onClick={() => openResumoConversas().catch(() => null)}
+          className="inline-flex items-center gap-1 text-sm font-semibold text-[#3083DC] transition hover:text-[#2563EB]"
+        >
+          Resumo
+          <ArrowRight size={14} />
+        </button>
       </div>
     </div>
   );
