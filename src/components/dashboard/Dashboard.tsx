@@ -9,7 +9,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Trophy,
   Heart,
   AlertTriangle,
   Lightbulb,
@@ -28,10 +27,6 @@ const SECTION_STYLES: Record<string, SectionVisual> = {
   conversations: {
     border: '#AFC9FF',
     iconColor: '#3083DC',
-  },
-  gamification: {
-    border: '#CDB5FF',
-    iconColor: '#8B5CF6',
   },
   emotions: {
     border: '#F8B7DA',
@@ -96,28 +91,7 @@ const Dashboard: React.FC = () => {
         </motion.section>
 
         {/* Gamificação */}
-        <section
-          id="gamificacao"
-          style={{
-            border: `2px dashed ${SECTION_STYLES.gamification.border}`,
-            backgroundColor: '#FFFFFF',
-          }}
-          className="rounded-[24px] p-6 shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-5">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${SECTION_STYLES.gamification.iconColor}1a` }}
-            >
-              <Trophy color={SECTION_STYLES.gamification.iconColor} />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-[#1C2541]">Gamificação</h3>
-              <p className="text-xs text-[#1C2541]/60">
-                Missão do dia e progresso geral
-              </p>
-            </div>
-          </div>
+        <section id="gamificacao" className="rounded-[28px]">
           <GamificacaoPanel />
         </section>
 

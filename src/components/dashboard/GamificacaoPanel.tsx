@@ -1,22 +1,31 @@
 /**
  * ARQUIVO: src/components/dashboard/GamificacaoPanel.tsx
- * AÇÃO: CRIAR novo componente
+ * AÇÃO: REESTILIZAR componente
  *
- * Gamificação simplificada (painel v1.1.6)
- * Destaques: quest diária, nível atual, XP e streak
+ * Card de gamificação inspirado no mockup (painel v1.1.6)
+ * Layout com cards internos, resumo e CTA para conquistas
  */
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Flame, ArrowRight } from 'lucide-react';
+import { Trophy, Flame, Target, Sparkles, ArrowRight } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
+
+const LIGHT_PURPLE_BORDER = '#D4C5FF';
+
+const clampToPercent = (value: number) => Math.min(Math.max(value, 0), 100);
 
 const GamificacaoPanel: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
-  const { gamificacao } = dashboardData;
+  const gamificacao = dashboardData.gamificacao;
+
+  if (!gamificacao) {
+    return null;
+  }
 
   const questDescricao = gamificacao.quest_diaria_descricao ?? 'Nenhuma missão ativa';
-  const questProgresso = Math.min(Math.max(gamificacao.quest_diaria_progresso ?? 0, 0), 100);
+  const questProgresso = clampToPercent(gamificacao.quest_diaria_progresso ?? 0);
+  const questDiasAtivos = gamificacao.quest_streak_dias ?? 0;
 
   const nivelAtual = gamificacao.nivel_atual ?? 0;
   const tituloNivel = gamificacao.titulo_nivel ?? '—';
@@ -26,70 +35,39 @@ const GamificacaoPanel: React.FC = () => {
   const xpRestante = Math.max(proximoNivelMin - xpTotal, 0);
 
   const streakDias = gamificacao.streak_conversas_dias ?? 0;
+  const melhorStreak = Math.max(gamificacao.melhor_streak ?? 0, streakDias);
+  const streakProgress =
+    melhorStreak > 0 ? clampToPercent((streakDias / melhorStreak) * 100) : 0;
+  const melhorStreakLabel =
+    melhorStreak > 0 ? `${melhorStreak} dia${melhorStreak === 1 ? '' : 's'}` : 'Novo recorde';
+
+  const reflexoesMeta = 10;
+  const totalReflexoes = gamificacao.total_reflexoes ?? 0;
+  const reflexoesCiclo =
+    totalReflexoes === 0
+      ? 0
+      : totalReflexoes % reflexoesMeta === 0
+        ? reflexoesMeta
+        : totalReflexoes % reflexoesMeta;
+  const reflexoesProgresso =
+    reflexoesMeta > 0 ? clampToPercent((reflexoesCiclo / reflexoesMeta) * 100) : 0;
+  const questDiasAtivosLabel =
+    questDiasAtivos > 0 ? `${questDiasAtivos} dia${questDiasAtivos === 1 ? '' : 's'}` : 'Hoje';
 
   return (
-    <div className="rounded-3xl border border-[#E4E1FF] bg-white p-4 shadow-sm sm:p-5 space-y-3">
-      {/* Quest do dia */}
-      <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3 sm:px-5 sm:py-4">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#E86114]">
-          <Target size={14} className="text-[#E86114]" />
-          Quest do dia
-        </div>
-
-        <p className="mt-2 text-base font-semibold text-[#1C2541] leading-snug">
-          {questDescricao}
-        </p>
-
-        <div className="mt-3">
-          <div className="h-1 rounded-full bg-[#E4E7EC]">
-            <motion.div
-              className="h-1 rounded-full bg-[#E86114]"
-              initial={{ width: 0 }}
-              animate={{ width: `${questProgresso}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            />
-          </div>
-          <p className="mt-1 text-xs font-medium text-[#475467]">
-            {questProgresso}% completo
-          </p>
-        </div>
-      </div>
-
-      {/* Métricas */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8B5CF6]">
-            Nível atual
-          </p>
-          <div className="mt-1 text-xl font-bold text-[#7C3AED]">
-            {nivelAtual}
-          </div>
-          <p className="text-sm text-[#475467]">{tituloNivel}</p>
-        </div>
-
-        <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8B5CF6]">
-            XP total
-          </p>
-          <div className="mt-1 text-xl font-bold text-[#2563EB]">
-            {xpTotal.toLocaleString('pt-BR')}
-          </div>
-          <p className="text-sm text-[#475467]">
-            Falta {xpRestante.toLocaleString('pt-BR')} XP
-          </p>
-        </div>
-      </div>
-
-      {/* Streak e ação */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-[#E4E1FF] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#F97316]/40 text-[#E86114]">
-            <Flame size={14} />
+    <div
+      className="rounded-[28px] bg-[#E8F3F5] p-5 sm:p-6 lg:p-7 shadow-sm space-y-5 border"
+      style={{ borderColor: LIGHT_PURPLE_BORDER }}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D9C9FF]">
+            <Trophy size={24} className="text-[#7C3AED]" />
           </span>
-          <div>
-            <p className="text-[11px] font-semibold uppercase text-[#E86114]">Streak ativo</p>
-            <p className="text-base font-bold text-[#1C2541]">
-              {streakDias} dia(s)
+          <div className="space-y-0.5">
+            <h3 className="text-xl font-semibold text-[#1C2541]">Conquistas</h3>
+            <p className="text-sm text-[#44506B]">
+              Acompanhe sua consistência e desbloqueie novos níveis
             </p>
           </div>
         </div>
@@ -97,11 +75,112 @@ const GamificacaoPanel: React.FC = () => {
         <button
           type="button"
           onClick={() => setView('proximosNiveis')}
-          className="inline-flex items-center justify-center gap-1 rounded-full border border-[#8B5CF6] px-4 py-2 text-sm font-semibold text-[#8B5CF6] transition-colors hover:bg-[#F4EBFF]"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#7C3AED]"
         >
-          Ver próximos níveis
-          <ArrowRight size={14} />
+          Ver tudo
+          <ArrowRight size={16} />
         </button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5" style={{ borderColor: '#F2D2B3', backgroundColor: '#E8F3F5' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#E86114]">
+              <Flame size={16} className="text-[#E86114]" />
+              Dias seguidos
+            </div>
+            <p className="text-xs font-semibold text-[#E86114]">{melhorStreakLabel}</p>
+          </div>
+
+          <p className="mt-3 text-3xl font-bold text-[#1C2541]">{streakDias}</p>
+
+          <div className="mt-4">
+            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
+              <motion.div
+                className="h-1.5 rounded-full bg-[#E86114]"
+                initial={{ width: 0 }}
+                animate={{ width: `${streakProgress}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5" style={{ borderColor: '#C3D8FF', backgroundColor: '#E8F3F5' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#3083DC]">
+              <Target size={16} className="text-[#3083DC]" />
+              Desenvolvimento
+            </div>
+            <p className="text-xs font-semibold text-[#3083DC]">
+              {reflexoesCiclo}/{reflexoesMeta}
+            </p>
+          </div>
+
+          <p className="mt-3 text-xl font-semibold text-[#1C2541]">
+            {reflexoesCiclo} Reflexões
+          </p>
+
+          <div className="mt-4">
+            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
+              <motion.div
+                className="h-1.5 rounded-full bg-[#3083DC]"
+                initial={{ width: 0 }}
+                animate={{ width: `${reflexoesProgresso}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5" style={{ borderColor: '#D8C5FF', backgroundColor: '#E8F3F5' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#8B5CF6]">
+              <Sparkles size={16} className="text-[#8B5CF6]" />
+              Quest do dia
+            </div>
+            <p className="text-xs font-semibold text-[#8B5CF6]">{questDiasAtivosLabel}</p>
+          </div>
+
+          <p className="mt-3 text-base font-semibold text-[#1C2541] leading-snug">
+            {questDescricao}
+          </p>
+
+          <div className="mt-4">
+            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
+              <motion.div
+                className="h-1.5 rounded-full bg-[#8B5CF6]"
+                initial={{ width: 0 }}
+                animate={{ width: `${questProgresso}%` }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-[#3083DC] px-5 py-6 text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-white/80">
+              Nível {nivelAtual} · {tituloNivel}
+            </p>
+            <p className="text-3xl font-bold leading-tight">
+              {xpTotal.toLocaleString('pt-BR')} XP
+            </p>
+            <p className="text-xs font-medium text-white/80">
+              Falta {xpRestante.toLocaleString('pt-BR')} XP para o próximo nível
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setView('conquistas')}
+            className="inline-flex items-center justify-center rounded-xl bg-[#7EBDC2] px-5 py-3 text-sm font-semibold text-[#0A2F35] transition-colors hover:bg-[#74B4B9]"
+          >
+            Conquistas
+          </button>
+        </div>
       </div>
     </div>
   );
