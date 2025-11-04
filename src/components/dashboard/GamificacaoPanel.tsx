@@ -12,8 +12,20 @@ import { Trophy, Flame, Target, Sparkles, ArrowRight } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
 
 const LIGHT_PURPLE_BORDER = '#D4C5FF';
+const STREAK_DEFAULT_GOALS = [3, 7, 30, 60, 90, 120, 180, 365];
 
 const clampToPercent = (value: number) => Math.min(Math.max(value, 0), 100);
+const parseStreakGoalFromId = (id?: string | null) => {
+  if (!id) {
+    return null;
+  }
+  const match = id.match(/streak_(\d+)_dias/i);
+  if (!match) {
+    return null;
+  }
+  const parsed = Number.parseInt(match[1], 10);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 const GamificacaoPanel: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
@@ -36,8 +48,49 @@ const GamificacaoPanel: React.FC = () => {
 
   const streakDias = gamificacao.streak_conversas_dias ?? 0;
   const melhorStreak = Math.max(gamificacao.melhor_streak ?? 0, streakDias);
+  const unlockedStreakGoals = (gamificacao.conquistas_desbloqueadas ?? [])
+    .map((conquista) => parseStreakGoalFromId(conquista.id))
+    .filter((goal): goal is number => goal !== null);
+
+  const upcomingStreakGoals = (gamificacao.conquistas_proximas ?? [])
+    .map((conquista) => {
+      const isStreak =
+        conquista.categoria === 'consistencia' || /streak_/i.test(conquista.id);
+      if (!isStreak) {
+        return null;
+      }
+      if (Number.isFinite(conquista.progresso_meta)) {
+        return conquista.progresso_meta;
+      }
+      return parseStreakGoalFromId(conquista.id);
+    })
+    .filter((goal): goal is number => goal !== null);
+
+  const questStreakTarget =
+    gamificacao.quest_streak_dias && gamificacao.quest_streak_dias > 0
+      ? gamificacao.quest_streak_dias
+      : null;
+
+  const streakProgressBaseline = Math.max(
+    streakDias,
+    melhorStreak,
+    unlockedStreakGoals.length > 0 ? Math.max(...unlockedStreakGoals) : 0
+  );
+
+  const nextStreakGoal =
+    upcomingStreakGoals
+      .filter((goal) => goal > streakProgressBaseline)
+      .sort((a, b) => a - b)[0] ??
+    (questStreakTarget && questStreakTarget > streakProgressBaseline
+      ? questStreakTarget
+      : null) ??
+    STREAK_DEFAULT_GOALS.find((goal) => goal > streakProgressBaseline) ??
+    (streakProgressBaseline > 0 ? streakProgressBaseline + 1 : 1);
+
   const streakProgress =
-    melhorStreak > 0 ? clampToPercent((streakDias / melhorStreak) * 100) : 0;
+    nextStreakGoal > 0
+      ? clampToPercent((streakDias / nextStreakGoal) * 100)
+      : 0;
   const reflexoesMeta = 10;
   const totalReflexoes = gamificacao.total_reflexoes ?? 0;
   const reflexoesCiclo =
@@ -63,20 +116,8 @@ const GamificacaoPanel: React.FC = () => {
           </span>
           <div className="space-y-0.5">
             <h3 className="text-xl font-semibold text-[#1C2541]">Conquistas</h3>
-            <p className="text-sm text-[#44506B]">
-              Acompanhe sua consistência e desbloqueie novos níveis
-            </p>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setView('proximosNiveis')}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#7C3AED]"
-        >
-          Ver tudo
-          <ArrowRight size={16} />
-        </button>
       </div>
 
       <div className="space-y-4">
@@ -104,6 +145,14 @@ const GamificacaoPanel: React.FC = () => {
                 animate={{ width: `${streakProgress}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
               />
+            </div>
+            <div className="mt-3 flex items-center justify-between text-xs font-semibold text-[#475467]">
+              <span>
+                {streakDias} dia{streakDias === 1 ? '' : 's'}
+              </span>
+              <span>
+                Meta {nextStreakGoal} dia{nextStreakGoal === 1 ? '' : 's'}
+              </span>
             </div>
           </div>
         </div>
