@@ -1,61 +1,61 @@
 {
-  "updatedAt": "2025-10-26T18:40:44.347Z",
-  "createdAt": "2025-10-18T15:32:30.610Z",
-  "id": "HDTrSrJiBIv2FFks",
-  "name": "sw_get_history",
+  "updatedAt": "2025-11-03T09:13:55.708Z",
+  "createdAt": "2025-11-03T09:13:55.708Z",
+  "id": "04S47KA7EIbiJZBA",
+  "name": "My workflow 4",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d8049be7-7253-4013-bc97-b3c53ba40dbe",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT data_conversa, resumo_conversa FROM usr_chat \n   WHERE usuario_id = $1\n   ORDER BY data_conversa DESC \n   LIMIT 5",
-        "options": {
-          "queryReplacement": "={{ $('start').item.json.usr_id }}"
-        }
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "quest_catalog",
+          "mode": "list",
+          "cachedResultName": "quest_catalog"
+        },
+        "returnAll": true,
+        "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -256,
-        -208
+        208,
+        0
       ],
-      "id": "30ce1a7b-d72d-47e3-bc64-dc38cdee69ba",
-      "name": "get_history",
-      "alwaysOutputData": true,
+      "id": "04b12cf0-77d0-4fc6-ba50-4e5b82781a86",
+      "name": "Select rows from a table",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
       }
-    },
-    {
-      "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "usr_id"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -448,
-        -208
-      ],
-      "id": "111614ef-32f9-491c-b137-2a6205618e7d",
-      "name": "start"
     }
   ],
   "connections": {
-    "start": {
+    "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
-            "node": "get_history",
+            "node": "Select rows from a table",
             "type": "main",
             "index": 0
           }
@@ -67,24 +67,18 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usr_id": "178edaa3-5389-47df-adde-7ad2c2dcd1b3"
-        }
-      }
-    ]
+  "meta": {
+    "templateCredsSetupCompleted": true
   },
-  "versionId": "aaeafc1f-03a3-475f-bcd6-104311fd04b9",
+  "pinData": {},
+  "versionId": "7ac18184-e0a4-49f4-950b-c4ff5abaefeb",
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-10-18T15:32:30.610Z",
-      "createdAt": "2025-10-18T15:32:30.610Z",
+      "updatedAt": "2025-11-03T09:13:55.708Z",
+      "createdAt": "2025-11-03T09:13:55.708Z",
       "role": "workflow:owner",
-      "workflowId": "HDTrSrJiBIv2FFks",
+      "workflowId": "04S47KA7EIbiJZBA",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "updatedAt": "2025-09-25T16:38:18.729Z",

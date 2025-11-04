@@ -168,7 +168,7 @@
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-03T08:00:04.654Z",
+              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -194,7 +194,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-03",
+              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }

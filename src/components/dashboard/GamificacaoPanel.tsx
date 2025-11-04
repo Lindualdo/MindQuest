@@ -28,11 +28,11 @@ const GamificacaoPanel: React.FC = () => {
   const streakDias = gamificacao.streak_conversas_dias ?? 0;
 
   return (
-    <div className="rounded-3xl border border-[#E4E1FF] bg-white/95 p-4 shadow-sm sm:p-5 space-y-4">
+    <div className="rounded-3xl border border-[#E4E1FF] bg-white p-4 shadow-sm sm:p-5 space-y-3">
       {/* Quest do dia */}
-      <div className="rounded-2xl border border-[#ECE7FF] bg-[#F9F7FF] p-4 sm:p-5">
+      <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3 sm:px-5 sm:py-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#E86114]">
-          <Target size={15} className="text-[#E86114]" />
+          <Target size={14} className="text-[#E86114]" />
           Quest do dia
         </div>
 
@@ -41,12 +41,12 @@ const GamificacaoPanel: React.FC = () => {
         </p>
 
         <div className="mt-3">
-          <div className="h-1.5 rounded-full bg-[#E4E7EC]">
+          <div className="h-1 rounded-full bg-[#E4E7EC]">
             <motion.div
-              className="h-1.5 rounded-full bg-[#E86114]"
+              className="h-1 rounded-full bg-[#E86114]"
               initial={{ width: 0 }}
               animate={{ width: `${questProgresso}%` }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
           <p className="mt-1 text-xs font-medium text-[#475467]">
@@ -57,21 +57,21 @@ const GamificacaoPanel: React.FC = () => {
 
       {/* Métricas */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-[#ECE7FF] bg-[#F9F7FF] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#8B5CF6]">
+        <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8B5CF6]">
             Nível atual
           </p>
-          <div className="mt-2 text-2xl font-bold text-[#7C3AED]">
+          <div className="mt-1 text-xl font-bold text-[#7C3AED]">
             {nivelAtual}
           </div>
           <p className="text-sm text-[#475467]">{tituloNivel}</p>
         </div>
 
-        <div className="rounded-2xl border border-[#ECE7FF] bg-[#F9F7FF] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#8B5CF6]">
+        <div className="rounded-2xl border border-[#E4E1FF] px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8B5CF6]">
             XP total
           </p>
-          <div className="mt-2 text-2xl font-bold text-[#2563EB]">
+          <div className="mt-1 text-xl font-bold text-[#2563EB]">
             {xpTotal.toLocaleString('pt-BR')}
           </div>
           <p className="text-sm text-[#475467]">
@@ -81,13 +81,13 @@ const GamificacaoPanel: React.FC = () => {
       </div>
 
       {/* Streak e ação */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-[#ECE7FF] bg-[#F9F7FF] p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FDEBCC] text-[#E86114]">
-            <Flame size={15} />
+      <div className="flex flex-col gap-3 rounded-2xl border border-[#E4E1FF] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#F97316]/40 text-[#E86114]">
+            <Flame size={14} />
           </span>
           <div>
-            <p className="text-xs font-semibold uppercase text-[#E86114]">Streak ativo</p>
+            <p className="text-[11px] font-semibold uppercase text-[#E86114]">Streak ativo</p>
             <p className="text-base font-bold text-[#1C2541]">
               {streakDias} dia(s)
             </p>
