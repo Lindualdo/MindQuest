@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, FileText, MessageCircle } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import Card from '../ui/Card';
 
@@ -73,7 +73,7 @@ const CheckInsHistorico: React.FC = () => {
     const diaSemana = diasSemanaExtenso[date.getDay()];
     const dataFormatada = formatDateDisplay(date);
     const label = diaSemana;
-    const dataLabel = `${index === 6 ? 'hoje ' : ''}(${dataFormatada})`;
+    const dataLabel = dataFormatada;
     return {
       date,
       label,
@@ -81,149 +81,85 @@ const CheckInsHistorico: React.FC = () => {
       checkin
     };
   });
-
-  const checkinsRespondidos = ultimosSeteDias
-    .map((dia) => dia.checkin)
-    .filter(
-      (checkin): checkin is typeof checkins_historico[number] =>
-        Boolean(checkin && checkin.status_resposta === 'respondido')
-    );
-  const totalRespondidos = checkinsRespondidos.length;
-
-  // Total de conversas no período (quando disponível)
-  const totalConversas = dashboardData.metricas_periodo?.total_checkins ?? checkins_historico.length;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'respondido': return 'bg-green-100 border-green-300';
-      case 'perdido': return 'bg-red-100 border-red-300';
-      case 'pendente': return 'bg-yellow-100 border-yellow-300';
-      default: return 'bg-gray-100 border-gray-300';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'respondido': return '✓';
-      case 'perdido': return '✗';
-      case 'pendente': return '⏳';
-      default: return '?';
-    }
-  };
+  const STATUS_CONFIG = {
+    respondido: {
+      wrapper: 'bg-green-50 border-green-200',
+      icon: '✓',
+      iconColor: 'text-green-600',
+    },
+    perdido: {
+      wrapper: 'bg-slate-100 border-slate-200',
+      icon: '✗',
+      iconColor: 'text-slate-500',
+    },
+    pendente: {
+      wrapper: 'bg-slate-100 border-slate-200',
+      icon: '⏳',
+      iconColor: 'text-slate-500',
+    },
+    default: {
+      wrapper: 'bg-slate-100 border-slate-200',
+      icon: '—',
+      iconColor: 'text-slate-400',
+    },
+  } as const;
 
   return (
-    <Card
-      hover={false}
-      className="!border-none bg-white shadow-none"
-    >
-      <div className="flex items-center justify-between mb-6 gap-4">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
-          <Calendar className="text-blue-600" size={24} />
-          <h3 className="text-xl font-semibold text-gray-800">Histórico de conversas</h3>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3083DC1A] text-[#3083DC]">
+            <Calendar size={20} />
+          </span>
+          <h3 className="text-xl font-semibold text-[#101828]">Histórico de conversas</h3>
         </div>
 
         <button
           type="button"
           onClick={() => openResumoConversas().catch(() => null)}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition mq-btn-outline"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-[#3083DC] transition hover:text-[#2563EB]"
         >
-          <FileText size={14} />
-          Resumo das conversa
+          Resumo
+          <ArrowRight size={14} />
         </button>
       </div>
 
-      {/* Grid dos dias */}
-      <div className="grid grid-cols-7 gap-2 mb-6">
-        {ultimosSeteDias.map(({ checkin, label, dataLabel }, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="text-center"
-          >
-            {/* Status do check-in */}
-            <div className={`
-              w-12 h-12 mx-auto rounded-xl border-2 flex items-center justify-center
-              transition-all duration-200 hover:scale-105 cursor-pointer
-              ${checkin ? getStatusColor(checkin.status_resposta) : 'bg-gray-50 border-gray-200'}
-            `}>
-              {checkin ? (
-                <div className="text-center">
-                  <div className="text-xs mt-1 font-bold text-gray-600">
-                    {getStatusIcon(checkin.status_resposta)}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-400">
-                  <Calendar size={16} />
-                </div>
-              )}
-            </div>
-            
-            {/* Dia e data */}
-            <div className="text-xs font-semibold text-gray-600 mt-2">
-              {label.toLowerCase()}
-            </div>
-            <div className="text-xs text-gray-500">
-              {dataLabel}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      <div className="grid grid-cols-7 gap-3">
+        {ultimosSeteDias.map(({ checkin, label, dataLabel }, index) => {
+          const statusConfig = checkin
+            ? STATUS_CONFIG[checkin.status_resposta as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.default
+            : STATUS_CONFIG.default;
 
-      {/* Estatísticas resumidas */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-[#3083DC]">
-            {totalRespondidos}
-          </div>
-          <div className="text-xs text-gray-600">Dias com conversas</div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-2xl font-bold text-[#3083DC]">
-            {totalConversas}
-          </div>
-          <div className="text-xs text-gray-600">Total conversas</div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-2xl font-bold text-[#3083DC]">
-            {dashboardData.gamificacao.streak_conversas_dias}
-          </div>
-          <div className="text-xs text-gray-600">Dias seguidos</div>
-        </div>
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex flex-col items-center gap-2 text-center"
+            >
+              <div
+                className={`
+                  flex h-14 w-14 items-center justify-center rounded-2xl border-2
+                  transition-all duration-200
+                  ${statusConfig.wrapper}
+                `}
+              >
+                <span className={`text-base font-semibold ${statusConfig.iconColor}`}>
+                  {statusConfig.icon}
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-[#101828] uppercase">
+                {label.slice(0, 3)}
+              </div>
+              <div className="text-xs text-[#667085]">
+                {dataLabel}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
-
-      {/* Último check-in detalhado */}
-      {checkins_historico[0] && checkins_historico[0].status_resposta === 'respondido' && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          transition={{ delay: 0.8 }}
-          className="mt-4 pt-4 border-t border-gray-100"
-        >
-          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-            <MessageCircle className="text-blue-600 mt-1" size={16} />
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-800 mb-1">
-                Última Conversa
-              </div>
-              <div className="text-xs text-gray-600 mb-2 flex items-center gap-2">
-                <Clock size={12} />
-                {checkins_historico[0].horario_resposta}
-              </div>
-              {checkins_historico[0].resposta_texto && (
-                <div className="text-sm text-gray-700 italic">
-                  "{checkins_historico[0].resposta_texto}"
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </Card>
+    </div>
   );
 };
 
