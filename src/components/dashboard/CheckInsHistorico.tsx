@@ -111,7 +111,7 @@ const CheckInsHistorico: React.FC = () => {
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3083DC1A] text-[#3083DC]">
             <Calendar size={20} />
           </span>
-          <h3 className="text-xl font-semibold text-[#101828]">Histórico de conversas</h3>
+          <h3 className="text-xl font-semibold text-[#101828]">Diário de conversas</h3>
         </div>
       </div>
 
