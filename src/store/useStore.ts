@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import type { StoreState, DashboardData, ResumoConversasPayload } from '../types/emotions';
+import type { StoreState, DashboardData, ResumoConversasPayload, QuestSnapshot } from '../types/emotions';
 
 // Importações dos serviços (usando sintaxe compatível)
 import { apiService } from '../services/apiService';
@@ -29,6 +29,7 @@ interface ExtendedStoreState extends StoreState {
   // Full chat detail
   openFullChat: (chatId: string) => Promise<void>;
   closeFullChat: () => void;
+  loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -58,6 +59,9 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   fullChatDetail: null,
   fullChatLoading: false,
   fullChatError: null,
+  questSnapshot: null,
+  questLoading: false,
+  questError: null,
 
   // Actions básicas
   setError: (error) => {
@@ -76,6 +80,47 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
 
   closeFullChat: () => {
     set({ view: 'resumoConversas', selectedChatId: null, fullChatDetail: null, fullChatError: null });
+  },
+
+  loadQuestSnapshot: async (usuarioIdParam) => {
+    const { dashboardData: stateDashboard } = get();
+    const usuarioId = usuarioIdParam ?? stateDashboard?.usuario?.id;
+
+    if (!usuarioId) {
+      console.warn('[QuestSnapshot] abortando: usuário não informado');
+      set({
+        questError: 'Usuário não informado para carregar quests',
+        questLoading: false,
+      });
+      return;
+    }
+
+    console.debug('[QuestSnapshot] carregando snapshot', { usuario_id: usuarioId });
+    set({ questLoading: true, questError: null });
+
+    try {
+      const questData = await apiService.getQuestSnapshot(usuarioId);
+      const currentDashboard = get().dashboardData;
+
+      console.debug('[QuestSnapshot] snapshot recebido', questData);
+      set({
+        questSnapshot: questData,
+        questLoading: false,
+        questError: null,
+        dashboardData: currentDashboard
+          ? {
+              ...currentDashboard,
+              questSnapshot: questData,
+            }
+          : currentDashboard,
+      });
+    } catch (error) {
+      console.error('[QuestSnapshot] erro ao carregar snapshot', error);
+      set({
+        questLoading: false,
+        questError: error instanceof Error ? error.message : 'Erro ao carregar quests',
+      });
+    }
   },
 
   setAuthenticated: (auth) => {
@@ -162,6 +207,16 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         ultimaAtualizacao: new Date().toISOString(),
         lastUpdated: new Date().toISOString()
       });
+
+      if (dashboardData?.usuario?.id) {
+        await get().loadQuestSnapshot(dashboardData.usuario.id);
+      } else {
+        set({
+          questSnapshot: null,
+          questLoading: false,
+          questError: 'Usuário inválido para quests',
+        });
+      }
 
     } catch (error) {
       console.error('Erro ao carregar dados do dashboard:', error);
@@ -433,15 +488,20 @@ export const useDashboard = () => {
     resumoConversasLoading,
     resumoConversasError,
     openResumoConversas,
-    closeResumoConversas,
-    loadResumoConversas,
-    // full chat
-    openFullChat,
-    closeFullChat,
-    selectedChatId,
-    fullChatDetail,
-    fullChatLoading,
-    fullChatError
+  closeResumoConversas,
+  loadResumoConversas,
+  // full chat
+  openFullChat,
+  closeFullChat,
+  selectedChatId,
+  fullChatDetail,
+  fullChatLoading,
+  fullChatError,
+  questSnapshot,
+  questLoading,
+  questError,
+  loadQuestSnapshot,
+  isAuthenticated
   } = useStore();
   
   return {
@@ -477,7 +537,12 @@ export const useDashboard = () => {
     selectedChatId,
     fullChatDetail,
     fullChatLoading,
-    fullChatError
+    fullChatError,
+    questSnapshot,
+    questLoading,
+    questError,
+    loadQuestSnapshot,
+    isAuthenticated
   };
 };
 

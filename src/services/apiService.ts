@@ -7,7 +7,7 @@
  */
 
 import { authService } from './authService';
-import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload } from '../types/emotions';
+import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload, QuestSnapshot, QuestStatus } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -177,6 +177,182 @@ class ApiService {
     }
 
     return `${this.remoteBaseUrl}${endpoint}`;
+  }
+
+  private toNumber(value: unknown, fallback: number | null = null): number | null {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().replace(/%/g, '').replace(/,/g, '.');
+      const match = normalized.match(/-?\d+(?:\.\d+)?/);
+      if (match) {
+        const parsed = Number(match[0]);
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    return fallback;
+  }
+
+  private toString(value: unknown): string | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    return String(value);
+  }
+
+  private normalizeQuestSnapshot(payload: unknown): QuestSnapshot | null {
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const raw = payload as Record<string, unknown>;
+    const questsRaw = Array.isArray(raw.quests_personalizadas)
+      ? raw.quests_personalizadas
+      : [];
+
+    const quests = questsRaw
+      .map((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return null;
+        }
+
+        const quest = entry as Record<string, unknown>;
+        const configObj =
+          quest.config && typeof quest.config === 'object' && !Array.isArray(quest.config)
+            ? (quest.config as Record<string, unknown>)
+            : null;
+
+        return {
+          instancia_id: this.toString(quest.instancia_id),
+          meta_codigo: this.toString(quest.meta_codigo) ?? '',
+          status: (this.toString(quest.status) ?? 'pendente') as QuestStatus,
+          titulo: this.toString(quest.titulo) ?? 'Quest personalizada',
+          descricao: this.toString(quest.descricao),
+          contexto_origem: this.toString(quest.contexto_origem),
+          progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
+          progresso_atual: this.toNumber(quest.progresso_atual, 0) ?? 0,
+          concluido_em: this.toString(quest.concluido_em),
+          config: configObj,
+          xp_recompensa:
+            this.toNumber(
+              quest.xp_recompensa ??
+                (configObj && typeof configObj.xp_recompensa !== 'undefined'
+                  ? configObj.xp_recompensa
+                  : null),
+              null
+            ),
+          prioridade: this.toString(
+            quest.prioridade ??
+              (configObj && typeof configObj.prioridade !== 'undefined' ? configObj.prioridade : null)
+          ),
+          recorrencia: this.toString(
+            quest.recorrencia ??
+              (configObj && typeof configObj.recorrencia !== 'undefined' ? configObj.recorrencia : null)
+          ),
+        };
+      })
+      .filter((entry): entry is QuestSnapshot['quests_personalizadas'][number] => entry !== null);
+
+    return {
+      usuario_id: this.toString(raw.usuario_id) ?? '',
+      xp_total: this.toNumber(raw.xp_total, 0) ?? 0,
+      xp_proximo_nivel: this.toNumber(raw.xp_proximo_nivel, null),
+      nivel_atual: this.toNumber(raw.nivel_atual, 1) ?? 1,
+      titulo_nivel: this.toString(raw.titulo_nivel),
+      sequencia_atual: this.toNumber(raw.sequencia_atual, 0) ?? 0,
+      sequencia_recorde: this.toNumber(raw.sequencia_recorde, 0) ?? 0,
+      meta_sequencia_codigo: this.toString(raw.meta_sequencia_codigo),
+      proxima_meta_codigo: this.toString(raw.proxima_meta_codigo),
+      sequencia_status:
+        raw.sequencia_status && typeof raw.sequencia_status === 'object'
+          ? (raw.sequencia_status as Record<string, unknown>)
+          : null,
+      quests_personalizadas: quests,
+    };
+  }
+
+  private extractQuestSnapshot(payload: unknown): QuestSnapshot | null {
+    if (!payload) {
+      return null;
+    }
+
+    if (typeof payload === 'string') {
+      const trimmed = payload.trim();
+      if (trimmed) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return this.extractQuestSnapshot(parsed);
+        } catch (_) {
+          return null;
+        }
+      }
+    }
+
+    if (Array.isArray(payload)) {
+      for (const item of payload) {
+        const snapshot = this.extractQuestSnapshot(item);
+        if (snapshot) {
+          return snapshot;
+        }
+      }
+      return null;
+    }
+
+    if (typeof payload === 'object') {
+      const obj = payload as Record<string, unknown>;
+
+      if (obj.snapshot_final !== undefined) {
+        const snapshot = this.normalizeQuestSnapshot(obj.snapshot_final);
+        if (snapshot) {
+          return snapshot;
+        }
+      }
+
+      if (obj.snapshot !== undefined) {
+        const snapshot = this.normalizeQuestSnapshot(obj.snapshot);
+        if (snapshot) {
+          return snapshot;
+        }
+      }
+
+      const nestedKeys = [
+        'response',
+        'data',
+        'json',
+        'body',
+        'payload',
+        'result',
+        'resultado',
+        'value',
+        'values',
+        'item',
+        'items'
+      ];
+      for (const nestedKey of nestedKeys) {
+        if (Object.prototype.hasOwnProperty.call(obj, nestedKey)) {
+          const nestedSnapshot = this.extractQuestSnapshot(obj[nestedKey]);
+          if (nestedSnapshot) {
+            return nestedSnapshot;
+          }
+        }
+      }
+
+      const maybeSnapshot = this.normalizeQuestSnapshot(obj);
+      if (maybeSnapshot && maybeSnapshot.usuario_id) {
+        return maybeSnapshot;
+      }
+    }
+
+    return null;
   }
 
   private extractDashboardPayload(payload: unknown): DashboardApiResponse | null {
@@ -540,6 +716,36 @@ class ApiService {
   public async refreshDashboardData(): Promise<DashboardApiResponse | null> {
     // Por enquanto, mesmo endpoint. Futuramente pode ter endpoint específico
     return this.getDashboardData();
+  }
+
+  public async getQuestSnapshot(usuarioId: string): Promise<QuestSnapshot> {
+    if (!usuarioId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const result = await this.makeRequest(
+      '/quests',
+      {
+        method: 'POST',
+        body: JSON.stringify({ usuario_id: usuarioId }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      true
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao consultar quests');
+    }
+
+    const snapshot = this.extractQuestSnapshot(result.response);
+    if (!snapshot) {
+      console.warn('[ApiService] Resposta de quests fora do formato esperado', result.response);
+      throw new Error('Resposta de quests fora do formato esperado');
+    }
+
+    return snapshot;
   }
 
   public async getHumorHistorico(

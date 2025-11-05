@@ -1,0 +1,247 @@
+{
+  "createdAt": "2025-11-05T18:12:00.000Z",
+  "id": "gQst1DashWf0rk",
+  "name": "dash_quests",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "quests",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -900,
+        0
+      ],
+      "id": "27d8c3e2-3d5a-4f87-a987-c1c4107c2c70",
+      "name": "Webhook",
+      "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\nconst body = input.body ?? {};\n\nconst candidate = [\n  query.usuario_id,\n  query.user_id,\n  query.id_usuario,\n  body.usuario_id,\n  body.user_id,\n  body.id_usuario,\n  input.headers?.usuario_id,\n  input.headers?.user_id,\n].find((value) => typeof value === 'string' && value.trim().length > 0);\n\nif (!candidate) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: candidate.trim(),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        0
+      ],
+      "id": "4a5d1e52-6f6d-4a68-8ed8-0ac676f5852a",
+      "name": "Validar Entrada"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.quest_estado_usuario\nWHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -440,
+        0
+      ],
+      "id": "9f4f1e6f-e3ec-4f5d-928c-565835b9b641",
+      "name": "Buscar Estado",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  qi.id                AS instancia_id,\n  qi.meta_codigo       AS meta_codigo,\n  qi.status            AS status,\n  qi.progresso_meta    AS progresso_meta,\n  qi.progresso_atual   AS progresso_atual,\n  qi.concluido_em      AS concluido_em,\n  qi.xp_concedido      AS xp_concedido,\n  qi.contexto_origem   AS contexto_origem,\n  qi.atualizado_em     AS atualizado_em,\n  qm.titulo            AS titulo,\n  qm.descricao         AS descricao,\n  qm.config            AS config,\n  qm.xp_recompensa     AS xp_recompensa,\n  qm.codigo            AS modelo_codigo,\n  qm.gatilho_codigo    AS gatilho_codigo,\n  qm.gatilho_valor     AS gatilho_valor,\n  qm.tipo              AS tipo\nFROM public.quest_instancias qi\nJOIN public.quest_modelos qm ON qm.id = qi.modelo_id\nWHERE qi.usuario_id = $1::uuid\n  AND qm.tipo = 'personalizada'\nORDER BY\n  CASE qi.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  qi.atualizado_em DESC\nLIMIT 20;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -200,
+        0
+      ],
+      "id": "cb80adc2-9d11-4a56-bb8a-119e91a8f5ee",
+      "name": "Buscar Quests",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $items('Validar Entrada', 0, 0)?.json ?? {};\nconst estadoRow = $items('Buscar Estado', 0, 0)?.json ?? null;\nconst questItems = $input.all();\n\nconst parseNumber = (value, fallback = null) => {\n  if (value === null || value === undefined) return fallback;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst parseString = (value) => {\n  if (value === null || value === undefined) return null;\n  return typeof value === 'string' ? value : String(value);\n};\n\nconst sequenciaStatus = (() => {\n  if (!estadoRow || estadoRow.sequencia_status == null) return null;\n  if (typeof estadoRow.sequencia_status === 'object') return estadoRow.sequencia_status;\n  try {\n    return JSON.parse(estadoRow.sequencia_status);\n  } catch (error) {\n    return null;\n  }\n})();\n\nconst quests = questItems.map((item) => {\n  const row = item.json;\n  const config = row.config && typeof row.config === 'object'\n    ? row.config\n    : (() => {\n        if (!row.config) return null;\n        try {\n          return JSON.parse(row.config);\n        } catch (error) {\n          return null;\n        }\n      })();\n\n  return {\n    instancia_id: parseString(row.instancia_id),\n    meta_codigo: parseString(row.meta_codigo) ?? '',\n    status: parseString(row.status) ?? 'pendente',\n    titulo: parseString(row.titulo) ?? 'Quest personalizada',\n    descricao: parseString(row.descricao),\n    contexto_origem: parseString(row.contexto_origem),\n    progresso_meta: parseNumber(row.progresso_meta, 1) ?? 1,\n    progresso_atual: parseNumber(row.progresso_atual, 0) ?? 0,\n    concluido_em: parseString(row.concluido_em),\n    config,\n    xp_recompensa: parseNumber(row.xp_recompensa, null),\n    prioridade: config && typeof config.prioridade === 'string' ? config.prioridade : null,\n    recorrencia: config && typeof config.recorrencia === 'string' ? config.recorrencia : null,\n  };\n});\n\nconst snapshot = {\n  usuario_id: parseString(estadoRow?.usuario_id) ?? parseString(entrada.usuario_id) ?? '',\n  xp_total: parseNumber(estadoRow?.xp_total, 0) ?? 0,\n  xp_proximo_nivel: parseNumber(estadoRow?.xp_proximo_nivel, null),\n  nivel_atual: parseNumber(estadoRow?.nivel_atual, 1) ?? 1,\n  titulo_nivel: parseString(estadoRow?.titulo_nivel),\n  sequencia_atual: parseNumber(estadoRow?.sequencia_atual, 0) ?? 0,\n  sequencia_recorde: parseNumber(estadoRow?.sequencia_recorde, 0) ?? 0,\n  meta_sequencia_codigo: parseString(estadoRow?.meta_sequencia_codigo),\n  proxima_meta_codigo: parseString(estadoRow?.proxima_meta_codigo),\n  sequencia_status: sequenciaStatus,\n  quests_personalizadas: quests,\n};\n\nreturn [{ json: snapshot }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        0
+      ],
+      "id": "bfd97461-7c63-4c4f-9afa-5d823fcf92c3",
+      "name": "Montar Snapshot"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        280,
+        0
+      ],
+      "id": "a7bb09ae-0f78-4df7-9a1d-34c162033e98",
+      "name": "Responder"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estado": {
+      "main": [
+        [
+          {
+            "node": "Buscar Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Quests": {
+      "main": [
+        [
+          {
+            "node": "Montar Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Responder": [
+      {
+        "json": {
+          "usuario_id": "00000000-0000-0000-0000-000000000000",
+          "xp_total": 0,
+          "xp_proximo_nivel": 300,
+          "nivel_atual": 1,
+          "titulo_nivel": "Recém-Convocado",
+          "sequencia_atual": 0,
+          "sequencia_recorde": 0,
+          "meta_sequencia_codigo": "streak_003",
+          "proxima_meta_codigo": "streak_005",
+          "sequencia_status": null,
+          "quests_personalizadas": []
+        }
+      }
+    ]
+  },
+  "versionId": "2fdd12ef-5c4a-4b8a-a6af-1f6d64695c24",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-05T18:12:00.000Z",
+      "role": "workflow:owner",
+      "workflowId": "gQst1DashWf0rk",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -180,6 +180,44 @@ export interface Gamificacao {
   habitos_ativos?: GamificacaoHabitSnapshot[] | null;
 }
 
+export type QuestStatus =
+  | 'pendente'
+  | 'ativa'
+  | 'concluida'
+  | 'vencida'
+  | 'cancelada'
+  | 'reiniciada';
+
+export interface QuestPersonalizadaResumo {
+  instancia_id: string | null;
+  meta_codigo: string;
+  status: QuestStatus;
+  titulo: string;
+  descricao: string | null;
+  contexto_origem: string | null;
+  progresso_meta: number;
+  progresso_atual: number;
+  concluido_em: string | null;
+  config?: Record<string, unknown> | null;
+  xp_recompensa?: number | null;
+  prioridade?: string | null;
+  recorrencia?: string | null;
+}
+
+export interface QuestSnapshot {
+  usuario_id: string;
+  xp_total: number;
+  xp_proximo_nivel: number | null;
+  nivel_atual: number;
+  titulo_nivel: string | null;
+  sequencia_atual: number;
+  sequencia_recorde: number;
+  meta_sequencia_codigo: string | null;
+  proxima_meta_codigo: string | null;
+  sequencia_status: Record<string, unknown> | null;
+  quests_personalizadas: QuestPersonalizadaResumo[];
+}
+
 // Sabotadores internos
 export interface SabotadorPadrao {
   id: string;
@@ -297,6 +335,7 @@ export interface DashboardData {
   distribuicao_panas: DistribuicaoPanas;
   
   gamificacao: Gamificacao;
+  questSnapshot?: QuestSnapshot | null;
   
   sabotadores: {
     padrao_principal: SabotadorPadrao;
@@ -341,6 +380,9 @@ export interface StoreState {
   fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
   fullChatLoading: boolean;
   fullChatError: string | null;
+  questSnapshot: QuestSnapshot | null;
+  questLoading: boolean;
+  questError: string | null;
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;
@@ -355,6 +397,7 @@ export interface StoreState {
   openResumoConversas: () => Promise<void>;
   closeResumoConversas: () => void;
   loadResumoConversas: () => Promise<void>;
+  loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil

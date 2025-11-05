@@ -194,6 +194,11 @@ Script de seed deverá:
     3. Aplica dedupe/limite (máx. 4 ativas/pendentes), normaliza campos e aciona `sw_experts_gamification` com os JSONs prontos.
   - Saída inclui as sugestões enviadas e o retorno consolidado da gamificação.
 
+## Integração com Dashboard
+
+- Endpoint `GET/POST /api/quests` (proxy local) encaminha requisições para o webhook `QUESTS_WEBHOOK_URL` (por padrão `https://mindquest-n8n.cloudfy.live/webhook/quests-dashboard`) com `usuario_id` obrigatório.
+- O front-end utiliza `QuestPanel` (`src/components/dashboard/QuestPanel.tsx`) para exibir `sequencia_atual`, progresso da meta e até quatro quests personalizadas do snapshot retornado pelo workflow `sw_experts_gamification`.
+
 ## Referências cruzadas
 
 - Documento funcional: `docs/espec_quest_funcional.md`.

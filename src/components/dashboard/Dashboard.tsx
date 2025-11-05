@@ -15,7 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import CheckInsHistorico from './CheckInsHistorico';
-import GamificacaoPanel from './GamificacaoPanel';
+import QuestPanel from './QuestPanel';
 import { useDashboard } from '../../store/useStore';
 
 type SectionVisual = {
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
 
         {/* Gamificação */}
         <section id="gamificacao" className="rounded-[28px]">
-          <GamificacaoPanel />
+          <QuestPanel />
         </section>
 
         {/* Emoções */}
