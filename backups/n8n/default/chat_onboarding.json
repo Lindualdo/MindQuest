@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-11-02T19:07:09.690Z",
   "createdAt": "2025-11-02T13:31:36.212Z",
   "id": "UlInW9nmQs7vnPIP",
   "name": "chat_onboarding",
@@ -206,7 +205,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO gamificacao (usuario_id, xp_total, nivel_atual, xp_proximo_nivel, titulo_nivel, streak_conversas_dias, streak_protecao_usada, quest_diaria_status, quest_diaria_progresso, quest_diaria_descricao, quest_diaria_data, conquistas_desbloqueadas, total_conversas, total_reflexoes, melhor_streak)\nVALUES ($1::uuid, 0, 1, 200, 'Explorador', 0, false, 'pendente', 0, 'Dê o primeiro passo: inicie sua primeira conversa comigo!', CURRENT_DATE, '[]'::jsonb, 0, 0, 0);",
+        "query": "INSERT INTO public.gamificacao (\n  id,\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  streak_conversas_dias,\n  melhor_streak,\n  streak_meta_atual,\n  streak_meta_proximo,\n  streak_meta_status,\n  streak_protecao_usada,\n  streak_protecao_resetada_em,\n  total_conversas,\n  total_reflexoes,\n  total_xp_ganho_hoje,\n  quest_diaria_status,\n  quest_diaria_progresso,\n  quest_diaria_descricao,\n  quest_diaria_data,\n  quest_streak_dias,\n  habitos_ativos,\n  conquistas_desbloqueadas,\n  ultima_conquista_id,\n  ultima_conquista_data,\n  ultima_conversa_data,\n  ultima_atualizacao,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  gen_random_uuid(),\n  $1::uuid,\n  0,\n  200,\n  1,\n  'Explorador',\n  0,\n  0,\n  'streak_003',\n  'streak_005',\n  jsonb_build_object(\n    'alvoDias', 3,\n    'estado', 'ativo',\n    'reinicios', 0,\n    'completado_em', NULL\n  ),\n  FALSE,\n  NULL,\n  0,\n  0,\n  0,\n  NULL,\n  0,\n  NULL,\n  NULL,\n  3,\n  '[]'::jsonb,\n  '[]'::jsonb,\n  NULL,\n  NULL,\n  NULL,\n  NOW(),\n  NOW(),\n  NOW()\n)\nON CONFLICT (usuario_id) DO NOTHING;\n",
         "options": {
           "queryReplacement": "={{ [$json.id] }}"
         }
@@ -228,7 +227,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url}\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.\n\nSe quiser um guia rápido pra aproveitar melhor, visite https://mindquest.pt/suporte/conversation-guide.\n\nQuando quiser, é só me contar o que está acontecendo por aí.`;\n\nreturn { json: { mensagem } };"
+        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url};\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.`;\nreturn { json: { mensagem } };"
       },
       "id": "d0abdb6a-29d7-44c9-a8f0-3b414e21083a",
       "name": "monta link para usuario",
@@ -320,7 +319,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        240,
+        272,
         32
       ],
       "id": "48950db3-388a-41dd-8481-26af0bec3c54",
@@ -401,7 +400,7 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        448,
+        896,
         32
       ],
       "credentials": {
@@ -455,11 +454,90 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        624,
-        368
+        1488,
+        304
       ],
       "id": "a654bb4d-240d-493a-9c68-8c723bd78df7",
       "name": "Chat Memory Manager1"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 5 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        32
+      ],
+      "id": "5cddef0c-1982-4990-a27e-4b0507c6bca5",
+      "name": "Wait",
+      "webhookId": "c929985f-0e38-41dd-8f39-81282d3765bb"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "U44ZfEwFU77EUthb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
+          "cachedResultName": "sw_send_message_with_retry"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "messageText": "=Antes de começarmos, aqui vai algumas dicas...\n\n- Use este canal para conversar comigo; as interações aqui alimentam o seu App com resumo das conversas, humor, emoções, padrões mentais, perfil comportamental, dicas úteis e conquistas para te dar clareza mental e te ajudar em suas realizações .\n\n- Lembrando que o MindQuest não é terapia nem App de produtividade, o propósito aqui é te dar clareza mental para você se conhecer melhor e usar suas emoções a seu favor.\n\n- Na primeira conversa fale sobre o que sentir vontade; emoções, padrões de pensamento, hábitos, relações ou decisões — qualquer tema relevante vira dado útil para você.\n\n- Se não souber por onde começar, é só me dizer que vou te orientando combinado?\n\nQuer começar agora?",
+            "remoteJid": "={{ $('start').item.json.remoteJid }}",
+            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        32
+      ],
+      "id": "4a59d348-bc0e-47ad-ae3b-ecfdf600ba83",
+      "name": "Orientações iniciais"
     }
   ],
   "connections": {
@@ -615,7 +693,7 @@
       "main": [
         [
           {
-            "node": "Redis Delete",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -643,6 +721,28 @@
           }
         ]
       ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Orientações iniciais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orientações iniciais": {
+      "main": [
+        [
+          {
+            "node": "Redis Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -656,25 +756,23 @@
         "json": {
           "remoteJid": "5512982389360@s.whatsapp.net",
           "pushName": "Aldo",
-          "id": "3AA47BD6BCB2AF945639",
+          "id": "3AB86843CF3B227F3612",
           "whatsapp_number": "5512982389360",
           "evolution_instancia": "MindQuest",
-          "menssagem": "Oi"
+          "menssagem": "Aldo"
         }
       }
     ]
   },
-  "versionId": "c8a89740-eb3d-450a-93aa-57309ecba274",
+  "versionId": "de9b2ca8-26ef-4311-9028-eb55e64b6d16",
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-11-02T13:31:36.212Z",
       "createdAt": "2025-11-02T13:31:36.212Z",
       "role": "workflow:owner",
       "workflowId": "UlInW9nmQs7vnPIP",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -683,12 +781,10 @@
         "description": null,
         "projectRelations": [
           {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -714,7 +810,6 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }

@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-11-02T12:07:44.652Z",
   "createdAt": "2025-10-22T18:20:20.342Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
@@ -368,22 +367,20 @@
         "json": {
           "instanceName": "MindQuest",
           "remoteJid": "5512982389360@s.whatsapp.net",
-          "messageText": "Ótimo! Pra personalizar ainda mais, me conta sua faixa etária. Responda apenas com o número correspondente:\n\n1️⃣ 13 a 17 anos  \n2️⃣ 18 a 24 anos  \n3️⃣ 25 a 34 anos  \n4️⃣ 35 a 44 anos  \n5️⃣ 45 a 54 anos  \n6️⃣ 55 a 64 anos  \n7️⃣ 65 anos ou mais"
+          "messageText": "Aldo, você fez muita coisa e se dedicou de verdade, isso já é um grande avanço que merece ser reconhecido.\n\nSentir esse cansaço é natural depois de tanto esforço, e é importante dar espaço para essa sensação sem se cobrar demais. Talvez agora seja um momento de olhar para si com mais gentileza e permitir pequenas pausas que ajudem a recarregar a energia.\n\nQue tal continuar essa conversa com calma, e quando quiser, a gente pode explorar juntos novos caminhos para cuidar melhor de você? O App MindQuest está à sua disposição para quando sentir vontade de recomeçar essa troca.  \n\nFica o convite aberto: de que forma gostaria de seguir cuidando de si agora?   Acesse: https://mindquest.pt/app/auth?token?12dd3c06-a8a4-4941-9215-e738bc3888385a1c2b28-9ebb-4650-acb8-06c32f59390b1762291139"
         }
       }
     ]
   },
-  "versionId": "cb6ff675-556b-494d-9d3e-bba4bfe4637d",
+  "versionId": "b537432a-b081-40f5-ad87-a90b199f89bb",
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-10-22T18:20:20.342Z",
       "createdAt": "2025-10-22T18:20:20.342Z",
       "role": "workflow:owner",
       "workflowId": "U44ZfEwFU77EUthb",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -392,12 +389,10 @@
         "description": null,
         "projectRelations": [
           {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -423,7 +418,6 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }

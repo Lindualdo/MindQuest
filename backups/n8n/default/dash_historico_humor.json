@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-10-22T01:17:38.039Z",
   "createdAt": "2025-10-07T10:10:22.720Z",
   "id": "K6wCa8HaaUwdp6bP",
   "name": "dash_historico_humor",
@@ -137,13 +136,11 @@
   "triggerCount": 1,
   "shared": [
     {
-      "updatedAt": "2025-10-07T10:10:22.720Z",
       "createdAt": "2025-10-07T10:10:22.720Z",
       "role": "workflow:owner",
       "workflowId": "K6wCa8HaaUwdp6bP",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -152,12 +149,10 @@
         "description": null,
         "projectRelations": [
           {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -183,7 +178,6 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }

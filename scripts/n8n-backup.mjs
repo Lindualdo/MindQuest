@@ -12,6 +12,7 @@ if (!apiKey) {
 
 const backupDir = path.resolve('backups/n8n');
 const pageLimit = Number(process.env.N8N_PAGE_LIMIT ?? '100');
+const fieldsToRemove = new Set(['updatedAt', 'lastActiveAt']);
 
 async function fileExists(targetPath) {
   try {
@@ -38,6 +39,19 @@ async function fetchJson(relativePath, searchParams = {}) {
   }
 
   return res.json();
+}
+
+function stripKeys(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripKeys(item));
+  }
+
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value).filter(([key]) => !fieldsToRemove.has(key));
+    return Object.fromEntries(entries.map(([key, val]) => [key, stripKeys(val)]));
+  }
+
+  return value;
 }
 
 async function paginate(resourcePath, baseParams = {}) {
@@ -147,6 +161,7 @@ async function exportWorkflows() {
       seen.add(workflow.id);
 
       const data = await fetchJson(`workflows/${workflow.id}`);
+      const sanitized = stripKeys(data);
       const baseSafeName = sanitizeName(workflow.name || `workflow-${workflow.id}`, `workflow-${workflow.id}`);
       let filePath = path.join(projectDir, `${baseSafeName}.json`);
 
@@ -155,7 +170,7 @@ async function exportWorkflows() {
         filePath = path.join(projectDir, `${baseSafeName}${suffix}.json`);
       }
 
-      await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+      await writeFile(filePath, `${JSON.stringify(sanitized, null, 2)}\n`, 'utf8');
       console.log(`✓ ${projectName}: ${workflow.name ?? 'Sem nome'} (#${workflow.id})`);
     }
   }

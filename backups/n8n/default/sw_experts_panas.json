@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-10-27T17:55:30.591Z",
   "createdAt": "2025-10-02T20:28:28.238Z",
   "id": "vJRfrbY4NhpNyfCD",
   "name": "sw_experts_panas",
@@ -200,13 +199,11 @@
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-10-02T20:28:28.238Z",
       "createdAt": "2025-10-02T20:28:28.238Z",
       "role": "workflow:owner",
       "workflowId": "vJRfrbY4NhpNyfCD",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -215,12 +212,10 @@
         "description": null,
         "projectRelations": [
           {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -246,7 +241,6 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }

@@ -1,5 +1,9 @@
 {
+  "createdAt": "2025-09-24T12:07:20.876Z",
+  "id": "r0CuG6F3S1TR8ohs",
   "name": "dash_authentication",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -299,46 +303,6 @@
       "continueOnFail": true
     }
   ],
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "mindquest-n8n.cloudfy.live",
-            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/138.0.7204.156 Mobile/15E148 Safari/604.1",
-            "content-length": "94",
-            "accept": "*/*",
-            "accept-encoding": "gzip, br",
-            "accept-language": "pt-BR,pt;q=0.9",
-            "cdn-loop": "cloudflare; loops=1",
-            "cf-connecting-ip": "2001:818:e374:a600:c531:c9e4:795b:8950",
-            "cf-ipcountry": "PT",
-            "cf-ray": "99983424a959aa28-LIS",
-            "cf-visitor": "{\"scheme\":\"https\"}",
-            "content-type": "application/json",
-            "origin": "https://mindquest.pt",
-            "referer": "https://mindquest.pt/",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "cross-site",
-            "x-forwarded-for": "172.68.103.6",
-            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
-            "x-forwarded-port": "443",
-            "x-forwarded-proto": "https",
-            "x-forwarded-server": "d49265bfcab0",
-            "x-real-ip": "172.68.103.6"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "token": "cb74f3e9-885d-4a25-b6bb-0f715ca4a151015e4e4c-ac43-4071-b580-4b0b75713d761762296942"
-          },
-          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/auth/validate",
-          "executionMode": "production"
-        }
-      }
-    ]
-  },
   "connections": {
     "Webhook": {
       "main": [
@@ -529,15 +493,105 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ef4fbf37-d2f5-4d44-bff0-d08679ec6a98",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+    "templateCredsSetupCompleted": true
   },
-  "id": "r0CuG6F3S1TR8ohs",
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/138.0.7204.156 Mobile/15E148 Safari/604.1",
+            "content-length": "94",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "pt-BR,pt;q=0.9",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:c531:c9e4:795b:8950",
+            "cf-ipcountry": "PT",
+            "cf-ray": "99983424a959aa28-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "origin": "https://mindquest.pt",
+            "referer": "https://mindquest.pt/",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.68.103.6",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.6"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "token": "cb74f3e9-885d-4a25-b6bb-0f715ca4a151015e4e4c-ac43-4071-b580-4b0b75713d761762296942"
+          },
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/auth/validate",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "ef4fbf37-d2f5-4d44-bff0-d08679ec6a98",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-24T12:07:20.876Z",
+      "role": "workflow:owner",
+      "workflowId": "r0CuG6F3S1TR8ohs",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

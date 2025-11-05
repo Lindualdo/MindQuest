@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-11-03T09:13:55.708Z",
   "createdAt": "2025-11-03T09:13:55.708Z",
   "id": "04S47KA7EIbiJZBA",
   "name": "My workflow 4",
@@ -11,8 +10,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -208,
+        -48
       ],
       "id": "d8049be7-7253-4013-bc97-b3c53ba40dbe",
       "name": "When clicking ‘Execute workflow’"
@@ -27,9 +26,9 @@
         },
         "table": {
           "__rl": true,
-          "value": "quest_catalog",
+          "value": "quest_catalogo",
           "mode": "list",
-          "cachedResultName": "quest_catalog"
+          "cachedResultName": "quest_catalogo"
         },
         "returnAll": true,
         "options": {}
@@ -37,11 +36,131 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        208,
-        0
+        16,
+        -48
       ],
       "id": "04b12cf0-77d0-4fc6-ba50-4e5b82781a86",
-      "name": "Select rows from a table",
+      "name": "Quest catalogo",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "usuarios_quest",
+          "mode": "list",
+          "cachedResultName": "usuarios_quest"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        -48
+      ],
+      "id": "d9ae6607-e1c0-43f5-a0a2-95e7e88b4275",
+      "name": "Usuarios quest",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "gamificacao",
+          "mode": "list",
+          "cachedResultName": "gamificacao"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        480,
+        -48
+      ],
+      "id": "fa3ad44c-c5e8-4a3f-9453-7551353645c2",
+      "name": "Gamificacao",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "gamificacao",
+          "mode": "list",
+          "cachedResultName": "gamificacao"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        704,
+        -48
+      ],
+      "id": "3dcd1720-3918-427f-aa8d-cc708d0ed1f2",
+      "name": "Gamificacao Niveis",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -53,13 +172,22 @@
   "connections": {
     "When clicking ‘Execute workflow’": {
       "main": [
-        [
-          {
-            "node": "Select rows from a table",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
+      ]
+    },
+    "Quest catalogo": {
+      "main": [
+        []
+      ]
+    },
+    "Usuarios quest": {
+      "main": [
+        []
+      ]
+    },
+    "Gamificacao": {
+      "main": [
+        []
       ]
     }
   },
@@ -71,17 +199,15 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7ac18184-e0a4-49f4-950b-c4ff5abaefeb",
+  "versionId": "241146f1-bc60-4a80-9591-0262ccd1a274",
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2025-11-03T09:13:55.708Z",
       "createdAt": "2025-11-03T09:13:55.708Z",
       "role": "workflow:owner",
       "workflowId": "04S47KA7EIbiJZBA",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -90,12 +216,10 @@
         "description": null,
         "projectRelations": [
           {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
-              "updatedAt": "2025-11-04T08:00:06.967Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -121,7 +245,6 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-04",
               "isPending": false
             }
           }
