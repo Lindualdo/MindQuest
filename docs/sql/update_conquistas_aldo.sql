@@ -1,8 +1,9 @@
--- Atualiza as conquistas do usuário Aldo com base em docs/data/conquistas_aldo.json.
+-- Atualiza as conquistas do usuário de testes (UUID d949d81c-9235-41ce-8b3b-6b5d593c5e24)
+-- com base em docs/data/conquistas_aldo.json.
 -- Executar após garantir que o usuário existe na tabela public.gamificacao.
 
 WITH alvo AS (
-  SELECT '015e4e4c-ac43-4071-b580-4b0b75713d76'::uuid AS usuario_id
+  SELECT 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'::uuid AS usuario_id
 ),
 seed AS (
   SELECT *
