@@ -1,0 +1,468 @@
+{
+  "name": "expert_quest_personalizadas",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            }
+          ]
+        }
+      },
+      "id": "ad64497c-c73f-4b86-b5d5-32cfbde5fe22",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1504,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
+      },
+      "id": "4d8ca7fe-6724-42ff-9250-c820921b61f3",
+      "name": "Normalizar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1264,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH quests AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    COALESCE(qi.contexto_origem, '') AS contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qi.concluido_em,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n    AND qi.status IN ('pendente','ativa')\n)\nSELECT json_build_object(\n  'quests_ativas',\n  COALESCE(json_agg(quests ORDER BY quests.concluido_em NULLS FIRST), '[]'::json)\n) AS contexto\nFROM quests;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "d76ea72d-1423-4af9-885a-07aacb0c38f9",
+      "name": "Buscar Quests Ativas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1040,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH ultimas AS (\n  SELECT\n    uc.id,\n    uc.session_id,\n    uc.data_conversa,\n    uc.resumo_conversa,\n    uc.tem_reflexao,\n    uc.total_palavras_usuario,\n    uc.criado_em\n  FROM public.usr_chat uc\n  WHERE uc.usuario_id = $1::uuid\n  ORDER BY uc.data_conversa DESC, uc.criado_em DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'conversas_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'chat_id', ultimas.id,\n      'session_id', ultimas.session_id,\n      'data_conversa', ultimas.data_conversa,\n      'resumo', ultimas.resumo_conversa,\n      'tem_reflexao', ultimas.tem_reflexao,\n      'total_palavras', ultimas.total_palavras_usuario\n    )\n    ORDER BY ultimas.data_conversa DESC, ultimas.criado_em DESC\n  ), '[]'::json)\n) AS conversas\nFROM ultimas;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "6badd6e8-2e8e-4d62-8fdc-6941fc42cdcf",
+      "name": "Buscar Conversas Recentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -832,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH ultimos AS (\n  SELECT\n    i.id,\n    i.titulo,\n    i.categoria,\n    i.tipo,\n    i.prioridade,\n    i.resumo_situacao,\n    i.criado_em\n  FROM public.insights i\n  WHERE i.usuario_id = $1::uuid\n  ORDER BY i.criado_em DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'insights_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', ultimos.id,\n      'titulo', ultimos.titulo,\n      'categoria', ultimos.categoria,\n      'tipo', ultimos.tipo,\n      'prioridade', ultimos.prioridade,\n      'resumo', ultimos.resumo_situacao,\n      'criado_em', ultimos.criado_em\n    )\n    ORDER BY ultimos.criado_em DESC\n  ), '[]'::json)\n) AS insights\nFROM ultimos;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "d3d8f27e-25c0-4fac-aa93-2905713c6d58",
+      "name": "Buscar Insights Recentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -640,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH ultimos AS (\n  SELECT\n    us.id,\n    us.sabotador_id,\n    us.apelido_personalizado,\n    us.contexto_principal,\n    us.insight_atual,\n    us.contramedida_ativa,\n    us.intensidade_media,\n    us.total_deteccoes,\n    us.data_ultima_atividade,\n    us.atualizado_em,\n    us.chat_id\n  FROM public.usuarios_sabotadores us\n  WHERE us.usuario_id = $1::uuid\n  ORDER BY COALESCE(us.data_ultima_atividade, us.atualizado_em) DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'sabotadores_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', ultimos.id,\n      'sabotador_id', ultimos.sabotador_id,\n      'apelido', ultimos.apelido_personalizado,\n      'contexto', ultimos.contexto_principal,\n      'insight', ultimos.insight_atual,\n      'contramedida', ultimos.contramedida_ativa,\n      'intensidade', ultimos.intensidade_media,\n      'total_deteccoes', ultimos.total_deteccoes,\n      'data_ultima_atividade', COALESCE(ultimos.data_ultima_atividade, ultimos.atualizado_em),\n      'chat_id', ultimos.chat_id\n    )\n    ORDER BY COALESCE(ultimos.data_ultima_atividade, ultimos.atualizado_em) DESC\n  ), '[]'::json)\n) AS sabotadores\nFROM ultimos;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "f8afbb65-f8e6-43c4-9ea4-fdad4043967b",
+      "name": "Buscar Sabotadores Recentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -432,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $items(\"Normalizar Entrada\", 0, 0).json || {};\nconst quests = $items(\"Buscar Quests Ativas\", 0, 0).json?.contexto || {};\nconst conversas = $items(\"Buscar Conversas Recentes\", 0, 0).json || {};\nconst insights = $items(\"Buscar Insights Recentes\", 0, 0).json || {};\nconst sabotadores = $items(\"Buscar Sabotadores Recentes\", 0, 0).json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || []\n  }\n}];"
+      },
+      "id": "4db586bf-0aef-4267-8b0f-ed5dbd12a26e",
+      "name": "Montar Contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 900,
+          "temperature": 0.2
+        }
+      },
+      "id": "edd902a7-3c62-4af2-ac1e-a4b1ff130246",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        784
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o agente de quests personalizadas do MindQuest.\nConsidere o contexto abaixo para sugerir novas quests ou atualizar as existentes.\n\n=== Dados do usuário ===\nChat atual: {{ $json.chat_id || 'N/A' }}\n\nQuests ativas:\n{{ JSON.stringify($json.quests_ativas || []) }}\n\nConversas recentes (máx. 10):\n{{ JSON.stringify($json.conversas_recentes || []) }}\n\nInsights recentes (máx. 10):\n{{ JSON.stringify($json.insights_recentes || []) }}\n\nSabotadores recentes (máx. 10):\n{{ JSON.stringify($json.sabotadores_recentes || []) }}\n\n=== Regras ===\n1. Somente micro-hábitos concretos (duração máxima 7 dias).\n2. Respeite limite total de 4 quests ativas/pendentes (considerando as atuais).\n3. Evite duplicar contexto/título já presente.\n4. Se necessário, sugira atualizações (concluir/cancelar/reiniciar) para quests existentes.\n5. Ajuste prioridade e recorrência conforme relevância.\n\n=== Formato da resposta ===\nRetorne exclusivamente JSON válido:\n{\n  \"novas_quests\": [\n    {\n      \"titulo\": \"string\",\n      \"descricao\": \"string\",\n      \"contexto_origem\": \"string\",\n      \"prioridade\": \"baixa|media|alta\",\n      \"recorrencia\": \"unica|diaria|semanal\",\n      \"prazo_inicio\": \"YYYY-MM-DD\",\n      \"prazo_fim\": \"YYYY-MM-DD\",\n      \"progresso_meta\": número inteiro >= 1,\n      \"status_inicial\": \"pendente\" ou \"ativa\",\n      \"xp_recompensa\": número >= 0,\n      \"payload_extra\": { opcional }\n    }\n  ],\n  \"atualizacoes\": [\n    {\n      \"meta_codigo\": \"string\" (opcional se usar instancia_id),\n      \"instancia_id\": \"uuid\" (opcional),\n      \"novo_status\": \"concluida|vencida|cancelada|reiniciada\",\n      \"progresso_atual\": número >= 0,\n      \"xp_extra\": número >= 0 opcional\n    }\n  ]\n}\n\nSe nada for necessário, devolva listas vazias.\nNão escreva texto fora do JSON.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "257b8017-9433-47b2-a23b-72ddbdc158bd",
+      "name": "Agente Quests",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"novas_quests\":[{\"titulo\":\"Check-in matinal\",\"descricao\":\"Registrar uma vitória pequena toda manhã\",\"contexto_origem\":\"manter_foco\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-05\",\"prazo_fim\":\"2025-11-11\",\"progresso_meta\":5,\"status_inicial\":\"pendente\",\"xp_recompensa\":40,\"payload_extra\":{\"canal\":\"app\"}}],\"atualizacoes\":[{\"meta_codigo\":\"quest_custom_001\",\"instancia_id\":\"00000000-0000-0000-0000-000000000000\",\"novo_status\":\"concluida\",\"progresso_atual\":3,\"xp_extra\":20}]}",
+        "autoFix": true
+      },
+      "id": "7d6d3684-0784-466c-a916-3713075f41a3",
+      "name": "Parser JSON",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const contexto = $items(\"Montar Contexto\", 0, 0).json || {};\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : []\n  }\n}];"
+      },
+      "id": "5806f101-117e-49cd-bd08-c25227c48b4b",
+      "name": "Interpretar Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $input.item.json || {};\nconst existentes = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst limite = 4;\nconst dedupe = new Set();\n\nfor (const ativo of existentes) {\n  const key = `${(ativo.contexto_origem || '').toLowerCase()}|${(ativo.titulo || '').toLowerCase()}`;\n  dedupe.add(key);\n}\n\nconst novas = [];\nfor (const quest of entrada.novas_quests_sugeridas || []) {\n  if (!quest || typeof quest !== 'object') continue;\n  const key = `${(quest.contexto_origem || '').toLowerCase()}|${(quest.titulo || '').toLowerCase()}`;\n  if (dedupe.has(key)) continue;\n  if (existentes.length + novas.length >= limite) break;\n  dedupe.add(key);\n  novas.push({\n    ...quest,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: quest.progresso_meta ?? 1,\n    xp_recompensa: quest.xp_recompensa ?? 0\n  });\n}\n\nconst atualizacoes = [];\nfor (const upd of entrada.atualizacoes_sugeridas || []) {\n  if (!upd || typeof upd !== 'object') continue;\n  const novoStatus = upd.novo_status || '';\n  if (!['concluida','vencida','cancelada','reiniciada'].includes(novoStatus)) continue;\n  atualizacoes.push({\n    meta_codigo: upd.meta_codigo || null,\n    instancia_id: upd.instancia_id || null,\n    novo_status: novoStatus,\n    progresso_atual: upd.progresso_atual ?? 0,\n    xp_extra: upd.xp_extra ?? 0\n  });\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: novas,\n    atualizacoes: atualizacoes\n  }\n}];"
+      },
+      "id": "b128cd24-f83a-4feb-b051-6f3da4c38227",
+      "name": "Aplicar Limites & Dedupe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "sw_experts_gamification",
+          "cachedResultUrl": "/workflow/agXJK8Dd49If1eFx",
+          "mode": "list",
+          "value": "agXJK8Dd49If1eFx"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').item.json.usuario_id }}",
+            "quests_personalizadas": "={{ JSON.stringify($json.novas_quests) }}",
+            "atualizacoes_status": "={{ JSON.stringify($json.atualizacoes) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "quests_personalizadas",
+              "displayName": "quests_personalizadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "atualizacoes_status",
+              "displayName": "atualizacoes_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "82312510-b294-426d-8348-ce4e8759c496",
+      "name": "Chamar Gamificação",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $items(\"Aplicar Limites & Dedupe\", 0, 0).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
+      },
+      "id": "bdc2ac47-7de1-490c-83d3-d702cd8b98e0",
+      "name": "Montar Saída",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        368
+      ]
+    }
+  ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Buscar Quests Ativas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Quests Ativas": {
+      "main": [
+        [
+          {
+            "node": "Buscar Conversas Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Conversas Recentes": {
+      "main": [
+        [
+          {
+            "node": "Buscar Insights Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Insights Recentes": {
+      "main": [
+        [
+          {
+            "node": "Buscar Sabotadores Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Sabotadores Recentes": {
+      "main": [
+        [
+          {
+            "node": "Montar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Contexto": {
+      "main": [
+        [
+          {
+            "node": "Agente Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Quests",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser JSON",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar Resultado": {
+      "main": [
+        [
+          {
+            "node": "Aplicar Limites & Dedupe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aplicar Limites & Dedupe": {
+      "main": [
+        [
+          {
+            "node": "Chamar Gamificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chamar Gamificação": {
+      "main": [
+        [
+          {
+            "node": "Montar Saída",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser JSON": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente Quests",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Quests": {
+      "main": [
+        [
+          {
+            "node": "Interpretar Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "da63e9b2-fb18-49f7-9b37-d9230e71cb7f",
+  "meta": {
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+  },
+  "id": "LKjU8NE9aNHw7kEh",
+  "tags": []
+}

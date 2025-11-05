@@ -1,0 +1,102 @@
+[
+  {
+    "usuario_id": "ed2a76f2-efd7-4b97-9345-c6fa041c9334",
+    "whatsapp_numero": "5512982389360",
+    "nivel_atual": 1,
+    "titulo_nivel": "Recém-Convocado",
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
+    "sequencia_status": {
+      "estado": "ativa",
+      "reinicios": 0,
+      "completado_em": null,
+      "alvo_conversas": 3
+    },
+    "meta_ativa": "streak_003",
+    "status_ativa": "ativa",
+    "alvo_ativo": 3,
+    "meta_pendente": "streak_005",
+    "status_pendente": "pendente",
+    "alvo_pendente": 5
+  },
+  {
+    "usuario_id": "21187ef1-9728-4a92-b6fc-35b3dac100cb",
+    "whatsapp_numero": "559981768033",
+    "nivel_atual": 1,
+    "titulo_nivel": "Recém-Convocado",
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
+    "sequencia_status": {
+      "estado": "ativa",
+      "reinicios": 0,
+      "completado_em": null,
+      "alvo_conversas": 3
+    },
+    "meta_ativa": "streak_003",
+    "status_ativa": "ativa",
+    "alvo_ativo": 3,
+    "meta_pendente": "streak_005",
+    "status_pendente": "pendente",
+    "alvo_pendente": 5
+  },
+  {
+    "usuario_id": "19343644-a5fc-49b2-b849-16cea92b9d6e",
+    "whatsapp_numero": "558799164481",
+    "nivel_atual": 1,
+    "titulo_nivel": "Recém-Convocado",
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
+    "sequencia_status": {
+      "estado": "ativa",
+      "reinicios": 0,
+      "completado_em": null,
+      "alvo_conversas": 3
+    },
+    "meta_ativa": "streak_003",
+    "status_ativa": "ativa",
+    "alvo_ativo": 3,
+    "meta_pendente": "streak_005",
+    "status_pendente": "pendente",
+    "alvo_pendente": 5
+  },
+  {
+    "usuario_id": "f6d4c6b0-5496-4035-b670-d8009df6c413",
+    "whatsapp_numero": "5512992060001",
+    "nivel_atual": 1,
+    "titulo_nivel": "Recém-Convocado",
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
+    "sequencia_status": {
+      "estado": "ativa",
+      "reinicios": 0,
+      "completado_em": null,
+      "alvo_conversas": 3
+    },
+    "meta_ativa": "streak_003",
+    "status_ativa": "ativa",
+    "alvo_ativo": 3,
+    "meta_pendente": "streak_005",
+    "status_pendente": "pendente",
+    "alvo_pendente": 5
+  },
+  {
+    "usuario_id": "3d450c8d-ac4c-4f4b-a7ad-5bc9f0f479bf",
+    "whatsapp_numero": "5512992305156",
+    "nivel_atual": 1,
+    "titulo_nivel": "Recém-Convocado",
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
+    "sequencia_status": {
+      "estado": "ativa",
+      "reinicios": 0,
+      "completado_em": null,
+      "alvo_conversas": 3
+    },
+    "meta_ativa": "streak_003",
+    "status_ativa": "ativa",
+    "alvo_ativo": 3,
+    "meta_pendente": "streak_005",
+    "status_pendente": "pendente",
+    "alvo_pendente": 5
+  }
+]

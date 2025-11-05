@@ -175,6 +175,24 @@ Script de seed deverá:
 - `chat_onboarding`: após criar o usuário, roda o SQL de bootstrap que:
   - insere registro em `quest_estado_usuario` (nível 1, meta `streak_003`);
   - garante instâncias iniciais `streak_003` (ativa) e `streak_005` (pendente) em `quest_instancias`.
+- `sw_experts_gamification` (nova versão):
+  - Entrada obrigatória: `usuario_id`.
+  - Entrada opcional `quests_personalizadas` (lista). Cada item deve conter:
+    - `codigo` (string, opcional; gera UUID se vazio), `titulo`, `descricao`, `contexto_origem`, `prioridade` (`baixa|media|alta`), `recorrencia` (`unica|diaria|semanal`), `prazo_inicio`, `prazo_fim`, `progresso_meta`, `status_inicial` (`pendente|ativa`), `xp_recompensa`, `payload_extra` (json opcional).
+  - Entrada opcional `atualizacoes_status` (lista). Cada item: `meta_codigo` ou `instancia_id`, `novo_status` (`concluida|vencida|cancelada|reiniciada`), `progresso_atual`, `xp_extra` opcional.
+  - Regras principais:
+    1. Validar limite de 4 quests personalizadas ativas/pendentes antes de inserir novas e evitar duplicatas por `titulo`/`contexto`.
+    2. Para novas quests: garantir modelo (`quest_modelos`, tipo `personalizada`, gatilho `manual`) e criar instância em `quest_instancias` com campos preenchidos (prioridade, janela, tentativas, status inicial). Incrementar `quest_estado_usuario.total_quests_personalizadas`.
+    3. Para atualizações: ajustar `quest_instancias` (status, progresso, `concluido_em`, `reiniciada_em`, `tentativas`). Se concluir, somar `xp_recompensa + xp_extra` em `quest_estado_usuario.xp_total` e `total_quests_concluidas`.
+    4. Recalcular nível e `xp_proximo_nivel` usando `quest_niveis`. Atualizar `total_xp_hoje`, `sequencia_status` conforme necessário.
+    5. Retornar snapshot atualizado (`quest_estado_usuario` + lista das quests personalizadas com status atual).
+- `expert_quest_personalizadas`:
+  - Inputs: `usuario_id` (obrigatório) e `chat_id` (opcional).
+  - Fluxo:
+    1. Consulta automática das quests personalizadas ativas, resumos das 10 últimas conversas (`usr_chat`), 10 insights recentes e 10 registros de `usuarios_sabotadores`.
+    2. Monta pacote de contexto e chama agente IA (`gpt-4.1-mini` via OpenRouter) para gerar `novas_quests`/`atualizacoes` no formato padronizado.
+    3. Aplica dedupe/limite (máx. 4 ativas/pendentes), normaliza campos e aciona `sw_experts_gamification` com os JSONs prontos.
+  - Saída inclui as sugestões enviadas e o retorno consolidado da gamificação.
 
 ## Referências cruzadas
 

@@ -13,135 +13,54 @@
               "name": "usuario_id"
             },
             {
-              "name": "chat_id"
+              "name": "quests_personalizadas",
+              "type": "json"
             },
             {
-              "name": "data_conversa"
-            },
-            {
-              "name": "tem_reflexao",
-              "type": "boolean"
-            },
-            {
-              "name": "justificativa_reflexao"
-            },
-            {
-              "name": "total_palavras_usuario",
-              "type": "number"
+              "name": "atualizacoes_status",
+              "type": "json"
             }
           ]
         }
       },
+      "id": "47408d45-3ae1-4ec5-8f4c-daf908a24a84",
+      "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        1344,
-        144
-      ],
-      "id": "47408d45-3ae1-4ec5-8f4c-daf908a24a84",
-      "name": "start"
+        -1400,
+        200
+      ]
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH ultimos_7_dias AS (\n  -- Gera os últimos 7 dias (hoje até 6 dias atrás)\n  SELECT \n    CURRENT_DATE - INTERVAL '1 day' * s.dia as data\n  FROM generate_series(0, 6) as s(dia)\n),\nconversas_por_dia AS (\n  -- Verifica quais desses 7 dias tiveram conversa\n  SELECT \n    d.data,\n    CASE \n      WHEN EXISTS (\n        SELECT 1 FROM usr_chat \n        WHERE usuario_id = $1::uuid \n        AND DATE(data_conversa) = d.data\n      ) THEN 1 \n      ELSE 0 \n    END as teve_conversa\n  FROM ultimos_7_dias d\n  ORDER BY d.data DESC\n),\nstreak_consecutivo AS (\n  -- Conta consecutivos de hoje para trás até encontrar 0\n  SELECT \n    data,\n    teve_conversa,\n    -- Soma cumulativa de dias SEM conversa (0 = teve, 1+ = não teve)\n    SUM(CASE WHEN teve_conversa = 0 THEN 1 ELSE 0 END) \n      OVER (ORDER BY data DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as quebras\n  FROM conversas_por_dia\n)\nSELECT \n  g.*,\n  COALESCE((\n    SELECT COUNT(*) \n    FROM streak_consecutivo \n    WHERE teve_conversa = 1 \n      AND quebras = 0  -- Só conta antes da primeira quebra\n  ), 0) as dias_consecutivos,\n  (SELECT COUNT(*) FROM usr_chat WHERE usuario_id = g.usuario_id AND DATE(data_conversa) = CURRENT_DATE) as conversas_hoje\nFROM gamificacao g\nWHERE g.usuario_id = $1::uuid;",
-        "options": {
-          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
-        }
+        "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1552,
-        144
-      ],
-      "id": "d677e56f-b07e-48a1-b28a-1601d57ab9b3",
-      "name": "Buscar Estado Atual",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH estado AS (\n  SELECT COALESCE(streak_meta_atual, 'streak_003') AS meta_codigo\n  FROM gamificacao\n  WHERE usuario_id = $1::uuid\n),\ncore_insert AS (\n  INSERT INTO usuarios_quest (\n    id,\n    usuario_id,\n    quest_id,\n    meta_codigo,\n    status,\n    progresso_meta,\n    progresso_percentual,\n    tentativas\n  )\n  SELECT\n    gen_random_uuid(),\n    $1::uuid,\n    qc.id,\n    qc.codigo,\n    'ativa',\n    COALESCE(qc.gatilho_valor, 0),\n    0,\n    1\n  FROM quest_catalogo qc\n  JOIN estado e ON e.meta_codigo = qc.codigo\n  WHERE qc.categoria = 'habit_core'\n    AND qc.ativo = TRUE\n    AND NOT EXISTS (\n      SELECT 1\n      FROM usuarios_quest uq\n      WHERE uq.usuario_id = $1::uuid\n        AND uq.meta_codigo = qc.codigo\n        AND uq.status IN ('ativa', 'pendente')\n    )\n  RETURNING id\n),\nonboarding_insert AS (\n  INSERT INTO usuarios_quest (\n    id,\n    usuario_id,\n    quest_id,\n    meta_codigo,\n    status,\n    progresso_meta,\n    progresso_percentual,\n    tentativas\n  )\n  SELECT\n    gen_random_uuid(),\n    $1::uuid,\n    qc.id,\n    qc.codigo,\n    'pendente',\n    COALESCE(qc.gatilho_valor, 0),\n    0,\n    1\n  FROM quest_catalogo qc\n  WHERE qc.categoria = 'onboarding'\n    AND qc.ativo = TRUE\n    AND NOT EXISTS (\n      SELECT 1\n      FROM usuarios_quest uq\n      WHERE uq.usuario_id = $1::uuid\n        AND uq.meta_codigo = qc.codigo\n    )\n  RETURNING id\n),\ndaily_insert AS (\n  INSERT INTO usuarios_quest (\n    id,\n    usuario_id,\n    quest_id,\n    meta_codigo,\n    status,\n    progresso_meta,\n    progresso_percentual,\n    tentativas,\n    referencia_data,\n    janela_inicio,\n    janela_fim\n  )\n  SELECT\n    gen_random_uuid(),\n    $1::uuid,\n    qc.id,\n    qc.codigo,\n    'pendente',\n    COALESCE((qc.config ->> 'meta')::integer, 1),\n    0,\n    1,\n    CURRENT_DATE::timestamp,\n    CURRENT_DATE::timestamp,\n    CURRENT_DATE::timestamp\n  FROM quest_catalogo qc\n  WHERE qc.categoria = 'habit_daily'\n    AND qc.ativo = TRUE\n    AND NOT EXISTS (\n      SELECT 1\n      FROM usuarios_quest uq\n      WHERE uq.usuario_id = $1::uuid\n        AND uq.meta_codigo = qc.codigo\n        AND uq.status IN ('pendente', 'ativa')\n        AND uq.referencia_data::date = CURRENT_DATE\n    )\n  RETURNING id\n)\nSELECT\n  COALESCE((SELECT COUNT(*) FROM core_insert), 0) AS core_criadas,\n  COALESCE((SELECT COUNT(*) FROM onboarding_insert), 0) AS onboarding_criadas,\n  COALESCE((SELECT COUNT(*) FROM daily_insert), 0) AS habitos_criados;\n",
-        "options": {
-          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1744,
-        144
-      ],
-      "id": "0d4bb3a3-df8d-4d34-be76-67cc842736ad",
-      "name": "Garantir Quests",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const parseJsonSafe = (value, fallback) => {\n  if (value === null || value === undefined) {\n    return fallback;\n  }\n  if (typeof value === 'object') {\n    return value;\n  }\n  try {\n    return JSON.parse(String(value));\n  } catch (error) {\n    return fallback;\n  }\n};\n\nconst estadoRaw = ($('Buscar Estado Atual').first()?.json) ?? {};\nconst questsRaw = $('Buscar Quests').all().map((item) => item.json ?? {});\nconst entrada = ($('start').first()?.json) ?? {};\n\nconst estado = { ...estadoRaw };\nestado.streak_meta_status = parseJsonSafe(estado.streak_meta_status, { alvoDias: 3, estado: 'ativo', reinicios: 0, completado_em: null });\nestado.conquistas_desbloqueadas = parseJsonSafe(estado.conquistas_desbloqueadas, []);\nestado.habitos_ativos = parseJsonSafe(estado.habitos_ativos, []);\n\nconst temReflexao = entrada.tem_reflexao === true || entrada.tem_reflexao === 'true' || entrada.tem_reflexao === ':true';\nconst totalPalavras = Number(entrada.total_palavras_usuario ?? 0) || 0;\n\nconst dataConversaRaw = entrada.data_conversa ?? estado.ultima_conversa_data ?? new Date().toISOString();\nconst dataHoje = new Date(dataConversaRaw).toISOString().split('T')[0];\n\nconst diasConsecutivos = Number(estado.dias_consecutivos ?? estado.streak_conversas_dias ?? 0) || 0;\nconst totalConversasAntes = Number(estado.total_conversas ?? 0) || 0;\nconst totalReflexoesAntes = Number(estado.total_reflexoes ?? 0) || 0;\nconst xpBase = temReflexao ? (totalPalavras > 50 ? 40 : 30) : 20;\n\nconst quests = questsRaw.map((quest) => ({\n  ...quest,\n  progresso_atual: Number(quest.progresso_atual ?? 0) || 0,\n  progresso_meta: quest.progresso_meta !== null && quest.progresso_meta !== undefined ? Number(quest.progresso_meta) : null,\n  progresso_percentual: Number(quest.progresso_percentual ?? 0) || 0,\n  xp_concedido: Number(quest.xp_concedido ?? 0) || 0,\n  tentativas: Number(quest.tentativas ?? 1) || 1,\n  dados_extras: parseJsonSafe(quest.dados_extras, null),\n  config: parseJsonSafe(quest.config, null),\n  janela_inicio: quest.janela_inicio ? String(quest.janela_inicio) : null,\n  janela_fim: quest.janela_fim ? String(quest.janela_fim) : null\n}));\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id ?? estado.usuario_id,\n    entrada,\n    estado,\n    quests,\n    dataHoje,\n    temReflexao,\n    totalPalavras,\n    xpBase,\n    diasConsecutivos,\n    totalConversasAntes,\n    totalReflexoesAntes\n  }\n}];"
-      },
+      "id": "3c5a0ce1-2c60-4f90-96ef-6d22dddf200c",
+      "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2144,
-        144
-      ],
-      "id": "0555c6c3-25bc-4e26-b0c4-363ec8fe7e18",
-      "name": "Preparar Contexto"
-    },
-    {
-      "parameters": {
-        "jsCode": "const contexto = $json;\n\nconst metas = [\n  { codigo: 'streak_003', dias: 3, xp: 80 },\n  { codigo: 'streak_005', dias: 5, xp: 100 },\n  { codigo: 'streak_007', dias: 7, xp: 130 },\n  { codigo: 'streak_010', dias: 10, xp: 170 },\n  { codigo: 'streak_015', dias: 15, xp: 220 },\n  { codigo: 'streak_020', dias: 20, xp: 280 },\n  { codigo: 'streak_025', dias: 25, xp: 350 },\n  { codigo: 'streak_030', dias: 30, xp: 450 }\n];\n\nconst estado = contexto.estado ?? {};\nconst diasAtual = contexto.diasConsecutivos ?? 0;\nconst storedDias = Number(estado.streak_conversas_dias ?? 0) || 0;\n\nlet metaCodigo = estado.streak_meta_atual || metas[0].codigo;\nlet metaIndex = metas.findIndex((meta) => meta.codigo === metaCodigo);\nif (metaIndex === -1) {\n  metaIndex = 0;\n  metaCodigo = metas[0].codigo;\n}\n\nconst status = { ...estado.streak_meta_status };\nstatus.alvoDias = metas[metaIndex].dias;\nstatus.estado = status.estado ?? 'ativo';\nstatus.reinicios = Number(status.reinicios ?? 0);\n\nlet reiniciou = false;\nlet metaIndexAtual = metaIndex;\nif (storedDias > diasAtual && storedDias > 0) {\n  reiniciou = true;\n  metaIndexAtual = 0;\n  status.reinicios += 1;\n  status.estado = 'ativo';\n  status.completado_em = null;\n}\n\nconst metaAtual = metas[metaIndexAtual];\nstatus.alvoDias = metaAtual.dias;\n\nlet completouMeta = diasAtual >= metaAtual.dias;\nlet proximoIndex = (metaIndexAtual + 1) % metas.length;\n\nif (completouMeta) {\n  status.estado = 'concluido';\n  status.completado_em = new Date().toISOString();\n} else if (!reiniciou) {\n  proximoIndex = (metaIndexAtual + 1) % metas.length;\n} else {\n  proximoIndex = 1 % metas.length;\n}\n\nconst novoMetaIndex = completouMeta ? proximoIndex : metaIndexAtual;\nconst novaMeta = metas[novoMetaIndex];\nconst metaSeguinte = metas[(novoMetaIndex + 1) % metas.length];\n\nreturn [{\n  json: {\n    ...contexto,\n    streak: {\n      metas,\n      atual: metaAtual,\n      novoMeta: novaMeta,\n      proximo: metaSeguinte,\n      status,\n      diasAtual,\n      reiniciou,\n      completouMeta,\n      melhorAnterior: Number(estado.melhor_streak ?? 0) || 0,\n      xpRecompensa: metaAtual.xp\n    }\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2352,
-        144
-      ],
-      "id": "b79fd104-d0fc-42d2-9867-75f8fcb8e018",
-      "name": "Resolver Streak"
-    },
-    {
-      "parameters": {
-        "jsCode": "const contexto = ($('Resolver Streak').first()?.json) ?? {};\nconst estado = contexto.estado ?? {};\nconst quests = contexto.quests ?? [];\nconst streak = contexto.streak ?? {};\n\nconst temReflexao = contexto.temReflexao === true;\nconst xpBase = Number(contexto.xpBase ?? 20) || 20;\nconst totalConversas = Number(contexto.totalConversasAntes ?? 0) + 1;\nconst totalReflexoes = Number(contexto.totalReflexoesAntes ?? 0) + (temReflexao ? 1 : 0);\nconst diasAtual = Number(streak.diasAtual ?? contexto.diasConsecutivos ?? 0) || 0;\nconst melhorAnterior = Number(streak.melhorAnterior ?? estado.melhor_streak ?? 0) || 0;\nconst melhorStreak = Math.max(melhorAnterior, diasAtual);\nconst dataHoje = contexto.dataHoje ?? new Date().toISOString().split('T')[0];\nconst nowIso = new Date().toISOString();\n\nconst questUpdates = [];\nconst questFinalStates = [];\nlet xpBonusQuests = 0;\nconst novasConquistas = [];\n\nconst pushUpdate = (update) => {\n  questUpdates.push({\n    quest_record_id: update.quest_record_id,\n    status: update.status,\n    progresso_atual: update.progresso_atual,\n    progresso_percentual: update.progresso_percentual,\n    xp_concedido: update.xp_concedido,\n    tentativas: update.tentativas,\n    concluido_em: update.concluido_em ?? '',\n    reiniciada_em: update.reiniciada_em ?? '',\n    dados_extras: update.dados_extras ? JSON.stringify(update.dados_extras) : ''\n  });\n};\n\nconst buildUpdate = (quest) => ({\n  quest_record_id: quest.id,\n  status: quest.status,\n  progresso_atual: quest.progresso_atual,\n  progresso_percentual: quest.progresso_percentual,\n  xp_concedido: quest.xp_concedido,\n  tentativas: quest.tentativas,\n  concluido_em: quest.concluido_em ?? null,\n  reiniciada_em: quest.reiniciada_em ?? null,\n  dados_extras: quest.dados_extras ?? null,\n  meta_codigo: quest.meta_codigo,\n  gatilho_tipo: quest.gatilho_tipo,\n  gatilho_valor: quest.gatilho_valor,\n  categoria: quest.categoria,\n  xp_recompensa: Number(quest.xp_recompensa ?? 0) || 0,\n  progresso_meta: quest.progresso_meta\n});\n\nconst toISODate = (value) => {\n  if (!value) {\n    return null;\n  }\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) {\n    return null;\n  }\n  return parsed.toISOString().split('T')[0];\n};\n\nfor (const quest of quests) {\n  const update = buildUpdate(quest);\n  const metaValor = Number(update.progresso_meta ?? quest.gatilho_valor ?? 0) || 1;\n  update.progresso_meta = metaValor;\n\n  if (quest.categoria === 'habit_core') {\n    update.progresso_atual = diasAtual;\n    const alvoDias = streak.atual?.dias ?? metaValor;\n    const percentual = alvoDias > 0 ? Math.min(100, Math.round((diasAtual / alvoDias) * 100)) : 0;\n    update.progresso_percentual = percentual;\n\n    if (streak.reiniciou && quest.status === 'ativa' && quest.meta_codigo !== streak.atual?.codigo) {\n      update.status = 'reiniciada';\n      update.reiniciada_em = nowIso;\n      update.tentativas = quest.tentativas + 1;\n    }\n\n    if (streak.completouMeta && quest.meta_codigo === streak.atual?.codigo) {\n      update.status = 'completa';\n      update.progresso_atual = streak.atual.dias;\n      update.progresso_percentual = 100;\n      update.concluido_em = streak.status?.completado_em ?? nowIso;\n      if (update.xp_concedido < update.xp_recompensa) {\n        xpBonusQuests += update.xp_recompensa - update.xp_concedido;\n        update.xp_concedido = update.xp_recompensa;\n      }\n      novasConquistas.push({\n        meta_codigo: quest.meta_codigo,\n        tipo_meta: 'streak',\n        valor_meta: streak.atual.dias,\n        desbloqueada_em: update.concluido_em\n      });\n    } else if (quest.meta_codigo === streak.atual?.codigo) {\n      update.status = 'ativa';\n      update.concluido_em = null;\n    }\n\n    pushUpdate(update);\n    questFinalStates.push({ ...quest, final: { ...update, janela_fim: quest.janela_fim, referencia_data: quest.referencia_data } });\n    continue;\n  }\n\n  if (quest.categoria === 'habit_daily') {\n    const dueISO = toISODate(quest.janela_fim) ?? toISODate(quest.referencia_data) ?? dataHoje;\n    if (quest.meta_codigo === 'habit_diaria_conversa') {\n      update.progresso_atual = metaValor;\n    } else if (quest.meta_codigo === 'habit_diaria_reflexao') {\n      update.progresso_atual = temReflexao ? metaValor : 0;\n    }\n\n    if (update.progresso_atual >= metaValor) {\n      update.status = 'completa';\n      update.progresso_percentual = 100;\n      update.concluido_em = nowIso;\n      if (update.xp_concedido < update.xp_recompensa) {\n        xpBonusQuests += update.xp_recompensa - update.xp_concedido;\n        update.xp_concedido = update.xp_recompensa;\n      }\n    } else {\n      update.progresso_percentual = 0;\n      if (dueISO && dueISO < dataHoje) {\n        update.status = 'expirada';\n      } else {\n        update.status = 'pendente';\n      }\n      update.concluido_em = null;\n    }\n\n    pushUpdate(update);\n    questFinalStates.push({ ...quest, final: { ...update, janela_fim: quest.janela_fim, referencia_data: quest.referencia_data } });\n    continue;\n  }\n\n  const progressValues = {\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes\n  };\n\n  if (quest.gatilho_tipo && Object.prototype.hasOwnProperty.call(progressValues, quest.gatilho_tipo)) {\n    const progresso = progressValues[quest.gatilho_tipo];\n    update.progresso_atual = progresso;\n    update.progresso_percentual = metaValor > 0 ? Math.min(100, Math.round((progresso / metaValor) * 100)) : update.progresso_percentual;\n    if (metaValor > 0 && progresso >= metaValor && quest.status !== 'completa') {\n      update.status = 'completa';\n      update.concluido_em = nowIso;\n      if (update.xp_concedido < update.xp_recompensa) {\n        xpBonusQuests += update.xp_recompensa - update.xp_concedido;\n        update.xp_concedido = update.xp_recompensa;\n      }\n    }\n  }\n\n  pushUpdate(update);\n  questFinalStates.push({ ...quest, final: { ...update, janela_fim: quest.janela_fim, referencia_data: quest.referencia_data } });\n}\n\nconst xpAnterior = Number(estado.xp_total ?? 0) || 0;\nconst xpTotal = xpAnterior + xpBase + xpBonusQuests;\n\nconst nivelTabela = [\n  { nivel: 1, xp: 200, titulo: 'Explorador' },\n  { nivel: 2, xp: 550, titulo: 'Aprendiz' },\n  { nivel: 3, xp: 1050, titulo: 'Observador' },\n  { nivel: 4, xp: 1700, titulo: 'Focado' },\n  { nivel: 5, xp: 2500, titulo: 'Praticante' },\n  { nivel: 6, xp: 3450, titulo: 'Consciente' },\n  { nivel: 7, xp: 4550, titulo: 'Iluminado' },\n  { nivel: 8, xp: 5800, titulo: 'Sábio' },\n  { nivel: 9, xp: 7200, titulo: 'Ascendente' },\n  { nivel: 10, xp: 9000, titulo: 'Mestre' },\n  { nivel: 15, xp: 15000, titulo: 'Transcendente' }\n];\n\nlet nivelAtual = 1;\nlet xpProximoNivel = nivelTabela[0].xp;\nlet tituloNivel = nivelTabela[0].titulo;\nfor (const item of nivelTabela) {\n  if (xpTotal < item.xp) {\n    nivelAtual = item.nivel;\n    xpProximoNivel = item.xp;\n    tituloNivel = item.titulo;\n    break;\n  }\n  nivelAtual = item.nivel;\n  xpProximoNivel = item.xp;\n  tituloNivel = item.titulo;\n}\nif (xpTotal >= nivelTabela[nivelTabela.length - 1].xp) {\n  nivelAtual = nivelTabela[nivelTabela.length - 1].nivel;\n  xpProximoNivel = nivelTabela[nivelTabela.length - 1].xp;\n  tituloNivel = nivelTabela[nivelTabela.length - 1].titulo;\n}\n\nconst conquistas = Array.isArray(estado.conquistas_desbloqueadas)\n  ? [...estado.conquistas_desbloqueadas]\n  : [];\nfor (const conquista of novasConquistas) {\n  const existente = conquistas.find((item) => item.meta_codigo === conquista.meta_codigo);\n  if (existente) {\n    existente.total = Number(existente.total ?? 1) + 1;\n    existente.ultima_vez = conquista.desbloqueada_em;\n  } else {\n    conquistas.push({\n      meta_codigo: conquista.meta_codigo,\n      tipo_meta: conquista.tipo_meta,\n      valor_meta: conquista.valor_meta,\n      total: 1,\n      ultima_vez: conquista.desbloqueada_em\n    });\n  }\n}\n\nconst statusBase = streak.status ? { ...streak.status } : { alvoDias: streak.novoMeta?.dias ?? 3, estado: 'ativo', reinicios: 0, completado_em: null };\nlet streakMetaStatus;\nif (streak.completouMeta || streak.reiniciou) {\n  streakMetaStatus = {\n    alvoDias: streak.novoMeta?.dias ?? 3,\n    estado: 'ativo',\n    reinicios: Number(statusBase.reinicios ?? 0),\n    completado_em: null\n  };\n} else {\n  streakMetaStatus = {\n    ...statusBase,\n    alvoDias: streak.novoMeta?.dias ?? statusBase.alvoDias ?? 3\n  };\n}\n\nconst habitSnapshots = questFinalStates\n  .filter((quest) => quest.categoria === 'habit_daily')\n  .map((quest) => ({\n    quest_id: quest.id,\n    codigo: quest.meta_codigo ?? quest.codigo,\n    titulo: quest.titulo,\n    status: quest.final.status,\n    vence_em: quest.final.janela_fim ?? quest.final.referencia_data ?? dataHoje,\n    progresso_atual: quest.final.progresso_atual,\n    progresso_meta: quest.final.progresso_meta,\n    atualizado_em: nowIso\n  }));\n\nconst ultimaConquista = novasConquistas.length > 0\n  ? novasConquistas[novasConquistas.length - 1]\n  : null;\nconst questStreak = questFinalStates.find((quest) => quest.categoria === 'habit_core' && quest.meta_codigo === streak.atual?.codigo);\nconst ultimaConquistaId = ultimaConquista && questStreak ? questStreak.quest_id : (estado.ultima_conquista_id ?? null);\nconst ultimaConquistaData = ultimaConquista ? ultimaConquista.desbloqueada_em : (estado.ultima_conquista_data ?? null);\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id ?? estado.usuario_id,\n    xp_total: xpTotal,\n    total_xp_ganho_hoje: xpBase + xpBonusQuests,\n    nivel_atual: nivelAtual,\n    xp_proximo_nivel: xpProximoNivel,\n    titulo_nivel: tituloNivel,\n    streak_conversas_dias: diasAtual,\n    melhor_streak: melhorStreak,\n    streak_meta_atual: streak.novoMeta?.codigo ?? streak.atual?.codigo ?? 'streak_003',\n    streak_meta_proximo: streak.proximo?.codigo ?? 'streak_005',\n    streak_meta_status: streakMetaStatus,\n    streak_protecao_usada: estado.streak_protecao_usada === true,\n    streak_protecao_resetada_em: estado.streak_protecao_resetada_em ?? null,\n    quest_streak_dias: streak.novoMeta?.dias ?? streak.atual?.dias ?? 3,\n    ultima_conversa_data: dataHoje,\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes,\n    habitos_ativos: habitSnapshots,\n    conquistas_desbloqueadas: conquistas,\n    ultima_conquista_id: ultimaConquistaId,\n    ultima_conquista_data: ultimaConquistaData,\n    quest_updates: questUpdates,\n    tem_reflexao: temReflexao,\n    total_palavras: contexto.totalPalavras ?? 0\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2528,
-        144
-      ],
-      "id": "06852b08-1c8f-4cfc-a3a8-f6eb2fc4a293",
-      "name": "Calcular Gamificação"
+        -1180,
+        200
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE gamificacao SET\n  xp_total = {{ Number($json.xp_total ?? 0) }}::integer,\n  nivel_atual = {{ Number($json.nivel_atual ?? 1) }}::integer,\n  xp_proximo_nivel = {{ Number($json.xp_proximo_nivel ?? 200) }}::integer,\n  titulo_nivel = NULLIF('{{ ($json.titulo_nivel ?? \"Explorador\").replace(/'/g, \"''\") }}', '')::text,\n  streak_conversas_dias = {{ Number($json.streak_conversas_dias ?? 0) }}::integer,\n  melhor_streak = {{ Number($json.melhor_streak ?? 0) }}::integer,\n  streak_meta_atual = '{{ ($json.streak_meta_atual ?? \"streak_003\").replace(/'/g, \"''\") }}',\n  streak_meta_proximo = '{{ ($json.streak_meta_proximo ?? \"streak_005\").replace(/'/g, \"''\") }}',\n  streak_meta_status = '{{ JSON.stringify($json.streak_meta_status ?? {}).replace(/'/g, \"''\") }}'::jsonb,\n  streak_protecao_usada = {{ $json.streak_protecao_usada === true ? 'TRUE' : 'FALSE' }},\n  streak_protecao_resetada_em = NULLIF('{{ ($json.streak_protecao_resetada_em ?? '').replace(/'/g, \"''\") }}', '')::timestamp,\n  total_conversas = {{ Number($json.total_conversas ?? 0) }}::integer,\n  total_reflexoes = {{ Number($json.total_reflexoes ?? 0) }}::integer,\n  total_xp_ganho_hoje = {{ Number($json.total_xp_ganho_hoje ?? 0) }}::integer,\n  quest_diaria_status = NULL,\n  quest_diaria_progresso = 0,\n  quest_diaria_descricao = NULL,\n  quest_diaria_data = NULL,\n  quest_streak_dias = {{ Number($json.quest_streak_dias ?? 0) }}::integer,\n  habitos_ativos = '{{ JSON.stringify($json.habitos_ativos ?? []).replace(/'/g, \"''\") }}'::jsonb,\n  conquistas_desbloqueadas = '{{ JSON.stringify($json.conquistas_desbloqueadas ?? []).replace(/'/g, \"''\") }}'::jsonb,\n  ultima_conquista_id = NULLIF('{{ ($json.ultima_conquista_id ?? '').replace(/'/g, \"''\") }}', '')::uuid,\n  ultima_conquista_data = NULLIF('{{ ($json.ultima_conquista_data ?? '').replace(/'/g, \"''\") }}', '')::timestamp,\n  ultima_conversa_data = '{{ $json.ultima_conversa_data ?? (new Date().toISOString().split('T')[0]) }}'::date,\n  ultima_atualizacao = NOW(),\n  atualizado_em = NOW()\nWHERE usuario_id = $1::uuid\nRETURNING *;",
+        "query": "WITH existentes AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n    AND qi.status IN ('pendente','ativa')\n)\nSELECT\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', existentes.id,\n        'meta_codigo', existentes.meta_codigo,\n        'status', existentes.status,\n        'contexto_origem', existentes.contexto_origem,\n        'progresso_meta', existentes.progresso_meta,\n        'progresso_atual', existentes.progresso_atual,\n        'titulo', existentes.titulo,\n        'descricao', existentes.descricao,\n        'config', existentes.config\n      )\n    ) FILTER (WHERE existentes.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_ativas\nFROM public.quest_estado_usuario eu\nLEFT JOIN existentes ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;",
         "options": {
-          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
+          "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
+      "id": "6c0c0553-6e31-4c25-8a11-594321f5b2b4",
+      "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        3312,
-        144
+        -960,
+        200
       ],
-      "id": "169b7711-0c84-4e6e-91d0-83a92f7a49d1",
-      "name": "Atualizar Gamificação",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -151,110 +70,144 @@
     },
     {
       "parameters": {
-        "options": {}
+        "jsCode": "const entrada = $items(\"Normalizar Entrada\", 0, 0).json || {};\nconst estado = $input.item.json || {};\nconst existentes = Array.isArray(estado.quests_ativas) ? estado.quests_ativas : [];\n\nconst limite = 4;\nconst disponivel = Math.max(limite - existentes.length, 0);\n\nconst dedupe = new Set();\nfor (const existente of existentes) {\n  const contexto = (existente.contexto_origem || '').toLowerCase();\n  const titulo = (existente.titulo || '').toLowerCase();\n  dedupe.add(`${contexto}|${titulo}`);\n}\n\nconst novos = [];\nfor (const quest of entrada.novas_quests || []) {\n  if (!quest || typeof quest !== 'object') continue;\n  const contexto = (quest.contexto_origem || '').toLowerCase();\n  const titulo = (quest.titulo || '').toLowerCase();\n  const key = `${contexto}|${titulo}`;\n  if (dedupe.has(key)) continue;\n  if (novos.length >= disponivel) break;\n  const codigo = quest.codigo && String(quest.codigo).trim()\n    ? String(quest.codigo).trim()\n    : `qp_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;\n  dedupe.add(key || codigo);\n  novos.push({\n    ...quest,\n    codigo,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: quest.progresso_meta ?? 1,\n    xp_recompensa: quest.xp_recompensa ?? 0\n  });\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: novos,\n    atualizacoes: entrada.atualizacoes || [],\n    estado_inicial: estado\n  }\n}];"
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3520,
-        144
-      ],
-      "id": "5818bb6a-d467-4093-83a0-4fc2b417c779",
-      "name": "Preparar Resultado"
-    },
-    {
-      "parameters": {
-        "content": "## 🎮 WORKFLOW: ATUALIZAÇÃO DE GAMIFICAÇÃO\n\n**Recebe:**\n- usuario_id\n- chat_id  \n- data_conversa\n- tem_reflexao (boolean)\n- total_palavras (number)\n\n**Processa:**\n1. Busca estado atual\n2. Calcula XP (base + bônus)\n3. Atualiza streak\n4. Verifica conquistas\n5. Atualiza quest diária\n6. Calcula novo nível\n7. Salva tudo no DB\n\n**Retorna:**\n- Estado atualizado completo\n- Debug info (XP ganho, conquistas, etc)",
-        "height": 460,
-        "width": 360,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        752,
-        -112
-      ],
-      "id": "a95962da-d912-4f82-aa16-1e85a4513cf6",
-      "name": "Sticky Note - Info"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT\n  uq.id,\n  uq.quest_id,\n  uq.meta_codigo,\n  uq.status,\n  uq.progresso_atual,\n  uq.progresso_meta,\n  uq.progresso_percentual,\n  uq.xp_concedido,\n  uq.tentativas,\n  uq.referencia_data,\n  uq.janela_inicio,\n  uq.janela_fim,\n  uq.dados_extras,\n  uq.concluido_em,\n  uq.reiniciada_em,\n  qc.codigo,\n  qc.titulo,\n  qc.descricao,\n  qc.categoria,\n  qc.tipo,\n  qc.gatilho_tipo,\n  qc.gatilho_valor,\n  qc.xp_recompensa,\n  qc.repeticao,\n  qc.config\nFROM usuarios_quest uq\nJOIN quest_catalogo qc ON qc.id = uq.quest_id\nWHERE uq.usuario_id = $1::uuid;\n",
-        "options": {
-          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1936,
-        144
-      ],
-      "id": "e222059e-e7f2-4fbe-8ef0-a9c418047a6f",
-      "name": "Buscar Quests",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH updates AS (\n  SELECT\n    (item->>'quest_record_id')::uuid AS quest_record_id,\n    NULLIF(item->>'status', '') AS status,\n    COALESCE((item->>'progresso_atual')::integer, 0) AS progresso_atual,\n    COALESCE((item->>'progresso_percentual')::integer, 0) AS progresso_percentual,\n    COALESCE((item->>'xp_concedido')::integer, 0) AS xp_concedido,\n    COALESCE((item->>'tentativas')::integer, NULL) AS tentativas,\n    NULLIF(item->>'concluido_em', '')::timestamp AS concluido_em,\n    NULLIF(item->>'reiniciada_em', '')::timestamp AS reiniciada_em,\n    NULLIF(item->>'dados_extras', '') AS dados_extras_raw\n  FROM jsonb_array_elements('{{ JSON.stringify($json.quest_updates ?? []).replace(/'/g, \"''\") }}'::jsonb) AS item\n)\nUPDATE usuarios_quest uq\nSET\n  status = COALESCE(updates.status, uq.status),\n  progresso_atual = updates.progresso_atual,\n  progresso_percentual = updates.progresso_percentual,\n  xp_concedido = updates.xp_concedido,\n  tentativas = COALESCE(updates.tentativas, uq.tentativas),\n  concluido_em = updates.concluido_em,\n    reiniciada_em = updates.reiniciada_em,\n    dados_extras = CASE\n    WHEN updates.dados_extras_raw IS NULL THEN uq.dados_extras\n    ELSE updates.dados_extras_raw::jsonb\n  END,\n  atualizado_em = NOW()\nFROM updates\nWHERE uq.id = updates.quest_record_id;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2704,
-        144
-      ],
-      "id": "3e36fe13-a4ca-4a8d-bb04-317e60b3df54",
-      "name": "Atualizar Quests",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT\n    '{{ ($('Calcular Gamificação').first().json.usuario_id ?? $('start').first().json.usuario_id).replace(\"'\", \"''\") }}'::uuid AS usuario_id,\n    '{{ $('Calcular Gamificação').first().json.ultima_conversa_data ?? (new Date().toISOString().split('T')[0]) }}'::date AS referencia_data\n),\nstats AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(SUM(uq.xp_concedido), 0) AS xp_total,\n    COALESCE(SUM(uq.xp_concedido) FILTER (\n      WHERE uq.concluido_em IS NOT NULL\n        AND uq.concluido_em::date = base.referencia_data\n    ), 0) AS xp_total_hoje\n  FROM usuarios_quest uq\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\ntotais AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_conversas'), 0) AS total_conversas,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_reflexoes'), 0) AS total_reflexoes\n  FROM usuarios_quest uq\n  JOIN quest_catalogo qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\nultima AS (\n  SELECT\n    uq.quest_id,\n    uq.concluido_em\n  FROM usuarios_quest uq\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n    AND uq.concluido_em IS NOT NULL\n  ORDER BY uq.concluido_em DESC\n  LIMIT 1\n)\nSELECT\n  base.usuario_id,\n  base.referencia_data,\n  COALESCE(stats.xp_total, 0) AS xp_total,\n  COALESCE(stats.xp_total_hoje, 0) AS xp_total_hoje,\n  COALESCE(totais.total_conversas, 0) AS total_conversas,\n  COALESCE(totais.total_reflexoes, 0) AS total_reflexoes,\n  NULL AS quest_diaria_status,\n  0 AS quest_diaria_progresso,\n  NULL AS quest_diaria_descricao,\n  NULL AS quest_diaria_usuario_quest_id,\n  ultima.quest_id AS ultima_conquista_id,\n  ultima.concluido_em AS ultima_conquista_data\nFROM base\nLEFT JOIN stats ON stats.usuario_id = base.usuario_id\nLEFT JOIN totais ON totais.usuario_id = base.usuario_id\nLEFT JOIN ultima ON TRUE;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2912,
-        144
-      ],
-      "id": "565d6c7b-7245-4f7a-a3dd-ffd7155fcf26",
-      "name": "Consolidar Estatísticas",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const processamento = ($('Calcular Gamificação').first()?.json) ?? {};\nconst agregados = $input.first()?.json ?? {};\n\nconst numberOr = (value, fallback = 0) => {\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst xpTotal = numberOr(processamento.xp_total ?? agregados.xp_total, 0);\nconst totalConversas = numberOr(processamento.total_conversas ?? agregados.total_conversas, 0);\nconst totalReflexoes = numberOr(processamento.total_reflexoes ?? agregados.total_reflexoes, 0);\nconst totalXpHoje = numberOr(processamento.total_xp_ganho_hoje ?? agregados.xp_total_hoje, 0);\nconst nivelAtual = numberOr(processamento.nivel_atual, 1);\nconst xpProximoNivel = numberOr(processamento.xp_proximo_nivel, 200);\nconst tituloNivel = processamento.titulo_nivel ?? 'Explorador';\nconst ultimaConversa = processamento.ultima_conversa_data ?? agregados.referencia_data ?? new Date().toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    ...processamento,\n    xp_total: xpTotal,\n    total_conversas: totalConversas,\n    total_reflexoes: totalReflexoes,\n    total_xp_ganho_hoje: totalXpHoje,\n    nivel_atual: nivelAtual,\n    xp_proximo_nivel: xpProximoNivel,\n    titulo_nivel: tituloNivel,\n    ultima_conversa_data: ultimaConversa,\n    quest_diaria_status: null,\n    quest_diaria_progresso: 0,\n    quest_diaria_descricao: null,\n    quest_diaria_data: null,\n    quest_diaria_id: null\n  }\n}];"
-      },
+      "id": "3bd3f8c0-ff7e-4db8-9c8e-bfbacdd2b048",
+      "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3104,
-        144
+        -740,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    (rec->>'codigo')::text AS codigo,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    rec->>'prioridade' AS prioridade,\n    rec->>'recorrencia' AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\nupsert AS (\n  INSERT INTO public.quest_modelos (\n    id,\n    codigo,\n    titulo,\n    descricao,\n    tipo,\n    gatilho_codigo,\n    gatilho_valor,\n    xp_recompensa,\n    repeticao,\n    ordem_inicial,\n    ativo,\n    config,\n    criado_em,\n    atualizado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    COALESCE(NULLIF(rows.codigo, ''), 'quest_' || encode(gen_random_bytes(6), 'hex')),\n    COALESCE(rows.titulo, 'Quest Personalizada'),\n    rows.descricao,\n    'personalizada',\n    'manual',\n    rows.progresso_meta,\n    rows.xp_recompensa,\n    CASE rows.recorrencia WHEN 'diaria' THEN 'recorrente' WHEN 'semanal' THEN 'recorrente' ELSE 'unica' END,\n    NULL,\n    TRUE,\n    jsonb_build_object(\n      'prioridade', rows.prioridade,\n      'recorrencia', rows.recorrencia,\n      'payload_extra', rows.payload_extra\n    ),\n    NOW(),\n    NOW()\n  FROM rows\n  ON CONFLICT (codigo) DO UPDATE\n  SET\n    titulo = EXCLUDED.titulo,\n    descricao = EXCLUDED.descricao,\n    gatilho_valor = EXCLUDED.gatilho_valor,\n    xp_recompensa = EXCLUDED.xp_recompensa,\n    repeticao = EXCLUDED.repeticao,\n    ativo = TRUE,\n    config = EXCLUDED.config,\n    atualizado_em = NOW()\n  RETURNING id, codigo\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE(jsonb_agg(jsonb_build_object('codigo', upsert.codigo, 'modelo_id', upsert.id)), '[]'::jsonb) AS modelos_upsertidos\nFROM payload\nLEFT JOIN upsert ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
+        }
+      },
+      "id": "7e28c9a1-8761-4af4-8390-2070e5b14b86",
+      "name": "Inserir Modelos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -520,
+        200
       ],
-      "id": "9aba9192-6192-4df0-b0ec-a073f2d6d98b",
-      "name": "Montar Resumo"
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    COALESCE(rec->>'codigo', '') AS codigo,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    rec->>'contexto_origem' AS contexto_origem,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\ninserted AS (\n  INSERT INTO public.quest_instancias (\n    id,\n    usuario_id,\n    modelo_id,\n    meta_codigo,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    janela_inicio,\n    janela_fim,\n    contexto_origem,\n    referencia_data,\n    reiniciada_em,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    cancelado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    rows.usuario_id,\n    qm.id,\n    rows.codigo,\n    COALESCE(NULLIF(rows.status_inicial, ''), 'pendente'),\n    0,\n    rows.progresso_meta,\n    0,\n    rows.xp_recompensa,\n    1,\n    rows.prazo_inicio,\n    rows.prazo_fim,\n    rows.contexto_origem,\n    rows.prazo_inicio,\n    NULL,\n    NOW(),\n    NOW(),\n    NULL,\n    NULL\n  FROM rows\n  JOIN public.quest_modelos qm ON qm.codigo = rows.codigo\n  WHERE rows.codigo <> ''\n    AND NOT EXISTS (\n      SELECT 1\n      FROM public.quest_instancias qi\n      WHERE qi.usuario_id = rows.usuario_id\n        AND qi.meta_codigo = rows.codigo\n        AND qi.status IN ('pendente','ativa')\n    )\n  RETURNING meta_codigo\n),\natualiza_estado AS (\n  UPDATE public.quest_estado_usuario\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas,\n  COALESCE(jsonb_agg(inserted.meta_codigo), '[]'::jsonb) AS codigos_inseridos\nFROM payload\nLEFT JOIN inserted ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
+        }
+      },
+      "id": "83e6055b-ef17-45aa-9621-94fd93361958",
+      "name": "Inserir Instancias",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -300,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS atualizacoes,\n    $3::jsonb AS estado_inicial,\n    $4::jsonb AS novas_quests\n),\nupdates AS (\n  SELECT\n    payload.usuario_id,\n    (rec->>'meta_codigo')::text AS meta_codigo,\n    (rec->>'instancia_id')::uuid AS instancia_id,\n    COALESCE(rec->>'novo_status', 'pendente') AS novo_status,\n    COALESCE((rec->>'progresso_atual')::int, 0) AS progresso_atual,\n    COALESCE((rec->>'xp_extra')::int, 0) AS xp_extra\n  FROM payload,\n       jsonb_array_elements(payload.atualizacoes) rec\n),\nalvos AS (\n  SELECT\n    qi.id,\n    qi.usuario_id,\n    qi.meta_codigo,\n    qi.progresso_meta,\n    qi.xp_concedido,\n    updates.novo_status,\n    updates.progresso_atual,\n    updates.xp_extra\n  FROM updates\n  JOIN public.quest_instancias qi\n    ON (\n      updates.instancia_id IS NOT NULL AND qi.id = updates.instancia_id\n    ) OR (\n      updates.instancia_id IS NULL\n      AND updates.meta_codigo IS NOT NULL\n      AND qi.meta_codigo = updates.meta_codigo\n      AND qi.usuario_id = updates.usuario_id\n      AND qi.status IN ('pendente','ativa')\n    )\n  WHERE qi.usuario_id = updates.usuario_id\n),\natualizados AS (\n  UPDATE public.quest_instancias qi\n  SET\n    status = COALESCE(alvos.novo_status, qi.status),\n    progresso_atual = alvos.progresso_atual,\n    progresso_percentual = CASE\n      WHEN qi.progresso_meta > 0 THEN LEAST(100, GREATEST(0, ROUND(alvos.progresso_atual::numeric / qi.progresso_meta::numeric * 100)))\n      ELSE qi.progresso_percentual\n    END,\n    atualizado_em = NOW(),\n    concluido_em = CASE WHEN alvos.novo_status = 'concluida' THEN NOW() ELSE qi.concluido_em END,\n    cancelado_em = CASE WHEN alvos.novo_status = 'cancelada' THEN NOW() ELSE qi.cancelado_em END,\n    reiniciada_em = CASE WHEN alvos.novo_status = 'reiniciada' THEN NOW() ELSE qi.reiniciada_em END\n  FROM alvos\n  WHERE qi.id = alvos.id\n  RETURNING\n    qi.id,\n    alvos.novo_status,\n    alvos.xp_extra,\n    qi.xp_concedido\n),\nxp_total AS (\n  SELECT\n    COALESCE(SUM(CASE WHEN novo_status = 'concluida' THEN COALESCE(xp_concedido, 0) + COALESCE(xp_extra, 0) ELSE 0 END), 0) AS xp_ganho,\n    COALESCE(SUM(CASE WHEN novo_status = 'concluida' THEN 1 ELSE 0 END), 0) AS concluidas,\n    COALESCE(SUM(CASE WHEN novo_status = 'reiniciada' THEN 1 ELSE 0 END), 0) AS reinicios\n  FROM atualizados\n),\natualiza_estado AS (\n  UPDATE public.quest_estado_usuario\n  SET\n    xp_total = quest_estado_usuario.xp_total + (SELECT xp_ganho FROM xp_total),\n    total_quests_concluidas = quest_estado_usuario.total_quests_concluidas + (SELECT concluidas FROM xp_total),\n    total_xp_hoje = quest_estado_usuario.total_xp_hoje + (SELECT xp_ganho FROM xp_total),\n    sequencia_status = jsonb_set(\n      COALESCE(quest_estado_usuario.sequencia_status, '{}'::jsonb),\n      '{reinicios}',\n      to_jsonb(\n        COALESCE((quest_estado_usuario.sequencia_status ->> 'reinicios')::int, 0) + (SELECT reinicios FROM xp_total)\n      ),\n      true\n    ),\n    atualizado_em = NOW()\n  WHERE quest_estado_usuario.usuario_id = (SELECT usuario_id FROM payload LIMIT 1)\n  RETURNING quest_estado_usuario.usuario_id\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  (SELECT xp_ganho FROM xp_total) AS xp_ganho,\n  (SELECT concluidas FROM xp_total) AS quests_concluidas,\n  (SELECT reinicios FROM xp_total) AS reinicios\nFROM payload;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {}), JSON.stringify($json.novas_quests ?? [])] }}"
+        }
+      },
+      "id": "6cbb6b18-ec9a-4d91-9d89-99c5c7eab3ac",
+      "name": "Aplicar Atualizacoes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH estado AS (\n  SELECT\n    eu.usuario_id,\n    eu.xp_total,\n    (\n      SELECT n.nivel\n      FROM public.quest_niveis n\n      WHERE eu.xp_total >= n.xp_minimo\n      ORDER BY n.nivel DESC\n      LIMIT 1\n    ) AS nivel_atual,\n    (\n      SELECT n.nome\n      FROM public.quest_niveis n\n      WHERE eu.xp_total >= n.xp_minimo\n      ORDER BY n.nivel DESC\n      LIMIT 1\n    ) AS titulo_nivel,\n    (\n      SELECT n.xp_proximo_nivel\n      FROM public.quest_niveis n\n      WHERE eu.xp_total >= n.xp_minimo\n      ORDER BY n.nivel DESC\n      LIMIT 1\n    ) AS xp_proximo_nivel\n  FROM public.quest_estado_usuario eu\n  WHERE eu.usuario_id = $1::uuid\n),\natualizado AS (\n  UPDATE public.quest_estado_usuario eu\n  SET\n    nivel_atual = estado.nivel_atual,\n    titulo_nivel = estado.titulo_nivel,\n    xp_proximo_nivel = estado.xp_proximo_nivel,\n    atualizado_em = NOW()\n  FROM estado\n  WHERE eu.usuario_id = estado.usuario_id\n  RETURNING\n    eu.usuario_id,\n    eu.xp_total,\n    eu.nivel_atual,\n    eu.titulo_nivel,\n    eu.xp_proximo_nivel\n)\nSELECT\n  atualizado.usuario_id,\n  atualizado.xp_total,\n  atualizado.nivel_atual,\n  atualizado.titulo_nivel,\n  atualizado.xp_proximo_nivel,\n  $2::numeric AS xp_ganho,\n  $3::integer AS quests_concluidas,\n  $4::integer AS reinicios,\n  $5::jsonb AS novas_quests,\n  $6::jsonb AS atualizacoes,\n  $7::jsonb AS estado_inicial\nFROM atualizado;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho ?? 0, $json.quests_concluidas ?? 0, $json.reinicios ?? 0, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
+        }
+      },
+      "id": "a3e35df2-9c1d-4e28-9b0d-fd508ddc7ac3",
+      "name": "Atualizar Estado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        140,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH personalizadas AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qi.concluido_em,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n)\nSELECT\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', personalizadas.id,\n        'meta_codigo', personalizadas.meta_codigo,\n        'status', personalizadas.status,\n        'contexto_origem', personalizadas.contexto_origem,\n        'progresso_meta', personalizadas.progresso_meta,\n        'progresso_atual', personalizadas.progresso_atual,\n        'concluido_em', personalizadas.concluido_em,\n        'titulo', personalizadas.titulo,\n        'descricao', personalizadas.descricao,\n        'config', personalizadas.config\n      )\n    ) FILTER (WHERE personalizadas.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_personalizadas\nFROM public.quest_estado_usuario eu\nLEFT JOIN personalizadas ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "e0c940c1-5d2e-47d3-8fdf-4d6e4c2ef049",
+      "name": "Buscar Snapshot Final",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        360,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const estadoAtualizado = $items(\"Atualizar Estado\", 0, 0).json || {};\nconst snapshotFinal = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id,\n    xp_total: estadoAtualizado.xp_total,\n    nivel_atual: estadoAtualizado.nivel_atual,\n    titulo_nivel: estadoAtualizado.titulo_nivel,\n    xp_proximo_nivel: estadoAtualizado.xp_proximo_nivel,\n    xp_ganho: estadoAtualizado.xp_ganho,\n    quests_concluidas_no_evento: estadoAtualizado.quests_concluidas,\n    reinicios_registrados: estadoAtualizado.reinicios,\n    novas_quests_registradas: estadoAtualizado.novas_quests || [],\n    atualizacoes_processadas: estadoAtualizado.atualizacoes || [],\n    snapshot_final: snapshotFinal\n  }\n}];"
+      },
+      "id": "9b54d53a-8aa7-43c9-a0e8-0ea96a9b43b0",
+      "name": "Montar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        200
+      ]
     }
   ],
   "connections": {
@@ -262,117 +215,95 @@
       "main": [
         [
           {
-            "node": "Buscar Estado Atual",
+            "node": "Normalizar Entrada",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar Estado Atual": {
+    "Normalizar Entrada": {
       "main": [
         [
           {
-            "node": "Garantir Quests",
+            "node": "Buscar Estado e Quests",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Calcular Gamificação": {
+    "Buscar Estado e Quests": {
       "main": [
         [
           {
-            "node": "Atualizar Quests",
+            "node": "Preparar Operacoes",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Gamificação": {
+    "Preparar Operacoes": {
       "main": [
         [
           {
-            "node": "Preparar Resultado",
+            "node": "Inserir Modelos",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar Quests": {
+    "Inserir Modelos": {
       "main": [
         [
           {
-            "node": "Preparar Contexto",
+            "node": "Inserir Instancias",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Quests": {
+    "Inserir Instancias": {
       "main": [
         [
           {
-            "node": "Consolidar Estatísticas",
+            "node": "Aplicar Atualizacoes",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Garantir Quests": {
+    "Aplicar Atualizacoes": {
       "main": [
         [
           {
-            "node": "Buscar Quests",
+            "node": "Atualizar Estado",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Consolidar Estatísticas": {
+    "Atualizar Estado": {
       "main": [
         [
           {
-            "node": "Montar Resumo",
+            "node": "Buscar Snapshot Final",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Montar Resumo": {
+    "Buscar Snapshot Final": {
       "main": [
         [
           {
-            "node": "Atualizar Gamificação",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar Contexto": {
-      "main": [
-        [
-          {
-            "node": "Resolver Streak",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Resolver Streak": {
-      "main": [
-        [
-          {
-            "node": "Calcular Gamificação",
+            "node": "Montar Resposta",
             "type": "main",
             "index": 0
           }
@@ -387,22 +318,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usuario_id": "8c6046bf-cf23-4da4-9689-a46b9e154b90",
-          "chat_id": "eab0eba6-d26b-4356-ba14-3c3dcf59798b",
-          "data_conversa": "Sun Nov 02 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "tem_reflexao": true,
-          "justificativa_reflexao": "Aldo demonstrou reflexão profunda ao analisar suas emoções complexas e oscilantes, compreendendo como o hiperfoco e a calmaria influenciam seu estado emocional. Ele fez conexões claras entre os eventos da separação, seus sentimentos atuais e as estratégias que usa para lidar com o vazio. Revelou autoconhecimento ao reconhecer tanto o alívio quanto a angústia, e questionou seus próprios padrões de enfrentamento, mostrando aprendizado e compreensão de sua situação interna.",
-          "total_palavras_usuario": 195
-        }
-      }
-    ]
-  },
-  "versionId": "cc17fe57-8f3d-42a1-bf88-76bb46c0fea6",
-  "triggerCount": 0,
+  "pinData": {},
+  "versionId": "f7f9bf9e-d6e7-4cdd-9d2a-4e924dd6c112",
   "shared": [
     {
       "createdAt": "2025-10-10T11:10:56.623Z",
