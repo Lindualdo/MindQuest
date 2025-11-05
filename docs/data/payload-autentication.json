@@ -3,13 +3,13 @@
     "response": {
       "success": true,
       "humor": {
-        "humor_atual": null,
-        "humor_medio": null,
-        "diferenca_percentual": null,
-        "conversas_total": 0,
+        "humor_atual": 5,
+        "humor_medio": 5,
+        "diferenca_percentual": 0,
+        "conversas_total": 1,
         "ultima_conversa": {
-          "data": null,
-          "hora": null,
+          "data": "2025-11-04T00:00:00.000Z",
+          "hora": "22:56:29.079083",
           "emoji": null,
           "emocao": null
         }
@@ -48,6 +48,7 @@
         "quest_diaria_descricao": "Complete sua conversa diária",
         "quest_diaria_data": null,
         "quest_streak_dias": 0,
+        "habitos_ativos": [],
         "conquistas_desbloqueadas": [],
         "conquistas_proximas": [],
         "total_conversas": 0,
@@ -102,15 +103,6 @@
       },
       "historico_diario": [
         {
-          "data": "2025-10-29",
-          "label": "29/10",
-          "tem_conversa": false,
-          "conversas": 0,
-          "emoji": null,
-          "humor": null,
-          "ultima_hora": null
-        },
-        {
           "data": "2025-10-30",
           "label": "30/10",
           "tem_conversa": false,
@@ -161,18 +153,27 @@
           "tem_conversa": true,
           "conversas": 1,
           "emoji": "😢",
-          "humor": null,
+          "humor": 5,
           "ultima_hora": "22:55:45"
+        },
+        {
+          "data": "2025-11-05",
+          "label": "05/11",
+          "tem_conversa": false,
+          "conversas": 0,
+          "emoji": null,
+          "humor": null,
+          "ultima_hora": null
         }
       ],
       "historico_resumo": {
         "total_conversas": 1,
-        "humor_medio": 0,
-        "sequencia_ativa": 1,
+        "humor_medio": 5,
+        "sequencia_ativa": 0,
         "ultima_conversa_data": "2025-11-04",
         "ultima_conversa_hora": "22:55:45",
-        "periodo_inicio": "2025-10-29",
-        "periodo_fim": "2025-11-04"
+        "periodo_inicio": "2025-10-30",
+        "periodo_fim": "2025-11-05"
       },
       "insights": [
         {
@@ -206,7 +207,7 @@
           "data_criacao": "2025-11-04T22:56:03.915Z"
         }
       ],
-      "timestamp": "2025-11-04T22:56:27.590Z"
+      "timestamp": "2025-11-05T00:15:58.263Z"
     }
   }
 ]
