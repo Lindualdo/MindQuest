@@ -167,7 +167,7 @@ const GamificacaoPanel: React.FC = () => {
                 {streakDias} dia{streakDias === 1 ? '' : 's'}
               </span>
               <span>
-                Meta {nextStreakGoal} conversas{nextStreakGoal === 1 ? '' : 's'}
+                Meta {nextStreakGoal} conversa{nextStreakGoal === 1 ? '' : 's'}
               </span>
             </div>
           </div>
@@ -177,7 +177,7 @@ const GamificacaoPanel: React.FC = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#8B5CF6]">
               <Sparkles size={16} className="text-[#8B5CF6]" />
-              Hábitos do dia
+              Quest do dia
             </div>
             <p className="text-xs font-semibold text-[#8B5CF6]">
               {habitosAtivos.length > 0 ? `${habitosConcluidos}/${habitosAtivos.length}` : '—'}
@@ -235,7 +235,7 @@ const GamificacaoPanel: React.FC = () => {
             </ul>
           ) : (
             <p className="mt-4 text-sm text-[#475467]">
-              Nenhum hábito ativo hoje. Complete a conversa para desbloquear sugestões diárias.
+              Nenhum quest ativo hoje
             </p>
           )}
         </div>
