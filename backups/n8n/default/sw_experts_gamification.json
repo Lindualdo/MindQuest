@@ -21,26 +21,26 @@
           ]
         }
       },
-      "id": "47408d45-3ae1-4ec5-8f4c-daf908a24a84",
+      "id": "7ffcea4f-93d9-474b-be36-e3fc4e130411",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1400,
-        200
+        96,
+        80
       ]
     },
     {
       "parameters": {
         "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "id": "3c5a0ce1-2c60-4f90-96ef-6d22dddf200c",
+      "id": "509f6336-759c-4f57-89e2-b0ffc399e87f",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1180,
-        200
+        320,
+        80
       ]
     },
     {
@@ -51,13 +51,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "6c0c0553-6e31-4c25-8a11-594321f5b2b4",
+      "id": "527e1356-d9d5-4e40-9863-ab216220ca38",
       "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -960,
-        200
+        544,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -70,13 +70,13 @@
       "parameters": {
         "jsCode": "const entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nconst existentesBrutos = Array.isArray(estado.quests_ativas)\n  ? estado.quests_ativas\n  : [];\n\nconst limite = 4;\nlet ocupados = Array.isArray(existentesBrutos)\n  ? existentesBrutos.length\n  : Number(existentesBrutos?.length) || 0;\n\nif (!Number.isFinite(ocupados)) {\n  ocupados = 0;\n}\n\nlet slotsDisponiveis = limite - ocupados;\nif (!Number.isFinite(slotsDisponiveis)) {\n  slotsDisponiveis = limite;\n}\nif (slotsDisponiveis < 0) {\n  slotsDisponiveis = 0;\n}\n\nconst dedupe = new Set();\nfor (const existente of existentesBrutos) {\n  const contexto = (existente?.contexto_origem || '').toLowerCase().trim();\n  const titulo = (existente?.titulo || '').toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst entradaListaBruta = Array.isArray(entrada.novas_quests)\n  ? entrada.novas_quests\n  : (typeof entrada.novas_quests === 'string'\n      ? (() => {\n          try {\n            const parsed = JSON.parse(entrada.novas_quests);\n            return Array.isArray(parsed) ? parsed : [];\n          } catch (error) {\n            return [];\n          }\n        })()\n      : []);\n\nconst novos = [];\nconst filaEspera = [];\n\nconst normalizarInteiro = (valor, padrao) => {\n  const numero = Number(valor);\n  if (Number.isFinite(numero) && numero > 0) {\n    return Math.trunc(numero);\n  }\n  return padrao;\n};\n\nfor (const bruto of entradaListaBruta) {\n  if (bruto == null) continue;\n\n  const quest =\n    typeof bruto === 'string'\n      ? (() => {\n          try {\n            return JSON.parse(bruto);\n          } catch (error) {\n            return null;\n          }\n        })()\n      : bruto;\n\n  if (!quest || typeof quest !== 'object') continue;\n\n  const contexto = (quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = (quest.titulo || '').toLowerCase().trim();\n  const temIdentificador = contexto || titulo;\n  const chaveDedup = temIdentificador ? `${contexto}|${titulo}` : null;\n\n  if (chaveDedup && dedupe.has(chaveDedup)) {\n    continue;\n  }\n\n  const codigoBase = quest.codigo && String(quest.codigo).trim();\n  const codigo =\n    codigoBase && codigoBase.length > 0\n      ? codigoBase\n      : `qp_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;\n\n  const questNormalizada = {\n    ...quest,\n    codigo,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: normalizarInteiro(quest.progresso_meta, 1),\n    xp_recompensa: normalizarInteiro(quest.xp_recompensa, 0),\n  };\n\n  if (chaveDedup) {\n    dedupe.add(chaveDedup);\n  }\n\n  if (slotsDisponiveis > 0) {\n    novos.push(questNormalizada);\n    slotsDisponiveis -= 1;\n  } else {\n    filaEspera.push(questNormalizada);\n  }\n}\n\nreturn [\n  {\n    json: {\n      usuario_id: entrada.usuario_id,\n      novas_quests: novos,\n      atualizacoes: Array.isArray(entrada.atualizacoes)\n        ? entrada.atualizacoes\n        : [],\n      estado_inicial: estado,\n      fila_espera: filaEspera,\n      debug_entrada_bruta: entrada.novas_quests,\n      debug_entrada_normalizada: entradaListaBruta,\n    },\n  },\n];"
       },
-      "id": "3bd3f8c0-ff7e-4db8-9c8e-bfbacdd2b048",
+      "id": "488e1b7e-5585-4824-bbca-42f8bc910b27",
       "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -740,
-        200
+        768,
+        80
       ]
     },
     {
@@ -87,13 +87,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "7e28c9a1-8761-4af4-8390-2070e5b14b86",
+      "id": "f721904c-aa55-4ef1-b2a9-643c779b36d5",
       "name": "Inserir Modelos",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -520,
-        200
+        976,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -110,13 +110,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "83e6055b-ef17-45aa-9621-94fd93361958",
+      "id": "f40f3021-ada4-4dff-a318-a19bcdb0d048",
       "name": "Inserir Instancias",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -300,
-        200
+        1200,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -133,13 +133,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {}), JSON.stringify($json.novas_quests ?? [])] }}"
         }
       },
-      "id": "6cbb6b18-ec9a-4d91-9d89-99c5c7eab3ac",
+      "id": "6ae9baff-504a-42d6-894a-54bc86033616",
       "name": "Aplicar Atualizacoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -80,
-        200
+        1424,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -156,13 +156,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho ?? 0, $json.quests_concluidas ?? 0, $json.reinicios ?? 0, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "a3e35df2-9c1d-4e28-9b0d-fd508ddc7ac3",
+      "id": "e451311d-ddaf-4c25-9c22-b3a95cce839a",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        140,
-        200
+        1648,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -179,13 +179,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "e0c940c1-5d2e-47d3-8fdf-4d6e4c2ef049",
+      "id": "139823ee-26c3-442a-a885-b6a1a1b55eb3",
       "name": "Buscar Snapshot Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        360,
-        200
+        1856,
+        80
       ],
       "credentials": {
         "postgres": {
@@ -198,13 +198,13 @@
       "parameters": {
         "jsCode": "const estadoAtualizado = $items(\"Atualizar Estado\", 0, 0).json || {}\nconst snapshotFinal = $input.item.json || {}\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id ?? snapshotFinal.usuario_id ?? null,\n    xp_total: estadoAtualizado.xp_total ?? snapshotFinal.xp_total ?? 0,\n    nivel_atual: estadoAtualizado.nivel_atual ?? snapshotFinal.nivel_atual ?? null,\n    titulo_nivel: estadoAtualizado.titulo_nivel ?? snapshotFinal.titulo_nivel ?? null,\n    xp_proximo_nivel: estadoAtualizado.xp_proximo_nivel ?? snapshotFinal.xp_proximo_nivel ?? null,\n    xp_ganho: estadoAtualizado.xp_ganho ?? 0,\n    quests_concluidas_no_evento: estadoAtualizado.quests_concluidas ?? 0,\n    reinicios_registrados: estadoAtualizado.reinicios ?? 0,\n    novas_quests_registradas: estadoAtualizado.novas_quests || [],\n    atualizacoes_processadas: estadoAtualizado.atualizacoes || [],\n    snapshot_final: snapshotFinal\n  }\n}]\n"
       },
-      "id": "9b54d53a-8aa7-43c9-a0e8-0ea96a9b43b0",
+      "id": "c1d6f333-9cab-42e6-a752-b0e0d3a9e4aa",
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        200
+        2080,
+        80
       ]
     }
   ],
@@ -316,8 +316,19 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "f7f9bf9e-d6e7-4cdd-9d2a-4e924dd6c112",
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "quests_personalizadas": "[{\"titulo\":\"Introduzir 5 minutos de meditação guiada diário\",\"descricao\":\"Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.\",\"contexto_origem\":\"sugestão personalizada para melhoria do bem-estar mental\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2024-04-27\",\"prazo_fim\":\"2024-05-03\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"xp_recompensa\":15,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Fazer 10 minutos de caminhada ao ar livre\",\"descricao\":\"Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.\",\"contexto_origem\":\"sugestão personalizada para saúde física e mental\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2024-04-27\",\"prazo_fim\":\"2024-05-03\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"xp_recompensa\":15,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Organizar a mesa de trabalho ao final do dia\",\"descricao\":\"Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.\",\"contexto_origem\":\"sugestão personalizada para ambiente de trabalho mais eficiente\",\"prioridade\":\"baixa\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2024-04-27\",\"prazo_fim\":\"2024-05-03\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"xp_recompensa\":10,\"payload_extra\":{\"canal\":\"app\"}}]",
+          "atualizacoes_status": "[]"
+        }
+      }
+    ]
+  },
+  "versionId": "e5bf9630-f451-43a1-b122-03abe049d01e",
+  "triggerCount": 0,
   "shared": [
     {
       "createdAt": "2025-10-10T11:10:56.623Z",

@@ -106,7 +106,7 @@ const Dashboard: React.FC = () => {
               <Heart color={SECTION_STYLES.emotions.iconColor} />
               <div className="text-left">
                 <h3 className="text-base font-semibold text-[#1C2541]">Emoções</h3>
-                <p className="text-sm text-[#1C2541]/60">Humor · Roda das Emoções · PANAS</p>
+                <p className="text-sm text-[#1C2541]/60">Humor, energia e emoções</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-[#94A3B8]" />

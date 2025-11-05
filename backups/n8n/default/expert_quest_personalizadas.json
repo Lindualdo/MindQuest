@@ -1,5 +1,9 @@
 {
+  "createdAt": "2025-11-05T13:38:03.212Z",
+  "id": "LKjU8NE9aNHw7kEh",
   "name": "expert_quest_personalizadas",
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -153,8 +157,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -224,
-        784
+        -240,
+        752
       ],
       "credentials": {
         "openRouterApi": {
@@ -190,7 +194,7 @@
       "typeVersion": 1.3,
       "position": [
         112,
-        672
+        656
       ]
     },
     {
@@ -295,16 +299,6 @@
       ]
     }
   ],
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145"
-        }
-      }
-    ]
-  },
   "connections": {
     "start": {
       "main": [
@@ -455,18 +449,73 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "da63e9b2-fb18-49f7-9b37-d9230e71cb7f",
-  "meta": {
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145"
+        }
+      }
+    ]
   },
-  "id": "LKjU8NE9aNHw7kEh",
+  "versionId": "a53b0eb4-404f-40c6-b39e-b8350297ea9d",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-05T13:38:03.212Z",
+      "role": "workflow:owner",
+      "workflowId": "LKjU8NE9aNHw7kEh",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
-}[
-  {
-    "success": true
-  }
-]
+}

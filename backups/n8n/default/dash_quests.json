@@ -1,12 +1,13 @@
 {
-  "createdAt": "2025-11-05T18:12:00.000Z",
-  "id": "gQst1DashWf0rk",
+  "createdAt": "2025-11-05T17:35:05.601Z",
+  "id": "yvg9NkBsLF3mbr5f",
   "name": "dash_quests",
   "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "quests",
         "responseMode": "responseNode",
         "options": {}
@@ -14,10 +15,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -900,
+        0,
         0
       ],
-      "id": "27d8c3e2-3d5a-4f87-a987-c1c4107c2c70",
+      "id": "e81ef11d-4715-42dc-abfd-b4d9dd24c173",
       "name": "Webhook",
       "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
     },
@@ -28,10 +29,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -680,
+        224,
         0
       ],
-      "id": "4a5d1e52-6f6d-4a68-8ed8-0ac676f5852a",
+      "id": "2d22f105-d2c0-4971-bb08-3370ff6fdbca",
       "name": "Validar Entrada"
     },
     {
@@ -45,10 +46,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -440,
+        464,
         0
       ],
-      "id": "9f4f1e6f-e3ec-4f5d-928c-565835b9b641",
+      "id": "5f4e7bbe-35e0-4a4f-b038-454d9546c99b",
       "name": "Buscar Estado",
       "credentials": {
         "postgres": {
@@ -68,10 +69,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -200,
+        704,
         0
       ],
-      "id": "cb80adc2-9d11-4a56-bb8a-119e91a8f5ee",
+      "id": "08ef5389-63cf-4b02-8ee1-9b957799c231",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -87,10 +88,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        40,
+        944,
         0
       ],
-      "id": "bfd97461-7c63-4c4f-9afa-5d823fcf92c3",
+      "id": "a69d04f6-98d9-42d6-a58b-2bec34b4a8d7",
       "name": "Montar Snapshot"
     },
     {
@@ -100,10 +101,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        280,
+        1184,
         0
       ],
-      "id": "a7bb09ae-0f78-4df7-9a1d-34c162033e98",
+      "id": "534e8c4c-bc73-4bbe-89fc-9d617b03931f",
       "name": "Responder"
     }
   ],
@@ -168,35 +169,15 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "pinData": {
-    "Responder": [
-      {
-        "json": {
-          "usuario_id": "00000000-0000-0000-0000-000000000000",
-          "xp_total": 0,
-          "xp_proximo_nivel": 300,
-          "nivel_atual": 1,
-          "titulo_nivel": "Recém-Convocado",
-          "sequencia_atual": 0,
-          "sequencia_recorde": 0,
-          "meta_sequencia_codigo": "streak_003",
-          "proxima_meta_codigo": "streak_005",
-          "sequencia_status": null,
-          "quests_personalizadas": []
-        }
-      }
-    ]
-  },
-  "versionId": "2fdd12ef-5c4a-4b8a-a6af-1f6d64695c24",
-  "triggerCount": 0,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e6696137-6872-4ff1-981a-58e31692dd18",
+  "triggerCount": 1,
   "shared": [
     {
-      "createdAt": "2025-11-05T18:12:00.000Z",
+      "createdAt": "2025-11-05T17:35:05.601Z",
       "role": "workflow:owner",
-      "workflowId": "gQst1DashWf0rk",
+      "workflowId": "yvg9NkBsLF3mbr5f",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",
