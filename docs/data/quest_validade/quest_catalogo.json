@@ -1,0 +1,251 @@
+[
+  {
+    "id": "a1b1c736-77d1-4a67-9c14-9bf1a4d6f301",
+    "codigo": "onboarding_primeira_conversa",
+    "titulo": "Onboarding · Primeira Conversa",
+    "descricao": "Complete a primeira conversa guiada para iniciar a jornada.",
+    "categoria": "onboarding",
+    "tipo": "sistema",
+    "gatilho_tipo": "total_conversas",
+    "gatilho_valor": 1,
+    "xp_recompensa": 40,
+    "repeticao": "unica",
+    "ordem_inicial": 1,
+    "ativo": true,
+    "config": null,
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "b2d3f2c8-8c3a-4f59-9a5e-51ae9fd5b6bb",
+    "codigo": "onboarding_primeira_semana",
+    "titulo": "Onboarding · Primeira Semana",
+    "descricao": "Conclua sete conversas no total para fechar a primeira semana.",
+    "categoria": "onboarding",
+    "tipo": "sistema",
+    "gatilho_tipo": "total_conversas",
+    "gatilho_valor": 7,
+    "xp_recompensa": 120,
+    "repeticao": "unica",
+    "ordem_inicial": 2,
+    "ativo": true,
+    "config": null,
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "c3128577-a8bb-4227-9f36-4eeef25cf2e3",
+    "codigo": "streak_003",
+    "titulo": "Sequência · 3 Dias",
+    "descricao": "Mantenha 3 dias consecutivos de conversa.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 3,
+    "xp_recompensa": 80,
+    "repeticao": "unica",
+    "ordem_inicial": 101,
+    "ativo": true,
+    "config": {
+      "streakTarget": 3
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "df91c9af-7a71-46b9-9b52-2eab3a908236",
+    "codigo": "streak_005",
+    "titulo": "Sequência · 5 Dias",
+    "descricao": "Alcance 5 dias seguidos de conversa.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 5,
+    "xp_recompensa": 100,
+    "repeticao": "unica",
+    "ordem_inicial": 102,
+    "ativo": true,
+    "config": {
+      "streakTarget": 5
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "ed284f23-c63f-4c0a-9b4f-379c92f4e24c",
+    "codigo": "streak_007",
+    "titulo": "Sequência · 7 Dias",
+    "descricao": "Complete uma semana inteira de conversas.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 7,
+    "xp_recompensa": 130,
+    "repeticao": "unica",
+    "ordem_inicial": 103,
+    "ativo": true,
+    "config": {
+      "streakTarget": 7
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "f6a6347c-74f8-4423-9a3d-965a753cce5d",
+    "codigo": "streak_010",
+    "titulo": "Sequência · 10 Dias",
+    "descricao": "Mantenha 10 dias consecutivos ativos.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 10,
+    "xp_recompensa": 170,
+    "repeticao": "unica",
+    "ordem_inicial": 104,
+    "ativo": true,
+    "config": {
+      "streakTarget": 10
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "09a9ff6c-1c84-4a30-a75a-2189d7adf7ce",
+    "codigo": "streak_015",
+    "titulo": "Sequência · 15 Dias",
+    "descricao": "Chegue a 15 dias seguidos de conversa.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 15,
+    "xp_recompensa": 220,
+    "repeticao": "unica",
+    "ordem_inicial": 105,
+    "ativo": true,
+    "config": {
+      "streakTarget": 15
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "1ddcc785-5305-454c-a4aa-0ad65dabc88b",
+    "codigo": "streak_020",
+    "titulo": "Sequência · 20 Dias",
+    "descricao": "Sustente 20 dias consecutivos.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 20,
+    "xp_recompensa": 280,
+    "repeticao": "unica",
+    "ordem_inicial": 106,
+    "ativo": true,
+    "config": {
+      "streakTarget": 20
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "2b61a6c4-1ca8-4dd1-92ea-828419684371",
+    "codigo": "streak_025",
+    "titulo": "Sequência · 25 Dias",
+    "descricao": "Mantenha 25 dias seguidos para consolidar a rotina.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 25,
+    "xp_recompensa": 350,
+    "repeticao": "unica",
+    "ordem_inicial": 107,
+    "ativo": true,
+    "config": {
+      "streakTarget": 25
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "3fdfa6d7-f48a-4724-b854-7d24b2d4a175",
+    "codigo": "streak_030",
+    "titulo": "Sequência · 30 Dias",
+    "descricao": "Chegue ao marco de 30 dias consecutivos de conversa.",
+    "categoria": "habit_core",
+    "tipo": "sistema",
+    "gatilho_tipo": "dias_consecutivos",
+    "gatilho_valor": 30,
+    "xp_recompensa": 450,
+    "repeticao": "unica",
+    "ordem_inicial": 108,
+    "ativo": true,
+    "config": {
+      "streakTarget": 30
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "d564d23f-7345-4b25-88f3-62c6a2f544d7",
+    "codigo": "habit_diaria_conversa",
+    "titulo": "Conversa diária concluída",
+    "descricao": "Finalize pelo menos uma conversa guiada hoje.",
+    "categoria": "habit_daily",
+    "tipo": "sistema",
+    "gatilho_tipo": "diario",
+    "gatilho_valor": 1,
+    "xp_recompensa": 20,
+    "repeticao": "diaria",
+    "ordem_inicial": 201,
+    "ativo": true,
+    "config": {
+      "meta": 1,
+      "prazo": "dia",
+      "autoComplete": "conversa"
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "ef3befe6-4470-4dc1-a53d-7f42724cb574",
+    "codigo": "habit_diaria_reflexao",
+    "titulo": "Reflexão profunda registrada",
+    "descricao": "Complete a conversa com uma reflexão final do dia.",
+    "categoria": "habit_daily",
+    "tipo": "sistema",
+    "gatilho_tipo": "diario",
+    "gatilho_valor": 1,
+    "xp_recompensa": 20,
+    "repeticao": "diaria",
+    "ordem_inicial": 202,
+    "ativo": true,
+    "config": {
+      "meta": 1,
+      "prazo": "dia",
+      "autoComplete": "reflexao"
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  },
+  {
+    "id": "c8900b61-7dc8-4d8f-bdf0-1fc27aef7722",
+    "codigo": "habit_diaria_respiracao",
+    "titulo": "Respiração consciente",
+    "descricao": "Pratique uma sequência de respiração consciente ao longo do dia.",
+    "categoria": "habit_daily",
+    "tipo": "sistema",
+    "gatilho_tipo": "diario",
+    "gatilho_valor": 1,
+    "xp_recompensa": 15,
+    "repeticao": "diaria",
+    "ordem_inicial": 203,
+    "ativo": true,
+    "config": {
+      "meta": 1,
+      "prazo": "dia",
+      "autoComplete": "manual"
+    },
+    "criado_em": "2025-11-05T00:00:00.000Z",
+    "atualizado_em": "2025-11-05T00:00:00.000Z"
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+    "quests_registradas": [
+      {
+        "titulo": "Estabelecer ritual diário de encerramento das operações financeiras às 20 horas",
+        "descricao": "Finalizar todas as operações financeiras até as 20 horas para reduzir ansiedade e promover relaxamento mental à noite.",
+        "contexto_origem": "Gestão da Ansiedade no Mercado Financeiro e Sr. Ansioso (Inquieto)",
+        "prioridade": "alta",
+        "recorrencia": "diaria",
+        "prazo_inicio": "2025-11-07",
+        "prazo_fim": "2025-11-13",
+        "progresso_meta": 7,
+        "status_inicial": "pendente",
+        "xp_recompensa": 25,
+        "payload_extra": {
+          "canal": "app"
+        }
+      }
+    ],
+    "atualizacoes_enviadas": [
+      {
+        "meta_codigo": "qp_1762358590707_19e5bc",
+        "instancia_id": "84894fd4-a581-4122-abe0-01cc811b036b",
+        "novo_status": "cancelada",
+        "progresso_atual": 0,
+        "xp_extra": 0
+      }
+    ],
+    "gamificacao_retorno": {
+      "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+      "xp_total": 0,
+      "nivel_atual": 1,
+      "titulo_nivel": "Recém-Convocado",
+      "xp_proximo_nivel": 300,
+      "xp_ganho": 0,
+      "quests_concluidas_no_evento": 0,
+      "reinicios_registrados": 0,
+      "novas_quests_registradas": [],
+      "atualizacoes_processadas": [],
+      "snapshot_final": {
+        "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+        "xp_total": 0,
+        "nivel_atual": 1,
+        "titulo_nivel": "Recém-Convocado",
+        "xp_proximo_nivel": 300,
+        "sequencia_atual": 0,
+        "sequencia_recorde": 0,
+        "meta_sequencia_codigo": "streak_003",
+        "proxima_meta_codigo": "streak_005",
+        "sequencia_status": {
+          "estado": "ativa",
+          "reinicios": 0,
+          "completado_em": null,
+          "alvo_conversas": 3
+        },
+        "quests_personalizadas": [
+          {
+            "config": {
+              "prioridade": "baixa",
+              "recorrencia": "diaria",
+              "payload_extra": {
+                "canal": "app"
+              }
+            },
+            "status": "cancelada",
+            "titulo": "Organizar a mesa de trabalho ao final do dia",
+            "descricao": "Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.",
+            "meta_codigo": "qp_1762358590707_19e5bc",
+            "concluido_em": null,
+            "instancia_id": "84894fd4-a581-4122-abe0-01cc811b036b",
+            "progresso_meta": 7,
+            "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
+            "progresso_atual": 0
+          },
+          {
+            "config": {
+              "prioridade": "media",
+              "recorrencia": "diaria",
+              "payload_extra": {
+                "canal": "app"
+              }
+            },
+            "status": "pendente",
+            "titulo": "Introduzir 5 minutos de meditação guiada diário",
+            "descricao": "Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.",
+            "meta_codigo": "qp_1762358590707_b49a3c",
+            "concluido_em": null,
+            "instancia_id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
+            "progresso_meta": 7,
+            "contexto_origem": "sugestão personalizada para melhoria do bem-estar mental",
+            "progresso_atual": 0
+          },
+          {
+            "config": {
+              "prioridade": "media",
+              "recorrencia": "diaria",
+              "payload_extra": {
+                "canal": "app"
+              }
+            },
+            "status": "pendente",
+            "titulo": "Fazer 10 minutos de caminhada ao ar livre",
+            "descricao": "Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.",
+            "meta_codigo": "qp_1762358590707_f74aa5",
+            "concluido_em": null,
+            "instancia_id": "5692cad5-fbd9-4250-a22f-e94b05c3bb86",
+            "progresso_meta": 7,
+            "contexto_origem": "sugestão personalizada para saúde física e mental",
+            "progresso_atual": 0
+          },
+          {
+            "config": {
+              "prioridade": "media",
+              "recorrencia": "diaria",
+              "payload_extra": {
+                "canal": "MindQuest App"
+              }
+            },
+            "status": "cancelada",
+            "titulo": "Praticar 5 minutos de meditação diária",
+            "descricao": "Iniciar um hábito diário de meditação por 5 minutos para melhorar o foco e o bem-estar.",
+            "meta_codigo": "qp_1762429911566_1a2181",
+            "concluido_em": null,
+            "instancia_id": "c969988f-0b39-4d15-87fe-c4380f8a5c4b",
+            "progresso_meta": 7,
+            "contexto_origem": "Nenhuma quest ativa ou saboteador recente, ideal para começar a desenvolver micro-hábitos positivos.",
+            "progresso_atual": 0
+          },
+          {
+            "config": {
+              "prioridade": "alta",
+              "recorrencia": "diaria",
+              "payload_extra": {
+                "canal": "app"
+              }
+            },
+            "status": "pendente",
+            "titulo": "Estabelecer ritual diário de encerramento das operações financeiras às 20 horas",
+            "descricao": "Finalizar todas as operações financeiras até as 20 horas para reduzir ansiedade e promover relaxamento mental à noite.",
+            "meta_codigo": "qp_1762444219459_6e18f2",
+            "concluido_em": null,
+            "instancia_id": "4c13546d-62f9-45c1-bc23-2b9b77fcddfb",
+            "progresso_meta": 7,
+            "contexto_origem": "Gestão da Ansiedade no Mercado Financeiro e Sr. Ansioso (Inquieto)",
+            "progresso_atual": 0
+          }
+        ]
+      }
+    }
+  }
+]
