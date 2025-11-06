@@ -25,7 +25,7 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 1 quest personalizada básica
 
 **Critérios para avançar:**
-- Mínimo 5 conversas
+- Cumprir Meta de Sequência 2 (5 conversas consecutivas)
 - Identificar 1 sabotador
 - Concluir 1 quest personalizada
 
@@ -55,9 +55,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 3 quests personalizadas relacionadas a sabotadores
 
 **Critérios para avançar:**
-- 10+ conversas acumuladas
+- Cumprir Meta de Sequência 3 (7 conversas consecutivas)
 - Mapear 3 sabotadores
-- Concluir 3 quests personalizadas
+- Concluir 3 quests personalizadas relacionadas a sabotadores
 
 **Foco Principal:** Mapeamento completo de padrões que travam evolução
 
@@ -86,8 +86,8 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 5 quests personalizadas com pelo menos 1 desafiadora
 
 **Critérios para avançar:**
-- 20+ conversas
-- 5 quests concluídas (1 alta prioridade)
+- Cumprir Meta de Sequência 4 (10 conversas consecutivas)
+- Concluir 5 quests personalizadas (incluindo 1 desafiadora)
 - Testar 3 estratégias novas
 
 **Foco Principal:** Sair da zona de conforto com ações concretas
@@ -117,9 +117,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 8 quests personalizadas + 1 quest recorrente por 21 dias
 
 **Critérios para avançar:**
-- 35+ conversas
-- 8 quests concluídas
-- 1 hábito mantido por 21 dias
+- Cumprir Meta de Sequência 5 (15 conversas consecutivas)
+- Concluir 8 quests personalizadas
+- Manter 1 quest recorrente por 21 dias
 
 **Foco Principal:** Criar rotinas sustentáveis e automáticas
 
@@ -148,8 +148,8 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 12 quests + recuperar de 1 falha sem abandonar
 
 **Critérios para avançar:**
-- 55+ conversas
-- 12 quests concluídas
+- Cumprir Meta de Sequência 6 (20 conversas consecutivas)
+- Concluir 12 quests personalizadas
 - Reagendar ou ajustar 2 quests sem cancelar
 
 **Foco Principal:** Gestão de obstáculos e recalibração inteligente
@@ -179,9 +179,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 15 quests em pelo menos 3 áreas diferentes da vida
 
 **Critérios para avançar:**
-- 75+ conversas
-- 15 quests em 3+ categorias
-- Integração visível entre áreas
+- Cumprir Meta de Sequência 7 (25 conversas consecutivas)
+- Concluir 15 quests em 3+ categorias
+- Demonstrar integração visível entre áreas
 
 **Foco Principal:** Evolução integrada: carreira, relações, saúde, propósito
 
@@ -211,9 +211,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 20 quests + criar e executar 2 quests próprias
 
 **Critérios para avançar:**
-- 100+ conversas
-- 20 quests concluídas
-- 2 quests criadas por você
+- Cumprir Meta de Sequência 8 (30 conversas consecutivas)
+- Concluir 20 quests personalizadas
+- Criar e executar 2 quests próprias
 
 **Foco Principal:** Autonomia total: você lidera sua evolução
 
@@ -242,9 +242,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 25 quests + 3 quests focadas em compartilhar aprendizados
 
 **Critérios para avançar:**
-- 130+ conversas
-- 25 quests concluídas
-- Contribuir com evolução de outros
+- Completar duas metas de sequência consecutivas sem reset (ciclos de 30 dias)
+- Concluir 25 quests (incluindo 3 focadas em compartilhar aprendizados)
+- Contribuir com evolução de outras pessoas
 
 **Foco Principal:** Multiplicar transformação: sua jornada ajuda outros
 
@@ -273,9 +273,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Completar 30 quests + 1 projeto de impacto de longo prazo
 
 **Critérios para avançar:**
-- 170+ conversas
-- 30 quests concluídas
-- 1 projeto de legado ativo
+- Sustentar conversas consistentes por 45+ dias sem reset
+- Concluir 30 quests personalizadas
+- Manter 1 projeto de legado ativo
 
 **Foco Principal:** Propósito maior: contribuição duradoura
 
@@ -304,9 +304,9 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 **Meta Principal:** Evolução contínua e ilimitada alinhada ao propósito
 
 **Critérios para avançar:**
-- 365+ dias
-- Todas conquistas anteriores
-- Estado mental estável 90+ dias
+- Sustentar conversas e evolução contínuas por 12 meses (metas de sequência recorrentes)
+- Cumprir todas as conquistas anteriores
+- Manter estado mental estável 90+ dias
 
 **Foco Principal:** Integração plena: você É a transformação
 
@@ -331,27 +331,24 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 ### Filosofia do Sistema
 
-**Princípio central:** Quests personalizadas são 3-10x mais valiosas que conversas, pois representam ação concreta e transformação real.
+**Princípio central:** Conversas sustentam a jornada; quests consolidam a transformação. Quanto mais consistência, maior o bônus.
 
 ### Conversas Diárias
 *(Meio para gerar insights)*
 
-| Tipo | XP |
+| Ação | XP |
 |------|-----|
-| Conversa padrão | 20 XP |
-| Com insight gerado | 35 XP |
-| Conversa profunda | 50 XP |
+| Conversa concluída | 200 XP |
+| Bônus diário por dia consecutivo (máx. +750) | +50 XP por dia (2º ao 15º) |
+| Meta de sequência concluída | Bônus premium progressivo (ver tabela abaixo) |
 
 ### Quests Personalizadas
 **(MOTOR DA EVOLUÇÃO)**
 
 | Tipo | XP |
 |------|-----|
-| Quest básica | 150 XP |
-| Quest recorrente | 250 XP |
-| Quest desafiadora | 400 XP |
-| Alta prioridade | 500 XP |
-| Projeto longo prazo | 800 XP |
+| Quest única | 150 XP |
+| Quest recorrente | 150 XP + 50 XP por repetição (até 15 consecutivas) |
 
 ### Quests de Sequência
 *(Hábito de conversar)*
@@ -366,6 +363,19 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 | Meta 6 (20 conversas) | 250 XP |
 | Meta 7 (25 conversas) | 340 XP |
 | Meta 8 (30 conversas) | 450 XP |
+
+**Bônus premium por meta concluída**
+
+| Meta | Bônus extra |
+|------|-------------|
+| Meta 1 (3 conversas) | +100 XP |
+| Meta 2 (5 conversas) | +150 XP |
+| Meta 3 (7 conversas) | +200 XP |
+| Meta 4 (10 conversas) | +250 XP |
+| Meta 5 (15 conversas) | +300 XP |
+| Meta 6 (20 conversas) | +350 XP |
+| Meta 7 (25 conversas) | +400 XP |
+| Meta 8 (30 conversas) | +500 XP |
 
 ### Marcos Especiais
 
@@ -387,11 +397,11 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 Para ilustrar o peso das quests personalizadas:
 
-- **1 quest personalizada desafiadora** = 8 conversas profundas
-- **1 projeto de longo prazo** = 16 conversas profundas
-- **1 quest de alta prioridade** = 10 conversas profundas
+- **1 conversa com streak de 5 dias** = 200 + (4 × 50) = 400 XP
+- **1 quest recorrente (3 repetições)** = 150 + (3 × 50) = 300 XP
+- **Meta 5 concluída (15 conversas)** = bônus premium +300 XP além do XP diário acumulado
 
-**Conclusão:** Ação vale muito mais que só refletir.
+**Conclusão:** Conversar com frequência eleva rapidamente o XP, enquanto as quests — especialmente as recorrentes — garante que a evolução saia do papel.
 
 ---
 
