@@ -1,0 +1,358 @@
+[
+  {
+    "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+    "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145",
+    "quests_ativas": [
+      {
+        "id": "84894fd4-a581-4122-abe0-01cc811b036b",
+        "meta_codigo": "qp_1762358590707_19e5bc",
+        "status": "pendente",
+        "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
+        "progresso_meta": 7,
+        "progresso_atual": 0,
+        "concluido_em": null,
+        "titulo": "Organizar a mesa de trabalho ao final do dia",
+        "descricao": "Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.",
+        "config": {
+          "prioridade": "baixa",
+          "recorrencia": "diaria",
+          "payload_extra": {
+            "canal": "app"
+          }
+        }
+      },
+      {
+        "id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
+        "meta_codigo": "qp_1762358590707_b49a3c",
+        "status": "pendente",
+        "contexto_origem": "sugestão personalizada para melhoria do bem-estar mental",
+        "progresso_meta": 7,
+        "progresso_atual": 0,
+        "concluido_em": null,
+        "titulo": "Introduzir 5 minutos de meditação guiada diário",
+        "descricao": "Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.",
+        "config": {
+          "prioridade": "media",
+          "recorrencia": "diaria",
+          "payload_extra": {
+            "canal": "app"
+          }
+        }
+      },
+      {
+        "id": "5692cad5-fbd9-4250-a22f-e94b05c3bb86",
+        "meta_codigo": "qp_1762358590707_f74aa5",
+        "status": "pendente",
+        "contexto_origem": "sugestão personalizada para saúde física e mental",
+        "progresso_meta": 7,
+        "progresso_atual": 0,
+        "concluido_em": null,
+        "titulo": "Fazer 10 minutos de caminhada ao ar livre",
+        "descricao": "Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.",
+        "config": {
+          "prioridade": "media",
+          "recorrencia": "diaria",
+          "payload_extra": {
+            "canal": "app"
+          }
+        }
+      }
+    ],
+    "conversas_recentes": [
+      {
+        "chat_id": "0fcc90ab-adf4-4445-a119-6686c616a8af",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-11-06",
+        "resumo": "Aldo iniciou o dia com disposição, valorizando uma manhã agradável e atividades de autocuidado como caminhada e alongamento. Ele está otimista com o desenvolvimento do seu app, mas ainda preocupado com a instabilidade do mercado financeiro, seu principal foco atualmente. Aldo identificou a necessidade de estabilizar sua operação financeira, buscando métodos para operar com menos pressão e ansiedade, propondo metas curtas e objetivas baseadas na situação atual em Portugal, em vez de comparações com o passado. Demonstrou um plano claro para limitar suas operações de curto prazo em criptomoedas, encerrando-as às 20h para reduzir ansiedade noturna, com reavaliação e metas matinais diárias, além de registrar desempenho e métricas para ajustes. Aldo solicitou a criação de \"quests\" no seu app para apoiar a prática das ações financeiras, equacionando o cuidado financeiro com espaço para lazer e autocuidado, o que facilita sua organização e evolução. Ele vê valor na conexão entre essas ações e o sistema do app, reforçando sua busca por equilíbrio entre disciplina e bem-estar.",
+        "tem_reflexao": true,
+        "total_palavras": 366
+      },
+      {
+        "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-11-03",
+        "resumo": "Aldo começou a semana sentindo muita adrenalina devido à pressão do mercado financeiro. Ele aprimorou suas estratégias deixando alertas configurados e reconhece que não pode controlar o mercado, apenas definir como agir. Ele tem mais agilidade ao executar estratégias baseadas no medo, vendendo rapidamente ao atingir stops, mas sente dificuldade em conter a ansiedade e evitar antecipar entradas baseadas na empolgação, o que causa perdas. Aldo está preso em casa para monitorar alertas, mas na prática ele deixa os gráficos e alertas ativos para realizar outras tarefas, como desenvolver seu app e cuidar da casa, ficando próximo do computador para agir rapidamente. Ele conversa consigo mesmo para manter a calma e segue rigorosamente a estratégia definida com base em dados. Aldo manifesta clareza, disciplina e autoconsciência ao lidar com a pressão e o ritmo acelerado do mercado, embora o controle da ansiedade diante da empolgação e espera pela confirmação do mercado ainda seja um desafio.",
+        "tem_reflexao": true,
+        "total_palavras": 233
+      },
+      {
+        "chat_id": "dd66a9b3-d455-4730-a683-b58ca8bb4a31",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-31",
+        "resumo": "Aldo está mais otimista hoje após uma melhora no mercado financeiro, apesar de ainda lidar com alta ansiedade e mente acelerada, especialmente durante operações no mercado, que afetam seu foco e emoção. Ele tenta aplicar técnicas de pausas curtas para desacelerar o coração, conseguindo em momentos mais calmos do dia, como perto das refeições e antes de dormir. Identificou que as pausas longas de cinco minutos são difíceis durante oscilações rápidas do mercado, onde sente urgência e pressão para agir. Aldo compartilhou insights sobre estratégias de ancoragem, como baixar alavancagem em momentos de crise e consultar gráficos de longo prazo para reduzir o medo e insegurança. Ele reconhece a importância dessas ferramentas para controlar a ansiedade e quer um checklist personalizado para usar durante as operações. Após receber uma lista inicial de técnicas de ancoragem, Aldo expressou que ela não atende perfeitamente suas necessidades, demonstrando autoconhecimento e desejo de ajustar e lapidar esse recurso para seu contexto específico.",
+        "tem_reflexao": true,
+        "total_palavras": 216
+      },
+      {
+        "chat_id": "ec3b2860-defd-4031-be17-d69e68d39776",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-30",
+        "resumo": "Aldo relatou que seu teste comportamental indicou baixa realização, pouca persistência, neuroticismo estável mas alto e baixa disciplina, contradizendo a ideia inicial de disciplina. Ele detalhou a dificuldade com impulsividade no mercado financeiro: após alcançar lucro ao realizar uma meta, recomprou por impulso antes do momento ideal, resultando em perdas e frustração financeira. Expressou sentimentos únicos de raiva e frustração consigo mesmo por cometer erros conscientes e pelo medo de repetir esses padrões. Aldo identificou o \"inquieto\" como seu principal sabotador, responsável por ações impulsivas, especialmente em situações de pressão no mercado, e descreveu uma tentativa frustrada de controlar a ansiedade com respiração. No final, ele mostrou abertura para estratégias práticas como pausas curtas e autorreflexão para melhorar seu autocontrole e persistência.",
+        "tem_reflexao": true,
+        "total_palavras": 204
+      },
+      {
+        "chat_id": "aa972450-4039-41f2-b0c4-5911d4f834f1",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-29",
+        "resumo": "Aldo compartilhou que passou por uma separação após 26 anos de casamento, motivada pela sensação de solidão e falta de acolhimento em casa. Relatou uma infância marcada por solidão e deslocamento, o que intensificou sua necessidade de atenção e afeto, que sentia não receber da ex-mulher nos últimos anos. Ele gosta de passar tempo sozinho, valorizando atividades introspectivas como programação, estudo e trabalho, mas enfrenta um conflito entre seu hiperfoco e a necessidade de atenção nas relações. Recentemente, afastou-se de uma pessoa com quem saiu algumas vezes devido à dedicação intensa ao mercado financeiro e ao desenvolvimento de seu app, o que gerou desencontros afetivos. Aldo sentiu alegria tanto nas novas conexões quanto na motivação pelo seu projeto, e busca equilíbrio entre dedicação ao trabalho e aos relacionamentos, prevendo melhora após o lançamento do app. Atualmente, foca no app, finanças e autocuidado, incluindo academia, caminhadas e momentos de relaxamento, valorizando momentos simples para recarregar energia e preservar seu espaço pessoal.",
+        "tem_reflexao": true,
+        "total_palavras": 678
+      },
+      {
+        "chat_id": "da87d0f2-672e-40f7-a71e-2220f9185b92",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-27",
+        "resumo": "Aldo relatou um estado emocional renovado, marcado por otimismo elevado devido a melhorias no mercado financeiro e progresso significativo no desenvolvimento e marketing do seu app, focado em ser transformador e útil para os usuários, não apenas um gerador de renda. Ele valoriza a conexão familiar, tendo passado tempo agradável com os filhos, e busca explorar aspectos pessoais além do trabalho e finanças, expressando vontade de momentos íntimos e afetuosos com alguém significativo. Aldo esclareceu que seu tempo livre ideal inclui relaxar próximo a alguém querido, além de aprender e compartilhar experiências. Demonstrou clareza em sua estratégia para finalizar o app em uma semana e equilíbrio ao inserir pausas de descanso no dia, embora sua mente acelerada e preocupações dificultem o relaxamento pleno. Ele indicou que a caminhada com música é uma prática importante para renovação, enquanto reconhece, sem conseguir manter disciplina, a tentativa de meditação e respiração consciente. Essas experiências refletem seu esforço contínuo para equilibrar produtividade, descanso e bem-estar emocional.",
+        "tem_reflexao": true,
+        "total_palavras": 295
+      },
+      {
+        "chat_id": "bdd9802e-3805-4500-9f97-c3e2ef3e0f5d",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-26",
+        "resumo": null,
+        "tem_reflexao": false,
+        "total_palavras": 0
+      },
+      {
+        "chat_id": "c2d19ba2-b204-4ea6-b897-994c2a56c6f9",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-26",
+        "resumo": "Aldo acordou muito cedo e disposto, motivado por um dia produtivo anterior em que avançou no detalhamento do seu app focado em desenvolvimento pessoal e no planejamento de estratégias financeiras. Ele sente empolgação e otimismo para a execução das decisões planejadas. O app que desenvolve tem como objetivo principal ajudar no desenvolvimento pessoal, diagnosticando aspectos como sabotadores, perfil comportamental e humor, com suporte de IA, e visa tanto ajudar outras pessoas quanto ser uma fonte financeira para Aldo. Ele valoriza o alinhamento entre paixão por tecnologia, IA e crescimento pessoal, além de utilizar essa jornada para aprendizado e autoconhecimento. Aldo vem numa longa jornada de desenvolvimento pessoal e autoconhecimento, que inclui mudança para Portugal para se afastar da correria do trabalho e focar no crescimento interno, estudo de filosofias como o estoicismo, terapias e experimentos pessoais. Apesar dos percalços financeiros, ele mantém otimismo e vê o projeto como uma chance de transformação pessoal e profissional. Expressa sentimentos de realização, felicidade, otimismo, empolgação e reconforto com seu avanço e o significado do projeto.",
+        "tem_reflexao": true,
+        "total_palavras": 243
+      },
+      {
+        "chat_id": "615a5fad-641f-48bf-bf37-6d30d7197608",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-25",
+        "resumo": "Aldo acordou cheio de energia e motivação para mudar seus ciclos atuais, refletindo sobre estratégias financeiras e outras áreas da vida. Ele identificou que a folga do trabalho e afastamento temporário do mercado financeiro lhe trouxe clareza sobre a importância de não ficar preso exclusivamente às finanças, visto que o mercado está incerto e pode acarretar perdas significativas. Aldo expressa preocupação com a necessidade de decisões difíceis, incluindo reduzir alavancagens para proteger seu capital e alcançar mais tranquilidade para cuidar de outras áreas. Ele descreve seus objetivos principais: reconstruir um relacionamento após o término do casamento, decidir sobre a proximidade com seus filhos (considerando mudar para o Brasil), e retomar projetos profissionais parados, como seu app e a ideia de ter uma empresa própria. A solidão pesa emocionalmente, resultado de um foco excessivo no crescimento profissional e financeiro, que negligenciou outras esferas da vida pessoal. Aldo planeja uma sequência para melhorias: primeiro resolver o financeiro para aliviar o peso, depois reaproximar-se dos filhos para diminuir a solidão, avançar nos negócios e, por último, amadurecer e buscar um relacionamento afetivo saudável. Ele imagina esse futuro ideal com felicidade, envolvendo proximidade familiar, segurança financeira equilibrada e um relacionamento pleno, reconhecendo os desafios para alcançar esse caminho.",
+        "tem_reflexao": true,
+        "total_palavras": 579
+      },
+      {
+        "chat_id": "b9a14db7-e290-4de3-a2be-8cc2075d39df",
+        "session_id": "MindQuestd949d81c-9235-41ce-8b3b-6b5d593c5e24351932786582",
+        "data_conversa": "2025-10-24",
+        "resumo": "Aldo relatou um dia emocionalmente mais tranquilo após enfrentar um problema técnico com seu teclado, o que o forçou a parar e descansar, o que lhe proporcionou uma recuperação emocional temporária. Ele mantém esperança devido aos fundamentos técnicos positivos do Bitcoin no longo prazo, mas sente ansiedade intensa por estar alavancado demais, o que tem aumentado sua pressão emocional. Ele explicou que seu nível de maturidade atual o impede de se preocupar com oscilações de curto prazo, pois acredita firmemente no conceito do Bitcoin, mas está preso no dilema entre aproveitar uma possível alta para recuperar perdas e diminuir a alavancagem para reduzir o risco. Aldo utiliza análises técnicas para gerenciar o risco, estabelecendo margens de segurança baseadas em suportes gráficos, mas foi liquidado devido a uma queda inesperada de 25%, gerando medo e ansiedade constantes sobre novas quedas bruscas. Ele reconhece que se arriscou excessivamente para tentar recuperar dinheiro perdido, o que o mantém em um ciclo de ansiedade entre aproveitar subidas e temer quedas. Para cuidar do seu bem-estar, considera que poderia encontrar paz somente ao assumir o prejuízo e sair do mercado, mesmo que isso implique perder dinheiro. Aldo está preso no dilema de continuar enfrentando a ansiedade para tentar recuperar seu capital ou aceitar a perda para buscar tranquilidade, evidenciando um conflito interno profundo e exaustivo.",
+        "tem_reflexao": true,
+        "total_palavras": 403
+      }
+    ],
+    "insights_recentes": [
+      {
+        "id": "63206fcc-45b6-437c-8b70-625b21a3ca78",
+        "titulo": "Gestão da Ansiedade no Mercado Financeiro",
+        "categoria": "emocional",
+        "tipo": "melhoria",
+        "prioridade": "alta",
+        "resumo": "Aldo demonstra ansiedade significativa relacionada às operações de curto prazo no mercado de criptomoedas, especialmente próxima ao horário de dormir, o que afeta seu descanso e bem-estar emocional.",
+        "criado_em": "2025-11-06T11:51:58.186706"
+      },
+      {
+        "id": "ef545222-59f4-432c-9473-0f2067ac309d",
+        "titulo": "Acompanhamento Objetivo para Redução de Ansiedade",
+        "categoria": "cognitivo",
+        "tipo": "melhoria",
+        "prioridade": "media",
+        "resumo": "Aldo quer acompanhar métricas e resultados diários das operações para evitar decisões impulsivas e melhorar o controle emocional no contexto financeiro.",
+        "criado_em": "2025-11-06T11:51:58.186706"
+      },
+      {
+        "id": "9a3fb5f7-38f4-494f-8ce9-05f70bd6b4fb",
+        "titulo": "Consistência em Pequenas Metas Financeiras e Autocuidado",
+        "categoria": "comportamental",
+        "tipo": "melhoria",
+        "prioridade": "media",
+        "resumo": "Aldo deseja criar metas curtas e alcançáveis focando no presente, evitando pressões do passado, e quer equilibrar o financeiro com autocuidado e lazer para manter a consistência.",
+        "criado_em": "2025-11-06T11:51:58.186706"
+      },
+      {
+        "id": "69198d61-08e2-4509-be45-0e47ca94bfba",
+        "titulo": "Clareza e Organização Estratégica",
+        "categoria": "cognitivo",
+        "tipo": "positivo",
+        "prioridade": "media",
+        "resumo": "Aldo demonstra clareza mental e organização ao definir estratégias no mercado financeiro, configurando alertas e aceitando limites do controle sobre o mercado, focando no que pode ser controlado.",
+        "criado_em": "2025-11-03T09:04:36.753942"
+      },
+      {
+        "id": "412c64b5-4992-43fb-9aa6-e5b562f67b34",
+        "titulo": "Gerenciamento da Ansiedade na Tomada de Decisão",
+        "categoria": "emocional",
+        "tipo": "melhoria",
+        "prioridade": "alta",
+        "resumo": "Aldo demonstra uma ansiedade significativa ao tentar antecipar operações no mercado, especialmente pela vontade de ganhar antes do momento estratégico, o que resulta em perdas. Ele consegue agir rápido movido pelo medo, mas tem dificuldade em manter a paciência na empolgação.",
+        "criado_em": "2025-11-03T09:04:36.753942"
+      },
+      {
+        "id": "1bf0703d-86d7-4d79-a24a-3f3944355f5d",
+        "titulo": "Estratégias para Aliviar a Tensão em Momentos Críticos",
+        "categoria": "comportamental",
+        "tipo": "melhoria",
+        "prioridade": "media",
+        "resumo": "Aldo enfrenta momentos críticos do mercado onde precisa estar próximo do computador, o que aumenta a tensão e limita pausas e distrações, dificultando o manejo do estresse físico e mental.",
+        "criado_em": "2025-11-03T09:04:36.753942"
+      },
+      {
+        "id": "9e098817-2193-421b-9b6e-f2704582fa96",
+        "titulo": "Reconhecimento da capacidade de autogerenciamento emocional",
+        "categoria": "emocional",
+        "tipo": "positivo",
+        "prioridade": "media",
+        "resumo": "Aldo demonstra momentos claros de autocontrole e uso de estratégias cognitivas para gerenciar sua ansiedade no mercado financeiro.",
+        "criado_em": "2025-10-31T13:37:47.587424"
+      },
+      {
+        "id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
+        "titulo": "Criação e ajuste de checklist personalizado de ancoragem",
+        "categoria": "cognitivo",
+        "tipo": "melhoria",
+        "prioridade": "media",
+        "resumo": "Aldo solicitou um checklist de ancoragem para controle da ansiedade, mas rejeitou uma primeira versão por não se adequar bem às suas necessidades.",
+        "criado_em": "2025-10-31T13:37:47.587424"
+      },
+      {
+        "id": "aab8d57f-5ecd-4962-98e0-b9af643c5448",
+        "titulo": "Gestão da ansiedade em momentos de alta pressão",
+        "categoria": "emocional",
+        "tipo": "melhoria",
+        "prioridade": "alta",
+        "resumo": "Aldo enfrenta ansiedade intensa especialmente ao operar no mercado financeiro, com mente acelerada e dificuldade para pausas prolongadas durante momentos críticos.",
+        "criado_em": "2025-10-31T13:37:47.587424"
+      },
+      {
+        "id": "07ad2c89-7981-4796-8fcb-ccc53671f5de",
+        "titulo": "Autoempatia e Gestão da Frustração",
+        "categoria": "emocional",
+        "tipo": "alerta",
+        "prioridade": "media",
+        "resumo": "Aldo sente raiva e frustração por não conseguir seguir o próprio plano, o que aumenta a autocrítica e o medo de repetir erros.",
+        "criado_em": "2025-10-30T15:06:39.883364"
+      }
+    ],
+    "sabotadores_recentes": [
+      {
+        "id": "1ee8eacb-7716-4abf-a05f-5ec20bf8ddb7",
+        "sabotador_id": "inquieto",
+        "apelido": "Sr. Ansioso",
+        "contexto": "financeiro",
+        "insight": "Aldo manifesta ansiedade principalmente relacionada às operações financeiras e sente dificuldade para relaxar, o que impacta seu descanso e bem-estar.",
+        "contramedida": "Estabelecer um ritual diário de encerramento das operações financeiras às 20 horas para sinalizar o momento de relaxar e desacelerar a mente.",
+        "intensidade": 75,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-11-06T00:00:00",
+        "chat_id": "0fcc90ab-adf4-4445-a119-6686c616a8af"
+      },
+      {
+        "id": "c5ba60ec-2a3f-41b3-b4d0-a8088b2f3b2e",
+        "sabotador_id": "controlador",
+        "apelido": "Mestre do Controle",
+        "contexto": "financeiro",
+        "insight": "Aldo sente a necessidade de controlar cada passo da operação financeira, mesmo reconhecendo que não pode controlar o mercado, o que gera estresse e tensão.",
+        "contramedida": "Aceitar a imprevisibilidade do mercado e confiar nas estratégias definidas sem tentar controlar além do possível.",
+        "intensidade": 65,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-11-03T00:00:00",
+        "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145"
+      },
+      {
+        "id": "532fc8f5-8c94-40aa-8f58-070080d33fd0",
+        "sabotador_id": "inquieto",
+        "apelido": "Mente Acelerada",
+        "contexto": "financeiro",
+        "insight": "Aldo apresenta ansiedade e inquietação que o levam a agir antecipadamente contra suas estratégias, perdendo oportunidades e gerando frustração.",
+        "contramedida": "Praticar pausas conscientes com respiração profunda antes de agir no mercado para reduzir a ansiedade.",
+        "intensidade": 75,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-11-03T00:00:00",
+        "chat_id": "456c63a4-680f-42fa-b6f7-2805299d8145"
+      },
+      {
+        "id": "8edafe72-86f2-49d9-b320-764f7e663d4c",
+        "sabotador_id": "inquieto",
+        "apelido": "Mente Acelerada",
+        "contexto": "financeiro",
+        "insight": "Aldo apresenta ansiedade alta e mente acelerada, impactando seu foco e controle nas operações financeiras.",
+        "contramedida": "Praticar técnicas rápidas de ancoragem e pausas curtas para reduzir a ansiedade no momento das operações.",
+        "intensidade": 75,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-31T00:00:00",
+        "chat_id": "dd66a9b3-d455-4730-a683-b58ca8bb4a31"
+      },
+      {
+        "id": "2ce63f0e-4290-4aa7-89bc-9259f6d50f79",
+        "sabotador_id": "hipervigilante",
+        "apelido": "Olho no Mercado",
+        "contexto": "financeiro",
+        "insight": "Aldo antecipa problemas e tem medo constante relacionado às oscilações de mercado, gerando insegurança e ansiedade.",
+        "contramedida": "Criar e usar um checklist de ancoragem para se conectar com estratégias sólidas e reduzir o medo do risco.",
+        "intensidade": 65,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-31T00:00:00",
+        "chat_id": "dd66a9b3-d455-4730-a683-b58ca8bb4a31"
+      },
+      {
+        "id": "181b0633-2201-46ca-b2b1-e28d122c5535",
+        "sabotador_id": "inquieto",
+        "apelido": "Mente Acelerada",
+        "contexto": "financeiro",
+        "insight": "O inquieto está impactando Aldo ao gerar impulsividade e ansiedade no mercado financeiro, levando-o a agir rapidamente sem seguir o plano, o que causa prejuízos.",
+        "contramedida": "Praticar respiração 4-7-8 para acalmar o inquieto antes de decisões impulsivas.",
+        "intensidade": 85,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-30T00:00:00",
+        "chat_id": "ec3b2860-defd-4031-be17-d69e68d39776"
+      },
+      {
+        "id": "bf5ac7fb-9d6f-4df8-9b0b-eb027da76ec7",
+        "sabotador_id": "critico",
+        "apelido": "Voz Crítica",
+        "contexto": "financeiro",
+        "insight": "Aldo está sendo severamente autocrítico, o que aumenta sua frustração e dificulta a autoempatia, afetando sua capacidade de aprender com os erros financeiros.",
+        "contramedida": "Praticar autoempatia, falando consigo mesmo como falaria com um amigo na mesma situação.",
+        "intensidade": 70,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-30T00:00:00",
+        "chat_id": "ec3b2860-defd-4031-be17-d69e68d39776"
+      },
+      {
+        "id": "692026ef-b622-4e0a-9e35-efa590445596",
+        "sabotador_id": "vitima",
+        "apelido": "Senhor Solidão",
+        "contexto": "relacionamentos",
+        "insight": "Aldo carrega um sentimento profundo de solidão e carência afetiva, que o faz sentir-se impotente diante de suas relações pessoais, impactando seu bem-estar emocional e decisões relacionais.",
+        "contramedida": "Praticar a auto-compaixão diária, reconhecendo suas qualidades e criando pequenos rituais de autocuidado que promovam sensação de acolhimento.",
+        "intensidade": 70,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-29T00:00:00",
+        "chat_id": "aa972450-4039-41f2-b0c4-5911d4f834f1"
+      },
+      {
+        "id": "f2836b4a-c324-4010-978e-53de86d73fb2",
+        "sabotador_id": "hiper_racional",
+        "apelido": "Mente Lógica",
+        "contexto": "profissional",
+        "insight": "Aldo mostra um forte foco na lógica e no controle do trabalho, evitando demonstrar ou lidar abertamente com suas emoções em ambientes profissionais, o que pode criar exaustão mental e desequilíbrio emocional.",
+        "contramedida": "Incorporar pausas regulares para prática de mindfulness ou meditação para se conectar com as emoções e reduzir o excesso de racionalização.",
+        "intensidade": 55,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-29T00:00:00",
+        "chat_id": "aa972450-4039-41f2-b0c4-5911d4f834f1"
+      },
+      {
+        "id": "276f59ab-4027-4b33-b90e-9f6941383ad5",
+        "sabotador_id": "inquieto",
+        "apelido": "Mente Acelerada",
+        "contexto": "financeiro",
+        "insight": "Aldo apresenta sinais de ansiedade e dificuldade de relaxar devido à pressão e dedicação intensa em sua vida financeira e profissional, o que pode comprometer sua saúde e bem-estar.",
+        "contramedida": "Estabelecer um horário fixo para descanso e técnicas de relaxamento para diminuir o ritmo mental acelerado.",
+        "intensidade": 50,
+        "total_deteccoes": 1,
+        "data_ultima_atividade": "2025-10-29T00:00:00",
+        "chat_id": "aa972450-4039-41f2-b0c4-5911d4f834f1"
+      }
+    ]
+  }
+]

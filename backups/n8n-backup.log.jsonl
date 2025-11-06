@@ -1,0 +1,36 @@
+[
+  {
+    "dataBackup": "2025-11-06T18:22:18.394Z",
+    "pastas": [
+      {
+        "pasta": ".",
+        "arquivos": [
+          "Assistente_de_suporte.json",
+          "chat_onboarding.json",
+          "dash_authentication.json",
+          "dash_conversa_full.json",
+          "dash_conversa_resumo.json",
+          "dash_historico_humor.json",
+          "dash_insights_detalhes.json",
+          "dash_quests.json",
+          "expert_quest_personalizadas.json",
+          "My_workflow_4.json",
+          "sw_agent_conversation_guide.json",
+          "sw_chat_interations_v2.json",
+          "sw_chat_transcription.json",
+          "sw_expert_bigfive_ocean.json",
+          "sw_expert_humor_energia.json",
+          "sw_expert_insights_acionaveis.json",
+          "sw_expert_sabotadores.json",
+          "sw_experts_gamification.json",
+          "sw_experts_panas.json",
+          "sw_get_history.json",
+          "sw_send_message_with_retry.json",
+          "sw_trader_cripto_guide.json",
+          "sw_user_conversation_guide.json",
+          "usr_chat.json"
+        ]
+      }
+    ]
+  }
+]
