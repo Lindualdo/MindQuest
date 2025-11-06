@@ -45,7 +45,7 @@
         "operation": "executeQuery",
         "query": "WITH quests AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    COALESCE(qi.contexto_origem, '') AS contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qi.concluido_em,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n    AND qi.status IN ('pendente','ativa')\n)\nSELECT json_build_object(\n  'quests_ativas',\n  COALESCE(json_agg(quests ORDER BY quests.concluido_em NULLS FIRST), '[]'::json)\n) AS contexto\nFROM quests;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
+          "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
       "id": "d76ea72d-1423-4af9-885a-07aacb0c38f9",
@@ -68,7 +68,7 @@
         "operation": "executeQuery",
         "query": "WITH ultimas AS (\n  SELECT\n    uc.id,\n    uc.session_id,\n    uc.data_conversa,\n    uc.resumo_conversa,\n    uc.tem_reflexao,\n    uc.total_palavras_usuario,\n    uc.criado_em\n  FROM public.usr_chat uc\n  WHERE uc.usuario_id = $1::uuid\n  ORDER BY uc.data_conversa DESC, uc.criado_em DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'conversas_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'chat_id', ultimas.id,\n      'session_id', ultimas.session_id,\n      'data_conversa', ultimas.data_conversa,\n      'resumo', ultimas.resumo_conversa,\n      'tem_reflexao', ultimas.tem_reflexao,\n      'total_palavras', ultimas.total_palavras_usuario\n    )\n    ORDER BY ultimas.data_conversa DESC, ultimas.criado_em DESC\n  ), '[]'::json)\n) AS conversas\nFROM ultimas;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
+          "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
       "id": "6badd6e8-2e8e-4d62-8fdc-6941fc42cdcf",
@@ -91,7 +91,7 @@
         "operation": "executeQuery",
         "query": "WITH ultimos AS (\n  SELECT\n    i.id,\n    i.titulo,\n    i.categoria,\n    i.tipo,\n    i.prioridade,\n    i.resumo_situacao,\n    i.criado_em\n  FROM public.insights i\n  WHERE i.usuario_id = $1::uuid\n  ORDER BY i.criado_em DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'insights_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', ultimos.id,\n      'titulo', ultimos.titulo,\n      'categoria', ultimos.categoria,\n      'tipo', ultimos.tipo,\n      'prioridade', ultimos.prioridade,\n      'resumo', ultimos.resumo_situacao,\n      'criado_em', ultimos.criado_em\n    )\n    ORDER BY ultimos.criado_em DESC\n  ), '[]'::json)\n) AS insights\nFROM ultimos;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
+          "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
       "id": "d3d8f27e-25c0-4fac-aa93-2905713c6d58",
@@ -114,7 +114,7 @@
         "operation": "executeQuery",
         "query": "WITH ultimos AS (\n  SELECT\n    us.id,\n    us.sabotador_id,\n    us.apelido_personalizado,\n    us.contexto_principal,\n    us.insight_atual,\n    us.contramedida_ativa,\n    us.intensidade_media,\n    us.total_deteccoes,\n    us.data_ultima_atividade,\n    us.atualizado_em,\n    us.chat_id\n  FROM public.usuarios_sabotadores us\n  WHERE us.usuario_id = $1::uuid\n  ORDER BY COALESCE(us.data_ultima_atividade, us.atualizado_em) DESC\n  LIMIT 10\n)\nSELECT json_build_object(\n  'sabotadores_recentes',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', ultimos.id,\n      'sabotador_id', ultimos.sabotador_id,\n      'apelido', ultimos.apelido_personalizado,\n      'contexto', ultimos.contexto_principal,\n      'insight', ultimos.insight_atual,\n      'contramedida', ultimos.contramedida_ativa,\n      'intensidade', ultimos.intensidade_media,\n      'total_deteccoes', ultimos.total_deteccoes,\n      'data_ultima_atividade', COALESCE(ultimos.data_ultima_atividade, ultimos.atualizado_em),\n      'chat_id', ultimos.chat_id\n    )\n    ORDER BY COALESCE(ultimos.data_ultima_atividade, ultimos.atualizado_em) DESC\n  ), '[]'::json)\n) AS sabotadores\nFROM ultimos;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
+          "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
       "id": "f8afbb65-f8e6-43c4-9ea4-fdad4043967b",
@@ -134,7 +134,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $items(\"Normalizar Entrada\", 0, 0).json || {};\nconst quests = $items(\"Buscar Quests Ativas\", 0, 0).json?.contexto || {};\nconst conversas = $items(\"Buscar Conversas Recentes\", 0, 0).json || {};\nconst insights = $items(\"Buscar Insights Recentes\", 0, 0).json || {};\nconst sabotadores = $items(\"Buscar Sabotadores Recentes\", 0, 0).json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || []\n  }\n}];"
+        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst questsRaw = getJson(\"Buscar Quests Ativas\");\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst insightsRaw = getJson(\"Buscar Insights Recentes\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Recentes\");\n\nconst quests = questsRaw.contexto || {};\nconst conversas = conversasRaw.conversas || {};\nconst insights = insightsRaw.insights || {};\nconst sabotadores = sabotadoresRaw.sabotadores || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || []\n  }\n}];"
       },
       "id": "4db586bf-0aef-4267-8b0f-ed5dbd12a26e",
       "name": "Montar Contexto",
@@ -199,7 +199,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const contexto = $items(\"Montar Contexto\", 0, 0).json || {};\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : []\n  }\n}];"
+        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst contexto = getJson(\"Montar Contexto\");\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : []\n  }\n}];"
       },
       "id": "5806f101-117e-49cd-bd08-c25227c48b4b",
       "name": "Interpretar Resultado",
@@ -287,7 +287,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $items(\"Aplicar Limites & Dedupe\", 0, 0).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
+        "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
       },
       "id": "bdc2ac47-7de1-490c-83d3-d702cd8b98e0",
       "name": "Montar Saída",
