@@ -1,26 +1,5 @@
 [
   {
-    "id": "84894fd4-a581-4122-abe0-01cc811b036b",
-    "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-    "modelo_id": "bdb8a17b-9573-4c61-b359-9790c8644ca5",
-    "meta_codigo": "qp_1762358590707_19e5bc",
-    "status": "cancelada",
-    "progresso_atual": 0,
-    "progresso_meta": 7,
-    "progresso_percentual": 0,
-    "xp_concedido": 10,
-    "tentativas": 1,
-    "janela_inicio": "2024-04-27T00:00:00.000Z",
-    "janela_fim": "2024-05-03T00:00:00.000Z",
-    "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
-    "referencia_data": "2024-04-27T00:00:00.000Z",
-    "reiniciada_em": null,
-    "ativado_em": "2025-11-05T16:03:10.728Z",
-    "atualizado_em": "2025-11-06T19:17:43.523Z",
-    "concluido_em": null,
-    "cancelado_em": "2025-11-06T19:17:43.523Z"
-  },
-  {
     "id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
     "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
     "modelo_id": "00ec3511-abe8-4b77-954b-2acf05ac5c7e",
