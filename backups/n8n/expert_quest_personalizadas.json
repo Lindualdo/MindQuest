@@ -18,26 +18,26 @@
           ]
         }
       },
-      "id": "ad64497c-c73f-4b86-b5d5-32cfbde5fe22",
+      "id": "60596cc9-7cfc-4979-be99-1d8f3412caa1",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1504,
-        368
+        -1552,
+        192
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
       },
-      "id": "4d8ca7fe-6724-42ff-9250-c820921b61f3",
+      "id": "7edc7490-96c7-42d8-9054-f375b570ee28",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1264,
-        368
+        -1312,
+        192
       ]
     },
     {
@@ -48,13 +48,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "d76ea72d-1423-4af9-885a-07aacb0c38f9",
+      "id": "b863c501-3bc3-42f3-9e90-851fd95cadd3",
       "name": "Buscar Quests Ativas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1040,
-        368
+        -1088,
+        192
       ],
       "credentials": {
         "postgres": {
@@ -71,13 +71,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "6badd6e8-2e8e-4d62-8fdc-6941fc42cdcf",
+      "id": "0d5035c4-6f98-41b2-936c-e9d1016fa741",
       "name": "Buscar Conversas Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -832,
-        368
+        -880,
+        192
       ],
       "credentials": {
         "postgres": {
@@ -94,13 +94,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "d3d8f27e-25c0-4fac-aa93-2905713c6d58",
+      "id": "1c0dc130-1eb8-4157-a363-21a288ef794f",
       "name": "Buscar Insights Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -640,
-        368
+        -688,
+        192
       ],
       "credentials": {
         "postgres": {
@@ -117,13 +117,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "f8afbb65-f8e6-43c4-9ea4-fdad4043967b",
+      "id": "f8b5f700-e078-47e0-99f9-bfb03b89a02e",
       "name": "Buscar Sabotadores Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -432,
-        368
+        -480,
+        192
       ],
       "credentials": {
         "postgres": {
@@ -136,13 +136,13 @@
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst questsRaw = getJson(\"Buscar Quests Ativas\");\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst insightsRaw = getJson(\"Buscar Insights Recentes\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Recentes\");\n\nconst quests = questsRaw.contexto || {};\nconst conversas = conversasRaw.conversas || {};\nconst insights = insightsRaw.insights || {};\nconst sabotadores = sabotadoresRaw.sabotadores || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || []\n  }\n}];"
       },
-      "id": "4db586bf-0aef-4267-8b0f-ed5dbd12a26e",
+      "id": "3682941a-a3e5-4236-9785-c1384442dd08",
       "name": "Montar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
-        368
+        -272,
+        192
       ]
     },
     {
@@ -152,13 +152,13 @@
           "temperature": 0.2
         }
       },
-      "id": "edd902a7-3c62-4af2-ac1e-a4b1ff130246",
+      "id": "b29b3b59-71ed-4f13-a4f6-930a7afd981a",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -240,
-        752
+        -288,
+        576
       ],
       "credentials": {
         "openRouterApi": {
@@ -174,13 +174,13 @@
         "hasOutputParser": true,
         "options": {}
       },
-      "id": "257b8017-9433-47b2-a23b-72ddbdc158bd",
+      "id": "110e401b-6035-4d57-8888-887e841ab334",
       "name": "Agente Quests",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -16,
-        368
+        -64,
+        192
       ]
     },
     {
@@ -188,39 +188,39 @@
         "jsonSchemaExample": "{\"novas_quests\":[{\"titulo\":\"Check-in matinal\",\"descricao\":\"Registrar uma vitória pequena toda manhã\",\"contexto_origem\":\"manter_foco\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-05\",\"prazo_fim\":\"2025-11-11\",\"progresso_meta\":5,\"status_inicial\":\"pendente\",\"xp_recompensa\":40,\"payload_extra\":{\"canal\":\"app\"}}],\"atualizacoes\":[{\"meta_codigo\":\"quest_custom_001\",\"instancia_id\":\"00000000-0000-0000-0000-000000000000\",\"novo_status\":\"concluida\",\"progresso_atual\":3,\"xp_extra\":20}]}",
         "autoFix": true
       },
-      "id": "7d6d3684-0784-466c-a916-3713075f41a3",
+      "id": "8c258a75-0e26-4862-a1f6-bbf01b7e5f2c",
       "name": "Parser JSON",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        112,
-        656
+        80,
+        480
       ]
     },
     {
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst contexto = getJson(\"Montar Contexto\");\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : []\n  }\n}];"
       },
-      "id": "5806f101-117e-49cd-bd08-c25227c48b4b",
+      "id": "aee4cc99-9a47-43d6-aff9-2bb9367648ce",
       "name": "Interpretar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        336,
-        368
+        304,
+        192
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\nconst existentes = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst limite = 4;\nconst dedupe = new Set();\n\nfor (const ativo of existentes) {\n  const key = `${(ativo.contexto_origem || '').toLowerCase()}|${(ativo.titulo || '').toLowerCase()}`;\n  dedupe.add(key);\n}\n\nconst novas = [];\nfor (const quest of entrada.novas_quests_sugeridas || []) {\n  if (!quest || typeof quest !== 'object') continue;\n  const key = `${(quest.contexto_origem || '').toLowerCase()}|${(quest.titulo || '').toLowerCase()}`;\n  if (dedupe.has(key)) continue;\n  if (existentes.length + novas.length >= limite) break;\n  dedupe.add(key);\n  novas.push({\n    ...quest,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: quest.progresso_meta ?? 1,\n    xp_recompensa: quest.xp_recompensa ?? 0\n  });\n}\n\nconst atualizacoes = [];\nfor (const upd of entrada.atualizacoes_sugeridas || []) {\n  if (!upd || typeof upd !== 'object') continue;\n  const novoStatus = upd.novo_status || '';\n  if (!['concluida','vencida','cancelada','reiniciada'].includes(novoStatus)) continue;\n  atualizacoes.push({\n    meta_codigo: upd.meta_codigo || null,\n    instancia_id: upd.instancia_id || null,\n    novo_status: novoStatus,\n    progresso_atual: upd.progresso_atual ?? 0,\n    xp_extra: upd.xp_extra ?? 0\n  });\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: novas,\n    atualizacoes: atualizacoes\n  }\n}];"
       },
-      "id": "b128cd24-f83a-4feb-b051-6f3da4c38227",
+      "id": "74dae15e-6cec-4966-96f6-7cc68870af42",
       "name": "Aplicar Limites & Dedupe",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        544,
-        368
+        512,
+        192
       ]
     },
     {
@@ -276,26 +276,26 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "82312510-b294-426d-8348-ce4e8759c496",
+      "id": "4fc8de75-baad-4b3c-bc05-1c31737d682f",
       "name": "Chamar Gamificação",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        768,
-        368
+        736,
+        192
       ]
     },
     {
       "parameters": {
         "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
       },
-      "id": "bdc2ac47-7de1-490c-83d3-d702cd8b98e0",
+      "id": "8c286062-b43b-43c5-bd81-4ee5671337a2",
       "name": "Montar Saída",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
-        368
+        944,
+        192
       ]
     }
   ],
@@ -464,7 +464,7 @@
       }
     ]
   },
-  "versionId": "a53b0eb4-404f-40c6-b39e-b8350297ea9d",
+  "versionId": "1cf80481-4466-4cdb-ae47-7dbf40f5473d",
   "triggerCount": 0,
   "shared": [
     {

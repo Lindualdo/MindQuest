@@ -10,7 +10,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -208,
+        -272,
         -48
       ],
       "id": "d8049be7-7253-4013-bc97-b3c53ba40dbe",
@@ -36,7 +36,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        16,
+        -64,
         -48
       ],
       "id": "04b12cf0-77d0-4fc6-ba50-4e5b82781a86",
@@ -58,16 +58,16 @@
         },
         "table": {
           "__rl": true,
-          "value": "usuarios_quest",
+          "value": "quest_estado_usuario",
           "mode": "list",
-          "cachedResultName": "usuarios_quest"
+          "cachedResultName": "quest_estado_usuario"
         },
         "returnAll": true,
         "where": {
           "values": [
             {
               "column": "usuario_id",
-              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
             }
           ]
         },
@@ -76,11 +76,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        240,
+        160,
         -48
       ],
-      "id": "d9ae6607-e1c0-43f5-a0a2-95e7e88b4275",
-      "name": "Usuarios quest",
+      "id": "714ca14a-503d-4de2-bfe2-0c42715d4252",
+      "name": "estado usuario",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -98,16 +98,16 @@
         },
         "table": {
           "__rl": true,
-          "value": "gamificacao",
+          "value": "quest_instancias",
           "mode": "list",
-          "cachedResultName": "gamificacao"
+          "cachedResultName": "quest_instancias"
         },
         "returnAll": true,
         "where": {
           "values": [
             {
               "column": "usuario_id",
-              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
             }
           ]
         },
@@ -116,11 +116,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        480,
+        384,
         -48
       ],
-      "id": "fa3ad44c-c5e8-4a3f-9453-7551353645c2",
-      "name": "Gamificacao",
+      "id": "97405d4f-453e-43a8-8a25-741a500c621c",
+      "name": "quest instancias",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -138,16 +138,28 @@
         },
         "table": {
           "__rl": true,
-          "value": "gamificacao",
+          "value": "usuarios_sabotadores",
           "mode": "list",
-          "cachedResultName": "gamificacao"
+          "cachedResultName": "usuarios_sabotadores"
         },
-        "returnAll": true,
+        "limit": 10,
         "where": {
           "values": [
             {
               "column": "usuario_id",
-              "value": "015e4e4c-ac43-4071-b580-4b0b75713d76"
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "data_ultima_atividade",
+              "direction": "DESC"
+            },
+            {
+              "column": "atualizado_em",
+              "direction": "DESC"
             }
           ]
         },
@@ -156,11 +168,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        704,
+        608,
         -48
       ],
-      "id": "3dcd1720-3918-427f-aa8d-cc708d0ed1f2",
-      "name": "Gamificacao Niveis",
+      "id": "eec3a8a1-9801-4fd2-af32-d025c1fc7e7f",
+      "name": "sabotadores",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -170,18 +182,49 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH dados_estado AS (\n  SELECT\n    eu.usuario_id,\n    eu.nivel_atual,\n    eu.xp_total,\n    eu.total_quests_personalizadas,\n    eu.total_quests_concluidas,\n    eu.total_xp_hoje,\n    eu.sequencia_atual,\n    eu.sequencia_recorde,\n    eu.meta_sequencia_codigo,\n    eu.proxima_meta_codigo,\n    eu.sequencia_status\n  FROM public.quest_estado_usuario eu\n  WHERE eu.usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'\n),\ninstancias AS (\n  SELECT\n    qi.usuario_id,\n    qi.id AS instancia_id,\n    qi.meta_codigo,\n    qi.status AS instancia_status,\n    qi.progresso_atual,\n    qi.progresso_meta,\n    qi.xp_concedido,\n    qi.janela_inicio,\n    qi.janela_fim,\n    qi.contexto_origem,\n    qi.ativado_em,\n    qi.concluido_em,\n    qi.cancelado_em,\n    qi.reiniciada_em,\n    qm.id AS modelo_id,\n    qm.codigo AS modelo_codigo,\n    qm.titulo,\n    qm.descricao,\n    qm.tipo,\n    qm.gatilho_codigo,\n    qm.gatilho_valor,\n    qm.xp_recompensa,\n    qm.repeticao,\n    qm.ativo,\n    qm.config,\n    qm.criado_em AS modelo_criado_em\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'\n)\nSELECT\n  COALESCE(de.usuario_id, instancias.usuario_id) AS usuario_id,\n  de.nivel_atual,\n  de.xp_total,\n  de.total_quests_personalizadas,\n  de.total_quests_concluidas,\n  de.total_xp_hoje,\n  de.sequencia_atual,\n  de.sequencia_recorde,\n  de.meta_sequencia_codigo,\n  de.proxima_meta_codigo,\n  de.sequencia_status,\n  instancias.instancia_id,\n  instancias.meta_codigo,\n  instancias.instancia_status,\n  instancias.progresso_atual,\n  instancias.progresso_meta,\n  instancias.xp_concedido,\n  instancias.janela_inicio,\n  instancias.janela_fim,\n  instancias.contexto_origem,\n  instancias.ativado_em,\n  instancias.concluido_em,\n  instancias.cancelado_em,\n  instancias.reiniciada_em,\n  instancias.modelo_id,\n  instancias.modelo_codigo,\n  instancias.titulo,\n  instancias.descricao,\n  instancias.tipo,\n  instancias.gatilho_codigo,\n  instancias.gatilho_valor,\n  instancias.xp_recompensa,\n  instancias.repeticao,\n  instancias.ativo,\n  instancias.config AS modelo_config,\n  instancias.modelo_criado_em\nFROM dados_estado de\nFULL JOIN instancias ON instancias.usuario_id = de.usuario_id\nORDER BY instancias.ativado_em NULLS LAST, instancias.modelo_codigo;\n",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "insights",
+          "mode": "list",
+          "cachedResultName": "insights"
+        },
+        "limit": 10,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "criado_em",
+              "direction": "DESC"
+            },
+            {
+              "column": "criado_em",
+              "direction": "DESC"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        32,
-        176
+        832,
+        -48
       ],
-      "id": "41f55285-9127-4bc0-9224-2aef6bed70fa",
-      "name": "Execute a SQL query",
+      "id": "adcf625e-909d-4429-ac34-7e4218c98621",
+      "name": "Insights",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -200,16 +243,6 @@
       "main": [
         []
       ]
-    },
-    "Usuarios quest": {
-      "main": [
-        []
-      ]
-    },
-    "Gamificacao": {
-      "main": [
-        []
-      ]
     }
   },
   "settings": {
@@ -220,7 +253,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b0550fec-ada4-47d6-a74a-3b7a0a75a776",
+  "versionId": "e72830ea-b485-43a4-a2ca-af70b508b470",
   "triggerCount": 0,
   "shared": [
     {

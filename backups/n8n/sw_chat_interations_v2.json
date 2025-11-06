@@ -630,58 +630,6 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "LKjU8NE9aNHw7kEh",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
-          "cachedResultName": "expert_quest_personalizadas"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "usuario_id": "={{ $json.usuario_id }}",
-            "chat_id": "={{ $('Grava_chat').item.json.id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": false
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        1728,
-        960
-      ],
-      "id": "f74c9646-c3a8-4ad9-93ba-63af4fec5c46",
-      "name": "Gamificação"
-    },
-    {
-      "parameters": {
         "mode": "delete",
         "deleteMode": "all"
       },
@@ -1531,6 +1479,58 @@
       ],
       "id": "9db8775a-5d86-44ee-9b71-5ef5a3533bde",
       "name": "Assistente de Reflexão"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LKjU8NE9aNHw7kEh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "cachedResultName": "expert_quest_personalizadas"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $('Grava_chat').item.json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        960
+      ],
+      "id": "f74c9646-c3a8-4ad9-93ba-63af4fec5c46",
+      "name": "cria os quests personalizados"
     }
   ],
   "connections": {
@@ -1816,7 +1816,7 @@
       "main": [
         [
           {
-            "node": "Gamificação",
+            "node": "cria os quests personalizados",
             "type": "main",
             "index": 0
           }
@@ -1968,115 +1968,19 @@
     "start": [
       {
         "json": {
-          "usr_id": "21187ef1-9728-4a92-b6fc-35b3dac100cb",
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.id": "AC02292DDC38B01B5726C41425882DE2",
-          "body.data.key.remoteJid": "559981768033@s.whatsapp.net",
+          "body.data.key.id": "2AB9D848E5BCA6D11710",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Marcello G.",
-          "body.data.message.conversation": "Olá",
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "está bom assim",
           "body.data.messageType": "conversation"
-        }
-      }
-    ],
-    "Gamificação": [
-      {
-        "json": {
-          "id": "5f64dfa8-11a7-4af5-8deb-2b087135a52f",
-          "usuario_id": "21187ef1-9728-4a92-b6fc-35b3dac100cb",
-          "session_id": "MindQuest21187ef1-9728-4a92-b6fc-35b3dac100cb559981768033",
-          "data_conversa": "Wed Nov 05 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
-          "horario_inicio": "04:10:30.846532",
-          "horario_fim": "04:10:30.846532",
-          "total_interactions": 6,
-          "status": "completa",
-          "mensagens": [
-            {
-              "autor": "usuario",
-              "texto": "Olá",
-              "timestamp": "2025-11-05T04:10:30.839Z",
-              "interaction": 1
-            },
-            {
-              "autor": "agente",
-              "texto": "Oi, Marcello! Que bom receber seu “olá” por aqui.  \n\nComo está se sentindo hoje?  \n\nMe conta um pouco do que anda passando, ou algo que você queira explorar juntos.  \n\n• Pode ser algo que esteja te deixando inquieto ou, quem sabe, algo que te trouxe alguma alegria.  \n• Também podemos pensar em pequenas ações que te ajudem a clarear a mente ou cuidar do que importa pra você.  \n\nTopa compartilhar um pouco?",
-              "timestamp": "2025-11-05T04:10:30.839Z",
-              "interaction": 1
-            },
-            {
-              "autor": "usuario",
-              "texto": "Estou com medo , peguei um projeto de trabalho cujo qual eu não tenho praticamente nenhuma autoridade, Conhecimento prático ou conhecimento técnico .\n\nVendi a ideia que foi aceita , mas estou \"demorando\" ao menos é o que eu sinto , e apesar de estar indo bem , cheguei a conclusão que estou com medo. \n\nMedo desse novo momento , medo da responsabilidade, medo das consequências, medo das oportunidades, medo de dar certo. \n\nEstou tendo algum apoio importante. \n\nMas estou com medo. E só o que eu consigo sentir.",
-              "timestamp": "2025-11-05T04:10:30.839Z",
-              "interaction": 2
-            },
-            {
-              "autor": "agente",
-              "texto": "Marcello, que coragem você está mostrando ao assumir algo tão grande mesmo se sentindo assim, com medo. É bem normal esse frio na barriga quando encaramos o desconhecido.\n\nEsse medo que você sente, inteiro, revela o quanto você está consciente da responsabilidade e das possibilidades desse projeto. Medo de dar certo, de errar ou de simplesmente estar no papel que aceitou pode deixar tudo muito intenso.\n\nSe quiser, podemos explorar juntos onde esse medo pesa mais para você:  \n• Talvez seja o medo de não ter todo o conhecimento técnico que imagina precisar.  \n• Ou o peso da responsabilidade em liderar ou tomar decisões.  \n• Ou até o receio das consequências, boas ou ruins, que essa nova fase pode trazer.  \n\nComo está sendo esse apoio que você mencionou? Conta um pouco de quem são essas pessoas e o que elas têm feito por você nesse momento. Topa?",
-              "timestamp": "2025-11-05T04:10:30.839Z",
-              "interaction": 2
-            },
-            {
-              "autor": "usuario",
-              "texto": "Esse apoio me motiva , me mostra o lado positivo me mostra e incentiva a comemorar minhas pequenas vitórias. \n\nMas estou preso em um sentimento de ver todo o negativo de tudo que faço.",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 3
-            },
-            {
-              "autor": "agente",
-              "texto": "Entendo, Marcello, é difícil quando o olhar pesa mais para o negativo mesmo com tanto incentivo ao redor.\n\nEsse tipo de sensação pode deixar tudo ainda mais desafiador, como se as conquistas ficassem invisíveis perto dos erros ou das dúvidas.\n\nÀs vezes, o cérebro acaba focando no que pode dar errado para tentar nos proteger, mesmo que isso gere ansiedade ou insegurança.\n\nQue tal experimentar algumas maneiras de equilibrar esse olhar tão crítico?  \n• Você pode tentar anotar as pequenas vitórias do dia, mesmo as que parecem simples.  \n• Outra ideia é reconhecer quando surge aquele pensamento negativo e questionar se ele é totalmente verdadeiro ou só uma parte da história.  \n• Talvez também ajude criar pequenos momentos para celebrar, mesmo que seja só um reconhecimento interno, como um “eu consegui hoje”.  \n\nQuer tentar pensar em algum desses jeitos para trazer mais leveza para esses dias?",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 3
-            },
-            {
-              "autor": "usuario",
-              "texto": "Olá ?",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 4
-            },
-            {
-              "autor": "agente",
-              "texto": "Oi, Marcello! Que bom te ver por aqui de novo.\n\nMesmo com o medo e o olhar duro que você sente, parece que você já tem uma força grande para seguir em frente.\n\nMe conta, o que você tem percebido de diferente em você desde que começou esse projeto?  \n\n• Pode ser um aprendizado, uma mudança de atitude ou até um pequeno passo que antes parecia impossível.  \n• Ou talvez algo que te surpreendeu em como está lidando com as dificuldades.  \n• Ou até um jeito novo de encarar o medo, por menor que seja.  \n\nQuer refletemos juntos sobre isso?",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 4
-            },
-            {
-              "autor": "usuario",
-              "texto": "Estou imerso no projeto pra dar conta. \n\nTentando aprender e fazer o que precisa ser feito.\n\nFico surpreso com meu avanço mas sinto que não sei o que estou fazendo.",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 5
-            },
-            {
-              "autor": "agente",
-              "texto": "Marcello, você está realmente mergulhado nesse projeto, se esforçando para aprender e fazer o que precisa, mesmo sentindo que está na dúvida sobre o que exatamente está fazendo.\n\nPercebo que, embora você se surpreenda com o progresso que tem feito, essa sensação de não ter total clareza pode gerar um certo desconforto e insegurança.\n\nÉ como se você estivesse navegando em um mar novo, aprendendo a cada onda, mas ainda se acostumando com o barco.\n\nSerá que faz sentido essa forma como estou vendo o que você está vivendo? Quer ajustar algum ponto ou compartilhar algo que ache importante?",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 5
-            },
-            {
-              "autor": "usuario",
-              "texto": "Olá",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 6
-            },
-            {
-              "autor": "agente",
-              "texto": "Oi, Marcello! Você tem avançado muito, mesmo com as dúvidas e medos — isso já é um grande passo.\n\nReconhecer seus sentimentos, se lançar no projeto e seguir aprendendo mostra uma força incrível que talvez você nem perceba direito ainda.\n\nQue tal continuar cuidando desse processo aos poucos, celebrando cada vitória, mesmo as pequenas?  \n\nQuando quiser, o App MindQuest está aqui para te acompanhar nesse caminho, sempre que precisar.\n\nQuer fechar por aqui hoje e retomar quando sentir vontade de continuar?",
-              "timestamp": "2025-11-05T04:10:30.840Z",
-              "interaction": 6
-            }
-          ],
-          "processada_em": null,
-          "criado_em": "2025-11-05T04:10:30.846Z",
-          "atualizado_em": "2025-11-05T04:10:30.846Z",
-          "resumo_conversa": "Marcello está enfrentando medo intenso em assumir um projeto de trabalho para o qual não tem autoridade nem conhecimento técnico, mesmo tendo vendido a ideia e obtido apoio motivador que destaca suas pequenas vitórias. Ele sente um foco negativo intenso sobre suas ações, apesar do suporte externo. Marcello está imerso no projeto, tentando aprender e agir, surpreendendo-se com seu avanço, mas mantém a sensação de não saber exatamente o que está fazendo. Seus sentimentos dominantes são medo, insegurança e um olhar crítico sobre si mesmo, mesmo diante dos progressos.",
-          "tem_reflexao": true,
-          "total_palavras_usuario": 117,
-          "chat_id": "5f64dfa8-11a7-4af5-8deb-2b087135a52f",
-          "justificativa_reflexao": "Marcello demonstra reflexão profunda ao reconhecer e nomear seus medos específicos relacionados à responsabilidade, às consequências e às oportunidades do projeto, além de perceber o impacto do seu olhar crítico em sua percepção do progresso. Ele também expressa autoconhecimento ao admitir o conflito entre surpresa positiva pelo avanço e insegurança quanto à clareza de suas ações."
         }
       }
     ]
   },
-  "versionId": "fd09e08e-a1ed-46a9-9f49-44ce833a5da1",
+  "versionId": "35f96d2f-2219-4dcb-a5c0-c5914453d72c",
   "triggerCount": 0,
   "shared": [
     {

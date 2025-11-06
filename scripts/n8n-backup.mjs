@@ -1,4 +1,4 @@
-import { mkdir, writeFile, rm, access, readdir, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, rm, access, readdir, readFile, rename } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import process from 'node:process';
@@ -16,7 +16,6 @@ const logFilePath = path.resolve('backups/n8n-backup.log.jsonl');
 const pageLimit = Number(process.env.N8N_PAGE_LIMIT ?? '100');
 const folderPageLimit = Number(process.env.N8N_FOLDER_PAGE_LIMIT ?? '100');
 const PROJECT_ROOT_ID = '0';
-const ROOT_PLACEHOLDER_DIR = '_sem_pasta';
 const fieldsToRemove = new Set(['updatedAt', 'lastActiveAt']);
 
 async function fileExists(targetPath) {
@@ -62,8 +61,7 @@ function stripKeys(value) {
 async function paginate(resourcePath, baseParams = {}) {
   const items = [];
   let cursor;
-  let skip = 0;
-  const baseSize = Number(baseParams.take ?? baseParams.limit ?? pageLimit);
+  const baseSize = Number(baseParams.limit ?? pageLimit);
   const pageSize = Number.isFinite(baseSize) && baseSize > 0 ? baseSize : pageLimit;
 
   while (true) {
@@ -71,12 +69,10 @@ async function paginate(resourcePath, baseParams = {}) {
 
     if (cursor) {
       params.cursor = cursor;
-    } else if (!('cursor' in params)) {
-      params.skip = String(skip);
     }
 
-    if (params.take === undefined && params.limit === undefined) {
-      params.take = String(pageSize);
+    if (params.limit === undefined) {
+      params.limit = String(pageSize);
     }
 
     const page = await fetchJson(resourcePath, params);
@@ -86,20 +82,11 @@ async function paginate(resourcePath, baseParams = {}) {
     const nextCursor =
       typeof page?.nextCursor === 'string' && page.nextCursor.length > 0 ? page.nextCursor : undefined;
 
-    if (nextCursor) {
-      cursor = nextCursor;
-      continue;
-    }
-
-    const totalCount = typeof page?.count === 'number' ? page.count : undefined;
-    if (pageItems.length < pageSize) {
-      break;
-    }
-    if (totalCount !== undefined && items.length >= totalCount) {
+    if (!nextCursor) {
       break;
     }
 
-    skip += pageItems.length;
+    cursor = nextCursor;
   }
 
   return items;
@@ -120,7 +107,7 @@ async function fetchProjectFolders(projectId) {
   const selectFields = JSON.stringify(['id', 'name', 'parentFolder', 'path']);
   return paginate(`projects/${projectId}/folders`, {
     select: selectFields,
-    take: String(folderPageLimit),
+    limit: String(folderPageLimit),
   });
 }
 
@@ -351,8 +338,9 @@ async function exportWorkflows() {
   const startedAt = new Date();
   const previousFiles = await collectExistingFiles(backupDir);
 
-  await rm(backupDir, { recursive: true, force: true });
-  await mkdir(backupDir, { recursive: true });
+  const stagingDir = path.join(path.dirname(backupDir), `.n8n-backup-${startedAt.getTime()}`);
+  await rm(stagingDir, { recursive: true, force: true });
+  await mkdir(stagingDir, { recursive: true });
 
   let projects = [];
   const folderIndexCache = new Map();
@@ -387,7 +375,6 @@ async function exportWorkflows() {
       try {
         workflows = await paginate('workflows', {
           projectId: project.id,
-          includeFolders: 'true',
         });
       } catch (error) {
         console.warn(`Falha ao listar workflows do projeto ${project.id}:`, error);
@@ -402,7 +389,7 @@ async function exportWorkflows() {
 
   let defaultWorkflows = [];
   try {
-    defaultWorkflows = await paginate('workflows', { includeFolders: 'true' });
+    defaultWorkflows = await paginate('workflows');
   } catch (error) {
     console.warn('Falha ao listar workflows padrão:', error);
   }
@@ -441,7 +428,6 @@ async function exportWorkflows() {
   );
 
   const seen = new Set();
-  const usedDirectoryOwners = new Map();
   const changes = {
     new: [],
     updated: [],
@@ -478,9 +464,7 @@ async function exportWorkflows() {
       if (!workflow?.id || seen.has(workflow.id)) continue;
       seen.add(workflow.id);
 
-      const workflowDetail = await fetchJson(`workflows/${workflow.id}`, {
-        includeParentFolder: 'true',
-      });
+      const workflowDetail = await fetchJson(`workflows/${workflow.id}`);
       const sanitized = stripKeys(workflowDetail);
       const ownerShare =
         Array.isArray(workflowDetail?.shared) && workflowDetail.shared.length > 0
@@ -541,19 +525,7 @@ async function exportWorkflows() {
         workflow.parentFolder?.name ?? workflowDetail?.parentFolder?.name ?? ownerShare?.folder?.name;
 
       const folderPlacement = resolveFolderPlacement(folderIndex, parentFolderId, parentFolderName);
-      const folderParts =
-        folderPlacement.sanitized.length > 0 ? folderPlacement.sanitized : [ROOT_PLACEHOLDER_DIR];
-
-      let directoryParts = [...folderParts];
-      const baseDirKey = directoryParts.join('/');
-      const existingOwner = usedDirectoryOwners.get(baseDirKey);
-      if (!existingOwner) {
-        usedDirectoryOwners.set(baseDirKey, effectiveProjectId);
-      } else if (existingOwner !== effectiveProjectId) {
-        directoryParts = [projectMeta.sanitizedName, ...directoryParts];
-      }
-
-      const workflowDir = path.join(backupDir, ...directoryParts);
+      const workflowDir = stagingDir;
       await mkdir(workflowDir, { recursive: true });
       const baseSafeName = sanitizeName(
         workflow.name || `workflow-${workflow.id}`,
@@ -569,13 +541,12 @@ async function exportWorkflows() {
       const serialized = `${JSON.stringify(sanitized, null, 2)}\n`;
       await writeFile(filePath, serialized, 'utf8');
 
-      const folderKey =
-        directoryParts.length > 0 ? directoryParts.join('/') : ROOT_PLACEHOLDER_DIR;
+      const folderKey = '.';
       const fileList = filesByFolder.get(folderKey) ?? [];
       fileList.push(path.basename(filePath));
       filesByFolder.set(folderKey, fileList);
 
-      const relativePath = path.relative(backupDir, filePath);
+      const relativePath = path.relative(stagingDir, filePath);
       const contentHash = createHash('sha256').update(serialized).digest('hex');
       const previous = previousFiles.get(relativePath);
 
@@ -591,7 +562,6 @@ async function exportWorkflows() {
             name: workflow.name ?? `workflow-${workflow.id}`,
             path: relativePath,
             projectId: effectiveProjectId,
-            folder: directoryParts.join('/'),
           });
         }
         previousFiles.delete(relativePath);
@@ -601,7 +571,6 @@ async function exportWorkflows() {
           name: workflow.name ?? `workflow-${workflow.id}`,
           path: relativePath,
           projectId: effectiveProjectId,
-          folder: directoryParts.join('/'),
         });
       }
 
@@ -641,6 +610,37 @@ async function exportWorkflows() {
     }
   }
 
+  const finishedAt = new Date();
+  const foldersLog = Array.from(filesByFolder.entries())
+    .map(([folderPath, arquivos]) => ({
+      pasta: folderPath,
+      arquivos: [...arquivos].sort((a, b) => a.localeCompare(b)),
+    }))
+    .sort((a, b) => a.pasta.localeCompare(b.pasta));
+
+  if (seen.size === 0) {
+    await rm(stagingDir, { recursive: true, force: true });
+    console.warn('Nenhum workflow exportado; mantendo backup anterior.');
+    return {
+      status: 'empty',
+      startedAt: startedAt.toISOString(),
+      finishedAt: finishedAt.toISOString(),
+      durationMs: finishedAt.getTime() - startedAt.getTime(),
+      backupDir,
+      totals: {
+        projects: 0,
+        workflows: { listed: allWorkflows.length, nonArchived: 0, active: 0 },
+      },
+      changes,
+      projects: [],
+      logEntry: {
+        dataBackup: finishedAt.toISOString(),
+        pastas: [],
+        observacao: 'Nenhum workflow exportado; verifique token/permissões do n8n.',
+      },
+    };
+  }
+
   const removedEntries = Array.from(previousFiles.keys());
   removedEntries.forEach((relativePath) => {
     changes.removed.push({ path: relativePath });
@@ -650,9 +650,13 @@ async function exportWorkflows() {
     `Resumo: novos=${changes.new.length} | atualizados=${changes.updated.length} | ` +
       `inalterados=${changes.unchanged} | removidos=${changes.removed.length}`,
   );
+
+  await rm(backupDir, { recursive: true, force: true });
+  await mkdir(path.dirname(backupDir), { recursive: true });
+  await rename(stagingDir, backupDir);
+
   console.log(`Backup concluído. ${seen.size} workflow(s) não arquivados salvos em ${backupDir}`);
 
-  const finishedAt = new Date();
   const projectSummaries = Array.from(projectStats.values()).map((stats) => ({
     projectId: stats.projectId,
     projectName: stats.projectName,
@@ -660,13 +664,6 @@ async function exportWorkflows() {
     active: stats.active,
     folders: stats.folderCount ?? null,
   }));
-
-  const foldersLog = Array.from(filesByFolder.entries())
-    .map(([folderPath, arquivos]) => ({
-      pasta: folderPath,
-      arquivos: [...arquivos].sort((a, b) => a.localeCompare(b)),
-    }))
-    .sort((a, b) => a.pasta.localeCompare(b.pasta));
 
   const logEntry = {
     dataBackup: finishedAt.toISOString(),
