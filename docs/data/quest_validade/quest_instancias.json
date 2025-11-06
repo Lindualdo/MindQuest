@@ -16,9 +16,9 @@
     "referencia_data": "2024-04-27T00:00:00.000Z",
     "reiniciada_em": null,
     "ativado_em": "2025-11-05T16:03:10.728Z",
-    "atualizado_em": "2025-11-06T15:50:19.518Z",
+    "atualizado_em": "2025-11-06T19:17:43.523Z",
     "concluido_em": null,
-    "cancelado_em": "2025-11-06T15:50:19.518Z"
+    "cancelado_em": "2025-11-06T19:17:43.523Z"
   },
   {
     "id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
@@ -101,6 +101,27 @@
     "reiniciada_em": null,
     "ativado_em": "2025-11-06T15:50:19.509Z",
     "atualizado_em": "2025-11-06T15:50:19.509Z",
+    "concluido_em": null,
+    "cancelado_em": null
+  },
+  {
+    "id": "1fddebf0-1717-496a-b57c-eb051660bf9f",
+    "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+    "modelo_id": "88a04b58-c2af-415b-b2f0-678c58c145c3",
+    "meta_codigo": "qp_1762457001071_3c7304",
+    "status": "pendente",
+    "progresso_atual": 0,
+    "progresso_meta": 7,
+    "progresso_percentual": 0,
+    "xp_concedido": 10,
+    "tentativas": 1,
+    "janela_inicio": "2024-04-27T00:00:00.000Z",
+    "janela_fim": "2024-05-03T00:00:00.000Z",
+    "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
+    "referencia_data": "2024-04-27T00:00:00.000Z",
+    "reiniciada_em": null,
+    "ativado_em": "2025-11-06T19:23:21.140Z",
+    "atualizado_em": "2025-11-06T19:23:21.140Z",
     "concluido_em": null,
     "cancelado_em": null
   },
