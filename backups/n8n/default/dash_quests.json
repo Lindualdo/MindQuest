@@ -7,56 +7,16 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "quests",
-        "responseMode": "responseNode",
         "options": {}
       },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
       "position": [
-        0,
-        0
+        1872,
+        -96
       ],
-      "id": "e81ef11d-4715-42dc-abfd-b4d9dd24c173",
-      "name": "Webhook",
-      "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
-    },
-    {
-      "parameters": {
-        "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\nconst body = input.body ?? {};\n\nconst candidate = [\n  query.usuario_id,\n  query.user_id,\n  query.id_usuario,\n  body.usuario_id,\n  body.user_id,\n  body.id_usuario,\n  input.headers?.usuario_id,\n  input.headers?.user_id,\n].find((value) => typeof value === 'string' && value.trim().length > 0);\n\nif (!candidate) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: candidate.trim(),\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        224,
-        0
-      ],
-      "id": "2d22f105-d2c0-4971-bb08-3370ff6fdbca",
-      "name": "Validar Entrada"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.quest_estado_usuario\nWHERE usuario_id = $1::uuid;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        464,
-        0
-      ],
-      "id": "5f4e7bbe-35e0-4a4f-b038-454d9546c99b",
-      "name": "Buscar Estado",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
+      "id": "284b4524-9ed1-45f4-a607-5afaf4f5767b",
+      "name": "Responder"
     },
     {
       "parameters": {
@@ -69,10 +29,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        704,
-        0
+        1456,
+        -256
       ],
-      "id": "08ef5389-63cf-4b02-8ee1-9b957799c231",
+      "id": "f2618d87-44bc-4686-b276-8c7431cb1901",
       "name": "Buscar Quests",
       "credentials": {
         "postgres": {
@@ -83,37 +43,92 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $items('Validar Entrada', 0, 0)?.json ?? {};\nconst estadoRow = $items('Buscar Estado', 0, 0)?.json ?? null;\nconst questItems = $input.all();\n\nconst parseNumber = (value, fallback = null) => {\n  if (value === null || value === undefined) return fallback;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : fallback;\n};\n\nconst parseString = (value) => {\n  if (value === null || value === undefined) return null;\n  return typeof value === 'string' ? value : String(value);\n};\n\nconst sequenciaStatus = (() => {\n  if (!estadoRow || estadoRow.sequencia_status == null) return null;\n  if (typeof estadoRow.sequencia_status === 'object') return estadoRow.sequencia_status;\n  try {\n    return JSON.parse(estadoRow.sequencia_status);\n  } catch (error) {\n    return null;\n  }\n})();\n\nconst quests = questItems.map((item) => {\n  const row = item.json;\n  const config = row.config && typeof row.config === 'object'\n    ? row.config\n    : (() => {\n        if (!row.config) return null;\n        try {\n          return JSON.parse(row.config);\n        } catch (error) {\n          return null;\n        }\n      })();\n\n  return {\n    instancia_id: parseString(row.instancia_id),\n    meta_codigo: parseString(row.meta_codigo) ?? '',\n    status: parseString(row.status) ?? 'pendente',\n    titulo: parseString(row.titulo) ?? 'Quest personalizada',\n    descricao: parseString(row.descricao),\n    contexto_origem: parseString(row.contexto_origem),\n    progresso_meta: parseNumber(row.progresso_meta, 1) ?? 1,\n    progresso_atual: parseNumber(row.progresso_atual, 0) ?? 0,\n    concluido_em: parseString(row.concluido_em),\n    config,\n    xp_recompensa: parseNumber(row.xp_recompensa, null),\n    prioridade: config && typeof config.prioridade === 'string' ? config.prioridade : null,\n    recorrencia: config && typeof config.recorrencia === 'string' ? config.recorrencia : null,\n  };\n});\n\nconst snapshot = {\n  usuario_id: parseString(estadoRow?.usuario_id) ?? parseString(entrada.usuario_id) ?? '',\n  xp_total: parseNumber(estadoRow?.xp_total, 0) ?? 0,\n  xp_proximo_nivel: parseNumber(estadoRow?.xp_proximo_nivel, null),\n  nivel_atual: parseNumber(estadoRow?.nivel_atual, 1) ?? 1,\n  titulo_nivel: parseString(estadoRow?.titulo_nivel),\n  sequencia_atual: parseNumber(estadoRow?.sequencia_atual, 0) ?? 0,\n  sequencia_recorde: parseNumber(estadoRow?.sequencia_recorde, 0) ?? 0,\n  meta_sequencia_codigo: parseString(estadoRow?.meta_sequencia_codigo),\n  proxima_meta_codigo: parseString(estadoRow?.proxima_meta_codigo),\n  sequencia_status: sequenciaStatus,\n  quests_personalizadas: quests,\n};\n\nreturn [{ json: snapshot }];"
+        "operation": "executeQuery",
+        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.quest_estado_usuario\nWHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1232,
+        -96
+      ],
+      "id": "d6a052b2-8702-4a73-bc61-5a47551756b1",
+      "name": "Buscar Estado",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\nconst body = input.body ?? {};\n\nconst candidate = [\n  query.usuario_id,\n  query.user_id,\n  query.id_usuario,\n  body.usuario_id,\n  body.user_id,\n  body.id_usuario,\n  input.headers?.usuario_id,\n  input.headers?.user_id,\n].find((value) => typeof value === 'string' && value.trim().length > 0);\n\nif (!candidate) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: candidate.trim(),\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
-        0
+        992,
+        -96
       ],
-      "id": "a69d04f6-98d9-42d6-a58b-2bec34b4a8d7",
-      "name": "Montar Snapshot"
+      "id": "ae08c38f-1bdd-4489-8a3c-8efcae0b6c9e",
+      "name": "Validar Entrada"
     },
     {
       "parameters": {
+        "path": "quests",
+        "responseMode": "responseNode",
         "options": {}
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
-        1184,
-        0
+        768,
+        -96
       ],
-      "id": "534e8c4c-bc73-4bbe-89fc-9d617b03931f",
-      "name": "Responder"
+      "id": "718f1157-74bc-4a36-84d8-ca2b2744d7c5",
+      "name": "Webhook",
+      "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        -96
+      ],
+      "id": "80ffc4bd-9676-41cd-b714-ba1c07129186",
+      "name": "Code in JavaScript"
     }
   ],
   "connections": {
-    "Webhook": {
+    "Buscar Quests": {
       "main": [
         [
           {
-            "node": "Validar Entrada",
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estado": {
+      "main": [
+        [
+          {
+            "node": "Buscar Quests",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -131,29 +146,18 @@
         ]
       ]
     },
-    "Buscar Estado": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "Buscar Quests",
+            "node": "Validar Entrada",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar Quests": {
-      "main": [
-        [
-          {
-            "node": "Montar Snapshot",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Montar Snapshot": {
+    "Code in JavaScript": {
       "main": [
         [
           {
@@ -171,7 +175,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "e6696137-6872-4ff1-981a-58e31692dd18",
+  "versionId": "b939350e-06d5-4bbd-b078-12dfbe33b037",
   "triggerCount": 1,
   "shared": [
     {

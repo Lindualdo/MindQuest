@@ -209,6 +209,47 @@ class ApiService {
     return String(value);
   }
 
+  private normalizeQuestEntry(entry: unknown): QuestSnapshot['quests_personalizadas'][number] | null {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+
+    const quest = entry as Record<string, unknown>;
+    const configObj =
+      quest.config && typeof quest.config === 'object' && !Array.isArray(quest.config)
+        ? (quest.config as Record<string, unknown>)
+        : null;
+
+    return {
+      instancia_id: this.toString(quest.instancia_id),
+      meta_codigo: this.toString(quest.meta_codigo) ?? '',
+      status: (this.toString(quest.status) ?? 'pendente') as QuestStatus,
+      titulo: this.toString(quest.titulo) ?? 'Quest personalizada',
+      descricao: this.toString(quest.descricao),
+      contexto_origem: this.toString(quest.contexto_origem),
+      progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
+      progresso_atual: this.toNumber(quest.progresso_atual, 0) ?? 0,
+      concluido_em: this.toString(quest.concluido_em),
+      config: configObj,
+      xp_recompensa:
+        this.toNumber(
+          quest.xp_recompensa ??
+            (configObj && typeof configObj.xp_recompensa !== 'undefined'
+              ? configObj.xp_recompensa
+              : null),
+          null
+        ),
+      prioridade: this.toString(
+        quest.prioridade ??
+          (configObj && typeof configObj.prioridade !== 'undefined' ? configObj.prioridade : null)
+      ),
+      recorrencia: this.toString(
+        quest.recorrencia ??
+          (configObj && typeof configObj.recorrencia !== 'undefined' ? configObj.recorrencia : null)
+      ),
+    };
+  }
+
   private normalizeQuestSnapshot(payload: unknown): QuestSnapshot | null {
     if (!payload || typeof payload !== 'object') {
       return null;
@@ -220,46 +261,7 @@ class ApiService {
       : [];
 
     const quests = questsRaw
-      .map((entry) => {
-        if (!entry || typeof entry !== 'object') {
-          return null;
-        }
-
-        const quest = entry as Record<string, unknown>;
-        const configObj =
-          quest.config && typeof quest.config === 'object' && !Array.isArray(quest.config)
-            ? (quest.config as Record<string, unknown>)
-            : null;
-
-        return {
-          instancia_id: this.toString(quest.instancia_id),
-          meta_codigo: this.toString(quest.meta_codigo) ?? '',
-          status: (this.toString(quest.status) ?? 'pendente') as QuestStatus,
-          titulo: this.toString(quest.titulo) ?? 'Quest personalizada',
-          descricao: this.toString(quest.descricao),
-          contexto_origem: this.toString(quest.contexto_origem),
-          progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
-          progresso_atual: this.toNumber(quest.progresso_atual, 0) ?? 0,
-          concluido_em: this.toString(quest.concluido_em),
-          config: configObj,
-          xp_recompensa:
-            this.toNumber(
-              quest.xp_recompensa ??
-                (configObj && typeof configObj.xp_recompensa !== 'undefined'
-                  ? configObj.xp_recompensa
-                  : null),
-              null
-            ),
-          prioridade: this.toString(
-            quest.prioridade ??
-              (configObj && typeof configObj.prioridade !== 'undefined' ? configObj.prioridade : null)
-          ),
-          recorrencia: this.toString(
-            quest.recorrencia ??
-              (configObj && typeof configObj.recorrencia !== 'undefined' ? configObj.recorrencia : null)
-          ),
-        };
-      })
+      .map((entry) => this.normalizeQuestEntry(entry))
       .filter((entry): entry is QuestSnapshot['quests_personalizadas'][number] => entry !== null);
 
     return {
@@ -298,6 +300,60 @@ class ApiService {
     }
 
     if (Array.isArray(payload)) {
+      const collectedQuests: QuestSnapshot['quests_personalizadas'] = [];
+      let collectedSnapshot: QuestSnapshot | null = null;
+
+      for (const item of payload) {
+        if (!item) {
+          continue;
+        }
+
+        if (typeof item === 'object' && !Array.isArray(item)) {
+          const obj = item as Record<string, unknown>;
+          const looksLikeQuest =
+            obj.meta_codigo !== undefined ||
+            obj.instancia_id !== undefined ||
+            obj.status !== undefined ||
+            obj.titulo !== undefined;
+          const looksLikeSnapshot =
+            obj.usuario_id !== undefined ||
+            obj.xp_total !== undefined ||
+            obj.sequencia_status !== undefined ||
+            obj.nivel_atual !== undefined;
+
+          if (looksLikeQuest && !looksLikeSnapshot) {
+            const normalizedQuest = this.normalizeQuestEntry(obj);
+            if (normalizedQuest) {
+              collectedQuests.push(normalizedQuest);
+              continue;
+            }
+          }
+
+          if (looksLikeSnapshot) {
+            const normalizedSnapshot = this.normalizeQuestSnapshot(obj);
+            if (normalizedSnapshot) {
+              collectedSnapshot = normalizedSnapshot;
+            }
+            continue;
+          }
+        }
+
+        const nestedSnapshot = this.extractQuestSnapshot(item);
+        if (nestedSnapshot) {
+          return nestedSnapshot;
+        }
+      }
+
+      if (collectedSnapshot) {
+        const combinedQuests =
+          collectedQuests.length > 0 ? collectedQuests : collectedSnapshot.quests_personalizadas;
+
+        return {
+          ...collectedSnapshot,
+          quests_personalizadas: combinedQuests,
+        };
+      }
+
       for (const item of payload) {
         const snapshot = this.extractQuestSnapshot(item);
         if (snapshot) {
@@ -309,6 +365,106 @@ class ApiService {
 
     if (typeof payload === 'object') {
       const obj = payload as Record<string, unknown>;
+
+      const looksLikeQuest =
+        obj.meta_codigo !== undefined ||
+        obj.instancia_id !== undefined ||
+        obj.status !== undefined ||
+        obj.titulo !== undefined;
+      const looksLikeSnapshot =
+        obj.usuario_id !== undefined ||
+        obj.xp_total !== undefined ||
+        obj.sequencia_status !== undefined ||
+        obj.nivel_atual !== undefined;
+
+      if (looksLikeQuest && !looksLikeSnapshot) {
+        const quest = this.normalizeQuestEntry(obj);
+        if (quest) {
+          return {
+            usuario_id: '',
+            xp_total: 0,
+            xp_proximo_nivel: null,
+            nivel_atual: 1,
+            titulo_nivel: null,
+            sequencia_atual: 0,
+            sequencia_recorde: 0,
+            meta_sequencia_codigo: null,
+            proxima_meta_codigo: null,
+            sequencia_status: null,
+            quests_personalizadas: [quest],
+          };
+        }
+      }
+
+      const stateCandidateKeys = [
+        'estado',
+        'state',
+        'snapshot',
+        'snapshot_final',
+        'snapshot_atual',
+        'buscar_estado',
+        'Buscar Estado',
+        'quest_estado',
+        'dados_estado'
+      ];
+      const questsCandidateKeys = [
+        'quests',
+        'quests_personalizadas',
+        'questsPersonalizadas',
+        'buscar_quests',
+        'Buscar Quests',
+        'dados_quests'
+      ];
+
+      for (const key of stateCandidateKeys) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const state = this.extractQuestSnapshot(obj[key]);
+          if (state) {
+            return state;
+          }
+        }
+      }
+
+      for (const key of questsCandidateKeys) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const value = obj[key];
+          if (Array.isArray(value)) {
+            const quests = value
+              .map((entry) => this.normalizeQuestEntry(entry))
+              .filter((entry): entry is QuestSnapshot['quests_personalizadas'][number] => entry !== null);
+
+            if (quests.length > 0) {
+              const snapshotCandidate =
+                this.extractQuestSnapshot(
+                  stateCandidateKeys
+                    .map((stateKey) => obj[stateKey])
+                    .find((stateValue) => stateValue !== undefined)
+                ) ?? this.normalizeQuestSnapshot(obj);
+
+              if (snapshotCandidate) {
+                return {
+                  ...snapshotCandidate,
+                  quests_personalizadas: quests,
+                };
+              }
+
+              return {
+                usuario_id: '',
+                xp_total: 0,
+                xp_proximo_nivel: null,
+                nivel_atual: 1,
+                titulo_nivel: null,
+                sequencia_atual: 0,
+                sequencia_recorde: 0,
+                meta_sequencia_codigo: null,
+                proxima_meta_codigo: null,
+                sequencia_status: null,
+                quests_personalizadas: quests,
+              };
+            }
+          }
+        }
+      }
 
       if (obj.snapshot_final !== undefined) {
         const snapshot = this.normalizeQuestSnapshot(obj.snapshot_final);
@@ -723,14 +879,12 @@ class ApiService {
       throw new Error('Usuário inválido');
     }
 
+    const endpoint = `/quests?usuario_id=${encodeURIComponent(usuarioId)}`;
+
     const result = await this.makeRequest(
-      '/quests',
+      endpoint,
       {
-        method: 'POST',
-        body: JSON.stringify({ usuario_id: usuarioId }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'GET',
       },
       true
     );

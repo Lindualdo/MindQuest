@@ -1,79 +1,94 @@
-[
-  {
-    "usuario_id": "",
-    "xp_total": 0,
-    "xp_proximo_nivel": null,
-    "nivel_atual": 1,
-    "titulo_nivel": null,
-    "sequencia_atual": 0,
-    "sequencia_recorde": 0,
-    "meta_sequencia_codigo": null,
-    "proxima_meta_codigo": null,
-    "sequencia_status": null,
-    "quests_personalizadas": [
-      {
-        "instancia_id": "84894fd4-a581-4122-abe0-01cc811b036b",
-        "meta_codigo": "qp_1762358590707_19e5bc",
-        "status": "pendente",
-        "titulo": "Organizar a mesa de trabalho ao final do dia",
-        "descricao": "Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.",
-        "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
-        "progresso_meta": 7,
-        "progresso_atual": 0,
-        "concluido_em": null,
-        "config": {
-          "prioridade": "baixa",
-          "recorrencia": "diaria",
-          "payload_extra": {
-            "canal": "app"
-          }
-        },
-        "xp_recompensa": 10,
+{
+  "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+  "xp_total": 0,
+  "xp_proximo_nivel": 300,
+  "nivel_atual": 1,
+  "titulo_nivel": "Recém-Convocado",
+  "sequencia_atual": 0,
+  "sequencia_recorde": 0,
+  "meta_sequencia_codigo": "streak_003",
+  "proxima_meta_codigo": "streak_005",
+  "sequencia_status": {
+    "estado": "ativa",
+    "reinicios": 0,
+    "completado_em": null,
+    "alvo_conversas": 3
+  },
+  "quests_personalizadas": [
+    {
+      "instancia_id": "84894fd4-a581-4122-abe0-01cc811b036b",
+      "meta_codigo": "qp_1762358590707_19e5bc",
+      "status": "pendente",
+      "progresso_meta": 7,
+      "progresso_atual": 0,
+      "concluido_em": null,
+      "xp_concedido": 10,
+      "contexto_origem": "sugestão personalizada para ambiente de trabalho mais eficiente",
+      "atualizado_em": "2025-11-05T16:03:10.728Z",
+      "titulo": "Organizar a mesa de trabalho ao final do dia",
+      "descricao": "Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.",
+      "config": {
         "prioridade": "baixa",
-        "recorrencia": "diaria"
+        "recorrencia": "diaria",
+        "payload_extra": {
+          "canal": "app"
+        }
       },
-      {
-        "instancia_id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
-        "meta_codigo": "qp_1762358590707_b49a3c",
-        "status": "pendente",
-        "titulo": "Introduzir 5 minutos de meditação guiada diário",
-        "descricao": "Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.",
-        "contexto_origem": "sugestão personalizada para melhoria do bem-estar mental",
-        "progresso_meta": 7,
-        "progresso_atual": 0,
-        "concluido_em": null,
-        "config": {
-          "prioridade": "media",
-          "recorrencia": "diaria",
-          "payload_extra": {
-            "canal": "app"
-          }
-        },
-        "xp_recompensa": 15,
+      "xp_recompensa": 10,
+      "modelo_codigo": "qp_1762358590707_19e5bc",
+      "gatilho_codigo": "manual",
+      "gatilho_valor": 7,
+      "tipo": "personalizada"
+    },
+    {
+      "instancia_id": "2f9e1b53-24b8-491c-96a4-7f355a025c87",
+      "meta_codigo": "qp_1762358590707_b49a3c",
+      "status": "pendente",
+      "progresso_meta": 7,
+      "progresso_atual": 0,
+      "concluido_em": null,
+      "xp_concedido": 15,
+      "contexto_origem": "sugestão personalizada para melhoria do bem-estar mental",
+      "atualizado_em": "2025-11-05T16:03:10.728Z",
+      "titulo": "Introduzir 5 minutos de meditação guiada diário",
+      "descricao": "Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.",
+      "config": {
         "prioridade": "media",
-        "recorrencia": "diaria"
+        "recorrencia": "diaria",
+        "payload_extra": {
+          "canal": "app"
+        }
       },
-      {
-        "instancia_id": "5692cad5-fbd9-4250-a22f-e94b05c3bb86",
-        "meta_codigo": "qp_1762358590707_f74aa5",
-        "status": "pendente",
-        "titulo": "Fazer 10 minutos de caminhada ao ar livre",
-        "descricao": "Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.",
-        "contexto_origem": "sugestão personalizada para saúde física e mental",
-        "progresso_meta": 7,
-        "progresso_atual": 0,
-        "concluido_em": null,
-        "config": {
-          "prioridade": "media",
-          "recorrencia": "diaria",
-          "payload_extra": {
-            "canal": "app"
-          }
-        },
-        "xp_recompensa": 15,
+      "xp_recompensa": 15,
+      "modelo_codigo": "qp_1762358590707_b49a3c",
+      "gatilho_codigo": "manual",
+      "gatilho_valor": 7,
+      "tipo": "personalizada"
+    },
+    {
+      "instancia_id": "5692cad5-fbd9-4250-a22f-e94b05c3bb86",
+      "meta_codigo": "qp_1762358590707_f74aa5",
+      "status": "pendente",
+      "progresso_meta": 7,
+      "progresso_atual": 0,
+      "concluido_em": null,
+      "xp_concedido": 15,
+      "contexto_origem": "sugestão personalizada para saúde física e mental",
+      "atualizado_em": "2025-11-05T16:03:10.728Z",
+      "titulo": "Fazer 10 minutos de caminhada ao ar livre",
+      "descricao": "Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.",
+      "config": {
         "prioridade": "media",
-        "recorrencia": "diaria"
-      }
-    ]
-  }
-]
+        "recorrencia": "diaria",
+        "payload_extra": {
+          "canal": "app"
+        }
+      },
+      "xp_recompensa": 15,
+      "modelo_codigo": "qp_1762358590707_f74aa5",
+      "gatilho_codigo": "manual",
+      "gatilho_valor": 7,
+      "tipo": "personalizada"
+    }
+  ]
+}
