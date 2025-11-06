@@ -4,7 +4,7 @@
 
 - Banco: PostgreSQL.
 - Schema padrão `public`.
-- Todas as tabelas usam UUID (`gen_random_uuid()`) como chave primária, exceto `quest_niveis` (chave natural `nivel`).
+- Todas as tabelas usam UUID (`gen_random_uuid()`) como chave primária, exceto `jornada_niveis` (chave natural `nivel`).
 - Status e tipos são restritos via `CHECK` para evitar valores fora da especificação funcional.
 - Timestamps padronizados (`criado_em`, `atualizado_em`) com `DEFAULT now()`.
 
@@ -12,7 +12,7 @@
 
 ### `quest_modelos`
 
-Catálogo das quests disponíveis.
+Catálogo de modelos reutilizáveis (sequência e personalizadas).
 
 ```sql
 CREATE TABLE public.quest_modelos (
@@ -117,21 +117,28 @@ CREATE TABLE public.quest_estado_usuario (
 CREATE INDEX idx_quest_estado_usuario_meta ON public.quest_estado_usuario (meta_sequencia_codigo);
 ```
 
-### `quest_niveis`
+### `jornada_niveis`
 
-Tabela de níveis.
+Tabela que descreve os 10 níveis da jornada.
 
 ```sql
-CREATE TABLE public.quest_niveis (
+CREATE TABLE public.jornada_niveis (
     nivel integer PRIMARY KEY,
     xp_minimo integer NOT NULL,
     xp_proximo_nivel integer,
-    nome varchar(80) NOT NULL,
+    titulo varchar(80) NOT NULL,
     descricao text,
+    lema varchar(120),
+    foco_principal text,
+    meta_principal text,
+    criterios jsonb NOT NULL DEFAULT '[]'::jsonb,
+    conquistas jsonb NOT NULL DEFAULT '[]'::jsonb,
+    recompensas jsonb NOT NULL DEFAULT '[]'::jsonb,
+    transformacao text,
     criado_em timestamp DEFAULT now() NOT NULL,
     atualizado_em timestamp DEFAULT now() NOT NULL,
-    CONSTRAINT quest_niveis_xp_check CHECK (xp_minimo >= 0),
-    CONSTRAINT quest_niveis_ordem_check CHECK (xp_proximo_nivel IS NULL OR xp_proximo_nivel > xp_minimo)
+    CONSTRAINT jornada_niveis_xp_check CHECK (xp_minimo >= 0),
+    CONSTRAINT jornada_niveis_ordem_check CHECK (xp_proximo_nivel IS NULL OR xp_proximo_nivel > xp_minimo)
 );
 ```
 
@@ -152,9 +159,15 @@ CREATE TABLE public.quest_eventos (
 CREATE INDEX idx_quest_eventos_usuario ON public.quest_eventos (usuario_id, registrado_em DESC);
 ```
 
+## Cálculo de XP
+
+- **Conversas**: job diário (ou workflow) consulta `usr_chat` para identificar dias com conversa concluída. Cada dia soma 200 XP em `quest_estado_usuario`. Ao detectar dias consecutivos, aplica bônus incremental de +50 XP por dia (2º ao 15º). As metas de sequência (`quest_instancias` com meta_codigo `streak_*`) monitoram o streak; quando a meta fecha, o sistema grava o status como `concluida`, libera a próxima e insere o bônus premium correspondente (+100…+500).
+- **Quests personalizadas**: a cada atualização que muda o status para `concluida`, o workflow calcula 150 XP base; se o modelo for recorrente (`quest_modelos.repeticao = 'recorrente'`), adiciona +50 XP por repetição (limitado a 15) com base no número de instâncias concluídas daquele `modelo_id`.
+- **Sincronização**: `quest_estado_usuario` guarda `xp_total`, `total_xp_hoje`, `sequencia_atual`, `meta_sequencia_codigo` e `proxima_meta_codigo`. Qualquer alteração em `quest_instancias` deve refletir esses campos, mantendo o snapshot pronto para leitura pelo dashboard.
+
 ## Cargas iniciais (seed)
 
-1. _Níveis_: inserir 10 registros conforme tabela funcional (campos `nivel`, `xp_minimo`, `xp_proximo_nivel`, `nome`, `descricao`).
+1. _Níveis_: inserir 10 registros em `jornada_niveis` conforme tabela funcional (campos `nivel`, `xp_minimo`, `xp_proximo_nivel`, `titulo`, `descricao`, `lema`, `meta_principal`, `criterios`, etc.).
 2. _Modelos de sequência_: `streak_003` … `streak_030` (`tipo = 'sequencia'`, `gatilho_codigo = 'conversas_consecutivas'`, `gatilho_valor = X`, `xp_recompensa` conforme funcional, `repeticao = 'unica'`, `ordem_inicial` crescente).
 3. Não criaremos mais hábitos diários como catálogo separado; quests personalizadas serão cadastradas dinamicamente.
 
@@ -183,8 +196,8 @@ Script de seed deverá:
   - Regras principais:
     1. Validar limite de 4 quests personalizadas ativas/pendentes antes de inserir novas e evitar duplicatas por `titulo`/`contexto`.
     2. Para novas quests: garantir modelo (`quest_modelos`, tipo `personalizada`, gatilho `manual`) e criar instância em `quest_instancias` com campos preenchidos (prioridade, janela, tentativas, status inicial). Incrementar `quest_estado_usuario.total_quests_personalizadas`.
-    3. Para atualizações: ajustar `quest_instancias` (status, progresso, `concluido_em`, `reiniciada_em`, `tentativas`). Se concluir, somar `xp_recompensa + xp_extra` em `quest_estado_usuario.xp_total` e `total_quests_concluidas`.
-    4. Recalcular nível e `xp_proximo_nivel` usando `quest_niveis`. Atualizar `total_xp_hoje`, `sequencia_status` conforme necessário.
+    3. Para atualizações: ajustar `quest_instancias` (status, progresso, `concluido_em`, `reiniciada_em`, `tentativas`). Se concluir, aplicar o XP padrão de 150; se `recorrente`, adicionar +50 por repetição até 15 (considerando as instâncias concluídas do mesmo modelo). Somar o resultado em `quest_estado_usuario.xp_total` e `total_quests_concluidas`.
+    4. Recalcular nível e `xp_proximo_nivel` usando `jornada_niveis`. Atualizar `total_xp_hoje`, `sequencia_status` conforme necessário.
     5. Retornar snapshot atualizado (`quest_estado_usuario` + lista das quests personalizadas com status atual).
 - `expert_quest_personalizadas`:
   - Inputs: `usuario_id` (obrigatório) e `chat_id` (opcional).

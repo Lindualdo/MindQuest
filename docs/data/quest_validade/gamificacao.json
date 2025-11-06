@@ -2,25 +2,25 @@
   {
     "id": "02542adf-1857-4131-9e8b-aee4109804e2",
     "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-    "xp_total": 1020,
-    "xp_proximo_nivel": 1350,
-    "nivel_atual": 3,
-    "titulo_nivel": "Conversador Assíduo",
+    "xp_total": 0,
+    "xp_proximo_nivel": 200,
+    "nivel_atual": 1,
+    "titulo_nivel": "Explorador",
     "sequencia_atual": 0,
-    "sequencia_recorde": 7,
-    "meta_sequencia_codigo": "streak_010",
-    "proxima_meta_codigo": "streak_015",
+    "sequencia_recorde": 0,
+    "meta_sequencia_codigo": "streak_003",
+    "proxima_meta_codigo": "streak_005",
     "sequencia_status": {
       "estado": "ativa",
       "reinicios": 0,
       "completado_em": null,
-      "alvo_conversas": 10
+      "alvo_conversas": 3
     },
-    "total_quests_concluidas": 5,
+    "total_quests_concluidas": 0,
     "total_quests_personalizadas": 5,
     "total_xp_hoje": 0,
     "ultima_conversa_em": null,
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-06T20:00:38.236Z"
+    "atualizado_em": "2025-11-06T22:33:29.455Z"
   }
 ]

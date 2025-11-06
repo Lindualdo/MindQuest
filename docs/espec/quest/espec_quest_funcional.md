@@ -24,16 +24,16 @@
 
 - Cada quest possui status (`pendente`, `ativa`, `concluída`, `vencida`, `cancelada`, `reiniciada`) exibido no painel.
 - O usuário visualiza três agrupamentos no painel: **Em andamento**, **Concluídas recentemente**, **Arquivadas**.
-- XP e conquistas são utilizados apenas para reforçar marcos relevantes; mensagens focam em entendimento do progresso, não em pontuação isolada.
+- XP é calculado com base em ações concretas: **200 XP** por conversa concluída (+50 XP por dia consecutivo até 15 dias) e **150 XP** por quest personalizada concluída (+50 XP extras por repetição quando recorrente, até 15). Metas de sequência concedem bônus premium adicionais (+100 a +500 XP).
 - Antes de propor nova quest, o Assistente de Conversa consulta a lista existente para evitar duplicidade ou sobrecarga.
 
 ## Quests de sequência de conversas
 
-- **Escada de metas**: 3, 5, 7, 10, 15, 20, 25 e 30 conversas consecutivas.
+- **Escada de metas**: 3, 5, 7, 10, 15, 20, 25 e 30 conversas consecutivas; cada conclusão concede um bônus premium (+100 até +500 XP) somado ao XP diário acumulado.
 - **Progressão**: concluir uma meta desbloqueia automaticamente a próxima; nenhuma meta é pulada e múltiplas conversas no mesmo dia contam para a sequência.
 - **Reset**: ficar mais de 24h sem conversar (intervalo máximo configurável) encerra a meta ativa com status `reiniciada`, registra o recorde no histórico e reinicia o ciclo na Meta 1 a partir da próxima conversa.
 - **Recordes**: o painel mostra streak atual, melhor streak e meta ativa. Conquistas destacam quantas vezes cada meta foi completada.
-- **Recompensa**: cada meta concede uma recompensa crescente (mensagem comemorativa + XP associado) imediatamente após a conversa que completa a sequência.
+- **Recompensa**: cada conversa rende 200 XP; dias consecutivos somam +50 XP (até 15). Ao completar a meta vigente, o usuário recebe o bônus premium correspondente e o painel celebra o marco.
 
 ## Quests personalizadas
 
@@ -42,22 +42,22 @@
 - **Limite ativo**: máximo de 4 quests simultâneas entre pendentes e ativas; se o limite for atingido, o assistente oferece replanejamento antes de sugerir novas missões.
 - **Acompanhamento**: o Assistente de Suporte agenda lembretes conforme prioridade e plano (Free ou Premium) e coleta feedback diário.
 - **Revisão**: se o usuário ignorar três lembretes consecutivos, o assistente pergunta se deseja reagendar, arquivar ou ajustar escopo.
-- **Encerramento**: uma quest pode ser concluída pelo usuário, pelo assistente (após confirmação de execução) ou expirada caso o prazo termine sem ação. Recorrências geram nova instância apenas após a conclusão da anterior ou após ajuste solicitado.
+- **Encerramento**: uma quest pode ser concluída pelo usuário, pelo assistente (após confirmação de execução) ou expirada caso o prazo termine sem ação. Recorrências geram nova instância apenas após a conclusão da anterior ou após ajuste solicitado; cada nova conclusão concede 150 XP + 50 XP por repetição (até 15).
 
 ## Níveis de evolução
 
 | Nível | Nome | XP mínimo | XP próximo nível | Conversas acumuladas (referência) | Descrição |
 |-------|------|-----------|------------------|------------------------------------|-----------|
-| 1 | Recém-Convocado | 0 | 300 | 0–10 | Inicia as conversas e conhece a jornada. |
-| 2 | Explorador Diário | 300 | 750 | 10–25 | Mantém presença diária e entende as quests. |
-| 3 | Conversador Assíduo | 750 | 1350 | 25–45 | Sustenta ritmo estável e ativa as primeiras missões personalizadas. |
-| 4 | Companheiro Constante | 1350 | 2100 | 45–70 | Consolida rotina e raramente falha em conversar. |
-| 5 | Parceiro de Jornada | 2100 | 3000 | 70–100 | Ajusta quests personalizadas e mantém engajamento equilibrado. |
-| 6 | Mentor da Tribo | 3000 | 4100 | 100–135 | Integra ações recorrentes e compartilha aprendizados. |
-| 7 | Guardião do Ritmo | 4100 | 5400 | 135–180 | Quase não quebra sequência; se quebra, retoma rápido. |
-| 8 | Referência MindQuest | 5400 | 6900 | 180–230 | Inspira pela consistência nas conversas e nas quests aceitas. |
-| 9 | Embaixador de Conversas | 6900 | 8600 | 230–285 | Sustenta múltiplas quests ativas com naturalidade. |
-| 10 | Guardião da Comunidade | 8600 | — | 285+ | Torna-se exemplo do ciclo MindQuest e ajuda na evolução coletiva. |
+| 1 | Despertar | 0 | 500 | Meta 2 + 1 quest | Reconhece a necessidade de mudança e conclui a primeira quest. |
+| 2 | Clareza | 500 | 1.200 | Meta 3 + 3 quests sabotadores | Mapeia sabotadores e transforma três insights em ação. |
+| 3 | Coragem | 1.200 | 2.200 | Meta 4 + 5 quests (1 desaf.) | Sai da zona de conforto e completa uma quest desafiadora. |
+| 4 | Consistência | 2.200 | 3.600 | Meta 5 + 8 quests | Mantém 1 quest recorrente por 21 dias e sustenta hábitos. |
+| 5 | Resiliência | 3.600 | 5.400 | Meta 6 + 12 quests | Recupera quests após falhas e continua evoluindo. |
+| 6 | Expansão | 5.400 | 7.400 | Meta 7 + 15 quests/3 áreas | Integra carreira, relações e bem-estar simultaneamente. |
+| 7 | Maestria | 7.400 | 9.800 | Meta 8 + 20 quests | Cria e executa quests autorais com autonomia. |
+| 8 | Impacto | 9.800 | 12.600 | 2 ciclos completos + 25 quests | Compartilha aprendizados e apoia outras jornadas. |
+| 9 | Legado | 12.600 | 16.000 | 45+ dias consistentes + 30 quests | Conduz projetos de longo prazo com impacto coletivo. |
+| 10 | Transcendência | 16.000 | — | 12 meses contínuos | Vive o propósito e mantém evolução perpétua. |
 
 ## Interação no painel
 
@@ -75,6 +75,5 @@
 
 ## Pendências para validação futura
 
-- Ajustar política de XP e níveis para refletir a nova estrutura, mantendo coerência com o histórico.
 - Definir mensagens específicas por plano (Free/Premium) para limites de lembretes e suporte.
 - Avaliar se haverá eventos temporários (campanhas) reutilizando o mesmo modelo de quests personalizadas.
