@@ -140,126 +140,6 @@
     "insight_id": null
   },
   {
-    "id": "98be6f7e-3697-495e-ad2d-08b6a8b24cce",
-    "codigo": "qp_1762482527332_39f9c5",
-    "titulo": "Ritual de Encerramento das Operações Financeiras até 20h",
-    "descricao": "Estabeleça um ritual diário para encerrar as operações financeiras até as 20 horas, incluindo etapa de registro de desempenho e relaxamento mental para reduzir a ansiedade noturna.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 100,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78",
-      "prioridade": "alta",
-      "recorrencia": "diaria",
-      "area_vida_id": "33333333-3333-4333-8333-333333333333",
-      "complexidade": 2,
-      "sabotador_id": null,
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-07T02:28:47.346Z",
-    "atualizado_em": "2025-11-07T02:28:47.346Z",
-    "area_vida_id": "33333333-3333-4333-8333-333333333333",
-    "sabotador_id": null,
-    "complexidade": 2,
-    "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78"
-  },
-  {
-    "id": "cf5ce735-9897-4c36-bad9-42a525700d68",
-    "codigo": "qp_1762482527334_1e9a54",
-    "titulo": "Micro-pausas com Técnicas de Respiração para Reduzir Ansiedade",
-    "descricao": "Pratique micro-pausas (1-2 minutos) usando técnicas de respiração profunda ou 4-7-8 antes de operar no mercado financeiro para controlar a ansiedade e evitar decisões impulsivas.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 80,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "insight_id": "412c64b5-4992-43fb-9aa6-e5b562f67b34",
-      "prioridade": "alta",
-      "recorrencia": "diaria",
-      "area_vida_id": "11111111-1111-4111-8111-111111111111",
-      "complexidade": 3,
-      "sabotador_id": null,
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-07T02:28:47.346Z",
-    "atualizado_em": "2025-11-07T02:28:47.346Z",
-    "area_vida_id": "11111111-1111-4111-8111-111111111111",
-    "sabotador_id": null,
-    "complexidade": 3,
-    "insight_id": "412c64b5-4992-43fb-9aa6-e5b562f67b34"
-  },
-  {
-    "id": "af215183-0bfa-44a3-9095-68431f61aacb",
-    "codigo": "qp_1762482527334_c597b3",
-    "titulo": "Criar Checklist Personalizado para Uso Durante Operações Financeiras",
-    "descricao": "Desenvolva e utilize um checklist personalizado focado em estratégias de ancoragem e controle emocional para consultar nos momentos críticos das operações, ajustando conforme experiência.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 1,
-    "xp_recompensa": 90,
-    "repeticao": "unica",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
-      "prioridade": "media",
-      "recorrencia": "unica",
-      "area_vida_id": "33333333-3333-4333-8333-333333333333",
-      "complexidade": 4,
-      "sabotador_id": null,
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-07T02:28:47.346Z",
-    "atualizado_em": "2025-11-07T02:28:47.346Z",
-    "area_vida_id": "33333333-3333-4333-8333-333333333333",
-    "sabotador_id": null,
-    "complexidade": 4,
-    "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc"
-  },
-  {
-    "id": "7e9fa9c4-f82b-4ffd-9e1f-952e231026ff",
-    "codigo": "qp_1762482527337_9fe78a",
-    "titulo": "Praticar Autoempatia Diária para Reduzir Autocrítica",
-    "descricao": "Diariamente, dedique 5 minutos para praticar autoempatia, falando consigo mesmo de forma gentil e compreensiva, como falaria com um amigo na mesma situação, para diminuir a autocrítica e frustração.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 70,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "insight_id": "07ad2c89-7981-4796-8fcb-ccc53671f5de",
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "area_vida_id": "11111111-1111-4111-8111-111111111111",
-      "complexidade": 1,
-      "sabotador_id": null,
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-07T02:28:47.346Z",
-    "atualizado_em": "2025-11-07T02:28:47.346Z",
-    "area_vida_id": "11111111-1111-4111-8111-111111111111",
-    "sabotador_id": null,
-    "complexidade": 1,
-    "insight_id": "07ad2c89-7981-4796-8fcb-ccc53671f5de"
-  },
-  {
     "id": "4738b689-db79-44c0-a4b0-9d97c1bca03a",
     "codigo": "streak_030",
     "titulo": "Sequência de 30 conversas",
@@ -278,5 +158,95 @@
     "sabotador_id": null,
     "complexidade": 0,
     "insight_id": null
+  },
+  {
+    "id": "d09c38f7-2aea-4179-a917-92f74d3538a2",
+    "codigo": "qp_1762510399517_ab3b3b",
+    "titulo": "Ritual Diário para Encerramento das Operações Financeiras",
+    "descricao": "Estabelecer um ritual diário para encerrar as operações financeiras às 20h, visando sinalizar o momento de relaxar e desacelerar a mente, contribuindo para redução da ansiedade noturna.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 7,
+    "xp_recompensa": 100,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78",
+      "prioridade": "alta",
+      "recorrencia": "diaria",
+      "area_vida_id": "33333333-3333-4333-8333-333333333333",
+      "complexidade": 2,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T10:13:19.522Z",
+    "atualizado_em": "2025-11-07T10:13:19.522Z",
+    "area_vida_id": "33333333-3333-4333-8333-333333333333",
+    "sabotador_id": null,
+    "complexidade": 2,
+    "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78"
+  },
+  {
+    "id": "4803c67d-6279-4e2b-8d63-a6712d0038c9",
+    "codigo": "qp_1762510399517_925eb5",
+    "titulo": "Checklist Rápido de Técnicas de Ancoragem para Momentos Críticos",
+    "descricao": "Utilizar um checklist personalizado com técnicas rápidas de ancoragem e pausas curtas para reduzir a ansiedade no momento das operações financeiras, especialmente em momentos de alta pressão.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 5,
+    "xp_recompensa": 70,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
+      "prioridade": "media",
+      "recorrencia": "diaria",
+      "area_vida_id": "33333333-3333-4333-8333-333333333333",
+      "complexidade": 3,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T10:13:19.522Z",
+    "atualizado_em": "2025-11-07T10:13:19.522Z",
+    "area_vida_id": "33333333-3333-4333-8333-333333333333",
+    "sabotador_id": null,
+    "complexidade": 3,
+    "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc"
+  },
+  {
+    "id": "a84d8901-17fe-4c62-b8e6-0c278e585a45",
+    "codigo": "qp_1762510399517_94288f",
+    "titulo": "Micro-metas diárias para equilíbrio entre finanças e autocuidado",
+    "descricao": "Estabelecer metas curtas e alcançáveis diariamente focadas em ações financeiras objetivas e incluir tempo dedicado para lazer e autocuidado, para manter consistência e reduzir pressão emocional ligada a perdas passadas.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 7,
+    "xp_recompensa": 80,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "9a3fb5f7-38f4-494f-8ce9-05f70bd6b4fb",
+      "prioridade": "media",
+      "recorrencia": "diaria",
+      "area_vida_id": "33333333-3333-4333-8333-333333333333",
+      "complexidade": 2,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T10:13:19.522Z",
+    "atualizado_em": "2025-11-07T10:13:19.522Z",
+    "area_vida_id": "33333333-3333-4333-8333-333333333333",
+    "sabotador_id": null,
+    "complexidade": 2,
+    "insight_id": "9a3fb5f7-38f4-494f-8ce9-05f70bd6b4fb"
   }
 ]
