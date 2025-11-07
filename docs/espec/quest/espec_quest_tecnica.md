@@ -201,11 +201,20 @@ Script de seed deverá:
     5. Retornar snapshot atualizado (`quest_estado_usuario` + lista das quests personalizadas com status atual).
 - `expert_quest_personalizadas`:
   - Inputs: `usuario_id` (obrigatório) e `chat_id` (opcional).
-  - Fluxo:
-    1. Consulta automática das quests personalizadas ativas, resumos das 10 últimas conversas (`usr_chat`), 10 insights recentes e 10 registros de `usuarios_sabotadores`.
-    2. Monta pacote de contexto e chama agente IA (`gpt-4.1-mini` via OpenRouter) para gerar `novas_quests`/`atualizacoes` no formato padronizado.
-    3. Aplica dedupe/limite (máx. 4 ativas/pendentes), normaliza campos e aciona `sw_experts_gamification` com os JSONs prontos.
-  - Saída inclui as sugestões enviadas e o retorno consolidado da gamificação.
+  - Fluxo detalhado:
+    1. Nodes Postgres buscam quests ativas/pedentes (personalizadas), as 10 conversas mais recentes (`usr_chat`), 10 insights (`insights`) e 10 entradas de `usuarios_sabotadores`, todos filtrados pelo usuário.
+    2. “Montar Contexto” unifica os dados em JSON único consumido pelo agente.
+    3. “Agente Quests” (OpenRouter · `gpt-4.1-mini`) recebe instruções rígidas: micro-hábitos concretos ≤ 7 dias, máximo de 4 quests simultâneas, sem duplicar `contexto_origem + título`, possibilidade de propor atualizações de status.
+    4. “Parser JSON” valida a resposta; “Interpretar Resultado” repassa apenas arrays válidos.
+    5. “Aplicar Limites & Dedupe” reforça as regras (limite de 4, dedupe, defaults de prioridade/recorrência/status/xp, filtro de status permitidos).
+    6. “Chamar Gamificação” invoca `sw_experts_gamification`, enviando `quests_personalizadas` e `atualizacoes_status` serializados.
+    7. “Montar Saída” retorna o que foi registrado (novas quests, atualizações e payload de resposta).
+  - Saída inclui as sugestões efetivamente aplicadas e o retorno consolidado da gamificação.
+- `job_batch_generate_quests`:
+  - Trigger manual (pode ser agendado).
+  - “Listar Usuários” executa `SELECT id FROM public.usuarios WHERE COALESCE(ativo, true) = true`.
+  - `Split In Batches` (batchSize 1) itera por usuário, chamando `expert_quest_personalizadas` com `chat_id = null` e aguardando cada execução terminar antes de puxar o próximo.
+  - O jobb encerra no node “Concluído” após processar todos os usuários ativos, servindo para cargas iniciais ou rotinas periódicas.
 
 ## Integração com Dashboard
 

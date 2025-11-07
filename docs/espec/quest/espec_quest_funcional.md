@@ -44,6 +44,14 @@
 - **Revisão**: se o usuário ignorar três lembretes consecutivos, o assistente pergunta se deseja reagendar, arquivar ou ajustar escopo.
 - **Encerramento**: uma quest pode ser concluída pelo usuário, pelo assistente (após confirmação de execução) ou expirada caso o prazo termine sem ação. Recorrências geram nova instância apenas após a conclusão da anterior ou após ajuste solicitado; cada nova conclusão concede 150 XP + 50 XP por repetição (até 15).
 
+### Critérios para sugestões automáticas
+
+- O workflow `expert_quest_personalizadas` sempre monta um contexto com: quests já ativas, até 10 conversas recentes (resumo + reflexões), 10 últimos insights e os 10 sabotadores mais ativos do usuário.
+- As sugestões priorizam **micro-hábitos concretos** com duração máxima de 7 dias. Nenhuma quest automática pode extrapolar esse prazo ou deixar de indicar ação observável.
+- Mesmo após a etapa de IA, a camada de aplicação impõe o limite de 4 quests simultâneas e remove duplicidades comparando `contexto_origem + título` com o que já está ativo.
+- O agente pode propor **novas quests** ou **atualizações** (concluir, cancelar, reiniciar) para instâncias existentes, facilitando a rotação do portfólio.
+- Prioridade, recorrência, status inicial e XP sugeridos são normalizados antes de chegar ao motor de gamificação, garantindo que todo payload enviado ao `sw_experts_gamification` esteja consistente.
+
 ## Níveis de evolução
 
 | Nível | Nome | XP mínimo | XP próximo nível | Conversas acumuladas (referência) | Descrição |
