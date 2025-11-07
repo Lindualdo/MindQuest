@@ -26,7 +26,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.item.json || {};\\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\\n  throw new Error('usuario_id obrigatório');\\n}\\nreturn [{ json: { usuario_id: usuarioId.trim() } }];"
+        "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\n  throw new Error('usuario_id obrigatório');\n}\nreturn [{ json: { usuario_id: usuarioId.trim() } }];"
       },
       "id": "7fbc59da-2c27-44d9-91cf-1fe51f21caeb",
       "name": "Validar Entrada",
