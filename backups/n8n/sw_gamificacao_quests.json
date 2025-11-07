@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-10-10T11:10:56.623Z",
   "id": "agXJK8Dd49If1eFx",
-  "name": "sw_experts_gamification",
+  "name": "sw_gamificacao_quests",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -40,6 +40,48 @@
       "typeVersion": 2,
       "position": [
         48,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "sw_calcula_jornada",
+          "cachedResultUrl": "/workflow/swCalcJornada01",
+          "mode": "list",
+          "value": "swCalcJornada01"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').item.json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "0f78d9c3-097f-46b3-8ba6-96f2d532908d",
+      "name": "Atualizar Jornada",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
         -128
       ]
     },
@@ -287,6 +329,17 @@
       ]
     },
     "Atualizar Estado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Jornada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Jornada": {
       "main": [
         [
           {

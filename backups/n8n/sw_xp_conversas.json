@@ -1,0 +1,261 @@
+{
+  "createdAt": "2025-11-07T15:00:00.000Z",
+  "id": "swXpConvs01",
+  "name": "sw_xp_conversas",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            }
+          ]
+        }
+      },
+      "id": "c1f61e58-305d-4e0a-9a77-12fda35c8b3f",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $input.item.json || {}\\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\\n  throw new Error('usuario_id obrigatório');\\n}\\nreturn [{ json: { usuario_id: usuarioId.trim() } }];"
+      },
+      "id": "0175fd54-ecbf-4bb7-9f75-3bb8b8f0a2e2",
+      "name": "Validar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT usuario_id, xp_total, total_xp_hoje, sequencia_atual, sequencia_recorde, meta_sequencia_codigo, proxima_meta_codigo, ultima_conversa_em, sequencia_status FROM public.quest_estado_usuario WHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "dd833d0e-1387-4771-b335-0b392d92f0c4",
+      "name": "Buscar Estado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  uc.id,\n  date(uc.data_conversa) AS dia,\n  uc.tem_reflexao,\n  COALESCE(uc.total_palavras_usuario, 0) AS total_palavras_usuario\nFROM public.usr_chat uc\nWHERE uc.usuario_id = $1::uuid\n  AND date(uc.data_conversa) > COALESCE($2::date, '1970-01-01'::date)\nORDER BY dia ASC, uc.data_conversa ASC;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.ultima_conversa_em ? $json.ultima_conversa_em : '1970-01-01'] }}"
+        }
+      },
+      "id": "e3d81dac-4039-4b83-81d7-2d0410fb0ce6",
+      "name": "Buscar Conversas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        64,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const getItem = (nodeName) => {\\n  const list = $items(nodeName, 0, 0) || [];\\n  return list[0]?.json || null;\\n};\\nconst getItems = (nodeName) => {\\n  const list = $items(nodeName) || [];\\n  return list.map((entry) => entry?.json || {});\\n};\\nconst estado = getItem('Buscar Estado');\\nif (!estado) {\\n  throw new Error('Estado do usuário não encontrado');\\n}\\nconst conversas = getItems('Buscar Conversas');\\nconst metas = [\\n  { codigo: 'streak_003', dias: 3, bonus: 40 },\\n  { codigo: 'streak_005', dias: 5, bonus: 60 },\\n  { codigo: 'streak_007', dias: 7, bonus: 90 },\\n  { codigo: 'streak_010', dias: 10, bonus: 130 },\\n  { codigo: 'streak_015', dias: 15, bonus: 180 },\\n  { codigo: 'streak_020', dias: 20, bonus: 250 },\\n  { codigo: 'streak_025', dias: 25, bonus: 340 },\\n  { codigo: 'streak_030', dias: 30, bonus: 450 },\\n];\\nconst toDay = (value) => {\\n  if (!value) return null;\\n  const date = new Date(value);\\n  if (Number.isNaN(date.getTime())) return null;\\n  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\\n};\\nconst parseStatus = () => {\\n  const raw = estado.sequencia_status;\\n  if (!raw) return { estado: 'ativa', reinicios: 0, alvo_conversas: 3 };\\n  if (typeof raw === 'object') return { estado: 'ativa', ...raw };\\n  try {\\n    return { estado: 'ativa', ...(JSON.parse(raw) || {}) };\\n  } catch (error) {\\n    return { estado: 'ativa', reinicios: 0, alvo_conversas: 3 };\\n  }\\n};\\nconst status = parseStatus();\\nlet xpGanho = 0;\\nconst diasMap = new Map();\\nconst calcXPConversa = (entrada) => {\\n  const palavras = Number(entrada.total_palavras_usuario) || 0;\\n  const reflexao = entrada.tem_reflexao === true;\\n  if (palavras >= 500) return 50;\\n  if (reflexao) return 35;\\n  return 20;\\n};\\nfor (const conversa of conversas) {\\n  const xp = calcXPConversa(conversa);\\n  xpGanho += xp;\\n  const dia = conversa.dia;\\n  if (!diasMap.has(dia)) {\\n    diasMap.set(dia, { xp: 0 });\\n  }\\n  diasMap.get(dia).xp += xp;\\n}\\nconst diasOrdenados = Array.from(diasMap.keys()).sort();\\nlet sequenciaAtual = Number(estado.sequencia_atual) || 0;\\nlet sequenciaRecorde = Number(estado.sequencia_recorde) || 0;\\nlet reinicios = Number(status.reinicios) || 0;\\nlet ultimaData = toDay(estado.ultima_conversa_em);\\nlet metaCodigoAtual = estado.meta_sequencia_codigo || metas[0].codigo;\\nlet metaIndex = metas.findIndex((meta) => meta.codigo === metaCodigoAtual);\\nif (metaIndex === -1) metaIndex = 0;\\nlet proximaCodigo = estado.proxima_meta_codigo || metas[metaIndex + 1]?.codigo || null;\\nconst msDia = 24 * 60 * 60 * 1000;\\nfor (const dia of diasOrdenados) {\\n  const diaAtual = toDay(dia);\\n  if (!diaAtual) continue;\\n  if (ultimaData) {\\n    const diff = Math.round((diaAtual - ultimaData) / msDia);\\n    if (diff > 1) {\\n      sequenciaAtual = 0;\\n      reinicios += 1;\\n    }\\n    if (diff === 0) {\\n      ultimaData = diaAtual;\\n      continue;\\n    }\\n  }\\n  sequenciaAtual += 1;\\n  ultimaData = diaAtual;\\n  if (sequenciaAtual > sequenciaRecorde) {\\n    sequenciaRecorde = sequenciaAtual;\\n  }\\n  while (metaIndex < metas.length && sequenciaAtual >= metas[metaIndex].dias) {\\n    xpGanho += metas[metaIndex].bonus;\\n    metaCodigoAtual = metas[metaIndex].codigo;\\n    metaIndex += 1;\\n    proximaCodigo = metas[metaIndex] ? metas[metaIndex].codigo : null;\\n  }\\n}\\nconst alvoConversas = metas[metaIndex]?.dias || metas[metas.length - 1].dias;\\nconst ultimaConversaISO = ultimaData ? ultimaData.toISOString() : estado.ultima_conversa_em || null;\\nreturn [{\\n  json: {\\n    usuario_id: estado.usuario_id,\\n    xp_ganho: xpGanho,\\n    sequencia_atual: sequenciaAtual,\\n    sequencia_recorde: sequenciaRecorde,\\n    meta_sequencia_codigo: metaCodigoAtual,\\n    proxima_meta_codigo: proximaCodigo,\\n    ultima_conversa_em: ultimaConversaISO,\\n    sequencia_status: {\\n      ...status,\\n      estado: 'ativa',\\n      reinicios,\\n      alvo_conversas: alvoConversas,\\n    },\\n    dias_processados: diasOrdenados.length\\n  }\\n}];"
+      },
+      "id": "fd4cf3af-2f93-4a6c-9f32-3b95a1489c22",
+      "name": "Calcular XP Conversas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::int AS xp_ganho,\n    $3::int AS sequencia_atual,\n    $4::int AS sequencia_recorde,\n    $5::varchar AS meta_codigo,\n    $6::varchar AS proxima_codigo,\n    NULLIF($7::timestamptz, '') AS ultima_conversa_em,\n    $8::jsonb AS sequencia_status\n),\natualizado AS (\n  UPDATE public.quest_estado_usuario q\n  SET\n    xp_total = q.xp_total + payload.xp_ganho,\n    total_xp_hoje = q.total_xp_hoje + payload.xp_ganho,\n    sequencia_atual = payload.sequencia_atual,\n    sequencia_recorde = payload.sequencia_recorde,\n    meta_sequencia_codigo = payload.meta_codigo,\n    proxima_meta_codigo = payload.proxima_codigo,\n    ultima_conversa_em = COALESCE(payload.ultima_conversa_em, q.ultima_conversa_em),\n    sequencia_status = payload.sequencia_status,\n    atualizado_em = NOW()\n  FROM payload\n  WHERE q.usuario_id = payload.usuario_id\n  RETURNING q.usuario_id, payload.xp_ganho\n)\nSELECT\n  payload.usuario_id,\n  payload.xp_ganho,\n  payload.sequencia_atual,\n  payload.sequencia_recorde\nFROM payload\nLEFT JOIN atualizado ON atualizado.usuario_id = payload.usuario_id;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho, $json.sequencia_atual, $json.sequencia_recorde, $json.meta_sequencia_codigo, $json.proxima_meta_codigo, $json.ultima_conversa_em || '', JSON.stringify($json.sequencia_status || {})] }}"
+        }
+      },
+      "id": "7ddf8378-9664-4c0a-8c3f-31ec441e4d70",
+      "name": "Atualizar Estado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        560,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "sw_calcula_jornada",
+          "cachedResultUrl": "/workflow/swCalcJornada01",
+          "mode": "list",
+          "value": "swCalcJornada01"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Validar Entrada').item.json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "2b4f1c5c-8ba5-483d-9c88-12e7b189f01f",
+      "name": "Atualizar Jornada",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a4b3c739-7c3a-4f8b-b105-5c1871cf2115",
+      "name": "Fim",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estado": {
+      "main": [
+        [
+          {
+            "node": "Buscar Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Conversas": {
+      "main": [
+        [
+          {
+            "node": "Calcular XP Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular XP Conversas": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Estado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Jornada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Jornada": {
+      "main": [
+        [
+          {
+            "node": "Fim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {}
+}

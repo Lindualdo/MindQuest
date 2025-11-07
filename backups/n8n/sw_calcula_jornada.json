@@ -1,0 +1,150 @@
+{
+  "createdAt": "2025-11-07T15:05:00.000Z",
+  "id": "swCalcJornada01",
+  "name": "sw_calcula_jornada",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            }
+          ]
+        }
+      },
+      "id": "a6c4d73a-4d1b-48da-a13b-f36fa0616765",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $input.item.json || {};\\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\\n  throw new Error('usuario_id obrigatório');\\n}\\nreturn [{ json: { usuario_id: usuarioId.trim() } }];"
+      },
+      "id": "7fbc59da-2c27-44d9-91cf-1fe51f21caeb",
+      "name": "Validar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT usuario_id, xp_total FROM public.quest_estado_usuario WHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "66517b5f-6b4f-4f13-9aa1-7131f48a0c49",
+      "name": "Buscar XP",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        16,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH nivel_destino AS (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= $2::int\n    AND (jn.xp_proximo_nivel IS NULL OR $2::int < jn.xp_proximo_nivel)\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n)\nUPDATE public.quest_estado_usuario q\nSET\n  nivel_atual = COALESCE(nivel_destino.nivel, q.nivel_atual),\n  titulo_nivel = COALESCE(nivel_destino.titulo, q.titulo_nivel),\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, q.xp_proximo_nivel),\n  atualizado_em = NOW()\nFROM nivel_destino\nWHERE q.usuario_id = $1::uuid\nRETURNING q.usuario_id, q.nivel_atual, q.titulo_nivel, q.xp_proximo_nivel;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0] }}"
+        }
+      },
+      "id": "55093b62-875d-4f69-8c57-e5cdb1465a72",
+      "name": "Atualizar Jornada",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        256,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "4af197a0-c1f4-4c66-9e0b-26f03a15affc",
+      "name": "Fim",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Buscar XP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar XP": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Jornada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Jornada": {
+      "main": [
+        [
+          {
+            "node": "Fim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {}
+}

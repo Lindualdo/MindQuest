@@ -24,16 +24,16 @@
 
 - Cada quest possui status (`pendente`, `ativa`, `concluída`, `vencida`, `cancelada`, `reiniciada`) exibido no painel.
 - O usuário visualiza três agrupamentos no painel: **Em andamento**, **Concluídas recentemente**, **Arquivadas**.
-- XP é calculado com base em ações concretas: **200 XP** por conversa concluída (+50 XP por dia consecutivo até 15 dias) e **150 XP** por quest personalizada concluída (+50 XP extras por repetição quando recorrente, até 15). Metas de sequência concedem bônus premium adicionais (+100 a +500 XP).
+- XP é calculado com base em ações concretas: **60 XP** por dia com conversa concluída (apenas uma conversa pontua por dia) e **150 XP** por quest personalizada concluída (+50 XP extras por repetição quando recorrente, até 15). Metas de sequência liberam bônus extras conforme marcos de 3, 7, 10, 20 e 30 dias (+80, +100, +150, +200 e +250 XP).
 - Antes de propor nova quest, o Assistente de Conversa consulta a lista existente para evitar duplicidade ou sobrecarga.
 
 ## Quests de sequência de conversas
 
-- **Escada de metas**: 3, 5, 7, 10, 15, 20, 25 e 30 conversas consecutivas; cada conclusão concede um bônus premium (+100 até +500 XP) somado ao XP diário acumulado.
+- **Escada de metas**: marcos de 3, 7, 10, 20 e 30 dias consecutivos; cada conclusão concede bônus progressivo (+80, +100, +150, +200 e +250 XP) somado ao XP diário acumulado.
 - **Progressão**: concluir uma meta desbloqueia automaticamente a próxima; nenhuma meta é pulada e múltiplas conversas no mesmo dia contam para a sequência.
 - **Reset**: ficar mais de 24h sem conversar (intervalo máximo configurável) encerra a meta ativa com status `reiniciada`, registra o recorde no histórico e reinicia o ciclo na Meta 1 a partir da próxima conversa.
 - **Recordes**: o painel mostra streak atual, melhor streak e meta ativa. Conquistas destacam quantas vezes cada meta foi completada.
-- **Recompensa**: cada conversa rende 200 XP; dias consecutivos somam +50 XP (até 15). Ao completar a meta vigente, o usuário recebe o bônus premium correspondente e o painel celebra o marco.
+- **Recompensa**: cada dia com pelo menos uma conversa registrada rende 60 XP. Ao completar marcos de sequência (3/7/10/20/30 dias) o usuário recebe bônus extras (80/100/150/200/250 XP) cumulativos. Se a sequência for perdida, o usuário reinicia na meta inicial, mas mantém todos os pontos já ganhos.
 
 ## Quests personalizadas
 
@@ -65,7 +65,7 @@
 | 7 | Maestria | 7.400 | 9.800 | Meta 8 + 20 quests | Cria e executa quests autorais com autonomia. |
 | 8 | Impacto | 9.800 | 12.600 | 2 ciclos completos + 25 quests | Compartilha aprendizados e apoia outras jornadas. |
 | 9 | Legado | 12.600 | 16.000 | 45+ dias consistentes + 30 quests | Conduz projetos de longo prazo com impacto coletivo. |
-| 10 | Transcendência | 16.000 | — | 12 meses contínuos | Vive o propósito e mantém evolução perpétua. |
+o| 10 | Transcendência | 16.000 | — | 12 meses contínuos | Vive o propósito e mantém evolução perpétua. |
 
 ## Interação no painel
 

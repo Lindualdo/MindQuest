@@ -161,7 +161,7 @@ CREATE INDEX idx_quest_eventos_usuario ON public.quest_eventos (usuario_id, regi
 
 ## Cálculo de XP
 
-- **Conversas**: job diário (ou workflow) consulta `usr_chat` para identificar dias com conversa concluída. Cada dia soma 200 XP em `quest_estado_usuario`. Ao detectar dias consecutivos, aplica bônus incremental de +50 XP por dia (2º ao 15º). As metas de sequência (`quest_instancias` com meta_codigo `streak_*`) monitoram o streak; quando a meta fecha, o sistema grava o status como `concluida`, libera a próxima e insere o bônus premium correspondente (+100…+500).
+- **Conversas**: job diário (ou workflow) consulta `usr_chat` para identificar dias com conversa concluída. Cada dia soma **60 XP fixos** (apenas uma conversa pontua por dia). Os bônus de sequência são aplicados somente quando o usuário completa metas de 3, 7, 10, 20 e 30 dias consecutivos (respeitando +80, +100, +150, +200 e +250 XP). Perder a sequência não remove XP acumulado; apenas reinicia a meta ativa.
 - **Quests personalizadas**: a cada atualização que muda o status para `concluida`, o workflow calcula 150 XP base; se o modelo for recorrente (`quest_modelos.repeticao = 'recorrente'`), adiciona +50 XP por repetição (limitado a 15) com base no número de instâncias concluídas daquele `modelo_id`.
 - **Sincronização**: `quest_estado_usuario` guarda `xp_total`, `total_xp_hoje`, `sequencia_atual`, `meta_sequencia_codigo` e `proxima_meta_codigo`. Qualquer alteração em `quest_instancias` deve refletir esses campos, mantendo o snapshot pronto para leitura pelo dashboard.
 
@@ -188,38 +188,44 @@ Script de seed deverá:
 - `chat_onboarding`: após criar o usuário, roda o SQL de bootstrap que:
   - insere registro em `quest_estado_usuario` (nível 1, meta `streak_003`);
   - garante instâncias iniciais `streak_003` (ativa) e `streak_005` (pendente) em `quest_instancias`.
-- `sw_experts_gamification` (nova versão):
-  - Entrada obrigatória: `usuario_id`.
-  - Entrada opcional `quests_personalizadas` (lista). Cada item deve conter:
-    - `codigo` (string, opcional; gera UUID se vazio), `titulo`, `descricao`, `contexto_origem`, `prioridade` (`baixa|media|alta`), `recorrencia` (`unica|diaria|semanal`), `prazo_inicio`, `prazo_fim`, `progresso_meta`, `status_inicial` (`pendente|ativa`), `xp_recompensa`, `payload_extra` (json opcional).
-  - Entrada opcional `atualizacoes_status` (lista). Cada item: `meta_codigo` ou `instancia_id`, `novo_status` (`concluida|vencida|cancelada|reiniciada`), `progresso_atual`, `xp_extra` opcional.
-  - Regras principais:
-    1. Validar limite de 4 quests personalizadas ativas/pendentes antes de inserir novas e evitar duplicatas por `titulo`/`contexto`.
-    2. Para novas quests: garantir modelo (`quest_modelos`, tipo `personalizada`, gatilho `manual`) e criar instância em `quest_instancias` com campos preenchidos (prioridade, janela, tentativas, status inicial). Incrementar `quest_estado_usuario.total_quests_personalizadas`.
-    3. Para atualizações: ajustar `quest_instancias` (status, progresso, `concluido_em`, `reiniciada_em`, `tentativas`). Se concluir, aplicar o XP padrão de 150; se `recorrente`, adicionar +50 por repetição até 15 (considerando as instâncias concluídas do mesmo modelo). Somar o resultado em `quest_estado_usuario.xp_total` e `total_quests_concluidas`.
-    4. Recalcular nível e `xp_proximo_nivel` usando `jornada_niveis`. Atualizar `total_xp_hoje`, `sequencia_status` conforme necessário.
-    5. Retornar snapshot atualizado (`quest_estado_usuario` + lista das quests personalizadas com status atual).
-- `expert_quest_personalizadas`:
+- `sw_expert_quest_personalizadas`: agente responsável por sugerir novas quests ou ajustes.
   - Inputs: `usuario_id` (obrigatório) e `chat_id` (opcional).
   - Fluxo detalhado:
-    1. Nodes Postgres buscam quests ativas/pedentes (personalizadas), as 10 conversas mais recentes (`usr_chat`), 10 insights (`insights`) e 10 entradas de `usuarios_sabotadores`, todos filtrados pelo usuário.
+    1. Nodes Postgres buscam quests personalizadas ativas/pendentes, as 10 conversas mais recentes (`usr_chat`), 10 insights (`insights`) e 10 registros de `usuarios_sabotadores`.
     2. “Montar Contexto” unifica os dados em JSON único consumido pelo agente.
-    3. “Agente Quests” (OpenRouter · `gpt-4.1-mini`) recebe instruções rígidas: micro-hábitos concretos ≤ 7 dias, máximo de 4 quests simultâneas, sem duplicar `contexto_origem + título`, possibilidade de propor atualizações de status.
+    3. “Agente Quests” (OpenRouter · `gpt-4.1-mini`) recebe instruções rígidas: micro-hábitos concretos ≤ 7 dias, máximo 4 quests simultâneas, sem duplicar `contexto_origem + título`, possibilidade de propor atualizações de status.
     4. “Parser JSON” valida a resposta; “Interpretar Resultado” repassa apenas arrays válidos.
     5. “Aplicar Limites & Dedupe” reforça as regras (limite de 4, dedupe, defaults de prioridade/recorrência/status/xp, filtro de status permitidos).
-    6. “Chamar Gamificação” invoca `sw_experts_gamification`, enviando `quests_personalizadas` e `atualizacoes_status` serializados.
+    6. “Chamar Gamificação” invoca `sw_gamificacao_quests`, enviando `quests_personalizadas` e `atualizacoes_status` serializados.
     7. “Montar Saída” retorna o que foi registrado (novas quests, atualizações e payload de resposta).
-  - Saída inclui as sugestões efetivamente aplicadas e o retorno consolidado da gamificação.
+- `sw_gamificacao_quests` (antigo `sw_experts_gamification`): aplica regras de persistência/XP para quests personalizadas.
+  - Entrada obrigatória: `usuario_id`.
+  - Payload `quests_personalizadas` (lista) e `atualizacoes_status` (lista) com os campos: `codigo`, `titulo`, `descricao`, `contexto_origem`, `prioridade`, `recorrencia`, `prazo_inicio`, `prazo_fim`, `progresso_meta`, `status_inicial`, `xp_recompensa`, `payload_extra`, além de atualizações contendo `meta_codigo`/`instancia_id`, `novo_status`, `progresso_atual`, `xp_extra`.
+  - Passos principais:
+    1. Validar limite de 4 quests ativas/pendentes e evitar duplicidade `titulo + contexto`.
+    2. Criar instâncias para novas quests garantindo vínculo com `quest_modelos`; atualizar `quest_estado_usuario.total_quests_personalizadas`.
+    3. Atualizar instâncias existentes (status, progresso, `concluido_em`, `reiniciada_em`, `tentativas`). Ao concluir, conceder XP conforme regra (150 XP base + 50 XP por repetição recorrente, até 15) e somar a `xp_total`, `total_quests_concluidas`, `total_xp_hoje`.
+    4. Ao final, chamar `sw_calcula_jornada` para recalcular nível/título antes de responder.
+- `sw_xp_conversas`: workflow dedicado a premiar conversas.
+  - Entrada: `usuario_id`.
+  - Busca `quest_estado_usuario` (sequência atual, recorde, meta/proxima meta, `ultima_conversa_em`, `xp_total`).
+  - Consulta `usr_chat` e agrega dias com conversa após `ultima_conversa_em`.
+  - Node “Calcular XP Conversas” determina 20/35/50 XP conforme tipo (padrão, insight, profunda), aplica bônus de metas de sequência (3→40, 5→60, 7→90, 10→130, 15→180, 20→250, 25→340, 30→450), atualiza `sequencia_atual`, `sequencia_recorde`, `meta_sequencia_codigo`, `proxima_meta_codigo`, `sequencia_status` e `ultima_conversa_em`.
+  - Node Postgres aplica os valores em `quest_estado_usuario` e, ao terminar, chama `sw_calcula_jornada`.
+- `sw_calcula_jornada`: serviço de nível reutilizável.
+  - Entrada: `usuario_id`.
+  - Lê `quest_estado_usuario.xp_total`, localiza a faixa correspondente em `jornada_niveis` e atualiza `nivel_atual`, `titulo_nivel`, `xp_proximo_nivel`, `atualizado_em`.
+  - Futuras versões poderão validar automaticamente os critérios qualitativos (metas de sequência cumpridas, quests concluídas, sabotadores mapeados) usando os mesmos dados.
 - `job_batch_generate_quests`:
   - Trigger manual (pode ser agendado).
   - “Listar Usuários” executa `SELECT id FROM public.usuarios WHERE COALESCE(ativo, true) = true`.
-  - `Split In Batches` (batchSize 1) itera por usuário, chamando `expert_quest_personalizadas` com `chat_id = null` e aguardando cada execução terminar antes de puxar o próximo.
-  - O jobb encerra no node “Concluído” após processar todos os usuários ativos, servindo para cargas iniciais ou rotinas periódicas.
+  - `Split In Batches` (batchSize 1) itera por usuário, chamando `sw_expert_quest_personalizadas` com `chat_id = null` e aguardando cada execução terminar antes de puxar o próximo.
+  - O job encerra no node “Concluído” após processar todos os usuários ativos, servindo para cargas iniciais ou rotinas periódicas.
 
 ## Integração com Dashboard
 
 - Endpoint `GET/POST /api/quests` (proxy local) encaminha requisições para o webhook `QUESTS_WEBHOOK_URL` (por padrão `https://mindquest-n8n.cloudfy.live/webhook/quests-dashboard`) com `usuario_id` obrigatório.
-- O front-end utiliza `QuestPanel` (`src/components/dashboard/QuestPanel.tsx`) para exibir `sequencia_atual`, progresso da meta e até quatro quests personalizadas do snapshot retornado pelo workflow `sw_experts_gamification`.
+- O front-end utiliza `QuestPanel` (`src/components/dashboard/QuestPanel.tsx`) para exibir `sequencia_atual`, progresso da meta e até quatro quests personalizadas do snapshot retornado pelo workflow `sw_gamificacao_quests`.
 
 ## Referências cruzadas
 
