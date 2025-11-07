@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { motion } from 'framer-motion';
 import {
   Trophy,
-  Flame,
   Sparkles,
   CheckCircle2,
   Circle,
@@ -13,16 +11,6 @@ import { useDashboard } from '../../store/useStore';
 import type { QuestStatus, QuestPersonalizadaResumo } from '../../types/emotions';
 
 const LIGHT_PURPLE_BORDER = '#D4C5FF';
-
-const clampToPercent = (value: number) => Math.min(Math.max(value, 0), 100);
-
-const parseMetaFromCodigo = (codigo?: string | null) => {
-  if (!codigo) return null;
-  const match = codigo.match(/(\d+)/);
-  if (!match) return null;
-  const parsed = Number.parseInt(match[1], 10);
-  return Number.isFinite(parsed) ? parsed : null;
-};
 
 const QUEST_STATUS_STYLES: Record<QuestStatus | 'default', {
   icon: React.ComponentType<{ size?: number }>;
@@ -37,18 +25,6 @@ const QUEST_STATUS_STYLES: Record<QuestStatus | 'default', {
   cancelada: { icon: AlertTriangle, color: '#CA8A04', bg: '#FEF3C7', label: 'Cancelada' },
   vencida: { icon: AlertTriangle, color: '#DC2626', bg: '#FEE2E2', label: 'Vencida' },
   default: { icon: Circle, color: '#6B7280', bg: '#E5E7EB', label: 'Em análise' },
-};
-
-const normalizeMetaAlvo = (snapshotMeta: unknown, codigo?: string | null) => {
-  if (snapshotMeta && typeof snapshotMeta === 'object') {
-    const alvo = (snapshotMeta as Record<string, unknown>).alvo_conversas;
-    const parsed = Number(alvo);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return Math.trunc(parsed);
-    }
-  }
-
-  return parseMetaFromCodigo(codigo) ?? 0;
 };
 
 const QuestPanel: React.FC = () => {
@@ -123,22 +99,9 @@ const QuestPanel: React.FC = () => {
 
   const {
     quests_personalizadas: questsPersonalizadas = [],
-    meta_sequencia_codigo,
-    sequencia_status,
-    sequencia_atual,
-    sequencia_recorde,
     xp_total = 0,
     xp_proximo_nivel,
   } = computedSnapshot;
-
-  const metaAlvo = useMemo(
-    () => normalizeMetaAlvo(sequencia_status, meta_sequencia_codigo),
-    [sequencia_status, meta_sequencia_codigo]
-  );
-
-  const sequenciaAtual = sequencia_atual ?? 0;
-  const sequenciaRecorde = Math.max(sequencia_recorde ?? 0, sequenciaAtual);
-  const progressoPercentual = metaAlvo > 0 ? clampToPercent((sequenciaAtual / metaAlvo) * 100) : 0;
 
   return (
     <div
@@ -162,45 +125,6 @@ const QuestPanel: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <div
-          className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5"
-          style={{ borderColor: '#F2D2B3', backgroundColor: '#E8F3F5' }}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-[#475467]">
-              <Flame size={18} className="text-[#E86114]" />
-              Conversas seguidas
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-medium text-[#98A2B3]">Max</p>
-              <p className="text-sm font-semibold text-[#E86114]">
-                {sequenciaRecorde > 0 ? `${sequenciaRecorde} conversa${sequenciaRecorde === 1 ? '' : 's'}` : '—'}
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-4 text-4xl font-bold text-[#1C2541] leading-none">{sequenciaAtual}</p>
-
-          <div className="mt-4">
-            <div className="h-1.5 rounded-full bg-[#D9E0E8]">
-              <motion.div
-                className="h-1.5 rounded-full bg-[#E86114]"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressoPercentual}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              />
-            </div>
-            <div className="mt-3 flex items-center justify-between text-xs font-semibold text-[#475467]">
-              <span>
-                {sequenciaAtual} conversa{sequenciaAtual === 1 ? '' : 's'}
-              </span>
-              <span>
-                Meta {metaAlvo > 0 ? metaAlvo : '?'} conversa{metaAlvo === 1 ? '' : 's'}
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div
           className="rounded-2xl border px-4 py-4 sm:px-5 sm:py-5"
           style={{ borderColor: '#D8C5FF', backgroundColor: '#E8F3F5' }}
