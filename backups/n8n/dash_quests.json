@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getItems = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list.map((entry) => entry?.json || {});\n};\n\nconst toNumber = (value, fallback = null) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst parseJson = (value) => {\n  if (!value) return null;\n  if (typeof value === 'object') return value;\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  try {\n    return JSON.parse(trimmed);\n  } catch (_err) {\n    return null;\n  }\n};\n\nconst sequenciaStatus = parseJson(getItem(\"Buscar Estado\").sequencia_status) || getItem(\"Buscar Estado\").sequencia_status || null;\nconst estado = getItem(\"Buscar Estado\");\nconst quests = getItems(\"Buscar Quests\").map((row) => {\n  if (!row) return null;\n  const config = parseJson(row.config);\n  return {\n    instancia_id: row.instancia_id ?? null,\n    meta_codigo: row.meta_codigo ?? '',\n    status: row.status ?? 'pendente',\n    titulo: row.titulo ?? 'Quest personalizada',\n    descricao: row.descricao ?? null,\n    contexto_origem: row.contexto_origem ?? null,\n    progresso_meta: toNumber(row.progresso_meta, 1) ?? 1,\n    progresso_atual: toNumber(row.progresso_atual, 0) ?? 0,\n    concluido_em: row.concluido_em ?? null,\n    config: config ?? null,\n    xp_recompensa: toNumber(row.xp_recompensa, config?.xp_recompensa ?? null),\n    prioridade: row.prioridade ?? config?.prioridade ?? null,\n    recorrencia: row.recorrencia ?? config?.recorrencia ?? null,\n  };\n}).filter((item) => item !== null);\n\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id ?? $json.usuario_id ?? null,\n    xp_total: toNumber(estado.xp_total, 0) ?? 0,\n    xp_proximo_nivel: toNumber(estado.xp_proximo_nivel, null),\n    nivel_atual: toNumber(estado.nivel_atual, 1) ?? 1,\n    titulo_nivel: estado.titulo_nivel ?? null,\n    sequencia_atual: toNumber(estado.sequencia_atual, 0) ?? 0,\n    sequencia_recorde: toNumber(estado.sequencia_recorde, 0) ?? 0,\n    meta_sequencia_codigo: estado.meta_sequencia_codigo ?? null,\n    proxima_meta_codigo: estado.proxima_meta_codigo ?? null,\n    sequencia_status: sequenciaStatus,\n    quests_personalizadas: quests,\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -104,7 +104,7 @@
         -96
       ],
       "id": "80ffc4bd-9676-41cd-b714-ba1c07129186",
-      "name": "Code in JavaScript"
+      "name": "Montar Resposta"
     }
   ],
   "connections": {
@@ -112,7 +112,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Montar Resposta",
             "type": "main",
             "index": 0
           }
@@ -128,7 +128,7 @@
             "index": 0
           },
           {
-            "node": "Code in JavaScript",
+            "node": "Montar Resposta",
             "type": "main",
             "index": 0
           }
@@ -157,7 +157,7 @@
         ]
       ]
     },
-    "Code in JavaScript": {
+    "Montar Resposta": {
       "main": [
         [
           {
