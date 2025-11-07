@@ -24,16 +24,41 @@
 
 - Cada quest possui status (`pendente`, `ativa`, `concluída`, `vencida`, `cancelada`, `reiniciada`) exibido no painel.
 - O usuário visualiza três agrupamentos no painel: **Em andamento**, **Concluídas recentemente**, **Arquivadas**.
-- XP é calculado com base em ações concretas: **60 XP** por dia com conversa concluída (apenas uma conversa pontua por dia) e **150 XP** por quest personalizada concluída (+50 XP extras por repetição quando recorrente, até 15). Metas de sequência liberam bônus extras conforme marcos de 3, 7, 10, 20 e 30 dias (+80, +100, +150, +200 e +250 XP).
+- Toda a pontuação deriva exclusivamente das regras listadas nas seções **XP · Conversas** e **XP · Quests Personalizadas** deste documento.
 - Antes de propor nova quest, o Assistente de Conversa consulta a lista existente para evitar duplicidade ou sobrecarga.
+
+## XP · Conversas (Sequência)
+
+- **Regra base**: conversou no dia, ganhou **75 XP**. Apenas o primeiro registro válido do dia pontua.
+- **Detecção**: qualquer conversa registrada em `usr_chat` após a última `ultima_conversa_em` já gera o crédito, sem distinção por palavras, reflexão ou tipo.
+- **Bônus de streak**:
+
+| Meta concluída | Conversas consecutivas | Bônus |
+|----------------|------------------------|-------|
+| Meta 1 | 3 dias | +40 XP |
+| Meta 2 | 5 dias | +60 XP |
+| Meta 3 | 7 dias | +90 XP |
+| Meta 4 | 10 dias | +130 XP |
+| Meta 5 | 15 dias | +180 XP |
+| Meta 6 | 20 dias | +250 XP |
+| Meta 7 | 25 dias | +340 XP |
+| Meta 8 | 30 dias | +450 XP |
+
+- **Reset**: ficar mais de 24h sem conversar encerra a meta ativa como `reiniciada`, registra o recorde e reinicia o ciclo na Meta 1. O XP acumulado (base + bônus) nunca é removido.
+
+## XP · Quests Personalizadas
+
+- **Conclusão**: mudar o status de uma instância para `concluída` concede **150 XP**.
+- **Recorrência**: se o modelo é recorrente, cada repetição concluída adiciona **+50 XP** extras, limitado a 15 repetições por `modelo_id`.
+- **Sem bônus adicionais**: encerramentos `vencida`, `cancelada` ou `reiniciada` não rendem XP, mas liberam vaga dentro do limite de 4 quests ativas/pendentes.
 
 ## Quests de sequência de conversas
 
-- **Escada de metas**: marcos de 3, 7, 10, 20 e 30 dias consecutivos; cada conclusão concede bônus progressivo (+80, +100, +150, +200 e +250 XP) somado ao XP diário acumulado.
+- **Escada de metas**: segue exatamente os marcos e bônus da tabela em **XP · Conversas** (3, 5, 7, 10, 15, 20, 25 e 30 dias).
 - **Progressão**: concluir uma meta desbloqueia automaticamente a próxima; nenhuma meta é pulada e múltiplas conversas no mesmo dia contam para a sequência.
 - **Reset**: ficar mais de 24h sem conversar (intervalo máximo configurável) encerra a meta ativa com status `reiniciada`, registra o recorde no histórico e reinicia o ciclo na Meta 1 a partir da próxima conversa.
 - **Recordes**: o painel mostra streak atual, melhor streak e meta ativa. Conquistas destacam quantas vezes cada meta foi completada.
-- **Recompensa**: cada dia com pelo menos uma conversa registrada rende 60 XP. Ao completar marcos de sequência (3/7/10/20/30 dias) o usuário recebe bônus extras (80/100/150/200/250 XP) cumulativos. Se a sequência for perdida, o usuário reinicia na meta inicial, mas mantém todos os pontos já ganhos.
+- **Recompensa**: cada dia com pelo menos uma conversa registrada rende 75 XP, e o bônus da meta concluída é aplicado imediatamente. Se a sequência for perdida, o usuário reinicia na meta inicial, mas mantém todos os pontos já ganhos.
 
 ## Quests personalizadas
 
