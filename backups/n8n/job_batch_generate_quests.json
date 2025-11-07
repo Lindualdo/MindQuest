@@ -1,0 +1,179 @@
+{
+  "createdAt": "2025-11-07T14:32:00.000Z",
+  "id": "job_batch_generate_quests",
+  "name": "job_batch_generate_quests",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        0
+      ],
+      "id": "0fd40e75-3f15-4d68-8ea5-2e9d8c7a2fa9",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -256,
+        0
+      ],
+      "id": "22c059c5-2311-4d1c-8156-c074c7f327f0",
+      "name": "Listar Usuários",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "7f3f3c94-8d0e-4f1b-8b37-8a0c3d22a0ce",
+      "name": "Split In Batches"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "expert_quest_personalizadas",
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "mode": "list",
+          "value": "LKjU8NE9aNHw7kEh"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.id }}",
+            "chat_id": null
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0fb1e2b4-deda-4e48-b828-6cf745ef8a34",
+      "name": "Executar Expert Quests"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "3745e648-6a7d-4a7a-84e9-8bf503c2ce7d",
+      "name": "Concluído"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Listar Usuários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar Usuários": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Executar Expert Quests",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Concluído",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Expert Quests": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "6b77a7bb-7d9d-4f67-958e-5d9e4a0bc612",
+  "triggerCount": 0,
+  "shared": []
+}
