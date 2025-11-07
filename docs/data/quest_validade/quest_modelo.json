@@ -13,7 +13,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "8f97a5a4-cc8a-4ae5-a786-e84abc880f3a",
@@ -29,7 +33,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "e353aeab-2861-40a5-a067-861e41d41d9b",
@@ -45,7 +53,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "0b96ac0a-691c-4a2f-b2b1-5c890a784fdc",
@@ -61,7 +73,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "37bcbad7-3509-485c-9173-30757462256a",
@@ -77,7 +93,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "af564111-6314-4f99-af1a-824667e7ceb6",
@@ -93,7 +113,11 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   },
   {
     "id": "01a219ac-7cb6-40ae-9029-0e88e841961e",
@@ -109,7 +133,131 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
+  },
+  {
+    "id": "98be6f7e-3697-495e-ad2d-08b6a8b24cce",
+    "codigo": "qp_1762482527332_39f9c5",
+    "titulo": "Ritual de Encerramento das Operações Financeiras até 20h",
+    "descricao": "Estabeleça um ritual diário para encerrar as operações financeiras até as 20 horas, incluindo etapa de registro de desempenho e relaxamento mental para reduzir a ansiedade noturna.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 7,
+    "xp_recompensa": 100,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78",
+      "prioridade": "alta",
+      "recorrencia": "diaria",
+      "area_vida_id": "33333333-3333-4333-8333-333333333333",
+      "complexidade": 2,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T02:28:47.346Z",
+    "atualizado_em": "2025-11-07T02:28:47.346Z",
+    "area_vida_id": "33333333-3333-4333-8333-333333333333",
+    "sabotador_id": null,
+    "complexidade": 2,
+    "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78"
+  },
+  {
+    "id": "cf5ce735-9897-4c36-bad9-42a525700d68",
+    "codigo": "qp_1762482527334_1e9a54",
+    "titulo": "Micro-pausas com Técnicas de Respiração para Reduzir Ansiedade",
+    "descricao": "Pratique micro-pausas (1-2 minutos) usando técnicas de respiração profunda ou 4-7-8 antes de operar no mercado financeiro para controlar a ansiedade e evitar decisões impulsivas.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 7,
+    "xp_recompensa": 80,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "412c64b5-4992-43fb-9aa6-e5b562f67b34",
+      "prioridade": "alta",
+      "recorrencia": "diaria",
+      "area_vida_id": "11111111-1111-4111-8111-111111111111",
+      "complexidade": 3,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T02:28:47.346Z",
+    "atualizado_em": "2025-11-07T02:28:47.346Z",
+    "area_vida_id": "11111111-1111-4111-8111-111111111111",
+    "sabotador_id": null,
+    "complexidade": 3,
+    "insight_id": "412c64b5-4992-43fb-9aa6-e5b562f67b34"
+  },
+  {
+    "id": "af215183-0bfa-44a3-9095-68431f61aacb",
+    "codigo": "qp_1762482527334_c597b3",
+    "titulo": "Criar Checklist Personalizado para Uso Durante Operações Financeiras",
+    "descricao": "Desenvolva e utilize um checklist personalizado focado em estratégias de ancoragem e controle emocional para consultar nos momentos críticos das operações, ajustando conforme experiência.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 1,
+    "xp_recompensa": 90,
+    "repeticao": "unica",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
+      "prioridade": "media",
+      "recorrencia": "unica",
+      "area_vida_id": "33333333-3333-4333-8333-333333333333",
+      "complexidade": 4,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T02:28:47.346Z",
+    "atualizado_em": "2025-11-07T02:28:47.346Z",
+    "area_vida_id": "33333333-3333-4333-8333-333333333333",
+    "sabotador_id": null,
+    "complexidade": 4,
+    "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc"
+  },
+  {
+    "id": "7e9fa9c4-f82b-4ffd-9e1f-952e231026ff",
+    "codigo": "qp_1762482527337_9fe78a",
+    "titulo": "Praticar Autoempatia Diária para Reduzir Autocrítica",
+    "descricao": "Diariamente, dedique 5 minutos para praticar autoempatia, falando consigo mesmo de forma gentil e compreensiva, como falaria com um amigo na mesma situação, para diminuir a autocrítica e frustração.",
+    "tipo": "personalizada",
+    "gatilho_codigo": "manual",
+    "gatilho_valor": 7,
+    "xp_recompensa": 70,
+    "repeticao": "recorrente",
+    "ordem_inicial": null,
+    "ativo": true,
+    "config": {
+      "insight_id": "07ad2c89-7981-4796-8fcb-ccc53671f5de",
+      "prioridade": "media",
+      "recorrencia": "diaria",
+      "area_vida_id": "11111111-1111-4111-8111-111111111111",
+      "complexidade": 1,
+      "sabotador_id": null,
+      "payload_extra": {
+        "canal": "app"
+      }
+    },
+    "criado_em": "2025-11-07T02:28:47.346Z",
+    "atualizado_em": "2025-11-07T02:28:47.346Z",
+    "area_vida_id": "11111111-1111-4111-8111-111111111111",
+    "sabotador_id": null,
+    "complexidade": 1,
+    "insight_id": "07ad2c89-7981-4796-8fcb-ccc53671f5de"
   },
   {
     "id": "4738b689-db79-44c0-a4b0-9d97c1bca03a",
@@ -125,270 +273,10 @@
     "ativo": true,
     "config": {},
     "criado_em": "2025-11-05T12:17:29.501Z",
-    "atualizado_em": "2025-11-05T12:17:29.501Z"
-  },
-  {
-    "id": "00ec3511-abe8-4b77-954b-2acf05ac5c7e",
-    "codigo": "qp_1762358590707_b49a3c",
-    "titulo": "Introduzir 5 minutos de meditação guiada diário",
-    "descricao": "Praticar meditação guiada por 5 minutos todos os dias para aumentar foco e reduzir estresse.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 15,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-05T16:03:10.714Z",
-    "atualizado_em": "2025-11-05T16:03:10.714Z"
-  },
-  {
-    "id": "fa9b79dd-4e08-4b1e-b576-fd90ef6bc30c",
-    "codigo": "qp_1762358590707_f74aa5",
-    "titulo": "Fazer 10 minutos de caminhada ao ar livre",
-    "descricao": "Realizar uma caminhada leve ao ar livre por pelo menos 10 minutos para incentivar a atividade física regular.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 15,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-05T16:03:10.714Z",
-    "atualizado_em": "2025-11-05T16:03:10.714Z"
-  },
-  {
-    "id": "52b5f5a6-f603-457d-b781-6c2c92855dcc",
-    "codigo": "qp_1762365638597_5422fa",
-    "titulo": "Praticar meditação guiada por 5 minutos",
-    "descricao": "Reserve 5 minutos para fazer uma meditação guiada, ajudando a melhorar foco e reduzir o estresse.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 15,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-05T18:00:38.604Z",
-    "atualizado_em": "2025-11-05T18:00:38.604Z"
-  },
-  {
-    "id": "ab5454fe-4197-4a11-9124-2849cd7715d1",
-    "codigo": "qp_1762365638598_8a2c2f",
-    "titulo": "Ler um artigo ou capítulo de livro sobre desenvolvimento pessoal",
-    "descricao": "Escolha um artigo ou um capítulo de livro sobre desenvolvimento pessoal e leia para aprender novas estratégias de crescimento.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 1,
-    "xp_recompensa": 20,
-    "repeticao": "unica",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "unica",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-05T18:00:38.604Z",
-    "atualizado_em": "2025-11-05T18:00:38.604Z"
-  },
-  {
-    "id": "dd704a52-9d96-4f36-a4ef-e6fde3fd257d",
-    "codigo": "qp_1762365638598_c3844e",
-    "titulo": "Fazer uma caminhada de 10 minutos ao ar livre",
-    "descricao": "Realize uma caminhada rápida de pelo menos 10 minutos ao ar livre para melhorar a disposição física e mental.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 25,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "alta",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-05T18:00:38.604Z",
-    "atualizado_em": "2025-11-05T18:00:38.604Z"
-  },
-  {
-    "id": "3e7dc2eb-0986-44ab-9563-409dbdb52f36",
-    "codigo": "qp_1762384560856_33a18c",
-    "titulo": "Hidratação diária de 7 dias",
-    "descricao": "Beba ao menos 1,5 litros de água por dia durante os próximos 7 dias para melhorar sua hidratação.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 50,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "mindquest"
-      }
-    },
-    "criado_em": "2025-11-05T23:16:00.866Z",
-    "atualizado_em": "2025-11-05T23:16:00.866Z"
-  },
-  {
-    "id": "838921dc-c85e-408c-a804-db83713f1695",
-    "codigo": "qp_1762429911566_1a2181",
-    "titulo": "Praticar 5 minutos de meditação diária",
-    "descricao": "Iniciar um hábito diário de meditação por 5 minutos para melhorar o foco e o bem-estar.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 10,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "MindQuest App"
-      }
-    },
-    "criado_em": "2025-11-06T11:51:51.573Z",
-    "atualizado_em": "2025-11-06T11:51:51.573Z"
-  },
-  {
-    "id": "1a6b30f4-4bf8-443f-9925-ac1a6b20fa4a",
-    "codigo": "qp_1762444219459_6e18f2",
-    "titulo": "Estabelecer ritual diário de encerramento das operações financeiras às 20 horas",
-    "descricao": "Finalizar todas as operações financeiras até as 20 horas para reduzir ansiedade e promover relaxamento mental à noite.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 25,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "alta",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-06T15:50:19.472Z",
-    "atualizado_em": "2025-11-06T15:50:19.472Z"
-  },
-  {
-    "id": "c2fd51e2-464a-4f24-8ed6-a7bcb2a7682a",
-    "codigo": "qp_1762444489474_2635d2",
-    "titulo": "Praticar técnicas diárias de respiração para ansiedade",
-    "descricao": "Dedique 5 minutos por dia para fazer exercícios de respiração profunda para reduzir a ansiedade e melhorar o foco no presente.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 30,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "alta",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "mindquest"
-      }
-    },
-    "criado_em": "2025-11-06T15:54:49.481Z",
-    "atualizado_em": "2025-11-06T15:54:49.481Z"
-  },
-  {
-    "id": "ac2d738b-1c67-4941-8abf-1e8ed6013a33",
-    "codigo": "qp_1762444489475_511f8a",
-    "titulo": "Dialogar diariamente com o filho sobre sentimentos e limites",
-    "descricao": "Reserve 10 minutos por dia para conversas abertas com seu filho, buscando entender seus sentimentos e reforçar limites com empatia e confiança.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 20,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "mindquest"
-      }
-    },
-    "criado_em": "2025-11-06T15:54:49.481Z",
-    "atualizado_em": "2025-11-06T15:54:49.481Z"
-  },
-  {
-    "id": "f558982c-f7cc-4d95-92a3-fd7775a39f8e",
-    "codigo": "qp_1762444489475_8352e3",
-    "titulo": "Celebrar pequenas conquistas diárias com autoaceitação",
-    "descricao": "Anote ou reconheça uma pequena conquista diária, praticando a autoaceitação e diminuindo a autocrítica negativa.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 15,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "media",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "mindquest"
-      }
-    },
-    "criado_em": "2025-11-06T15:54:49.481Z",
-    "atualizado_em": "2025-11-06T15:54:49.481Z"
-  },
-  {
-    "id": "88a04b58-c2af-415b-b2f0-678c58c145c3",
-    "codigo": "qp_1762457001071_3c7304",
-    "titulo": "Organizar a mesa de trabalho ao final do dia",
-    "descricao": "Dedicar 5 minutos para organizar e limpar a mesa de trabalho ao final de cada dia para aumentar produtividade e foco.",
-    "tipo": "personalizada",
-    "gatilho_codigo": "manual",
-    "gatilho_valor": 7,
-    "xp_recompensa": 10,
-    "repeticao": "recorrente",
-    "ordem_inicial": null,
-    "ativo": true,
-    "config": {
-      "prioridade": "baixa",
-      "recorrencia": "diaria",
-      "payload_extra": {
-        "canal": "app"
-      }
-    },
-    "criado_em": "2025-11-06T19:23:21.133Z",
-    "atualizado_em": "2025-11-06T19:23:21.133Z"
+    "atualizado_em": "2025-11-05T12:17:29.501Z",
+    "area_vida_id": null,
+    "sabotador_id": null,
+    "complexidade": 0,
+    "insight_id": null
   }
 ]

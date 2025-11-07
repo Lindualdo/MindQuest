@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-11-03T09:13:55.708Z",
   "id": "04S47KA7EIbiJZBA",
-  "name": "My workflow 4",
+  "name": "exporta dados base",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -231,6 +231,123 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "quest_estado_usuario",
+          "mode": "list",
+          "cachedResultName": "quest_estado_usuario"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "e5c41c26-0c46-40db-8fa8-909174656334",
+      "name": "Gamificacao",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "quest_modelos",
+          "mode": "list",
+          "cachedResultName": "quest_modelos"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        160
+      ],
+      "id": "b05e0157-1580-4923-9f8c-55e381bbb5f7",
+      "name": "quest modelo",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "usr_chat",
+          "mode": "list",
+          "cachedResultName": "usr_chat"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "usuario_id",
+              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        160
+      ],
+      "id": "90004298-d72a-4f42-8c41-acad0fed9bda",
+      "name": "usr chat",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -253,7 +370,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e72830ea-b485-43a4-a2ca-af70b508b470",
+  "versionId": "991e297e-3133-4559-b639-e849f4006c75",
   "triggerCount": 0,
   "shared": [
     {

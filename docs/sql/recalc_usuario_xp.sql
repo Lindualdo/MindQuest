@@ -180,9 +180,10 @@ atualiza_personalizadas AS (
 reset_sequencias AS (
   UPDATE public.quest_instancias qi
   SET xp_concedido = 0
-  FROM params p
-  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id
+  FROM params p,
+       public.quest_modelos qm
   WHERE qi.usuario_id = p.usuario_id
+    AND qm.id = qi.modelo_id
     AND qm.tipo = 'sequencia'
   RETURNING 1
 ),
@@ -190,7 +191,11 @@ resumo AS (
   SELECT
     p.usuario_id,
     COALESCE(ec.xp_base, 0) + COALESCE(ec.xp_premium, 0) + COALESCE(xp_personalizadas.xp_total, 0) AS xp_total,
-    ec.*,
+    COALESCE(ec.xp_base, 0) AS xp_base,
+    COALESCE(ec.xp_premium, 0) AS xp_premium,
+    COALESCE(ec.recorde, 0) AS recorde,
+    COALESCE(ec.streak_atual, 0) AS streak_atual,
+    ec.ultima_conversa,
     xp_personalizadas.total_concluidas,
     mp.atual AS meta_atual_codigo,
     mp.proxima AS meta_proxima_codigo

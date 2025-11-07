@@ -21,43 +21,43 @@
           ]
         }
       },
-      "id": "7ffcea4f-93d9-474b-be36-e3fc4e130411",
+      "id": "22712bbf-feb9-4c1c-bca7-af1dabac8c97",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        96,
-        80
+        -176,
+        -128
       ]
     },
     {
       "parameters": {
         "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "id": "509f6336-759c-4f57-89e2-b0ffc399e87f",
+      "id": "8aefc1e9-261b-459e-920c-b218d8aeec20",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        320,
-        80
+        48,
+        -128
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH existentes AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n    AND qi.status IN ('pendente','ativa')\n)\nSELECT\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', existentes.id,\n        'meta_codigo', existentes.meta_codigo,\n        'status', existentes.status,\n        'contexto_origem', existentes.contexto_origem,\n        'progresso_meta', existentes.progresso_meta,\n        'progresso_atual', existentes.progresso_atual,\n        'titulo', existentes.titulo,\n        'descricao', existentes.descricao,\n        'config', existentes.config\n      )\n    ) FILTER (WHERE existentes.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_ativas\nFROM public.quest_estado_usuario eu\nLEFT JOIN existentes ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;",
+        "query": "\nWITH existentes AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qm.titulo,\n    qm.descricao,\n    qm.config,\n    qi.area_vida_id,\n    qi.sabotador_id,\n    qi.insight_id,\n    qi.complexidade\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n    AND qi.status IN ('pendente','ativa')\n)\nSELECT\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', existentes.id,\n        'meta_codigo', existentes.meta_codigo,\n        'status', existentes.status,\n        'contexto_origem', existentes.contexto_origem,\n        'progresso_meta', existentes.progresso_meta,\n        'progresso_atual', existentes.progresso_atual,\n        'titulo', existentes.titulo,\n        'descricao', existentes.descricao,\n        'config', existentes.config,\n        'area_vida_id', existentes.area_vida_id,\n        'sabotador_id', existentes.sabotador_id,\n        'insight_id', existentes.insight_id,\n        'complexidade', existentes.complexidade\n      )\n    ) FILTER (WHERE existentes.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_ativas\nFROM public.quest_estado_usuario eu\nLEFT JOIN existentes ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_total,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "527e1356-d9d5-4e40-9863-ab216220ca38",
+      "id": "c46a387c-225e-44fe-83e1-8c8235ac0f54",
       "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        544,
-        80
+        272,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -68,32 +68,32 @@
     },
     {
       "parameters": {
-        "jsCode": "const entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nconst existentesBrutos = Array.isArray(estado.quests_ativas)\n  ? estado.quests_ativas\n  : [];\n\nconst limite = 4;\nlet ocupados = Array.isArray(existentesBrutos)\n  ? existentesBrutos.length\n  : Number(existentesBrutos?.length) || 0;\n\nif (!Number.isFinite(ocupados)) {\n  ocupados = 0;\n}\n\nlet slotsDisponiveis = limite - ocupados;\nif (!Number.isFinite(slotsDisponiveis)) {\n  slotsDisponiveis = limite;\n}\nif (slotsDisponiveis < 0) {\n  slotsDisponiveis = 0;\n}\n\nconst dedupe = new Set();\nfor (const existente of existentesBrutos) {\n  const contexto = (existente?.contexto_origem || '').toLowerCase().trim();\n  const titulo = (existente?.titulo || '').toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst entradaListaBruta = Array.isArray(entrada.novas_quests)\n  ? entrada.novas_quests\n  : (typeof entrada.novas_quests === 'string'\n      ? (() => {\n          try {\n            const parsed = JSON.parse(entrada.novas_quests);\n            return Array.isArray(parsed) ? parsed : [];\n          } catch (error) {\n            return [];\n          }\n        })()\n      : []);\n\nconst novos = [];\nconst filaEspera = [];\n\nconst normalizarInteiro = (valor, padrao) => {\n  const numero = Number(valor);\n  if (Number.isFinite(numero) && numero > 0) {\n    return Math.trunc(numero);\n  }\n  return padrao;\n};\n\nfor (const bruto of entradaListaBruta) {\n  if (bruto == null) continue;\n\n  const quest =\n    typeof bruto === 'string'\n      ? (() => {\n          try {\n            return JSON.parse(bruto);\n          } catch (error) {\n            return null;\n          }\n        })()\n      : bruto;\n\n  if (!quest || typeof quest !== 'object') continue;\n\n  const contexto = (quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = (quest.titulo || '').toLowerCase().trim();\n  const temIdentificador = contexto || titulo;\n  const chaveDedup = temIdentificador ? `${contexto}|${titulo}` : null;\n\n  if (chaveDedup && dedupe.has(chaveDedup)) {\n    continue;\n  }\n\n  const codigoBase = quest.codigo && String(quest.codigo).trim();\n  const codigo =\n    codigoBase && codigoBase.length > 0\n      ? codigoBase\n      : `qp_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;\n\n  const questNormalizada = {\n    ...quest,\n    codigo,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: normalizarInteiro(quest.progresso_meta, 1),\n    xp_recompensa: normalizarInteiro(quest.xp_recompensa, 0),\n  };\n\n  if (chaveDedup) {\n    dedupe.add(chaveDedup);\n  }\n\n  if (slotsDisponiveis > 0) {\n    novos.push(questNormalizada);\n    slotsDisponiveis -= 1;\n  } else {\n    filaEspera.push(questNormalizada);\n  }\n}\n\nreturn [\n  {\n    json: {\n      usuario_id: entrada.usuario_id,\n      novas_quests: novos,\n      atualizacoes: Array.isArray(entrada.atualizacoes)\n        ? entrada.atualizacoes\n        : [],\n      estado_inicial: estado,\n      fila_espera: filaEspera,\n      debug_entrada_bruta: entrada.novas_quests,\n      debug_entrada_normalizada: entradaListaBruta,\n    },\n  },\n];"
+        "jsCode": "\nconst entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nconst existentesBrutos = Array.isArray(estado.quests_ativas)\n  ? estado.quests_ativas\n  : [];\n\nconst limite = 4;\nlet ocupados = Array.isArray(existentesBrutos)\n  ? existentesBrutos.length\n  : Number(existentesBrutos?.length) || 0;\n\nif (!Number.isFinite(ocupados)) {\n  ocupados = 0;\n}\n\nlet slotsDisponiveis = limite - ocupados;\nif (!Number.isFinite(slotsDisponiveis)) {\n  slotsDisponiveis = limite;\n}\nif (slotsDisponiveis < 0) {\n  slotsDisponiveis = 0;\n}\n\nconst dedupe = new Set();\nfor (const existente of existentesBrutos) {\n  const contexto = (existente?.contexto_origem || '').toLowerCase().trim();\n  const titulo = (existente?.titulo || '').toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst normalizeUuid = (value) => {\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;\n  return uuidRegex.test(trimmed) ? trimmed : null;\n};\n\nconst normalizeTextId = (value) => {\n  if (value == null) return null;\n  const text = String(value).trim();\n  return text || null;\n};\n\nconst clampComplexidade = (value) => {\n  const num = Number(value);\n  if (!Number.isFinite(num)) return 0;\n  if (num < 0) return 0;\n  if (num > 5) return 5;\n  return Math.round(num);\n};\n\nconst entradaListaBruta = Array.isArray(entrada.novas_quests)\n  ? entrada.novas_quests\n  : (typeof entrada.novas_quests === 'string'\n      ? (() => {\n          try {\n            const parsed = JSON.parse(entrada.novas_quests);\n            return Array.isArray(parsed) ? parsed : [];\n          } catch (error) {\n            return [];\n          }\n        })()\n      : []);\n\nconst novos = [];\nconst filaEspera = [];\n\nconst normalizarInteiro = (valor, padrao) => {\n  const numero = Number(valor);\n  if (Number.isFinite(numero) && numero > 0) {\n    return Math.trunc(numero);\n  }\n  return padrao;\n};\n\nfor (const bruto of entradaListaBruta) {\n  if (bruto == null) continue;\n\n  const quest =\n    typeof bruto === 'string'\n      ? (() => {\n          try {\n            return JSON.parse(bruto);\n          } catch (error) {\n            return null;\n          }\n        })()\n      : bruto;\n\n  if (!quest || typeof quest !== 'object') continue;\n\n  const contexto = (quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = (quest.titulo || '').toLowerCase().trim();\n  const temIdentificador = contexto || titulo;\n  const chaveDedup = temIdentificador ? `${contexto}|${titulo}` : null;\n\n  if (chaveDedup && dedupe.has(chaveDedup)) {\n    continue;\n  }\n\n  const areaVidaId = normalizeUuid(quest.area_vida_id);\n  if (!areaVidaId) {\n    continue;\n  }\n\n  const sabotadorId = normalizeTextId(quest.sabotador_id);\n  const complexidade = clampComplexidade(quest.complexidade);\n\n  const codigoBase = quest.codigo && String(quest.codigo).trim();\n  const codigo =\n    codigoBase && codigoBase.length > 0\n      ? codigoBase\n      : `qp_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;\n\n  const questNormalizada = {\n    ...quest,\n    codigo,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: normalizarInteiro(quest.progresso_meta, 1),\n    xp_recompensa: normalizarInteiro(quest.xp_recompensa, 0),\n    area_vida_id: areaVidaId,\n    sabotador_id: sabotadorId,\n    complexidade,\n  };\n\n  if (chaveDedup) {\n    dedupe.add(chaveDedup);\n  }\n\n  if (slotsDisponiveis > 0) {\n    novos.push(questNormalizada);\n    slotsDisponiveis -= 1;\n  } else {\n    filaEspera.push(questNormalizada);\n  }\n}\n\nreturn [\n  {\n    json: {\n      usuario_id: entrada.usuario_id,\n      novas_quests: novos,\n      atualizacoes: Array.isArray(entrada.atualizacoes)\n        ? entrada.atualizacoes\n        : [],\n      estado_inicial: estado,\n      fila_espera: filaEspera,\n      debug_entrada_bruta: entrada.novas_quests,\n      debug_entrada_normalizada: entradaListaBruta,\n    },\n  },\n];\n"
       },
-      "id": "488e1b7e-5585-4824-bbca-42f8bc910b27",
+      "id": "dcb04dbb-4e54-456c-933c-af47ecc388ff",
       "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        768,
-        80
+        496,
+        -128
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    (rec->>'codigo')::text AS codigo,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    rec->>'prioridade' AS prioridade,\n    rec->>'recorrencia' AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\nupsert AS (\n  INSERT INTO public.quest_modelos (\n    id,\n    codigo,\n    titulo,\n    descricao,\n    tipo,\n    gatilho_codigo,\n    gatilho_valor,\n    xp_recompensa,\n    repeticao,\n    ordem_inicial,\n    ativo,\n    config,\n    criado_em,\n    atualizado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    COALESCE(NULLIF(rows.codigo, ''), 'quest_' || encode(gen_random_bytes(6), 'hex')),\n    COALESCE(rows.titulo, 'Quest Personalizada'),\n    rows.descricao,\n    'personalizada',\n    'manual',\n    rows.progresso_meta,\n    rows.xp_recompensa,\n    CASE rows.recorrencia WHEN 'diaria' THEN 'recorrente' WHEN 'semanal' THEN 'recorrente' ELSE 'unica' END,\n    NULL,\n    TRUE,\n    jsonb_build_object(\n      'prioridade', rows.prioridade,\n      'recorrencia', rows.recorrencia,\n      'payload_extra', rows.payload_extra\n    ),\n    NOW(),\n    NOW()\n  FROM rows\n  ON CONFLICT (codigo) DO UPDATE\n  SET\n    titulo = EXCLUDED.titulo,\n    descricao = EXCLUDED.descricao,\n    gatilho_valor = EXCLUDED.gatilho_valor,\n    xp_recompensa = EXCLUDED.xp_recompensa,\n    repeticao = EXCLUDED.repeticao,\n    ativo = TRUE,\n    config = EXCLUDED.config,\n    atualizado_em = NOW()\n  RETURNING id, codigo\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE(jsonb_agg(jsonb_build_object('codigo', upsert.codigo, 'modelo_id', upsert.id)), '[]'::jsonb) AS modelos_upsertidos\nFROM payload\nLEFT JOIN upsert ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;",
+        "query": "\nWITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    (rec->>'codigo')::text AS codigo,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    rec->>'prioridade' AS prioridade,\n    rec->>'recorrencia' AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra,\n    NULLIF(rec->>'area_vida_id', '')::uuid AS area_vida_id,\n    NULLIF(rec->>'sabotador_id', '') AS sabotador_id,\n    NULLIF(rec->>'insight_id', '')::uuid AS insight_id,\n    COALESCE((rec->>'complexidade')::smallint, 0) AS complexidade\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\nupsert AS (\n  INSERT INTO public.quest_modelos (\n    id,\n    codigo,\n    titulo,\n    descricao,\n    tipo,\n    gatilho_codigo,\n    gatilho_valor,\n    xp_recompensa,\n    repeticao,\n    ordem_inicial,\n    ativo,\n    area_vida_id,\n    sabotador_id,\n    insight_id,\n    complexidade,\n    config,\n    criado_em,\n    atualizado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    COALESCE(NULLIF(rows.codigo, ''), 'quest_' || encode(gen_random_bytes(6), 'hex')),\n    COALESCE(rows.titulo, 'Quest Personalizada'),\n    rows.descricao,\n    'personalizada',\n    'manual',\n    rows.progresso_meta,\n    rows.xp_recompensa,\n    CASE rows.recorrencia WHEN 'diaria' THEN 'recorrente' WHEN 'semanal' THEN 'recorrente' ELSE 'unica' END,\n    NULL,\n    TRUE,\n    rows.area_vida_id,\n    rows.sabotador_id,\n    rows.insight_id,\n    rows.complexidade,\n    jsonb_build_object(\n      'prioridade', rows.prioridade,\n      'recorrencia', rows.recorrencia,\n      'payload_extra', rows.payload_extra,\n      'area_vida_id', rows.area_vida_id::text,\n      'sabotador_id', rows.sabotador_id,\n      'insight_id', rows.insight_id::text,\n      'complexidade', rows.complexidade\n    ),\n    NOW(),\n    NOW()\n  FROM rows\n  ON CONFLICT (codigo) DO UPDATE\n  SET\n    titulo = EXCLUDED.titulo,\n    descricao = EXCLUDED.descricao,\n    gatilho_valor = EXCLUDED.gatilho_valor,\n    xp_recompensa = EXCLUDED.xp_recompensa,\n    repeticao = EXCLUDED.repeticao,\n    ativo = TRUE,\n    area_vida_id = EXCLUDED.area_vida_id,\n    sabotador_id = EXCLUDED.sabotador_id,\n    insight_id = EXCLUDED.insight_id,\n    complexidade = EXCLUDED.complexidade,\n    config = EXCLUDED.config,\n    atualizado_em = NOW()\n  RETURNING id, codigo\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE(jsonb_agg(jsonb_build_object('codigo', upsert.codigo, 'modelo_id', upsert.id)), '[]'::jsonb) AS modelos_upsertidos\nFROM payload\nLEFT JOIN upsert ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "f721904c-aa55-4ef1-b2a9-643c779b36d5",
+      "id": "084ed48e-4030-4b42-a315-3a3dc6bdba64",
       "name": "Inserir Modelos",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        976,
-        80
+        704,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -105,18 +105,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    COALESCE(rec->>'codigo', '') AS codigo,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    rec->>'contexto_origem' AS contexto_origem,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\ninserted AS (\n  INSERT INTO public.quest_instancias (\n    id,\n    usuario_id,\n    modelo_id,\n    meta_codigo,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    janela_inicio,\n    janela_fim,\n    contexto_origem,\n    referencia_data,\n    reiniciada_em,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    cancelado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    rows.usuario_id,\n    qm.id,\n    rows.codigo,\n    COALESCE(NULLIF(rows.status_inicial, ''), 'pendente'),\n    0,\n    rows.progresso_meta,\n    0,\n    rows.xp_recompensa,\n    1,\n    rows.prazo_inicio,\n    rows.prazo_fim,\n    rows.contexto_origem,\n    rows.prazo_inicio,\n    NULL,\n    NOW(),\n    NOW(),\n    NULL,\n    NULL\n  FROM rows\n  JOIN public.quest_modelos qm ON qm.codigo = rows.codigo\n  WHERE rows.codigo <> ''\n    AND NOT EXISTS (\n      SELECT 1\n      FROM public.quest_instancias qi\n      WHERE qi.usuario_id = rows.usuario_id\n        AND qi.meta_codigo = rows.codigo\n        AND qi.status IN ('pendente','ativa')\n    )\n  RETURNING meta_codigo\n),\natualiza_estado AS (\n  UPDATE public.quest_estado_usuario\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas,\n  COALESCE(jsonb_agg(inserted.meta_codigo), '[]'::jsonb) AS codigos_inseridos\nFROM payload\nLEFT JOIN inserted ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;",
+        "query": "\nWITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    COALESCE(rec->>'codigo', '') AS codigo,\n    rec->>'status_inicial' AS status_inicial,\n    COALESCE((rec->>'progresso_meta')::int, 1) AS progresso_meta,\n    COALESCE((rec->>'xp_recompensa')::int, 0) AS xp_recompensa,\n    rec->>'contexto_origem' AS contexto_origem,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    NULLIF(rec->>'area_vida_id', '')::uuid AS area_vida_id,\n    NULLIF(rec->>'sabotador_id', '') AS sabotador_id,\n    NULLIF(rec->>'insight_id', '')::uuid AS insight_id,\n    COALESCE((rec->>'complexidade')::smallint, 0) AS complexidade\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\ninserted AS (\n  INSERT INTO public.quest_instancias (\n    id,\n    usuario_id,\n    modelo_id,\n    meta_codigo,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    janela_inicio,\n    janela_fim,\n    contexto_origem,\n    referencia_data,\n    reiniciada_em,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    cancelado_em,\n    area_vida_id,\n    sabotador_id,\n    insight_id,\n    complexidade\n  )\n  SELECT\n    gen_random_uuid(),\n    rows.usuario_id,\n    qm.id,\n    rows.codigo,\n    COALESCE(NULLIF(rows.status_inicial, ''), 'pendente'),\n    0,\n    rows.progresso_meta,\n    0,\n    rows.xp_recompensa,\n    1,\n    rows.prazo_inicio,\n    rows.prazo_fim,\n    rows.contexto_origem,\n    rows.prazo_inicio,\n    NULL,\n    NOW(),\n    NOW(),\n    NULL,\n    NULL,\n    rows.area_vida_id,\n    rows.sabotador_id,\n    rows.insight_id,\n    rows.complexidade\n  FROM rows\n  JOIN public.quest_modelos qm ON qm.codigo = rows.codigo\n  WHERE rows.codigo <> ''\n    AND NOT EXISTS (\n      SELECT 1\n      FROM public.quest_instancias qi\n      WHERE qi.usuario_id = rows.usuario_id\n        AND qi.meta_codigo = rows.codigo\n        AND qi.status IN ('pendente','ativa')\n    )\n  RETURNING meta_codigo\n),\natualiza_estado AS (\n  UPDATE public.quest_estado_usuario\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas,\n  COALESCE(jsonb_agg(inserted.meta_codigo), '[]'::jsonb) AS codigos_inseridos\nFROM payload\nLEFT JOIN inserted ON TRUE\nGROUP BY payload.usuario_id, payload.novas_quests, payload.atualizacoes, payload.estado_inicial;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "f40f3021-ada4-4dff-a318-a19bcdb0d048",
+      "id": "9497b60f-4c10-4630-bad2-510b89a5a7d9",
       "name": "Inserir Instancias",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1200,
-        80
+        928,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -133,13 +133,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {}), JSON.stringify($json.novas_quests ?? [])] }}"
         }
       },
-      "id": "6ae9baff-504a-42d6-894a-54bc86033616",
+      "id": "8c2a2396-d683-4286-9b92-b33c0235e3f3",
       "name": "Aplicar Atualizacoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1424,
-        80
+        1152,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -156,13 +156,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho ?? 0, $json.quests_concluidas ?? 0, $json.reinicios ?? 0, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "e451311d-ddaf-4c25-9c22-b3a95cce839a",
+      "id": "3d84ae9a-4435-445b-8b20-2d439b161ef6",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1648,
-        80
+        1376,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -174,18 +174,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH personalizadas AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qi.concluido_em,\n    qm.titulo,\n    qm.descricao,\n    qm.config\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n)\nSELECT\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', personalizadas.id,\n        'meta_codigo', personalizadas.meta_codigo,\n        'status', personalizadas.status,\n        'contexto_origem', personalizadas.contexto_origem,\n        'progresso_meta', personalizadas.progresso_meta,\n        'progresso_atual', personalizadas.progresso_atual,\n        'concluido_em', personalizadas.concluido_em,\n        'titulo', personalizadas.titulo,\n        'descricao', personalizadas.descricao,\n        'config', personalizadas.config\n      )\n    ) FILTER (WHERE personalizadas.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_personalizadas\nFROM public.quest_estado_usuario eu\nLEFT JOIN personalizadas ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;",
+        "query": "\nWITH personalizadas AS (\n  SELECT\n    qi.id,\n    qi.meta_codigo,\n    qi.status,\n    qi.contexto_origem,\n    qi.progresso_meta,\n    qi.progresso_atual,\n    qi.concluido_em,\n    qm.titulo,\n    qm.descricao,\n    qm.config,\n    qi.area_vida_id,\n    qi.sabotador_id,\n    qi.insight_id,\n    qi.complexidade\n  FROM public.quest_instancias qi\n  JOIN public.quest_modelos qm ON qm.id = qi.modelo_id\n  WHERE qi.usuario_id = $1::uuid\n    AND qm.tipo = 'personalizada'\n)\nSELECT\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status,\n  COALESCE(\n    jsonb_agg(\n      jsonb_build_object(\n        'instancia_id', personalizadas.id,\n        'meta_codigo', personalizadas.meta_codigo,\n        'status', personalizadas.status,\n        'contexto_origem', personalizadas.contexto_origem,\n        'progresso_meta', personalizadas.progresso_meta,\n        'progresso_atual', personalizadas.progresso_atual,\n        'concluido_em', personalizadas.concluido_em,\n        'titulo', personalizadas.titulo,\n        'descricao', personalizadas.descricao,\n        'config', personalizadas.config,\n        'area_vida_id', personalizadas.area_vida_id,\n        'sabotador_id', personalizadas.sabotador_id,\n        'insight_id', personalizadas.insight_id,\n        'complexidade', personalizadas.complexidade\n      )\n    ) FILTER (WHERE personalizadas.id IS NOT NULL),\n    '[]'::jsonb\n  ) AS quests_personalizadas\nFROM public.quest_estado_usuario eu\nLEFT JOIN personalizadas ON TRUE\nWHERE eu.usuario_id = $1::uuid\nGROUP BY\n  eu.usuario_id,\n  eu.xp_total,\n  eu.nivel_atual,\n  eu.titulo_nivel,\n  eu.xp_proximo_nivel,\n  eu.sequencia_atual,\n  eu.sequencia_recorde,\n  eu.meta_sequencia_codigo,\n  eu.proxima_meta_codigo,\n  eu.sequencia_status;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "139823ee-26c3-442a-a885-b6a1a1b55eb3",
+      "id": "fc91681c-24bb-4b77-9b77-a7c128f365c8",
       "name": "Buscar Snapshot Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1856,
-        80
+        1584,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -198,13 +198,13 @@
       "parameters": {
         "jsCode": "const estadoItems = $items(\"Atualizar Estado\", 0, 0) || [];\nconst estadoAtualizado = (estadoItems[0] && estadoItems[0].json) || {};\nconst snapshotFinal = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      return Array.isArray(parsed) ? parsed : [];\n    } catch (error) {\n      return [];\n    }\n  }\n  return [];\n};\n\nconst toNumber = (value, fallback = 0) => {\n  const numeric = Number(value);\n  return Number.isFinite(numeric) ? numeric : fallback;\n};\n\nconst filaItems = $items(\"Preparar Operacoes\", 0, 0) || [];\nconst filaEspera = parseList(filaItems[0]?.json?.fila_espera);\n\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id ?? snapshotFinal.usuario_id ?? null,\n    xp_total: toNumber(estadoAtualizado.xp_total ?? snapshotFinal.xp_total ?? 0),\n    nivel_atual: estadoAtualizado.nivel_atual ?? snapshotFinal.nivel_atual ?? null,\n    titulo_nivel: estadoAtualizado.titulo_nivel ?? snapshotFinal.titulo_nivel ?? null,\n    xp_proximo_nivel: toNumber(estadoAtualizado.xp_proximo_nivel ?? snapshotFinal.xp_proximo_nivel ?? 0),\n    xp_ganho: toNumber(estadoAtualizado.xp_ganho, 0),\n    quests_concluidas_no_evento: toNumber(estadoAtualizado.quests_concluidas, 0),\n    reinicios_registrados: toNumber(estadoAtualizado.reinicios, 0),\n    novas_quests_registradas: parseList(estadoAtualizado.novas_quests),\n    atualizacoes_processadas: parseList(estadoAtualizado.atualizacoes),\n    fila_espera: filaEspera,\n    snapshot_final: snapshotFinal\n  }\n}];\n"
       },
-      "id": "c1d6f333-9cab-42e6-a752-b0e0d3a9e4aa",
+      "id": "0cf2a1b8-1f57-4838-8342-8e041b744ad0",
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2080,
-        80
+        1808,
+        -128
       ]
     }
   ],
@@ -327,7 +327,7 @@
       }
     ]
   },
-  "versionId": "e5bf9630-f451-43a1-b122-03abe049d01e",
+  "versionId": "935ae525-1608-4012-853c-1cabc1f87371",
   "triggerCount": 0,
   "shared": [
     {

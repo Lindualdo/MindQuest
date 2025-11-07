@@ -327,6 +327,18 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 ---
 
+### Regras de Vínculo Conversa → Insight → Quest
+
+Para garantir que o fluxo MindQuest permaneça íntegro (conversa gera insight, insight gera quest, quest gera transformação), adotamos as seguintes regras estruturais no produto:
+
+1. **Toda quest personalizada deve referenciar explicitamente um insight de origem.** Se o usuário não tiver insights registrados, a jornada deve incentivar uma nova reflexão antes de propor quests.
+2. **Quests podem (e devem) também se relacionar a sabotadores relevantes**, mas esse vínculo é complementar ao insight obrigatoriamente informado.
+3. **Áreas da vida são definidas a partir do insight**, garantindo que relatórios e progressos reflitam o contexto em que a micro-ação nasceu.
+
+Esses vínculos são persistidos no banco (`quest_modelos` e `quest_instancias`) e expostos aos workflows, permitindo análises de impacto de cada insight e reforçando o ciclo conversa → insight → quest.
+
+---
+
 ## Sistema de Pontuação (XP)
 
 ### Filosofia do Sistema

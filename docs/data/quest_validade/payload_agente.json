@@ -1,0 +1,67 @@
+{
+  "action": "parse",
+  "response": {
+    "output": {
+      "novas_quests": [
+        {
+          "titulo": "Ritual Diário para Encerramento das Operações Financeiras",
+          "descricao": "Estabeleça um horário fixo para encerrar todas as operações financeiras às 20h diariamente, para sinalizar o momento de relaxamento e desaceleração da mente, ajudando a controlar a ansiedade noturna.",
+          "contexto_origem": "Controle da ansiedade e necessidade de desacelerar após o mercado financeiro relatadas pelas conversas recentes e insights.",
+          "prioridade": "alta",
+          "recorrencia": "diaria",
+          "prazo_inicio": "2025-11-07",
+          "prazo_fim": "2025-11-13",
+          "progresso_meta": 7,
+          "status_inicial": "pendente",
+          "xp_recompensa": 80,
+          "insight_id": "63206fcc-45b6-437c-8b70-625b21a3ca78",
+          "sabotador_id": "1ee8eacb-7716-4abf-a05f-5ec20bf8ddb7",
+          "area_vida_id": "11111111-1111-4111-8111-111111111111",
+          "complexidade": 2,
+          "payload_extra": {
+            "canal": "app"
+          }
+        },
+        {
+          "titulo": "Checklist Diário para Controle da Ansiedade nas Operações",
+          "descricao": "Utilize um checklist personalizado de ancoragem para realizar pausas conscientes e práticas rápidas de respiração 4-7-8 antes de tomar decisões financeiras, reduzindo ansiedade e impulsividade durante as operações.",
+          "contexto_origem": "Necessidade de um checklist ajustado e eficaz para gerenciar a ansiedade financeira e o sabotador inquieto na tomada de decisões.",
+          "prioridade": "media",
+          "recorrencia": "diaria",
+          "prazo_inicio": "2025-11-07",
+          "prazo_fim": "2025-11-13",
+          "progresso_meta": 7,
+          "status_inicial": "pendente",
+          "xp_recompensa": 60,
+          "insight_id": "1a84195b-76ca-4ee3-a24e-b1b9bc1909cc",
+          "sabotador_id": "181b0633-2201-46ca-b2b1-e28d122c5535",
+          "area_vida_id": "11111111-1111-4111-8111-111111111111",
+          "complexidade": 3,
+          "payload_extra": {
+            "canal": "app"
+          }
+        },
+        {
+          "titulo": "Metas Curtas e Consistentes para Finanças e Autocuidado",
+          "descricao": "Defina e registre metas financeiras diárias pequenas e alcançáveis focadas no presente, junto com ações simples diárias de autocuidado e lazer, para equilibrar o financeiro com o bem-estar pessoal.",
+          "contexto_origem": "Busca de equilíbrio entre metas financeiras e autocuidado para manter consistência e reduzir pressão, conforme reflexão do usuário e insights recentes.",
+          "prioridade": "media",
+          "recorrencia": "diaria",
+          "prazo_inicio": "2025-11-07",
+          "prazo_fim": "2025-11-13",
+          "progresso_meta": 7,
+          "status_inicial": "pendente",
+          "xp_recompensa": 55,
+          "insight_id": "9a3fb5f7-38f4-494f-8ce9-05f70bd6b4fb",
+          "sabotador_id": "276f59ab-4027-4b33-b90e-9f6941383ad5",
+          "area_vida_id": "11111111-1111-4111-8111-111111111111",
+          "complexidade": 2,
+          "payload_extra": {
+            "canal": "app"
+          }
+        }
+      ],
+      "atualizacoes": []
+    }
+  }
+}

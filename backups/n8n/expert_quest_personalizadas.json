@@ -18,26 +18,26 @@
           ]
         }
       },
-      "id": "60596cc9-7cfc-4979-be99-1d8f3412caa1",
+      "id": "d93de3dd-5563-476b-a065-18caad2d3f08",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1552,
-        192
+        -1568,
+        -96
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
       },
-      "id": "7edc7490-96c7-42d8-9054-f375b570ee28",
+      "id": "b734705e-619c-4f9f-89c5-8f0d15031cca",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1312,
-        192
+        -1328,
+        -96
       ]
     },
     {
@@ -48,13 +48,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "b863c501-3bc3-42f3-9e90-851fd95cadd3",
+      "id": "72bb5784-d966-4823-b882-cf969c513152",
       "name": "Buscar Quests Ativas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1088,
-        192
+        -1104,
+        -96
       ],
       "credentials": {
         "postgres": {
@@ -71,13 +71,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "0d5035c4-6f98-41b2-936c-e9d1016fa741",
+      "id": "637d771f-da01-4e71-93dc-85cdfcc8e07e",
       "name": "Buscar Conversas Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -880,
-        192
+        -896,
+        -96
       ],
       "credentials": {
         "postgres": {
@@ -94,13 +94,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "1c0dc130-1eb8-4157-a363-21a288ef794f",
+      "id": "6a81265f-9a1d-4749-9565-6fbd6da31db0",
       "name": "Buscar Insights Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -688,
-        192
+        -704,
+        -96
       ],
       "credentials": {
         "postgres": {
@@ -117,13 +117,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "f8b5f700-e078-47e0-99f9-bfb03b89a02e",
+      "id": "0fd352de-7a3f-406a-bb96-acfdba2f887b",
       "name": "Buscar Sabotadores Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        192
+        -496,
+        -96
       ],
       "credentials": {
         "postgres": {
@@ -134,15 +134,57 @@
     },
     {
       "parameters": {
-        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst questsRaw = getJson(\"Buscar Quests Ativas\");\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst insightsRaw = getJson(\"Buscar Insights Recentes\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Recentes\");\n\nconst quests = questsRaw.contexto || {};\nconst conversas = conversasRaw.conversas || {};\nconst insights = insightsRaw.insights || {};\nconst sabotadores = sabotadoresRaw.sabotadores || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || []\n  }\n}];"
+        "operation": "executeQuery",
+        "query": "SELECT json_build_object(\n  'areas_vida',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', av.id,\n      'codigo', av.codigo,\n      'nome', av.nome,\n      'descricao', av.descricao\n    )\n    ORDER BY av.nome\n  ), '[]'::json)\n) AS areas_vida\nFROM public.areas_vida_catalogo av\nWHERE av.ativo = true;",
+        "options": {}
       },
-      "id": "3682941a-a3e5-4236-9785-c1384442dd08",
+      "id": "95dd8f3e-cddc-4ddf-aacb-a2e5a001f0b2",
+      "name": "Listar Áreas da Vida",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        -96
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT json_build_object(\n  'sabotadores_catalogo',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', sc.id,\n      'nome', sc.nome,\n      'emoji', sc.emoji,\n      'descricao', sc.descricao\n    )\n    ORDER BY sc.nome\n  ), '[]'::json)\n) AS sabotadores_catalogo\nFROM public.sabotadores_catalogo sc;",
+        "options": {}
+      },
+      "id": "afbe045a-86fd-4f53-9339-45f3b6619606",
+      "name": "Listar Sabotadores Catálogo",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -352,
+        -96
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst questsRaw = getJson(\"Buscar Quests Ativas\");\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst insightsRaw = getJson(\"Buscar Insights Recentes\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Recentes\");\nconst areasRaw = getJson(\"Listar Áreas da Vida\");\nconst sabotadoresCatRaw = getJson(\"Listar Sabotadores Catálogo\");\n\nconst quests = questsRaw.contexto || {};\nconst conversas = conversasRaw.conversas || {};\nconst insights = insightsRaw.insights || {};\nconst sabotadores = sabotadoresRaw.sabotadores || {};\nconst areasVida = areasRaw.areas_vida || [];\nconst sabotadoresCatalogo = sabotadoresCatRaw.sabotadores_catalogo || [];\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: quests.quests_ativas || [],\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || [],\n    areas_vida_disponiveis: areasVida,\n    sabotadores_catalogo: sabotadoresCatalogo\n  }\n}];"
+      },
+      "id": "7bc2df5f-6b55-45ba-9222-6179c0722d0f",
       "name": "Montar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        192
+        -288,
+        -96
       ]
     },
     {
@@ -152,13 +194,13 @@
           "temperature": 0.2
         }
       },
-      "id": "b29b3b59-71ed-4f13-a4f6-930a7afd981a",
+      "id": "1eb976e3-3821-4c60-a66b-488dad1c396e",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -288,
-        576
+        -304,
+        288
       ],
       "credentials": {
         "openRouterApi": {
@@ -170,57 +212,57 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Você é o agente de quests personalizadas do MindQuest.\nConsidere o contexto abaixo para sugerir novas quests ou atualizar as existentes.\n\n=== Dados do usuário ===\nChat atual: {{ $json.chat_id || 'N/A' }}\n\nQuests ativas:\n{{ JSON.stringify($json.quests_ativas || []) }}\n\nConversas recentes (máx. 10):\n{{ JSON.stringify($json.conversas_recentes || []) }}\n\nInsights recentes (máx. 10):\n{{ JSON.stringify($json.insights_recentes || []) }}\n\nSabotadores recentes (máx. 10):\n{{ JSON.stringify($json.sabotadores_recentes || []) }}\n\n=== Regras ===\n1. Somente micro-hábitos concretos (duração máxima 7 dias).\n2. Respeite limite total de 4 quests ativas/pendentes (considerando as atuais).\n3. Evite duplicar contexto/título já presente.\n4. Se necessário, sugira atualizações (concluir/cancelar/reiniciar) para quests existentes.\n5. Ajuste prioridade e recorrência conforme relevância.\n\n=== Formato da resposta ===\nRetorne exclusivamente JSON válido:\n{\n  \"novas_quests\": [\n    {\n      \"titulo\": \"string\",\n      \"descricao\": \"string\",\n      \"contexto_origem\": \"string\",\n      \"prioridade\": \"baixa|media|alta\",\n      \"recorrencia\": \"unica|diaria|semanal\",\n      \"prazo_inicio\": \"YYYY-MM-DD\",\n      \"prazo_fim\": \"YYYY-MM-DD\",\n      \"progresso_meta\": número inteiro >= 1,\n      \"status_inicial\": \"pendente\" ou \"ativa\",\n      \"xp_recompensa\": número >= 0,\n      \"payload_extra\": { opcional }\n    }\n  ],\n  \"atualizacoes\": [\n    {\n      \"meta_codigo\": \"string\" (opcional se usar instancia_id),\n      \"instancia_id\": \"uuid\" (opcional),\n      \"novo_status\": \"concluida|vencida|cancelada|reiniciada\",\n      \"progresso_atual\": número >= 0,\n      \"xp_extra\": número >= 0 opcional\n    }\n  ]\n}\n\nSe nada for necessário, devolva listas vazias.\nNão escreva texto fora do JSON.",
+        "text": "=Você é o agente de quests personalizadas do MindQuest.\nConsidere o contexto abaixo para sugerir novas quests ou atualizar as existentes.\n\n=== Dados do usuário ===\nChat atual: {{ $json.chat_id || 'N/A' }}\n\nQuests ativas:\n{{ JSON.stringify($json.quests_ativas || []) }}\n\nConversas recentes (máx. 10):\n{{ JSON.stringify($json.conversas_recentes || []) }}\n\nInsights recentes (máx. 10) — use os IDs para vincular cada quest:\n{{ JSON.stringify($json.insights_recentes || []) }}\n\nSabotadores recentes (máx. 10):\n{{ JSON.stringify($json.sabotadores_recentes || []) }}\n\nÁreas da vida disponíveis (use sempre os IDs abaixo):\n{{ JSON.stringify($json.areas_vida_disponiveis || []) }}\n\nSabotadores disponíveis (use apenas os IDs abaixo quando precisar referenciar um sabotador):\n{{ JSON.stringify($json.sabotadores_catalogo || []) }}\n\n=== Regras ===\n1. Somente micro-hábitos concretos (duração máxima 7 dias).\n2. Respeite limite total de 4 quests ativas/pendentes (considerando as atuais).\n3. Evite duplicar contexto/título já presente.\n4. Se necessário, sugira atualizações (concluir/cancelar/reiniciar) para quests existentes.\n5. Ajuste prioridade e recorrência conforme relevância.\n6. Toda nova quest deve estar vinculada a um insight listado acima (preencha sempre o campo insight_id com o UUID correspondente).\n7. Informe o sabotador somente quando fizer sentido, mas **apenas** usando os IDs fornecidos na lista de sabotadores disponíveis; caso contrário deixe sabotador_id como null.\n8. Sempre informe a área da vida usando o ID fornecido e o nível de complexidade entre 0 e 5 (0 = microação simples, 5 = altamente desafiadora) considerando esforço emocional e operacional.\n\n=== Formato da resposta ===\nRetorne exclusivamente JSON válido em uma única linha (sem quebras de linha ou espaços extras):\n{\n  \"novas_quests\": [\n    {\n      \"titulo\": \"string\",\n      \"descricao\": \"string\",\n      \"contexto_origem\": \"string\",\n      \"prioridade\": \"baixa|media|alta\",\n      \"recorrencia\": \"unica|diaria|semanal\",\n      \"prazo_inicio\": \"YYYY-MM-DD\",\n      \"prazo_fim\": \"YYYY-MM-DD\",\n      \"progresso_meta\": número inteiro >= 1,\n      \"status_inicial\": \"pendente\" ou \"ativa\",\n      \"xp_recompensa\": número >= 0,\n      \"insight_id\": \"uuid\",\n      \"sabotador_id\": \"uuid\" ou null,\n      \"area_vida_id\": \"uuid\",\n      \"complexidade\": inteiro entre 0 e 5,\n      \"payload_extra\": { opcional }\n    }\n  ],\n  \"atualizacoes\": [\n    {\n      \"meta_codigo\": \"string\" (opcional se usar instancia_id),\n      \"instancia_id\": \"uuid\" (opcional),\n      \"novo_status\": \"concluida|vencida|cancelada|reiniciada\",\n      \"progresso_atual\": número >= 0,\n      \"xp_extra\": número >= 0 opcional\n    }\n  ]\n}\n\nSe nada for necessário, devolva listas vazias.\nNão escreva texto fora do JSON.",
         "hasOutputParser": true,
         "options": {}
       },
-      "id": "110e401b-6035-4d57-8888-887e841ab334",
+      "id": "6943449f-6c91-42a6-a9ae-61050257f140",
       "name": "Agente Quests",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -64,
-        192
+        -80,
+        -96
       ]
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"novas_quests\":[{\"titulo\":\"Check-in matinal\",\"descricao\":\"Registrar uma vitória pequena toda manhã\",\"contexto_origem\":\"manter_foco\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-05\",\"prazo_fim\":\"2025-11-11\",\"progresso_meta\":5,\"status_inicial\":\"pendente\",\"xp_recompensa\":40,\"payload_extra\":{\"canal\":\"app\"}}],\"atualizacoes\":[{\"meta_codigo\":\"quest_custom_001\",\"instancia_id\":\"00000000-0000-0000-0000-000000000000\",\"novo_status\":\"concluida\",\"progresso_atual\":3,\"xp_extra\":20}]}",
+        "jsonSchemaExample": "{\"novas_quests\":[{\"titulo\":\"Check-in matinal\",\"descricao\":\"Registrar uma vitória pequena toda manhã\",\"contexto_origem\":\"manter_foco\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-05\",\"prazo_fim\":\"2025-11-11\",\"progresso_meta\":5,\"status_inicial\":\"pendente\",\"xp_recompensa\":40,\"insight_id\":\"33333333-3333-4333-8333-333333333333\",\"sabotador_id\":\"11111111-1111-1111-1111-111111111111\",\"area_vida_id\":\"22222222-2222-2222-2222-222222222222\",\"complexidade\":2,\"payload_extra\":{\"canal\":\"app\"}}],\"atualizacoes\":[{\"meta_codigo\":\"quest_custom_001\",\"instancia_id\":\"00000000-0000-0000-0000-000000000000\",\"novo_status\":\"concluida\",\"progresso_atual\":3,\"xp_extra\":20}]}",
         "autoFix": true
       },
-      "id": "8c258a75-0e26-4862-a1f6-bbf01b7e5f2c",
+      "id": "a20573a8-6b1f-4f20-9aa0-ee2fb44c6ece",
       "name": "Parser JSON",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
         80,
-        480
+        192
       ]
     },
     {
       "parameters": {
-        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst contexto = getJson(\"Montar Contexto\");\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : []\n  }\n}];"
+        "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst contexto = getJson(\"Montar Contexto\");\nconst resultado = $json.output || { novas_quests: [], atualizacoes: [] };\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [],\n    atualizacoes_sugeridas: Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : [],\n    sabotadores_catalogo: contexto.sabotadores_catalogo || []\n  }\n}];"
       },
-      "id": "aee4cc99-9a47-43d6-aff9-2bb9367648ce",
+      "id": "2cf0e5e4-1ef1-4fb7-a923-f92b8e3de1ac",
       "name": "Interpretar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         304,
-        192
+        -96
       ]
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.item.json || {};\nconst existentes = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst limite = 4;\nconst dedupe = new Set();\n\nfor (const ativo of existentes) {\n  const key = `${(ativo.contexto_origem || '').toLowerCase()}|${(ativo.titulo || '').toLowerCase()}`;\n  dedupe.add(key);\n}\n\nconst novas = [];\nfor (const quest of entrada.novas_quests_sugeridas || []) {\n  if (!quest || typeof quest !== 'object') continue;\n  const key = `${(quest.contexto_origem || '').toLowerCase()}|${(quest.titulo || '').toLowerCase()}`;\n  if (dedupe.has(key)) continue;\n  if (existentes.length + novas.length >= limite) break;\n  dedupe.add(key);\n  novas.push({\n    ...quest,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: quest.progresso_meta ?? 1,\n    xp_recompensa: quest.xp_recompensa ?? 0\n  });\n}\n\nconst atualizacoes = [];\nfor (const upd of entrada.atualizacoes_sugeridas || []) {\n  if (!upd || typeof upd !== 'object') continue;\n  const novoStatus = upd.novo_status || '';\n  if (!['concluida','vencida','cancelada','reiniciada'].includes(novoStatus)) continue;\n  atualizacoes.push({\n    meta_codigo: upd.meta_codigo || null,\n    instancia_id: upd.instancia_id || null,\n    novo_status: novoStatus,\n    progresso_atual: upd.progresso_atual ?? 0,\n    xp_extra: upd.xp_extra ?? 0\n  });\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: novas,\n    atualizacoes: atualizacoes\n  }\n}];"
+        "jsCode": "const entrada = $input.item.json || {};\nconst existentes = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst limite = 4;\nconst dedupe = new Set();\n\nconst normalizeUuid = (value) => {\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;\n  return uuidRegex.test(trimmed) ? trimmed : null;\n};\n\nconst clampComplexidade = (value) => {\n  const num = Number(value);\n  if (!Number.isFinite(num)) return 0;\n  return Math.min(5, Math.max(0, Math.round(num)));\n};\n\nconst sabotadoresCatalogoIds = new Set(\n  Array.isArray(entrada.sabotadores_catalogo)\n    ? entrada.sabotadores_catalogo\n        .map((item) => normalizeUuid(item && item.id))\n        .filter(Boolean)\n    : []\n);\n\nfor (const ativo of existentes) {\n  const key = `${(ativo.contexto_origem || '').toLowerCase()}|${(ativo.titulo || '').toLowerCase()}`;\n  dedupe.add(key);\n}\n\nconst novas = [];\nfor (const quest of entrada.novas_quests_sugeridas || []) {\n  if (!quest || typeof quest !== 'object') continue;\n  const key = `${(quest.contexto_origem || '').toLowerCase()}|${(quest.titulo || '').toLowerCase()}`;\n  if (dedupe.has(key)) continue;\n  if (existentes.length + novas.length >= limite) break;\n\n  const areaVidaId = normalizeUuid(quest.area_vida_id);\n  const insightId = normalizeUuid(quest.insight_id);\n  if (!areaVidaId || !insightId) continue;\n\n  const rawSabId = normalizeUuid(quest.sabotador_id);\n  const sabotadorId = rawSabId && sabotadoresCatalogoIds.has(rawSabId) ? rawSabId : null;\n\n  dedupe.add(key);\n  novas.push({\n    ...quest,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: quest.progresso_meta ?? 1,\n    xp_recompensa: quest.xp_recompensa ?? 0,\n    insight_id: insightId,\n    sabotador_id: sabotadorId,\n    area_vida_id: areaVidaId,\n    complexidade: clampComplexidade(quest.complexidade)\n  });\n}\n\nconst atualizacoes = [];\nfor (const upd of entrada.atualizacoes_sugeridas || []) {\n  if (!upd || typeof upd !== 'object') continue;\n  const novoStatus = upd.novo_status || '';\n  if (!['concluida','vencida','cancelada','reiniciada'].includes(novoStatus)) continue;\n  atualizacoes.push({\n    meta_codigo: upd.meta_codigo || null,\n    instancia_id: upd.instancia_id || null,\n    novo_status: novoStatus,\n    progresso_atual: upd.progresso_atual ?? 0,\n    xp_extra: upd.xp_extra ?? 0\n  });\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: novas,\n    atualizacoes: atualizacoes\n  }\n}];"
       },
-      "id": "74dae15e-6cec-4966-96f6-7cc68870af42",
+      "id": "3259a8ed-5b22-42af-91ff-afda40746ad0",
       "name": "Aplicar Limites & Dedupe",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         512,
-        192
+        -96
       ]
     },
     {
@@ -276,26 +318,26 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "4fc8de75-baad-4b3c-bc05-1c31737d682f",
+      "id": "cd7a5d29-f431-4317-aa2c-4ec395a1f204",
       "name": "Chamar Gamificação",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
         736,
-        192
+        -96
       ]
     },
     {
       "parameters": {
         "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
       },
-      "id": "8c286062-b43b-43c5-bd81-4ee5671337a2",
+      "id": "00a90172-a16c-47ee-bc5b-eb370c021d51",
       "name": "Montar Saída",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         944,
-        192
+        -96
       ]
     }
   ],
@@ -356,6 +398,28 @@
       ]
     },
     "Buscar Sabotadores Recentes": {
+      "main": [
+        [
+          {
+            "node": "Listar Áreas da Vida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar Áreas da Vida": {
+      "main": [
+        [
+          {
+            "node": "Listar Sabotadores Catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar Sabotadores Catálogo": {
       "main": [
         [
           {
@@ -464,7 +528,7 @@
       }
     ]
   },
-  "versionId": "1cf80481-4466-4cdb-ae47-7dbf40f5473d",
+  "versionId": "57901be9-adf3-4be4-bf40-17510b7a64e1",
   "triggerCount": 0,
   "shared": [
     {
