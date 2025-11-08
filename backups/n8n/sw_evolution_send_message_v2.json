@@ -1,0 +1,95 @@
+{
+  "createdAt": "2025-11-08T00:00:00.000Z",
+  "id": "sw_evolution_send_message_v2",
+  "name": "sw_evolution_send_message_v2",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "instanceName" },
+            { "name": "remoteJidOrNumber" },
+            { "name": "messageText" },
+            { "name": "linkPreview" },
+            { "name": "minDelayMs" }
+          ]
+        }
+      },
+      "id": "n_start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-1320, 80]
+    },
+    {
+      "parameters": {
+        "jsCode": "const i = $input.item.json || {};\nlet remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || '';\nif (remote && !/@/.test(remote)) {\n  const digits = String(remote).replace(/\\\n?\\D/g,'').trim();\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nif (remote.startsWith('+')) {\n  const digits = remote.replace(/\\\n?\\D/g,'');\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nconst minDelayMs = Number(i.minDelayMs ?? 2000) || 2000;\nconst linkPreview = (String(i.linkPreview).toLowerCase() === 'true');\nreturn [{ json: { ...i, remoteJid: remote, minDelayMs, linkPreview } }];"
+      },
+      "id": "n_normalize",
+      "name": "Normalize JID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1120, 80]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.ceil(($json.minDelayMs || 2000) / 1000) }}"
+      },
+      "id": "n_wait",
+      "name": "Min Delay",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [-920, 80]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').first().json.instanceName }}",
+        "remoteJid": "={{ $('Normalize JID').first().json.remoteJid }}",
+        "messageText": "={{ $('start').first().json.messageText }}",
+        "options_message": {
+          "delay": "={{ 2000 }}",
+          "linkPreview": "={{ $('Normalize JID').first().json.linkPreview }}"
+        }
+      },
+      "id": "n_send",
+      "name": "Send Message",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [-700, 80],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "evolutionApi": { "id": "H4gurJcNVV0yrS90", "name": "Evolution account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first()?.json ?? {};\nconst d = r.data ?? {};\nconst httpStatus = Number(r.statusCode ?? d.statusCode ?? r.code ?? 0) || null;\nconst statusRaw = String(d.status ?? r.status ?? '').trim();\nconst status = statusRaw.toUpperCase() || (httpStatus && httpStatus>=200 && httpStatus<300 ? 'SUCCESS' : 'UNKNOWN');\nconst successFlag = String(r.success ?? '').toLowerCase() === 'true';\nconst success = successFlag || ['SUCCESS','SENT','DELIVERED','READ','ACCEPTED','ACK','QUEUED'].includes(status);\nreturn [{ json: {\n  success,\n  status,\n  httpStatus,\n  messageId: d.key?.id ?? r.messageId ?? null,\n  errorMessage: d.error ?? r.error ?? r.message ?? null,\n  response: r\n}}];"
+      },
+      "id": "n_classify",
+      "name": "Classify Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-460, 80]
+    }
+  ],
+  "connections": {
+    "start": { "main": [[{ "node": "Normalize JID", "type": "main", "index": 0 }]] },
+    "Normalize JID": { "main": [[{ "node": "Min Delay", "type": "main", "index": 0 }]] },
+    "Min Delay": { "main": [[{ "node": "Send Message", "type": "main", "index": 0 }]] },
+    "Send Message": { "main": [[{ "node": "Classify Result", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {}
+}
+
