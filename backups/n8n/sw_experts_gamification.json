@@ -1,7 +1,7 @@
 {
-  "createdAt": "2025-11-07T16:03:52.061Z",
-  "id": "bTeLj5qOKQo9PDMO",
-  "name": "sw_gamificacao_quests",
+  "createdAt": "2025-10-10T11:10:56.623Z",
+  "id": "agXJK8Dd49If1eFx",
+  "name": "sw_experts_gamification",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -21,68 +21,26 @@
           ]
         }
       },
-      "id": "04f589f3-dc37-4ef0-8124-9b198a694ad1",
+      "id": "22712bbf-feb9-4c1c-bca7-af1dabac8c97",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        128,
-        -16
+        -176,
+        -128
       ]
     },
     {
       "parameters": {
         "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "id": "ce51a469-2c20-4222-b7b9-b906a1b5e29d",
+      "id": "8aefc1e9-261b-459e-920c-b218d8aeec20",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        352,
-        -16
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "cachedResultName": "sw_calcula_jornada",
-          "cachedResultUrl": "/workflow/swCalcJornada01",
-          "mode": "list",
-          "value": "swCalcJornada01"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "usuario_id": "={{ $('start').item.json.usuario_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "id": "1bcc7346-6a08-4d5c-bb6f-2cd0572db965",
-      "name": "Atualizar Jornada",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        1904,
-        -16
+        48,
+        -128
       ]
     },
     {
@@ -93,13 +51,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "ba160596-e88c-4e6b-b586-f04b632d446c",
+      "id": "c46a387c-225e-44fe-83e1-8c8235ac0f54",
       "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        576,
-        -16
+        272,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -112,13 +70,13 @@
       "parameters": {
         "jsCode": "\nconst entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nconst existentesBrutos = Array.isArray(estado.quests_ativas)\n  ? estado.quests_ativas\n  : [];\n\nconst limite = 4;\nlet ocupados = Array.isArray(existentesBrutos)\n  ? existentesBrutos.length\n  : Number(existentesBrutos?.length) || 0;\n\nif (!Number.isFinite(ocupados)) {\n  ocupados = 0;\n}\n\nlet slotsDisponiveis = limite - ocupados;\nif (!Number.isFinite(slotsDisponiveis)) {\n  slotsDisponiveis = limite;\n}\nif (slotsDisponiveis < 0) {\n  slotsDisponiveis = 0;\n}\n\nconst dedupe = new Set();\nfor (const existente of existentesBrutos) {\n  const contexto = (existente?.contexto_origem || '').toLowerCase().trim();\n  const titulo = (existente?.titulo || '').toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst normalizeUuid = (value) => {\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;\n  return uuidRegex.test(trimmed) ? trimmed : null;\n};\n\nconst normalizeTextId = (value) => {\n  if (value == null) return null;\n  const text = String(value).trim();\n  return text || null;\n};\n\nconst clampComplexidade = (value) => {\n  const num = Number(value);\n  if (!Number.isFinite(num)) return 0;\n  if (num < 0) return 0;\n  if (num > 5) return 5;\n  return Math.round(num);\n};\n\nconst entradaListaBruta = Array.isArray(entrada.novas_quests)\n  ? entrada.novas_quests\n  : (typeof entrada.novas_quests === 'string'\n      ? (() => {\n          try {\n            const parsed = JSON.parse(entrada.novas_quests);\n            return Array.isArray(parsed) ? parsed : [];\n          } catch (error) {\n            return [];\n          }\n        })()\n      : []);\n\nconst novos = [];\nconst filaEspera = [];\n\nconst normalizarInteiro = (valor, padrao) => {\n  const numero = Number(valor);\n  if (Number.isFinite(numero) && numero > 0) {\n    return Math.trunc(numero);\n  }\n  return padrao;\n};\n\nfor (const bruto of entradaListaBruta) {\n  if (bruto == null) continue;\n\n  const quest =\n    typeof bruto === 'string'\n      ? (() => {\n          try {\n            return JSON.parse(bruto);\n          } catch (error) {\n            return null;\n          }\n        })()\n      : bruto;\n\n  if (!quest || typeof quest !== 'object') continue;\n\n  const contexto = (quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = (quest.titulo || '').toLowerCase().trim();\n  const temIdentificador = contexto || titulo;\n  const chaveDedup = temIdentificador ? `${contexto}|${titulo}` : null;\n\n  if (chaveDedup && dedupe.has(chaveDedup)) {\n    continue;\n  }\n\n  const areaVidaId = normalizeUuid(quest.area_vida_id);\n  if (!areaVidaId) {\n    continue;\n  }\n\n  const sabotadorId = normalizeTextId(quest.sabotador_id);\n  const complexidade = clampComplexidade(quest.complexidade);\n\n  const codigoBase = quest.codigo && String(quest.codigo).trim();\n  const codigo =\n    codigoBase && codigoBase.length > 0\n      ? codigoBase\n      : `qp_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;\n\n  const questNormalizada = {\n    ...quest,\n    codigo,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    status_inicial: quest.status_inicial || 'pendente',\n    progresso_meta: normalizarInteiro(quest.progresso_meta, 1),\n    xp_recompensa: normalizarInteiro(quest.xp_recompensa, 0),\n    area_vida_id: areaVidaId,\n    sabotador_id: sabotadorId,\n    complexidade,\n  };\n\n  if (chaveDedup) {\n    dedupe.add(chaveDedup);\n  }\n\n  if (slotsDisponiveis > 0) {\n    novos.push(questNormalizada);\n    slotsDisponiveis -= 1;\n  } else {\n    filaEspera.push(questNormalizada);\n  }\n}\n\nreturn [\n  {\n    json: {\n      usuario_id: entrada.usuario_id,\n      novas_quests: novos,\n      atualizacoes: Array.isArray(entrada.atualizacoes)\n        ? entrada.atualizacoes\n        : [],\n      estado_inicial: estado,\n      fila_espera: filaEspera,\n      debug_entrada_bruta: entrada.novas_quests,\n      debug_entrada_normalizada: entradaListaBruta,\n    },\n  },\n];\n"
       },
-      "id": "a6b38598-2733-40f1-810b-f60633c757eb",
+      "id": "dcb04dbb-4e54-456c-933c-af47ecc388ff",
       "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        -16
+        496,
+        -128
       ]
     },
     {
@@ -129,13 +87,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "bb3b576c-84d6-48e1-b576-56e239ac38b4",
+      "id": "084ed48e-4030-4b42-a315-3a3dc6bdba64",
       "name": "Inserir Modelos",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1008,
-        -16
+        704,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -152,13 +110,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "6720bcb7-aaca-4914-8eb9-d77da91966bc",
+      "id": "9497b60f-4c10-4630-bad2-510b89a5a7d9",
       "name": "Inserir Instancias",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1232,
-        -16
+        928,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -175,13 +133,13 @@
           "queryReplacement": "={{ [$json.usuario_id, JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {}), JSON.stringify($json.novas_quests ?? [])] }}"
         }
       },
-      "id": "bfe84f8d-c5cb-4448-b05d-e9be10bed121",
+      "id": "8c2a2396-d683-4286-9b92-b33c0235e3f3",
       "name": "Aplicar Atualizacoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1456,
-        -16
+        1152,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -198,13 +156,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho ?? 0, $json.quests_concluidas ?? 0, $json.reinicios ?? 0, JSON.stringify($json.novas_quests ?? []), JSON.stringify($json.atualizacoes ?? []), JSON.stringify($json.estado_inicial ?? {})] }}"
         }
       },
-      "id": "df66cfc2-4fb3-4374-9f37-32df5a8e8c9d",
+      "id": "3d84ae9a-4435-445b-8b20-2d439b161ef6",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
-        -16
+        1376,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -221,13 +179,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "3a59ceaa-af19-4481-9c90-714598baaae2",
+      "id": "fc91681c-24bb-4b77-9b77-a7c128f365c8",
       "name": "Buscar Snapshot Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2112,
-        -16
+        1584,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -240,13 +198,13 @@
       "parameters": {
         "jsCode": "const estadoItems = $items(\"Atualizar Estado\", 0, 0) || [];\nconst estadoAtualizado = (estadoItems[0] && estadoItems[0].json) || {};\nconst snapshotFinal = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      return Array.isArray(parsed) ? parsed : [];\n    } catch (error) {\n      return [];\n    }\n  }\n  return [];\n};\n\nconst toNumber = (value, fallback = 0) => {\n  const numeric = Number(value);\n  return Number.isFinite(numeric) ? numeric : fallback;\n};\n\nconst filaItems = $items(\"Preparar Operacoes\", 0, 0) || [];\nconst filaEspera = parseList(filaItems[0]?.json?.fila_espera);\n\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id ?? snapshotFinal.usuario_id ?? null,\n    xp_total: toNumber(estadoAtualizado.xp_total ?? snapshotFinal.xp_total ?? 0),\n    nivel_atual: estadoAtualizado.nivel_atual ?? snapshotFinal.nivel_atual ?? null,\n    titulo_nivel: estadoAtualizado.titulo_nivel ?? snapshotFinal.titulo_nivel ?? null,\n    xp_proximo_nivel: toNumber(estadoAtualizado.xp_proximo_nivel ?? snapshotFinal.xp_proximo_nivel ?? 0),\n    xp_ganho: toNumber(estadoAtualizado.xp_ganho, 0),\n    quests_concluidas_no_evento: toNumber(estadoAtualizado.quests_concluidas, 0),\n    reinicios_registrados: toNumber(estadoAtualizado.reinicios, 0),\n    novas_quests_registradas: parseList(estadoAtualizado.novas_quests),\n    atualizacoes_processadas: parseList(estadoAtualizado.atualizacoes),\n    fila_espera: filaEspera,\n    snapshot_final: snapshotFinal\n  }\n}];\n"
       },
-      "id": "278a42d0-7603-4ec4-8096-75b8a50a2077",
+      "id": "0cf2a1b8-1f57-4838-8342-8e041b744ad0",
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2320,
-        -16
+        1808,
+        -128
       ]
     }
   ],
@@ -332,17 +290,6 @@
       "main": [
         [
           {
-            "node": "Atualizar Jornada",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Atualizar Jornada": {
-      "main": [
-        [
-          {
             "node": "Buscar Snapshot Final",
             "type": "main",
             "index": 0
@@ -366,7 +313,9 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {
     "start": [
       {
@@ -378,13 +327,13 @@
       }
     ]
   },
-  "versionId": "80a71516-1868-4216-9af1-e4500348117c",
+  "versionId": "935ae525-1608-4012-853c-1cabc1f87371",
   "triggerCount": 0,
   "shared": [
     {
-      "createdAt": "2025-11-07T16:03:52.061Z",
+      "createdAt": "2025-10-10T11:10:56.623Z",
       "role": "workflow:owner",
-      "workflowId": "bTeLj5qOKQo9PDMO",
+      "workflowId": "agXJK8Dd49If1eFx",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",

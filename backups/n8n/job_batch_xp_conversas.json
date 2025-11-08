@@ -1,33 +1,34 @@
 {
-  "createdAt": "2025-11-07T15:20:00.000Z",
-  "id": "job_batch_xp_conversas",
+  "createdAt": "2025-11-07T18:43:36.658Z",
+  "id": "W673PRUKy5pHPKdz",
   "name": "job_batch_xp_conversas",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "4c2c5c64-0a21-4907-a1a7-ef702aa2b2df",
+      "id": "f5854252-e9bd-4d0a-8a96-3520a7ada3d2",
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -480,
-        0
+        944,
+        48
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;"
+        "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;",
+        "options": {}
       },
-      "id": "a06a22f3-cc9f-4d89-b8bb-d40772e8354d",
+      "id": "6de8b767-a569-470c-b069-e56e7bab83ac",
       "name": "Listar Usuários",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -256,
-        0
+        1168,
+        48
       ],
       "credentials": {
         "postgres": {
@@ -41,30 +42,32 @@
         "batchSize": 1,
         "options": {}
       },
-      "id": "8f1f6b33-6d26-46c0-9cd7-d0ed9c8f3159",
+      "id": "93a54113-c7f4-4268-accc-ec24c234a0da",
       "name": "Split In Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        -16,
-        0
+        1408,
+        48
       ]
     },
     {
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "cachedResultName": "sw_xp_conversas",
-          "cachedResultUrl": "/workflow/swXpConvs01",
+          "value": "ItBastfCTkWxm41M",
           "mode": "list",
-          "value": "swXpConvs01"
+          "cachedResultUrl": "/workflow/ItBastfCTkWxm41M",
+          "cachedResultName": "sw_xp_conversas"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
             "usuario_id": "={{ $json.id }}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "usuario_id"
+          ],
           "schema": [
             {
               "id": "usuario_id",
@@ -83,24 +86,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "bab3890c-4df7-4f4a-842d-2448b4378d6c",
+      "id": "ac4b8b20-3748-4ba9-90f5-1d44e732d648",
       "name": "Executar XP Conversas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        208,
-        0
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "a3534d05-a0de-45d4-a4ff-41d62a52b5bc",
-      "name": "Concluído",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        432,
-        0
+        1632,
+        48
       ]
     }
   ],
@@ -135,13 +127,6 @@
             "type": "main",
             "index": 0
           }
-        ],
-        [
-          {
-            "node": "Concluído",
-            "type": "main",
-            "index": 0
-          }
         ]
       ]
     },
@@ -163,7 +148,58 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "job-batch-xp-conversas-v1",
+  "versionId": "612b30a4-d8d6-431a-8a0a-d4e2b35e3f55",
   "triggerCount": 0,
-  "shared": []
+  "shared": [
+    {
+      "createdAt": "2025-11-07T18:43:36.658Z",
+      "role": "workflow:owner",
+      "workflowId": "W673PRUKy5pHPKdz",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }

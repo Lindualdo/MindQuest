@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-11-07T15:05:00.000Z",
-  "id": "swCalcJornada01",
+  "createdAt": "2025-11-07T19:12:28.703Z",
+  "id": "71Ru87yaRA5SNjOQ",
   "name": "sw_calcula_jornada",
   "active": false,
   "isArchived": false,
@@ -15,25 +15,25 @@
           ]
         }
       },
-      "id": "a6c4d73a-4d1b-48da-a13b-f36fa0616765",
+      "id": "f1f92aaa-9318-4cc2-8325-e7e72b2e5626",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -448,
+        0,
         0
       ]
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\n  throw new Error('usuario_id obrigatório');\n}\nreturn [{ json: { usuario_id: usuarioId.trim() } }];"
+        "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\n  throw new Error('usuario_id obrigatório');\n}\nreturn [{ json: { usuario_id: usuarioId.trim() } }];\n"
       },
-      "id": "7fbc59da-2c27-44d9-91cf-1fe51f21caeb",
+      "id": "2c47f697-2896-498a-8de8-2df7cc5352c7",
       "name": "Validar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -224,
+        224,
         0
       ]
     },
@@ -45,12 +45,12 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "66517b5f-6b4f-4f13-9aa1-7131f48a0c49",
+      "id": "208a85ec-cdfd-4f54-9775-5360f13e569a",
       "name": "Buscar XP",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        16,
+        464,
         0
       ],
       "credentials": {
@@ -68,12 +68,12 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0] }}"
         }
       },
-      "id": "55093b62-875d-4f69-8c57-e5cdb1465a72",
+      "id": "3ab8600d-a22b-4729-9443-df30166bf724",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        256,
+        704,
         0
       ],
       "credentials": {
@@ -85,12 +85,12 @@
     },
     {
       "parameters": {},
-      "id": "4af197a0-c1f4-4c66-9e0b-26f03a15affc",
+      "id": "be9e5045-9357-443e-beaf-bf20e53328f3",
       "name": "Fim",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        480,
+        928,
         0
       ]
     }
@@ -146,5 +146,67 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {}
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa"
+        }
+      }
+    ]
+  },
+  "versionId": "2ee86772-4b4b-4b61-85b6-1b9213840459",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-07T19:12:28.703Z",
+      "role": "workflow:owner",
+      "workflowId": "71Ru87yaRA5SNjOQ",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }

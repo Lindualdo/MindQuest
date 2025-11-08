@@ -24,7 +24,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1360,
+        -1424,
         192
       ],
       "id": "3ec0cd09-24db-475e-95c9-81f069215fd0",
@@ -34,8 +34,8 @@
       "parameters": {
         "resource": "messages-api",
         "instanceName": "={{ $('start').item.json.instanceName }}",
-        "remoteJid": "={{ $('start').item.json.remoteJid }}",
-        "messageText": "={{ $('start').item.json.messageText }}",
+        "remoteJid": "={{ $json.remoteJid }}",
+        "messageText": "={{ $json.messageText }}",
         "options_message": {
           "delay": "={{ 2000 }}",
           "linkPreview": false
@@ -361,18 +361,8 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {
-    "start": [
-      {
-        "json": {
-          "instanceName": "MindQuest",
-          "remoteJid": "447950890394@s.whatsapp.net",
-          "messageText": "Ella, foi um prazer acompanhar você nesse momento de reconhecimento e vontade de mudança. Percebo que você está buscando um equilíbrio saudável entre compromisso e flexibilidade, dando espaço para o descanso sem culpa.\n\nVocê quer construir uma rotina que respeite seu ritmo e permita ajustes sem perder a responsabilidade, usando lembretes e reflexões para manter o foco. Esse cuidado com você mesma já é um grande avanço na direção do que te faz bem.\n\nFaz sentido esse resumão para você? Quer acrescentar ou ajustar algo antes da gente seguir? "
-        }
-      }
-    ]
-  },
-  "versionId": "02c61f22-03e4-4a67-a94d-3ea315ba65ae",
+  "pinData": {},
+  "versionId": "d996e780-646c-4840-9716-a963bc7faae9",
   "triggerCount": 0,
   "shared": [
     {

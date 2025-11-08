@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-11-07T14:32:00.000Z",
-  "id": "job_batch_generate_quests",
+  "createdAt": "2025-11-07T12:42:26.199Z",
+  "id": "cwYywKL1Uqn1sKyX",
   "name": "job_batch_generate_quests",
   "active": false,
   "isArchived": false,
@@ -10,24 +10,25 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -480,
-        0
+        896,
+        128
       ],
-      "id": "0fd40e75-3f15-4d68-8ea5-2e9d8c7a2fa9",
+      "id": "bfd749ac-1fdd-4867-9853-a93b7c9a80ad",
       "name": "Manual Trigger"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;"
+        "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;",
+        "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -256,
-        0
+        1120,
+        128
       ],
-      "id": "22c059c5-2311-4d1c-8156-c074c7f327f0",
+      "id": "ff6d96be-f14f-4d48-bb3c-6c1541605b48",
       "name": "Listar Usuários",
       "credentials": {
         "postgres": {
@@ -44,10 +45,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        -16,
-        0
+        1360,
+        128
       ],
-      "id": "7f3f3c94-8d0e-4f1b-8b37-8a0c3d22a0ce",
+      "id": "1e3226bd-ee63-4ff6-bda6-3290ebb5c38c",
       "name": "Split In Batches"
     },
     {
@@ -96,22 +97,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        208,
-        0
+        1584,
+        128
       ],
-      "id": "0fb1e2b4-deda-4e48-b828-6cf745ef8a34",
+      "id": "7de19dcb-7625-425c-967c-1d5add53d4fc",
       "name": "Executar Expert Quests"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        432,
-        0
-      ],
-      "id": "3745e648-6a7d-4a7a-84e9-8bf503c2ce7d",
-      "name": "Concluído"
     }
   ],
   "connections": {
@@ -145,13 +135,6 @@
             "type": "main",
             "index": 0
           }
-        ],
-        [
-          {
-            "node": "Concluído",
-            "type": "main",
-            "index": 0
-          }
         ]
       ]
     },
@@ -173,7 +156,58 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "6b77a7bb-7d9d-4f67-958e-5d9e4a0bc612",
+  "versionId": "84d31b91-926a-4213-a519-cc7a82b98f42",
   "triggerCount": 0,
-  "shared": []
+  "shared": [
+    {
+      "createdAt": "2025-11-07T12:42:26.199Z",
+      "role": "workflow:owner",
+      "workflowId": "cwYywKL1Uqn1sKyX",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }

@@ -67,7 +67,7 @@
           "values": [
             {
               "column": "usuario_id",
-              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+              "value": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff"
             }
           ]
         },
@@ -182,39 +182,8 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "insights",
-          "mode": "list",
-          "cachedResultName": "insights"
-        },
-        "limit": 10,
-        "where": {
-          "values": [
-            {
-              "column": "usuario_id",
-              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
-            }
-          ]
-        },
-        "sort": {
-          "values": [
-            {
-              "column": "criado_em",
-              "direction": "DESC"
-            },
-            {
-              "column": "criado_em",
-              "direction": "DESC"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT '1d74e1c4-a42c-4641-8db9-da3b80b8dbff'::uuid AS usuario_id\n),\nestado AS (\n  SELECT\n    q.usuario_id,\n    q.xp_total,\n    q.total_xp_hoje,\n    q.sequencia_atual,\n    q.sequencia_recorde,\n    q.meta_sequencia_codigo,\n    q.proxima_meta_codigo,\n    q.ultima_conversa_em,\n    q.sequencia_status,\n    q.atualizado_em\n  FROM public.quest_estado_usuario q\n  JOIN params p ON p.usuario_id = q.usuario_id\n)\nSELECT jsonb_build_object(\n  'estado', to_jsonb(e),\n  'conversas', COALESCE(conv.conversas, '[]'::jsonb)\n) AS diagnostico\nFROM estado e\nCROSS JOIN LATERAL (\n  SELECT jsonb_agg(\n           jsonb_build_object(\n             'id', uc.id,\n             'data_conversa', uc.data_conversa,\n             'atualizado_em', uc.atualizado_em,\n             'tem_reflexao', uc.tem_reflexao,\n             'total_palavras_usuario', COALESCE(uc.total_palavras_usuario, 0)\n           )\n           ORDER BY uc.data_conversa, uc.atualizado_em\n         ) AS conversas\n  FROM public.usr_chat uc\n  JOIN params p ON p.usuario_id = uc.usuario_id\n  WHERE uc.data_conversa >= NOW() - INTERVAL '30 days'\n) conv;\n",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -287,11 +256,6 @@
           "cachedResultName": "quest_modelos"
         },
         "returnAll": true,
-        "where": {
-          "values": [
-            {}
-          ]
-        },
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -311,28 +275,11 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "usr_chat",
-          "mode": "list",
-          "cachedResultName": "usr_chat"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "usuario_id",
-              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
-            }
-          ]
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "WITH estado AS (\n  SELECT\n    usuario_id,\n    xp_total,\n    total_xp_hoje,\n    sequencia_atual,\n    sequencia_recorde,\n    meta_sequencia_codigo,\n    proxima_meta_codigo,\n    ultima_conversa_em,\n    sequencia_status\n  FROM public.quest_estado_usuario\n  WHERE usuario_id = $1::uuid\n),\nconversas AS (\n  SELECT\n    uc.id,\n    uc.usuario_id,\n    uc.data_conversa::date AS dia,\n    uc.atualizado_em,\n    COALESCE(uc.total_palavras_usuario, 0) AS palavras,\n    COALESCE(uc.tem_reflexao, false) AS tem_reflexao,\n    CASE\n      WHEN COALESCE(uc.total_palavras_usuario, 0) >= 500 THEN 50\n      WHEN COALESCE(uc.tem_reflexao, false)           THEN 35\n      ELSE 20\n    END AS xp_base\n  FROM public.usr_chat uc\n  WHERE uc.usuario_id = $1::uuid\n    AND uc.data_conversa >= now() - INTERVAL '45 days'\n),\nnovas AS (\n  SELECT\n    c.*,\n    CASE\n      WHEN e.ultima_conversa_em IS NULL THEN true\n      WHEN c.dia > date(e.ultima_conversa_em) THEN true\n      WHEN c.dia = date(e.ultima_conversa_em)\n           AND c.atualizado_em > e.ultima_conversa_em THEN true\n      ELSE false\n    END AS conversa_nova\n  FROM conversas c\n  CROSS JOIN estado e\n),\ndias AS (\n  SELECT DISTINCT dia\n  FROM novas\n  WHERE conversa_nova\n),\nstreaks AS (\n  SELECT\n    dia,\n    ROW_NUMBER() OVER (PARTITION BY bloco ORDER BY dia) AS streak_len\n  FROM (\n    SELECT\n      dia,\n      SUM(nova_serie) OVER (ORDER BY dia\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS bloco\n    FROM (\n      SELECT\n        dia,\n        CASE\n          WHEN lag(dia) OVER (ORDER BY dia) = dia - INTERVAL '1 day' THEN 0\n          ELSE 1\n        END AS nova_serie\n      FROM dias\n    ) s\n  ) x\n),\nmetas AS (\n  SELECT *\n  FROM (VALUES\n    ('streak_003',3,40),\n    ('streak_007',7,90),\n    ('streak_010',10,130),\n    ('streak_015',15,180),\n    ('streak_020',20,250),\n    ('streak_025',25,340),\n    ('streak_030',30,450)\n  ) AS m(codigo,dias,bonus)\n),\nmetas_atingidas AS (\n  SELECT\n    s.dia,\n    m.codigo,\n    m.dias,\n    m.bonus\n  FROM streaks s\n  JOIN metas m ON s.streak_len = m.dias\n  JOIN novas n ON n.dia = s.dia\n  WHERE EXISTS (\n    SELECT 1\n    FROM novas nn\n    WHERE nn.dia = s.dia\n      AND nn.conversa_nova\n  )\n),\nagregado AS (\n  SELECT json_build_object(\n    'estado', (SELECT row_to_json(estado) FROM estado),\n    'xp_por_conversa', COALESCE(json_agg(\n      json_build_object(\n        'chat_id', n.id,\n        'dia', n.dia,\n        'palavras', n.palavras,\n        'tem_reflexao', n.tem_reflexao,\n        'xp_base', n.xp_base,\n        'conversa_nova', n.conversa_nova\n      )\n      ORDER BY n.dia, n.atualizado_em\n    ), '[]'::json),\n    'xp_total_conversas_novas', COALESCE(SUM(n.xp_base) FILTER (WHERE n.conversa_nova), 0),\n    'streaks', COALESCE(json_agg(\n      json_build_object(\n        'dia', s.dia,\n        'tamanho', s.streak_len\n      )\n      ORDER BY s.dia\n    ) FILTER (WHERE s.dia IS NOT NULL), '[]'::json),\n    'metas_atingidas', COALESCE(json_agg(\n      json_build_object(\n        'dia', ma.dia,\n        'codigo', ma.codigo,\n        'bonus', ma.bonus\n      )\n      ORDER BY ma.dia\n    ) FILTER (WHERE ma.dia IS NOT NULL), '[]'::json),\n    'janela_analisada', json_build_object(\n      'inicio', (SELECT MIN(dia) FROM conversas),\n      'fim',    (SELECT MAX(dia) FROM conversas)\n    )\n  ) AS auditoria\n  FROM novas n\n  LEFT JOIN streaks s ON s.dia = n.dia\n  LEFT JOIN metas_atingidas ma ON ma.dia = n.dia\n)\nSELECT auditoria FROM agregado;\n",
+        "options": {
+          "queryReplacement": "=0847d8a7-4fba-45f2-9470-a7eeacaa4bd4"
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -341,7 +288,7 @@
         160
       ],
       "id": "90004298-d72a-4f42-8c41-acad0fed9bda",
-      "name": "usr chat",
+      "name": "valida pontuação",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -370,7 +317,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "991e297e-3133-4559-b639-e849f4006c75",
+  "versionId": "d41391fc-1ac9-4817-abb7-c8af84bcdf7c",
   "triggerCount": 0,
   "shared": [
     {
