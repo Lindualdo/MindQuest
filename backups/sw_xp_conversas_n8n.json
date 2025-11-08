@@ -11,26 +11,26 @@
           ]
         }
       },
-      "id": "56b3ed10-dec1-4ee1-8d79-cf30729c3d63",
+      "id": "0d93e000-e0f3-45d7-b755-7822e3839551",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        592,
-        -64
+        -736,
+        48
       ]
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.item.json || {}; const usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id; if (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) { throw new Error('usuario_id obrigat\u00f3rio'); } return [{ json: { usuario_id: usuarioId.trim() } }];"
+        "jsCode": "const entrada = $input.item.json || {}; const usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id; if (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) { throw new Error('usuario_id obrigatório'); } return [{ json: { usuario_id: usuarioId.trim() } }];"
       },
-      "id": "5b0ca1a0-30e8-43ad-a57c-9a3f452bc51d",
+      "id": "d5e8dd39-cded-4739-8142-00421f5092c8",
       "name": "Validar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
-        -64
+        -512,
+        48
       ]
     },
     {
@@ -41,13 +41,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "26ef8239-3f9c-43de-9a71-cc4600908307",
+      "id": "b3b671f4-5948-47e9-974f-5d2ccfee8f50",
       "name": "Buscar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1056,
-        -64
+        -272,
+        48
       ],
       "credentials": {
         "postgres": {
@@ -64,14 +64,14 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "af85a380-6ac2-4852-ade7-37d2d2818ede",
+      "id": "f5bd0e6e-a144-4274-af4e-a6533cb6d5b6",
       "name": "Buscar Conversas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "alwaysOutputData": true,
       "position": [
-        1296,
-        -64
+        -32,
+        48
       ],
       "credentials": {
         "postgres": {
@@ -82,15 +82,15 @@
     },
     {
       "parameters": {
-        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || null;\n};\nconst getItems = (nodeName) => {\n  const list = $items(nodeName) || [];\n  return list.map((entry) => entry?.json || {});\n};\nconst estado = getItem('Buscar Estado');\nif (!estado) {\n  throw new Error('Estado do usu\u00e1rio n\u00e3o encontrado');\n}\nconst conversas = getItems('Buscar Conversas');\nconst metas = [\n  { codigo: 'streak_003', dias: 3, bonus: 40 },\n  { codigo: 'streak_005', dias: 5, bonus: 60 },\n  { codigo: 'streak_007', dias: 7, bonus: 90 },\n  { codigo: 'streak_010', dias: 10, bonus: 130 },\n  { codigo: 'streak_015', dias: 15, bonus: 180 },\n  { codigo: 'streak_020', dias: 20, bonus: 250 },\n  { codigo: 'streak_025', dias: 25, bonus: 340 },\n  { codigo: 'streak_030', dias: 30, bonus: 450 },\n];\nconst metaTargets = metas.map((meta) => ({ codigo: meta.codigo, dias: meta.dias }));\nconst toTimestamp = (value) => {\n  if (!value) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return date.getTime();\n};\nconst toDay = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\n};\nconst parseStatus = () => {\n  const raw = estado.sequencia_status;\n  if (!raw) return { estado: 'ativa', reinicios: 0, alvo_conversas: metaTargets[0].dias };\n  if (typeof raw === 'object') {\n    return { estado: 'ativa', alvo_conversas: metaTargets[0].dias, ...raw };\n  }\n  try {\n    return { estado: 'ativa', alvo_conversas: metaTargets[0].dias, ...(JSON.parse(raw) || {}) };\n  } catch (error) {\n    return { estado: 'ativa', reinicios: 0, alvo_conversas: metaTargets[0].dias };\n  }\n};\nconst determineNextMeta = (streak) => {\n  for (const meta of metaTargets) {\n    if (streak < meta.dias) {\n      return meta;\n    }\n  }\n  return metaTargets[metaTargets.length - 1];\n};\nconst status = parseStatus();\nconst msDia = 24 * 60 * 60 * 1000;\nconst conversasOrdenadas = conversas\n  .map((entrada) => {\n    const timestamp = toTimestamp(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISO = toDay(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISOTexto = diaISO ? diaISO.toISOString() : null;\n    return { ...entrada, timestamp, diaISO, diaISOTexto };\n  })\n  .filter((entrada) => entrada.diaISO && entrada.diaISOTexto && Number.isFinite(entrada.timestamp))\n  .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst ultimaRegistradaTimestamp = toTimestamp(estado.ultima_conversa_em);\nconst isConversaNova = (entrada) => {\n  if (!ultimaRegistradaTimestamp) return true;\n  return (entrada.timestamp || 0) > ultimaRegistradaTimestamp;\n};\nconst XP_POR_DIA = 75;\nlet xpGanho = 0;\nlet ultimoDiaPontuado = null;\nlet sequenciaAtual = 0;\nlet sequenciaRecordeCalculado = 0;\nlet reinicios = Number(status.reinicios) || 0;\nlet metaAlcancadaIdxAnterior = metas.findIndex((meta) => meta.codigo === estado.meta_sequencia_codigo);\nif (metaAlcancadaIdxAnterior < 0) metaAlcancadaIdxAnterior = -1;\nlet metaAlcancadaIdx = metaAlcancadaIdxAnterior;\nlet alvoIdx = Math.max(metaAlcancadaIdxAnterior + 1, 0);\nconst resetMetaIndices = () => {\n  metaAlcancadaIdxAnterior = -1;\n  metaAlcancadaIdx = -1;\n  alvoIdx = 0;\n};\nconst applyReset = () => {\n  if (sequenciaAtual > 0) {\n    reinicios += 1;\n  }\n  sequenciaAtual = 0;\n  resetMetaIndices();\n};\nlet ultimaTimestampProcessado = null;\nlet ultimoDiaSequencia = null;\nfor (const conversa of conversasOrdenadas) {\n  conversa.isNova = isConversaNova(conversa);\n  const diaISOTexto = conversa.diaISOTexto;\n  if (diaISOTexto && diaISOTexto !== ultimoDiaPontuado) {\n    xpGanho += XP_POR_DIA;\n    ultimoDiaPontuado = diaISOTexto;\n  }\n  if (ultimoDiaSequencia) {\n    const diffDias = Math.floor(\n      (conversa.diaISO.getTime() - ultimoDiaSequencia.getTime()) / msDia,\n    );\n    if (diffDias > 1) {\n      applyReset();\n    }\n  }\n  sequenciaAtual += 1;\n  ultimaTimestampProcessado = conversa.timestamp ?? ultimaTimestampProcessado ?? conversa.timestamp;\n  ultimoDiaSequencia = conversa.diaISO;\n  if (sequenciaAtual > sequenciaRecordeCalculado) {\n    sequenciaRecordeCalculado = sequenciaAtual;\n  }\n  while (alvoIdx < metas.length && sequenciaAtual >= metas[alvoIdx].dias) {\n    if (conversa.isNova && alvoIdx > metaAlcancadaIdxAnterior) {\n      xpGanho += metas[alvoIdx].bonus;\n    }\n    metaAlcancadaIdx = alvoIdx;\n    alvoIdx += 1;\n  }\n  metaAlcancadaIdxAnterior = metaAlcancadaIdx;\n}\nif (ultimoDiaSequencia) {\n  const agora = new Date();\n  const hojeUTC = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth(), agora.getUTCDate()));\n  const diffDiasFinal = Math.floor((hojeUTC.getTime() - ultimoDiaSequencia.getTime()) / msDia);\n  if (diffDiasFinal > 1) {\n    applyReset();\n  }\n}\nconst sequenciaRecorde = Math.max(sequenciaRecordeCalculado, Number(estado.sequencia_recorde) || 0);\nconst metaCodigoAtual = metaAlcancadaIdx >= 0 ? metas[metaAlcancadaIdx].codigo : metas[0].codigo;\nconst proximaMetaAlvo = determineNextMeta(sequenciaAtual);\nconst proximaCodigo = proximaMetaAlvo ? proximaMetaAlvo.codigo : null;\nconst alvoConversas = proximaMetaAlvo ? proximaMetaAlvo.dias : metaTargets[metaTargets.length - 1].dias;\nconst ultimaConversaISO = ultimaTimestampProcessado\n  ? new Date(ultimaTimestampProcessado).toISOString()\n  : estado.ultima_conversa_em || null;\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id,\n    xp_ganho: xpGanho,\n    sequencia_atual: sequenciaAtual,\n    sequencia_recorde: sequenciaRecorde,\n    meta_sequencia_codigo: metaCodigoAtual,\n    proxima_meta_codigo: proximaCodigo,\n    ultima_conversa_em: ultimaConversaISO,\n    sequencia_status: { ...status, estado: 'ativa', reinicios, alvo_conversas: alvoConversas },\n    dias_processados: conversasOrdenadas.length,\n  },\n}];\n"
+        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || null;\n};\nconst getItems = (nodeName) => {\n  const list = $items(nodeName) || [];\n  return list.map((entry) => entry?.json || {});\n};\nconst estado = getItem('Buscar Estado');\nif (!estado) {\n  throw new Error('Estado do usuário não encontrado');\n}\nconst conversas = getItems('Buscar Conversas');\nconst metas = [\n  { codigo: 'streak_003', dias: 3, bonus: 40 },\n  { codigo: 'streak_005', dias: 5, bonus: 60 },\n  { codigo: 'streak_007', dias: 7, bonus: 90 },\n  { codigo: 'streak_010', dias: 10, bonus: 130 },\n  { codigo: 'streak_015', dias: 15, bonus: 180 },\n  { codigo: 'streak_020', dias: 20, bonus: 250 },\n  { codigo: 'streak_025', dias: 25, bonus: 340 },\n  { codigo: 'streak_030', dias: 30, bonus: 450 },\n];\nconst metaTargets = metas.map((meta) => ({ codigo: meta.codigo, dias: meta.dias }));\nconst toTimestamp = (value) => {\n  if (!value) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return date.getTime();\n};\nconst toDay = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\n};\nconst parseStatus = () => {\n  const raw = estado.sequencia_status;\n  if (!raw) return { estado: 'ativa', reinicios: 0, alvo_conversas: metaTargets[0].dias };\n  if (typeof raw === 'object') {\n    return { estado: 'ativa', alvo_conversas: metaTargets[0].dias, ...raw };\n  }\n  try {\n    return { estado: 'ativa', alvo_conversas: metaTargets[0].dias, ...(JSON.parse(raw) || {}) };\n  } catch (error) {\n    return { estado: 'ativa', reinicios: 0, alvo_conversas: metaTargets[0].dias };\n  }\n};\nconst determineNextMeta = (streak) => {\n  for (const meta of metaTargets) {\n    if (streak < meta.dias) {\n      return meta;\n    }\n  }\n  return metaTargets[metaTargets.length - 1];\n};\nconst status = parseStatus();\nconst msDia = 24 * 60 * 60 * 1000;\nconst conversasOrdenadas = conversas\n  .map((entrada) => {\n    const timestamp = toTimestamp(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISO = toDay(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISOTexto = diaISO ? diaISO.toISOString() : null;\n    return { ...entrada, timestamp, diaISO, diaISOTexto };\n  })\n  .filter((entrada) => entrada.diaISO && entrada.diaISOTexto && Number.isFinite(entrada.timestamp))\n  .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst ultimaRegistradaTimestamp = toTimestamp(estado.ultima_conversa_em);\nconst isConversaNova = (entrada) => {\n  if (!ultimaRegistradaTimestamp) return true;\n  return (entrada.timestamp || 0) > ultimaRegistradaTimestamp;\n};\nconst XP_POR_DIA = 75;\nlet xpGanho = 0;\nlet ultimoDiaPontuado = null;\nlet sequenciaAtual = 0;\nlet sequenciaRecordeCalculado = 0;\nlet reinicios = Number(status.reinicios) || 0;\nlet metaAlcancadaIdxAnterior = metas.findIndex((meta) => meta.codigo === estado.meta_sequencia_codigo);\nif (metaAlcancadaIdxAnterior < 0) metaAlcancadaIdxAnterior = -1;\nlet metaAlcancadaIdx = metaAlcancadaIdxAnterior;\nlet alvoIdx = Math.max(metaAlcancadaIdxAnterior + 1, 0);\nconst resetMetaIndices = () => {\n  metaAlcancadaIdxAnterior = -1;\n  metaAlcancadaIdx = -1;\n  alvoIdx = 0;\n};\nconst applyReset = () => {\n  if (sequenciaAtual > 0) {\n    reinicios += 1;\n  }\n  sequenciaAtual = 0;\n  resetMetaIndices();\n};\nlet ultimaTimestampProcessado = null;\nfor (const conversa of conversasOrdenadas) {\n  conversa.isNova = isConversaNova(conversa);\n  const diaISOTexto = conversa.diaISOTexto;\n  if (diaISOTexto && diaISOTexto !== ultimoDiaPontuado) {\n    xpGanho += XP_POR_DIA;\n    ultimoDiaPontuado = diaISOTexto;\n  }\n  if (ultimaTimestampProcessado !== null) {\n    const diff = (conversa.timestamp || 0) - ultimaTimestampProcessado;\n    if (diff > msDia) {\n      applyReset();\n    }\n  }\n  sequenciaAtual += 1;\n  ultimaTimestampProcessado = conversa.timestamp || ultimaTimestampProcessado;\n  if (sequenciaAtual > sequenciaRecordeCalculado) {\n    sequenciaRecordeCalculado = sequenciaAtual;\n  }\n  while (alvoIdx < metas.length && sequenciaAtual >= metas[alvoIdx].dias) {\n    if (conversa.isNova && alvoIdx > metaAlcancadaIdxAnterior) {\n      xpGanho += metas[alvoIdx].bonus;\n    }\n    metaAlcancadaIdx = alvoIdx;\n    alvoIdx += 1;\n  }\n  metaAlcancadaIdxAnterior = metaAlcancadaIdx;\n}\nif (ultimaTimestampProcessado && Date.now() - ultimaTimestampProcessado > msDia) {\n  applyReset();\n}\nconst sequenciaRecorde = Math.max(sequenciaRecordeCalculado, Number(estado.sequencia_recorde) || 0);\nconst metaCodigoAtual = metaAlcancadaIdx >= 0 ? metas[metaAlcancadaIdx].codigo : metas[0].codigo;\nconst proximaMetaAlvo = determineNextMeta(sequenciaAtual);\nconst proximaCodigo = proximaMetaAlvo ? proximaMetaAlvo.codigo : null;\nconst alvoConversas = proximaMetaAlvo ? proximaMetaAlvo.dias : metaTargets[metaTargets.length - 1].dias;\nconst ultimaConversaISO = ultimaTimestampProcessado\n  ? new Date(ultimaTimestampProcessado).toISOString()\n  : estado.ultima_conversa_em || null;\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id,\n    xp_ganho: xpGanho,\n    sequencia_atual: sequenciaAtual,\n    sequencia_recorde: sequenciaRecorde,\n    meta_sequencia_codigo: metaCodigoAtual,\n    proxima_meta_codigo: proximaCodigo,\n    ultima_conversa_em: ultimaConversaISO,\n    sequencia_status: { ...status, estado: 'ativa', reinicios, alvo_conversas: alvoConversas },\n    dias_processados: conversasOrdenadas.length,\n  },\n}];\n"
       },
-      "id": "df026a33-878a-4214-9880-13b0a501036b",
+      "id": "2f13b368-883c-447f-8cad-6749cf812d0d",
       "name": "Calcular XP Conversas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1536,
-        -64
+        224,
+        48
       ]
     },
     {
@@ -101,13 +101,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_ganho, $json.sequencia_atual, $json.sequencia_recorde, $json.meta_sequencia_codigo, $json.proxima_meta_codigo, ($json.ultima_conversa_em && $json.ultima_conversa_em !== '' ? $json.ultima_conversa_em : null), JSON.stringify($json.sequencia_status || {})] }}"
         }
       },
-      "id": "f70eb884-f195-4dd2-9ee0-f54c8ab7adf3",
+      "id": "d3a06355-ac57-4010-b405-9c3f3aed67a7",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1792,
-        -64
+        480,
+        48
       ],
       "credentials": {
         "postgres": {
@@ -152,26 +152,26 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "9a2443ec-1b6b-422d-8877-77f246a2a82d",
+      "id": "31461bb6-0b4e-4619-a818-c90f9f802c4a",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2032,
-        -64
+        720,
+        48
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $items('Validar Entrada', 0, 0) || [];\nconst payload = entrada[0]?.json || {};\nreturn [{ json: { usuario_id: payload.usuario_id || null } }];"
       },
-      "id": "0a19ae8f-39cd-42ea-9831-513493f7b950",
+      "id": "285e06a3-7e1c-4215-a733-7fc1ec99b8bd",
       "name": "Retornar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2256,
-        -64
+        944,
+        48
       ]
     }
   ],
@@ -179,7 +179,7 @@
     "start": [
       {
         "json": {
-          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
         }
       }
     ]
@@ -267,7 +267,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c02a60f2-a4ed-47ba-9014-aeb2bf33d9c7",
+  "versionId": "85ebe1b2-f341-411f-838b-2c0e68b7dc90",
   "meta": {
     "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
   },
