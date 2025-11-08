@@ -29,8 +29,9 @@
 
 ## XP · Conversas (Sequência)
 
-- **Regra base**: conversou no dia, ganhou **75 XP**. Apenas o primeiro registro válido do dia pontua.
-- **Detecção**: qualquer conversa registrada em `usr_chat` após a última `ultima_conversa_em` já gera o crédito, sem distinção por palavras, reflexão ou tipo.
+- **Regra base**: conversou no dia, ganhou **75 XP**. Várias conversas no mesmo dia continuam valendo só 75 XP para aquela data.
+- **Dias válidos**: qualquer dia com pelo menos uma conversa já garante o XP diário; não importa o número de mensagens ou o tamanho delas.
+- **Passos da sequência**: cada conversa conta como um passo na sequência, mesmo que seja a terceira do dia. A sequência só é quebrada quando o usuário fica mais de 24 horas sem conversar.
 - **Bônus de streak**:
 
 | Meta concluída | Conversas consecutivas | Bônus |
@@ -58,7 +59,7 @@
 - **Progressão**: concluir uma meta desbloqueia automaticamente a próxima; nenhuma meta é pulada e múltiplas conversas no mesmo dia contam para a sequência.
 - **Reset**: ficar mais de 24h sem conversar (intervalo máximo configurável) encerra a meta ativa com status `reiniciada`, registra o recorde no histórico e reinicia o ciclo na Meta 1 a partir da próxima conversa.
 - **Recordes**: o painel mostra streak atual, melhor streak e meta ativa. Conquistas destacam quantas vezes cada meta foi completada.
-- **Recompensa**: cada dia com pelo menos uma conversa registrada rende 75 XP, e o bônus da meta concluída é aplicado imediatamente. Se a sequência for perdida, o usuário reinicia na meta inicial, mas mantém todos os pontos já ganhos.
+- **Recompensa**: a pessoa soma 75 XP por dia com conversa registrada e, além disso, recebe o bônus correspondente sempre que completa a quantidade de conversas seguidas da meta atual. Se ficar mais de 24 horas sem conversar, a sequência volta para o começo, mas os pontos obtidos permanecem.
 
 ## Quests personalizadas
 
