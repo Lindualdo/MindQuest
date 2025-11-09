@@ -10,6 +10,8 @@ Este repositório define o estilo de respostas e a forma de trabalho com o Codex
 - Usar cabeçalhos apenas quando melhorarem a leitura.
 - Referenciar arquivos como `caminho/arquivo.ext:linha`.
 - Evitar formatação pesada e “pensar em voz alta”.
+- Não usar introduções/conclusões verbosas; respostas devem caber em 4–6 bullets ou 2 frases curtas no máximo.
+- Ao reportar erros: descreva apenas o que precisa para resolver e decisões pendentes; explique o motivo do erro somente se o usuário pedir.
 
 ## N8N / MCP
 - Priorizar ferramentas MCP do n8n (search_nodes, get_node_info, validate_workflow, etc.) antes de qualquer outra fonte.

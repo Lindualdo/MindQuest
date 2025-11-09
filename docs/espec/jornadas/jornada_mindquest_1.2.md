@@ -137,3 +137,19 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 | 8 | Impacto | Minha evolução inspira outros | XP: 9.800 – 12.600 | Completar 25 quests + 3 quests focadas em compartilhar aprendizados |
 | 9 | Legado | Construo algo maior que eu | XP: 12.600 – 16.000 | Completar 30 quests + 1 projeto de impacto de longo prazo |
 | 10 | Transcendência | Vivo o que sempre quis ser | XP: 16.000 – ∞ | Evolução contínua e ilimitada alinhada ao propósito |
+
+## Fluxos de Dados · XP
+
+### Conversas (sequência)
+Resumo: `usr_chat` → `sw_xp_conversas` → `resumo_jornada` → `sw_calcula_jornada`
+Breve: `sw_xp_conversas` lê até 45 dias de `usr_chat`, calcula 75 XP por conversa + bônus de meta, atualiza `resumo_jornada` e dispara `sw_calcula_jornada` para refletir níveis.
+
+### Quests personalizadas
+Resumo: `quest_atribuidas` → `sw_xp_quests` → `resumo_jornada` → `sw_calcula_jornada`
+Breve: `sw_xp_quests` aplica 150 XP por conclusão +30 XP por recorrência (até 21 ciclos), persiste em `resumo_jornada` e chama `sw_calcula_jornada` para reavaliar níveis.
+
+### Tabelas Principais
+- `resumo_jornada`: snapshot do usuário (XP total, nível atual, metas e totais concluídos).
+- `jornada_niveis`: faixas de XP/nível usadas pelos workflows e pelo app.
+- `quest_templates`: catálogo técnico de quests automáticas (streaks, onboarding, hábitos).
+- `quest_atribuidas`: quests entregues aos usuários com status, progresso, textos e XP concedido.

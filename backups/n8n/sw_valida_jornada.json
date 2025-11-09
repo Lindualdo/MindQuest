@@ -1,0 +1,110 @@
+{
+  "createdAt": "2025-11-07T16:26:00.000Z",
+  "id": "sw_valida_jornada",
+  "name": "sw_valida_jornada",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "552b5559-7f35-4cfb-bbc9-33bca1b22aca",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  q.usuario_id,\n  u.nome AS usuario_nome,\n  u.email AS usuario_email,\n  q.xp_total,\n  q.nivel_atual,\n  q.titulo_nivel,\n  q.xp_proximo_nivel,\n  j.nivel AS nivel_calculado,\n  j.titulo AS titulo_calculado,\n  j.xp_proximo_nivel AS xp_proximo_calculado\nFROM public.quest_estado_usuario q\nJOIN public.usuarios u ON u.id = q.usuario_id\nLEFT JOIN LATERAL (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= q.xp_total\n    AND (jn.xp_proximo_nivel IS NULL OR q.xp_total < jn.xp_proximo_nivel)\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n) j ON TRUE\nWHERE COALESCE(u.ativo, true) = true\nORDER BY q.atualizado_em DESC NULLS LAST, u.nome ASC;",
+        "options": {}
+      },
+      "id": "3fa472fd-1104-47a9-a9ed-1239747544b0",
+      "name": "Buscar Estados e Niveis",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        440,
+        -40
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const normalizeString = (value) => {\n  if (value === null || value === undefined) return null;\n  return String(value).trim() || null;\n};\nconst normalizeNumber = (value) => {\n  if (value === null || value === undefined || value === '') return null;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) ? parsed : null;\n};\nreturn $input.all().map(item => {\n  const row = item.json;\n  const diffs = [];\n  if ((row.nivel_atual ?? null) !== (row.nivel_calculado ?? null)) {\n    diffs.push(`nivel esperado ${row.nivel_calculado ?? 'desconhecido'}`);\n  }\n  if (normalizeString(row.titulo_nivel) !== normalizeString(row.titulo_calculado)) {\n    diffs.push('titulo divergente');\n  }\n  if (normalizeNumber(row.xp_proximo_nivel) !== normalizeNumber(row.xp_proximo_calculado)) {\n    diffs.push('xp_proximo divergente');\n  }\n  return {\n    json: {\n      ...row,\n      status: diffs.length ? 'inconsistente' : 'ok',\n      divergencias: diffs\n    }\n  };\n});"
+      },
+      "id": "4d74470e-32f8-4a4d-90b4-3b4671cc57cd",
+      "name": "Calcular Divergencias",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        -40
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "50c8cd05-9aa1-443c-9c44-a326ee7fb78d",
+      "name": "Resultados",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -40
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estados e Niveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Estados e Niveis": {
+      "main": [
+        [
+          {
+            "node": "Calcular Divergencias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Divergencias": {
+      "main": [
+        [
+          {
+            "node": "Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "db87b81a-5b0d-4409-942e-10be4bee28b1",
+  "triggerCount": 0,
+  "shared": [],
+  "tags": []
+}
