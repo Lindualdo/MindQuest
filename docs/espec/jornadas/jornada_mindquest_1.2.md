@@ -55,7 +55,7 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 |----------|---------|
 | Quest Custom (definidas por usuário) | `sw_xp_quest` *(renomear `sw_xperts_gamification`)* |
 | Quest Conversa (sistema padrão) | `sw_xp_conversas` |
-
+| Mudança de nível  | `sw_calcula_jornada` |
 
 ## Cálculo de XP
 
