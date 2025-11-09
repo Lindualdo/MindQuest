@@ -1,0 +1,259 @@
+{
+  "createdAt": "2025-11-08T21:15:40.375Z",
+  "id": "kbmJxJtDUZ1CU4Xt",
+  "name": "sw_tts",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instanceName"
+            },
+            {
+              "name": "remoteJidOrNumber"
+            },
+            {
+              "name": "ttsText"
+            },
+            {
+              "name": "voice"
+            },
+            {
+              "name": "responseFormat"
+            },
+            {
+              "name": "messageText"
+            },
+            {
+              "name": "linkPreview"
+            },
+            {
+              "name": "minDelayMs"
+            }
+          ]
+        }
+      },
+      "id": "n_start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const i = $input.item.json || {};\nlet remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || '';\nif (remote && !/@/.test(remote)) {\n  const digits = String(remote).replace(/\\D/g,'').trim();\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nif (remote.startsWith('+')) {\n  const digits = remote.replace(/\\D/g,'');\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nconst voice = String(i.voice || 'alloy').trim();\nconst responseFormat = String(i.responseFormat || 'mp3').trim();\nconst inputTtsText = String(i.ttsText || i.messageText || '').trim();\nreturn [{ json: { ...i, remoteJid: remote, voice, responseFormat, inputTtsText } }];"
+      },
+      "id": "n_normalize",
+      "name": "Normalize JID & Inputs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "generate",
+        "model": "tts-1",
+        "input": "={{ $('Normalize JID & Inputs').first().json.inputTtsText }}",
+        "voice": "={{ $('Normalize JID & Inputs').first().json.voice }}",
+        "options": {
+          "response_format": "={{ $('Normalize JID & Inputs').first().json.responseFormat || 'mp3' }}",
+          "binaryPropertyOutput": "audio"
+        }
+      },
+      "id": "n_tts",
+      "name": "OpenAI TTS",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        -920,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "binaryToJson",
+        "setAllData": false,
+        "sourceKey": "audio",
+        "destinationKey": "audio",
+        "options": {
+          "encoding": "base64"
+        }
+      },
+      "id": "n_move",
+      "name": "Binary → Base64 JSON",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.audio.fileName || ('tts.' + ($('Normalize JID & Inputs').first().json.responseFormat || 'mp3')) }}"
+      },
+      "id": "n_evo_send_audio",
+      "name": "Evolution: Send Audio (base64)",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "value": {
+            "messageText": "={{ $('start').first().json.messageText || ('🗣️ Áudio: ' + ( $('Normalize JID & Inputs').first().json.inputTtsText ? $('Normalize JID & Inputs').first().json.inputTtsText.slice(0,120) : '' )) }}"
+          }
+        }
+      },
+      "id": "n_call_send_text",
+      "name": "Call sw_evolution_send_message_v2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -280,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Normalize JID & Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize JID & Inputs": {
+      "main": [
+        [
+          {
+            "node": "OpenAI TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI TTS": {
+      "main": [
+        [
+          {
+            "node": "Binary → Base64 JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Binary → Base64 JSON": {
+      "main": [
+        [
+          {
+            "node": "Evolution: Send Audio (base64)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution: Send Audio (base64)": {
+      "main": [
+        [
+          {
+            "node": "Call sw_evolution_send_message_v2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionTimeout": 180,
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "55e1cf5a-9614-4fb4-8cd9-1954892b1ee3",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-08T21:15:40.375Z",
+      "role": "workflow:owner",
+      "workflowId": "kbmJxJtDUZ1CU4Xt",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

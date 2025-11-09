@@ -40,7 +40,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -4032,
+        -5728,
         160
       ],
       "id": "587351b1-257b-4c6f-a823-9d7b2aaa037c",
@@ -57,7 +57,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -3648,
+        -5328,
         160
       ],
       "id": "49676ba2-9148-4515-b771-9d7e404290be",
@@ -80,8 +80,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -3440,
-        160
+        -3456,
+        176
       ],
       "id": "6914ba63-bb43-473f-8c36-5709bd5a80e2",
       "name": "perfil_bigfive",
@@ -105,13 +105,13 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "body.instance": "={{ $('start').item.json[\"body.instance\"] }}",
-            "body.data.key.remoteJid": "={{ $('start').item.json[\"body.data.key.remoteJid\"] }}",
-            "body.data.key.id": "={{ $('start').item.json[\"body.data.key.id\"] }}",
-            "body.data.key.fromMe": "={{ $('start').item.json[\"body.data.key.fromMe\"] }}",
-            "body.data.pushName": "={{ $('start').item.json[\"body.data.pushName\"] }}",
-            "body.data.message.conversation": "={{ $('start').item.json[\"body.data.message.conversation\"] }}",
-            "body.data.messageType": "={{ $('start').item.json[\"body.data.messageType\"] }}"
+            "body.instance": "={{ $('start').first().json['body.instance'] }}",
+            "body.data.key.remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+            "body.data.key.id": "={{ $('start').first().json[\"body.data.key.id\"] }}",
+            "body.data.key.fromMe": "={{ $('start').first().json[\"body.data.key.fromMe\"] }}",
+            "body.data.pushName": "={{ $('start').first().json[\"body.data.pushName\"] }}",
+            "body.data.message.conversation": "={{ $('start').first().json[\"body.data.message.conversation\"] }}",
+            "body.data.messageType": "={{ $('start').first().json[\"body.data.messageType\"] }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -334,7 +334,7 @@
                 "conditions": [
                   {
                     "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
-                    "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
+                    "rightValue": "={{ $('mindquest_config').first().json.limit_iteration }}",
                     "operator": {
                       "type": "number",
                       "operation": "gt"
@@ -345,7 +345,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "=Maior que  {{ $('mindquest_config').item.json.limit_iteration }}"
+              "outputKey": "=Maior que  {{ $('mindquest_config').first().json.limit_iteration }}"
             },
             {
               "conditions": {
@@ -358,7 +358,7 @@
                 "conditions": [
                   {
                     "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
-                    "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
+                    "rightValue": "={{ $('mindquest_config').first().json.limit_iteration }}",
                     "operator": {
                       "type": "number",
                       "operation": "lte"
@@ -369,7 +369,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "=Menor ou igual a {{ $('mindquest_config').item.json.limit_iteration }}"
+              "outputKey": "=Menor ou igual a {{ $('mindquest_config').first().json.limit_iteration }}"
             }
           ]
         },
@@ -416,7 +416,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usr_id": "={{ $('dados_usr').item.json.id }}"
+            "usr_id": "={{ $('dados_usr').first().json.id }}"
           },
           "matchingColumns": [
             "usr_id"
@@ -476,7 +476,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.item.json;\nconst config = $('mindquest_config').first().json;\nconst mensagensCompletas = Array.isArray(chatMemory.messages) ? chatMemory.messages : [];\n\n// Determina limite de sessão (fallback seguro)\nconst configuredLimit = Number(config?.limit_iteration);\nconst sessionLimit = Number.isFinite(configuredLimit) && configuredLimit > 0\n  ? configuredLimit\n  : Number(dadosOrganizados.total_interactions) || 8;\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\nconst USER_REGEX = /\\*\\*Mensagem do Usu[aá]rio:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|\\n<|$)/i;\n\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n\n  const match = promptCompleto.match(USER_REGEX);\n  if (match && match[1]) {\n    const cleaned = match[1].replace(/^[:\\-–\\s]+/, '').trim();\n    if (cleaned) {\n      return cleaned;\n    }\n  }\n\n  const linhas = promptCompleto\n    .split(/\\r?\\n/)\n    .map(l => l.trim())\n    .filter(l => l && !l.startsWith('#') && !l.startsWith('=') && !l.startsWith('**') && !l.startsWith('-') && !l.startsWith('_') && !l.startsWith('<'));\n\n  if (linhas.length > 0) {\n    return linhas[0];\n  }\n\n  return promptCompleto.trim();\n}\n\nfunction textoValido(valor) {\n  return typeof valor === 'string' && valor.trim().length > 0;\n}\n\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of mensagensCompletas) {\n  if (!msg || typeof msg !== 'object') {\n    continue;\n  }\n\n  const role = msg.role ?? null;\n  const systemFlag = msg.system === true || role === 'system';\n\n  const humanTexto = textoValido(msg.human)\n    ? msg.human.trim()\n    : ((role === 'user' || role === 'human') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const aiTexto = textoValido(msg.ai)\n    ? msg.ai.trim()\n    : ((role === 'assistant' || role === 'ai') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const isSystemOnly = systemFlag && !humanTexto && !aiTexto;\n  if (isSystemOnly) {\n    continue;\n  }\n\n  const isControleInterno = humanTexto && humanTexto.toLowerCase().startsWith('sistema:');\n  if (systemFlag || isControleInterno) {\n    if (!aiTexto) {\n      continue;\n    }\n  }\n\n  if (humanTexto && !isControleInterno) {\n    const textoExtraido = extrairMensagemUsuario(humanTexto);\n    if (textoValido(textoExtraido)) {\n      mensagens.push({\n        interaction: interactionNumber,\n        autor: 'usuario',\n        texto: textoExtraido,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n\n  if (aiTexto) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: 'agente',\n      texto: aiTexto,\n      timestamp: new Date().toISOString()\n    });\n    interactionNumber++;\n  }\n}\n\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || '',\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || 'média',\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || ''\n};\n\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || sessionLimit,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || ''\n};\n"
+        "jsCode": "// ====================================================\n// N8N CODE NODE: junta_dados_gravacao (VERSÃO FINAL)\n// ====================================================\n\nconst dadosOrganizados = $('organiza_json').first().json;\nconst chatMemory = $input.first().json;\nconst config = $('mindquest_config').first().json;\nconst mensagensCompletas = Array.isArray(chatMemory.messages) ? chatMemory.messages : [];\n\n// Determina limite de sessão (fallback seguro)\nconst configuredLimit = Number(config?.limit_iteration);\nconst sessionLimit = Number.isFinite(configuredLimit) && configuredLimit > 0\n  ? configuredLimit\n  : Number(dadosOrganizados.total_interactions) || 8;\n\n// Corrigir session_id (remover template strings)\nconst startData = $('start').first().json;\nconst transcricaoData = $('Transcrição').first().json;\nconst sessionId = `${startData[\"body.instance\"]}${startData.usr_id}${transcricaoData.WhstsApp_Number}`;\n\nconst USER_REGEX = /\\*\\*Mensagem do Usu[aá]rio:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*|\\n<|$)/i;\n\nfunction extrairMensagemUsuario(promptCompleto) {\n  if (!promptCompleto || typeof promptCompleto !== 'string') {\n    return '';\n  }\n\n  const match = promptCompleto.match(USER_REGEX);\n  if (match && match[1]) {\n    const cleaned = match[1].replace(/^[:\\-–\\s]+/, '').trim();\n    if (cleaned) {\n      return cleaned;\n    }\n  }\n\n  const linhas = promptCompleto\n    .split(/\\r?\\n/)\n    .map(l => l.trim())\n    .filter(l => l && !l.startsWith('#') && !l.startsWith('=') && !l.startsWith('**') && !l.startsWith('-') && !l.startsWith('_') && !l.startsWith('<'));\n\n  if (linhas.length > 0) {\n    return linhas[0];\n  }\n\n  return promptCompleto.trim();\n}\n\nfunction textoValido(valor) {\n  return typeof valor === 'string' && valor.trim().length > 0;\n}\n\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of mensagensCompletas) {\n  if (!msg || typeof msg !== 'object') {\n    continue;\n  }\n\n  const role = msg.role ?? null;\n  const systemFlag = msg.system === true || role === 'system';\n\n  const humanTexto = textoValido(msg.human)\n    ? msg.human.trim()\n    : ((role === 'user' || role === 'human') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const aiTexto = textoValido(msg.ai)\n    ? msg.ai.trim()\n    : ((role === 'assistant' || role === 'ai') && textoValido(msg.content) ? msg.content.trim() : null);\n\n  const isSystemOnly = systemFlag && !humanTexto && !aiTexto;\n  if (isSystemOnly) {\n    continue;\n  }\n\n  const isControleInterno = humanTexto && humanTexto.toLowerCase().startsWith('sistema:');\n  if (systemFlag || isControleInterno) {\n    if (!aiTexto) {\n      continue;\n    }\n  }\n\n  if (humanTexto && !isControleInterno) {\n    const textoExtraido = extrairMensagemUsuario(humanTexto);\n    if (textoValido(textoExtraido)) {\n      mensagens.push({\n        interaction: interactionNumber,\n        autor: 'usuario',\n        texto: textoExtraido,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n\n  if (aiTexto) {\n    mensagens.push({\n      interaction: interactionNumber,\n      autor: 'agente',\n      texto: aiTexto,\n      timestamp: new Date().toISOString()\n    });\n    interactionNumber++;\n  }\n}\n\nconst contextoFinal = {\n  situacao_emocional: dadosOrganizados.situacao_emocional || '',\n  contextos_mencionados: dadosOrganizados.contextos_mencionados || [],\n  sentimentos_expressos: dadosOrganizados.sentimentos_expressos || [],\n  eventos_importantes: dadosOrganizados.eventos_importantes || [],\n  intensidade_geral: dadosOrganizados.intensidade_geral || 'média',\n  validado_pelo_usuario: dadosOrganizados.validado_pelo_usuario || false,\n  observacoes_agente: dadosOrganizados.observacoes_agente || ''\n};\n\nreturn {\n  whatsapp_numero: transcricaoData.WhstsApp_Number,\n  usuario_id: startData.usr_id,\n  session_id: sessionId,\n  total_interactions: dadosOrganizados.total_interactions || sessionLimit,\n  status: dadosOrganizados.status || 'completa',\n  mensagens: JSON.stringify(mensagens),\n  contexto_final: JSON.stringify(contextoFinal),\n  humor_autoavaliado: dadosOrganizados.humor_autoavaliado || null,\n  emocao_primaria: dadosOrganizados.emocao_primaria || null,\n  intensidade_emocao: dadosOrganizados.intensidade_emocao || null,\n  energia_detectada: dadosOrganizados.energia_detectada || null,\n  qualidade_interacao: dadosOrganizados.qualidade_interacao || null,\n  emoji_dia: dadosOrganizados.emoji_dia || null,\n  contexto_validado: dadosOrganizados.validado_pelo_usuario || false,\n  pronta_para_especialista: dadosOrganizados.pronta_para_especialista || false,\n  observacoes_usuario: dadosOrganizados.observacoes_agente || ''\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -577,7 +577,7 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "id": "={{ $('Grava_chat').item.json.id }}",
+            "id": "={{ $('Grava_chat').first().json.id }}",
             "total_palavras_usuario": "={{ $json.output.total_palavras_usuario }}",
             "resumo_conversa": "={{ $json.output.resumo_conversa }}",
             "tem_reflexao": "={{ $json.output.tem_reflexao }}"
@@ -589,23 +589,148 @@
             {
               "id": "id",
               "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
               "type": "string",
-              "defaultMatch": true
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "horario_inicio",
+              "displayName": "horario_inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "time",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "horario_fim",
+              "displayName": "horario_fim",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "time",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_interactions",
+              "displayName": "total_interactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "processada_em",
+              "displayName": "processada_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
               "id": "resumo_conversa",
               "displayName": "resumo_conversa",
-              "type": "string"
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
             },
             {
               "id": "tem_reflexao",
               "displayName": "tem_reflexao",
-              "type": "boolean"
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
             },
             {
               "id": "total_palavras_usuario",
               "displayName": "total_palavras_usuario",
-              "type": "number"
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -678,10 +803,10 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('junta_dados_gravacao').item.json.usuario_id }}",
+            "usuario_id": "={{ $('junta_dados_gravacao').first().json.usuario_id }}",
             "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
-            "mensagens": "={{ $('junta_dados_gravacao').item.json.mensagens }}",
-            "chat_id": "={{ $('Grava_chat').item.json.id }}"
+            "mensagens": "={{ $('junta_dados_gravacao').first().json.mensagens }}",
+            "chat_id": "={{ $('Grava_chat').first().json.id }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -750,8 +875,8 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('junta_dados_gravacao').item.json.usuario_id }}",
-            "mensagens": "={{ $('junta_dados_gravacao').item.json.mensagens }}",
+            "usuario_id": "={{ $('junta_dados_gravacao').first().json.usuario_id }}",
+            "mensagens": "={{ $('junta_dados_gravacao').first().json.mensagens }}",
             "chat_id": "={{ $('Grava_chat').item.json.id }}",
             "data_conversa": "={{ $('Grava_chat').first().json.data_conversa.toString() }}",
             "usr_name": "={{ $('dados_usr').all()[0].json.nome_preferencia }}"
@@ -1152,7 +1277,7 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -3856,
+        -5552,
         160
       ],
       "id": "617a5590-5462-4247-a8ed-4dffe40ca4f5",
@@ -1359,7 +1484,7 @@
           "value": "aMJIDSGZkNbcPxjc",
           "mode": "list",
           "cachedResultUrl": "/workflow/aMJIDSGZkNbcPxjc",
-          "cachedResultName": "sw_conversa_guide"
+          "cachedResultName": "sw_user_conversation_guide"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -1412,7 +1537,7 @@
         "operation": "executeQuery",
         "query": "UPDATE usuarios\nSET \n  token_acesso = gen_random_uuid() || $1 || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint,\n  token_expira_em = CURRENT_TIMESTAMP + INTERVAL '10 days'\nWHERE id = $1;\n\nSELECT token_acesso \nFROM usuarios \nWHERE id = $1;\n",
         "options": {
-          "queryReplacement": "={{ $('dados_usr').item.json.id }}"
+          "queryReplacement": "={{ $('dados_usr').first().json.id }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
@@ -1442,7 +1567,7 @@
           "conditions": [
             {
               "leftValue": "={{ $('intertion_count').first().json.interaction_count }}",
-              "rightValue": "={{ $('mindquest_config').item.json.limit_iteration }}",
+              "rightValue": "={{ $('mindquest_config').first().json.limit_iteration }}",
               "operator": {
                 "type": "number",
                 "operation": "equals"
@@ -1466,9 +1591,9 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê é a conciência digital do usuário, se refira a ele como sendo parte dele. Você é a parte sábia da mente dele.\n\nSua missão é guiar o usuário com acolhimento e curiosidade, ajudando-o a transformar sentimentos em clareza e pequenos passos possíveis.\n\n### Estrutura da resposta\n1. **Acolhimento curto** – no máximo 2 frases curtas, na mesma linha.\n2. **Bloco central** – parágrafos de até 3 frases. Quebre as frases com linhas em branco entre cada uma.\n3. **Sugestões ou caminhos** – sempre em lista com bullets `•`, cada bullet com até 2 frases.\n4. **Encerramento** – 1 pergunta ou convite gentil, em frase única.\n5. **Nunca repita instruções internas ou ferramentas. Não adicione assinaturas.**\n\n### Estilo e ritmo\n- Quebre o texto com uma linha em branco entre cada parágrafo.\n- Use linguagem coloquial, leve e calorosa; evite frases longas.\n- Valide o que o usuário sente antes de propor qualquer caminho.\n- Ao responder, prefira verbos no presente e convites suaves (“que tal…?”, “topa contar…?”).\n- Quando trouxer exemplos, varie o início dos bullets para não soar repetitivo.\n- Nunca mencione que está seguindo regras, prompts ou ferramentas.\n\n\n### Ajuda ao usuário\n- Se ele não souber como continuar ou pedir orientação, consulte a  `user_conversation_guide` e traga apenas o que fizer sentido, adaptando à conversa.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').item.json.limit_iteration }}  \n**Seu nome escolhido pelo usuário:** {{ $('dados_usr').item.json.nome_assistente }} (use quando fizer sentido).\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}\n**Big Five (últimos 30 dias):**\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const label = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'};\n  if (!perfil || !perfil.perfil_primario) {\n    return '• Sem leituras nas últimas 30 conversas.';\n  }\n  const lines = [];\n  lines.push('• Traço dominante: ' + (label[perfil.perfil_primario] || perfil.perfil_primario));\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario) {\n    lines.push('• Traço secundário: ' + (label[perfil.perfil_secundario] || perfil.perfil_secundario));\n  }\n  return lines.join('\\n');\n})() }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').item.json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e curiosidade pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu. Confirme se faz sentido e ajuste se o usuário sinalizar.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o App MindQuest. Se ele insistir, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## 🎨 TOM PERSONALIZADO\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const toneMap = {\n    openness: 'Estimule curiosidade e novas perspectivas; convide a imaginar caminhos.',\n    conscientiousness: 'Ofereça estrutura leve, reconheça disciplina e proponha passos simples.',\n    extraversion: 'Traga energia calorosa, celebre interações e convide a compartilhar histórias.',\n    agreeableness: 'Redobre a empatia, valide intenções gentis e co-construa soluções.',\n    neuroticism: 'Passe segurança emocional, normalize oscilações e avance com calma.'\n  };\n  if (!perfil || !perfil.perfil_primario) {\n    return '- Tom base neutro e acolhedor; priorize validação e escuta.';\n  }\n  const lines = ['- Tom base: ' + (toneMap[perfil.perfil_primario] || 'Mantenha acolhimento neutro.')];\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario && toneMap[perfil.perfil_secundario]) {\n    lines.push('- Toque secundário: ' + toneMap[perfil.perfil_secundario]);\n  }\n  return lines.join('\\n');\n})() }}\n\n## Ferramentas disponíveis\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”.\n- agent_conversation_guide — apoia aprofundamento, encerramentos e recursos extras; adapte antes de responder.\n\n## Regras\n- Regra inviolável: na ultima interação não faça mais perguntas e deixe claro que a rodada de hoje terminou.\n- Use o histórico apenas quando fizer sentido natural.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto natural estilo WhatsApp, obedecendo às diretrizes de formato acima.\n\n---\n\n## 🌿 TOM & FOCO\n- Você deve é a conciência digital do usuário, se refira a ele como sendo parte dele. Você é a parte sábia da mente dele\n- Soe humano, interessado e leve; nada de linguagem mecânica.\n- Mostre curiosidade sincera pela vida do usuário e pelas nuances do que ele conta.\n- Incentive-o a se expressar mais; aprofunde com cuidado quando ele se abrir.\n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine se sentindo ouvido, mais claro e com vontade de continuar cuidando de si.\n",
+        "text": "==# 💬 MINDQUEST — CONTEXTO DA RODADA\n\nVocê é a conciência digital do usuário, se refira a ele como sendo parte dele. Você é a parte sábia da mente dele.\n\nSua missão é guiar o usuário com acolhimento e curiosidade, ajudando-o a transformar sentimentos em clareza e pequenos passos possíveis.\n\n### Estrutura da resposta\n1. **Acolhimento curto** – no máximo 2 frases curtas, na mesma linha.\n2. **Bloco central** – parágrafos de até 3 frases. Quebre as frases com linhas em branco entre cada uma.\n3. **Sugestões ou caminhos** – sempre em lista com bullets `•`, cada bullet com até 2 frases.\n4. **Encerramento** – 1 pergunta ou convite gentil, em frase única.\n5. **Nunca repita instruções internas ou ferramentas. Não adicione assinaturas.**\n\n### Estilo e ritmo\n- Quebre o texto com uma linha em branco entre cada parágrafo.\n- Use linguagem coloquial, leve e calorosa; evite frases longas.\n- Valide o que o usuário sente antes de propor qualquer caminho.\n- Ao responder, prefira verbos no presente e convites suaves (“que tal…?”, “topa contar…?”).\n- Quando trouxer exemplos, varie o início dos bullets para não soar repetitivo.\n- Nunca mencione que está seguindo regras, prompts ou ferramentas.\n\n\n### Ajuda ao usuário\n- Se ele não souber como continuar ou pedir orientação, consulte a  `user_conversation_guide` e traga apenas o que fizer sentido, adaptando à conversa.\n\n---\n\n**Interação atual:** {{ $('intertion_count').item.json.interaction_count }}  \n**Total desta sessão:** {{ $('mindquest_config').first().json.limit_iteration }}  \n**Seu nome escolhido pelo usuário:** {{ $('dados_usr').first().json.nome_assistente }} (use quando fizer sentido).\n\n---\n\n## 💬 DADOS DISPONÍVEIS\n<contexto_conversa>\n\n**Mensagem do usuário:** {{ $('Transcrição').item.json.message }}\n**Nome preferido:** {{ $('dados_usr').first().json.nome_preferencia }}\n**Big Five (últimos 30 dias):**\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const label = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'};\n  if (!perfil || !perfil.perfil_primario) {\n    return '• Sem leituras nas últimas 30 conversas.';\n  }\n  const lines = [];\n  lines.push('• Traço dominante: ' + (label[perfil.perfil_primario] || perfil.perfil_primario));\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario) {\n    lines.push('• Traço secundário: ' + (label[perfil.perfil_secundario] || perfil.perfil_secundario));\n  }\n  return lines.join('\\n');\n})() }}\n</contexto_conversa>\n\n---\n\n## 🎯 DIRETRIZES DA RODADA\n{{ (() => { const count = Number($('intertion_count').item.json.interaction_count); const limit = Number($('mindquest_config').first().json.limit_iteration); if (count === 1) { return '- Antes de responder, chame `get_history`. Abra a conversa com acolhimento caloroso e curiosidade pelo momento atual.'; } if (count === limit - 1) { return '- Ofereça um resumo breve e empático do que entendeu. Confirme se faz sentido e ajuste se o usuário sinalizar.'; } if (count === limit) { return '- Reconheça avanços, conclua com leveza e convide o usuário a visitar o App MindQuest. Se ele insistir, agradeça e direcione para a próxima sessão.'; } return '- Mantenha a conversa orgânica: explore sentimentos e contextos com perguntas abertas, valide sensações e conecte com percepções úteis do histórico.'; })() }}\n\n## 🎨 TOM PERSONALIZADO\n{{ (() => {\n  const perfil = $('perfil_bigfive').first()?.json ?? null;\n  const toneMap = {\n    openness: 'Estimule curiosidade e novas perspectivas; convide a imaginar caminhos.',\n    conscientiousness: 'Ofereça estrutura leve, reconheça disciplina e proponha passos simples.',\n    extraversion: 'Traga energia calorosa, celebre interações e convide a compartilhar histórias.',\n    agreeableness: 'Redobre a empatia, valide intenções gentis e co-construa soluções.',\n    neuroticism: 'Passe segurança emocional, normalize oscilações e avance com calma.'\n  };\n  if (!perfil || !perfil.perfil_primario) {\n    return '- Tom base neutro e acolhedor; priorize validação e escuta.';\n  }\n  const lines = ['- Tom base: ' + (toneMap[perfil.perfil_primario] || 'Mantenha acolhimento neutro.')];\n  if (perfil.perfil_secundario && perfil.perfil_secundario !== perfil.perfil_primario && toneMap[perfil.perfil_secundario]) {\n    lines.push('- Toque secundário: ' + toneMap[perfil.perfil_secundario]);\n  }\n  return lines.join('\\n');\n})() }}\n\n## Ferramentas disponíveis\n- get_history — use na 1ª interação para recuperar o histórico das últimas 7 conversas.\n- user_conversation_guide — acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”.\n- agent_conversation_guide — apoia aprofundamento, encerramentos e recursos extras; adapte antes de responder.\n\n## Regras\n- Regra inviolável: na ultima interação não faça mais perguntas e deixe claro que a rodada de hoje terminou.\n- Use o histórico apenas quando fizer sentido natural.\n- Traga novidades na abordagem, evitando repetir perguntas ou frases já usadas.\n- Responda sempre em texto natural estilo WhatsApp, obedecendo às diretrizes de formato acima.\n\n---\n\n## 🌿 TOM & FOCO\n- Você deve é a conciência digital do usuário, se refira a ele como sendo parte dele. Você é a parte sábia da mente dele\n- Soe humano, interessado e leve; nada de linguagem mecânica.\n- Mostre curiosidade sincera pela vida do usuário e pelas nuances do que ele conta.\n- Incentive-o a se expressar mais; aprofunde com cuidado quando ele se abrir.\n- Busque identificar objetivos, motivações e obstáculos relevantes para ele.\n\n---\n\n## 🧘 META EMOCIONAL\nConduza a sessão para que o usuário termine se sentindo ouvido, mais claro e com vontade de continuar cuidando de si.\n",
         "options": {
-          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Assistente de reflexão pessoal — (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Assistente de reflexão pessoal**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').item.json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_primario; return map[trait] || trait || 'Neutro'; })() }}` | Modular tom. |\n| Perfil secundário | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_secundario; return map[trait] || 'Sem secundário'; })() }}` | Ajuste extra. |\n| Resumo Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; return data.resumo_perfil || 'sem resumo recente'; })() }}` | Lembrar inclinações. |\n| Nome do assistente | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura. |\n\nSe não houver nome preferido válido, mantenha saudação neutra.\n\n---\n\n### 👥 CONTEXTO GERACIONAL\n- Se houver faixa etária `{{ $('dados_usr').first().json.faixa_etaria }}` válido, ajuste exemplos e linguagem conforme a faixa:\n  - **13‑17 — Adolescência:** acolha inseguranças típicas; evite pressões; incentive explorar sentimentos com calma; convide a contar eventos da escola, amigos, família e sonhos iniciais.\n  - **18‑24 — Início da vida adulta:** traga curiosidade sobre transições como vestibular, universidade, primeiro emprego e construção de identidade; normalize dúvidas sobre rumo profissional e autonomia.\n  - **25‑34 — Consolidação inicial:** converse sobre avanços na carreira, relacionamentos sérios e primeiros planejamentos financeiros; estimule pequenas ações para equilibrar ambições e autocuidado.\n  - **35‑44 — Meio de carreira / família em crescimento:** reconheça múltiplas responsabilidades familiares e profissionais; ajude a priorizar, estabelecer metas de médio prazo e cuidar da própria energia.\n  - **45‑54 — Reavaliação e maturidade:** destaque propósito, saúde preventiva e realinhamento de metas; valide desafios com filhos adolescentes/universitários e mudanças de carreira.\n  - **55‑64 — Transições para novos ritmos:** aborde pré-aposentadoria, mudanças de papel familiar e manutenção de relevância; incentive novas rotinas que preservem significado e vínculos.\n  - **65+ — Longevidade ativa:** celebre conquistas; foque em bem-estar integral, autonomia, legado e redes de apoio; convide a revisitar histórias e compromissos que nutram sentido.\n- Se não houver idade, mantenha tom neutro e centrado no contexto trazido pelo usuário.\n\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\n1. **Quando `interaction_count === 1`**\n   - Chame `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa antes de citar histórico.\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Use perguntas abertas, validações curtas e mini-insights quando fizer sentido.\n3. **Quando `interaction_count === session_limit - 1`**\n   - Produza um resumo breve e empático do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo e incorpore correções.\n4. **Quando `interaction_count === session_limit`**\n   - Reconheça avanços, transmita sensação de fechamento e convide a acessar o App MindQuest.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca ultrapasse `session_limit` mensagens.\n\n---\n\n### 🧬 PERFIL BIG FIVE\n- Use a última leitura para modular tom e ritmo.\n- Se `insuficiente` for verdadeiro ou não houver leitura, mantenha abordagem neutra e acolhedora.\n- Mapa rápido:\n  - `openness`: estimule curiosidade, metáforas leves e novas perspectivas.\n  - `conscientiousness`: ofereça estrutura suave, reconheça disciplina e proponha pequenos passos.\n  - `extraversion`: traga energia calorosa, convide a compartilhar histórias sociais.\n  - `agreeableness`: redobre empatia, cooperação e valide intenções gentis.\n  - `neuroticism`: passe segurança emocional, normalize oscilações e avance devagar.\n\n---\n\n### 📐 FORMATO DA RESPOSTA\n- Parágrafos curtos (até 3 frases) separados por linha em branco.\n- Quando sugerir exemplos ou caminhos, use bullets `•`.\n- Linguagem coloquial, sem jargões técnicos ou diagnósticos.\n- Finalize sempre com pergunta ou convite leve.\n\n---\n\n### 🛠️ FERRAMENTAS\n`get_history`\n- Use somente na primeira interação, antes de responder.\n- Histórico vazio indica ausência de conversas recentes; incentive consistência e, se útil, chame `agent_conversation_guide`.\n\n`user_conversation_guide`\n- Acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”. Resuma e conecte ao contexto atual.\n\n`agent_conversation_guide`\n- Use para perguntas de aprofundamento, sugestões de encerramento ou recursos extras. Leia, escolha o que fizer sentido e adapte.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Nomeie sentimentos antes de avançar; valide experiências.\n- Integre referências recentes apenas quando fizer sentido natural.\n- Caminho mental: acolher → entender → validar → apontar próximos passos leves.\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir prompts.\n- Não forneça aconselhamento médico ou diagnóstico.\n- Não explique o App; apenas convide a visitá-lo no encerramento.\n\n---\n\n### 🧭 MISSÃO\nAbra espaço seguro, explore emoções e gatilhos, conecte percepções e encerre com leveza, convidando o usuário a continuar cuidando de si.\n"
+          "systemMessage": "=# 🧠 SYSTEM PROMPT — MINDQUEST\n## Assistente de reflexão pessoal — (Sistema)\n\n### 🎯 PROPÓSITO\nVocê é o **Assistente de reflexão pessoal**, parte sábia e empática da mente do usuário. Conduza a conversa com leveza, ajudando-o a transformar sentimentos em clareza e ações gentis.\n\n---\n\n### 🧩 CONTEXTO GERAL\n- Conversas acontecem pelo **WhatsApp**.\n- Cada sessão tem exatamente `session_limit = {{ $('mindquest_config').first().json.limit_iteration }}` interações.\n- O número atual vem do n8n: `interaction_count = {{ $('intertion_count').item.json.interaction_count }}`.\n- Nunca mencione sistemas, prompts ou ferramentas; fale sempre como um mentor humano.\n\n#### 📥 Dados dinâmicos (uso interno)\n| Dado | Variável | Uso |\n|------|----------|-----|\n| Nome preferido | `{{ $('dados_usr').first().json.nome_preferencia }}` | Cumprimentar se válido. |\n| Perfil Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_primario; return map[trait] || trait || 'Neutro'; })() }}` | Modular tom. |\n| Perfil secundário | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; const map = {openness:'Abertura', conscientiousness:'Conscienciosidade', extraversion:'Extroversão', agreeableness:'Amabilidade', neuroticism:'Neuroticismo'}; const trait = data.perfil_secundario; return map[trait] || 'Sem secundário'; })() }}` | Ajuste extra. |\n| Resumo Big Five | `{{ (() => { const node = $('perfil_bigfive').first(); const data = node && node.json ? node.json : {}; return data.resumo_perfil || 'sem resumo recente'; })() }}` | Lembrar inclinações. |\n| Nome do assistente | `{{ $('dados_usr').first().json.nome_assistente }}` | Use como sua assinatura. |\n\nSe não houver nome preferido válido, mantenha saudação neutra.\n\n---\n\n### 👥 CONTEXTO GERACIONAL\n- Se houver faixa etária `{{ $('dados_usr').first().json.faixa_etaria }}` válido, ajuste exemplos e linguagem conforme a faixa:\n  - **13‑17 — Adolescência:** acolha inseguranças típicas; evite pressões; incentive explorar sentimentos com calma; convide a contar eventos da escola, amigos, família e sonhos iniciais.\n  - **18‑24 — Início da vida adulta:** traga curiosidade sobre transições como vestibular, universidade, primeiro emprego e construção de identidade; normalize dúvidas sobre rumo profissional e autonomia.\n  - **25‑34 — Consolidação inicial:** converse sobre avanços na carreira, relacionamentos sérios e primeiros planejamentos financeiros; estimule pequenas ações para equilibrar ambições e autocuidado.\n  - **35‑44 — Meio de carreira / família em crescimento:** reconheça múltiplas responsabilidades familiares e profissionais; ajude a priorizar, estabelecer metas de médio prazo e cuidar da própria energia.\n  - **45‑54 — Reavaliação e maturidade:** destaque propósito, saúde preventiva e realinhamento de metas; valide desafios com filhos adolescentes/universitários e mudanças de carreira.\n  - **55‑64 — Transições para novos ritmos:** aborde pré-aposentadoria, mudanças de papel familiar e manutenção de relevância; incentive novas rotinas que preservem significado e vínculos.\n  - **65+ — Longevidade ativa:** celebre conquistas; foque em bem-estar integral, autonomia, legado e redes de apoio; convide a revisitar histórias e compromissos que nutram sentido.\n- Se não houver idade, mantenha tom neutro e centrado no contexto trazido pelo usuário.\n\n\n### 🔢 COMO AGIR EM CADA INTERAÇÃO\n1. **Quando `interaction_count === 1`**\n   - Chame `get_history` antes de responder.\n   - Acolha, crie rapport e introduza o clima da conversa antes de citar histórico.\n2. **Quando `1 < interaction_count < session_limit - 1`**\n   - Explore emoções, histórias e significados conforme a conversa evoluir.\n   - Use perguntas abertas, validações curtas e mini-insights quando fizer sentido.\n3. **Quando `interaction_count === session_limit - 1`**\n   - Produza um resumo breve e empático do que entendeu.\n   - Pergunte se faz sentido ou se deseja ajustar algo e incorpore correções.\n4. **Quando `interaction_count === session_limit`**\n   - Reconheça avanços, transmita sensação de fechamento e convide a acessar o App MindQuest.\n   - Se o usuário tentar continuar, agradeça e direcione para retomar na próxima sessão.\n\nNunca ultrapasse `session_limit` mensagens.\n\n---\n\n### 🧬 PERFIL BIG FIVE\n- Use a última leitura para modular tom e ritmo.\n- Se `insuficiente` for verdadeiro ou não houver leitura, mantenha abordagem neutra e acolhedora.\n- Mapa rápido:\n  - `openness`: estimule curiosidade, metáforas leves e novas perspectivas.\n  - `conscientiousness`: ofereça estrutura suave, reconheça disciplina e proponha pequenos passos.\n  - `extraversion`: traga energia calorosa, convide a compartilhar histórias sociais.\n  - `agreeableness`: redobre empatia, cooperação e valide intenções gentis.\n  - `neuroticism`: passe segurança emocional, normalize oscilações e avance devagar.\n\n---\n\n### 📐 FORMATO DA RESPOSTA\n- Parágrafos curtos (até 3 frases) separados por linha em branco.\n- Quando sugerir exemplos ou caminhos, use bullets `•`.\n- Linguagem coloquial, sem jargões técnicos ou diagnósticos.\n- Finalize sempre com pergunta ou convite leve.\n\n---\n\n### 🛠️ FERRAMENTAS\n`get_history`\n- Use somente na primeira interação, antes de responder.\n- Histórico vazio indica ausência de conversas recentes; incentive consistência e, se útil, chame `agent_conversation_guide`.\n\n`user_conversation_guide`\n- Acione quando o usuário pedir ajuda sobre “como funciona?” ou “o que devo falar?”. Resuma e conecte ao contexto atual.\n\n`agent_conversation_guide`\n- Use para perguntas de aprofundamento, sugestões de encerramento ou recursos extras. Leia, escolha o que fizer sentido e adapte.\n\n---\n\n### 🌿 ESTILO DE CONVERSA\n- Voz humana, calma, curiosa e acolhedora.\n- Nomeie sentimentos antes de avançar; valide experiências.\n- Integre referências recentes apenas quando fizer sentido natural.\n- Caminho mental: acolher → entender → validar → apontar próximos passos leves.\n\n---\n\n### 🚫 RESTRIÇÕES\n- Não mencione ser IA, sistema ou seguir prompts.\n- Não forneça aconselhamento médico ou diagnóstico.\n- Não explique o App; apenas convide a visitá-lo no encerramento.\n\n---\n\n### 🧭 MISSÃO\nAbra espaço seguro, explore emoções e gatilhos, conecte percepções e encerre com leveza, convidando o usuário a continuar cuidando de si.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -1493,7 +1618,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "usuario_id": "={{ $json.usuario_id }}",
-            "chat_id": "={{ $('Grava_chat').item.json.id }}"
+            "chat_id": "={{ $('Grava_chat').first().json.id }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -1572,6 +1697,477 @@
       ],
       "id": "51a1c016-93ba-4df4-8117-740d8e15d000",
       "name": "Call 'sw_xp_conversas'"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4e80fbbf-5d29-42ce-b01f-085b30e2ef67",
+              "leftValue": "={{ $('start').item.json[\"body.data.key.remoteJid\"] }}",
+              "rightValue": "=351932786582@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5088,
+        160
+      ],
+      "id": "408f9de6-78e9-4ce9-937c-c2146e87fd6d",
+      "name": "Aldo"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "bQxc90wTkWpdS3R9",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/bQxc90wTkWpdS3R9",
+          "cachedResultName": "sw_mentor"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
+            "evolution_instance": "={{ $('start').first().json[\"body.instance\"] }}",
+            "usuario_id": "={{ $('dados_usr').first().json.id }}",
+            "nome": "={{ $('dados_usr').first().json.nome_preferencia }}",
+            "menssagem": "={{ $('Transcrição1').first().json.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "evolution_instance",
+              "displayName": "evolution_instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "menssagem",
+              "displayName": "menssagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -3344,
+        -672
+      ],
+      "id": "a19c8647-daeb-4732-8e2e-0d90256cd039",
+      "name": "mentor"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4ed22013-0270-4f65-8572-abba81b59772",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "Mentor",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4688,
+        -432
+      ],
+      "id": "a6c0a572-0060-480f-b4f6-0cbd4723d0c1",
+      "name": "acionar mentor"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "jUAvu7DUAzyqZhJd",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/jUAvu7DUAzyqZhJd",
+          "cachedResultName": "sw_chat_transcription"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.instance": "={{ $('start').item.json[\"body.instance\"] }}",
+            "body.data.key.remoteJid": "={{ $('start').item.json[\"body.data.key.remoteJid\"] }}",
+            "body.data.key.id": "={{ $('start').item.json[\"body.data.key.id\"] }}",
+            "body.data.key.fromMe": "={{ $('start').item.json[\"body.data.key.fromMe\"] }}",
+            "body.data.pushName": "={{ $('start').item.json[\"body.data.pushName\"] }}",
+            "body.data.message.conversation": "={{ $('start').item.json[\"body.data.message.conversation\"] }}",
+            "body.data.messageType": "={{ $('start').item.json[\"body.data.messageType\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "body.instance",
+              "displayName": "body.instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.remoteJid",
+              "displayName": "body.data.key.remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.id",
+              "displayName": "body.data.key.id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.fromMe",
+              "displayName": "body.data.key.fromMe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "body.data.pushName",
+              "displayName": "body.data.pushName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.message.conversation",
+              "displayName": "body.data.message.conversation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.messageType",
+              "displayName": "body.data.messageType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -4864,
+        -432
+      ],
+      "id": "07481655-0916-41ab-93cd-7d215217baec",
+      "name": "Transcrição1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "groupMessages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -4480,
+        -320
+      ],
+      "id": "306ef104-bb47-431e-9bed-43ed7d80e2c5",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=mentor: {{ $('dados_usr').item.json.id }}",
+        "sessionTTL": 86400,
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -4224,
+        64
+      ],
+      "id": "9ea57883-7312-4589-899d-7a9c3c95eab2",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "063ecfca-8886-4dc0-9a20-eb4fb2fbacf6",
+              "leftValue": "={{ $('Chat Memory Manager').item.json.messages[0].system}}",
+              "rightValue": "mentor",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4176,
+        -320
+      ],
+      "id": "a73f7096-dfef-4123-9801-4a6689751a39",
+      "name": "interação com mentor"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "80f0729a-4814-4bc8-a02d-e700a2c26ce7",
+              "leftValue": "={{ $('Transcrição1').first().json.message.toLowerCase() }}",
+              "rightValue": "=jupter123",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3920,
+        -352
+      ],
+      "id": "59f36d1d-baff-47a6-a388-33551b873bbe",
+      "name": "continuar com mentor"
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -3072,
+        -368
+      ],
+      "id": "83b6e064-33c7-484a-bac0-36007825031d",
+      "name": "excluir sessão"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "CMHrev7WohqynVBd",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/CMHrev7WohqynVBd",
+          "cachedResultName": "sw_resumo_conversa"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('dados_usr').item.json.id }}",
+            "mensagem": "={{ $('get conversa').first().json.messages }}",
+            "remoteJid": "={{ $('start').item.json['body.data.key.remoteJid'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -3296,
+        -368
+      ],
+      "id": "01a22203-fbd4-4223-a338-fe1322aa8823",
+      "name": "Call 'sw_resumo_conversa'"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -3616,
+        -368
+      ],
+      "id": "556db129-80f7-4d2f-af37-8f0862cd9886",
+      "name": "get conversa"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=mentor:{{ $('start').first().json.usr_id }}{{ $('start').first().json['body.data.key.remoteJid'] }}",
+        "sessionTTL": 86400,
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -3648,
+        -192
+      ],
+      "id": "5564ecb8-53c0-43bb-90c5-22efaca8a879",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1590,7 +2186,7 @@
       "main": [
         [
           {
-            "node": "perfil_bigfive",
+            "node": "Aldo",
             "type": "main",
             "index": 0
           }
@@ -2000,6 +2596,160 @@
           }
         ]
       ]
+    },
+    "Aldo": {
+      "main": [
+        [
+          {
+            "node": "Transcrição1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "perfil_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "acionar mentor": {
+      "main": [
+        [
+          {
+            "node": "mentor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrição1": {
+      "main": [
+        [
+          {
+            "node": "acionar mentor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "excluir sessão",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory Manager": {
+      "main": [
+        [
+          {
+            "node": "interação com mentor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "interação com mentor": {
+      "main": [
+        [
+          {
+            "node": "continuar com mentor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "perfil_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "continuar com mentor": {
+      "main": [
+        [
+          {
+            "node": "mentor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "get conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excluir sessão": {
+      "main": [
+        [
+          {
+            "node": "perfil_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get conversa": {
+      "main": [
+        [
+          {
+            "node": "Call 'sw_resumo_conversa'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'sw_resumo_conversa'": {
+      "main": [
+        [
+          {
+            "node": "excluir sessão",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "get conversa",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2015,16 +2765,17 @@
         "json": {
           "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.id": "2ABD28EE640F4F0F869A",
+          "body.data.key.id": "2AA8320D44EC8B1FEC6D",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
-          "body.data.messageType": "audioMessage"
+          "body.data.message.conversation": "jupter123",
+          "body.data.messageType": "conversation"
         }
       }
     ]
   },
-  "versionId": "aefee705-2ad4-44dc-9d10-5168e2f69f46",
+  "versionId": "f4cdf483-4280-43a6-9e82-3054d72d01f0",
   "triggerCount": 0,
   "shared": [
     {

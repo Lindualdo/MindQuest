@@ -106,5 +106,93 @@
         ]
       }
     ]
+  },
+  {
+    "dataBackup": "2025-11-09T08:14:53.730Z",
+    "pastas": [
+      {
+        "pasta": ".",
+        "arquivos": [
+          "Assistente_de_suporte.json",
+          "chat_onboarding.json",
+          "dash_authentication.json",
+          "dash_conversa_full.json",
+          "dash_conversa_resumo.json",
+          "dash_historico_humor.json",
+          "dash_insights_detalhes.json",
+          "dash_quests.json",
+          "expert_quest_personalizadas.json",
+          "exporta_dados_base.json",
+          "job_batch_atualiza_jornada.json",
+          "job_batch_generate_quests.json",
+          "job_batch_xp_conversas.json",
+          "sw_agent_conversation_guide.json",
+          "sw_calcula_jornada.json",
+          "sw_chat_interations_v2.json",
+          "sw_chat_transcription.json",
+          "sw_evolution_send_message_v2.json",
+          "sw_expert_bigfive_ocean.json",
+          "sw_expert_humor_energia.json",
+          "sw_expert_insights_acionaveis.json",
+          "sw_expert_sabotadores.json",
+          "sw_experts_gamification.json",
+          "sw_experts_panas.json",
+          "sw_gamificacao_quests.json",
+          "sw_get_history.json",
+          "sw_mentor.json",
+          "sw_resumo_conversa.json",
+          "sw_send_message_with_retry.json",
+          "sw_trader_cripto_guide.json",
+          "sw_tts.json",
+          "sw_user_conversation_guide.json",
+          "sw_xp_conversas.json",
+          "usr_chat.json"
+        ]
+      }
+    ]
+  },
+  {
+    "dataBackup": "2025-11-09T11:41:02.036Z",
+    "pastas": [
+      {
+        "pasta": ".",
+        "arquivos": [
+          "Assistente_de_suporte.json",
+          "chat_onboarding.json",
+          "dash_authentication.json",
+          "dash_conversa_full.json",
+          "dash_conversa_resumo.json",
+          "dash_historico_humor.json",
+          "dash_insights_detalhes.json",
+          "dash_quests.json",
+          "expert_quest_personalizadas.json",
+          "exporta_dados_base.json",
+          "job_batch_atualiza_jornada.json",
+          "job_batch_generate_quests.json",
+          "job_batch_xp_conversas.json",
+          "sw_agent_conversation_guide.json",
+          "sw_calcula_jornada.json",
+          "sw_chat_interations_v2.json",
+          "sw_chat_transcription.json",
+          "sw_evolution_send_message_v2.json",
+          "sw_expert_bigfive_ocean.json",
+          "sw_expert_humor_energia.json",
+          "sw_expert_insights_acionaveis.json",
+          "sw_expert_sabotadores.json",
+          "sw_experts_gamification.json",
+          "sw_experts_panas.json",
+          "sw_gamificacao_quests.json",
+          "sw_get_history.json",
+          "sw_mentor.json",
+          "sw_resumo_conversa.json",
+          "sw_send_message_with_retry.json",
+          "sw_trader_cripto_guide.json",
+          "sw_tts.json",
+          "sw_user_conversation_guide.json",
+          "sw_xp_conversas.json",
+          "usr_chat.json"
+        ]
+      }
+    ]
   }
 ]

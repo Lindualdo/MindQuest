@@ -1,49 +1,76 @@
 {
-  "createdAt": "2025-11-08T00:00:00.000Z",
-  "id": "sw_evolution_send_message_v2",
+  "createdAt": "2025-11-08T20:18:46.472Z",
+  "id": "DJB5qWudX1Hqap1O",
   "name": "sw_evolution_send_message_v2",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
-      "parameters": {
-        "workflowInputs": {
-          "values": [
-            { "name": "instanceName" },
-            { "name": "remoteJidOrNumber" },
-            { "name": "messageText" },
-            { "name": "linkPreview" },
-            { "name": "minDelayMs" }
-          ]
-        }
-      },
-      "id": "n_start",
+      "id": "start",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [-1320, 80]
+      "position": [
+        -1320,
+        80
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instanceName"
+            },
+            {
+              "name": "remoteJidOrNumber"
+            },
+            {
+              "name": "messageText"
+            },
+            {
+              "name": "linkPreview"
+            },
+            {
+              "name": "minDelayMs"
+            }
+          ]
+        }
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const i = $input.item.json || {};\nlet remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || '';\nif (remote && !/@/.test(remote)) {\n  const digits = String(remote).replace(/\\\n?\\D/g,'').trim();\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nif (remote.startsWith('+')) {\n  const digits = remote.replace(/\\\n?\\D/g,'');\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nconst minDelayMs = Number(i.minDelayMs ?? 2000) || 2000;\nconst linkPreview = (String(i.linkPreview).toLowerCase() === 'true');\nreturn [{ json: { ...i, remoteJid: remote, minDelayMs, linkPreview } }];"
-      },
-      "id": "n_normalize",
+      "id": "normalize",
       "name": "Normalize JID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1120, 80]
+      "position": [
+        -1120,
+        80
+      ],
+      "parameters": {
+        "jsCode": "const i = $input.item.json || {}; let remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || ''; if (remote && !/@/.test(remote)) { const digits = String(remote).replace(/\\D/g,'').trim(); if (digits) remote = `${digits}@s.whatsapp.net`; } if (remote.startsWith('+')) { const digits = remote.replace(/\\D/g,''); if (digits) remote = `${digits}@s.whatsapp.net`; } const minDelayMs = Number(i.minDelayMs ?? 2000) || 2000; const linkPreview = (String(i.linkPreview).toLowerCase() === 'true'); return [{ json: { ...i, remoteJid: remote, minDelayMs, linkPreview } }];"
+      }
     },
     {
-      "parameters": {
-        "amount": "={{ Math.ceil(($json.minDelayMs || 2000) / 1000) }}"
-      },
-      "id": "n_wait",
+      "id": "wait",
       "name": "Min Delay",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [-920, 80]
+      "position": [
+        -920,
+        80
+      ],
+      "parameters": {
+        "amount": "={{ Math.ceil(($json.minDelayMs || 2000) / 1000) }}"
+      }
     },
     {
+      "id": "send",
+      "name": "Send Message",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        80
+      ],
       "parameters": {
         "resource": "messages-api",
         "instanceName": "={{ $('start').first().json.instanceName }}",
@@ -54,42 +81,138 @@
           "linkPreview": "={{ $('Normalize JID').first().json.linkPreview }}"
         }
       },
-      "id": "n_send",
-      "name": "Send Message",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [-700, 80],
       "retryOnFail": true,
       "maxTries": 5,
       "waitBetweenTries": 5000,
       "credentials": {
-        "evolutionApi": { "id": "H4gurJcNVV0yrS90", "name": "Evolution account" }
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
       }
     },
     {
-      "parameters": {
-        "jsCode": "const r = $input.first()?.json ?? {};\nconst d = r.data ?? {};\nconst httpStatus = Number(r.statusCode ?? d.statusCode ?? r.code ?? 0) || null;\nconst statusRaw = String(d.status ?? r.status ?? '').trim();\nconst status = statusRaw.toUpperCase() || (httpStatus && httpStatus>=200 && httpStatus<300 ? 'SUCCESS' : 'UNKNOWN');\nconst successFlag = String(r.success ?? '').toLowerCase() === 'true';\nconst success = successFlag || ['SUCCESS','SENT','DELIVERED','READ','ACCEPTED','ACK','QUEUED'].includes(status);\nreturn [{ json: {\n  success,\n  status,\n  httpStatus,\n  messageId: d.key?.id ?? r.messageId ?? null,\n  errorMessage: d.error ?? r.error ?? r.message ?? null,\n  response: r\n}}];"
-      },
-      "id": "n_classify",
+      "id": "classify",
       "name": "Classify Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-460, 80]
+      "position": [
+        -460,
+        80
+      ],
+      "parameters": {
+        "jsCode": "const r = $input.first()?.json ?? {}; const d = r.data ?? {}; const httpStatus = Number(r.statusCode ?? d.statusCode ?? r.code ?? 0) || null; const statusRaw = String(d.status ?? r.status ?? '').trim(); const status = statusRaw.toUpperCase() || (httpStatus && httpStatus>=200 && httpStatus<300 ? 'SUCCESS' : 'UNKNOWN'); const successFlag = String(r.success ?? '').toLowerCase() === 'true'; const success = successFlag || ['SUCCESS','SENT','DELIVERED','READ','ACCEPTED','ACK','QUEUED'].includes(status); return [{ json: { success, status, httpStatus, messageId: d.key?.id ?? r.messageId ?? null, errorMessage: d.error ?? r.error ?? r.message ?? null, response: r } }];"
+      }
     }
   ],
   "connections": {
-    "start": { "main": [[{ "node": "Normalize JID", "type": "main", "index": 0 }]] },
-    "Normalize JID": { "main": [[{ "node": "Min Delay", "type": "main", "index": 0 }]] },
-    "Min Delay": { "main": [[{ "node": "Send Message", "type": "main", "index": 0 }]] },
-    "Send Message": { "main": [[{ "node": "Classify Result", "type": "main", "index": 0 }]] }
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Normalize JID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize JID": {
+      "main": [
+        [
+          {
+            "node": "Min Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Min Delay": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message": {
+      "main": [
+        [
+          {
+            "node": "Classify Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "settings": {
     "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": 120
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   },
   "staticData": null,
   "meta": null,
-  "pinData": {}
+  "pinData": null,
+  "versionId": "47924d47-063c-4382-87c3-5c00d5312114",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-08T20:18:46.472Z",
+      "role": "workflow:owner",
+      "workflowId": "DJB5qWudX1Hqap1O",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }
-
