@@ -165,4 +165,4 @@ Breve: `sw_xp_quest` aplica 150 XP por conclusão (+30 por recorrência completa
 - `usuarios_conquistas`: snapshot consolidado (XP base, XP bônus, meta atual, nível) consumido pelo app.
 - `conquistas_historico`: linha por conquista (conversa ou quest) com XP obtido, níveis antes/depois e payload.
 - `usuarios_quest`: apenas quests personalizadas em andamento (status, progresso, XP concedido).
-- `jornada_niveis` / `usuarios_jornada`: catálogo e posição do usuário na jornada macro (Despertar → Transcendência).
+- `jornada_niveis`: catálogo e posição do usuário na jornada macro (Despertar → Transcendência).
