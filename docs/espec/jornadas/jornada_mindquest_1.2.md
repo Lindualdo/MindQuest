@@ -44,10 +44,11 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 ## XP · Conversas (Sequência)
 
 - **Regra base**: conversou no dia, ganhou **75 XP**. Várias conversas no mesmo dia continuam valendo só 75 XP para aquela data.
+- **Bônus de primeira conversa**: ao desbloquear o hábito (primeiro dia da sequência), concede +75 XP extras sobre o XP base.
 - **Acúmulo de XP diário**: mesmo que o usuário converse diversas vezes no mesmo dia, apenas a primeira conversa do dia rende XP; as demais contam apenas para o streak.
 - **Progressão de streak**: a sequência usa os mesmos dias válidos do XP diário; múltiplas conversas no mesmo dia não avançam a meta.
 - **Dias válidos**: qualquer dia com pelo menos uma conversa já garante o XP diário; não importa o número de mensagens ou o tamanho delas.
-- **Passos da sequência**: cada conversa conta como um passo na sequência, mesmo que seja a terceira do dia. A sequência só é quebrada quando o usuário ficar um dia sem conversa (tem conversa na segunda e não tem na terça)
+- **Passos da sequência**: apenas **um** avanço por dia válido. Conversas adicionais no mesmo dia mantêm o contexto, mas não incrementam a meta. A sequência só é quebrada quando o usuário passa um dia inteiro sem conversar.
 
 - **Reset**: ficar um dia sem conversa, encerra a meta ativa como `reiniciada`, registra o recorde e reinicia o ciclo na Meta 1. O XP acumulado (base + bônus) nunca é removido.
 
@@ -91,11 +92,11 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 #### Regras de Sequência de Conversas
 
-- **Contagem**: contabilizar o número de conversas consecutivas realizadas, independentemente da data; múltiplas conversas no mesmo dia somam na sequência.
-- **O que NÃO é sequência**: conta conversas seguidas (itens consecutivos), não dias consecutivos; o usuário pode ter várias conversas no mesmo dia e avançar na meta.
+- **Contagem**: usa os mesmos dias válidos do XP diário; só a primeira conversa de cada dia faz a sequência avançar.
+- **O que NÃO é sequência**: múltiplas conversas no mesmo dia **não** geram passos extras; elas ajudam no contexto, mas não mudam as metas.
 - **Quebra da sequência**: se houver um dia sem nenhuma conversa registrada, a contagem volta para zero (ex.: segunda tem conversa, terça não → sequência quebrada).
-- **Próxima meta**: ao atingir uma meta (ex.: 3 conversas seguidas), definir automaticamente a próxima meta da lista (5, depois 7, 10, etc.), reiniciando a contagem para persegui-la.
-- **Maior sequência registrada**: armazenar o maior intervalo contínuo em que houve pelo menos uma conversa por dia (do dia X ao dia Y sem falhas); atualize somente quando a sequência atual ultrapassar o recorde anterior.
+- **Próxima meta**: ao atingir uma meta diária (ex.: 3 dias consecutivos), definir automaticamente a próxima meta da lista (5, depois 7, 10, etc.), reiniciando a contagem para persegui-la.
+- **Maior sequência registrada**: armazenar o maior intervalo contínuo de dias consecutivos com conversa; atualize somente quando a sequência atual ultrapassar o recorde anterior.
 
 ## Regras de Nível
 

@@ -135,4 +135,39 @@ WHERE NOT EXISTS (
     SELECT 1 FROM public.metas_catalogo WHERE codigo = 'primeira_conversa'
 );
 
+INSERT INTO public.metas_catalogo (
+    id,
+    codigo,
+    titulo,
+    descricao,
+    tipo,
+    gatilho_codigo,
+    gatilho_valor,
+    xp_recompensa,
+    repeticao,
+    ordem_inicial,
+    ativo,
+    config,
+    criado_em,
+    atualizado_em
+)
+SELECT
+    gen_random_uuid(),
+    'conversa_diaria',
+    'Conversa diária',
+    'Registra o XP base concedido em cada dia com pelo menos uma conversa válida.',
+    'recorrente',
+    'conversas_diarias',
+    1,
+    75,
+    'recorrente',
+    0,
+    TRUE,
+    '{"tipo":"xp_diaria"}'::jsonb,
+    NOW(),
+    NOW()
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.metas_catalogo WHERE codigo = 'conversa_diaria'
+);
+
 COMMIT;

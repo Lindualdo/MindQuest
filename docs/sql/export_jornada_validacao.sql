@@ -14,11 +14,11 @@ WITH conversas AS (
 ),
 quests AS (
     SELECT
-        qa.usuario_id,
-        COALESCE(SUM(qa.xp_concedido), 0) AS xp_quests
-    FROM public.quest_atribuidas qa
-    WHERE qa.status = 'concluida'
-    GROUP BY qa.usuario_id
+        uq.usuario_id,
+        COALESCE(SUM(uq.xp_concedido), 0) AS xp_quests
+    FROM public.usuarios_quest uq
+    WHERE uq.status = 'concluida'
+    GROUP BY uq.usuario_id
 ),
 streak_bonus AS (
     SELECT
@@ -35,17 +35,38 @@ streak_bonus AS (
         ), '[]'::json) AS streaks_bonus_detalhes
     FROM (
         SELECT
-            qa.usuario_id,
+            uq.usuario_id,
             qt.codigo AS meta_codigo,
             qt.titulo AS meta_titulo,
             COUNT(*) AS completadas,
-            SUM(COALESCE(qa.xp_concedido, qt.xp_recompensa, 0)) AS xp_total
-        FROM public.quest_atribuidas qa
-        JOIN public.quest_templates qt ON qt.id = qa.modelo_id
-        WHERE qt.tipo = 'sequencia' AND qa.status = 'concluida'
-        GROUP BY qa.usuario_id, qt.codigo, qt.titulo
+            SUM(COALESCE(uq.xp_concedido, qt.xp_recompensa, 0)) AS xp_total
+        FROM public.usuarios_quest uq
+        JOIN public.metas_catalogo qt ON qt.id = uq.modelo_id
+        WHERE qt.tipo = 'sequencia' AND uq.status = 'concluida'
+        GROUP BY uq.usuario_id, qt.codigo, qt.titulo
     ) resumo
     GROUP BY resumo.usuario_id
+),
+historico AS (
+    SELECT
+        ch.usuario_id,
+        json_agg(
+            json_build_object(
+                'id', ch.id,
+                'tipo', ch.tipo,
+                'meta_codigo', ch.meta_codigo,
+                'meta_titulo', ch.meta_titulo,
+                'xp_base', ch.xp_base,
+                'xp_bonus', ch.xp_bonus,
+                'nivel_anterior', ch.nivel_anterior,
+                'nivel_novo', ch.nivel_novo,
+                'detalhes', ch.detalhes,
+                'registrado_em', ch.registrado_em
+            )
+            ORDER BY ch.registrado_em DESC
+        ) AS historico_conquistas
+    FROM public.conquistas_historico ch
+    GROUP BY ch.usuario_id
 ) 
 SELECT
     u.id        AS usuario_id,
@@ -58,7 +79,7 @@ SELECT
     COALESCE(c.conversas_totais, 0) AS conversas_totais,
     COALESCE(sb.streaks_concluidos, 0)      AS streaks_com_bonus,
     COALESCE(sb.xp_bonus_streak, 0)         AS xp_bonus_streak,
-    COALESCE(sb.streaks_bonus_detalhes, '[]'::json) AS streaks_bonus_detalhes,
+    COALESCE(hist.historico_conquistas, '[]'::json) AS historico_conquistas,
     COALESCE(qe.sequencia_atual, 0)    AS sequencia_atual,
     COALESCE(qe.sequencia_recorde, 0)  AS sequencia_recorde,
     qe.meta_sequencia_codigo           AS meta_sequencia_codigo,
@@ -66,7 +87,8 @@ SELECT
 FROM public.usuarios u
 LEFT JOIN conversas c ON c.usuario_id = u.id
 LEFT JOIN quests qi ON qi.usuario_id = u.id
-LEFT JOIN public.resumo_jornada qe ON qe.usuario_id = u.id
+LEFT JOIN public.usuarios_conquistas qe ON qe.usuario_id = u.id
 LEFT JOIN streak_bonus sb ON sb.usuario_id = u.id
+LEFT JOIN historico hist ON hist.usuario_id = u.id
 WHERE COALESCE(u.ativo, true) = true
 ORDER BY xp_total DESC, usuario_nome ASC;
