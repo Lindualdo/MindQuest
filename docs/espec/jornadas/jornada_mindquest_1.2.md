@@ -44,6 +44,8 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 ## XP · Conversas (Sequência)
 
 - **Regra base**: conversou no dia, ganhou **75 XP**. Várias conversas no mesmo dia continuam valendo só 75 XP para aquela data.
+- **Acúmulo de XP diário**: mesmo que o usuário converse diversas vezes no mesmo dia, apenas a primeira conversa do dia rende XP; as demais contam apenas para o streak.
+- **Progressão de streak**: a sequência usa os mesmos dias válidos do XP diário; múltiplas conversas no mesmo dia não avançam a meta.
 - **Dias válidos**: qualquer dia com pelo menos uma conversa já garante o XP diário; não importa o número de mensagens ou o tamanho delas.
 - **Passos da sequência**: cada conversa conta como um passo na sequência, mesmo que seja a terceira do dia. A sequência só é quebrada quando o usuário ficar um dia sem conversa (tem conversa na segunda e não tem na terça)
 
@@ -70,7 +72,8 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 | Evento | Regra de XP | Observações |
 |--------|-------------|-------------|
-| Quest concluída | 75 XP fixos | representa a entrega completa da rotina de conversa padrão |
+| Dia com conversa | 75 XP | conta 1 por dia (usar `COUNT(DISTINCT DATE(data_conversa))` de `usr_chat`) |
+| Metas de sequência | conforme `streak_metas` | bônus aplicados quando a sequência (dias consecutivos) ultrapassa 3/5/7/… |
 
 ### Quests de Sequência Bonus *(hábito de conversar)*
 
@@ -143,6 +146,11 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 ### Conversas (sequência)
 Resumo: `usr_chat` → `sw_xp_conversas` → `resumo_jornada` → `sw_calcula_jornada`
 Breve: `sw_xp_conversas` lê até 45 dias de `usr_chat`, calcula 75 XP por conversa + bônus de meta, atualiza `resumo_jornada` e dispara `sw_calcula_jornada` para refletir níveis.
+
+### Tabelas chaves (conversas)
+- `usr_chat`: única fonte de verdade para XP diário e streaks (dias distintos + sequências). Todos os workflows devem derivar números daqui.
+- `quest_templates` / `quest_atribuidas`: apenas quests personalizadas (conversas não entram aqui).
+- `resumo_jornada`: cache único consumido pelo app/webhooks. Sempre atualize via workflows (`sw_xp_conversas`, `sw_xp_quests`) e nunca leia dados em cada rotina diretamente de outras tabelas para evitar divergências.
 
 ### Quests personalizadas
 Resumo: `quest_atribuidas` → `sw_xp_quests` → `resumo_jornada` → `sw_calcula_jornada`

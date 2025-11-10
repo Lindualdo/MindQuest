@@ -16,22 +16,7 @@
               "name": "remoteJidOrNumber"
             },
             {
-              "name": "ttsText"
-            },
-            {
-              "name": "voice"
-            },
-            {
-              "name": "responseFormat"
-            },
-            {
               "name": "messageText"
-            },
-            {
-              "name": "linkPreview"
-            },
-            {
-              "name": "minDelayMs"
             }
           ]
         }
@@ -41,50 +26,37 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1320,
-        80
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const i = $input.item.json || {};\nlet remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || '';\nif (remote && !/@/.test(remote)) {\n  const digits = String(remote).replace(/\\D/g,'').trim();\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nif (remote.startsWith('+')) {\n  const digits = remote.replace(/\\D/g,'');\n  if (digits) remote = `${digits}@s.whatsapp.net`;\n}\nconst voice = String(i.voice || 'alloy').trim();\nconst responseFormat = String(i.responseFormat || 'mp3').trim();\nconst inputTtsText = String(i.ttsText || i.messageText || '').trim();\nreturn [{ json: { ...i, remoteJid: remote, voice, responseFormat, inputTtsText } }];"
-      },
-      "id": "n_normalize",
-      "name": "Normalize JID & Inputs",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1120,
+        -1168,
         80
       ]
     },
     {
       "parameters": {
         "resource": "audio",
-        "operation": "generate",
-        "model": "tts-1",
-        "input": "={{ $('Normalize JID & Inputs').first().json.inputTtsText }}",
-        "voice": "={{ $('Normalize JID & Inputs').first().json.voice }}",
-        "options": {
-          "response_format": "={{ $('Normalize JID & Inputs').first().json.responseFormat || 'mp3' }}",
-          "binaryPropertyOutput": "audio"
-        }
+        "input": "={{ $json.messageText }}",
+        "voice": "shimmer",
+        "options": {}
       },
       "id": "n_tts",
       "name": "OpenAI TTS",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 2,
       "position": [
-        -920,
+        -944,
         80
-      ]
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "iBbF6xeELJJicTdo",
+          "name": "OpenAi account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "binaryToJson",
         "setAllData": false,
-        "sourceKey": "audio",
-        "destinationKey": "audio",
+        "sourceKey": "=data",
+        "destinationKey": "=mindquest",
         "options": {
           "encoding": "base64"
         }
@@ -100,57 +72,32 @@
     },
     {
       "parameters": {
-        "fileName": "={{ $json.audio.fileName || ('tts.' + ($('Normalize JID & Inputs').first().json.responseFormat || 'mp3')) }}"
+        "resource": "messages-api",
+        "operation": "send-audio",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $('start').item.json.remoteJidOrNumber }}",
+        "media": "={{ $json.mindquest }}",
+        "fileName": "={{ $json.fileName || ('tts.' + ($('start').item.json.responseFormat || 'mp3')) }}",
+        "options_message": {}
       },
-      "id": "n_evo_send_audio",
-      "name": "Evolution: Send Audio (base64)",
       "type": "n8n-nodes-evolution-api.evolutionApi",
       "typeVersion": 1,
       "position": [
-        -520,
+        -512,
         80
       ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 3000,
+      "id": "4dddf5a4-10aa-4510-9058-cefe175e7a3e",
+      "name": "Evolution: Send Audio (base64)",
       "credentials": {
         "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
+          "id": "foSAtmXVyX4ygfQv",
+          "name": "MindQuest"
         }
       }
-    },
-    {
-      "parameters": {
-        "workflowInputs": {
-          "value": {
-            "messageText": "={{ $('start').first().json.messageText || ('🗣️ Áudio: ' + ( $('Normalize JID & Inputs').first().json.inputTtsText ? $('Normalize JID & Inputs').first().json.inputTtsText.slice(0,120) : '' )) }}"
-          }
-        }
-      },
-      "id": "n_call_send_text",
-      "name": "Call sw_evolution_send_message_v2",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        -280,
-        80
-      ]
     }
   ],
   "connections": {
     "start": {
-      "main": [
-        [
-          {
-            "node": "Normalize JID & Inputs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize JID & Inputs": {
       "main": [
         [
           {
@@ -182,17 +129,6 @@
           }
         ]
       ]
-    },
-    "Evolution: Send Audio (base64)": {
-      "main": [
-        [
-          {
-            "node": "Call sw_evolution_send_message_v2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -200,9 +136,21 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
-  "pinData": null,
-  "versionId": "55e1cf5a-9614-4fb4-8cd9-1954892b1ee3",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJidOrNumber": "351932786582@s.whatsapp.net",
+          "messageText": "Oi, Aldo. Vejo que enviou \"jupter123\". Gostaria de saber se quer compartilhar algo específico ou se prefere seguir conversando sobre seus planos e estratégias? Estou aqui para ajudar no que precisar."
+        }
+      }
+    ]
+  },
+  "versionId": "a060aca5-21a9-4289-9a95-88fdbe707ddc",
   "triggerCount": 0,
   "shared": [
     {

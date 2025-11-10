@@ -1,0 +1,290 @@
+{
+  "createdAt": "2025-11-05T17:35:05.601Z",
+  "id": "yvg9NkBsLF3mbr5f",
+  "name": "webhook_quests",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "3b4959c7-d717-4465-a516-6dcc3b2bf704",
+      "name": "Responder"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  qa.id                AS instancia_id,\n  qa.meta_codigo       AS meta_codigo,\n  qa.status            AS status,\n  qa.progresso_meta    AS progresso_meta,\n  qa.progresso_atual   AS progresso_atual,\n  qa.concluido_em      AS concluido_em,\n  qa.xp_concedido      AS xp_concedido,\n  qa.contexto_origem   AS contexto_origem,\n  qa.atualizado_em     AS atualizado_em,\n  qt.titulo            AS titulo,\n  qt.descricao         AS descricao,\n  qt.config            AS config,\n  qt.xp_recompensa     AS xp_recompensa,\n  qt.codigo            AS modelo_codigo,\n  qt.gatilho_codigo    AS gatilho_codigo,\n  qt.gatilho_valor     AS gatilho_valor,\n  qt.tipo              AS tipo\nFROM public.quest_atribuidas qa\nJOIN public.quest_templates qt ON qt.id = qa.modelo_id\nWHERE qa.usuario_id = $1::uuid\n  AND qt.tipo = 'personalizada'\nORDER BY\n  CASE qa.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  qa.atualizado_em DESC\nLIMIT 20;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        -208
+      ],
+      "id": "59804735-60d2-4507-9d44-dee0cc1e01de",
+      "name": "Buscar Quests",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.resumo_jornada\nWHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        -48
+      ],
+      "id": "6ed88af3-ae8e-4df2-8f42-4ec0327086fe",
+      "name": "Buscar Estado",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\nconst body = input.body ?? {};\n\nconst candidate = [\n  query.usuario_id,\n  query.user_id,\n  query.id_usuario,\n  body.usuario_id,\n  body.user_id,\n  body.id_usuario,\n  input.headers?.usuario_id,\n  input.headers?.user_id,\n].find((value) => typeof value === 'string' && value.trim().length > 0);\n\nif (!candidate) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: candidate.trim(),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        -48
+      ],
+      "id": "cb3dde4c-0e33-4a83-9696-32770b4101c4",
+      "name": "Validar Entrada"
+    },
+    {
+      "parameters": {
+        "path": "quests",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -864,
+        -48
+      ],
+      "id": "6494f855-0b0e-48f8-be9a-ff748cec6c76",
+      "name": "Webhook",
+      "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
+    },
+    {
+      "parameters": {
+        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getItems = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list.map((entry) => entry?.json || {});\n};\n\nconst toNumber = (value, fallback = null) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst parseJson = (value) => {\n  if (!value) return null;\n  if (typeof value === 'object') return value;\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  try {\n    return JSON.parse(trimmed);\n  } catch (_err) {\n    return null;\n  }\n};\n\nconst sequenciaStatus = parseJson(getItem('Buscar Estado').sequencia_status) || getItem('Buscar Estado').sequencia_status || null;\nconst estado = getItem('Buscar Estado');\nconst questsRaw = getItems('Buscar Quests');\nconst historicoConversasRaw = getItems('Conversas Recentes');\n\nconst quests = questsRaw\n  .map((row) => {\n    if (!row) return null;\n    const config = parseJson(row.config);\n    return {\n      instancia_id: row.instancia_id ?? null,\n      meta_codigo: row.meta_codigo ?? '',\n      status: row.status ?? 'pendente',\n      titulo: row.titulo ?? 'Quest personalizada',\n      descricao: row.descricao ?? null,\n      contexto_origem: row.contexto_origem ?? null,\n      progresso_meta: toNumber(row.progresso_meta, 1) ?? 1,\n      progresso_atual: toNumber(row.progresso_atual, 0) ?? 0,\n      concluido_em: row.concluido_em ?? null,\n      config: config ?? null,\n      xp_recompensa: toNumber(row.xp_recompensa, config?.xp_recompensa ?? null),\n      prioridade: row.prioridade ?? config?.prioridade ?? null,\n      recorrencia: row.recorrencia ?? config?.recorrencia ?? null,\n    };\n  })\n  .filter((item) => item !== null);\n\nconst historicoConversas = historicoConversasRaw.map((row) => ({\n  dia: row.dia,\n  conversou: Boolean(row.conversou),\n}));\n\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id ?? $json.usuario_id ?? null,\n    xp_total: toNumber(estado.xp_total, 0) ?? 0,\n    xp_proximo_nivel: toNumber(estado.xp_proximo_nivel, null),\n    nivel_atual: toNumber(estado.nivel_atual, 1) ?? 1,\n    titulo_nivel: estado.titulo_nivel ?? null,\n    sequencia_atual: toNumber(estado.sequencia_atual, 0) ?? 0,\n    sequencia_recorde: toNumber(estado.sequencia_recorde, 0) ?? 0,\n    meta_sequencia_codigo: estado.meta_sequencia_codigo ?? null,\n    proxima_meta_codigo: estado.proxima_meta_codigo ?? null,\n    sequencia_status: sequenciaStatus,\n    historico_conversas: historicoConversas,\n    quests_personalizadas: quests,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "469e8989-6852-433e-a133-ddb168c5d667",
+      "name": "Montar Resposta"
+    },
+    {
+      "id": "b7de5c6a-4d09-4eba-8f34-04d3c5a8f6c7",
+      "name": "Conversas Recentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        160
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH dias AS (\n    SELECT generate_series(\n        (CURRENT_DATE - INTERVAL '13 day')::date,\n        CURRENT_DATE,\n        INTERVAL '1 day'\n    )::date AS dia\n)\nSELECT\n    d.dia,\n    EXISTS (\n        SELECT 1\n        FROM public.usr_chat uc\n        WHERE uc.usuario_id = $1::uuid\n          AND DATE(uc.data_conversa) = d.dia\n    ) AS conversou\nFROM dias d\nORDER BY d.dia DESC;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "f7e0c4f2-bae8-4f09-9a41-4f50a4c5e87c",
+      "name": "Aguardar Dados",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -16,
+        -48
+      ],
+      "parameters": {
+        "mode": "append"
+      }
+    }
+  ],
+  "connections": {
+    "Buscar Estado": {
+      "main": [
+        [
+          {
+            "node": "Buscar Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Buscar Estado",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conversas Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Quests": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar Dados": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversas Recentes": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Dados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "76ae9da9-cf43-41aa-9ea4-7b6e76ff82ae",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-05T17:35:05.601Z",
+      "role": "workflow:owner",
+      "workflowId": "yvg9NkBsLF3mbr5f",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

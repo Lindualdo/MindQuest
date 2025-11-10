@@ -5,18 +5,18 @@
 WITH conversas AS (
     SELECT
         uc.usuario_id,
-        COUNT(*) * 75 AS xp_conversas
+        COUNT(DISTINCT DATE(uc.data_conversa)) * 75 AS xp_conversas -- regra: só uma conversa por dia gera 75 XP
     FROM public.usr_chat uc
     WHERE uc.data_conversa IS NOT NULL
     GROUP BY uc.usuario_id
 ),
 quests AS (
     SELECT
-        qi.usuario_id,
-        COALESCE(SUM(qi.xp_concedido), 0) AS xp_quests
-    FROM public.quest_instancias qi
-    WHERE qi.status = 'concluida'
-    GROUP BY qi.usuario_id
+        qa.usuario_id,
+        COALESCE(SUM(qa.xp_concedido), 0) AS xp_quests
+    FROM public.quest_atribuidas qa
+    WHERE qa.status = 'concluida'
+    GROUP BY qa.usuario_id
 )
 SELECT
     u.id        AS usuario_id,
@@ -28,6 +28,6 @@ SELECT
 FROM public.usuarios u
 LEFT JOIN conversas c ON c.usuario_id = u.id
 LEFT JOIN quests qi ON qi.usuario_id = u.id
-LEFT JOIN public.quest_estado_usuario qe ON qe.usuario_id = u.id
+LEFT JOIN public.resumo_jornada qe ON qe.usuario_id = u.id
 WHERE COALESCE(u.ativo, true) = true
 ORDER BY xp_total DESC, usuario_nome ASC;

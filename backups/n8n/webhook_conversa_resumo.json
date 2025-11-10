@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-10-12T07:55:47.675Z",
   "id": "v7HttxPItfsC82pA",
-  "name": "dash_conversa_resumo",
+  "name": "webhook_conversa_resumo",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -133,7 +133,7 @@
       }
     ]
   },
-  "versionId": "5fde7173-3d81-4b34-8f8b-772085eeafb2",
+  "versionId": "490520f3-3476-4aad-a751-daf6c6aced8b",
   "triggerCount": 1,
   "shared": [
     {

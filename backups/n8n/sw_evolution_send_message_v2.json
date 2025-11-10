@@ -6,14 +6,6 @@
   "isArchived": false,
   "nodes": [
     {
-      "id": "start",
-      "name": "start",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -1320,
-        80
-      ],
       "parameters": {
         "workflowInputs": {
           "values": [
@@ -34,9 +26,20 @@
             }
           ]
         }
-      }
+      },
+      "id": "start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        80
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const i = $input.item.json || {}; let remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || ''; if (remote && !/@/.test(remote)) { const digits = String(remote).replace(/\\D/g,'').trim(); if (digits) remote = `${digits}@s.whatsapp.net`; } if (remote.startsWith('+')) { const digits = remote.replace(/\\D/g,''); if (digits) remote = `${digits}@s.whatsapp.net`; } const minDelayMs = Number(i.minDelayMs ?? 2000) || 2000; const linkPreview = (String(i.linkPreview).toLowerCase() === 'true'); return [{ json: { ...i, remoteJid: remote, minDelayMs, linkPreview } }];"
+      },
       "id": "normalize",
       "name": "Normalize JID",
       "type": "n8n-nodes-base.code",
@@ -44,33 +47,23 @@
       "position": [
         -1120,
         80
-      ],
-      "parameters": {
-        "jsCode": "const i = $input.item.json || {}; let remote = i.remoteJidOrNumber || i.remoteJid || i.whatsapp_numero || ''; if (remote && !/@/.test(remote)) { const digits = String(remote).replace(/\\D/g,'').trim(); if (digits) remote = `${digits}@s.whatsapp.net`; } if (remote.startsWith('+')) { const digits = remote.replace(/\\D/g,''); if (digits) remote = `${digits}@s.whatsapp.net`; } const minDelayMs = Number(i.minDelayMs ?? 2000) || 2000; const linkPreview = (String(i.linkPreview).toLowerCase() === 'true'); return [{ json: { ...i, remoteJid: remote, minDelayMs, linkPreview } }];"
-      }
+      ]
     },
     {
+      "parameters": {
+        "amount": "={{ Math.ceil(($json.minDelayMs || 2000) / 1000) }}"
+      },
       "id": "wait",
       "name": "Min Delay",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -920,
+        -928,
         80
       ],
-      "parameters": {
-        "amount": "={{ Math.ceil(($json.minDelayMs || 2000) / 1000) }}"
-      }
+      "webhookId": "2c56cd3e-3002-45c1-a70b-de6f13d0f64e"
     },
     {
-      "id": "send",
-      "name": "Send Message",
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        -700,
-        80
-      ],
       "parameters": {
         "resource": "messages-api",
         "instanceName": "={{ $('start').first().json.instanceName }}",
@@ -81,6 +74,14 @@
           "linkPreview": "={{ $('Normalize JID').first().json.linkPreview }}"
         }
       },
+      "id": "send",
+      "name": "Send Message",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        80
+      ],
       "retryOnFail": true,
       "maxTries": 5,
       "waitBetweenTries": 5000,
@@ -92,17 +93,81 @@
       }
     },
     {
+      "parameters": {
+        "jsCode": "const r = $input.first()?.json ?? {}; const d = r.data ?? {}; const httpStatus = Number(r.statusCode ?? d.statusCode ?? r.code ?? 0) || null; const statusRaw = String(d.status ?? r.status ?? '').trim(); const status = statusRaw.toUpperCase() || (httpStatus && httpStatus>=200 && httpStatus<300 ? 'SUCCESS' : 'UNKNOWN'); const successFlag = String(r.success ?? '').toLowerCase() === 'true'; const success = successFlag || ['SUCCESS','SENT','DELIVERED','READ','ACCEPTED','ACK','QUEUED'].includes(status); return [{ json: { success, status, httpStatus, messageId: d.key?.id ?? r.messageId ?? null, errorMessage: d.error ?? r.error ?? r.message ?? null, response: r } }];"
+      },
       "id": "classify",
       "name": "Classify Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -460,
+        -464,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "kbmJxJtDUZ1CU4Xt",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/kbmJxJtDUZ1CU4Xt",
+          "cachedResultName": "sw_tts"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json.instanceName }}",
+            "remoteJidOrNumber": "={{ $('start').item.json.remoteJidOrNumber }}",
+            "messageText": "={{ $json.response.data.message.conversation }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
         80
       ],
-      "parameters": {
-        "jsCode": "const r = $input.first()?.json ?? {}; const d = r.data ?? {}; const httpStatus = Number(r.statusCode ?? d.statusCode ?? r.code ?? 0) || null; const statusRaw = String(d.status ?? r.status ?? '').trim(); const status = statusRaw.toUpperCase() || (httpStatus && httpStatus>=200 && httpStatus<300 ? 'SUCCESS' : 'UNKNOWN'); const successFlag = String(r.success ?? '').toLowerCase() === 'true'; const success = successFlag || ['SUCCESS','SENT','DELIVERED','READ','ACCEPTED','ACK','QUEUED'].includes(status); return [{ json: { success, status, httpStatus, messageId: d.key?.id ?? r.messageId ?? null, errorMessage: d.error ?? r.error ?? r.message ?? null, response: r } }];"
-      }
+      "id": "203785ec-23fc-43b6-881d-bb6d07173f5d",
+      "name": "Call 'sw_tts'",
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -149,6 +214,17 @@
           }
         ]
       ]
+    },
+    "Classify Result": {
+      "main": [
+        [
+          {
+            "node": "Call 'sw_tts'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -160,8 +236,20 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": null,
-  "versionId": "47924d47-063c-4382-87c3-5c00d5312114",
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJidOrNumber": "351932786582@s.whatsapp.net",
+          "messageText": "Aldo, entendo que você deseja um plano que conecte seus sabotadores com os gatilhos específicos do mercado de criptomoedas, voltado para sua experiência tanto como trader quanto investidor de longo prazo. \n\nNo universo altamente volátil do Bitcoin e outras criptomoedas, alguns gatilhos emocionais comuns que afetam quem está nesse mercado incluem:\n\n- Oscilações bruscas de preços gerando medo e euforia, que ativam o seu **Exigente Implacável**, levando a decisões impulsivas para evitar perdas ou garantir ganhos rápidos.\n- A incerteza constante do mercado que estimula o seu **Mestre do Controle**, causando frustração por não conseguir prever ou controlar todos os movimentos.\n- A ansiedade e mente acelerada com cenários catastróficos possíveis, característicos do seu **Sr. Ansioso** e **Mente Turbulenta**.\n- O impacto emocional das perdas financeiras, ativando seu **Sofredor** e aumentando o risco de respostas desproporcionais.\n\nCom base nisso, aqui estão estratégias alinhadas com seus sabotadores, específicas para o mercado de criptomoedas:\n\n1. **Exigente Implacável**  \n   - Defina regras claras de entrada e saída que sigam sua estratégia, evitando decisões no calor do momento.  \n   - Use um diário de operações para registrar não só dados financeiros, mas também seus sentimentos naquele momento; isso ajuda a conscientizar e gerenciar a autoexigência.\n\n2. **Mestre do Controle / O Comandante**  \n   - Aceite que a volatilidade é inerente ao mercado cripto, praticando a dicotomia do controle: foque no que pode controlar (estratégia, disciplina), abrace o imprevisível e não se desgaste tentando prever o imprevisível.  \n   - Delegue o que for possível (consultoria, uso de sistemas automáticos confiáveis) para minimizar a pressão de controle absoluto.\n\n3. **Sr. Ansioso / Mente Turbulenta**  \n   - Estabeleça períodos fixos para acompanhamento de notícias e preços, evitando checar constantemente.  \n   - Pratique técnicas de ancoragem e respiração conforme já falamos, especialmente antes e depois de acompanhar o mercado.\n\n4. **O Sofredor**  \n   - Prepare-se mentalmente para as oscilações, criando um fundo de resiliência emocional: pequenas práticas como visualização positiva baseada em cenários prévios de superação ajudam a reduzir o impacto das perdas.  \n   - Separe momentos para atividades fora do mercado, que tragam prazer e alívio do stress, para equilibrar a carga emocional.\n\nQuer que eu monte um plano prático detalhado a partir dessas estratégias, com ações semanais para você aplicar? Será um passo a passo focado na realidade do mercado cripto, integrado ao seu perfil interno.Aldo, entendo que você deseja um plano que conecte seus sabotadores com os gatilhos específicos do mercado de criptomoedas, para lidar melhor com a ansiedade e pressão desse universo tão volátil.\n\nAlguns gatilhos comuns para quem atua como trader ou investidor em criptomoedas incluem:\n\n- Oscilações bruscas de preço, que ativam o Exigente Implacável, levando a decisões impulsivas.\n- A sensação de falta de controle (Mestre do Controle) diante da volatilidade.\n- Pensamentos acelerados e a ansiedade intensa do Sr. Ansioso e Mente Turbulenta.\n- Impacto emocional das perdas, que ativa o Sofredor e dificulta a resiliência.\n\nCom isso em mente, aqui vão sugestões alinhadas aos seus sabotadores:\n\n1. **Exigente Implacável**  \n   - Crie regras rígidas e objetivas para suas operações, evitando decisões por impulso.  \n   - Mantenha um diário de trades, anotando também seus sentimentos para trazer consciência à autoexigência.\n\n2. **Mestre do Controle**  \n   - Aplique a dicotomia do controle: concentre-se em sua estratégia e disciplina, e aceite a imprevisibilidade do mercado.  \n   - Use ferramentas e consultoria para aliviar a necessidade de controle absoluto.\n\n3. **Sr. Ansioso / Mente Turbulenta**  \n   - Estabeleça horários fixos para acompanhar o mercado e evitar checagens constantes",
+          "linkPreview": "false",
+          "minDelayMs": "2000"
+        }
+      }
+    ]
+  },
+  "versionId": "9dd1a50d-9522-4bd4-9edf-60665b4ccc59",
   "triggerCount": 0,
   "shared": [
     {

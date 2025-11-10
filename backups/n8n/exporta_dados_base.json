@@ -10,8 +10,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -272,
-        -48
+        160,
+        -64
       ],
       "id": "d8049be7-7253-4013-bc97-b3c53ba40dbe",
       "name": "When clicking ‘Execute workflow’"
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -64,
-        -48
+        368,
+        -64
       ],
       "id": "04b12cf0-77d0-4fc6-ba50-4e5b82781a86",
       "name": "Quest catalogo",
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        -48
+        592,
+        -64
       ],
       "id": "714ca14a-503d-4de2-bfe2-0c42715d4252",
       "name": "estado usuario",
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        384,
-        -48
+        816,
+        -64
       ],
       "id": "97405d4f-453e-43a8-8a25-741a500c621c",
       "name": "quest instancias",
@@ -168,8 +168,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        608,
-        -48
+        1040,
+        -64
       ],
       "id": "eec3a8a1-9801-4fd2-af32-d025c1fc7e7f",
       "name": "sabotadores",
@@ -189,8 +189,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        832,
-        -48
+        1264,
+        -64
       ],
       "id": "adcf625e-909d-4429-ac34-7e4218c98621",
       "name": "Insights",
@@ -203,33 +203,14 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "quest_estado_usuario",
-          "mode": "list",
-          "cachedResultName": "quest_estado_usuario"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "usuario_id",
-              "value": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "SELECT\n  data_conversa,\n  DATE(data_conversa) AS dia,\n  usuario_id\nFROM public.usr_chat\nWHERE usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'\nORDER BY data_conversa ASC;\n",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -64,
+        736,
         160
       ],
       "id": "e5c41c26-0c46-40db-8fa8-909174656334",
@@ -295,6 +276,27 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select * from usuarios",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "7667c0c0-228e-418e-97d5-80e7053ab167",
+      "name": "codex_agente",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -317,7 +319,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "4b5da8c9-96c0-4068-8c70-4b269c022428",
+  "versionId": "dad3cdab-5a7f-4c9f-9516-49e936d15f84",
   "triggerCount": 0,
   "shared": [
     {

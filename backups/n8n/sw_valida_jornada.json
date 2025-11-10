@@ -1,19 +1,19 @@
 {
-  "createdAt": "2025-11-07T16:26:00.000Z",
-  "id": "sw_valida_jornada",
+  "createdAt": "2025-11-09T19:59:22.630Z",
+  "id": "2myEbSm9D3X7sP2p",
   "name": "sw_valida_jornada",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "552b5559-7f35-4cfb-bbc9-33bca1b22aca",
+      "id": "6b2484cc-463b-4105-abce-a1f81f81e75d",
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        200,
-        -40
+        0,
+        0
       ]
     },
     {
@@ -22,13 +22,13 @@
         "query": "SELECT\n  q.usuario_id,\n  u.nome AS usuario_nome,\n  u.email AS usuario_email,\n  q.xp_total,\n  q.nivel_atual,\n  q.titulo_nivel,\n  q.xp_proximo_nivel,\n  j.nivel AS nivel_calculado,\n  j.titulo AS titulo_calculado,\n  j.xp_proximo_nivel AS xp_proximo_calculado\nFROM public.quest_estado_usuario q\nJOIN public.usuarios u ON u.id = q.usuario_id\nLEFT JOIN LATERAL (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= q.xp_total\n    AND (jn.xp_proximo_nivel IS NULL OR q.xp_total < jn.xp_proximo_nivel)\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n) j ON TRUE\nWHERE COALESCE(u.ativo, true) = true\nORDER BY q.atualizado_em DESC NULLS LAST, u.nome ASC;",
         "options": {}
       },
-      "id": "3fa472fd-1104-47a9-a9ed-1239747544b0",
+      "id": "c31203a9-d3a5-4e6d-a838-e074fb8bf640",
       "name": "Buscar Estados e Niveis",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        440,
-        -40
+        240,
+        0
       ],
       "credentials": {
         "postgres": {
@@ -41,24 +41,24 @@
       "parameters": {
         "jsCode": "const normalizeString = (value) => {\n  if (value === null || value === undefined) return null;\n  return String(value).trim() || null;\n};\nconst normalizeNumber = (value) => {\n  if (value === null || value === undefined || value === '') return null;\n  const parsed = Number(value);\n  return Number.isFinite(parsed) ? parsed : null;\n};\nreturn $input.all().map(item => {\n  const row = item.json;\n  const diffs = [];\n  if ((row.nivel_atual ?? null) !== (row.nivel_calculado ?? null)) {\n    diffs.push(`nivel esperado ${row.nivel_calculado ?? 'desconhecido'}`);\n  }\n  if (normalizeString(row.titulo_nivel) !== normalizeString(row.titulo_calculado)) {\n    diffs.push('titulo divergente');\n  }\n  if (normalizeNumber(row.xp_proximo_nivel) !== normalizeNumber(row.xp_proximo_calculado)) {\n    diffs.push('xp_proximo divergente');\n  }\n  return {\n    json: {\n      ...row,\n      status: diffs.length ? 'inconsistente' : 'ok',\n      divergencias: diffs\n    }\n  };\n});"
       },
-      "id": "4d74470e-32f8-4a4d-90b4-3b4671cc57cd",
+      "id": "bb55c067-51bd-4048-8d54-d882dd32806b",
       "name": "Calcular Divergencias",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        700,
-        -40
+        512,
+        0
       ]
     },
     {
       "parameters": {},
-      "id": "50c8cd05-9aa1-443c-9c44-a326ee7fb78d",
+      "id": "90a8e21a-5899-44b0-bd70-5a09232a743b",
       "name": "Resultados",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        920,
-        -40
+        720,
+        0
       ]
     }
   ],
@@ -102,9 +102,59 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": null,
-  "versionId": "db87b81a-5b0d-4409-942e-10be4bee28b1",
+  "pinData": {},
+  "versionId": "49cded87-fae3-4e6d-a5f4-da188de00bcd",
   "triggerCount": 0,
-  "shared": [],
+  "shared": [
+    {
+      "createdAt": "2025-11-09T19:59:22.630Z",
+      "role": "workflow:owner",
+      "workflowId": "2myEbSm9D3X7sP2p",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

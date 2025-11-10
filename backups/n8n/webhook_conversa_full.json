@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-10-16T11:52:20.583Z",
   "id": "CGdzaV8rqARmJCwO",
-  "name": "dash_conversa_full",
+  "name": "webhook_conversa_full",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -127,7 +127,7 @@
       }
     ]
   },
-  "versionId": "33d04c87-7f5e-465e-825f-dc27a9bcc608",
+  "versionId": "bc646940-6b34-4697-bd0b-b457cdfc9a07",
   "triggerCount": 1,
   "shared": [
     {

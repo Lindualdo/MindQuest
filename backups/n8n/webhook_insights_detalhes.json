@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-10-09T16:27:21.938Z",
   "id": "hJiLj3MC3V3LMDKV",
-  "name": "dash_insights_detalhes",
+  "name": "webhook_insights_detalhes",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -148,7 +148,7 @@
       }
     ]
   },
-  "versionId": "5ca7b1d8-70e4-424c-8bf4-e61faab3b837",
+  "versionId": "c7442b50-843f-476e-9468-44adfca4278f",
   "triggerCount": 1,
   "shared": [
     {

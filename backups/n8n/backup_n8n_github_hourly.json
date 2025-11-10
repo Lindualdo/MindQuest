@@ -1,0 +1,437 @@
+{
+  "createdAt": "2025-11-09T13:07:06.936Z",
+  "id": "O7J1bbpVNaFAEvXj",
+  "name": "backup_n8n_github_hourly",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        280,
+        300
+      ],
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hourly": {
+                "minute": 5
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Set Constants",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "BASE_URL",
+              "type": "string",
+              "value": "https://<workspace>.n8n.cloud/rest"
+            },
+            {
+              "id": "a2",
+              "name": "OWNER",
+              "type": "string",
+              "value": "<owner>"
+            },
+            {
+              "id": "a3",
+              "name": "REPO",
+              "type": "string",
+              "value": "MindQuest"
+            },
+            {
+              "id": "a4",
+              "name": "BRANCH",
+              "type": "string",
+              "value": "main"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3",
+      "name": "HTTP Request - List Folders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        820,
+        200
+      ],
+      "parameters": {
+        "url": "={{ $json.BASE_URL + '/folders' }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": {
+            "parameter": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "={{ $env.N8N_API_KEY }}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "4",
+      "name": "HTTP Request - List Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        820,
+        420
+      ],
+      "parameters": {
+        "url": "={{ $json.BASE_URL + '/workflows' }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": {
+            "parameter": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "={{ $env.N8N_API_KEY }}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "5",
+      "name": "Function - Join Folders and Workflows",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        420
+      ],
+      "parameters": {
+        "functionCode": "const foldersResp = $node['HTTP Request - List Folders'].json || {};\nconst foldersArr = foldersResp.data || foldersResp || [];\nconst folderMap = Array.isArray(foldersArr) ? foldersArr.reduce((acc, f) => { if (f && f.id) acc[f.id] = f.name || 'Uncategorized'; return acc; }, {}) : {};\nconst workflowsResp = $json || {};\nconst workflows = workflowsResp.data || [];\nconst sanitize = (s) => (s || 'Uncategorized').replace(/[\\\\/\\\\:?*\\\"<>|]/g, '_');\nconst out = [];\nfor (const wf of workflows) {\n  out.push({ json: {\n    id: wf.id,\n    name: wf.name,\n    folderId: wf.folderId,\n    folderName: folderMap[wf.folderId] || 'Uncategorized',\n    folderSlug: sanitize(folderMap[wf.folderId] || 'Uncategorized'),\n    workflowSlug: sanitize(wf.name)\n  }\n  });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "6",
+      "name": "HTTP Request - Get Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1350,
+        420
+      ],
+      "parameters": {
+        "url": "={{ $item(0).$node['Set Constants'].json.BASE_URL + '/workflows/' + $json.id }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": {
+            "parameter": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "={{ $env.N8N_API_KEY }}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "7",
+      "name": "Function - Prepare Path and Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        420
+      ],
+      "parameters": {
+        "functionCode": "const folder = $item(0).$node['Function - Join Folders and Workflows'].json.folderSlug;\nconst file = $item(0).$node['Function - Join Folders and Workflows'].json.workflowSlug + '.json';\nconst path = `backups/${folder}/${file}`;\nreturn [{ json: { path, content: JSON.stringify($json, null, 2) } }];"
+      }
+    },
+    {
+      "id": "8",
+      "name": "GitHub - Get File",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1860,
+        420
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": "={{ $item(0).$node['Set Constants'].json.OWNER }}",
+        "repository": "={{ $item(0).$node['Set Constants'].json.REPO }}",
+        "filePath": "={{ $json.path }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {
+          "branch": "={{ $item(0).$node['Set Constants'].json.BRANCH }}"
+        }
+      }
+    },
+    {
+      "id": "9",
+      "name": "IF - File Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2120,
+        420
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ !!$node['GitHub - Get File'].json.sha }}",
+              "rightValue": ""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "10",
+      "name": "GitHub - Create File",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        330
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "create",
+        "owner": "={{ $item(0).$node['Set Constants'].json.OWNER }}",
+        "repository": "={{ $item(0).$node['Set Constants'].json.REPO }}",
+        "filePath": "={{ $node['Function - Prepare Path and Content'].json.path }}",
+        "fileContent": "={{ $node['Function - Prepare Path and Content'].json.content }}",
+        "commitMessage": "={{ 'backup(n8n): add ' + $node['Function - Prepare Path and Content'].json.path }}",
+        "additionalParameters": {
+          "branch": "={{ $item(0).$node['Set Constants'].json.BRANCH }}"
+        }
+      }
+    },
+    {
+      "id": "11",
+      "name": "GitHub - Edit File",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        510
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "={{ $item(0).$node['Set Constants'].json.OWNER }}",
+        "repository": "={{ $item(0).$node['Set Constants'].json.REPO }}",
+        "filePath": "={{ $node['Function - Prepare Path and Content'].json.path }}",
+        "fileContent": "={{ $node['Function - Prepare Path and Content'].json.content }}",
+        "commitMessage": "={{ 'backup(n8n): update ' + $node['Function - Prepare Path and Content'].json.path }}",
+        "additionalParameters": {
+          "branch": "={{ $item(0).$node['Set Constants'].json.BRANCH }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "Set Constants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Constants": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - List Folders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request - List Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - List Workflows": {
+      "main": [
+        [
+          {
+            "node": "Function - Join Folders and Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Join Folders and Workflows": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - Get Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - Get Workflow": {
+      "main": [
+        [
+          {
+            "node": "Function - Prepare Path and Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Prepare Path and Content": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Get File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub - Get File": {
+      "main": [
+        [
+          {
+            "node": "IF - File Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - File Exists?": {
+      "main": [
+        [
+          {
+            "node": "GitHub - Edit File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "GitHub - Create File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "c6c7bc83-d435-48a4-838c-6fcd9665af70",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-09T13:07:06.936Z",
+      "role": "workflow:owner",
+      "workflowId": "O7J1bbpVNaFAEvXj",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

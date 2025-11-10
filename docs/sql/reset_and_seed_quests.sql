@@ -1,34 +1,31 @@
 -- Reset completo da estrutura de quests e carga inicial padrão.
--- Executa em uma única transação: limpa tabelas e recria níveis, modelos,
--- estados por usuário e instâncias básicas (streak_003 / streak_005).
+-- Executa em uma única transação: limpa tabelas finais (sem views),
+-- recria níveis, templates, estados por usuário e instâncias base
+-- (streak_003 / streak_005).
 
 BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 1) Limpeza das tabelas principais
-DELETE FROM public.quest_instancias;
-DELETE FROM public.quest_estado_usuario;
-DELETE FROM public.quest_modelos;
+DELETE FROM public.quest_atribuidas;
+DELETE FROM public.resumo_jornada;
+DELETE FROM public.quest_templates;
+DELETE FROM public.jornada_niveis;
 
-DELETE FROM public.quest_niveis;
-
--- 2) Seed de níveis
-INSERT INTO public.quest_niveis (nivel, xp_minimo, xp_proximo_nivel, nome, descricao, criado_em, atualizado_em)
+INSERT INTO public.jornada_niveis (nivel, xp_minimo, xp_proximo_nivel, nome, descricao, criado_em, atualizado_em)
 VALUES
-  (1,    0,  300,  'Recém-Convocado',        'Inicia as conversas e conhece a jornada.',                       NOW(), NOW()),
-  (2,  300,  750,  'Explorador Diário',      'Mantém presença diária e entende as quests.',                   NOW(), NOW()),
-  (3,  750, 1350,  'Conversador Assíduo',    'Sustenta ritmo estável e ativa as primeiras missões.',          NOW(), NOW()),
-  (4, 1350, 2100,  'Companheiro Constante',  'Consolida rotina e raramente falha em conversar.',              NOW(), NOW()),
-  (5, 2100, 3000,  'Parceiro de Jornada',    'Ajusta quests personalizadas e mantém engajamento equilibrado.',NOW(), NOW()),
-  (6, 3000, 4100,  'Mentor da Tribo',        'Integra ações recorrentes e compartilha aprendizados.',         NOW(), NOW()),
-  (7, 4100, 5400,  'Guardião do Ritmo',      'Quase não quebra sequência; retoma rápido quando acontece.',    NOW(), NOW()),
-  (8, 5400, 6900,  'Referência MindQuest',   'Inspira pela consistência nas conversas e nas quests.',         NOW(), NOW()),
-  (9, 6900, 8600,  'Embaixador de Conversas','Sustenta múltiplas quests ativas com naturalidade.',            NOW(), NOW()),
-  (10, 8600, NULL, 'Guardião da Comunidade', 'Exemplo do ciclo MindQuest e apoio à evolução coletiva.',       NOW(), NOW());
+  (1,     0,   500,  'Despertar',       'Percebe a necessidade de mudar e inicia as primeiras conversas.',                  NOW(), NOW()),
+  (2,   500,  1200,  'Clareza',        'Entende sabotadores, padrões e aprende a manter presença diária.',                 NOW(), NOW()),
+  (3,  1200,  2200,  'Coragem',        'Experimenta novas abordagens e sustenta a consistência das conversas.',            NOW(), NOW()),
+  (4,  2200,  3600,  'Consistência',   'Transforma conversas e quests em hábitos, mesmo em dias difíceis.',               NOW(), NOW()),
+  (5,  3600,  5400,  'Resiliência',    'Retoma o ritmo após quedas e mantém equilíbrio entre quests e rotina.',           NOW(), NOW()),
+  (6,  5400,  7400,  'Expansão',       'Integra ações em diversas áreas da vida e compartilha aprendizados.',             NOW(), NOW()),
+  (7,  7400,  9800,  'Maestria',       'Guiado pelo próprio processo, cria quests intencionais e sustenta longas sequências.', NOW(), NOW()),
+  (8,  9800, 12600,  'Impacto',        'Usa as conversas para inspirar, apoiar outras pessoas e liderar pelo exemplo.',   NOW(), NOW()),
+  (9, 12600, 16000,  'Legado',         'Transforma o progresso em projetos consistentes de longo prazo.',                 NOW(), NOW()),
+  (10,16000, NULL,   'Transcendência', 'Vive segundo seus princípios, mantém estabilidade emocional e continuidade ilimitada.', NOW(), NOW());
 
--- 3) Seed dos modelos base (sequência)
-INSERT INTO public.quest_modelos
+INSERT INTO public.quest_templates
     (id, codigo, titulo, descricao, tipo, gatilho_codigo, gatilho_valor, xp_recompensa, repeticao, ordem_inicial, ativo, config, criado_em, atualizado_em)
 VALUES
   (gen_random_uuid(), 'streak_003', 'Sequência de 3 conversas',  'Complete 3 conversas consecutivas.', 'sequencia', 'conversas_consecutivas',  3,  80, 'unica', 1, true, '{}'::jsonb, NOW(), NOW()),
@@ -40,8 +37,7 @@ VALUES
   (gen_random_uuid(), 'streak_025', 'Sequência de 25 conversas', 'Complete 25 conversas consecutivas.', 'sequencia', 'conversas_consecutivas', 25, 350, 'unica', 7, true, '{}'::jsonb, NOW(), NOW()),
   (gen_random_uuid(), 'streak_030', 'Sequência de 30 conversas', 'Complete 30 conversas consecutivas.', 'sequencia', 'conversas_consecutivas', 30, 450, 'unica', 8, true, '{}'::jsonb, NOW(), NOW());
 
--- 4) Estado inicial por usuário
-INSERT INTO public.quest_estado_usuario (
+INSERT INTO public.resumo_jornada (
     id,
     usuario_id,
     xp_total,
@@ -64,9 +60,9 @@ SELECT
     gen_random_uuid(),
     u.id,
     0,
-    300,
+    500,
     1,
-    'Recém-Convocado',
+    'Despertar',
     0,
     0,
     'streak_003',
@@ -80,11 +76,10 @@ SELECT
     NOW()
 FROM public.usuarios u;
 
--- 5) Instâncias iniciais (streak_003 ativa, streak_005 pendente)
 WITH modelos AS (
-    SELECT codigo, id FROM public.quest_modelos WHERE codigo IN ('streak_003','streak_005')
+    SELECT codigo, id FROM public.quest_templates WHERE codigo IN ('streak_003','streak_005')
 )
-INSERT INTO public.quest_instancias (
+INSERT INTO public.quest_atribuidas (
     id,
     usuario_id,
     modelo_id,

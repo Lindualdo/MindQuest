@@ -63,7 +63,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH nivel_destino AS (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= $2::int\n    AND (jn.xp_proximo_nivel IS NULL OR $2::int < jn.xp_proximo_nivel)\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n)\nUPDATE public.quest_estado_usuario q\nSET\n  nivel_atual = COALESCE(nivel_destino.nivel, q.nivel_atual),\n  titulo_nivel = COALESCE(nivel_destino.titulo, q.titulo_nivel),\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, q.xp_proximo_nivel),\n  atualizado_em = NOW()\nFROM nivel_destino\nWHERE q.usuario_id = $1::uuid\nRETURNING q.usuario_id, q.nivel_atual, q.titulo_nivel, q.xp_proximo_nivel;",
+        "query": "WITH nivel_destino AS (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= $2::int\n    AND ($2::int < COALESCE(jn.xp_proximo_nivel, $2::int + 1))\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n)\nUPDATE public.resumo_jornada r\nSET\n  nivel_atual      = COALESCE(nivel_destino.nivel, r.nivel_atual),\n  titulo_nivel     = COALESCE(nivel_destino.nome, r.titulo_nivel),\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, r.xp_proximo_nivel),\n  atualizado_em    = NOW()\nFROM nivel_destino\nWHERE r.usuario_id = $1::uuid\nRETURNING r.usuario_id, r.nivel_atual, r.titulo_nivel, r.xp_proximo_nivel;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0] }}"
         }
@@ -150,12 +150,12 @@
     "start": [
       {
         "json": {
-          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
         }
       }
     ]
   },
-  "versionId": "2ee86772-4b4b-4b61-85b6-1b9213840459",
+  "versionId": "d23a2129-f51b-40a1-a847-82d628121481",
   "triggerCount": 0,
   "shared": [
     {

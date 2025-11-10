@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-09-24T12:07:20.876Z",
   "id": "r0CuG6F3S1TR8ohs",
-  "name": "dash_authentication",
+  "name": "webhook_app_authentication",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -540,7 +540,7 @@
       }
     ]
   },
-  "versionId": "ef4fbf37-d2f5-4d44-bff0-d08679ec6a98",
+  "versionId": "1e19efb1-022e-4984-9b0f-dc93d6c857f1",
   "triggerCount": 1,
   "shared": [
     {
