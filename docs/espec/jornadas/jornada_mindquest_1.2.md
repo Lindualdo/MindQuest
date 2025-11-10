@@ -73,12 +73,13 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 | Evento | Regra de XP | Observações |
 |--------|-------------|-------------|
 | Dia com conversa | 75 XP | conta 1 por dia (usar `COUNT(DISTINCT DATE(data_conversa))` de `usr_chat`) |
-| Metas de sequência | conforme `streak_metas` | bônus aplicados quando a sequência (dias consecutivos) ultrapassa 3/5/7/… |
+| Metas de sequência | conforme `streak_metas` | bônus aplicados quando a sequência (dias consecutivos) ultrapassa 1 (primeira conversa) e 3/5/7/… |
 
 ### Quests de Sequência Bonus *(hábito de conversar)*
 
 | Meta | XP |
 |------|-----|
+| Primeira Conversa (1 dia) | 75 XP bônus (além dos 75 XP base) |
 | Meta 1 (3 conversas) | 40 XP |
 | Meta 2 (5 conversas) | 60 XP |
 | Meta 3 (7 conversas) | 90 XP |
@@ -144,20 +145,23 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 ## Fluxos de Dados · XP
 
 ### Conversas (sequência)
-Resumo: `usr_chat` → `sw_xp_conversas` → `resumo_jornada` → `sw_calcula_jornada`
-Breve: `sw_xp_conversas` lê até 45 dias de `usr_chat`, calcula 75 XP por conversa + bônus de meta, atualiza `resumo_jornada` e dispara `sw_calcula_jornada` para refletir níveis.
+Resumo: `usr_chat` → `sw_xp_conversas` → `usuarios_conquistas` + `conquistas_historico` → `sw_calcula_jornada`
+Breve: `sw_xp_conversas` lê até 45 dias de `usr_chat`, calcula 75 XP por dia + bônus de meta, atualiza o snapshot em `usuarios_conquistas` (XP base/bônus, meta ativa) e grava a conquista no `conquistas_historico`. Ao final chama `sw_calcula_jornada` para refletir níveis.
 
 ### Tabelas chaves (conversas)
-- `usr_chat`: única fonte de verdade para XP diário e streaks (dias distintos + sequências). Todos os workflows devem derivar números daqui.
-- `quest_templates` / `quest_atribuidas`: apenas quests personalizadas (conversas não entram aqui).
-- `resumo_jornada`: cache único consumido pelo app/webhooks. Sempre atualize via workflows (`sw_xp_conversas`, `sw_xp_quests`) e nunca leia dados em cada rotina diretamente de outras tabelas para evitar divergências.
+- `usr_chat`: única fonte de verdade para XP diário e streaks (dias distintos + sequências).
+- `metas_catalogo`: catálogo das metas padrão (primeira conversa, streak_003, streak_005…).
+- `usuarios_conquistas`: cache consumido pelo app/webhooks; sempre atualizado pelos workflows.
+- `conquistas_historico`: log detalhado de cada conquista (meta, XP, níveis antes/depois).
 
 ### Quests personalizadas
-Resumo: `quest_atribuidas` → `sw_xp_quests` → `resumo_jornada` → `sw_calcula_jornada`
-Breve: `sw_xp_quests` aplica 150 XP por conclusão +30 XP por recorrência (até 21 ciclos), persiste em `resumo_jornada` e chama `sw_calcula_jornada` para reavaliar níveis.
+Resumo: `usuarios_quest` → `sw_xp_quest` → `usuarios_conquistas` + `conquistas_historico` → `sw_calcula_jornada`
+Breve: `sw_xp_quest` aplica 150 XP por conclusão (+30 por recorrência completada), atualiza `usuarios_conquistas`, registra o evento em `conquistas_historico` e dispara `sw_calcula_jornada` para reavaliar níveis.
 
 ### Tabelas Principais
-- `resumo_jornada`: snapshot do usuário (XP total, nível atual, metas e totais concluídos).
-- `jornada_niveis`: faixas de XP/nível usadas pelos workflows e pelo app.
-- `quest_templates`: catálogo técnico de quests automáticas (streaks, onboarding, hábitos).
-- `quest_atribuidas`: quests entregues aos usuários com status, progresso, textos e XP concedido.
+- `usr_chat`: log bruto das conversas; única fonte para XP diário e streaks.
+- `metas_catalogo`: catálogo de metas do sistema (streaks, onboarding, quests padrão).
+- `usuarios_conquistas`: snapshot consolidado (XP base, XP bônus, meta atual, nível) consumido pelo app.
+- `conquistas_historico`: linha por conquista (conversa ou quest) com XP obtido, níveis antes/depois e payload.
+- `usuarios_quest`: apenas quests personalizadas em andamento (status, progresso, XP concedido).
+- `jornada_niveis` / `usuarios_jornada`: catálogo e posição do usuário na jornada macro (Despertar → Transcendência).
