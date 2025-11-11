@@ -21,7 +21,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  qa.id                AS instancia_id,\n  qa.meta_codigo       AS meta_codigo,\n  qa.status            AS status,\n  qa.progresso_meta    AS progresso_meta,\n  qa.progresso_atual   AS progresso_atual,\n  qa.concluido_em      AS concluido_em,\n  qa.xp_concedido      AS xp_concedido,\n  qa.contexto_origem   AS contexto_origem,\n  qa.atualizado_em     AS atualizado_em,\n  qt.titulo            AS titulo,\n  qt.descricao         AS descricao,\n  qt.config            AS config,\n  qt.xp_recompensa     AS xp_recompensa,\n  qt.codigo            AS modelo_codigo,\n  qt.gatilho_codigo    AS gatilho_codigo,\n  qt.gatilho_valor     AS gatilho_valor,\n  qt.tipo              AS tipo\nFROM public.quest_atribuidas qa\nJOIN public.quest_templates qt ON qt.id = qa.modelo_id\nWHERE qa.usuario_id = $1::uuid\n  AND qt.tipo = 'personalizada'\nORDER BY\n  CASE qa.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  qa.atualizado_em DESC\nLIMIT 20;",
+        "query": "SELECT\n  uq.id                AS instancia_id,\n  uq.meta_codigo       AS meta_codigo,\n  uq.status            AS status,\n  uq.progresso_meta    AS progresso_meta,\n  uq.progresso_atual   AS progresso_atual,\n  uq.concluido_em      AS concluido_em,\n  uq.xp_concedido      AS xp_concedido,\n  uq.contexto_origem   AS contexto_origem,\n  uq.atualizado_em     AS atualizado_em,\n  mc.titulo            AS titulo,\n  mc.descricao         AS descricao,\n  mc.config            AS config,\n  mc.xp_recompensa     AS xp_recompensa,\n  mc.codigo            AS modelo_codigo,\n  mc.gatilho_codigo    AS gatilho_codigo,\n  mc.gatilho_valor     AS gatilho_valor,\n  mc.tipo              AS tipo\nFROM public.usuarios_quest uq\nJOIN public.metas_catalogo mc ON mc.id = uq.modelo_id\nWHERE uq.usuario_id = $1::uuid\n  AND mc.tipo = 'personalizada'\nORDER BY\n  CASE uq.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  uq.atualizado_em DESC\nLIMIT 20;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -44,7 +44,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.resumo_jornada\nWHERE usuario_id = $1::uuid;",
+        "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.usuarios_conquistas\nWHERE usuario_id = $1::uuid;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -233,7 +233,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "76ae9da9-cf43-41aa-9ea4-7b6e76ff82ae",
+  "versionId": "65955f07-f5f1-4ee8-8a30-5d705e559efd",
   "triggerCount": 1,
   "shared": [
     {

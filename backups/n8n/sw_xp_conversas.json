@@ -44,7 +44,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT usuario_id, xp_total, total_xp_hoje, sequencia_atual, sequencia_recorde, meta_sequencia_codigo, proxima_meta_codigo, ultima_conversa_em, sequencia_status FROM public.usuarios_conquistas WHERE usuario_id = $1::uuid;",
+        "query": "SELECT usuario_id, xp_total, total_xp_hoje, sequencia_atual, sequencia_recorde, meta_sequencia_codigo, proxima_meta_codigo, ultima_conversa_em, sequencia_status\nFROM public.usuarios_conquistas\nWHERE usuario_id = $1::uuid;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -104,7 +104,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::int AS xp_base_increment,\n    $3::int AS xp_bonus_increment,\n    $4::int AS xp_total_increment,\n    $5::int AS sequencia_atual,\n    $6::int AS sequencia_recorde,\n    $7::varchar AS meta_codigo,\n    $8::varchar AS proxima_codigo,\n    NULLIF($9::text, '')::timestamptz AS ultima_conversa_em,\n    $10::jsonb AS sequencia_status\n),\natualizado AS (\n  UPDATE public.usuarios_conquistas uc\n  SET\n    xp_total = COALESCE(uc.xp_total, 0) + payload.xp_total_increment,\n    xp_base = COALESCE(uc.xp_base, 0) + payload.xp_base_increment,\n    xp_bonus = COALESCE(uc.xp_bonus, 0) + payload.xp_bonus_increment,\n    total_xp_hoje = COALESCE(uc.total_xp_hoje, 0) + payload.xp_total_increment,\n    sequencia_atual = payload.sequencia_atual,\n    sequencia_recorde = payload.sequencia_recorde,\n    meta_sequencia_codigo = payload.meta_codigo,\n    proxima_meta_codigo = payload.proxima_codigo,\n    ultima_conversa_em = COALESCE(payload.ultima_conversa_em, uc.ultima_conversa_em),\n    sequencia_status = payload.sequencia_status,\n    atualizado_em = NOW()\n  FROM payload\n  WHERE uc.usuario_id = payload.usuario_id\n  RETURNING uc.usuario_id\n)\nSELECT payload.usuario_id\nFROM payload\nLEFT JOIN atualizado ON atualizado.usuario_id = payload.usuario_id;",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::int AS xp_ganho,\n    $3::int AS sequencia_atual,\n    $4::int AS sequencia_recorde,\n    $5::varchar AS meta_codigo,\n    $6::varchar AS proxima_codigo,\n    NULLIF($7::text, '')::timestamptz AS ultima_conversa_em,\n    $8::jsonb AS sequencia_status\n),\natualizado AS (\n  UPDATE public.usuarios_conquistas r\n  SET\n    xp_total = r.xp_total + payload.xp_ganho,\n    total_xp_hoje = r.total_xp_hoje + payload.xp_ganho,\n    sequencia_atual = payload.sequencia_atual,\n    sequencia_recorde = payload.sequencia_recorde,\n    meta_sequencia_codigo = payload.meta_codigo,\n    proxima_meta_codigo = payload.proxima_codigo,\n    ultima_conversa_em = COALESCE(payload.ultima_conversa_em, r.ultima_conversa_em),\n    sequencia_status = payload.sequencia_status,\n    atualizado_em = NOW()\n  FROM payload\n  WHERE r.usuario_id = payload.usuario_id\n  RETURNING r.usuario_id, payload.xp_ganho\n)\nSELECT\n  payload.usuario_id,\n  payload.xp_ganho,\n  payload.sequencia_atual,\n  payload.sequencia_recorde\nFROM payload\nLEFT JOIN atualizado ON atualizado.usuario_id = payload.usuario_id;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_base_increment || 0, $json.xp_bonus_increment || 0, $json.xp_total_increment || $json.xp_ganho || 0, $json.sequencia_atual || 0, $json.sequencia_recorde || 0, $json.meta_sequencia_codigo || '', $json.proxima_meta_codigo || '', ($json.ultima_conversa_em && $json.ultima_conversa_em !== '' ? $json.ultima_conversa_em : null), JSON.stringify($json.sequencia_status || {})] }}"
         }
@@ -463,7 +463,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "9727b75d-2106-49bc-aa9d-161bb41b544f",
+  "versionId": "cea8f26c-b98f-40bb-b6f8-ddd6cde521ae",
   "triggerCount": 0,
   "shared": [
     {
