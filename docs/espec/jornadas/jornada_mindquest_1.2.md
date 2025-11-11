@@ -151,18 +151,18 @@ Breve: `sw_xp_conversas` lê até 45 dias de `usr_chat`, calcula 75 XP por dia +
 
 ### Tabelas chaves (conversas)
 - `usr_chat`: única fonte de verdade para XP diário e streaks (dias distintos + sequências).
-- `metas_catalogo`: catálogo das metas padrão (primeira conversa, streak_003, streak_005…).
-- `usuarios_conquistas`: cache consumido pelo app/webhooks; sempre atualizado pelos workflows.
-- `conquistas_historico`: log detalhado de cada conquista (meta, XP, níveis antes/depois).
+- `metas_catalogo`: catálogo minimalista das metas automáticas (primeira conversa, streaks e, futuramente, hábitos padrão). Quests personalizadas deixam de passar por aqui.
+- `usuarios_conquistas`: snapshot consumido pelo app/webhooks; sempre atualizado pelos workflows.
+- `conquistas_historico`: log detalhado de cada conquista (meta, XP base/bônus e payload para recorrências).
 
 ### Quests personalizadas
 Resumo: `usuarios_quest` → `sw_xp_quest` → `usuarios_conquistas` + `conquistas_historico` → `sw_calcula_jornada`
-Breve: `sw_xp_quest` aplica 150 XP por conclusão (+30 por recorrência completada), atualiza `usuarios_conquistas`, registra o evento em `conquistas_historico` e dispara `sw_calcula_jornada` para reavaliar níveis.
+Breve: `usuarios_quest` desempenha o mesmo papel que `usr_chat` faz para conversas — cada sugestão aceita vira uma linha com status/progresso. O `sw_xp_quest` lê esse log, insere novas instâncias quando o agente aprova, aplica 150 XP por conclusão (+30 por recorrência completada até 21 ciclos), grava o evento bruto em `conquistas_historico.detalhes` (para recorrentes) e atualiza o saldo consolidado em `usuarios_conquistas` antes de disparar `sw_calcula_jornada`.
 
 ### Tabelas Principais
 - `usr_chat`: log bruto das conversas; única fonte para XP diário e streaks.
-- `metas_catalogo`: catálogo de metas do sistema (streaks, onboarding, quests padrão).
-- `usuarios_conquistas`: snapshot consolidado (XP base, XP bônus, meta atual, nível) consumido pelo app.
-- `conquistas_historico`: linha por conquista (conversa ou quest) com XP obtido, níveis antes/depois e payload.
-- `usuarios_quest`: apenas quests personalizadas em andamento (status, progresso, XP concedido).
+- `usuarios_quest`: log bruto de cada quest criada para o usuário (pendente, ativa, concluída, recorrente), usado como insumo para XP e para auditoria.
+- `metas_catalogo`: catálogo das metas “default” (conversas/hábitos). Para quests personalizadas o workflow já trabalha direto com `usuarios_quest`.
+- `usuarios_conquistas`: snapshot consolidado (XP base, XP bônus, streak atual/recorde, contadores de quests e nível) consumido pelo app e pelos workflows.
+- `conquistas_historico`: linha por conquista (conversa ou quest) com XP obtido, payload completo das recorrências e timestamps para auditoria.
 - `jornada_niveis`: catálogo e posição do usuário na jornada macro (Despertar → Transcendência).

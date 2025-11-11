@@ -4,7 +4,7 @@
 
 BEGIN;
 
--- Remove histórico granular de XP/conquistas.
+-- Remove histórico granular de XP/conquistas (conversas + quests).
 TRUNCATE TABLE public.conquistas_historico RESTART IDENTITY;
 
 -- Remove instâncias ativas/pendentes de quests personalizadas.

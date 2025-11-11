@@ -42,6 +42,8 @@ Ao tratar de workflows n8n:
 - Evitar formatação pesada e “pensar em voz alta”.
 - Não usar introduções/conclusões verbosas; respostas devem caber em 4–6 bullets ou 2 frases curtas no máximo.
 - Ao reportar erros: descreva apenas o que precisa para resolver e decisões pendentes; explique o motivo do erro somente se o usuário pedir.
+- Para resumos pedidos pelo usuário, listar apenas o que falta fazer ou ações pendentes; se estiver tudo resolvido, responda explicitamente `sem ações`.
+- Quando o usuário pedir atualização rápida, responda só com status (`pendente`, `em execução`, `concluído` etc.) e a instrução objetiva; dê detalhes técnicos apenas se solicitado.
 
 ## N8N / MCP
 - Priorizar ferramentas MCP do n8n (search_nodes, get_node_info, validate_workflow, etc.) antes de qualquer outra fonte.
