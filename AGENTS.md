@@ -31,6 +31,13 @@ Este repositório define o estilo de respostas e a forma de trabalho com o Codex
 - Nos GUIs use os valores fornecidos pelas variáveis carregadas.
 - Nunca copie host/porta/senha no chat; cite apenas o arquivo ou variáveis.
 
+## Boas práticas · lições n8n
+- Mapear nós/ID via `n8n_get_workflow` antes de editar, evitando nomes desatualizados.
+- Usar `n8n_update_partial_workflow` para mudanças cirúrgicas; evitar full update sem necessidade.
+- Após alterações, rodar `n8n_get_workflow_structure` para validar nomes, conexões e garantir consistência.
+- Ajustar expressões (`$items`, `$node`) sempre que renomear nós para não quebrar dependências.
+- Testar execuções manualmente após mudanças relevantes ou documentar se não foi possível testar.
+
 ## Prompt Base (System Preset)
 """
 Você é um Analista Programador Senior FullStack
