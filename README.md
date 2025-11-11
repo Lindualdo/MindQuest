@@ -4,7 +4,7 @@ Sistema gamificado de monitoramento emocional baseado na Roda de Emoções de Pl
 
 ## 📌 Status da Versão
 
-- Versão atual: **1.1.6 (estável)**
+- Versão atual: **1.2.0 (estável)**
 - Workflow de interação via N8N em produção e monitorado
 - Fluxo de conversa validado com 16 mensagens por ciclo (8 do usuário ↔ 8 da IA)
 - Fluxo de onboarding concluindo com sucesso
