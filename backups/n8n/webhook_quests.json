@@ -21,7 +21,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  uq.id                AS instancia_id,\n  uq.meta_codigo       AS meta_codigo,\n  uq.status            AS status,\n  uq.progresso_meta    AS progresso_meta,\n  uq.progresso_atual   AS progresso_atual,\n  uq.concluido_em      AS concluido_em,\n  uq.xp_concedido      AS xp_concedido,\n  uq.contexto_origem   AS contexto_origem,\n  uq.atualizado_em     AS atualizado_em,\n  mc.titulo            AS titulo,\n  mc.descricao         AS descricao,\n  mc.config            AS config,\n  mc.xp_recompensa     AS xp_recompensa,\n  mc.codigo            AS modelo_codigo,\n  mc.gatilho_codigo    AS gatilho_codigo,\n  mc.gatilho_valor     AS gatilho_valor,\n  mc.tipo              AS tipo\nFROM public.usuarios_quest uq\nJOIN public.metas_catalogo mc ON mc.id = uq.modelo_id\nWHERE uq.usuario_id = $1::uuid\n  AND mc.tipo = 'personalizada'\nORDER BY\n  CASE uq.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  uq.atualizado_em DESC\nLIMIT 20;",
+        "query": "SELECT\n  uq.id              AS instancia_id,\n  uq.meta_codigo     AS meta_codigo,\n  uq.status          AS status,\n  uq.progresso_meta  AS progresso_meta,\n  uq.progresso_atual AS progresso_atual,\n  uq.concluido_em    AS concluido_em,\n  uq.xp_concedido    AS xp_concedido,\n  uq.contexto_origem AS contexto_origem,\n  uq.atualizado_em   AS atualizado_em,\n  uq.area_vida_id,\n  uq.sabotador_id,\n  uq.insight_id,\n  uq.complexidade,\n  mc.titulo          AS titulo,\n  mc.descricao       AS descricao,\n  mc.config          AS config,\n  mc.xp_recompensa   AS xp_recompensa,\n  mc.codigo          AS modelo_codigo,\n  mc.tipo            AS tipo\nFROM public.usuarios_quest uq\nLEFT JOIN public.metas_catalogo mc ON mc.id = uq.modelo_id\nWHERE uq.usuario_id = $1::uuid\nORDER BY\n  CASE uq.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  uq.atualizado_em DESC\nLIMIT 20;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -107,6 +107,13 @@
       "name": "Montar Resposta"
     },
     {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH dias AS (\n    SELECT generate_series(\n        (CURRENT_DATE - INTERVAL '13 day')::date,\n        CURRENT_DATE,\n        INTERVAL '1 day'\n    )::date AS dia\n)\nSELECT\n    d.dia,\n    EXISTS (\n        SELECT 1\n        FROM public.usr_chat uc\n        WHERE uc.usuario_id = $1::uuid\n          AND DATE(uc.data_conversa) = d.dia\n    ) AS conversou\nFROM dias d\nORDER BY d.dia DESC;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
       "id": "b7de5c6a-4d09-4eba-8f34-04d3c5a8f6c7",
       "name": "Consultar Usr Chat 14d",
       "type": "n8n-nodes-base.postgres",
@@ -115,13 +122,6 @@
         -176,
         160
       ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH dias AS (\n    SELECT generate_series(\n        (CURRENT_DATE - INTERVAL '13 day')::date,\n        CURRENT_DATE,\n        INTERVAL '1 day'\n    )::date AS dia\n)\nSELECT\n    d.dia,\n    EXISTS (\n        SELECT 1\n        FROM public.usr_chat uc\n        WHERE uc.usuario_id = $1::uuid\n          AND DATE(uc.data_conversa) = d.dia\n    ) AS conversou\nFROM dias d\nORDER BY d.dia DESC;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
-        }
-      },
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -130,6 +130,7 @@
       }
     },
     {
+      "parameters": {},
       "id": "f7e0c4f2-bae8-4f09-9a41-4f50a4c5e87c",
       "name": "Aguardar Dados",
       "type": "n8n-nodes-base.merge",
@@ -137,10 +138,7 @@
       "position": [
         -16,
         -48
-      ],
-      "parameters": {
-        "mode": "append"
-      }
+      ]
     }
   ],
   "connections": {
@@ -232,8 +230,49 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
-  "versionId": "7b502a7d-efc1-4bd6-bc27-f161f47b597b",
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/123.0.0.0",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9,pt-BR;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:4ed:251e:7048:6b3f",
+            "cf-ipcountry": "PT",
+            "cf-ray": "99cf6788cf6216a5-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "origin": "http://localhost:5173",
+            "priority": "u=1, i",
+            "referer": "http://localhost:5173/",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"99\", \"Opera\";v=\"123\", \"Chromium\";v=\"139\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "172.68.103.43",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.43"
+          },
+          "params": {},
+          "query": {
+            "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+          },
+          "body": {},
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/quests",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "4602e4bb-5f7f-4c6e-bb65-ecaf134e14e6",
   "triggerCount": 1,
   "shared": [
     {

@@ -24,7 +24,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        16,
+        -160,
         560
       ]
     },
@@ -37,7 +37,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
+        64,
         560
       ]
     },
@@ -232,7 +232,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::text AS meta_codigo,\n    $3::text AS meta_titulo,\n    $4::int AS xp_base_increment,\n    $5::jsonb AS ocorrencias,\n    $6::int AS recorrencia_increment\n),\natualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = COALESCE(ch.xp_base, 0) + payload.xp_base_increment,\n    detalhes = jsonb_set(\n      jsonb_set(\n        COALESCE(ch.detalhes, '{}'::jsonb),\n        '{recorrencia_total}',\n        to_jsonb(COALESCE((ch.detalhes->>'recorrencia_total')::int, 0) + payload.recorrencia_increment)\n      ),\n      '{ocorrencias}',\n      (COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || payload.ocorrencias)\n    ),\n    registrado_em = NOW()\n  FROM payload\n  WHERE ch.usuario_id = payload.usuario_id\n    AND ch.meta_codigo = payload.meta_codigo\n  RETURNING ch.id\n)\nINSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  nivel_anterior,\n  nivel_novo,\n  detalhes\n)\nSELECT\n  payload.usuario_id,\n  'conversa',\n  payload.meta_codigo,\n  payload.meta_titulo,\n  payload.xp_base_increment,\n  0,\n  NULL,\n  NULL,\n  jsonb_build_object(\n    'recorrencia_total', payload.recorrencia_increment,\n    'ocorrencias', payload.ocorrencias\n  )\nFROM payload\nWHERE NOT EXISTS (SELECT 1 FROM atualizado);",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::text AS meta_codigo,\n    $3::text AS meta_titulo,\n    $4::int AS xp_base_increment,\n    $5::jsonb AS ocorrencias,\n    $6::int AS recorrencia_increment\n),\natualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = COALESCE(ch.xp_base, 0) + payload.xp_base_increment,\n    detalhes = jsonb_set(\n      jsonb_set(\n        COALESCE(ch.detalhes, '{}'::jsonb),\n        '{recorrencia_total}',\n        to_jsonb(COALESCE((ch.detalhes->>'recorrencia_total')::int, 0) + payload.recorrencia_increment)\n      ),\n      '{ocorrencias}',\n      (COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || payload.ocorrencias)\n    ),\n    registrado_em = NOW()\n  FROM payload\n  WHERE ch.usuario_id = payload.usuario_id\n    AND ch.meta_codigo = payload.meta_codigo\n  RETURNING ch.id\n)\nINSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  detalhes,\n  registrado_em\n)\nSELECT\n  payload.usuario_id,\n  'conversa',\n  payload.meta_codigo,\n  payload.meta_titulo,\n  payload.xp_base_increment,\n  0,\n  jsonb_build_object(\n    'recorrencia_total', payload.recorrencia_increment,\n    'ocorrencias', payload.ocorrencias\n  ),\n  NOW()\nFROM payload\nWHERE NOT EXISTS (SELECT 1 FROM atualizado);\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.meta_codigo, $json.meta_titulo, $json.xp_base_increment || 0, JSON.stringify($json.ocorrencias || []), $json.recorrencia_increment || 0] }}"
         }
@@ -268,7 +268,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  nivel_anterior,\n  nivel_novo,\n  detalhes\n)\nVALUES (\n  $1::uuid,\n  'conversa',\n  $2::text,\n  $3::text,\n  $4::int,\n  $5::int,\n  NULL,\n  NULL,\n  COALESCE($6::jsonb, '{}'::jsonb)\n);",
+        "query": "INSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  detalhes,\n  registrado_em\n)\nVALUES (\n  $1::uuid,\n  'conversa',\n  $2::text,\n  $3::text,\n  $4::int,\n  $5::int,\n  COALESCE($6::jsonb, '{}'::jsonb),\n  NOW()\n);",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.meta_codigo, $json.meta_titulo, $json.xp_base || 0, $json.xp_bonus || 0, JSON.stringify($json.detalhes || {})] }}"
         }
@@ -302,6 +302,9 @@
       ]
     },
     {
+      "parameters": {
+        "jsCode": "const entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst usuarioId = entrada.usuario_id || $json.usuario_id || null;\nif (!usuarioId) {\n  return [];\n}\nreturn [{ json: { usuario_id: usuarioId } }];"
+      },
       "id": "7f7cb2b4-1b62-4c6d-9167-1b595b6d0c76",
       "name": "Garantir Retorno Batch",
       "type": "n8n-nodes-base.code",
@@ -309,27 +312,24 @@
       "position": [
         2816,
         736
-      ],
-      "parameters": {
-        "jsCode": "const entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst usuarioId = entrada.usuario_id || $json.usuario_id || null;\nif (!usuarioId) {\n  return [];\n}\nreturn [{ json: { usuario_id: usuarioId } }];"
-      }
+      ]
     },
     {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH alvo AS (\n  SELECT $1::uuid AS usuario_id\n)\nINSERT INTO public.usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status,\n  total_quests_concluidas,\n  total_quests_personalizadas,\n  total_xp_hoje,\n  ultima_conversa_em,\n  xp_base,\n  xp_bonus,\n  criado_em,\n  atualizado_em\n)\nSELECT\n  alvo.usuario_id,\n  0,\n  500,\n  1,\n  'Despertar',\n  0,\n  0,\n  'streak_003',\n  'streak_005',\n  jsonb_build_object('estado', 'ativa', 'alvo_conversas', 3, 'reinicios', 0, 'completado_em', NULL),\n  0,\n  0,\n  0,\n  NULL,\n  0,\n  0,\n  NOW(),\n  NOW()\nFROM alvo\nON CONFLICT (usuario_id) DO NOTHING\nRETURNING usuario_id;\n\nselect $1 as usuario_id",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
       "id": "7b1a0557-8acf-4afb-8dbb-f4edc85a09f0",
       "name": "Criar Registro Base",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        360,
+        272,
         560
       ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH alvo AS (\n  SELECT $1::uuid AS usuario_id\n)\nINSERT INTO public.usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status,\n  total_quests_concluidas,\n  total_quests_personalizadas,\n  total_xp_hoje,\n  ultima_conversa_em,\n  xp_base,\n  xp_bonus,\n  historico_resumido,\n  criado_em,\n  atualizado_em\n)\nSELECT\n  alvo.usuario_id,\n  0,\n  500,\n  1,\n  'Despertar',\n  0,\n  0,\n  'streak_003',\n  'streak_005',\n  jsonb_build_object('estado', 'ativa', 'alvo_conversas', 3, 'reinicios', 0, 'completado_em', NULL),\n  0,\n  0,\n  0,\n  NULL,\n  0,\n  0,\n  '[]'::jsonb,\n  NOW(),\n  NOW()\nFROM alvo\nON CONFLICT (usuario_id) DO NOTHING\nRETURNING usuario_id;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
-        }
-      },
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -515,12 +515,12 @@
       {
         "json": {
           "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "calcular_apenas_novos": false
+          "calcular_apenas_novos": true
         }
       }
     ]
   },
-  "versionId": "4b0842a5-a2d9-4c3d-bdff-77dbf172188a",
+  "versionId": "180e7dd5-0560-4839-b13a-98a45dc94331",
   "triggerCount": 0,
   "shared": [
     {

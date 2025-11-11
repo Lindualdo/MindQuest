@@ -166,3 +166,12 @@ Breve: `usuarios_quest` desempenha o mesmo papel que `usr_chat` faz para convers
 - `usuarios_conquistas`: snapshot consolidado (XP base, XP bônus, streak atual/recorde, contadores de quests e nível) consumido pelo app e pelos workflows.
 - `conquistas_historico`: linha por conquista (conversa ou quest) com XP obtido, payload completo das recorrências e timestamps para auditoria.
 - `jornada_niveis`: catálogo e posição do usuário na jornada macro (Despertar → Transcendência).
+
+## Regras de Persistência · Quests
+
+- `usuarios_quest` armazena todo o estado da quest personalizada (status, contexto, progresso). Para recorrentes, `progresso_meta` define quantos dias/ciclos formam um bloco; `progresso_atual` acumula quantos dias já foram cumpridos naquele bloco.
+- Cada dia concluído (recorrente ou não) fecha um evento e concede **150 XP base** no snapshot `usuarios_conquistas`. Se a quest for recorrente, cada ciclo completo recebe +30 XP extras, até 21 ciclos (630 XP adicionais), também refletidos no snapshot.
+- `conquistas_historico` mantém uma única linha por quest personalizada. O campo `detalhes` registra todo o histórico daquela instância: datas cumpridas, ciclos reiniciados, bônus aplicados e observações. Assim o app consegue exibir o progresso e o número de repetições sem replicar linhas.
+- Quando uma quest não recorrente termina, `usuarios_quest.status` vira `concluída` e ela sai das listas ativas. Para recorrentes, cada ciclo concluído reseta `progresso_atual` e mantém o status `ativa` até o usuário completar o número total de ciclos pactado; só então o status vai para `concluída`.
+- `usuarios_quest` é apenas o “snapshot” do desafio vigente (máx. 3 simultâneos por usuário). Não guarda histórico diário; serve só para exibir o que está pendente/ativo e controlar slots disponíveis.
+- Todo evento concluído vai para `conquistas_historico` (tipo `quest`), e é ali que o campo `detalhes` registra as recorrências, datas cumpridas e bônus — inclusive o log completo das quests recorrentes.
