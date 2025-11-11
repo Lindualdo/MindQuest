@@ -63,40 +63,7 @@
 ## Limitações/observações
 - Ausência de registro em `usuarios_conquistas` impede execuções (precisa seed inicial).
 - Reprocessamentos em lote devem recriar snapshots antes de rodar o workflow.
+- o primeiro registro em usuarios_conquista é criado no onboarding ao criar o cadastro do usurio
 
-## Fluxo proposto (revisão)
-
-### Objetivos da revisão
-- Manter `usr_chat` como fonte primária (docs/espec/jornadas/jornada_mindquest_1.2.md:44-99); `usuarios_conquistas` vira apenas cache derivado.
-- Permitir criar o snapshot on-the-fly para usuários novos.
-- Permitir reprocessar intervalos completos sem depender de dados pré-existentes.
-
-### Sequência sugerida
-1. **start / Validar Entrada**
-   - Recebe `usuario_id`, `recalcular_completo`, `data_inicio_custom` (opcional).
-   - Normaliza data de corte (default = última conversa já registrada; fallback = 45 dias).
-2. **Definir Janela / Garantir Snapshot**
-   - Lê `usuarios_conquistas`; se não existir, insere registro padrão (`nivel=1`, `streak=0`, `meta=streak_003`).
-   - Expõe `ultima_conversa_em` e `sequencia_status` para cálculos, mas não interrompe o fluxo.
-3. **Buscar Conversas**
-   - Consulta `usr_chat` com base no intervalo definido (última conversa processada + 45 dias ou `recalcular_completo`).
-   - Se não houver novas conversas, retorna estado atual imediatamente.
-4. **Calcular XP Conversas**
-   - Reprocessa os dias retornados aplicando regras:
-     - 75 XP por dia distinto (primeira conversa do dia).
-     - +75 XP primeira conversa geral.
-     - Bônus de metas `streak_003…streak_030`.
-     - Reset de streak quando existir gap de 1 dia inteiro.
-   - Emite payload com XP base/bônus, streak atual/recorde, meta ativa/próxima, eventos para histórico.
-5. **Persistir / Registrar**
-   - `Sincronizar Usuarios Conquistas`: UPSERT com novos valores (criando se ainda inexistente).
-   - `Registrar XP Diário`: grava/atualiza meta `conversa_diaria` em `conquistas_historico`.
-   - `Registrar Bônus de Streak`: adiciona eventos de primeira conversa + metas completas.
-6. **Atualizar Jornada + Retornar Resultado**
-   - Chama `sw_calcula_jornada`.
-   - Retorna o snapshot recalculado, incluindo indicadores de quantos dias foram processados.
-
-### Benefícios
-- Usuários novos passam pelo mesmo fluxo (snapshot criado automaticamente).
-- Reprocessamentos em lote podem ser feitos apenas truncando dados e executando o workflow, sem seed manual.
-- A fonte única (`usr_chat`) garante aderência às regras e reduz inconsistências entre histórico e snapshot.
+## Melhoria
+- incluir validação e carga inicial
