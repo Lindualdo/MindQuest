@@ -2,7 +2,7 @@
   "createdAt": "2025-11-07T18:43:36.658Z",
   "id": "W673PRUKy5pHPKdz",
   "name": "job_batch_xp_conversas",
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {
@@ -11,13 +11,13 @@
         "query": "SELECT u.id\nFROM public.usuarios u\nWHERE COALESCE(u.ativo, true) = true;",
         "options": {}
       },
-      "id": "6de8b767-a569-470c-b069-e56e7bab83ac",
+      "id": "96dd88ce-c180-4e3d-a09d-eff667126346",
       "name": "Listar Usuários",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1168,
-        48
+        480,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -31,13 +31,13 @@
         "batchSize": 1,
         "options": {}
       },
-      "id": "93a54113-c7f4-4268-accc-ec24c234a0da",
+      "id": "d44bda6b-73f8-4b47-bc99-ba4699652c54",
       "name": "Split In Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        1408,
-        48
+        720,
+        -128
       ]
     },
     {
@@ -86,13 +86,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "ac4b8b20-3748-4ba9-90f5-1d44e732d648",
+      "id": "34e36ca6-7fac-4626-9566-2469dee62e0f",
       "name": "Executar XP Conversas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1632,
-        48
+        944,
+        -128
       ]
     },
     {
@@ -108,10 +108,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        928,
-        48
+        240,
+        -128
       ],
-      "id": "60f90755-b6e5-49db-a97c-65fe5671fa9e",
+      "id": "6032af10-b428-4bf6-8d98-0fbbc729317b",
       "name": "Schedule Trigger"
     }
   ],
@@ -171,7 +171,7 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "6012280a-d48f-47f6-98f6-35525f775577",
+  "versionId": "ba3aa461-ec31-4379-a55c-b127e6f8419f",
   "triggerCount": 1,
   "shared": [
     {

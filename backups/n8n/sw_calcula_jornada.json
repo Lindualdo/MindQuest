@@ -40,7 +40,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT usuario_id, xp_total FROM public.quest_estado_usuario WHERE usuario_id = $1::uuid;",
+        "query": "WITH base AS (\n  SELECT\n    uc.usuario_id,\n    uc.xp_total,\n    uc.nivel_atual,\n    uc.titulo_nivel,\n    uc.sequencia_recorde,\n    uc.total_quests_concluidas,\n    uc.total_quests_personalizadas\n  FROM public.usuarios_conquistas uc\n  WHERE uc.usuario_id = $1::uuid\n),\nsabotadores AS (\n  SELECT usuario_id, COUNT(*) AS sabotadores_identificados\n  FROM public.usuarios_sabotadores\n  GROUP BY usuario_id\n),\nquests AS (\n  SELECT\n    usuario_id,\n    COUNT(*) FILTER (WHERE status = 'concluida') AS quests_concluidas,\n    COUNT(*) FILTER (WHERE status = 'concluida' AND COALESCE(complexidade, 0) >= 2) AS quests_desafiadoras,\n    COUNT(*) FILTER (WHERE status = 'concluida' AND COALESCE(progresso_meta, 0) >= 21) AS quests_recorrentes_21,\n    COUNT(DISTINCT area_vida_id) FILTER (WHERE status = 'concluida' AND area_vida_id IS NOT NULL) AS areas_vida_distintas,\n    COUNT(*) FILTER (WHERE status = 'concluida' AND COALESCE(meta_codigo, '') ILIKE 'compartilhar%') AS quests_compartilhar,\n    COUNT(*) FILTER (WHERE status = 'concluida' AND COALESCE(meta_codigo, '') ILIKE 'propria%') AS quests_proprias\n  FROM public.usuarios_quest\n  GROUP BY usuario_id\n)\nSELECT\n  base.*,\n  COALESCE(s.sabotadores_identificados, 0) AS sabotadores_identificados,\n  COALESCE(q.quests_concluidas, 0) AS quests_concluidas,\n  COALESCE(q.quests_desafiadoras, 0) AS quests_desafiadoras,\n  COALESCE(q.quests_recorrentes_21, 0) AS quests_recorrentes_21,\n  COALESCE(q.areas_vida_distintas, 0) AS areas_vida_distintas,\n  COALESCE(q.quests_compartilhar, 0) AS quests_compartilhar,\n  COALESCE(q.quests_proprias, 0) AS quests_proprias,\n  0 AS falhas_recuperadas,\n  0 AS projetos_impacto\nFROM base\nLEFT JOIN sabotadores s ON s.usuario_id = base.usuario_id\nLEFT JOIN quests q ON q.usuario_id = base.usuario_id;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -63,9 +63,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH nivel_destino AS (\n  SELECT jn.*\n  FROM public.jornada_niveis jn\n  WHERE jn.xp_minimo <= $2::int\n    AND ($2::int < COALESCE(jn.xp_proximo_nivel, $2::int + 1))\n  ORDER BY jn.nivel DESC\n  LIMIT 1\n)\nUPDATE public.resumo_jornada r\nSET\n  nivel_atual      = COALESCE(nivel_destino.nivel, r.nivel_atual),\n  titulo_nivel     = COALESCE(nivel_destino.nome, r.titulo_nivel),\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, r.xp_proximo_nivel),\n  atualizado_em    = NOW()\nFROM nivel_destino\nWHERE r.usuario_id = $1::uuid\nRETURNING r.usuario_id, r.nivel_atual, r.titulo_nivel, r.xp_proximo_nivel;\n",
+        "query": "WITH nivel_destino AS (\n  SELECT *\n  FROM public.jornada_niveis\n  WHERE nivel = $3::int\n)\nUPDATE public.usuarios_conquistas uc\nSET\n  xp_total = $2::int,\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, uc.xp_proximo_nivel),\n  nivel_atual = COALESCE(nivel_destino.nivel, uc.nivel_atual),\n  titulo_nivel = COALESCE(nivel_destino.nome, uc.titulo_nivel),\n  atualizado_em = NOW()\nFROM nivel_destino\nWHERE uc.usuario_id = $1::uuid\nRETURNING uc.usuario_id, uc.nivel_atual, uc.titulo_nivel, uc.xp_proximo_nivel;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0] }}"
+          "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0, $json.target_nivel || 1] }}"
         }
       },
       "id": "3ab8600d-a22b-4729-9443-df30166bf724",
@@ -93,6 +93,19 @@
         928,
         0
       ]
+    },
+    {
+      "id": "b7a9f734-de7f-4dbb-95b4-73b01c2d0983",
+      "name": "Determinar Nível",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        584,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const data = $json || {};\nconst xpTotal = Number(data.xp_total) || 0;\nconst metrics = {\n  sequencia_recorde: Number(data.sequencia_recorde) || 0,\n  total_quests_personalizadas: Number(data.total_quests_personalizadas) || 0,\n  total_quests_concluidas: Number(data.total_quests_concluidas) || 0,\n  sabotadores_identificados: Number(data.sabotadores_identificados) || 0,\n  quests_concluidas: Number(data.quests_concluidas) || 0,\n  quests_desafiadoras: Number(data.quests_desafiadoras) || 0,\n  quests_recorrentes_21: Number(data.quests_recorrentes_21) || 0,\n  areas_vida_distintas: Number(data.areas_vida_distintas) || 0,\n  quests_compartilhar: Number(data.quests_compartilhar) || 0,\n  quests_proprias: Number(data.quests_proprias) || 0,\n  falhas_recuperadas: Number(data.falhas_recuperadas) || 0,\n  projetos_impacto: Number(data.projetos_impacto) || 0,\n};\nmetrics.ciclos30 = Math.floor(metrics.sequencia_recorde / 30);\nconst LEVELS = [\n  { level: 1, minXp: 0, requirements: () => true },\n  { level: 2, minXp: 500, requirements: (m) => m.sequencia_recorde >= 7 && m.sabotadores_identificados >= 3 && (m.total_quests_personalizadas >= 3 || m.quests_concluidas >= 3) },\n  { level: 3, minXp: 1200, requirements: (m) => m.sequencia_recorde >= 10 && m.quests_concluidas >= 5 && m.quests_desafiadoras >= 1 },\n  { level: 4, minXp: 2200, requirements: (m) => m.sequencia_recorde >= 15 && m.quests_concluidas >= 8 && m.quests_recorrentes_21 >= 1 },\n  { level: 5, minXp: 3600, requirements: (m) => m.sequencia_recorde >= 20 && m.quests_concluidas >= 12 && m.falhas_recuperadas >= 1 },\n  { level: 6, minXp: 5400, requirements: (m) => m.sequencia_recorde >= 25 && m.quests_concluidas >= 15 && m.areas_vida_distintas >= 3 },\n  { level: 7, minXp: 7400, requirements: (m) => m.sequencia_recorde >= 30 && m.quests_concluidas >= 20 && m.quests_proprias >= 2 },\n  { level: 8, minXp: 9800, requirements: (m) => m.ciclos30 >= 2 && m.quests_concluidas >= 25 && m.quests_compartilhar >= 3 },\n  { level: 9, minXp: 12600, requirements: (m) => m.sequencia_recorde >= 45 && m.quests_concluidas >= 30 && m.projetos_impacto >= 1 },\n  { level: 10, minXp: 16000, requirements: (m) => m.sequencia_recorde >= 365 && m.projetos_impacto >= 1 },\n];\nconst xpEligible = LEVELS.reduce((acc, lvl) => (xpTotal >= lvl.minXp ? lvl.level : acc), 1);\nlet criteriaEligible = 1;\nfor (const lvl of LEVELS) {\n  if (lvl.level > xpEligible) break;\n  if (lvl.requirements(metrics)) {\n    criteriaEligible = lvl.level;\n  } else {\n    break;\n  }\n}\nconst targetLevel = Math.min(xpEligible, criteriaEligible);\nreturn [{\n  json: {\n    usuario_id: data.usuario_id,\n    xp_total: xpTotal,\n    xp_eligible_level: xpEligible,\n    criteria_eligible_level: criteriaEligible,\n    target_nivel: targetLevel,\n  },\n}];"
+      }
     }
   ],
   "connections": {
@@ -118,22 +131,33 @@
         ]
       ]
     },
-    "Buscar XP": {
+    "Atualizar Jornada": {
       "main": [
         [
           {
-            "node": "Atualizar Jornada",
+            "node": "Fim",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Jornada": {
+    "Buscar XP": {
       "main": [
         [
           {
-            "node": "Fim",
+            "node": "Determinar Nível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determinar Nível": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Jornada",
             "type": "main",
             "index": 0
           }
@@ -155,7 +179,7 @@
       }
     ]
   },
-  "versionId": "d23a2129-f51b-40a1-a847-82d628121481",
+  "versionId": "0c38ff5d-4021-45cd-9fc8-1c002b73d990",
   "triggerCount": 0,
   "shared": [
     {
