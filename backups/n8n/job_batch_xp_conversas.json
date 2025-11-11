@@ -2,20 +2,9 @@
   "createdAt": "2025-11-07T18:43:36.658Z",
   "id": "W673PRUKy5pHPKdz",
   "name": "job_batch_xp_conversas",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {},
-      "id": "f5854252-e9bd-4d0a-8a96-3520a7ada3d2",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        944,
-        48
-      ]
-    },
     {
       "parameters": {
         "operation": "executeQuery",
@@ -63,7 +52,8 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $json.id }}"
+            "usuario_id": "={{ $json.id }}",
+            "calcular_apenas_novos": true
           },
           "matchingColumns": [
             "usuario_id"
@@ -77,6 +67,16 @@
               "display": true,
               "canBeUsedToMatch": true,
               "type": "string"
+            },
+            {
+              "id": "calcular_apenas_novos",
+              "displayName": "calcular_apenas_novos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -94,20 +94,28 @@
         1632,
         48
       ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        48
+      ],
+      "id": "60f90755-b6e5-49db-a97c-65fe5671fa9e",
+      "name": "Schedule Trigger"
     }
   ],
   "connections": {
-    "Manual Trigger": {
-      "main": [
-        [
-          {
-            "node": "Listar Usuários",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Listar Usuários": {
       "main": [
         [
@@ -140,16 +148,31 @@
           }
         ]
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Listar Usuários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "612b30a4-d8d6-431a-8a0a-d4e2b35e3f55",
-  "triggerCount": 0,
+  "versionId": "6012280a-d48f-47f6-98f6-35525f775577",
+  "triggerCount": 1,
   "shared": [
     {
       "createdAt": "2025-11-07T18:43:36.658Z",
