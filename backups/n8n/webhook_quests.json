@@ -12,16 +12,16 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        256,
-        -48
+        -48,
+        -32
       ],
-      "id": "3b4959c7-d717-4465-a516-6dcc3b2bf704",
+      "id": "b542605d-3138-459f-9d9b-4f4cd1c2bcbc",
       "name": "Responder"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  uq.id              AS instancia_id,\n  uq.meta_codigo     AS meta_codigo,\n  uq.status          AS status,\n  uq.progresso_meta  AS progresso_meta,\n  uq.progresso_atual AS progresso_atual,\n  uq.concluido_em    AS concluido_em,\n  uq.xp_concedido    AS xp_concedido,\n  uq.contexto_origem AS contexto_origem,\n  uq.atualizado_em   AS atualizado_em,\n  uq.area_vida_id,\n  uq.sabotador_id,\n  uq.insight_id,\n  uq.complexidade,\n  mc.titulo          AS titulo,\n  mc.descricao       AS descricao,\n  mc.config          AS config,\n  mc.xp_recompensa   AS xp_recompensa,\n  mc.codigo          AS modelo_codigo,\n  mc.tipo            AS tipo\nFROM public.usuarios_quest uq\nLEFT JOIN public.metas_catalogo mc ON mc.id = uq.modelo_id\nWHERE uq.usuario_id = $1::uuid\nORDER BY\n  CASE uq.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  uq.atualizado_em DESC\nLIMIT 20;\n",
+        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.progresso_meta,\n    uq.progresso_atual,\n    uq.xp_concedido,\n    uq.contexto_origem,\n    uq.concluido_em,\n    uq.atualizado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.complexidade,\n    uq.config,\n    COALESCE(uq.config->>'meta_codigo', uq.id::text) AS meta_codigo,\n    COALESCE(uq.config->>'titulo', 'Quest personalizada') AS titulo,\n    uq.config->>'descricao' AS descricao,\n    uq.config->>'prioridade' AS prioridade,\n    uq.config->>'recorrencia' AS recorrencia,\n    COALESCE((uq.config->>'xp_recompensa')::int, NULL) AS xp_recompensa,\n    uq.config->>'tipo' AS tipo\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  quests.id AS instancia_id,\n  quests.meta_codigo,\n  quests.status,\n  quests.progresso_meta,\n  quests.progresso_atual,\n  quests.concluido_em,\n  quests.xp_concedido,\n  quests.contexto_origem,\n  quests.atualizado_em,\n  quests.area_vida_id,\n  quests.sabotador_id,\n  quests.insight_id,\n  quests.complexidade,\n  quests.titulo,\n  quests.descricao,\n  quests.config,\n  quests.xp_recompensa,\n  quests.meta_codigo AS modelo_codigo,\n  quests.tipo\nFROM quests\nORDER BY\n  CASE quests.status\n    WHEN 'ativa' THEN 0\n    WHEN 'pendente' THEN 1\n    WHEN 'reiniciada' THEN 2\n    WHEN 'concluida' THEN 3\n    WHEN 'vencida' THEN 4\n    WHEN 'cancelada' THEN 5\n    ELSE 6\n  END,\n  quests.atualizado_em DESC\nLIMIT 20;\n",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -29,10 +29,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -176,
-        -208
+        -480,
+        -192
       ],
-      "id": "59804735-60d2-4507-9d44-dee0cc1e01de",
+      "id": "321fa049-a71d-454f-9a96-5b0816b5f127",
       "name": "Listar Usuarios Quest",
       "credentials": {
         "postgres": {
@@ -52,10 +52,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -400,
-        -48
+        -704,
+        -32
       ],
-      "id": "6ed88af3-ae8e-4df2-8f42-4ec0327086fe",
+      "id": "82e051b5-6f11-4b68-a465-847db4cdc4b1",
       "name": "Ler Usuarios Conquistas",
       "credentials": {
         "postgres": {
@@ -71,10 +71,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -640,
-        -48
+        -944,
+        -32
       ],
-      "id": "cb3dde4c-0e33-4a83-9696-32770b4101c4",
+      "id": "9e63df37-4c4a-4458-83ea-e4f50d70ea94",
       "name": "Validar Entrada"
     },
     {
@@ -86,10 +86,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -864,
-        -48
+        -1168,
+        -32
       ],
-      "id": "6494f855-0b0e-48f8-be9a-ff748cec6c76",
+      "id": "f65b81dc-6aa9-4bde-a0e6-ab5f3b9ff970",
       "name": "Webhook",
       "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
     },
@@ -100,10 +100,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        -48
+        -256,
+        -32
       ],
-      "id": "469e8989-6852-433e-a133-ddb168c5d667",
+      "id": "5dc7935d-164d-4653-8236-929bedd926e6",
       "name": "Montar Resposta"
     },
     {
@@ -114,13 +114,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "b7de5c6a-4d09-4eba-8f34-04d3c5a8f6c7",
+      "id": "061132a7-d70c-4747-8bab-d7cd561b5300",
       "name": "Consultar Usr Chat 14d",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -176,
-        160
+        -480,
+        176
       ],
       "credentials": {
         "postgres": {
@@ -131,13 +131,13 @@
     },
     {
       "parameters": {},
-      "id": "f7e0c4f2-bae8-4f09-9a41-4f50a4c5e87c",
+      "id": "fcf76563-c274-43d4-996c-bfd5fc808637",
       "name": "Aguardar Dados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -16,
-        -48
+        -320,
+        -32
       ]
     }
   ],
@@ -272,7 +272,7 @@
       }
     ]
   },
-  "versionId": "4602e4bb-5f7f-4c6e-bb65-ecaf134e14e6",
+  "versionId": "f46c1e93-1caf-4744-9c5d-5d7d31e3b6b2",
   "triggerCount": 1,
   "shared": [
     {

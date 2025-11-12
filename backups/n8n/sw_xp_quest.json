@@ -21,26 +21,26 @@
           ]
         }
       },
-      "id": "f8168b55-9298-4008-9df3-aba50c4e5c19",
+      "id": "1cbecedd-e4ed-4fea-b7db-d25b68dee57b",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1264,
-        -176
+        -304,
+        -256
       ]
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigat\u00f3rio');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
+        "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "id": "ca52ad0b-4880-4eb2-be02-c1620a6aea59",
+      "id": "d69e8b33-094d-431e-bf39-e8b50af11c2c",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1040,
-        -176
+        -80,
+        -256
       ]
     },
     {
@@ -79,13 +79,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "dab1393f-2db8-42f4-83c7-2057891754ee",
+      "id": "616c37ad-6d3b-41e9-b7d7-fad48e57fc3b",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        528,
-        -176
+        1488,
+        -256
       ]
     },
     {
@@ -96,13 +96,13 @@
           "queryReplacement": "={{ [ $json.usuario_id ] }}"
         }
       },
-      "id": "82e45a1e-bb80-4ef0-a7aa-42937394f08c",
+      "id": "060622ac-2d79-4778-92cc-c5f01b3c14a9",
       "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -816,
-        -176
+        144,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -115,30 +115,30 @@
       "parameters": {
         "jsCode": "const entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: Array.isArray(entrada.novas_quests) ? entrada.novas_quests : [],\n    atualizacoes: Array.isArray(entrada.atualizacoes) ? entrada.atualizacoes : [],\n    estado_inicial: estado\n  }\n}];"
       },
-      "id": "c9decfd5-efbe-4cf6-b6c1-dd49cbfb6b73",
+      "id": "8213d908-9b86-4bfc-8853-3f0cd371ec3f",
       "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -592,
-        -176
+        368,
+        -256
       ]
     },
     {
       "parameters": {
+        "operation": "executeQuery",
         "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    COALESCE(rec->>'prioridade', 'media') AS prioridade,\n    COALESCE(rec->>'recorrencia', 'unica') AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    GREATEST(1, COALESCE((rec->>'progresso_meta')::int, 1)) AS progresso_meta,\n    COALESCE(rec->>'status_inicial', 'pendente') AS status_inicial,\n    NULLIF(rec->>'area_vida_id', '')::uuid AS area_vida_id,\n    NULLIF(rec->>'sabotador_id', '') AS sabotador_id,\n    NULLIF(rec->>'insight_id', '')::uuid AS insight_id,\n    COALESCE((rec->>'complexidade')::smallint, 0) AS complexidade,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\ninserted AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    janela_inicio,\n    janela_fim,\n    contexto_origem,\n    referencia_data,\n    reiniciada_em,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    cancelado_em,\n    area_vida_id,\n    sabotador_id,\n    insight_id,\n    complexidade,\n    config\n  )\n  SELECT\n    gen_random_uuid(),\n    rows.usuario_id,\n    rows.status_inicial,\n    0,\n    rows.progresso_meta,\n    0,\n    0,\n    0,\n    rows.prazo_inicio,\n    rows.prazo_fim,\n    rows.contexto_origem,\n    rows.prazo_inicio,\n    NULL,\n    NOW(),\n    NOW(),\n    NULL,\n    NULL,\n    rows.area_vida_id,\n    rows.sabotador_id,\n    rows.insight_id,\n    rows.complexidade,\n    jsonb_build_object(\n      'titulo', rows.titulo,\n      'descricao', rows.descricao,\n      'prioridade', rows.prioridade,\n      'recorrencia', rows.recorrencia,\n      'payload_extra', rows.payload_extra\n    )\n  FROM rows\n  RETURNING id\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas\nFROM payload;",
         "options": {
           "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.novas_quests || []), JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}) ] }}"
-        },
-        "operation": "executeQuery"
+        }
       },
-      "id": "55ee05f9-f2a2-4867-9e71-c160b1a857a3",
+      "id": "96e823a4-6caa-4ce7-a0eb-c3d4067dfd07",
       "name": "Inserir Instancias",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -160,
-        -176
+        800,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -149,19 +149,19 @@
     },
     {
       "parameters": {
+        "operation": "executeQuery",
         "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS atualizacoes,\n    $3::jsonb AS estado_inicial,\n    $4::jsonb AS novas_quests\n),\nupdates AS (\n  SELECT\n    payload.usuario_id,\n    (rec->>'instancia_id')::uuid AS instancia_id,\n    COALESCE(rec->>'novo_status', 'pendente') AS novo_status,\n    COALESCE((rec->>'progresso_atual')::int, 0) AS progresso_atual,\n    COALESCE((rec->>'xp_extra')::int, 0) AS xp_extra\n  FROM payload,\n       jsonb_array_elements(payload.atualizacoes) rec\n  WHERE rec ? 'instancia_id'\n),\nalvos AS (\n  SELECT\n    uq.id,\n    uq.usuario_id,\n    uq.status AS status_atual,\n    uq.progresso_meta,\n    uq.progresso_atual AS progresso_atual_atual,\n    updates.novo_status,\n    updates.progresso_atual,\n    updates.xp_extra,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM updates\n  JOIN public.usuarios_quest uq ON uq.id = updates.instancia_id\n  WHERE uq.usuario_id = updates.usuario_id\n),\nalvos_enriquecidos AS (\n  SELECT\n    alvos.*,\n    COALESCE(alvos.config->>'recorrencia', 'unica') AS recorrencia,\n    CASE WHEN alvos.novo_status = 'concluida' THEN 150 ELSE 0 END AS xp_base_evento,\n    CASE WHEN alvos.novo_status = 'concluida' AND COALESCE(alvos.config->>'recorrencia', 'unica') <> 'unica' THEN 30 ELSE 0 END AS xp_bonus_evento\n  FROM alvos\n),\natualizados AS (\n  UPDATE public.usuarios_quest uq\n  SET\n    status = CASE\n      WHEN ae.novo_status IN ('pendente','ativa','concluida','vencida','cancelada','reiniciada') THEN ae.novo_status\n      ELSE uq.status\n    END,\n    progresso_atual = ae.progresso_atual,\n    progresso_percentual = CASE\n      WHEN uq.progresso_meta > 0 THEN LEAST(100, GREATEST(0, ROUND(ae.progresso_atual::numeric / uq.progresso_meta::numeric * 100)))\n      ELSE uq.progresso_percentual\n    END,\n    atualizado_em = NOW(),\n    concluido_em = CASE WHEN ae.novo_status = 'concluida' THEN NOW() ELSE uq.concluido_em END,\n    reiniciada_em = CASE WHEN ae.novo_status = 'reiniciada' THEN NOW() ELSE uq.reiniciada_em END\n  FROM alvos_enriquecidos ae\n  WHERE uq.id = ae.id\n  RETURNING uq.id, ae.usuario_id, ae.novo_status, ae.recorrencia, ae.xp_base_evento, ae.xp_bonus_evento, ae.xp_extra, ae.config\n),\nhistorico AS (\n  INSERT INTO public.conquistas_historico (\n    usuario_id,\n    tipo,\n    meta_codigo,\n    meta_titulo,\n    xp_base,\n    xp_bonus,\n    detalhes\n  )\n  SELECT\n    upd.usuario_id,\n    'quest',\n    upd.id::text,\n    COALESCE(upd.config->>'titulo', 'Quest Personalizada'),\n    upd.xp_base_evento,\n    upd.xp_bonus_evento + upd.xp_extra,\n    jsonb_build_object(\n      'quest_id', upd.id,\n      'recorrencia', upd.recorrencia,\n      'registrado_em', NOW()\n    )\n  FROM atualizados upd\n  WHERE upd.novo_status = 'concluida'\n),\nxp_total AS (\n  SELECT\n    COALESCE(SUM(upd.xp_base_evento + upd.xp_bonus_evento + upd.xp_extra), 0) AS xp_ganho,\n    COUNT(*) FILTER (WHERE upd.novo_status = 'concluida') AS concluidas,\n    COUNT(*) FILTER (WHERE upd.novo_status = 'reiniciada') AS reinicios\n  FROM atualizados upd\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas rj\n  SET\n    xp_total = rj.xp_total + (SELECT xp_ganho FROM xp_total),\n    total_quests_concluidas = rj.total_quests_concluidas + (SELECT concluidas FROM xp_total),\n    total_xp_hoje = rj.total_xp_hoje + (SELECT xp_ganho FROM xp_total),\n    atualizado_em = NOW()\n  WHERE rj.usuario_id = (SELECT usuario_id FROM payload LIMIT 1)\n  RETURNING rj.usuario_id\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  (SELECT xp_ganho FROM xp_total) AS xp_ganho,\n  (SELECT concluidas FROM xp_total) AS quests_concluidas,\n  (SELECT reinicios FROM xp_total) AS reinicios\nFROM payload;",
         "options": {
           "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}), JSON.stringify($json.novas_quests || []) ] }}"
-        },
-        "operation": "executeQuery"
+        }
       },
-      "id": "73a5fb0f-e21d-4085-8dd9-36c598329e0e",
+      "id": "30bb2eef-a5bc-437c-a40e-af1137e3209c",
       "name": "Aplicar Atualizacoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        80,
-        -176
+        1040,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -178,13 +178,13 @@
           "queryReplacement": "={{ [ $json.usuario_id, $json.xp_ganho, $json.quests_concluidas, $json.reinicios, JSON.stringify($json.novas_quests || []), JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}) ] }}"
         }
       },
-      "id": "571a39bc-c76a-421a-ae2b-17e5cd81d052",
+      "id": "6704bbb3-c763-43bb-9754-4394c59c9bd1",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        304,
-        -176
+        1264,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -195,19 +195,19 @@
     },
     {
       "parameters": {
+        "operation": "executeQuery",
         "query": "WITH personalizadas AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.contexto_origem,\n    uq.progresso_meta,\n    uq.progresso_atual,\n    uq.concluido_em,\n    uq.ativado_em,\n    uq.atualizado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.complexidade,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status,\n  COALESCE(jsonb_agg(personalizadas) FILTER (WHERE personalizadas.id IS NOT NULL), '[]'::jsonb) AS quests_personalizadas\nFROM public.usuarios_conquistas rj\nLEFT JOIN personalizadas ON TRUE\nWHERE rj.usuario_id = $1::uuid\nGROUP BY\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status;",
         "options": {
           "queryReplacement": "={{ [ $json.usuario_id ] }}"
-        },
-        "operation": "executeQuery"
+        }
       },
-      "id": "ee327a4a-6485-4f30-bfa7-7994d8a8f3d0",
+      "id": "a94da6b0-24c5-4555-b4a0-093ef25df15e",
       "name": "Buscar Snapshot Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        736,
-        -176
+        1696,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -220,13 +220,13 @@
       "parameters": {
         "jsCode": "const estadoItems = $items(\"Atualizar Estado\", 0, 0) || [];\nconst estadoAtualizado = (estadoItems[0] && estadoItems[0].json) || {};\nconst snapshotFinal = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      return Array.isArray(parsed) ? parsed : [];\n    } catch (error) {\n      return [];\n    }\n  }\n  return [];\n};\n\nconst toNumber = (value, fallback = 0) => {\n  const numeric = Number(value);\n  return Number.isFinite(numeric) ? numeric : fallback;\n};\n\nconst filaItems = $items(\"Preparar Operacoes\", 0, 0) || [];\nconst filaEspera = parseList(filaItems[0]?.json?.fila_espera);\n\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id ?? snapshotFinal.usuario_id ?? null,\n    xp_total: toNumber(estadoAtualizado.xp_total ?? snapshotFinal.xp_total ?? 0),\n    nivel_atual: estadoAtualizado.nivel_atual ?? snapshotFinal.nivel_atual ?? null,\n    titulo_nivel: estadoAtualizado.titulo_nivel ?? snapshotFinal.titulo_nivel ?? null,\n    xp_proximo_nivel: toNumber(estadoAtualizado.xp_proximo_nivel ?? snapshotFinal.xp_proximo_nivel ?? 0),\n    xp_ganho: toNumber(estadoAtualizado.xp_ganho, 0),\n    quests_concluidas_no_evento: toNumber(estadoAtualizado.quests_concluidas, 0),\n    reinicios_registrados: toNumber(estadoAtualizado.reinicios, 0),\n    novas_quests_registradas: parseList(estadoAtualizado.novas_quests),\n    atualizacoes_processadas: parseList(estadoAtualizado.atualizacoes),\n    fila_espera: filaEspera,\n    snapshot_final: snapshotFinal\n  }\n}];\n"
       },
-      "id": "8a05eb35-9aae-4b59-b9bf-5cb1ce982782",
+      "id": "c0950b29-cbe9-4816-a1b5-91dbb961d08f",
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
-        -176
+        1904,
+        -256
       ]
     }
   ],
@@ -341,13 +341,13 @@
       {
         "json": {
           "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "quests_personalizadas": "[{\"titulo\":\"Celebrar Pequenas Conquistas Di\u00e1rias\",\"descricao\":\"Registre diariamente uma pequena vit\u00f3ria ou progresso em seus projetos, acompanhando com um breve momento de autocuidado para refor\u00e7ar o est\u00edmulo motivacional e ajudar a manter a disciplina e o foco equilibrados com o cuidado pessoal.\",\"contexto_origem\":\"Necessidade de apoio motivacional com est\u00edmulos concretos para sustentar empenho nos projetos.\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-11\",\"prazo_fim\":\"2025-11-17\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"xp_recompensa\":30,\"insight_id\":\"08f71213-1b30-4255-99dc-91eaecf180a3\",\"sabotador_id\":\"hiper_realizador\",\"area_vida_id\":\"11111111-1111-4111-8111-111111111111\",\"complexidade\":2,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Ritual Semanal de Revis\u00e3o Financeira e Autocuidado\",\"descricao\":\"Estabele\u00e7a um momento semanal para revisar suas finan\u00e7as e opera\u00e7\u00f5es no mercado com calma, seguido de uma atividade que promova seu bem-estar emocional, fortalecendo a disciplina e reduzindo a ansiedade financeira.\",\"contexto_origem\":\"Plano detalhado para manejo emocional das perdas financeiras e disciplina no mercado com autocuidado.\",\"prioridade\":\"alta\",\"recorrencia\":\"semanal\",\"prazo_inicio\":\"2025-11-11\",\"prazo_fim\":\"2025-11-24\",\"progresso_meta\":2,\"status_inicial\":\"pendente\",\"xp_recompensa\":50,\"insight_id\":\"99ac5a27-74bc-4e44-82d5-d2844d0ca319\",\"sabotador_id\":\"hiper_realizador\",\"area_vida_id\":\"33333333-3333-4333-8333-333333333333\",\"complexidade\":4,\"payload_extra\":{\"canal\":\"app\"}}]",
+          "quests_personalizadas": "[{\"titulo\":\"Celebrar Pequenas Conquistas Diárias\",\"descricao\":\"Registre diariamente uma pequena vitória ou progresso em seus projetos, acompanhando com um breve momento de autocuidado para reforçar o estímulo motivacional e ajudar a manter a disciplina e o foco equilibrados com o cuidado pessoal.\",\"contexto_origem\":\"Necessidade de apoio motivacional com estímulos concretos para sustentar empenho nos projetos.\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-11\",\"prazo_fim\":\"2025-11-17\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"xp_recompensa\":30,\"insight_id\":\"08f71213-1b30-4255-99dc-91eaecf180a3\",\"sabotador_id\":\"hiper_realizador\",\"area_vida_id\":\"11111111-1111-4111-8111-111111111111\",\"complexidade\":2,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Ritual Semanal de Revisão Financeira e Autocuidado\",\"descricao\":\"Estabeleça um momento semanal para revisar suas finanças e operações no mercado com calma, seguido de uma atividade que promova seu bem-estar emocional, fortalecendo a disciplina e reduzindo a ansiedade financeira.\",\"contexto_origem\":\"Plano detalhado para manejo emocional das perdas financeiras e disciplina no mercado com autocuidado.\",\"prioridade\":\"alta\",\"recorrencia\":\"semanal\",\"prazo_inicio\":\"2025-11-11\",\"prazo_fim\":\"2025-11-24\",\"progresso_meta\":2,\"status_inicial\":\"pendente\",\"xp_recompensa\":50,\"insight_id\":\"99ac5a27-74bc-4e44-82d5-d2844d0ca319\",\"sabotador_id\":\"hiper_realizador\",\"area_vida_id\":\"33333333-3333-4333-8333-333333333333\",\"complexidade\":4,\"payload_extra\":{\"canal\":\"app\"}}]",
           "atualizacoes_status": "[]"
         }
       }
     ]
   },
-  "versionId": "a0fdb580-cee4-4473-b275-3fa62d6919a4",
+  "versionId": "7468e5df-93fb-4b70-b48b-1221d9bab246",
   "triggerCount": 0,
   "shared": [
     {

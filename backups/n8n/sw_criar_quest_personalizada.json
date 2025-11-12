@@ -18,26 +18,26 @@
           ]
         }
       },
-      "id": "f989ba7c-3250-4fbe-8335-72f39ba0744d",
+      "id": "ed0b6cf8-401a-4270-9384-dd4787a01d1d",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1824,
-        160
+        -2912,
+        -48
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
       },
-      "id": "67ca1917-193c-4d43-b510-dec2ee54840d",
+      "id": "94d34adb-58e6-4cbb-a714-ac3c32ea54f2",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1648,
-        160
+        -2736,
+        -48
       ]
     },
     {
@@ -48,13 +48,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "8fe25394-b17a-45d3-a488-48c6ccbbad8a",
+      "id": "3e302606-2b04-4d8d-a487-e47bc609d09e",
       "name": "Buscar Quests Ativas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1456,
-        160
+        -2544,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -71,13 +71,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "609268f5-ae8b-43dc-ab0f-a4bfd4624ded",
+      "id": "6a350263-05bd-4f4f-961b-82845afc9c5b",
       "name": "Buscar Conversas Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1280,
-        160
+        -2368,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -94,13 +94,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "930aa2fd-f11a-438e-8d40-75037d39f294",
+      "id": "5d01abc6-424b-45e7-84c8-e5d17b3fa546",
       "name": "Buscar Insights Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1088,
-        160
+        -2176,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -117,13 +117,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "02617072-2204-4cdd-8730-30d9eb1b4dfd",
+      "id": "5025aa8e-8029-4c6f-90a9-38676ab4dd38",
       "name": "Buscar Sabotadores Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -880,
-        160
+        -1968,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -138,13 +138,13 @@
         "query": "SELECT json_build_object(\n  'areas_vida',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', avc.id,\n      'codigo', avc.codigo,\n      'nome', avc.nome,\n      'descricao', avc.descricao\n    )\n    ORDER BY avc.nome ASC\n  ), '[]'::json)\n) AS areas\nFROM public.areas_vida_catalogo avc\nWHERE avc.ativo IS TRUE;",
         "options": {}
       },
-      "id": "d339922e-db9c-4322-9404-954059299088",
+      "id": "34d9c40b-4723-4961-ab90-317dad7fbd18",
       "name": "Listar Áreas da Vida",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
-        160
+        -1744,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -159,13 +159,13 @@
         "query": "SELECT json_build_object(\n  'sabotadores_catalogo',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', sc.id,\n      'nome', sc.nome,\n      'emoji', sc.emoji,\n      'descricao', sc.descricao\n    )\n    ORDER BY sc.nome ASC\n  ), '[]'::json)\n) AS catalogo\nFROM public.sabotadores_catalogo sc;",
         "options": {}
       },
-      "id": "04dbf5a4-288a-4474-8c70-aa4e5c69efac",
+      "id": "eb2e5c93-6b19-4bf0-a020-a031d02a7280",
       "name": "Listar Sabotadores Catálogo",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        160
+        -1536,
+        -48
       ],
       "credentials": {
         "postgres": {
@@ -178,13 +178,13 @@
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst questsRaw = getJson(\"Buscar Quests Ativas\");\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst insightsRaw = getJson(\"Buscar Insights Recentes\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Recentes\");\nconst areasRaw = getJson(\"Listar Áreas da Vida\");\nconst sabotadoresCatRaw = getJson(\"Listar Sabotadores Catálogo\");\n\nconst quests = questsRaw.contexto || {};\nconst questsAtivas = Array.isArray(quests.quests_ativas) ? quests.quests_ativas : [];\nconst ativosValidos = questsAtivas.filter((quest) => {\n  const status = String(quest?.status || '').toLowerCase();\n  return status === 'pendente' || status === 'ativa';\n});\nconst limite = 3;\nconst slotsDisponiveis = Math.max(0, limite - ativosValidos.length);\n\nconst conversas = conversasRaw.conversas || {};\nconst insights = insightsRaw.insights || {};\nconst sabotadores = sabotadoresRaw.sabotadores || {};\nconst areasVida = areasRaw.areas_vida || [];\nconst sabotadoresCatalogo = sabotadoresCatRaw.sabotadores_catalogo || [];\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    quests_ativas: questsAtivas,\n    slots_disponiveis: slotsDisponiveis,\n    conversas_recentes: conversas.conversas_recentes || [],\n    insights_recentes: insights.insights_recentes || [],\n    sabotadores_recentes: sabotadores.sabotadores_recentes || [],\n    areas_vida_disponiveis: areasVida,\n    sabotadores_catalogo: sabotadoresCatalogo\n  }\n}];"
       },
-      "id": "ca759383-8ee9-4a8e-9ac4-8258f9aabb3e",
+      "id": "c557e349-903b-4ea0-a3e0-c2e9c1b2b935",
       "name": "Montar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -256,
-        160
+        -1344,
+        -48
       ]
     },
     {
@@ -194,13 +194,13 @@
           "temperature": 0.2
         }
       },
-      "id": "00a0027c-d40a-4ccc-81d1-f3efe2b79809",
+      "id": "8fe3cb4f-8f78-4081-a46d-f2999f719e7b",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -320,
-        544
+        -1408,
+        336
       ],
       "credentials": {
         "openRouterApi": {
@@ -218,13 +218,13 @@
           "enableStreaming": false
         }
       },
-      "id": "c21a7af6-6d35-406d-8d31-2c200380ecc3",
+      "id": "7700190f-59dc-4980-b11a-9c599488ef28",
       "name": "Agente Quests",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -64,
-        160
+        -1152,
+        -48
       ],
       "alwaysOutputData": true
     },
@@ -232,52 +232,52 @@
       "parameters": {
         "jsonSchemaExample": "{\"novas_quests\":[{\"titulo\":\"Check-in matinal\",\"descricao\":\"Registrar uma vitória pequena toda manhã\",\"contexto_origem\":\"manter_foco\",\"prioridade\":\"media\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-05\",\"prazo_fim\":\"2025-11-11\",\"progresso_meta\":5,\"status_inicial\":\"pendente\",\"xp_recompensa\":40,\"insight_id\":\"33333333-3333-4333-8333-333333333333\",\"sabotador_id\":\"11111111-1111-1111-1111-111111111111\",\"area_vida_id\":\"22222222-2222-2222-2222-222222222222\",\"complexidade\":2,\"payload_extra\":{\"canal\":\"app\"}}],\"atualizacoes\":[{\"meta_codigo\":\"quest_custom_001\",\"instancia_id\":\"00000000-0000-0000-0000-000000000000\",\"novo_status\":\"concluida\",\"progresso_atual\":3,\"xp_extra\":20}]}"
       },
-      "id": "948401b4-e55d-4c30-8ef5-8ca8a7ad092f",
+      "id": "8ef11136-68db-41a5-910c-7296eb5c912e",
       "name": "Parser JSON",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        80,
-        496
+        -1008,
+        288
       ]
     },
     {
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst contexto = getJson(\"Montar Contexto\");\n\nconst rawOutput = $json.output ?? { novas_quests: [], atualizacoes: [] };\nlet resultado;\nif (typeof rawOutput === 'string') {\n  try {\n    resultado = JSON.parse(rawOutput);\n  } catch (error) {\n    resultado = { novas_quests: [], atualizacoes: [] };\n  }\n} else if (rawOutput && typeof rawOutput === 'object') {\n  resultado = rawOutput;\n} else {\n  resultado = { novas_quests: [], atualizacoes: [] };\n}\n\nconst novasQuests = Array.isArray(resultado.novas_quests) ? resultado.novas_quests : [];\nconst atualizacoes = Array.isArray(resultado.atualizacoes) ? resultado.atualizacoes : [];\n\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas,\n    novas_quests_sugeridas: novasQuests,\n    atualizacoes_sugeridas: atualizacoes,\n    sabotadores_catalogo: contexto.sabotadores_catalogo || [],\n    sabotadores_recentes: contexto.sabotadores_recentes || []\n  }\n}];"
       },
-      "id": "914c5fe4-df19-435e-9f62-e25d8e470ab1",
+      "id": "b612752c-dd1f-41d6-876b-c718d022ea3b",
       "name": "Interpretar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        304,
-        160
+        -784,
+        -48
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = ($input.item && $input.item.json) ? $input.item.json : {};\nconst questsAtivas = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst limite = 3;\nconst dedupe = new Set();\nconst uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;\n\nfor (const ativo of questsAtivas) {\n  const contexto = String(ativo?.contexto_origem || '').toLowerCase().trim();\n  const titulo = String((ativo?.config?.titulo ?? ativo?.titulo ?? '')).toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst novas = [];\nconst atualizacoes = Array.isArray(entrada.atualizacoes_sugeridas) ? entrada.atualizacoes_sugeridas : [];\nconst candidatas = Array.isArray(entrada.novas_quests_sugeridas) ? entrada.novas_quests_sugeridas : [];\n\nfor (const quest of candidatas) {\n  if (!quest || typeof quest !== 'object') continue;\n  if (novas.length + questsAtivas.length >= limite) break;\n\n  const contexto = String(quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = String(quest.titulo || '').toLowerCase().trim();\n  const chave = `${contexto}|${titulo}`;\n  if (!contexto && !titulo) continue;\n  if (dedupe.has(chave)) continue;\n\n  let areaVidaId = null;\n  if (typeof quest.area_vida_id === 'string') {\n    const trimmed = quest.area_vida_id.trim();\n    if (trimmed && uuidRegex.test(trimmed)) {\n      areaVidaId = trimmed;\n    }\n  }\n\n  let insightId = null;\n  if (typeof quest.insight_id === 'string') {\n    const trimmed = quest.insight_id.trim();\n    if (trimmed && uuidRegex.test(trimmed)) {\n      insightId = trimmed;\n    }\n  }\n\n  let sabotadorId = null;\n  if (typeof quest.sabotador_id === 'string') {\n    const trimmed = quest.sabotador_id.trim();\n    if (trimmed && uuidRegex.test(trimmed)) {\n      sabotadorId = trimmed;\n    }\n  }\n\n  if (!areaVidaId || !insightId) continue;\n\n  dedupe.add(chave);\n  novas.push({\n    titulo: quest.titulo,\n    descricao: quest.descricao,\n    contexto_origem: quest.contexto_origem,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    prazo_inicio: quest.prazo_inicio || null,\n    prazo_fim: quest.prazo_fim || null,\n    progresso_meta: quest.progresso_meta ?? 1,\n    status_inicial: quest.status_inicial || 'pendente',\n    area_vida_id: areaVidaId,\n    sabotador_id: sabotadorId,\n    insight_id: insightId,\n    complexidade: quest.complexidade ?? 0,\n    payload_extra: quest.payload_extra || {}\n  });\n}\n\nreturn [\n  {\n    json: {\n      usuario_id: entrada.usuario_id || null,\n      novas_quests: novas,\n      atualizacoes,\n      estado_inicial: entrada\n    }\n  }\n];"
       },
-      "id": "12af0ffb-6c51-40e4-b7af-2388f60ad1a5",
+      "id": "49ced57d-1127-4a8c-8df5-62d4388c3f91",
       "name": "Aplicar Limites & Dedupe",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        160
+        -576,
+        -48
       ]
     },
     {
       "parameters": {
         "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
       },
-      "id": "a8a9e634-a5e6-4547-9b44-e153fcd9c93a",
+      "id": "fc70e0e3-a21a-4ca2-a97c-41285cef348e",
       "name": "Montar Saída",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
-        160
+        -144,
+        -48
       ]
     },
     {
@@ -333,24 +333,16 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "09f1bb87-573e-488d-abe3-4f6e6a9dca6c",
+      "id": "40e40ade-9073-40f4-b14d-4d13a3d5d140",
       "name": "Calcula Xps quest",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        736,
-        160
+        -352,
+        -48
       ]
     },
     {
-      "id": "63f7d10f-5d8c-4c69-8f0f-5f0e4d3a971c",
-      "name": "Tem Slots?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -64,
-        160
-      ],
       "parameters": {
         "conditions": {
           "boolean": [
@@ -361,20 +353,28 @@
             }
           ]
         }
-      }
+      },
+      "id": "f3029fe0-8f5a-4fe9-a416-870b50c33a6a",
+      "name": "Tem Slots?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -48
+      ]
     },
     {
-      "id": "0c0b6f53-4a23-444d-8a0d-2f4605b1a68c",
+      "parameters": {
+        "jsCode": "const contexto = $input.item.json || {};\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas || [],\n    novas_quests_sugeridas: [],\n    atualizacoes_sugeridas: [],\n    sabotadores_catalogo: contexto.sabotadores_catalogo || [],\n    sabotadores_recentes: contexto.sabotadores_recentes || [],\n    areas_vida_disponiveis: contexto.areas_vida_disponiveis || []\n  }\n}];"
+      },
+      "id": "6b018dba-7ae8-4b9a-9219-8c9f096e214d",
       "name": "Sem Slots",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        160,
-        0
-      ],
-      "parameters": {
-        "jsCode": "const contexto = $input.item.json || {};\nreturn [{\n  json: {\n    usuario_id: contexto.usuario_id,\n    chat_id: contexto.chat_id,\n    quests_ativas: contexto.quests_ativas || [],\n    novas_quests_sugeridas: [],\n    atualizacoes_sugeridas: [],\n    sabotadores_catalogo: contexto.sabotadores_catalogo || [],\n    sabotadores_recentes: contexto.sabotadores_recentes || [],\n    areas_vida_disponiveis: contexto.areas_vida_disponiveis || []\n  }\n}];"
-      }
+        -928,
+        -208
+      ]
     }
   ],
   "connections": {
@@ -473,11 +473,6 @@
             "node": "Agente Quests",
             "type": "ai_languageModel",
             "index": 0
-          },
-          {
-            "node": "Parser JSON",
-            "type": "ai_languageModel",
-            "index": 0
           }
         ]
       ]
@@ -499,17 +494,6 @@
           {
             "node": "Calcula Xps quest",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parser JSON": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Agente Quests",
-            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -592,7 +576,7 @@
       }
     ]
   },
-  "versionId": "f4d6d9c8-7379-49c3-96bd-14e4c7b1e26f",
+  "versionId": "fbb1f64e-e369-48c8-b67c-27fc49210cdc",
   "triggerCount": 0,
   "shared": [
     {
