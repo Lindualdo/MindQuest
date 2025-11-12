@@ -31,7 +31,7 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 | Tipo | Finalidade | Origem | Limite ativo | Como progride | Quando encerra |
 |------|------------|--------|--------------|----------------|----------------|
 | **Sequência de Conversas** | Sustentar o hábito diário de conversar com o assistente. | Automática, baseada no registro de conversas concluídas. | Uma por vez (meta corrente). | Cumprindo o número de conversas consecutivas da meta ativa. | Ao completar a meta ou exceder o intervalo máximo sem conversar. |
-| **Personalizada** | Traduzir insights, sabotadores ou oportunidades identificadas nas conversas em ações concretas. | Recomendada pelo Assistente de Conversa; usuário aceita e configura. | Até 4 simultâneas (ativas ou pendentes). | Concluída pelo assistente, a partir da confirmação do usuario
+| **Personalizada** | Traduzir insights, sabotadores ou oportunidades identificadas nas conversas em ações concretas. | Recomendada pelo Assistente de Conversa; usuário aceita e configura. | Até 3 simultâneas (ativas ou pendentes). | Concluída pelo assistente, a partir da confirmação do usuario
 
 ## Regras comuns
 
@@ -45,6 +45,7 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 
 - **Regra base**: conversou no dia, ganhou **75 XP**. Várias conversas no mesmo dia continuam valendo só 75 XP para aquela data.
 - **Bônus de primeira conversa**: ao desbloquear o hábito (primeiro dia da sequência), concede +75 XP extras sobre o XP base.
+- **Catálogo único**: tanto o XP diário (`conversa_diaria`) quanto os bônus automáticos (`primeira_conversa`, `streak_*`) ficam em `metas_catalogo`, permitindo ajustes via painel administrativo; se um desses registros faltar, os workflows devem falhar imediatamente para evitar valores incorretos.
 - **Acúmulo de XP diário**: mesmo que o usuário converse diversas vezes no mesmo dia, apenas a primeira conversa do dia rende XP; as demais contam apenas para o streak.
 - **Progressão de streak**: a sequência usa os mesmos dias válidos do XP diário; múltiplas conversas no mesmo dia não avançam a meta.
 - **Dias válidos**: qualquer dia com pelo menos uma conversa já garante o XP diário; não importa o número de mensagens ou o tamanho delas.
@@ -68,6 +69,7 @@ A Jornada MindQuest é estruturada em **10 níveis de evolução pessoal**, onde
 |--------|-------------|-------------|
 | Quest concluída | 150 XP fixos | valor base aplicado a qualquer Quest Custom finalizada |
 | Recorrência concluída | +30 XP por ciclo, até 21 ciclos | bônus acumulativo para a mesma quest recorrente; máximo 630 XP extras |
+- **Catálogo único**: os valores `xp_base_quest` (150) e `xp_bonus_recorrencia` (30) moram em `metas_catalogo` com tipo `personalizada`. Se qualquer um deles faltar, o workflow deve falhar em vez de assumir defaults.
 
 ### Quest Conversa
 
