@@ -1,4 +1,4 @@
-import CardMomentoAgora from '@/components/app/v1.2/CardMomentoAgora';
+import CardSaudacaoHero from '@/components/app/v1.2/CardSaudacaoHero';
 import CardQuestDesbloqueada from '@/components/app/v1.2/CardQuestDesbloqueada';
 import CardPanorama from '@/components/app/v1.2/CardPanorama';
 import CardConversas from '@/components/app/v1.2/CardConversas';
@@ -144,7 +144,7 @@ const HomeV1_2 = () => (
   <div className="mq-app-v1_2 min-h-screen">
     <HeaderV1_2 />
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-8">
-      <CardMomentoAgora
+      <CardSaudacaoHero
         nome={mock.usuario.nome}
         nivelAtual={mock.usuario.nivel}
         xpAtual={mock.usuario.xpAtual}

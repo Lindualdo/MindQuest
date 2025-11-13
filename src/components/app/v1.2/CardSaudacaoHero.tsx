@@ -10,7 +10,7 @@ type Props = {
   xpRestante: number;
 };
 
-const CardMomentoAgora = ({
+const CardSaudacaoHero = ({
   nome,
   nivelAtual,
   xpAtual,
@@ -64,4 +64,4 @@ const CardMomentoAgora = ({
   );
 };
 
-export default CardMomentoAgora;
+export default CardSaudacaoHero;
