@@ -1,11 +1,6 @@
 import CardJornada from '@/components/app/v1.2/CardJornada';
 import CardConversas from '@/components/app/v1.2/CardConversas';
-import CardQuestAtiva from '@/components/app/v1.2/CardQuestAtiva';
-import CardPanorama from '@/components/app/v1.2/CardPanorama';
-import CardQuests from '@/components/app/v1.2/CardQuests';
-import CardJornadaConquistas from '@/components/app/v1.2/CardJornadaConquistas';
-import CardInsightsPadroes from '@/components/app/v1.2/CardInsightsPadroes';
-import CardResumoSemana from '@/components/app/v1.2/CardResumoSemana';
+import CardQuest from '@/components/app/v1.2/CardQuest';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 
@@ -164,50 +159,12 @@ const HomeV1_2 = () => (
         onExplorarHistorico={noop}
       />
 
-      <CardQuestAtiva
+      <CardQuest
         titulo={mock.questDesbloqueada.titulo}
         descricao={mock.questDesbloqueada.descricao}
         xpRecompensa={mock.questDesbloqueada.xp}
         onExplorarQuests={noop}
       />
-
-      <CardPanorama itens={mock.panorama} onExplorar={noop} />
-
-      <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2">
-        <CardQuests
-          questDoDia={mock.quests.questDoDia}
-          outrasQuests={mock.quests.outras}
-          slotsDisponiveis={mock.quests.slots}
-          onMarcarFeita={noop}
-          onExplorar={noop}
-        />
-      </div>
-
-      <CardJornadaConquistas
-        nivelAtual={mock.usuario.nivel}
-        xpAtual={mock.usuario.xpAtual}
-        xpMeta={mock.usuario.xpMeta}
-        descricaoNivel={mock.jornada.descricao}
-        checklist={mock.jornada.checklist}
-        proximoNivel={mock.usuario.proximoNivel}
-        xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
-        conquistas={mock.jornada.conquistas}
-        onVerHistorico={noop}
-      />
-
-      <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2">
-        <CardInsightsPadroes
-          alerta={mock.insights.alerta}
-          resumo={mock.insights.resumo}
-          onVerPadrao={noop}
-          onVerAnalise={noop}
-        />
-        <CardResumoSemana
-          emocoes={mock.resumoSemana.emocoes}
-          panas={mock.resumoSemana.panas}
-          onVerDetalhes={noop}
-        />
-      </div>
     </div>
   </div>
 );
