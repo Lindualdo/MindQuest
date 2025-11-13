@@ -35,7 +35,7 @@ const CardQuestAtiva = ({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="rounded-3xl border p-5 sm:p-6"
+      className="rounded-3xl border p-4 sm:p-5"
       style={{
         backgroundColor: '#E8F3F5',
         borderColor: '#C9DEE5',
@@ -43,7 +43,7 @@ const CardQuestAtiva = ({
       }}
     >
     <div
-      className="rounded-2xl px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wide"
+      className="rounded-2xl px-3.5 py-1 text-[9px] font-semibold uppercase tracking-wide"
       style={{ backgroundColor: '#FFFFFF', color: '#7EBDC2' }}
     >
       <div className="flex items-center justify-between gap-3 text-[0.7rem] sm:text-[0.75rem]">
@@ -54,7 +54,7 @@ const CardQuestAtiva = ({
       </div>
     </div>
 
-    <div className="mt-5 flex flex-col items-center gap-2 text-center">
+    <div className="mt-4 flex flex-col items-center gap-2 text-center">
       <div
         className="flex h-12 w-12 items-center justify-center rounded-2xl border-2"
         style={{ borderColor: '#7EBDC2', backgroundColor: '#FFFFFF', color: '#7EBDC2', boxShadow: '0 8px 16px rgba(126,189,194,0.25)' }}
@@ -81,7 +81,7 @@ const CardQuestAtiva = ({
       </div>
     </div>
 
-    <div className="mt-4 grid grid-cols-2 gap-2 text-[0.7rem] sm:text-[0.8rem] font-semibold">
+    <div className="mt-3 grid grid-cols-2 gap-2 text-[0.68rem] sm:text-[0.78rem] font-semibold">
       <button
         type="button"
         onClick={onConversar}
@@ -101,7 +101,7 @@ const CardQuestAtiva = ({
     </div>
 
     <div
-      className="mt-5 rounded-2xl bg-white px-4 py-3 shadow-sm"
+      className="mt-4 rounded-2xl bg-white px-3.5 py-2.5 shadow-sm"
       style={{ border: '1px solid #F5C7A6' }}
     >
       <div className="flex items-center justify-between text-[0.65rem] font-semibold" style={{ color: '#1C2541' }}>
@@ -119,9 +119,9 @@ const CardQuestAtiva = ({
           Recorde: {recordeAtual} dia{recordeAtual > 1 ? 's' : ''}
         </span>
       </div>
-      <div className="mt-3 h-2 rounded-full bg-[#D7E3F0]">
+      <div className="mt-3 mq-bar-track-v1_2" style={{ backgroundColor: '#D7E3F0' }}>
         <div
-          className="h-full rounded-full"
+          className="mq-bar-fill-v1_2"
           style={{ width: `${progressoConversas}%`, backgroundColor: '#F97316' }}
         />
       </div>
