@@ -12,10 +12,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        -48,
-        -32
+        160,
+        64
       ],
-      "id": "b542605d-3138-459f-9d9b-4f4cd1c2bcbc",
+      "id": "72ed82d5-b607-41c7-8abf-157f402e3380",
       "name": "Responder"
     },
     {
@@ -29,10 +29,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        -192
+        -432,
+        -96
       ],
-      "id": "321fa049-a71d-454f-9a96-5b0816b5f127",
+      "id": "f9872254-5402-4312-b0a4-a5946e4079f1",
       "name": "Listar Usuarios Quest",
       "credentials": {
         "postgres": {
@@ -52,10 +52,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -704,
-        -32
+        -656,
+        64
       ],
-      "id": "82e051b5-6f11-4b68-a465-847db4cdc4b1",
+      "id": "3df2788c-8fca-4859-9ae5-a42c0df6b787",
       "name": "Ler Usuarios Conquistas",
       "credentials": {
         "postgres": {
@@ -71,10 +71,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -944,
-        -32
+        -896,
+        64
       ],
-      "id": "9e63df37-4c4a-4458-83ea-e4f50d70ea94",
+      "id": "214c289c-60ca-4d55-8f66-e699a42bd44a",
       "name": "Validar Entrada"
     },
     {
@@ -86,10 +86,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1168,
-        -32
+        -1120,
+        64
       ],
-      "id": "f65b81dc-6aa9-4bde-a0e6-ab5f3b9ff970",
+      "id": "49e50fe8-9bec-4d22-9793-1d88c78fd766",
       "name": "Webhook",
       "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests"
     },
@@ -100,10 +100,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -256,
-        -32
+        -48,
+        64
       ],
-      "id": "5dc7935d-164d-4653-8236-929bedd926e6",
+      "id": "c5aa0b1b-c5c8-4519-8f41-54a1334ed198",
       "name": "Montar Resposta"
     },
     {
@@ -114,13 +114,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "061132a7-d70c-4747-8bab-d7cd561b5300",
+      "id": "de53c231-bf04-421c-835a-69cd9a03f174",
       "name": "Consultar Usr Chat 14d",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        176
+        -432,
+        272
       ],
       "credentials": {
         "postgres": {
@@ -131,13 +131,13 @@
     },
     {
       "parameters": {},
-      "id": "fcf76563-c274-43d4-996c-bfd5fc808637",
+      "id": "9e01dce7-45a6-4e8b-b32e-6debe17f9acd",
       "name": "Aguardar Dados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -320,
-        -32
+        -272,
+        64
       ]
     }
   ],
@@ -272,7 +272,7 @@
       }
     ]
   },
-  "versionId": "f46c1e93-1caf-4744-9c5d-5d7d31e3b6b2",
+  "versionId": "bb16430b-2e6f-4b2f-a412-b228ee076eca",
   "triggerCount": 1,
   "shared": [
     {
