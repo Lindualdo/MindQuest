@@ -1,5 +1,5 @@
 import CardSaudacaoHero from '@/components/app/v1.2/CardSaudacaoHero';
-import CardQuestDesbloqueada from '@/components/app/v1.2/CardQuestDesbloqueada';
+import CardQuestAtiva from '@/components/app/v1.2/CardQuestAtiva';
 import CardPanorama from '@/components/app/v1.2/CardPanorama';
 import CardConversas from '@/components/app/v1.2/CardConversas';
 import CardQuests from '@/components/app/v1.2/CardQuests';
@@ -153,7 +153,7 @@ const HomeV1_2 = () => (
         xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
       />
 
-      <CardQuestDesbloqueada
+      <CardQuestAtiva
         titulo={mock.questDesbloqueada.titulo}
         descricao={mock.questDesbloqueada.descricao}
         xpRecompensa={mock.questDesbloqueada.xp}

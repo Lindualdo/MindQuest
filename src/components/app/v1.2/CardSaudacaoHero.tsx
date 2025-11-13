@@ -28,33 +28,31 @@ const CardSaudacaoHero = ({
       className="mq-card-v1_2 p-5"
       style={{ backgroundColor: 'var(--mq-v1_2-muted)' }}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="mq-card-title-v1_2 text-[0.85rem] sm:text-[1.15rem]">
-            👋 Boa tarde, {nome}
-          </h1>
-          <p className="mq-subtitle-v1_2 text-[8px] sm:text-[10px]">{nivelAtual}</p>
-        </div>
-        <span className="inline-flex items-center justify-center text-xs" style={{ color: '#3083DC' }}>
+      <div className="flex flex-col items-center gap-1 text-center">
+        <span className="inline-flex items-center justify-center rounded-full bg-white/70 p-1 text-xs" style={{ color: '#3083DC' }}>
           <Medal size={16} />
         </span>
+        <h1 className="mq-card-title-v1_2 text-[0.78rem] sm:text-[1rem]">
+          👋 Boa tarde, {nome}
+        </h1>
+        <p className="mq-subtitle-v1_2 text-[7px] sm:text-[9px]">{nivelAtual}</p>
       </div>
-      <div className="mt-4 rounded-2xl border bg-white px-4 py-3" style={{ borderColor: 'rgba(28,37,65,0.15)' }}>
-        <div className="flex items-center justify-between text-xs sm:text-sm font-medium" style={{ color: '#1C2541' }}>
+      <div className="mt-3 rounded-2xl border bg-white px-4 py-2.5" style={{ borderColor: 'rgba(28,37,65,0.15)' }}>
+        <div className="flex items-center justify-between text-[0.65rem] sm:text-xs font-medium" style={{ color: '#1C2541' }}>
           <span>{xpAtual} XP</span>
           <span>{xpMeta} XP</span>
         </div>
-        <div className="relative mt-2 h-2.5" style={{ backgroundColor: 'var(--mq-v1_2-bar)' }}>
+        <div className="relative mt-2 h-2" style={{ backgroundColor: 'var(--mq-v1_2-bar)' }}>
           <div className="mq-bar-fill-v1_2" style={{ width: `${progresso}%` }} />
         </div>
-        <p className="mt-2 text-[9px] sm:text-xs font-medium" style={{ color: '#1C2541' }}>
+        <p className="mt-2 text-[8px] sm:text-[11px] font-medium" style={{ color: '#1C2541' }}>
           Faltam <strong>{xpRestante} XP</strong> para {proximoNivel}
         </p>
       </div>
-      <div className="mt-3 flex justify-end">
+      <div className="mt-2 flex justify-center">
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[11px] font-semibold"
+          className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-semibold"
           style={{ color: '#3083DC' }}
         >
           Explorar jornada <span aria-hidden="true">→</span>
