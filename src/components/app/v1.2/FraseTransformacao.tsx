@@ -23,7 +23,7 @@ const FraseTransformacao = () => {
       style={{ color: '#1C2541' }}
     >
       <p className="font-semibold tracking-tight text-[0.8rem] sm:text-[1rem]">
-        Conversas &gt; quests &gt; transformação →
+        Conversas → Quests → Transformação →
       </p>
       <motion.span
         key={areas[indiceAtual]}

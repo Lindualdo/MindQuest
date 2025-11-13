@@ -3,10 +3,11 @@ import FraseTransformacao from '@/components/app/v1.2/FraseTransformacao';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 
 type Props = {
+  nomeUsuario: string;
   onRefresh?: () => void;
 };
 
-const HeaderV1_2 = ({ onRefresh }: Props) => (
+const HeaderV1_2 = ({ nomeUsuario, onRefresh }: Props) => (
   <header
     className="sticky top-0 z-40 border-b"
     style={{ backgroundColor: '#E8F3F5', borderColor: 'rgba(28,37,65,0.08)' }}
@@ -22,7 +23,10 @@ const HeaderV1_2 = ({ onRefresh }: Props) => (
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[#1C2541]">
+        <div className="flex items-center gap-2 text-[#1C2541]">
+          <p className="text-[0.7rem] sm:text-xs font-semibold" style={{ color: '#1C2541' }}>
+            Olá, {nomeUsuario}
+          </p>
           <button
             type="button"
             onClick={onRefresh}

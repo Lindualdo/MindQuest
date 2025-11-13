@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
-import { Medal } from 'lucide-react';
-
 type Props = {
-  nome: string;
+  descricaoNivel: string;
   nivelAtual: string;
   xpAtual: number;
   xpMeta: number;
@@ -10,8 +8,8 @@ type Props = {
   xpRestante: number;
 };
 
-const CardSaudacaoHero = ({
-  nome,
+const CardJornada = ({
+  descricaoNivel,
   nivelAtual,
   xpAtual,
   xpMeta,
@@ -28,16 +26,14 @@ const CardSaudacaoHero = ({
       className="mq-card-v1_2 p-4"
       style={{ backgroundColor: 'var(--mq-v1_2-muted)' }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1 leading-tight">
-          <h1 className="mq-card-title-v1_2 text-[0.67rem] sm:text-[0.88rem]">
-            👋 Boa tarde, {nome}
-          </h1>
-          <p className="mq-subtitle-v1_2 text-[0.45rem] sm:text-[0.65rem]">{nivelAtual}</p>
-        </div>
-        <span className="inline-flex items-center justify-center rounded-full bg-white/70 p-1 text-xs" style={{ color: '#3083DC' }}>
-          <Medal size={16} />
-        </span>
+      <div className="space-y-1 leading-tight">
+        <h2 className="text-[0.8rem] sm:text-[1rem] font-semibold" style={{ color: '#1C2541' }}>
+          Sua jornada
+        </h2>
+        <p className="mq-subtitle-v1_2 text-[0.55rem] sm:text-[0.75rem]">{nivelAtual}</p>
+        <p className="text-[0.5rem] sm:text-[0.7rem]" style={{ color: '#7E8CA0' }}>
+          {descricaoNivel}
+        </p>
       </div>
       <div className="mt-3 rounded-2xl border bg-white px-3.5 py-2.5" style={{ borderColor: 'rgba(28,37,65,0.15)' }}>
         <div className="flex items-center justify-between text-[0.65rem] sm:text-xs font-medium" style={{ color: '#1C2541' }}>
@@ -60,4 +56,4 @@ const CardSaudacaoHero = ({
   );
 };
 
-export default CardSaudacaoHero;
+export default CardJornada;

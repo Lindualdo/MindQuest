@@ -1,7 +1,7 @@
-import CardSaudacaoHero from '@/components/app/v1.2/CardSaudacaoHero';
+import CardJornada from '@/components/app/v1.2/CardJornada';
+import CardConversas from '@/components/app/v1.2/CardConversas';
 import CardQuestAtiva from '@/components/app/v1.2/CardQuestAtiva';
 import CardPanorama from '@/components/app/v1.2/CardPanorama';
-import CardConversas from '@/components/app/v1.2/CardConversas';
 import CardQuests from '@/components/app/v1.2/CardQuests';
 import CardJornadaConquistas from '@/components/app/v1.2/CardJornadaConquistas';
 import CardInsightsPadroes from '@/components/app/v1.2/CardInsightsPadroes';
@@ -142,10 +142,10 @@ const mock = {
 
 const HomeV1_2 = () => (
   <div className="mq-app-v1_2 min-h-screen">
-    <HeaderV1_2 />
+    <HeaderV1_2 nomeUsuario={mock.usuario.nome} />
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-24 pt-4">
-      <CardSaudacaoHero
-        nome={mock.usuario.nome}
+      <CardJornada
+        descricaoNivel={mock.jornada.descricao}
         nivelAtual={mock.usuario.nivel}
         xpAtual={mock.usuario.xpAtual}
         xpMeta={mock.usuario.xpMeta}
@@ -153,31 +153,27 @@ const HomeV1_2 = () => (
         xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
       />
 
+      <CardConversas
+        streakAtual={mock.conversas.streak}
+        recorde={mock.conversas.recorde}
+        progressoAtual={mock.conversas.progressoAtual}
+        progressoMeta={mock.conversas.progressoMeta}
+        beneficios={mock.conversas.beneficios}
+        dias={mock.conversas.dias}
+        onConversar={noop}
+        onExplorarHistorico={noop}
+      />
+
       <CardQuestAtiva
         titulo={mock.questDesbloqueada.titulo}
         descricao={mock.questDesbloqueada.descricao}
         xpRecompensa={mock.questDesbloqueada.xp}
-        ultimaConversa={mock.questDesbloqueada.ultimaConversa}
-        streakAtual={mock.questDesbloqueada.streak}
-        metaStreak={mock.questDesbloqueada.meta}
-        recordeConversas={mock.conversas.recorde}
-        onVerQuest={noop}
-        onConversar={noop}
-        onExplorarHistorico={noop}
+        onExplorarQuests={noop}
       />
 
       <CardPanorama itens={mock.panorama} onExplorar={noop} />
 
       <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2">
-        <CardConversas
-          streakAtual={mock.conversas.streak}
-          recorde={mock.conversas.recorde}
-          progressoAtual={mock.conversas.progressoAtual}
-          progressoMeta={mock.conversas.progressoMeta}
-          dias={mock.conversas.dias}
-          beneficios={mock.conversas.beneficios}
-          onConversar={noop}
-        />
         <CardQuests
           questDoDia={mock.quests.questDoDia}
           outrasQuests={mock.quests.outras}
