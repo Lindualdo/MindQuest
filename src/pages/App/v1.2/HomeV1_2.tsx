@@ -7,7 +7,6 @@ import CardJornadaConquistas from '@/components/app/v1.2/CardJornadaConquistas';
 import CardInsightsPadroes from '@/components/app/v1.2/CardInsightsPadroes';
 import CardResumoSemana from '@/components/app/v1.2/CardResumoSemana';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
-import FraseTransformacao from '@/components/app/v1.2/FraseTransformacao';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 
 const noop = () => undefined;
@@ -144,9 +143,7 @@ const mock = {
 const HomeV1_2 = () => (
   <div className="mq-app-v1_2 min-h-screen">
     <HeaderV1_2 />
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-24 pt-6">
-      <FraseTransformacao />
-
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-24 pt-4">
       <CardSaudacaoHero
         nome={mock.usuario.nome}
         nivelAtual={mock.usuario.nivel}

@@ -62,10 +62,10 @@ const CardQuestAtiva = ({
         <Target size={20} />
       </div>
       <div className="space-y-1">
-        <h3 className="text-[0.9rem] sm:text-[0.95rem] font-semibold" style={{ color: '#1C2541' }}>
+        <h3 className="w-full text-center text-[0.9rem] sm:text-[0.95rem] font-semibold" style={{ color: '#1C2541' }}>
           {titulo}
         </h3>
-        <p className="text-[0.78rem] sm:text-[0.85rem]" style={{ color: '#4F5779', lineHeight: 1.28 }}>
+        <p className="text-[0.78rem] sm:text-[0.85rem] text-center" style={{ color: '#4F5779', lineHeight: 1.28 }}>
           {descricao}
         </p>
         <span
