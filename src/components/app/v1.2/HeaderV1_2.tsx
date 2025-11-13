@@ -10,12 +10,12 @@ const HeaderV1_2 = ({ onRefresh }: Props) => (
     className="sticky top-0 z-40 border-b"
     style={{ backgroundColor: '#E8F3F5', borderColor: 'rgba(28,37,65,0.08)' }}
   >
-    <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-3">
-      <div className="flex items-center gap-3">
-        <img src={mindquestLogo} alt="MindQuest" className="h-10 w-auto" />
+    <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-2.5 px-4 py-2">
+      <div className="flex items-center gap-2.5">
+        <img src={mindquestLogo} alt="MindQuest" className="h-8 w-auto" />
         <div className="leading-tight">
-          <p className="text-sm font-semibold" style={{ color: '#D90368' }}>MindQuest</p>
-          <p className="text-[11px] font-medium tracking-tight" style={{ color: '#1C2541' }}>
+          <p className="text-[13px] font-semibold" style={{ color: '#D90368' }}>MindQuest</p>
+          <p className="text-[10px] font-medium tracking-tight" style={{ color: '#1C2541' }}>
             mente clara, resultados reais
           </p>
         </div>

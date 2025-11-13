@@ -63,3 +63,18 @@
   font-weight: 600;
   background: transparent;
 }
+
+.mq-app-v1_2 .mq-link-inline-v1_2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--mq-v1_2-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.mq-app-v1_2 .mq-link-inline-v1_2:hover {
+  color: var(--mq-v1_2-text);
+}

@@ -143,7 +143,7 @@ const mock = {
 const HomeV1_2 = () => (
   <div className="mq-app-v1_2 min-h-screen">
     <HeaderV1_2 />
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-8">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-24 pt-6">
       <CardSaudacaoHero
         nome={mock.usuario.nome}
         nivelAtual={mock.usuario.nivel}
@@ -160,8 +160,10 @@ const HomeV1_2 = () => (
         ultimaConversa={mock.questDesbloqueada.ultimaConversa}
         streakAtual={mock.questDesbloqueada.streak}
         metaStreak={mock.questDesbloqueada.meta}
+        recordeConversas={mock.conversas.recorde}
         onVerQuest={noop}
         onConversar={noop}
+        onExplorarHistorico={noop}
       />
 
       <CardPanorama itens={mock.panorama} onExplorar={noop} />
