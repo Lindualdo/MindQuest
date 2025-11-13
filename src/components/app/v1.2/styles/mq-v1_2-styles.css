@@ -1,0 +1,65 @@
+/* Tokens v1.2 */
+.mq-app-v1_2 {
+  --mq-v1_2-bg: #F5EBF3;
+  --mq-v1_2-surface: #E8F3F5;
+  --mq-v1_2-card: #FFFFFF;
+  --mq-v1_2-border: rgba(28, 37, 65, 0.08);
+  --mq-v1_2-primary: #3083DC;
+  --mq-v1_2-accent: #D90368;
+  --mq-v1_2-text: #1C2541;
+  --mq-v1_2-muted: #E8F3F5;
+  --mq-v1_2-bar: #C5DDF2;
+  --mq-v1_2-shadow: 0px 8px 24px rgba(28, 37, 65, 0.04);
+
+  font-family: 'Inter', 'SF Pro Display', 'SF Pro Text', -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+  background-color: var(--mq-v1_2-bg);
+  color: var(--mq-v1_2-text);
+}
+
+.mq-app-v1_2 .mq-card-v1_2 {
+  border-radius: 28px;
+  background-color: var(--mq-v1_2-card);
+  border: 1px solid var(--mq-v1_2-border);
+  box-shadow: var(--mq-v1_2-shadow);
+}
+
+.mq-app-v1_2 .mq-card-title-v1_2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--mq-v1_2-text);
+  margin: 0;
+}
+
+.mq-app-v1_2 .mq-subtitle-v1_2 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--mq-v1_2-primary);
+}
+
+.mq-app-v1_2 .mq-bar-track-v1_2 {
+  width: 100%;
+  height: 10px;
+  background-color: var(--mq-v1_2-bar);
+  border-radius: 0;
+}
+
+.mq-app-v1_2 .mq-bar-fill-v1_2 {
+  height: 100%;
+  border-radius: 0;
+  background-color: var(--mq-v1_2-primary);
+}
+
+.mq-app-v1_2 .mq-cta-primary-v1_2 {
+  border-radius: 999px;
+  background-color: var(--mq-v1_2-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.mq-app-v1_2 .mq-cta-secondary-v1_2 {
+  border-radius: 999px;
+  border: 1px solid var(--mq-v1_2-primary);
+  color: var(--mq-v1_2-primary);
+  font-weight: 600;
+  background: transparent;
+}

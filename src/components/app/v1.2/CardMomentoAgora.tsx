@@ -25,49 +25,40 @@ const CardMomentoAgora = ({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 }}
-      className="rounded-3xl border p-4 sm:p-5"
-      style={{ backgroundColor: '#E8F3F5', borderColor: '#D0E3E6' }}
+      className="mq-card-v1_2 p-5"
+      style={{ backgroundColor: 'var(--mq-v1_2-muted)' }}
     >
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase" style={{ color: '#7EBDC2' }}>
-          Seu momento agora
-        </p>
-        <h1 className="text-xl font-semibold" style={{ color: '#1C2541' }}>
-          👋 Boa tarde, {nome}
-        </h1>
-        <p className="text-sm" style={{ color: '#3083DC' }}>{nivelAtual}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="mq-card-title-v1_2 text-[0.85rem] sm:text-[1.15rem]">
+            👋 Boa tarde, {nome}
+          </h1>
+          <p className="mq-subtitle-v1_2 text-[8px] sm:text-[10px]">{nivelAtual}</p>
+        </div>
+        <span className="inline-flex items-center justify-center text-xs" style={{ color: '#3083DC' }}>
+          <Medal size={16} />
+        </span>
       </div>
-      <div className="mt-4 space-y-3">
-        <div className="flex items-center justify-between text-sm" style={{ color: '#1C2541' }}>
+      <div className="mt-4 rounded-2xl border bg-white px-4 py-3" style={{ borderColor: 'rgba(28,37,65,0.15)' }}>
+        <div className="flex items-center justify-between text-xs sm:text-sm font-medium" style={{ color: '#1C2541' }}>
           <span>{xpAtual} XP</span>
           <span>{xpMeta} XP</span>
         </div>
-        <div className="h-2 rounded-full" style={{ backgroundColor: '#FFFFFF' }}>
-          <div className="h-full rounded-full" style={{ width: `${progresso}%`, backgroundColor: '#3083DC' }} />
+        <div className="relative mt-2 h-2.5" style={{ backgroundColor: 'var(--mq-v1_2-bar)' }}>
+          <div className="mq-bar-fill-v1_2" style={{ width: `${progresso}%` }} />
         </div>
-        <p className="text-sm" style={{ color: '#1C2541' }}>
+        <p className="mt-2 text-[9px] sm:text-xs font-medium" style={{ color: '#1C2541' }}>
           Faltam <strong>{xpRestante} XP</strong> para {proximoNivel}
         </p>
       </div>
-      <div className="mt-5 flex gap-3">
+      <div className="mt-3 flex justify-end">
         <button
           type="button"
-          className="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-white"
-          style={{ backgroundColor: '#D90368' }}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold"
+          style={{ color: '#3083DC' }}
         >
-          Conversar
+          Explorar jornada <span aria-hidden="true">→</span>
         </button>
-        <button
-          type="button"
-          className="flex-1 rounded-full border px-4 py-2 text-sm font-semibold"
-          style={{ borderColor: '#3083DC', color: '#3083DC' }}
-        >
-          Jornada
-        </button>
-      </div>
-      <div className="mt-4 inline-flex items-center gap-2 rounded-2xl px-3 py-1" style={{ backgroundColor: '#FFFFFF' }}>
-        <Medal size={18} color="#3083DC" />
-        <span className="text-xs font-semibold" style={{ color: '#1C2541' }}>Jornada ativa</span>
       </div>
     </motion.section>
   );

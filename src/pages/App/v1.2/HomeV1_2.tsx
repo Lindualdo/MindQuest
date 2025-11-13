@@ -6,6 +6,8 @@ import CardQuests from '@/components/app/v1.2/CardQuests';
 import CardJornadaConquistas from '@/components/app/v1.2/CardJornadaConquistas';
 import CardInsightsPadroes from '@/components/app/v1.2/CardInsightsPadroes';
 import CardResumoSemana from '@/components/app/v1.2/CardResumoSemana';
+import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 
 const noop = () => undefined;
 
@@ -138,11 +140,9 @@ const mock = {
   },
 };
 
-const PaginaInicialV12 = () => (
-  <div
-    className="min-h-screen"
-    style={{ backgroundColor: '#F5EBF3' }}
-  >
+const HomeV1_2 = () => (
+  <div className="mq-app-v1_2 min-h-screen">
+    <HeaderV1_2 />
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-8">
       <CardMomentoAgora
         nome={mock.usuario.nome}
@@ -214,4 +214,4 @@ const PaginaInicialV12 = () => (
   </div>
 );
 
-export default PaginaInicialV12;
+export default HomeV1_2;
