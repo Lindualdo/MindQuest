@@ -94,14 +94,12 @@ const HumorHistoryPage: React.FC = () => {
         const timestamp = parseDateTime(dateValue, horaValue);
         const dateLabel = formatLabel(dateValue, horaValue, index + 1);
         const humorValue = Number(entry.humor ?? entry.pico_dia ?? entry.humor_medio ?? 0);
-        const energiaValue = Number(entry.energia ?? entry.energia_media ?? 0);
         const emoji = entry.emoji ?? (entry.conversa ? entry.conversa.emoji : null);
         const emocao = entry.emocao ?? (entry.conversa ? entry.conversa.emocao : null);
 
         return {
           label: dateLabel,
           humor: humorValue,
-          energia: energiaValue,
           emoji,
           emocao,
           raw: entry,
@@ -235,11 +233,7 @@ const HumorHistoryPage: React.FC = () => {
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                     <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
                     <Tooltip
-                      formatter={(value: number, name: string) => {
-                        if (name === 'humor') return [value.toFixed(1), 'Humor'];
-                        if (name === 'energia') return [value.toFixed(1), 'Energia'];
-                        return [value, name];
-                      }}
+                      formatter={(value: number) => [value.toFixed(1), 'Humor']}
                       labelFormatter={(label, payload = []) => {
                         const data = payload[0]?.payload as (typeof chartData)[number] | undefined;
                         if (!data) return label;
@@ -248,7 +242,7 @@ const HumorHistoryPage: React.FC = () => {
                         }`;
                       }}
                     />
-                    <Legend formatter={(value) => (value === 'humor' ? 'Humor' : 'Energia')} />
+                    <Legend formatter={() => 'Humor'} />
                     <Line
                       type="monotone"
                       dataKey="humor"
@@ -256,13 +250,6 @@ const HumorHistoryPage: React.FC = () => {
                       strokeWidth={3}
                       dot={{ r: 4 }}
                       activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="energia"
-                      stroke="#F59E0B"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -298,16 +285,9 @@ const HumorHistoryPage: React.FC = () => {
                               Humor:{' '}
                               <span className="font-semibold text-blue-600">
                                 {detail.humor.toFixed(1)}
-                              </span>{' '}
-                              • Energia:{' '}
-                              <span className="font-semibold text-amber-600">{detail.energia.toFixed(1)}</span>
+                              </span>
                             </p>
                           </div>
-                          {detail.emotion && (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-                              Emoção: {detail.emotion}
-                            </span>
-                          )}
                         </div>
                         {detail.justification && (
                           <div className="mt-3 border-t border-gray-100 pt-3 text-xs leading-relaxed text-gray-600">

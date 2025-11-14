@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
+import SabotadoresDashboardPage from '@/pages/App/SabotadoresDashboardPage';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
@@ -22,6 +24,7 @@ const HomeV1_2 = () => {
     loadPanoramaCard,
     isLoading,
     setView,
+    view,
   } = useDashboard();
 
   const userId = dashboardData?.usuario?.id;
@@ -76,9 +79,18 @@ const HomeV1_2 = () => {
   const nomeUsuario = dashboardData?.usuario?.nome_preferencia
     ?? dashboardData?.usuario?.nome
     ?? 'MindQuest';
-  const handleExplore = () => setView('dashEmocoes');
+  const handleExplore = () => setView('humorHistorico');
+  const handleVerSabotadores = () => setView('dashSabotadores');
 
   const showLoadingBanner = (isLoading && !cardData) || panoramaCardLoading;
+
+  if (view === 'humorHistorico') {
+    return <HumorHistoryPage />;
+  }
+
+  if (view === 'dashSabotadores') {
+    return <SabotadoresDashboardPage />;
+  }
 
   return (
     <div className="mq-app-v1_2 min-h-screen">
@@ -99,6 +111,7 @@ const HomeV1_2 = () => {
         sabotadorAtivo={sabotadorAtivo}
         sabotadorDescricao={sabotadorDescricao}
         onExplorar={handleExplore}
+        onVerSabotadores={handleVerSabotadores}
       />
 
         {panoramaCardError && (
