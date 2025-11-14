@@ -22,14 +22,14 @@ const CardQuestAtiva = ({
       className="mq-card-v1_2 p-5"
       style={{
         backgroundColor: '#F0FAF6',
-        borderColor: 'rgba(126,189,194,0.25)',
-        boxShadow: '0 12px 22px rgba(126,189,194,0.12)',
+        borderColor: 'rgba(126,189,194,0.2)',
+        boxShadow: '0 8px 16px rgba(126,189,194,0.08)',
       }}
     >
       <div className="flex justify-center">
         <div
           className="mq-eyebrow-v1_2 inline-flex items-center gap-1 rounded-full px-5 py-1 uppercase"
-          style={{ backgroundColor: '#FFFFFF', color: '#7EBDC2', boxShadow: '0 6px 18px rgba(126,189,194,0.25)' }}
+          style={{ backgroundColor: '#FFFFFF', color: '#7EBDC2', boxShadow: '0 4px 12px rgba(126,189,194,0.18)' }}
         >
           <Sparkles size={14} color="#D90368" />
           Hoje você desbloqueou
@@ -39,7 +39,7 @@ const CardQuestAtiva = ({
       <div className="mt-5 flex flex-col items-center gap-3 text-center">
         <div
           className="flex h-12 w-12 items-center justify-center rounded-2xl border-2"
-          style={{ borderColor: '#7EBDC2', backgroundColor: '#FFFFFF', color: '#7EBDC2', boxShadow: '0 8px 16px rgba(126,189,194,0.25)' }}
+          style={{ borderColor: '#7EBDC2', backgroundColor: '#FFFFFF', color: '#7EBDC2', boxShadow: '0 6px 14px rgba(126,189,194,0.18)' }}
         >
           <Target size={20} />
         </div>

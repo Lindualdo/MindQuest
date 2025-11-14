@@ -32,7 +32,7 @@ const CardConversas = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
       className="mq-card-v1_2 p-5"
-      style={{ backgroundColor: 'rgba(255,228,208,0.55)', borderColor: 'rgba(249,115,22,0.18)', boxShadow: '0 10px 18px rgba(249,115,22,0.12)' }}
+      style={{ backgroundColor: 'rgba(255,228,208,0.4)', borderColor: 'rgba(249,115,22,0.12)', boxShadow: '0 8px 16px rgba(249,115,22,0.08)' }}
     >
       <header className="flex flex-col gap-1">
         <p className="mq-card-heading-v1_2 text-[0.95rem]">💬 Conversas</p>
@@ -45,10 +45,10 @@ const CardConversas = ({
       </header>
 
       <div className="mt-3">
-        <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(249, 115, 22, 0.25)' }}>
+        <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(249, 115, 22, 0.18)' }}>
           <div
             className="mq-bar-fill-v1_2"
-            style={{ width: `${progresso}%`, backgroundColor: '#F97316' }}
+            style={{ width: `${progresso}%`, backgroundColor: '#FB8A2A' }}
           />
         </div>
         <div className="mt-2 flex items-center text-[0.75rem] font-medium" style={{ color: '#1C2541' }}>
