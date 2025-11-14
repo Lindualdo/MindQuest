@@ -73,7 +73,9 @@ const HomeV1_2 = () => {
     };
   }, [cardData]);
 
-  const nomeUsuario = dashboardData?.usuario?.nome ?? 'MindQuest';
+  const nomeUsuario = dashboardData?.usuario?.nome_preferencia
+    ?? dashboardData?.usuario?.nome
+    ?? 'MindQuest';
   const handleExplore = () => setView('dashEmocoes');
 
   const showLoadingBanner = (isLoading && !cardData) || panoramaCardLoading;

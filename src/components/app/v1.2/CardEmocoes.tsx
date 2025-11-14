@@ -92,7 +92,7 @@ const CardPanoramaEmocional = ({
               <p className="mq-card-meta-v1_2 text-[0.7rem] text-slate-500">
                 Humor atual <span className="font-semibold text-slate-900">{safeHumorAtual.toFixed(1)}</span>
               </p>
-              <p className="text-sm font-semibold text-slate-800 mt-1">Média semanal {safeHumorMedio.toFixed(1)}</p>
+              <p className="text-[0.85rem] font-semibold text-slate-800 mt-1">Média semanal {safeHumorMedio.toFixed(1)}</p>
             </div>
           </div>
         </div>
@@ -112,13 +112,13 @@ const CardPanoramaEmocional = ({
           <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoções dominante</p>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
-            <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
+            <p className="text-[0.85rem] font-semibold" style={{ color: '#1C2541' }}>
               {emocaoDominante}
             </p>
           </div>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
-            <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
+            <p className="text-[0.85rem] font-semibold" style={{ color: '#1C2541' }}>
               {emocaoDominante2}
             </p>
           </div>
@@ -137,11 +137,6 @@ const CardPanoramaEmocional = ({
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end">
-        <button type="button" onClick={onExplorar} className="mq-link-inline-v1_2 text-[0.8rem]">
-          Explorar emoções <span aria-hidden="true">→</span>
-        </button>
-      </div>
     </motion.section>
   );
 };
