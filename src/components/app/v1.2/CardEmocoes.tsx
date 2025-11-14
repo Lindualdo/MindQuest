@@ -99,7 +99,7 @@ const CardPanoramaEmocional = ({
                   Humor atual <span className="font-semibold text-slate-900">{safeHumorAtual.toFixed(1)}</span>
                 </p>
                 <p className="text-[0.85rem] font-semibold text-slate-800 mt-1">
-                  Média semanal {safeHumorMedio.toFixed(1)}
+                  Média {safeHumorMedio.toFixed(1)}
                 </p>
               </div>
             </div>
@@ -107,7 +107,8 @@ const CardPanoramaEmocional = ({
               <button
                 type="button"
                 onClick={onExplorar}
-                className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-[0.65rem] font-semibold text-slate-600 shadow-sm transition hover:bg-white"
+                className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-[0.65rem] font-semibold shadow-sm transition hover:bg-white"
+                style={{ color: '#3083DC' }}
               >
                 Histórico
                 <ArrowUpRight size={12} />
@@ -134,7 +135,8 @@ const CardPanoramaEmocional = ({
               <button
                 type="button"
                 onClick={onVerEmocoes}
-                className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-[0.6rem] font-semibold text-slate-600 shadow-sm transition hover:bg-white"
+                className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-[0.6rem] font-semibold shadow-sm transition hover:bg-white"
+                style={{ color: '#3083DC' }}
               >
                 Ver painel
                 <ArrowUpRight size={12} />
@@ -161,7 +163,8 @@ const CardPanoramaEmocional = ({
               <button
                 type="button"
                 onClick={onVerSabotadores}
-                className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-[0.6rem] font-semibold text-slate-600 shadow-sm transition hover:bg-white"
+                className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-[0.6rem] font-semibold shadow-sm transition hover:bg-white"
+                style={{ color: '#3083DC' }}
               >
                 Ver painel
                 <ArrowUpRight size={12} />
