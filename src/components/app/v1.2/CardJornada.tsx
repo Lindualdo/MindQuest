@@ -24,7 +24,7 @@ const CardJornada = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 }}
       className="mq-card-v1_2 p-5"
-      style={{ backgroundColor: 'var(--mq-v1_2-muted)' }}
+      style={{ backgroundColor: '#DCE8F8', borderColor: 'rgba(48,131,220,0.25)', boxShadow: '0 16px 28px rgba(48,131,220,0.12)' }}
     >
       <div className="space-y-1.5 leading-tight">
         <h2 className="mq-card-heading-v1_2 text-[0.85rem] sm:text-[1rem]">Minha jornada</h2>

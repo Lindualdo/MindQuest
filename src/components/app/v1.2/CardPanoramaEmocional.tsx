@@ -30,8 +30,8 @@ const CardPanoramaEmocional = ({
       className="mq-card-v1_2 p-5"
       style={{
         backgroundColor: '#E8F3F5',
-        borderColor: 'rgba(28,37,65,0.08)',
-        boxShadow: '0 20px 40px rgba(28,37,65,0.12)',
+        borderColor: '#C5DEE4',
+        boxShadow: '0 18px 32px rgba(28,37,65,0.08)',
       }}
     >
       <div>
@@ -41,7 +41,7 @@ const CardPanoramaEmocional = ({
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-4" style={{ border: '1px solid rgba(52,199,89,0.25)' }}>
+        <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-4" style={{ border: '1px solid rgba(52,199,89,0.3)' }}>
           <div
             className="relative flex h-20 w-20 items-center justify-center rounded-full"
             style={{ background: `conic-gradient(#34C759 0deg ${gaugeDegrees}deg, #E2E8F0 ${gaugeDegrees}deg 360deg)` }}
@@ -58,7 +58,7 @@ const CardPanoramaEmocional = ({
             </p>
           </div>
         </div>
-        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.25)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.35)' }}>
           <p className="mq-card-meta-v1_2 text-[0.7rem]">Energia</p>
           <div className="mt-2 h-2 rounded-full" style={{ backgroundColor: '#FDE5D2' }}>
             <div
@@ -70,7 +70,7 @@ const CardPanoramaEmocional = ({
             {energiaWidth}%
           </p>
         </div>
-        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.2)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.25)' }}>
           <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoção dominante</p>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
@@ -79,7 +79,7 @@ const CardPanoramaEmocional = ({
             </p>
           </div>
         </div>
-        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.2)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.25)' }}>
           <p className="mq-card-meta-v1_2 text-[0.7rem]">Sabotador ativo</p>
           <div className="mt-2 flex items-center gap-2">
             <Brain size={18} color="#D90368" />
