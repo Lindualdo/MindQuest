@@ -58,6 +58,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   panoramaCardUserId: null,
   panoramaCardLoading: false,
   panoramaCardError: null,
+  questsCard: null,
+  questsCardUserId: null,
+  questsCardLoading: false,
+  questsCardError: null,
   conversasCard: null,
   conversasCardUserId: null,
   conversasCardLoading: false,
@@ -173,6 +177,95 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         panoramaCardLoading: false,
         panoramaCardError: error instanceof Error ? error.message : 'Erro ao carregar panorama emocional',
+      });
+    }
+  },
+
+  loadQuestsCard: async (usuarioIdParam) => {
+    const { dashboardData, questsCardUserId, questsCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        questsCardError: 'Usuário não informado para carregar card de quests',
+        questsCardLoading: false,
+      });
+      return;
+    }
+
+    if (questsCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (questsCardLoading) {
+      return;
+    }
+
+    set({ questsCardLoading: true, questsCardError: null });
+
+    try {
+      const payload = await apiService.getQuestsCard(userId);
+      set({
+        questsCard: payload.card_quests,
+        questsCardUserId: userId,
+        questsCardLoading: false,
+        questsCardError: null,
+      });
+    } catch (error) {
+      console.error('[QuestsCard] erro ao carregar card de quests', error);
+      set({
+        questsCardLoading: false,
+        questsCardError: error instanceof Error ? error.message : 'Erro ao carregar card de quests',
+      });
+    }
+  },
+
+  markQuestAsCompletedLocal: (questId) => {
+    if (!questId) return;
+    const snapshot = get().questSnapshot;
+    const questsCard = get().questsCard;
+    const nowIso = new Date().toISOString();
+
+    if (snapshot?.quests_personalizadas) {
+      const updatedSnapshot = {
+        ...snapshot,
+        quests_personalizadas: snapshot.quests_personalizadas.map((quest) => {
+          if (quest.instancia_id !== questId) return quest;
+          const meta = quest.progresso_meta ?? 1;
+          return {
+            ...quest,
+            status: 'concluida',
+            progresso_atual: meta,
+            concluido_em: nowIso,
+          };
+        }),
+      };
+      set({ questSnapshot: updatedSnapshot });
+    }
+
+    if (questsCard?.quest && questsCard.quest.id === questId) {
+      set({
+        questsCard: {
+          ...questsCard,
+          quest: {
+            ...questsCard.quest,
+            status: 'concluida',
+            progresso: {
+              ...questsCard.quest.progresso,
+              atual: questsCard.quest.progresso.meta,
+              percentual: 100,
+            },
+            ultima_atualizacao: nowIso,
+            ultima_atualizacao_label: 'agora',
+          },
+        },
       });
     }
   },
@@ -313,6 +406,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           get().loadQuestSnapshot(dashboardData.usuario.id),
           get().loadPanoramaCard(dashboardData.usuario.id),
           get().loadConversasCard(dashboardData.usuario.id),
+          get().loadQuestsCard(dashboardData.usuario.id),
         ]);
       } else {
         set({
@@ -327,6 +421,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           conversasCardUserId: null,
           conversasCardLoading: false,
           conversasCardError: 'Usuário inválido para card de conversas',
+          questsCard: null,
+          questsCardUserId: null,
+          questsCardLoading: false,
+          questsCardError: 'Usuário inválido para card de quests',
         });
       }
 
@@ -621,6 +719,11 @@ export const useDashboard = () => {
     conversasCardLoading,
     conversasCardError,
     loadConversasCard,
+    questsCard,
+    questsCardLoading,
+    questsCardError,
+    loadQuestsCard,
+    markQuestAsCompletedLocal,
     isAuthenticated
   } = useStore();
   
@@ -670,6 +773,11 @@ export const useDashboard = () => {
     conversasCardLoading,
     conversasCardError,
     loadConversasCard,
+    questsCard,
+    questsCardLoading,
+    questsCardError,
+    loadQuestsCard,
+    markQuestAsCompletedLocal,
     isAuthenticated
   };
 };

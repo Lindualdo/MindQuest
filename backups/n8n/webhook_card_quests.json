@@ -1,0 +1,146 @@
+{
+  "createdAt": "2025-11-15T10:12:00.000Z",
+  "id": "wbhCardQuestsV12",
+  "name": "webhook_card_quests",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "card/quests",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-card-quests",
+      "name": "Webhook Card Quests",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+      },
+      "id": "code-validate-quests",
+      "name": "Validar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input AS (\n  SELECT $1::uuid AS usuario_id\n),\nbase_meta AS (\n  SELECT COALESCE(xp_recompensa, 150) AS xp_recompensa\n  FROM public.metas_catalogo\n  WHERE codigo = 'xp_base_quest'\n  LIMIT 1\n),\nbonus_meta AS (\n  SELECT COALESCE(xp_recompensa, 30) AS xp_recompensa\n  FROM public.metas_catalogo\n  WHERE codigo = 'xp_bonus_recorrencia'\n  LIMIT 1\n),\nquest_raw AS (\n  SELECT\n    uq.*,\n    COALESCE(uq.config->>'titulo', 'Quest personalizada') AS titulo,\n    COALESCE(uq.config->>'descricao', 'Continue avançando na sua jornada.') AS descricao,\n    NULLIF(uq.config->>'prioridade', '') AS prioridade,\n    NULLIF(uq.config->>'recorrencia', '') AS recorrencia,\n    COALESCE((uq.config->>'xp_recompensa')::int, base_meta.xp_recompensa, 150) AS xp_calculado\n  FROM public.usuarios_quest uq\n  JOIN input i ON i.usuario_id = uq.usuario_id\n  CROSS JOIN base_meta\n),\nquest_ranked AS (\n  SELECT\n    quest_raw.*,\n    ROW_NUMBER() OVER (\n      ORDER BY\n        CASE quest_raw.status\n          WHEN 'ativa' THEN 0\n          WHEN 'pendente' THEN 1\n          ELSE 2\n        END,\n        COALESCE(quest_raw.atualizado_em, quest_raw.ativado_em) DESC NULLS LAST\n    ) AS ordem\n  FROM quest_raw\n),\nquest AS (\n  SELECT * FROM quest_ranked WHERE ordem = 1\n),\nsnapshot AS (\n  SELECT\n    uc.usuario_id,\n    uc.total_quests_concluidas,\n    uc.total_quests_personalizadas,\n    COALESCE(uc.xp_base, 0) AS xp_base_sum,\n    COALESCE(uc.xp_bonus, 0) AS xp_bonus_sum,\n    uc.atualizado_em\n  FROM public.usuarios_conquistas uc\n  JOIN input i ON i.usuario_id = uc.usuario_id\n)\nSELECT\n  'quest'::text AS bloco,\n  i.usuario_id AS user_id,\n  q.id AS quest_id,\n  q.titulo,\n  q.descricao,\n  q.status,\n  q.prioridade,\n  q.recorrencia,\n  q.progresso_atual,\n  q.progresso_meta,\n  q.progresso_percentual,\n  q.xp_calculado,\n  q.atualizado_em,\n  snap.total_quests_concluidas,\n  snap.total_quests_personalizadas,\n  snap.xp_base_sum,\n  snap.xp_bonus_sum,\n  bonus_meta.xp_recompensa AS xp_bonus_recorrencia,\n  base_meta.xp_recompensa AS xp_base_default\nFROM input i\nLEFT JOIN quest q ON q.usuario_id = i.usuario_id\nLEFT JOIN snapshot snap ON snap.usuario_id = i.usuario_id\nCROSS JOIN base_meta\nCROSS JOIN bonus_meta;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "id": "postgres-quests-state",
+      "name": "Estado Quests",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -480,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const row = $input.first()?.json || {};\n\nconst meta = Number(row.progresso_meta ?? 1) || 1;\nconst atual = Math.min(Number(row.progresso_atual ?? 0) || 0, meta);\nconst percentual = meta > 0 ? Math.round((atual / meta) * 100) : 0;\n\nconst beneficios = [];\nconst xpBase = Number(row.xp_base_default ?? 150) || 150;\nconst xpBonus = Number(row.xp_bonus_recorrencia ?? 30) || 0;\n\nbeneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus (recorrência)`);\nbeneficios.push('Novo insight aplicado na prática');\nbeneficios.push('Progresso em hábitos chaves');\n\nfunction humanizeDate(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  const diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) return 'agora';\n  return `há ${parts.join(' e ')}`;\n}\n\nconst quest = row.quest_id\n  ? {\n      id: row.quest_id,\n      titulo: row.titulo ?? 'Quest personalizada',\n      descricao: row.descricao ?? 'Continue avançando na sua jornada.',\n      status: row.status ?? 'pendente',\n      prioridade: row.prioridade ?? null,\n      recorrencia: row.recorrencia ?? null,\n      progresso: {\n        atual,\n        meta,\n        percentual,\n        label: `${atual}/${meta}`,\n      },\n      xp_recompensa: Number(row.xp_calculado ?? xpBase) || xpBase,\n      ultima_atualizacao: row.atualizado_em ?? null,\n      ultima_atualizacao_label: humanizeDate(row.atualizado_em),\n    }\n  : null;\n\nconst response = {\n  success: true,\n  usuario_id: row.user_id ?? null,\n  card_quests: {\n    quest,\n    snapshot: {\n      total_concluidas: Number(row.total_quests_concluidas ?? 0) || 0,\n      total_personalizadas: Number(row.total_quests_personalizadas ?? 0) || 0,\n      xp_base_total: Number(row.xp_base_sum ?? 0) || 0,\n      xp_bonus_total: Number(row.xp_bonus_sum ?? 0) || 0,\n    },\n    beneficios,\n    recompensas: {\n      xp_base: xpBase,\n      xp_bonus_recorrencia: xpBonus,\n    },\n  },\n};\n\nreturn [{ json: response }];"
+      },
+      "id": "code-build-quest-response",
+      "name": "Montar Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-card-quests",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Card Quests": {
+      "main": [
+        [
+          {
+            "node": "Validar Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Params": {
+      "main": [
+        [
+          {
+            "node": "Estado Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estado Quests": {
+      "main": [
+        [
+          {
+            "node": "Montar Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Response": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

@@ -372,6 +372,45 @@ export interface PanoramaCardResponse {
   card_panorama_emocional: PanoramaCardData;
 }
 
+export interface QuestCardQuest {
+  id: string | null;
+  titulo: string;
+  descricao: string | null;
+  status: string;
+  prioridade?: string | null;
+  recorrencia?: string | null;
+  progresso: {
+    atual: number;
+    meta: number;
+    percentual: number;
+    label?: string | null;
+  };
+  xp_recompensa: number;
+  ultima_atualizacao: string | null;
+  ultima_atualizacao_label: string | null;
+}
+
+export interface QuestCardData {
+  quest: QuestCardQuest | null;
+  snapshot: {
+    total_concluidas: number;
+    total_personalizadas: number;
+    xp_base_total: number;
+    xp_bonus_total: number;
+  };
+  beneficios: string[];
+  recompensas: {
+    xp_base: number;
+    xp_bonus_recorrencia: number;
+  };
+}
+
+export interface QuestCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_quests: QuestCardData;
+}
+
 export interface ConversasCardData {
   streak: {
     atual: number;
@@ -472,6 +511,10 @@ export interface StoreState {
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
   panoramaCardError: string | null;
+  questsCard: QuestCardData | null;
+  questsCardUserId: string | null;
+  questsCardLoading: boolean;
+  questsCardError: string | null;
   conversasCard: ConversasCardData | null;
   conversasCardUserId: string | null;
   conversasCardLoading: boolean;
@@ -500,6 +543,8 @@ export interface StoreState {
   loadResumoConversas: () => Promise<void>;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   loadPanoramaCard: (usuarioId?: string) => Promise<void>;
+  loadQuestsCard: (usuarioId?: string) => Promise<void>;
+  markQuestAsCompletedLocal: (questId: string) => void;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
 }
 

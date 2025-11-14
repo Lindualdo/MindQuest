@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
 import CardConversas from '@/components/app/v1.2/CardConversas';
+import CardQuestAtiva from '@/components/app/v1.2/CardQuest';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
 import SabotadoresDashboardPage from '@/pages/App/SabotadoresDashboardPage';
@@ -10,6 +11,7 @@ import ResumoConversasPage from '@/pages/App/ResumoConversasPage';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 import InsightsDashboardPage from '@/pages/App/InsightsDashboardPage';
 import InsightDetailPage from '@/pages/App/InsightDetailPage';
+import PainelQuestsPage from '@/pages/App/PainelQuestsPage';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
 
@@ -36,6 +38,10 @@ const HomeV1_2 = () => {
     conversasCardError,
     loadConversasCard,
     openResumoConversas,
+    questsCard,
+    questsCardLoading,
+    questsCardError,
+    loadQuestsCard,
   } = useDashboard();
 
   const userId = dashboardData?.usuario?.id;
@@ -46,7 +52,8 @@ const HomeV1_2 = () => {
     }
     loadPanoramaCard(userId);
     loadConversasCard(userId);
-  }, [userId, loadPanoramaCard, loadConversasCard]);
+    loadQuestsCard(userId);
+  }, [userId, loadPanoramaCard, loadConversasCard, loadQuestsCard]);
 
   const cardData = panoramaCard;
 
@@ -95,6 +102,7 @@ const HomeV1_2 = () => {
   const handleVerSabotadores = () => setView('dashSabotadores');
   const handleVerEmocoes = () => setView('dashEmocoes');
   const handleVerInsights = () => setView('dashInsights');
+  const handleVerPainelQuests = () => setView('painelQuests');
   const handleExplorarConversas = () => {
     void openResumoConversas();
   };
@@ -127,6 +135,33 @@ const HomeV1_2 = () => {
     };
   }, [conversasCard]);
 
+  const {
+    questTitulo,
+    questDescricao,
+    questProgressoAtual,
+    questProgressoMeta,
+    questXpRecompensa,
+    questBeneficios,
+    questPrioridade,
+    questRecorrencia,
+    questStatus,
+    questAtualizacaoLabel,
+  } = useMemo(() => {
+    const quest = questsCard?.quest;
+    return {
+      questTitulo: quest?.titulo ?? 'Nenhuma quest ativa',
+      questDescricao: quest?.descricao ?? 'Ative novas micro ações para manter seu ritmo.',
+      questProgressoAtual: quest?.progresso?.atual ?? 0,
+      questProgressoMeta: quest?.progresso?.meta ?? 1,
+      questXpRecompensa: quest?.xp_recompensa ?? questsCard?.recompensas?.xp_base ?? 150,
+      questBeneficios: questsCard?.beneficios ?? ['+150 XP base', '+30 XP bônus recorrência'],
+      questPrioridade: quest?.prioridade ?? null,
+      questRecorrencia: quest?.recorrencia ?? null,
+      questStatus: quest?.status ?? null,
+      questAtualizacaoLabel: quest?.ultima_atualizacao_label ?? null,
+    };
+  }, [questsCard]);
+
   if (view === 'humorHistorico') {
     return <HumorHistoryPage />;
   }
@@ -153,6 +188,10 @@ const HomeV1_2 = () => {
 
   if (view === 'insightDetail') {
     return <InsightDetailPage />;
+  }
+
+  if (view === 'painelQuests') {
+    return <PainelQuestsPage />;
   }
 
   return (
@@ -191,6 +230,20 @@ const HomeV1_2 = () => {
           onExplorarHistorico={handleExplorarConversas}
         />
 
+        <CardQuestAtiva
+          titulo={questTitulo}
+          descricao={questDescricao}
+          progressoAtual={questProgressoAtual}
+          progressoMeta={questProgressoMeta}
+          xpRecompensa={questXpRecompensa}
+          beneficios={questBeneficios}
+          prioridade={questPrioridade}
+          recorrencia={questRecorrencia}
+          status={questStatus}
+          ultimaAtualizacaoLabel={questAtualizacaoLabel}
+          onAbrirPainel={handleVerPainelQuests}
+        />
+
         {panoramaCardError && (
           <p className="text-xs font-medium text-rose-600">
             Não foi possível carregar o panorama emocional: {panoramaCardError}
@@ -203,6 +256,14 @@ const HomeV1_2 = () => {
         )}
         {conversasCardLoading && (
           <p className="text-xs font-medium text-slate-500">Carregando dados das conversas...</p>
+        )}
+        {questsCardError && (
+          <p className="text-xs font-medium text-rose-600">
+            Não foi possível carregar o card de quests: {questsCardError}
+          </p>
+        )}
+        {questsCardLoading && (
+          <p className="text-xs font-medium text-slate-500">Carregando progresso das quests...</p>
         )}
       </div>
     </div>
