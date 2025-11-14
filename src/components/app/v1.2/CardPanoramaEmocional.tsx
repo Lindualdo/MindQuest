@@ -29,9 +29,9 @@ const CardPanoramaEmocional = ({
       transition={{ delay: 0.2 }}
       className="mq-card-v1_2 p-5"
       style={{
-        backgroundColor: '#E8F3F5',
-        borderColor: '#C5DEE4',
-        boxShadow: '0 18px 32px rgba(28,37,65,0.08)',
+        backgroundColor: '#F2F6FF',
+        borderColor: 'rgba(48,131,220,0.16)',
+        boxShadow: '0 16px 28px rgba(48,131,220,0.08)',
       }}
     >
       <div>

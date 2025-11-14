@@ -32,7 +32,7 @@ const CardConversas = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
       className="mq-card-v1_2 p-5"
-      style={{ backgroundColor: 'rgba(255,228,208,0.75)', borderColor: 'rgba(249,115,22,0.25)', boxShadow: '0 12px 22px rgba(249,115,22,0.15)' }}
+      style={{ backgroundColor: 'rgba(255,228,208,0.55)', borderColor: 'rgba(249,115,22,0.18)', boxShadow: '0 10px 18px rgba(249,115,22,0.12)' }}
     >
       <header className="flex flex-col gap-1">
         <p className="mq-card-heading-v1_2 text-[0.95rem]">💬 Conversas</p>
@@ -59,7 +59,7 @@ const CardConversas = ({
         </p>
       </div>
 
-      <div className="mt-4 rounded-2xl px-4 py-3" style={{ backgroundColor: '#FFE8F1', border: '1px solid rgba(217,3,104,0.3)' }}>
+      <div className="mt-4 rounded-2xl px-4 py-3" style={{ backgroundColor: '#FFF1F6', border: '1px solid rgba(217,3,104,0.25)' }}>
         <p className="mq-card-heading-v1_2 text-[0.85rem]">💡 Próxima conversa desbloqueia</p>
         <ul className="mt-2 list-disc space-y-1 pl-4 text-[0.75rem]" style={{ color: '#1C2541' }}>
           <li>+75 XP base</li>

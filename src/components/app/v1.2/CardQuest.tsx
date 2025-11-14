@@ -21,9 +21,9 @@ const CardQuestAtiva = ({
       transition={{ delay: 0.1 }}
       className="mq-card-v1_2 p-5"
       style={{
-        backgroundColor: '#E2F6F1',
-        borderColor: 'rgba(126,189,194,0.4)',
-        boxShadow: '0 18px 32px rgba(126,189,194,0.18)',
+        backgroundColor: '#F0FAF6',
+        borderColor: 'rgba(126,189,194,0.25)',
+        boxShadow: '0 12px 22px rgba(126,189,194,0.12)',
       }}
     >
       <div className="flex justify-center">
