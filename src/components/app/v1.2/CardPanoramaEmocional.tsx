@@ -41,7 +41,7 @@ const CardPanoramaEmocional = ({
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-4 rounded-2xl bg-white/80 px-4 py-4" style={{ border: '1px solid rgba(28,37,65,0.08)' }}>
+        <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-4" style={{ border: '1px solid rgba(52,199,89,0.25)' }}>
           <div
             className="relative flex h-20 w-20 items-center justify-center rounded-full"
             style={{ background: `conic-gradient(#34C759 0deg ${gaugeDegrees}deg, #E2E8F0 ${gaugeDegrees}deg 360deg)` }}
@@ -60,7 +60,7 @@ const CardPanoramaEmocional = ({
             </p>
           </div>
         </div>
-        <div className="rounded-2xl bg-white/80 px-4 py-3" style={{ border: '1px solid rgba(28,37,65,0.08)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.25)' }}>
           <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
             Energia
           </p>
@@ -74,7 +74,7 @@ const CardPanoramaEmocional = ({
             {energiaWidth}%
           </p>
         </div>
-        <div className="rounded-2xl bg-white/90 px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.15)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.2)' }}>
           <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
             Emoção dominante
           </p>
@@ -85,7 +85,7 @@ const CardPanoramaEmocional = ({
             </p>
           </div>
         </div>
-        <div className="rounded-2xl bg-white/90 px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.15)' }}>
+        <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.2)' }}>
           <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
             Sabotador ativo
           </p>
