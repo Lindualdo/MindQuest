@@ -3,6 +3,8 @@ import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
 import SabotadoresDashboardPage from '@/pages/App/SabotadoresDashboardPage';
+import EmocoesDashboardPageV12 from '@/pages/App/v1.2/dash_emocoes/EmocoesDashboardPageV12';
+import PanasDetailPage from '@/pages/App/PanasDetailPage';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
@@ -81,6 +83,7 @@ const HomeV1_2 = () => {
     ?? 'MindQuest';
   const handleExplore = () => setView('humorHistorico');
   const handleVerSabotadores = () => setView('dashSabotadores');
+  const handleVerEmocoes = () => setView('dashEmocoes');
 
   const showLoadingBanner = (isLoading && !cardData) || panoramaCardLoading;
 
@@ -90,6 +93,14 @@ const HomeV1_2 = () => {
 
   if (view === 'dashSabotadores') {
     return <SabotadoresDashboardPage />;
+  }
+
+  if (view === 'dashEmocoes') {
+    return <EmocoesDashboardPageV12 />;
+  }
+
+  if (view === 'panasDetail') {
+    return <PanasDetailPage />;
   }
 
   return (
@@ -112,6 +123,7 @@ const HomeV1_2 = () => {
         sabotadorDescricao={sabotadorDescricao}
         onExplorar={handleExplore}
         onVerSabotadores={handleVerSabotadores}
+        onVerEmocoes={handleVerEmocoes}
       />
 
         {panoramaCardError && (

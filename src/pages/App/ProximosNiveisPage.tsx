@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
-  Target,
   Flag,
   Calendar,
   Trophy
@@ -27,18 +26,23 @@ const ProximosNiveisPage: React.FC = () => {
   );
 
   const timeline = useMemo(() => {
-    const base = [
+    type TimelineItem = {
+      nivel: number;
+      titulo: string;
+      status: 'atual' | 'futuro';
+    };
+    const base: TimelineItem[] = [
       {
         nivel: gamificacao.nivel_atual,
         titulo: currentLevel?.titulo || `Nível ${gamificacao.nivel_atual}`,
-        status: 'atual' as const
+        status: 'atual'
       }
     ];
     upcomingLevels.forEach((nivel) => {
       base.push({
         nivel: nivel.nivel,
         titulo: nivel.titulo,
-        status: 'futuro' as const
+        status: 'futuro'
       });
     });
     return base.slice(0, 6);

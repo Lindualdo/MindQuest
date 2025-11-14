@@ -11,6 +11,7 @@ type Props = {
   sabotadorDescricao?: string | null;
   onExplorar?: () => void;
   onVerSabotadores?: () => void;
+  onVerEmocoes?: () => void;
 };
 
 const CardPanoramaEmocional = ({
@@ -23,6 +24,7 @@ const CardPanoramaEmocional = ({
   sabotadorDescricao,
   onExplorar,
   onVerSabotadores,
+  onVerEmocoes,
 }: Props) => {
   const safeHumorMedio = Number.isFinite(humorMedio) ? humorMedio : Number(humorMedio) || 0;
   const safeHumorAtual = Number.isFinite(humorAtual) ? humorAtual : Number(humorAtual) || safeHumorMedio;
@@ -126,7 +128,19 @@ const CardPanoramaEmocional = ({
           </p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.25)' }}>
-          <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoções dominante</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoções dominante</p>
+            {onVerEmocoes && (
+              <button
+                type="button"
+                onClick={onVerEmocoes}
+                className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-[0.6rem] font-semibold text-slate-600 shadow-sm transition hover:bg-white"
+              >
+                Ver painel
+                <ArrowUpRight size={12} />
+              </button>
+            )}
+          </div>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
             <p className="text-[0.85rem] font-semibold" style={{ color: '#1C2541' }}>
