@@ -82,7 +82,6 @@ const HumorHistoryPage: React.FC = () => {
   };
 
   const chartData = useMemo(() => {
-
     const source =
       humorHistorico?.detalhes && humorHistorico.detalhes.length > 0
         ? humorHistorico.detalhes
@@ -90,29 +89,14 @@ const HumorHistoryPage: React.FC = () => {
 
     return source
       .map((entry, index) => {
-        const dateValue = (entry as Record<string, unknown>).data ?? null;
-        const horaValue = (entry as Record<string, unknown>).hora ?? null;
+        const dateValue = entry.data ?? null;
+        const horaValue = 'hora' in entry ? entry.hora ?? null : null;
         const timestamp = parseDateTime(dateValue, horaValue);
         const dateLabel = formatLabel(dateValue, horaValue, index + 1);
-        const humorValue = Number(
-          (entry as Record<string, unknown>).humor ??
-            (entry as Record<string, unknown>).pico_dia ??
-            (entry as Record<string, unknown>).humor_medio ??
-            0
-        );
-        const energiaValue = Number(
-          (entry as Record<string, unknown>).energia ??
-            (entry as Record<string, unknown>).energia_media ??
-            0
-        );
-        const emoji =
-          (entry as Record<string, unknown>).emoji ??
-          (entry as Record<string, unknown>).conversa?.emoji ??
-          null;
-        const emocao =
-          (entry as Record<string, unknown>).emocao ??
-          (entry as Record<string, unknown>).conversa?.emocao ??
-          null;
+        const humorValue = Number(entry.humor ?? entry.pico_dia ?? entry.humor_medio ?? 0);
+        const energiaValue = Number(entry.energia ?? entry.energia_media ?? 0);
+        const emoji = entry.emoji ?? (entry.conversa ? entry.conversa.emoji : null);
+        const emocao = entry.emocao ?? (entry.conversa ? entry.conversa.emocao : null);
 
         return {
           label: dateLabel,

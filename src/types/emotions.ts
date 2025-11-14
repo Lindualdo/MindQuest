@@ -62,9 +62,20 @@ export interface HumorHistoricoSeriePoint {
   pico_dia?: number | null;
   humor_medio?: number | null;
   energia?: number | null;
+  energia_media?: number | null;
   emoji?: string | null;
   emocao?: string | null;
   chat_id?: string | null;
+  conversa?: {
+    id: string | null;
+    horario_inicio?: string | null;
+    horario_fim?: string | null;
+    emocao?: string | null;
+    intensidade_emocao?: number | null;
+    qualidade_interacao?: number | null;
+    emoji?: string | null;
+    observacoes?: string | null;
+  } | null;
 }
 
 export interface HumorHistoricoDetalhe {
@@ -72,11 +83,17 @@ export interface HumorHistoricoDetalhe {
   hora: string | null;
   humor: number;
   energia: number;
+  pico_dia?: number | null;
+  humor_medio?: number | null;
+  energia_media?: number | null;
+  emoji?: string | null;
+  emocao?: string | null;
   variacao_humor?: string | null;
   variacao_energia?: string | null;
   periodo_dia?: string | null;
   justificativa?: string | null;
   confianca?: number | null;
+  insights?: string[];
   conversa?: {
     id: string | null;
     horario_inicio?: string | null;
@@ -280,6 +297,7 @@ export interface InsightDetail extends Insight {
   usuario_id: string;
   ativo: boolean;
   chat_id?: string | null;
+  criado_em?: string | null;
   resumo_situacao?: string;
   feedback_positivo?: string;
   feedback_desenvolvimento?: string;
