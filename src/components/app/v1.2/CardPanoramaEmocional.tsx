@@ -27,7 +27,7 @@ const CardPanoramaEmocional = ({
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="rounded-3xl border p-5"
+      className="mq-card-v1_2 p-5"
       style={{
         background: 'linear-gradient(135deg, #F5EBF3 0%, #E8F3F5 45%, #FFFFFF 100%)',
         borderColor: 'rgba(28,37,65,0.08)',
@@ -35,9 +35,7 @@ const CardPanoramaEmocional = ({
       }}
     >
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.15em]" style={{ color: '#7E8CA0' }}>
-          visão 360° emocional
-        </p>
+        <p className="mq-eyebrow-v1_2 tracking-[0.18em]">Visão 360° emocional</p>
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -52,18 +50,14 @@ const CardPanoramaEmocional = ({
             </span>
           </div>
           <div>
-            <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
-              Humor atual
-            </p>
-            <p className="text-sm" style={{ color: '#1C2541' }}>
+            <p className="mq-card-meta-v1_2 text-[0.7rem]">Humor atual</p>
+            <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
               Média semanal {humorMedio.toFixed(1)}
             </p>
           </div>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.25)' }}>
-          <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
-            Energia
-          </p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Energia</p>
           <div className="mt-2 h-2 rounded-full" style={{ backgroundColor: '#FDE5D2' }}>
             <div
               className="h-full rounded-full"
@@ -75,9 +69,7 @@ const CardPanoramaEmocional = ({
           </p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.2)' }}>
-          <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
-            Emoção dominante
-          </p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoção dominante</p>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
             <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
@@ -86,9 +78,7 @@ const CardPanoramaEmocional = ({
           </div>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.2)' }}>
-          <p className="text-xs font-medium" style={{ color: '#7E8CA0' }}>
-            Sabotador ativo
-          </p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Sabotador ativo</p>
           <div className="mt-2 flex items-center gap-2">
             <Brain size={18} color="#D90368" />
             <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>

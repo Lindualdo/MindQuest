@@ -146,14 +146,14 @@ const mock = {
 const HomeV1_2 = () => (
   <div className="mq-app-v1_2 min-h-screen">
     <HeaderV1_2 nomeUsuario={mock.usuario.nome} />
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 pb-24 pt-4">
-      <CardJornada
-        descricaoNivel={mock.jornada.descricao}
-        nivelAtual={mock.usuario.nivel}
-        xpAtual={mock.usuario.xpAtual}
-        xpMeta={mock.usuario.xpMeta}
-        proximoNivel={mock.usuario.proximoNivel}
-        xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-6 sm:gap-6">
+      <CardPanoramaEmocional
+        humorAtual={mock.panoramaEmocional.humorAtual}
+        humorMedio={mock.panoramaEmocional.humorMedio}
+        energiaPositiva={mock.panoramaEmocional.energiaPositiva}
+        emocaoDominante={mock.panoramaEmocional.emocaoDominante}
+        sabotadorAtivo={mock.panoramaEmocional.sabotadorAtivo}
+        onExplorar={noop}
       />
 
       <CardConversas
@@ -174,13 +174,13 @@ const HomeV1_2 = () => (
         onExplorarQuests={noop}
       />
 
-      <CardPanoramaEmocional
-        humorAtual={mock.panoramaEmocional.humorAtual}
-        humorMedio={mock.panoramaEmocional.humorMedio}
-        energiaPositiva={mock.panoramaEmocional.energiaPositiva}
-        emocaoDominante={mock.panoramaEmocional.emocaoDominante}
-        sabotadorAtivo={mock.panoramaEmocional.sabotadorAtivo}
-        onExplorar={noop}
+      <CardJornada
+        descricaoNivel={mock.jornada.descricao}
+        nivelAtual={mock.usuario.nivel}
+        xpAtual={mock.usuario.xpAtual}
+        xpMeta={mock.usuario.xpMeta}
+        proximoNivel={mock.usuario.proximoNivel}
+        xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
       />
     </div>
   </div>
