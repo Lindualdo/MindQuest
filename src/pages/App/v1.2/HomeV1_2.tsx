@@ -1,6 +1,7 @@
 import CardJornada from '@/components/app/v1.2/CardJornada';
 import CardConversas from '@/components/app/v1.2/CardConversas';
 import CardQuest from '@/components/app/v1.2/CardQuest';
+import CardPanoramaEmocional from '@/components/app/v1.2/CardPanoramaEmocional';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 
@@ -45,6 +46,13 @@ const mock = {
       estado: 'alerta' as const,
     },
   ],
+  panoramaEmocional: {
+    humorAtual: 8,
+    humorMedio: 5.8,
+    energiaPositiva: 65,
+    emocaoDominante: 'Confiança · 28%',
+    sabotadorAtivo: 'Hiper-realizador',
+  },
   conversas: {
     streak: 1,
     recorde: 17,
@@ -164,6 +172,15 @@ const HomeV1_2 = () => (
         descricao={mock.questDesbloqueada.descricao}
         xpRecompensa={mock.questDesbloqueada.xp}
         onExplorarQuests={noop}
+      />
+
+      <CardPanoramaEmocional
+        humorAtual={mock.panoramaEmocional.humorAtual}
+        humorMedio={mock.panoramaEmocional.humorMedio}
+        energiaPositiva={mock.panoramaEmocional.energiaPositiva}
+        emocaoDominante={mock.panoramaEmocional.emocaoDominante}
+        sabotadorAtivo={mock.panoramaEmocional.sabotadorAtivo}
+        onExplorar={noop}
       />
     </div>
   </div>
