@@ -1,11 +1,15 @@
 import { useEffect, useMemo } from 'react';
 import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
+import CardConversas from '@/components/app/v1.2/CardConversas';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
 import SabotadoresDashboardPage from '@/pages/App/SabotadoresDashboardPage';
 import EmocoesDashboardPageV12 from '@/pages/App/v1.2/dash_emocoes/EmocoesDashboardPageV12';
 import PanasDetailPage from '@/pages/App/PanasDetailPage';
+import ResumoConversasPage from '@/pages/App/ResumoConversasPage';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
+import InsightsDashboardPage from '@/pages/App/InsightsDashboardPage';
+import InsightDetailPage from '@/pages/App/InsightDetailPage';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
 
@@ -27,6 +31,11 @@ const HomeV1_2 = () => {
     isLoading,
     setView,
     view,
+    conversasCard,
+    conversasCardLoading,
+    conversasCardError,
+    loadConversasCard,
+    openResumoConversas,
   } = useDashboard();
 
   const userId = dashboardData?.usuario?.id;
@@ -36,7 +45,8 @@ const HomeV1_2 = () => {
       return;
     }
     loadPanoramaCard(userId);
-  }, [userId, loadPanoramaCard]);
+    loadConversasCard(userId);
+  }, [userId, loadPanoramaCard, loadConversasCard]);
 
   const cardData = panoramaCard;
 
@@ -84,8 +94,38 @@ const HomeV1_2 = () => {
   const handleExplore = () => setView('humorHistorico');
   const handleVerSabotadores = () => setView('dashSabotadores');
   const handleVerEmocoes = () => setView('dashEmocoes');
+  const handleVerInsights = () => setView('dashInsights');
+  const handleExplorarConversas = () => {
+    void openResumoConversas();
+  };
 
   const showLoadingBanner = (isLoading && !cardData) || panoramaCardLoading;
+
+  const {
+    streakAtual,
+    recorde,
+    progressoAtual,
+    progressoMeta,
+    beneficios,
+    xpBonus,
+    ultimaConversaLabel,
+  } = useMemo(() => {
+    const card = conversasCard;
+    return {
+      streakAtual: card?.streak?.atual ?? 0,
+      recorde: card?.streak?.recorde ?? 0,
+      progressoAtual: card?.progresso?.atual ?? 0,
+      progressoMeta: card?.progresso?.meta ?? 1,
+      beneficios: card?.beneficios ?? [
+        '+75 XP base',
+        '+40 XP bônus',
+        'Novo insight personalizado',
+        'Progresso na Quest ativa',
+      ],
+      xpBonus: card?.xp?.bonus_proxima_meta ?? 40,
+      ultimaConversaLabel: card?.ultima_conversa?.label ?? undefined,
+    };
+  }, [conversasCard]);
 
   if (view === 'humorHistorico') {
     return <HumorHistoryPage />;
@@ -103,6 +143,18 @@ const HomeV1_2 = () => {
     return <PanasDetailPage />;
   }
 
+  if (view === 'resumoConversas') {
+    return <ResumoConversasPage />;
+  }
+
+  if (view === 'dashInsights') {
+    return <InsightsDashboardPage />;
+  }
+
+  if (view === 'insightDetail') {
+    return <InsightDetailPage />;
+  }
+
   return (
     <div className="mq-app-v1_2 min-h-screen">
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
@@ -118,18 +170,39 @@ const HomeV1_2 = () => {
           humorMedio={humorMedio}
           energiaPositiva={energiaPositiva}
           emocaoDominante={emocaoDominante}
-        emocaoDominante2={emocaoDominante2}
-        sabotadorAtivo={sabotadorAtivo}
-        sabotadorDescricao={sabotadorDescricao}
-        onExplorar={handleExplore}
-        onVerSabotadores={handleVerSabotadores}
-        onVerEmocoes={handleVerEmocoes}
-      />
+          emocaoDominante2={emocaoDominante2}
+          sabotadorAtivo={sabotadorAtivo}
+          sabotadorDescricao={sabotadorDescricao}
+          onExplorar={handleExplore}
+          onVerSabotadores={handleVerSabotadores}
+          onVerEmocoes={handleVerEmocoes}
+          onVerInsights={handleVerInsights}
+        />
+
+        <CardConversas
+          streakAtual={streakAtual}
+          recorde={recorde}
+          progressoAtual={progressoAtual}
+          progressoMeta={Math.max(progressoMeta, 1)}
+          beneficios={beneficios}
+          xpBonus={xpBonus}
+          ultimaConversaLabel={ultimaConversaLabel}
+          onVerInsights={handleVerInsights}
+          onExplorarHistorico={handleExplorarConversas}
+        />
 
         {panoramaCardError && (
           <p className="text-xs font-medium text-rose-600">
             Não foi possível carregar o panorama emocional: {panoramaCardError}
           </p>
+        )}
+        {conversasCardError && (
+          <p className="text-xs font-medium text-rose-600">
+            Não foi possível carregar o card de conversas: {conversasCardError}
+          </p>
+        )}
+        {conversasCardLoading && (
+          <p className="text-xs font-medium text-slate-500">Carregando dados das conversas...</p>
         )}
       </div>
     </div>

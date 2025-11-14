@@ -7,7 +7,7 @@
  */
 
 import { authService } from './authService';
-import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload, QuestSnapshot, QuestStatus, PanoramaCardResponse } from '../types/emotions';
+import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload, QuestSnapshot, QuestStatus, PanoramaCardResponse, ConversasCardResponse } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -898,6 +898,32 @@ class ApiService {
     }
 
     return payload as PanoramaCardResponse;
+  }
+
+  public async getConversasCard(userId: string): Promise<ConversasCardResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/card/conversas?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar card de conversas');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object' || !('card_conversas' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado no card de conversas');
+    }
+
+    return payload as ConversasCardResponse;
   }
 
   public async getQuestSnapshot(usuarioId: string): Promise<QuestSnapshot> {

@@ -58,6 +58,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   panoramaCardUserId: null,
   panoramaCardLoading: false,
   panoramaCardError: null,
+  conversasCard: null,
+  conversasCardUserId: null,
+  conversasCardLoading: false,
+  conversasCardError: null,
   // full chat
   selectedChatId: null,
   fullChatDetail: null,
@@ -173,6 +177,52 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
+  loadConversasCard: async (usuarioIdParam) => {
+    const { dashboardData, conversasCardUserId, conversasCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        conversasCardError: 'Usuário não informado para carregar card de conversas',
+        conversasCardLoading: false,
+      });
+      return;
+    }
+
+    if (conversasCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (conversasCardLoading) {
+      return;
+    }
+
+    set({ conversasCardLoading: true, conversasCardError: null });
+
+    try {
+      const payload = await apiService.getConversasCard(userId);
+      set({
+        conversasCard: payload.card_conversas,
+        conversasCardUserId: userId,
+        conversasCardLoading: false,
+        conversasCardError: null,
+      });
+    } catch (error) {
+      console.error('[ConversasCard] erro ao carregar card de conversas', error);
+      set({
+        conversasCardLoading: false,
+        conversasCardError: error instanceof Error ? error.message : 'Erro ao carregar card de conversas',
+      });
+    }
+  },
+
   setAuthenticated: (auth) => {
     set({ isAuthenticated: auth });
   },
@@ -262,6 +312,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         await Promise.all([
           get().loadQuestSnapshot(dashboardData.usuario.id),
           get().loadPanoramaCard(dashboardData.usuario.id),
+          get().loadConversasCard(dashboardData.usuario.id),
         ]);
       } else {
         set({
@@ -272,6 +323,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           panoramaCardUserId: null,
           panoramaCardLoading: false,
           panoramaCardError: 'Usuário inválido para panorama emocional',
+          conversasCard: null,
+          conversasCardUserId: null,
+          conversasCardLoading: false,
+          conversasCardError: 'Usuário inválido para card de conversas',
         });
       }
 
@@ -558,11 +613,15 @@ export const useDashboard = () => {
   questLoading,
   questError,
   loadQuestSnapshot,
-  panoramaCard,
-  panoramaCardLoading,
-  panoramaCardError,
-  loadPanoramaCard,
-  isAuthenticated
+    panoramaCard,
+    panoramaCardLoading,
+    panoramaCardError,
+    loadPanoramaCard,
+    conversasCard,
+    conversasCardLoading,
+    conversasCardError,
+    loadConversasCard,
+    isAuthenticated
   } = useStore();
   
   return {
@@ -607,6 +666,10 @@ export const useDashboard = () => {
     panoramaCardLoading,
     panoramaCardError,
     loadPanoramaCard,
+    conversasCard,
+    conversasCardLoading,
+    conversasCardError,
+    loadConversasCard,
     isAuthenticated
   };
 };

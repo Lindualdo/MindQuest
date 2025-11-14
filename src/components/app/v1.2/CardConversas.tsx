@@ -11,6 +11,7 @@ type Props = {
   ultimaConversaLabel?: string;
   onConversar?: () => void;
   onExplorarHistorico?: () => void;
+  onVerInsights?: () => void;
 };
 
 const CardConversas = ({
@@ -23,6 +24,7 @@ const CardConversas = ({
   ultimaConversaLabel,
   onConversar,
   onExplorarHistorico,
+  onVerInsights,
 }: Props) => {
   const progresso = Math.min(100, Math.round((progressoAtual / progressoMeta) * 100));
 
@@ -80,7 +82,17 @@ const CardConversas = ({
         </ul>
       </div>
 
-      <div className="mt-3 flex justify-end">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        {onVerInsights && (
+          <button
+            type="button"
+            onClick={onVerInsights}
+            className="mq-link-inline-v1_2 text-[0.75rem] sm:text-[0.85rem]"
+            style={{ color: '#3083DC' }}
+          >
+            Ver insights <span aria-hidden="true">→</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onExplorarHistorico}

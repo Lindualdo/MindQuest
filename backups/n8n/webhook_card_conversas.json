@@ -1,0 +1,146 @@
+{
+  "createdAt": "2025-11-14T16:48:00.000Z",
+  "id": "wbhCardConversasV12",
+  "name": "webhook_card_conversas",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "card/conversas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node-conversas",
+      "name": "Webhook Card Conversas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
+      },
+      "id": "code-validate-params",
+      "name": "Validar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input AS (\n  SELECT $1::uuid AS usuario_id\n),\nestado AS (\n  SELECT\n    uc.usuario_id,\n    uc.sequencia_atual,\n    uc.sequencia_recorde,\n    uc.meta_sequencia_codigo,\n    uc.proxima_meta_codigo,\n    uc.ultima_conversa_em,\n    uc.sequencia_status\n  FROM public.usuarios_conquistas uc\n  JOIN input i ON i.usuario_id = uc.usuario_id\n),\nbase AS (\n  SELECT * FROM estado\n  UNION ALL\n  SELECT\n    i.usuario_id,\n    0,\n    0,\n    'streak_003',\n    'streak_005',\n    NULL,\n    '{}'::jsonb\n  FROM input i\n  WHERE NOT EXISTS (SELECT 1 FROM estado)\n)\nSELECT\n  'sequencia'::text AS bloco,\n  b.usuario_id AS user_id,\n  b.sequencia_atual,\n  b.sequencia_recorde,\n  b.meta_sequencia_codigo,\n  b.proxima_meta_codigo,\n  b.ultima_conversa_em,\n  b.sequencia_status,\n  COALESCE((regexp_match(b.meta_sequencia_codigo, '\\\\d+'))[1]::int, 3) AS meta_alvo_dias,\n  COALESCE((regexp_match(b.proxima_meta_codigo, '\\\\d+'))[1]::int, 5) AS proxima_meta_dias,\n  base_meta.xp_recompensa AS xp_base_diaria,\n  meta_atual.xp_recompensa AS xp_bonus_meta,\n  meta_atual.titulo AS meta_atual_titulo,\n  meta_prox.xp_recompensa AS xp_bonus_proxima_meta,\n  meta_prox.titulo AS meta_prox_titulo\nFROM base b\nLEFT JOIN public.metas_catalogo base_meta ON base_meta.codigo = 'conversa_diaria'\nLEFT JOIN public.metas_catalogo meta_atual ON meta_atual.codigo = b.meta_sequencia_codigo\nLEFT JOIN public.metas_catalogo meta_prox ON meta_prox.codigo = b.proxima_meta_codigo;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "id": "postgres-estado-conversas",
+      "name": "Estado Conversas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -480,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(item => item.json || {});\nconst find = (fn) => rows.find(fn) || {};\nconst sequencia = find(row => row.bloco === 'sequencia');\n\nconst metaAlvo = Number(sequencia.meta_alvo_dias ?? 3) || 3;\nconst streakAtual = Number(sequencia.sequencia_atual ?? 0) || 0;\nconst progressoAtual = Math.min(streakAtual, metaAlvo);\nconst percentual = metaAlvo > 0 ? Math.round((progressoAtual / metaAlvo) * 100) : 0;\n\nconst proximaMetaDias = Number(sequencia.proxima_meta_dias ?? (metaAlvo >= 3 ? metaAlvo + 2 : 5)) || 5;\nconst xpBase = Number(sequencia.xp_base_diaria ?? 75) || 0;\nconst xpBonus = Number(sequencia.xp_bonus_proxima_meta ?? sequencia.xp_bonus_meta ?? 0) || 0;\n\nconst ultimaConversacaoIso = sequencia.ultima_conversa_em || null;\n\nfunction humanizeDiff(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  let diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  diffMs -= days * 86_400_000;\n  const hours = Math.floor(diffMs / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) parts.push('menos de 1h');\n  return `há ${parts.join(' e ')}`;\n}\n\nconst beneficios = [];\nif (xpBase > 0) beneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus`);\nbeneficios.push('Novo insight personalizado');\nbeneficios.push('Progresso na Quest ativa');\n\nconst response = {\n  success: true,\n  usuario_id: sequencia.user_id || null,\n  card_conversas: {\n    streak: {\n      atual: streakAtual,\n      recorde: Number(sequencia.sequencia_recorde ?? streakAtual) || 0,\n      meta_codigo: sequencia.meta_sequencia_codigo || 'streak_003',\n      proxima_meta_codigo: sequencia.proxima_meta_codigo || 'streak_005'\n    },\n    progresso: {\n      atual: progressoAtual,\n      meta: metaAlvo,\n      percentual,\n      label: `${progressoAtual}/${metaAlvo}`\n    },\n    ultima_conversa: {\n      timestamp: ultimaConversacaoIso,\n      label: humanizeDiff(ultimaConversacaoIso) || 'Sem registros recentes'\n    },\n    xp: {\n      base: xpBase,\n      bonus_proxima_meta: xpBonus,\n      proxima_meta_dias: proximaMetaDias,\n      proxima_meta_titulo: sequencia.meta_prox_titulo || null\n    },\n    beneficios\n  }\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+      },
+      "id": "code-montar-response",
+      "name": "Montar Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-card-conversas",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Card Conversas": {
+      "main": [
+        [
+          {
+            "node": "Validar Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Params": {
+      "main": [
+        [
+          {
+            "node": "Estado Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estado Conversas": {
+      "main": [
+        [
+          {
+            "node": "Montar Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Response": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

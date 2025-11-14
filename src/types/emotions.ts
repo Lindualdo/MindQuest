@@ -372,6 +372,38 @@ export interface PanoramaCardResponse {
   card_panorama_emocional: PanoramaCardData;
 }
 
+export interface ConversasCardData {
+  streak: {
+    atual: number;
+    recorde: number;
+    meta_codigo: string | null;
+    proxima_meta_codigo: string | null;
+  };
+  progresso: {
+    atual: number;
+    meta: number;
+    percentual: number;
+    label?: string | null;
+  };
+  ultima_conversa: {
+    timestamp: string | null;
+    label: string | null;
+  };
+  xp: {
+    base: number;
+    bonus_proxima_meta: number;
+    proxima_meta_dias: number;
+    proxima_meta_titulo: string | null;
+  };
+  beneficios: string[];
+}
+
+export interface ConversasCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_conversas: ConversasCardData;
+}
+
 // Dashboard Data - estrutura principal
 export interface DashboardData {
   usuario: {
@@ -440,6 +472,10 @@ export interface StoreState {
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
   panoramaCardError: string | null;
+  conversasCard: ConversasCardData | null;
+  conversasCardUserId: string | null;
+  conversasCardLoading: boolean;
+  conversasCardError: string | null;
   // full chat detail
   selectedChatId: string | null;
   fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
@@ -464,6 +500,7 @@ export interface StoreState {
   loadResumoConversas: () => Promise<void>;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   loadPanoramaCard: (usuarioId?: string) => Promise<void>;
+  loadConversasCard: (usuarioId?: string) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil
