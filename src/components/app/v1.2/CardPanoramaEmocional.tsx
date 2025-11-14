@@ -29,13 +29,15 @@ const CardPanoramaEmocional = ({
       transition={{ delay: 0.2 }}
       className="mq-card-v1_2 p-5"
       style={{
-        background: 'linear-gradient(135deg, #F5EBF3 0%, #E8F3F5 45%, #FFFFFF 100%)',
+        backgroundColor: '#E8F3F5',
         borderColor: 'rgba(28,37,65,0.08)',
         boxShadow: '0 20px 40px rgba(28,37,65,0.12)',
       }}
     >
       <div>
-        <p className="mq-eyebrow-v1_2 tracking-[0.18em]">Visão 360° emocional</p>
+        <p className="mq-eyebrow-v1_2 tracking-[0.18em]" style={{ color: '#2A314A' }}>
+          Visão 360° emocional
+        </p>
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">

@@ -42,7 +42,11 @@ const CardJornada = ({
           <div className="mq-bar-fill-v1_2" style={{ width: `${progresso}%` }} />
         </div>
         <p className="mt-2 text-[0.7rem] sm:text-xs font-medium" style={{ color: '#1C2541' }}>
-          Faltam <strong>{xpRestante} XP</strong> para {proximoNivel}
+          Faltam <strong>{xpRestante} XP</strong> para
+          <span className="sr-only">Meta {proximoNivel}</span>
+        </p>
+        <p className="mq-card-meta-v1_2 text-[0.68rem] sm:text-[0.75rem]" style={{ color: '#1C2541' }}>
+          Meta {proximoNivel}
         </p>
       </div>
       <div className="mt-2 flex justify-end">
