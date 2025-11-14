@@ -7,7 +7,7 @@
  */
 
 import { authService } from './authService';
-import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload, QuestSnapshot, QuestStatus } from '../types/emotions';
+import type { HumorHistoricoPayload, InsightDetail, ResumoConversasPayload, QuestSnapshot, QuestStatus, PanoramaCardResponse } from '../types/emotions';
 
 interface ApiResponse {
   success: boolean;
@@ -872,6 +872,32 @@ class ApiService {
   public async refreshDashboardData(): Promise<DashboardApiResponse | null> {
     // Por enquanto, mesmo endpoint. Futuramente pode ter endpoint específico
     return this.getDashboardData();
+  }
+
+  public async getPanoramaCard(userId: string): Promise<PanoramaCardResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/card/emocoes?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar panorama emocional');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object' || !('card_panorama_emocional' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado no panorama emocional');
+    }
+
+    return payload as PanoramaCardResponse;
   }
 
   public async getQuestSnapshot(usuarioId: string): Promise<QuestSnapshot> {

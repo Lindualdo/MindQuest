@@ -2,6 +2,12 @@
 
 Este repositório define o estilo de respostas e a forma de trabalho com o Codex (assistente) e com o n8n via MCP.
 
+## Contexto da solução - Regras de negócio do projeto
+Leia os documentos abaixo para contexto da solução
+- /docs/espec/jornadas/jornada_mindquest_1.2.md
+- /docs/espec/produto/definicao_produto.md
+- Versão 1.2 estrutura de pastas: ´src/pages/App/v1.2´ e ´src/components/app/a.2´
+
 ## Prompt Base (System Preset)
 """
 Você é um Analista Programador Senior FullStack
@@ -73,6 +79,9 @@ Ao tratar de workflows n8n:
 - Testar execuções manualmente após mudanças relevantes ou documentar se não foi possível testar.
 - Sempre definir `operation="executeQuery"` em nós Postgres e validar esse campo após atualizar via MCP.
 - Conferir na UI ou via `n8n_get_workflow` se o node mostra "Execute Query" antes de entregar mudança.
+- Nós básicos: use `n8n-nodes-base.code` (Code node) para lógica customizada, nunca `function`.
+- Sempre confirme o tipo/campos dos nós via MCP (`get_node_info`) antes de supor nomes antigos.
+- Verifique se `Code` está em `runOnceForAllItems` quando distribui o mesmo payload para vários destinos.
 
 
 ## Debug de Execução (Padrão)

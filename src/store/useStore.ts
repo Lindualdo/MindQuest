@@ -54,6 +54,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   resumoConversas: null,
   resumoConversasLoading: false,
   resumoConversasError: null,
+  panoramaCard: null,
+  panoramaCardUserId: null,
+  panoramaCardLoading: false,
+  panoramaCardError: null,
   // full chat
   selectedChatId: null,
   fullChatDetail: null,
@@ -119,6 +123,52 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         questLoading: false,
         questError: error instanceof Error ? error.message : 'Erro ao carregar quests',
+      });
+    }
+  },
+
+  loadPanoramaCard: async (usuarioIdParam) => {
+    const { dashboardData, panoramaCardUserId, panoramaCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        panoramaCardError: 'Usuário não informado para carregar panorama emocional',
+        panoramaCardLoading: false,
+      });
+      return;
+    }
+
+    if (panoramaCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (panoramaCardLoading) {
+      return;
+    }
+
+    set({ panoramaCardLoading: true, panoramaCardError: null });
+
+    try {
+      const payload = await apiService.getPanoramaCard(userId);
+      set({
+        panoramaCard: payload.card_panorama_emocional,
+        panoramaCardUserId: userId,
+        panoramaCardLoading: false,
+        panoramaCardError: null,
+      });
+    } catch (error) {
+      console.error('[PanoramaCard] erro ao carregar card emocional', error);
+      set({
+        panoramaCardLoading: false,
+        panoramaCardError: error instanceof Error ? error.message : 'Erro ao carregar panorama emocional',
       });
     }
   },
@@ -209,12 +259,19 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       });
 
       if (dashboardData?.usuario?.id) {
-        await get().loadQuestSnapshot(dashboardData.usuario.id);
+        await Promise.all([
+          get().loadQuestSnapshot(dashboardData.usuario.id),
+          get().loadPanoramaCard(dashboardData.usuario.id),
+        ]);
       } else {
         set({
           questSnapshot: null,
           questLoading: false,
           questError: 'Usuário inválido para quests',
+          panoramaCard: null,
+          panoramaCardUserId: null,
+          panoramaCardLoading: false,
+          panoramaCardError: 'Usuário inválido para panorama emocional',
         });
       }
 
@@ -501,6 +558,10 @@ export const useDashboard = () => {
   questLoading,
   questError,
   loadQuestSnapshot,
+  panoramaCard,
+  panoramaCardLoading,
+  panoramaCardError,
+  loadPanoramaCard,
   isAuthenticated
   } = useStore();
   
@@ -542,6 +603,10 @@ export const useDashboard = () => {
     questLoading,
     questError,
     loadQuestSnapshot,
+    panoramaCard,
+    panoramaCardLoading,
+    panoramaCardError,
+    loadPanoramaCard,
     isAuthenticated
   };
 };

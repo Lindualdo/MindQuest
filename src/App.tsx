@@ -101,7 +101,11 @@ function App() {
   }
 
   if (isAppPreviewV12) {
-    return <HomeV1_2 />;
+    return (
+      <AuthGuard>
+        <HomeV1_2 />
+      </AuthGuard>
+    );
   }
 
   const { 

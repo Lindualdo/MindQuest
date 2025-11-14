@@ -1,190 +1,112 @@
-import CardJornada from '@/components/app/v1.2/CardJornada';
-import CardConversas from '@/components/app/v1.2/CardConversas';
-import CardQuest from '@/components/app/v1.2/CardQuest';
-import CardPanoramaEmocional from '@/components/app/v1.2/CardPanoramaEmocional';
+import { useEffect, useMemo } from 'react';
+import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
+import { useDashboard } from '@/store/useStore';
+import { getSabotadorById } from '@/data/sabotadoresCatalogo';
 
-const noop = () => undefined;
-
-const mock = {
-  usuario: {
-    nome: 'Ana',
-    nivel: 'Nível 3 · Coragem',
-    xpAtual: 1450,
-    xpMeta: 2200,
-    proximoNivel: 'Consistência',
-  },
-  questDesbloqueada: {
-    titulo: 'Nova Quest Ativa',
-    descricao: 'Micro-metas diárias para evitar sobrecarga',
-    xp: 150,
-    ultimaConversa: 'há 3h',
-    streak: 1,
-    meta: 3,
-  },
-  panorama: [
-    {
-      titulo: 'Humor',
-      valor: '😌 Calma',
-      descricao: 'Sensação estável hoje',
-      tag: '↗️ Melhor',
-      estado: 'positivo' as const,
-    },
-    {
-      titulo: 'Energia',
-      valor: '🔋 75%',
-      descricao: 'Reservas altas para agir',
-      tag: '⚡ Alta',
-      estado: 'neutro' as const,
-    },
-    {
-      titulo: 'Sabotador',
-      valor: '🧠 Hiper-vigilância',
-      descricao: 'Fique atenta a excessos',
-      tag: '⚠️ Ativo',
-      estado: 'alerta' as const,
-    },
-  ],
-  panoramaEmocional: {
-    humorAtual: 8,
-    humorMedio: 5.8,
-    energiaPositiva: 65,
-    emocaoDominante: 'Confiança · 28%',
-    emocaoDominante2: 'Alegria · 27%',
-    sabotadorAtivo: 'Hiper-realizador',
-  },
-  conversas: {
-    streak: 1,
-    recorde: 17,
-    progressoAtual: 1,
-    progressoMeta: 3,
-    dias: [
-      { dia: 'QUI', data: '6/11', status: 'feito' as const },
-      { dia: 'SEX', data: '7/11', status: 'feito' as const },
-      { dia: 'SAB', data: '8/11', status: 'feito' as const },
-      { dia: 'DOM', data: '9/11', status: 'falhou' as const },
-      { dia: 'SEG', data: '10/11', status: 'feito' as const },
-      { dia: 'TER', data: '11/11', status: 'falhou' as const },
-      { dia: 'QUA', data: '12/11', status: 'feito' as const },
-    ],
-    beneficios: [
-      '+75 XP base',
-      'Novo insight personalizado',
-      'Progresso na Quest ativa',
-    ],
-  },
-  quests: {
-    questDoDia: {
-      titulo: 'Micro-metas para evitar sobrecarga',
-      descricao: 'Definir e cumprir 3 micro metas hoje',
-      dias: '0/7 dias',
-      xp: 150,
-      prioridade: 'alta' as const,
-      status: 'pendente' as const,
-    },
-    outras: [
-      {
-        titulo: 'Prática diária Pomodoro',
-        descricao: '',
-        dias: '0/7 dias',
-        xp: 150,
-        prioridade: 'alta' as const,
-        status: 'ativa' as const,
-      },
-      {
-        titulo: 'Rotina semanal emocional',
-        descricao: '',
-        dias: '0/1 dias',
-        xp: 150,
-        prioridade: 'media' as const,
-        status: 'pendente' as const,
-      },
-    ],
-    slots: 1,
-  },
-  jornada: {
-    descricao: 'Aceito experimentar mudanças reais',
-    checklist: [
-      { texto: '5 quests concluídas', feito: true },
-      { texto: '1 desafiadora completa', feito: true },
-      { texto: 'Meta 4 ativa (10 conversas)', feito: false },
-    ],
-    conquistas: [
-      { titulo: 'Nova Quest Desbloqueada', descricao: '+150 XP', quando: 'há 3h', deltaXp: '+150 XP' },
-      { titulo: '1 Dia de Conversa Seguida', descricao: '', quando: 'hoje', deltaXp: '+75 XP' },
-      { titulo: 'Insight Profundo Gerado', descricao: 'Sabotador identificado', quando: 'ontem', deltaXp: '+0 XP' },
-    ],
-  },
-  insights: {
-    alerta: {
-      titulo: 'Hiper-vigilância detectada',
-      descricao: '5 conversas seguidas mencionando preocupação excessiva',
-      contador: 7,
-    },
-    resumo: {
-      humorDominante: '😌 Calma (4/7 dias)',
-      energiaMedia: 70,
-      conversasValidas: 5,
-      totalDias: 7,
-    },
-  },
-  resumoSemana: {
-    emocoes: [
-      { nome: 'Alegria', percentual: 28 },
-      { nome: 'Confiança', percentual: 22 },
-      { nome: 'Expectativa', percentual: 18 },
-      { nome: 'Medo', percentual: 12 },
-    ],
-    panas: [
-      { categoria: 'Positivos', percentual: 65, cor: '#22C55E' },
-      { categoria: 'Desafiador', percentual: 30, cor: '#F97316' },
-      { categoria: 'Neutro/Calmo', percentual: 5, cor: '#94A3B8' },
-    ],
-  },
+const formatEmotion = (nome?: string | null, percentual?: number | null) => {
+  if (!nome) {
+    return 'Sem dados disponíveis';
+  }
+  const value = percentual === undefined || percentual === null ? '--' : `${Math.round(percentual)}%`;
+  return `${nome} · ${value}`;
 };
 
-const HomeV1_2 = () => (
-  <div className="mq-app-v1_2 min-h-screen">
-    <HeaderV1_2 nomeUsuario={mock.usuario.nome} />
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-6 sm:gap-6">
-      <CardPanoramaEmocional
-        humorAtual={mock.panoramaEmocional.humorAtual}
-        humorMedio={mock.panoramaEmocional.humorMedio}
-        energiaPositiva={mock.panoramaEmocional.energiaPositiva}
-        emocaoDominante={mock.panoramaEmocional.emocaoDominante}
-        emocaoDominante2={mock.panoramaEmocional.emocaoDominante2}
-        sabotadorAtivo={mock.panoramaEmocional.sabotadorAtivo}
-        onExplorar={noop}
+const HomeV1_2 = () => {
+  const {
+    dashboardData,
+    panoramaCard,
+    panoramaCardLoading,
+    panoramaCardError,
+    loadPanoramaCard,
+    isLoading,
+    setView,
+  } = useDashboard();
+
+  const userId = dashboardData?.usuario?.id;
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+    loadPanoramaCard(userId);
+  }, [userId, loadPanoramaCard]);
+
+  const cardData = panoramaCard;
+
+  const {
+    humorAtual,
+    humorMedio,
+    energiaPositiva,
+    emocaoDominante,
+    emocaoDominante2,
+    sabotadorAtivo,
+    sabotadorDescricao,
+  } = useMemo(() => {
+    const humor = cardData?.humor;
+    const energia = cardData?.energia;
+    const emo1 = cardData?.emocoes_dominantes?.[0];
+    const emo2 = cardData?.emocoes_dominantes?.[1];
+    const sabotador = cardData?.sabotador;
+    const catalogEntry = sabotador?.id ? getSabotadorById(String(sabotador.id)) : undefined;
+    const descricaoCatalogo = catalogEntry?.descricao ?? catalogEntry?.resumo ?? '';
+    const primeiraFraseDescricao =
+      descricaoCatalogo
+        .split('.')
+        .map((frase) => frase.trim())
+        .find((frase) => frase.length > 0) ?? '';
+    const descricaoFormatada = primeiraFraseDescricao
+      ? `${primeiraFraseDescricao}${primeiraFraseDescricao.endsWith('.') ? '' : '.'}`
+      : null;
+
+    return {
+      humorAtual: humor?.atual ?? humor?.media_7d ?? 0,
+      humorMedio: humor?.media_7d ?? humor?.atual ?? 0,
+      energiaPositiva: energia?.percentual_positiva ?? 0,
+      emocaoDominante: formatEmotion(emo1?.nome ?? null, emo1?.percentual ?? null),
+      emocaoDominante2: formatEmotion(emo2?.nome ?? null, emo2?.percentual ?? null),
+      sabotadorAtivo: sabotador?.nome
+        ? `${sabotador.emoji ?? '🧠'} ${sabotador.nome}`.trim()
+        : 'Nenhum sabotador dominante detectado',
+      sabotadorDescricao: descricaoFormatada,
+    };
+  }, [cardData]);
+
+  const nomeUsuario = dashboardData?.usuario?.nome ?? 'MindQuest';
+  const handleExplore = () => setView('dashEmocoes');
+
+  const showLoadingBanner = (isLoading && !cardData) || panoramaCardLoading;
+
+  return (
+    <div className="mq-app-v1_2 min-h-screen">
+      <HeaderV1_2 nomeUsuario={nomeUsuario} />
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-6 sm:gap-6">
+        {showLoadingBanner && (
+          <p className="rounded-2xl bg-white/70 px-4 py-2 text-center text-xs font-medium text-slate-600 shadow-sm">
+            Atualizando panorama emocional...
+          </p>
+        )}
+
+        <CardPanoramaEmocional
+          humorAtual={humorAtual}
+          humorMedio={humorMedio}
+          energiaPositiva={energiaPositiva}
+          emocaoDominante={emocaoDominante}
+        emocaoDominante2={emocaoDominante2}
+        sabotadorAtivo={sabotadorAtivo}
+        sabotadorDescricao={sabotadorDescricao}
+        onExplorar={handleExplore}
       />
 
-      <CardConversas
-        streakAtual={mock.conversas.streak}
-        recorde={mock.conversas.recorde}
-        progressoAtual={mock.conversas.progressoAtual}
-        progressoMeta={mock.conversas.progressoMeta}
-        beneficios={mock.conversas.beneficios}
-        onConversar={noop}
-        onExplorarHistorico={noop}
-      />
-
-      <CardQuest
-        titulo={mock.questDesbloqueada.titulo}
-        descricao={mock.questDesbloqueada.descricao}
-        xpRecompensa={mock.questDesbloqueada.xp}
-        onExplorarQuests={noop}
-      />
-
-      <CardJornada
-        descricaoNivel={mock.jornada.descricao}
-        nivelAtual={mock.usuario.nivel}
-        xpAtual={mock.usuario.xpAtual}
-        xpMeta={mock.usuario.xpMeta}
-        proximoNivel={mock.usuario.proximoNivel}
-        xpRestante={mock.usuario.xpMeta - mock.usuario.xpAtual}
-      />
+        {panoramaCardError && (
+          <p className="text-xs font-medium text-rose-600">
+            Não foi possível carregar o panorama emocional: {panoramaCardError}
+          </p>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default HomeV1_2;

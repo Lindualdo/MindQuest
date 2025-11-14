@@ -8,6 +8,7 @@ type Props = {
   emocaoDominante: string;
   emocaoDominante2: string;
   sabotadorAtivo: string;
+  sabotadorDescricao?: string | null;
   onExplorar?: () => void;
 };
 
@@ -18,11 +19,21 @@ const CardPanoramaEmocional = ({
   emocaoDominante,
   emocaoDominante2,
   sabotadorAtivo,
+  sabotadorDescricao,
   onExplorar,
 }: Props) => {
-  const energiaWidth = Math.min(100, Math.max(0, energiaPositiva));
-  const humorPercent = Math.min(100, Math.max(0, (humorAtual / 10) * 100));
-  const gaugeDegrees = (humorPercent / 100) * 360;
+  const safeHumorMedio = Number.isFinite(humorMedio) ? humorMedio : Number(humorMedio) || 0;
+  const safeHumorAtual = Number.isFinite(humorAtual) ? humorAtual : Number(humorAtual) || safeHumorMedio;
+  const safeEnergiaPositiva = Number.isFinite(energiaPositiva)
+    ? energiaPositiva
+    : Number(energiaPositiva) || 0;
+
+  const energiaWidth = Math.min(100, Math.max(0, safeEnergiaPositiva));
+  const energiaLabel = `${Math.round(energiaWidth)}%`;
+  const sabotadorDescricaoTexto =
+    sabotadorDescricao?.trim() && sabotadorDescricao.trim().length > 0
+      ? sabotadorDescricao.trim()
+      : 'Focado em metas e reconhecimento externo, usa sucesso como escudo emocional.';
 
   return (
     <motion.section
@@ -43,21 +54,32 @@ const CardPanoramaEmocional = ({
       </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-4" style={{ border: '1px solid rgba(52,199,89,0.3)' }}>
-          <div
-            className="relative flex h-20 w-20 items-center justify-center rounded-full"
-            style={{ background: `conic-gradient(#34C759 0deg ${gaugeDegrees}deg, #E2E8F0 ${gaugeDegrees}deg 360deg)` }}
-          >
-            <div className="h-16 w-16 rounded-full bg-white" />
-            <span className="absolute text-lg font-semibold" style={{ color: '#1C2541' }}>
-              {humorMedio.toFixed(1)}
-            </span>
-          </div>
-          <div>
-            <p className="mq-card-meta-v1_2 text-[0.7rem]">Humor</p>
-            <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
-              Média semanal 
-            </p>
+        <div className="rounded-2xl bg-white px-4 py-4 flex items-center gap-4" style={{ border: '1px solid rgba(52,199,89,0.3)' }}>
+          <div className="flex items-center gap-4">
+            <div className="relative w-24 h-24">
+              <svg viewBox="0 0 120 120" className="w-full h-full">
+                <circle cx="60" cy="60" r="48" stroke="#E2E8F0" strokeWidth="10" fill="none" strokeLinecap="round" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  stroke="#22C55E"
+                  strokeWidth="10"
+                  fill="none"
+                  strokeDasharray={2 * Math.PI * 48}
+                  strokeDashoffset={2 * Math.PI * 48 * (1 - safeHumorAtual / 10)}
+                  strokeLinecap="round"
+                  transform="rotate(-90 60 60)"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-2xl font-semibold text-slate-900">{safeHumorAtual.toFixed(1)}</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">Humor atual</p>
+              <p className="text-lg font-semibold text-slate-900 mt-1">Média semanal {safeHumorMedio.toFixed(1)}</p>
+            </div>
           </div>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.35)' }}>
@@ -69,7 +91,7 @@ const CardPanoramaEmocional = ({
             />
           </div>
           <p className="mt-1 text-sm font-semibold" style={{ color: '#F97316' }}>
-            {energiaWidth}%
+            {energiaLabel}
           </p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.25)' }}>
@@ -96,7 +118,7 @@ const CardPanoramaEmocional = ({
             </p>
           </div>
           <p className="mt-1 text-xs" style={{ color: '#7E8CA0' }}>
-            Focado em metas e reconhecimento externo, usa sucesso como escudo emocional.
+            {sabotadorDescricaoTexto}
           </p>
         </div>
       </div>

@@ -311,6 +311,49 @@ export interface AlertaPreventivo {
   visivel_usuario: boolean; // na v1.1 = false
 }
 
+export interface PanoramaCardEmotion {
+  nome: string | null;
+  emoji?: string | null;
+  percentual?: number | null;
+}
+
+export interface PanoramaCardSabotador {
+  id: string | null;
+  nome: string | null;
+  emoji?: string | null;
+  apelido?: string | null;
+  contexto?: string | null;
+  insight?: string | null;
+  contramedida?: string | null;
+  intensidade_media?: number | string | null;
+  total_deteccoes?: number | string | null;
+  conversas_afetadas?: number | string | null;
+}
+
+export interface PanoramaCardData {
+  humor: {
+    media_7d: number | null;
+    atual: number | null;
+    amostras: number;
+    ultima_data: string | null;
+    ultima_hora: string | null;
+  };
+  energia: {
+    percentual_positiva: number;
+    percentual_negativa: number;
+    percentual_neutra: number;
+    categoria: string | null;
+  };
+  emocoes_dominantes: PanoramaCardEmotion[];
+  sabotador: PanoramaCardSabotador | null;
+}
+
+export interface PanoramaCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_panorama_emocional: PanoramaCardData;
+}
+
 // Dashboard Data - estrutura principal
 export interface DashboardData {
   usuario: {
@@ -375,6 +418,10 @@ export interface StoreState {
   resumoConversas: ResumoConversasPayload | null;
   resumoConversasLoading: boolean;
   resumoConversasError: string | null;
+  panoramaCard: PanoramaCardData | null;
+  panoramaCardUserId: string | null;
+  panoramaCardLoading: boolean;
+  panoramaCardError: string | null;
   // full chat detail
   selectedChatId: string | null;
   fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
@@ -398,6 +445,7 @@ export interface StoreState {
   closeResumoConversas: () => void;
   loadResumoConversas: () => Promise<void>;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
+  loadPanoramaCard: (usuarioId?: string) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil
