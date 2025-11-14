@@ -15,6 +15,19 @@ import type {
 } from '../types/emotions';
 import { gamificacaoLevels } from '../data/gamificacaoLevels';
 
+type ProximaJornadaBlock = {
+  xp_total?: string | number | null;
+  nivel_atual?: string | number | null;
+  titulo_atual?: string | null;
+  tituloAtual?: string | null;
+  proximo_nivel?: unknown;
+  Proximo_Nivel?: unknown;
+  proximos_niveis?: unknown;
+  Proximos_Niveis?: unknown;
+  desafios?: unknown;
+  Desafios?: unknown;
+};
+
 interface ApiData {
   success?: boolean;
   humor?: {
@@ -459,7 +472,7 @@ class DataAdapter {
 
     const perfil = safeJsonParse<Record<string, unknown>>(payload.Perfil_BigFive);
     const gamificacaoBlock = safeJsonParse<Record<string, unknown>>(payload.Gameficacao ?? payload.Gamificacao);
-    const proximaJornadaBlock = safeJsonParse<Record<string, unknown>>(payload.Proxima_Jornada ?? payload.proxima_jornada);
+    const proximaJornadaBlock = safeJsonParse<ProximaJornadaBlock>(payload.Proxima_Jornada ?? payload.proxima_jornada);
     const sabotadorBlock = safeJsonParse<Record<string, unknown>>(payload.Sabotador);
     const distribuicaoBlock = safeJsonParse<Record<string, unknown>>(payload.Distribuicao_Emocoes);
     const rodaEmocoesBlock = payload.roda_emocoes
@@ -680,37 +693,57 @@ class DataAdapter {
       ? safeJsonParse<Record<string, unknown>>(proximaJornadaBlock.proximo_nivel ?? proximaJornadaBlock.Proximo_Nivel)
       : null;
 
-    const proximaJornada: Partial<ApiData['proxima_jornada']> = {};
+    let proximaJornada: ApiData['proxima_jornada'] | undefined;
     if (proximaJornadaBlock) {
-      const setProximaValue = (key: keyof ApiData['proxima_jornada'], value: unknown) => {
-        if (value === undefined) return;
-        if (Array.isArray(value) || typeof value === 'object' || value === null) {
-          proximaJornada[key] = value as any;
-          return;
-        }
-        const parsed = this.parseNullString<string>(value as string | null | undefined);
-        if (parsed !== null && parsed !== undefined) {
-          proximaJornada[key] = parsed as any;
-        }
+      const xpTotalParsed = this.parseNumber(proximaJornadaBlock.xp_total as string | number | null | undefined);
+      const nivelAtualParsed = this.parseNumber(proximaJornadaBlock.nivel_atual as string | number | null | undefined);
+      const tituloAtualParsed = this.parseNullString<string>(
+        (proximaJornadaBlock.titulo_atual ?? proximaJornadaBlock.tituloAtual) as string | null | undefined
+      );
+
+      const proximoNivelParsed = proximoNivelBlock
+        ? {
+            nivel: this.parseNumber(proximoNivelBlock.nivel as string | number | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.nivel as string | null | undefined) ?? null,
+            titulo: this.parseNullString<string>(proximoNivelBlock.titulo as string | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.Titulo as string | null | undefined) ?? null,
+            xp_minimo:
+              this.parseNumber(proximoNivelBlock.xp_minimo as string | number | null | undefined) ??
+              this.parseNumber(proximoNivelBlock.XP_Minimo as string | number | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.xp_minimo as string | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.XP_Minimo as string | null | undefined) ??
+              null,
+            xp_restante:
+              this.parseNumber(proximoNivelBlock.xp_restante as string | number | null | undefined) ??
+              this.parseNumber(proximoNivelBlock.XP_Restante as string | number | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.xp_restante as string | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.XP_Restante as string | null | undefined) ??
+              null,
+            descricao:
+              this.parseNullString<string>(proximoNivelBlock.descricao as string | null | undefined) ??
+              this.parseNullString<string>(proximoNivelBlock.Descricao as string | null | undefined) ??
+              null
+          }
+        : null;
+
+      proximaJornada = {
+        xp_total: xpTotalParsed ?? null,
+        nivel_atual: nivelAtualParsed ?? null,
+        titulo_atual: tituloAtualParsed ?? null,
+        proximo_nivel: proximoNivelParsed,
+        proximos_niveis: proximosNiveisArray ?? null,
+        desafios: desafiosProximaJornadaArray ?? null
       };
 
-      setProximaValue('xp_total', proximaJornadaBlock.xp_total);
-      setProximaValue('nivel_atual', proximaJornadaBlock.nivel_atual);
-      setProximaValue('titulo_atual', proximaJornadaBlock.titulo_atual ?? proximaJornadaBlock.tituloAtual);
-      if (proximoNivelBlock) {
-        proximaJornada.proximo_nivel = {
-          nivel: proximoNivelBlock.nivel ?? proximoNivelBlock.Nivel ?? null,
-          titulo: proximoNivelBlock.titulo ?? proximoNivelBlock.Titulo ?? null,
-          xp_minimo: proximoNivelBlock.xp_minimo ?? proximoNivelBlock.XP_Minimo ?? null,
-          xp_restante: proximoNivelBlock.xp_restante ?? proximoNivelBlock.XP_Restante ?? null,
-          descricao: proximoNivelBlock.descricao ?? proximoNivelBlock.Descricao ?? null
-        };
-      }
-      if (proximosNiveisArray) {
-        proximaJornada.proximos_niveis = proximosNiveisArray as any;
-      }
-      if (desafiosProximaJornadaArray) {
-        proximaJornada.desafios = desafiosProximaJornadaArray as any;
+      const hasUsefulData = Object.values(proximaJornada).some((value) => {
+        if (value === null || value === undefined) return false;
+        if (Array.isArray(value)) return value.length > 0;
+        if (typeof value === 'object') return Object.keys(value).length > 0;
+        return true;
+      });
+
+      if (!hasUsefulData) {
+        proximaJornada = undefined;
       }
     }
 
@@ -719,7 +752,7 @@ class DataAdapter {
       user: partialUserData,
       perfil_big_five: Object.keys(perfilBigFive).length > 0 ? (perfilBigFive as ApiData['perfil_big_five']) : undefined,
       gamificacao: Object.keys(gamificacao).length > 0 ? (gamificacao as ApiData['gamificacao']) : undefined,
-      proxima_jornada: Object.keys(proximaJornada).length > 0 ? (proximaJornada as ApiData['proxima_jornada']) : undefined,
+      proxima_jornada: proximaJornada,
       sabotador: Object.keys(sabotador).length > 0 ? (sabotador as ApiData['sabotador']) : undefined,
       distribuicao_emocoes: Object.keys(distribuicao).length > 0 ? (distribuicao as ApiData['distribuicao_emocoes']) : undefined,
       panas: Object.keys(panas).length > 0 ? (panas as ApiData['panas']) : undefined,
@@ -1110,7 +1143,7 @@ class DataAdapter {
       const nome = this.parseNullString<string>(data.nome as string | null | undefined) ?? 'Conquista';
       if (!id) return null;
       const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🏆';
-      const xpBonus = this.parseNumber(data.xp_bonus) ?? 0;
+      const xpBonus = this.parseNumber(data.xp_bonus as string | number | null | undefined) ?? 0;
       const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
       const desbloqueadaEm = this.parseNullString<string>(data.desbloqueada_em as string | null | undefined) ?? '';
       return {
@@ -1131,12 +1164,14 @@ class DataAdapter {
       if (!id) return null;
       const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🔒';
       const status = this.parseNullString<string>(data.status as string | null | undefined) ?? 'pendente';
-      const xpBonus = this.parseNumber(data.xp_bonus) ?? 0;
+      const xpBonus = this.parseNumber(data.xp_bonus as string | number | null | undefined) ?? 0;
       const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
       const categoriaCodigo = this.parseNullString<string>(data.categoria_codigo as string | null | undefined);
-      const progressoMeta = this.parseNumber(data.progresso_meta) ?? 0;
-      const progressoAtual = this.parseNumber(data.progresso_atual) ?? 0;
-      const progressoPercentual = clamp(this.parseNumber(data.progresso_percentual) ?? 0);
+      const progressoMeta = this.parseNumber(data.progresso_meta as string | number | null | undefined) ?? 0;
+      const progressoAtual = this.parseNumber(data.progresso_atual as string | number | null | undefined) ?? 0;
+      const progressoPercentual = clamp(
+        this.parseNumber(data.progresso_percentual as string | number | null | undefined) ?? 0
+      );
       const ultimaAtualizacaoEntrada = this.parseNullString<string>(data.ultima_atualizacao as string | null | undefined);
 
       return {

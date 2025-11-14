@@ -6,6 +6,7 @@ type Props = {
   humorMedio: number;
   energiaPositiva: number; // 0-100 PANAS positivos
   emocaoDominante: string;
+  emocaoDominante2: string;
   sabotadorAtivo: string;
   onExplorar?: () => void;
 };
@@ -15,6 +16,7 @@ const CardPanoramaEmocional = ({
   humorMedio,
   energiaPositiva,
   emocaoDominante,
+  emocaoDominante2,
   sabotadorAtivo,
   onExplorar,
 }: Props) => {
@@ -36,7 +38,7 @@ const CardPanoramaEmocional = ({
     >
       <div>
         <p className="mq-eyebrow-v1_2 tracking-[0.18em]" style={{ color: '#2A314A' }}>
-          Visão 360° emocional
+          Minhas emoções - Visão 360° - Semanal
         </p>
       </div>
 
@@ -48,18 +50,18 @@ const CardPanoramaEmocional = ({
           >
             <div className="h-16 w-16 rounded-full bg-white" />
             <span className="absolute text-lg font-semibold" style={{ color: '#1C2541' }}>
-              {humorAtual.toFixed(1)}
+              {humorMedio.toFixed(1)}
             </span>
           </div>
           <div>
-            <p className="mq-card-meta-v1_2 text-[0.7rem]">Humor atual</p>
+            <p className="mq-card-meta-v1_2 text-[0.7rem]">Humor</p>
             <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
-              Média semanal {humorMedio.toFixed(1)}
+              Média semanal 
             </p>
           </div>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(249,115,22,0.35)' }}>
-          <p className="mq-card-meta-v1_2 text-[0.7rem]">Energia</p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Energia média</p>
           <div className="mt-2 h-2 rounded-full" style={{ backgroundColor: '#FDE5D2' }}>
             <div
               className="h-full rounded-full"
@@ -71,16 +73,22 @@ const CardPanoramaEmocional = ({
           </p>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(48,131,220,0.25)' }}>
-          <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoção dominante</p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Emoções dominante</p>
           <div className="mt-2 flex items-center gap-2">
             <Heart size={18} color="#D90368" />
             <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
               {emocaoDominante}
             </p>
           </div>
+          <div className="mt-2 flex items-center gap-2">
+            <Heart size={18} color="#D90368" />
+            <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>
+              {emocaoDominante2}
+            </p>
+          </div>
         </div>
         <div className="rounded-2xl bg-white px-4 py-3" style={{ border: '1px solid rgba(217,3,104,0.25)' }}>
-          <p className="mq-card-meta-v1_2 text-[0.7rem]">Sabotador ativo</p>
+          <p className="mq-card-meta-v1_2 text-[0.7rem]">Sabotador mais ativo</p>
           <div className="mt-2 flex items-center gap-2">
             <Brain size={18} color="#D90368" />
             <p className="text-sm font-semibold" style={{ color: '#1C2541' }}>

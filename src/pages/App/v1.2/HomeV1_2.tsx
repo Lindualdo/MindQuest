@@ -51,6 +51,7 @@ const mock = {
     humorMedio: 5.8,
     energiaPositiva: 65,
     emocaoDominante: 'Confiança · 28%',
+    emocaoDominante2: 'Alegria · 27%',
     sabotadorAtivo: 'Hiper-realizador',
   },
   conversas: {
@@ -152,6 +153,7 @@ const HomeV1_2 = () => (
         humorMedio={mock.panoramaEmocional.humorMedio}
         energiaPositiva={mock.panoramaEmocional.energiaPositiva}
         emocaoDominante={mock.panoramaEmocional.emocaoDominante}
+        emocaoDominante2={mock.panoramaEmocional.emocaoDominante2}
         sabotadorAtivo={mock.panoramaEmocional.sabotadorAtivo}
         onExplorar={noop}
       />
@@ -162,7 +164,6 @@ const HomeV1_2 = () => (
         progressoAtual={mock.conversas.progressoAtual}
         progressoMeta={mock.conversas.progressoMeta}
         beneficios={mock.conversas.beneficios}
-        dias={mock.conversas.dias}
         onConversar={noop}
         onExplorarHistorico={noop}
       />

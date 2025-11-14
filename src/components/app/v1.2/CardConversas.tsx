@@ -51,8 +51,13 @@ const CardConversas = ({
             style={{ width: `${progresso}%`, backgroundColor: '#FB8A2A' }}
           />
         </div>
-        <div className="mt-2 flex items-center text-[0.75rem] font-medium" style={{ color: '#1C2541' }}>
-          <span>{progressoAtual}/{progressoMeta} conversas concluídas</span>
+        <div className="mt-2 flex items-center justify-between text-[0.75rem] font-medium" style={{ color: '#1C2541' }}>
+          <span>
+            {progressoAtual} conversa{progressoAtual > 1 ? 's' : ''}
+          </span>
+          <span>
+            Meta {progressoMeta} conversa{progressoMeta > 1 ? 's' : ''}
+          </span>
         </div>
         <p className="mq-card-meta-v1_2 mt-0.5">
           {ultimaConversaLabel ?? 'Última conversa há 1 dia e 4h'}

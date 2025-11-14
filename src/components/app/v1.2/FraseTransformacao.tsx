@@ -19,10 +19,10 @@ const FraseTransformacao = () => {
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-wrap items-center gap-2 text-[0.75rem] sm:text-[0.95rem]"
+      className="flex flex-wrap items-center gap-1.5 text-[0.7rem] sm:text-[0.85rem]"
       style={{ color: '#1C2541' }}
     >
-      <p className="font-semibold tracking-tight text-[0.8rem] sm:text-[1rem]">
+      <p className="font-semibold tracking-tight text-[0.78rem] sm:text-[0.95rem]">
         Conversas → Quests → Transformação →
       </p>
       <motion.span
@@ -30,7 +30,7 @@ const FraseTransformacao = () => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-        className="rounded-full px-3 py-0.5 text-[0.72rem] font-semibold sm:text-[0.9rem]"
+        className="rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold sm:text-[0.85rem]"
         style={{
           backgroundColor: 'rgba(217,3,104,0.08)',
           color: '#D90368',
