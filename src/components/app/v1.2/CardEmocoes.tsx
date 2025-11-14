@@ -30,6 +30,10 @@ const CardPanoramaEmocional = ({
 
   const energiaWidth = Math.min(100, Math.max(0, safeEnergiaPositiva));
   const energiaLabel = `${Math.round(energiaWidth)}%`;
+  const clampedHumorAtual = Math.max(0, Math.min(10, safeHumorAtual));
+  const pointerAngle = (Math.PI * clampedHumorAtual) / 10;
+  const pointerX = 60 - 30 * Math.cos(pointerAngle);
+  const pointerY = 70 - 30 * Math.sin(pointerAngle);
   const sabotadorDescricaoTexto =
     sabotadorDescricao?.trim() && sabotadorDescricao.trim().length > 0
       ? sabotadorDescricao.trim()
@@ -56,29 +60,39 @@ const CardPanoramaEmocional = ({
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-4 py-4 flex items-center gap-4" style={{ border: '1px solid rgba(52,199,89,0.3)' }}>
           <div className="flex items-center gap-4">
-            <div className="relative w-24 h-24">
-              <svg viewBox="0 0 120 120" className="w-full h-full">
-                <circle cx="60" cy="60" r="48" stroke="#E2E8F0" strokeWidth="10" fill="none" strokeLinecap="round" />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="48"
-                  stroke="#22C55E"
-                  strokeWidth="10"
-                  fill="none"
-                  strokeDasharray={2 * Math.PI * 48}
-                  strokeDashoffset={2 * Math.PI * 48 * (1 - safeHumorAtual / 10)}
-                  strokeLinecap="round"
-                  transform="rotate(-90 60 60)"
-                />
+            <div className="relative" style={{ width: '102px' }}>
+              <svg viewBox="0 0 120 80" className="w-full">
+                <defs>
+                  <linearGradient id="humor-gauge" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#F87171" />
+                    <stop offset="35%" stopColor="#F97316" />
+                    <stop offset="70%" stopColor="#FACC15" />
+                    <stop offset="100%" stopColor="#22C55E" />
+                  </linearGradient>
+                </defs>
+                <path d="M10 70 A50 50 0 0 1 110 70" fill="none" stroke="#E2E8F0" strokeWidth={10} strokeLinecap="round" />
+                <path d="M10 70 A50 50 0 0 1 110 70" fill="none" stroke="url(#humor-gauge)" strokeWidth={10} strokeLinecap="round" />
+                {[0, 5, 10].map((value) => {
+                  const angle = (Math.PI * value) / 10;
+                  const x1 = 60 - 35 * Math.cos(angle);
+                  const y1 = 70 - 35 * Math.sin(angle);
+                  const x2 = 60 - 42 * Math.cos(angle);
+                  const y2 = 70 - 42 * Math.sin(angle);
+                  return <line key={value} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#94A3B8" strokeWidth={1.5} />;
+                })}
+                {Number.isFinite(safeHumorAtual) && (
+                  <>
+                    <line x1={60} y1={70} x2={pointerX} y2={pointerY} stroke="#16A34A" strokeWidth={3} strokeLinecap="round" />
+                    <circle cx={60} cy={70} r={4} fill="#16A34A" />
+                  </>
+                )}
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-semibold text-slate-900">{safeHumorAtual.toFixed(1)}</span>
-              </div>
             </div>
             <div>
-              <p className="text-sm text-slate-500">Humor atual</p>
-              <p className="text-lg font-semibold text-slate-900 mt-1">Média semanal {safeHumorMedio.toFixed(1)}</p>
+              <p className="mq-card-meta-v1_2 text-[0.7rem] text-slate-500">
+                Humor atual <span className="font-semibold text-slate-900">{safeHumorAtual.toFixed(1)}</span>
+              </p>
+              <p className="text-sm font-semibold text-slate-800 mt-1">Média semanal {safeHumorMedio.toFixed(1)}</p>
             </div>
           </div>
         </div>
