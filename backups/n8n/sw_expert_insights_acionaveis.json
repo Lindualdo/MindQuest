@@ -42,7 +42,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Você é psicólogo especialista em desenvolvimento pessoal. Analise a conversa e contexto validado abaixo.\n\nCONVERSA:\n{{ $json.mensagens }}\n\nUsuário: {{ $json.usr_name }} | Data: {{ $json.data_conversa }}\n\nTAREFA: Gere 2-4 insights acionáveis com Feedback Sanduíche + Recursos Práticos.\n\nESTRUTURA DE CADA INSIGHT:\n1. RESUMO (30-50 palavras): Sintetize estado emocional objetivamente\n2. FEEDBACK SANDUÍCHE:\n   - Positivo (20-30 pal): Reconheça forças\n   - Desenvolvimento (30-40 pal): Padrão que merece atenção\n   - Motivacional (20-30 pal): Esperança + próximos passos\n3. RECURSOS (2-4 itens): tipo, nome, descricao, aplicacao_pratica\n\n═══════════════════════════════════════════════════════\n⚠️ VALORES PERMITIDOS - USE EXATAMENTE COMO LISTADO ⚠️\n═══════════════════════════════════════════════════════\n\nCATEGORIA (use APENAS estes valores):\n✓ comportamental\n✓ emocional\n✓ social\n✓ cognitivo\n✗ NUNCA: financeiro, profissional, financeiro-emocional, ou qualquer outro\n\nTIPO INSIGHT (use APENAS estes valores):\n✓ padrao\n✓ melhoria\n✓ positivo\n✓ alerta\n\nPRIORIDADE (use APENAS estes valores):\n✓ alta\n✓ media (SEM acento)\n✓ baixa\n\nTIPO RECURSO (use APENAS estes valores):\n✓ tecnica\n✓ conceito\n✓ leitura\n✓ pratica\n✓ reflexao\n\n═══════════════════════════════════════════════════════\n\nREGRAS CRÍTICAS:\n- Base TUDO no relatado (sem suposições)\n- Use APENAS os valores listados acima (sem variações, adaptações ou combinações)\n- Seja ESPECÍFICO nas evidências\n- Recursos PRÁTICOS e aplicáveis\n- Tom EMPÁTICO mas DIRETO\n- VALIDE cada campo antes de gerar o JSON\n\nANTES DE RETORNAR: Verifique se TODOS os valores de categoria, tipo, prioridade e tipo_recurso estão EXATAMENTE como listado acima.\n\nRETORNE JSON ARRAY com 2-4 insights no formato:\n[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Título\",\"icone\":\"🔄\",\"prioridade\":\"alta\",\"resumo_situacao\":\"...\",\"feedback_positivo\":\"...\",\"feedback_desenvolvimento\":\"...\",\"feedback_motivacional\":\"...\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"...\",\"descricao\":\"...\",\"aplicacao_pratica\":\"...\"}],\"baseado_em\":[\"evidência1\",\"evidência2\"]}]",
+        "text": "=Você é psicólogo especialista em desenvolvimento pessoal. Analise a conversa e contexto validado abaixo.\n\nCONVERSA:\n{{ $json.mensagens }}\n\nUsuário: {{ $json.usr_name }} | Data: {{ $json.data_conversa }}\n\nChame a ferramenta: ´get_user_insight`\nConsidere também esses ultimos Insights na sua analise\n\nTAREFA: Gere 1 insights acionáveis com Feedback Sanduíche + Recursos Práticos.\nPriorize os pontos mais relevantes identificados na conversa\n\nAnalise os ultimos Insighs anteriores para evitar repetição\n\nESTRUTURA DE CADA INSIGHT:\n1. RESUMO (30-50 palavras): Sintetize estado emocional objetivamente\n2. FEEDBACK SANDUÍCHE:\n   - Positivo (20-30 pal): Reconheça forças\n   - Desenvolvimento (30-40 pal): Padrão que merece atenção\n   - Motivacional (20-30 pal): Esperança + próximos passos\n3. RECURSOS (2-4 itens): tipo, nome, descricao, aplicacao_pratica\n\n═══════════════════════════════════════════════════════\n⚠️ VALORES PERMITIDOS - USE EXATAMENTE COMO LISTADO ⚠️\n═══════════════════════════════════════════════════════\n\nCATEGORIA (use APENAS estes valores):\n✓ comportamental\n✓ emocional\n✓ social\n✓ cognitivo\n✗ NUNCA: financeiro, profissional, financeiro-emocional, ou qualquer outro\n\nTIPO INSIGHT (use APENAS estes valores):\n✓ padrao\n✓ melhoria\n✓ positivo\n✓ alerta\n\nPRIORIDADE (use APENAS estes valores):\n✓ alta\n✓ media (SEM acento)\n✓ baixa\n\nTIPO RECURSO (use APENAS estes valores):\n✓ tecnica\n✓ conceito\n✓ leitura\n✓ pratica\n✓ reflexao\n\n═══════════════════════════════════════════════════════\n\nREGRAS CRÍTICAS:\n- Base TUDO no relatado (sem suposições)\n- Use APENAS os valores listados acima (sem variações, adaptações ou combinações)\n- Seja ESPECÍFICO nas evidências\n- Recursos PRÁTICOS e aplicáveis\n- Tom EMPÁTICO mas DIRETO\n- VALIDE cada campo antes de gerar o JSON\n\nANTES DE RETORNAR: Verifique se TODOS os valores de categoria, tipo, prioridade e tipo_recurso estão EXATAMENTE como listado acima.\n\nRETORNE JSON ARRAY com 1 insights no formato:\n[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Título\",\"icone\":\"🔄\",\"prioridade\":\"alta\",\"resumo_situacao\":\"...\",\"feedback_positivo\":\"...\",\"feedback_desenvolvimento\":\"...\",\"feedback_motivacional\":\"...\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"...\",\"descricao\":\"...\",\"aplicacao_pratica\":\"...\"}],\"baseado_em\":[\"evidência1\",\"evidência2\"]}]",
         "hasOutputParser": true,
         "options": {
           "systemMessage": "Psicólogo especialista. Gera insights acionáveis com feedback sanduíche e recursos práticos. Retorna array JSON com 2-4 insights.",
@@ -66,8 +66,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        256,
-        272
+        336,
+        384
       ],
       "id": "a80b485e-52ee-4e43-9a5a-0e3952051056",
       "name": "Parser JSON"
@@ -82,8 +82,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        112,
-        400
+        -112,
+        464
       ],
       "id": "0f6db9cf-f7b1-4821-8975-ec2653eb95d2",
       "name": "OpenRouter Claude",
@@ -129,6 +129,29 @@
       ],
       "id": "5480e67e-2907-4cfa-9a95-f100a3a2164a",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select tipo, categoria, titulo, descricao, prioridade from insights where usuario_id = $1 limit 15 ",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        272
+      ],
+      "id": "3522f252-eba0-4095-80bc-6b2296af3d4b",
+      "name": "get_user_insight",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -191,6 +214,17 @@
           }
         ]
       ]
+    },
+    "get_user_insight": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gerador Insights",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -214,7 +248,7 @@
       }
     ]
   },
-  "versionId": "7bfc5ab3-329e-4028-b280-6908904cde78",
+  "versionId": "28f2fec0-2eac-446c-b5e5-d508ff9230d9",
   "triggerCount": 0,
   "shared": [
     {

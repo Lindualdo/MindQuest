@@ -185,6 +185,7 @@ interface ApiData {
 }
 
 type ApiPayload = ApiData | { response?: unknown } | { data?: unknown } | Array<unknown> | Record<string, unknown> | null | undefined;
+type ProximaJornada = NonNullable<ApiData['proxima_jornada']>;
 
 class DataAdapter {
   private parseNullString<T>(value: string | null | undefined): T | null {
@@ -227,6 +228,26 @@ class DataAdapter {
     }
 
     return 0;
+  }
+
+  private isNonNullable<T>(value: T | null | undefined): value is T {
+    return value !== null && value !== undefined;
+  }
+
+  private mergeDefinedValues<T extends Record<string, unknown>>(defaults: T, overrides?: Partial<T>): T {
+    if (!overrides) {
+      return { ...defaults };
+    }
+
+    const result = { ...defaults };
+    for (const key of Object.keys(overrides) as Array<keyof T>) {
+      const value = overrides[key];
+      if (value !== undefined) {
+        result[key] = value as T[typeof key];
+      }
+    }
+
+    return result;
   }
 
   private getDefaultApiData(): ApiData {
@@ -788,6 +809,14 @@ class DataAdapter {
     };
 
     const insights = Array.isArray(safeData.insights) ? safeData.insights : [];
+    const defaultProximaJornada = (defaults.proxima_jornada ?? this.getDefaultApiData().proxima_jornada) as ProximaJornada;
+    const overridesProximaJornada = safeData.proxima_jornada
+      ? ({ ...safeData.proxima_jornada } as Partial<ProximaJornada>)
+      : undefined;
+    const mergedProximaJornada = this.mergeDefinedValues<ProximaJornada>(
+      defaultProximaJornada,
+      overridesProximaJornada
+    );
 
     return {
       success: 'success' in safeData ? safeData.success : defaults.success,
@@ -805,8 +834,7 @@ class DataAdapter {
         ...(safeData.gamificacao || {})
       },
       proxima_jornada: {
-        ...defaults.proxima_jornada,
-        ...(safeData.proxima_jornada || {})
+        ...mergedProximaJornada
       },
       sabotador: {
         ...defaults.sabotador,
@@ -1136,7 +1164,9 @@ class DataAdapter {
     if (questStatusRaw === 'parcial') questStatus = 'parcial';
     else if (questStatusRaw === 'completa') questStatus = 'completa';
 
-    const parseConquistaEntry = (entry: unknown) => {
+    const parseConquistaEntry = (
+      entry: unknown
+    ): Gamificacao['conquistas_desbloqueadas'][number] | null => {
       if (!entry || typeof entry !== 'object') return null;
       const data = entry as Record<string, unknown>;
       const id = this.parseNullString<string>(data.id as string | null | undefined);
@@ -1146,7 +1176,7 @@ class DataAdapter {
       const xpBonus = this.parseNumber(data.xp_bonus as string | number | null | undefined) ?? 0;
       const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
       const desbloqueadaEm = this.parseNullString<string>(data.desbloqueada_em as string | null | undefined) ?? '';
-      return {
+      const conquista: Gamificacao['conquistas_desbloqueadas'][number] = {
         id,
         nome,
         emoji,
@@ -1154,9 +1184,12 @@ class DataAdapter {
         categoria,
         desbloqueada_em: desbloqueadaEm
       };
+      return conquista;
     };
 
-    const parseConquistaProximaEntry = (entry: unknown) => {
+    const parseConquistaProximaEntry = (
+      entry: unknown
+    ): Gamificacao['conquistas_proximas'][number] | null => {
       if (!entry || typeof entry !== 'object') return null;
       const data = entry as Record<string, unknown>;
       const id = this.parseNullString<string>(data.id as string | null | undefined);
@@ -1174,7 +1207,7 @@ class DataAdapter {
       );
       const ultimaAtualizacaoEntrada = this.parseNullString<string>(data.ultima_atualizacao as string | null | undefined);
 
-      return {
+      const conquistaProxima: Gamificacao['conquistas_proximas'][number] = {
         id,
         nome,
         emoji,
@@ -1187,13 +1220,14 @@ class DataAdapter {
         progresso_percentual: progressoPercentual,
         ultima_atualizacao: ultimaAtualizacaoEntrada ?? null
       };
+      return conquistaProxima;
     };
 
     let conquistas: Gamificacao['conquistas_desbloqueadas'] = [];
     if (Array.isArray(gamificacao.conquistas_desbloqueadas)) {
       conquistas = gamificacao.conquistas_desbloqueadas
         .map(parseConquistaEntry)
-        .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => item !== null);
+        .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => this.isNonNullable(item));
     } else {
       const conquistasStr = this.parseNullString<string>(gamificacao.conquistas_desbloqueadas as string | null | undefined);
       if (conquistasStr) {
@@ -1202,7 +1236,7 @@ class DataAdapter {
           if (Array.isArray(parsed)) {
             conquistas = parsed
               .map(parseConquistaEntry)
-              .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => item !== null);
+              .filter((item): item is Gamificacao['conquistas_desbloqueadas'][number] => this.isNonNullable(item));
           }
         } catch (error) {
           console.error('Erro ao parsear conquistas:', error);
@@ -1215,7 +1249,7 @@ class DataAdapter {
     if (Array.isArray(proximasFonte)) {
       conquistasProximas = proximasFonte
         .map(parseConquistaProximaEntry)
-        .filter((item): item is Gamificacao['conquistas_proximas'][number] => item !== null);
+        .filter((item): item is Gamificacao['conquistas_proximas'][number] => this.isNonNullable(item));
     } else {
       const proximasStr = this.parseNullString<string>(proximasFonte as string | null | undefined);
       if (proximasStr) {
@@ -1224,7 +1258,7 @@ class DataAdapter {
           if (Array.isArray(parsed)) {
             conquistasProximas = parsed
               .map(parseConquistaProximaEntry)
-              .filter((item): item is Gamificacao['conquistas_proximas'][number] => item !== null);
+              .filter((item): item is Gamificacao['conquistas_proximas'][number] => this.isNonNullable(item));
           }
         } catch (error) {
           console.error('Erro ao parsear conquistas futuras:', error);
@@ -1307,11 +1341,11 @@ class DataAdapter {
     if ((!proximoNivel || proximosNiveis.length === 0) && Array.isArray(proximaJornada?.proximos_niveis)) {
       const proximosComplementares = (proximaJornada?.proximos_niveis as Array<Record<string, unknown>>)
         .map((entry) => {
-          const nivel = this.parseNumber(entry.nivel) ?? null;
+          const nivel = this.parseNumber(entry.nivel as string | number | null | undefined) ?? null;
           if (nivel === null) return null;
-          const xpMinimo = this.parseNumber(entry.xp_minimo) ?? 0;
-          const xpMaximo = this.parseNumber(entry.xp_proximo_nivel) ?? null;
-          return {
+          const xpMinimo = this.parseNumber(entry.xp_minimo as string | number | null | undefined) ?? 0;
+          const xpMaximo = this.parseNumber(entry.xp_proximo_nivel as string | number | null | undefined) ?? null;
+          const proximoPreview: Gamificacao['proximos_niveis'][number] = {
             nivel,
             titulo: this.parseNullString<string>(entry.titulo as string | null | undefined) ?? `Nível ${nivel}`,
             xp_minimo: xpMinimo,
@@ -1319,8 +1353,9 @@ class DataAdapter {
             xp_restante: Math.max(xpMinimo - xpTotal, 0),
             descricao: this.parseNullString<string>(entry.descricao as string | null | undefined)
           };
+          return proximoPreview;
         })
-        .filter((item): item is Gamificacao['proximos_niveis'][number] => item !== null);
+        .filter((item): item is Gamificacao['proximos_niveis'][number] => this.isNonNullable(item));
       if (proximosComplementares.length > 0) {
         proximosNiveis = proximosComplementares.slice(0, 3);
         proximoNivel = { ...proximosNiveis[0] };

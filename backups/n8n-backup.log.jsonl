@@ -735,5 +735,55 @@
         ]
       }
     ]
+  },
+  {
+    "dataBackup": "2025-11-14T08:08:58.985Z",
+    "pastas": [
+      {
+        "pasta": ".",
+        "arquivos": [
+          "Assistente_de_suporte.json",
+          "backup_n8n_github_hourly_v2.json",
+          "backup_n8n_github_hourly.json",
+          "chat_onboarding.json",
+          "exporta_dados_base.json",
+          "job_batch_atualiza_jornada.json",
+          "job_batch_generate_quests.json",
+          "job_batch_xp_conversas.json",
+          "job_batch_xp_quest.json",
+          "My_workflow_4.json",
+          "sw_agent_conversation_guide.json",
+          "sw_calcula_jornada.json",
+          "sw_chat_interations_v2.json",
+          "sw_chat_transcription.json",
+          "sw_criar_quest.json",
+          "sw_evolution_send_message_v2.json",
+          "sw_expert_bigfive_ocean.json",
+          "sw_expert_humor_energia.json",
+          "sw_expert_insights_acionaveis.json",
+          "sw_expert_sabotadores.json",
+          "sw_experts_panas.json",
+          "sw_get_history.json",
+          "sw_mentor.json",
+          "sw_resumo_conversa.json",
+          "sw_send_message_with_retry.json",
+          "sw_trader_cripto_guide.json",
+          "sw_tts.json",
+          "sw_user_conversation_guide.json",
+          "sw_valida_jornada.json",
+          "sw_xp_conversas.json",
+          "sw_xp_quest.json",
+          "usr_chat.json",
+          "valida_xp_conversa.json",
+          "valida_xp_quest.json",
+          "webhook_app_authentication.json",
+          "webhook_conversa_full.json",
+          "webhook_conversa_resumo.json",
+          "webhook_historico_humor.json",
+          "webhook_insights_detalhes.json",
+          "webhook_quests.json"
+        ]
+      }
+    ]
   }
 ]
