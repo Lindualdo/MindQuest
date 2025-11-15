@@ -74,17 +74,17 @@ const CardConversas = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
-      className="mq-card-v1_2 px-4 py-5 sm:px-5"
+      className="mq-card-v1_2 px-4 py-6 sm:px-5"
       style={{
         backgroundColor: '#FFF9F5',
         borderColor: 'rgba(255,153,110,0.25)',
         boxShadow: '0 10px 18px rgba(255,153,110,0.08)',
       }}
     >
-      <header className="flex flex-col gap-1.5">
-        <p className="mq-card-title-v1_2">🗓️ Diário de conversas</p>
+      <header className="flex flex-col gap-2">
+        <p className="mq-card-title-v1_2 text-lg sm:text-xl">🗓️ Diário de conversas</p>
         <div
-          className="flex flex-wrap items-center justify-between gap-1 text-[0.78rem] font-semibold"
+          className="flex flex-wrap items-center justify-between gap-1 text-[0.85rem] font-semibold"
           style={{ color: '#1C2541' }}
         >
           <span className="inline-flex items-center gap-1.5" style={{ color: '#F97316' }}>
@@ -94,17 +94,14 @@ const CardConversas = ({
         </div>
       </header>
 
-      <div className="mt-3">
+      <div className="mt-4">
         <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(255,153,110,0.18)' }}>
           <div
             className="mq-bar-fill-v1_2"
             style={{ width: `${progresso}%`, backgroundColor: '#FF9072' }}
           />
         </div>
-        <div
-          className="mt-2 flex items-center justify-between text-[0.75rem] font-medium"
-          style={{ color: '#1C2541' }}
-        >
+        <div className="mt-3 flex items-center justify-between text-[0.82rem] font-semibold" style={{ color: '#1C2541' }}>
           <span>
             {progressoAtual} conversa{progressoAtual > 1 ? 's' : ''}
           </span>
@@ -112,7 +109,7 @@ const CardConversas = ({
             Meta {progressoMeta} conversa{progressoMeta > 1 ? 's' : ''}
           </span>
         </div>
-        <p className="mq-card-meta-v1_2 mt-0.5">
+        <p className="mq-card-meta-v1_2 mt-1 text-[0.72rem]">
           {ultimaConversaLabel ?? 'Última conversa há 1 dia e 4h'}
         </p>
       </div>
@@ -128,7 +125,7 @@ const CardConversas = ({
                   className="flex flex-col items-center text-center"
                 >
                   <div
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border-2 text-sm font-semibold sm:h-11 sm:w-11"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border-2 text-[0.8rem] font-semibold sm:h-10 sm:w-10 sm:text-sm"
                     style={{
                       backgroundColor: config.bg,
                       borderColor: config.border,
@@ -138,10 +135,10 @@ const CardConversas = ({
                   >
                     {config.icon}
                   </div>
-                  <span className="mt-1 text-[0.58rem] font-semibold uppercase tracking-wide text-[#1C2541] sm:text-[0.65rem]">
+                  <span className="mt-1 text-[0.56rem] font-semibold uppercase tracking-wide text-[#1C2541] sm:text-[0.63rem]">
                     {dia.label}
                   </span>
-                  <span className="text-[0.58rem] font-medium text-[#7E8CA0] sm:text-[0.65rem]">
+                  <span className="text-[0.56rem] font-medium text-[#7E8CA0] sm:text-[0.63rem]">
                     {dia.dataLabel}
                   </span>
                 </div>
