@@ -32,7 +32,7 @@ const CardJornada = ({
       style={{ backgroundColor: '#F7EEF9', borderColor: 'rgba(217,3,104,0.12)', boxShadow: '0 10px 18px rgba(217,3,104,0.08)' }}
     >
       <div className="space-y-1.5 leading-tight">
-        <h2 className="mq-card-heading-v1_2 text-[0.85rem] sm:text-[1rem]">Minha jornada</h2>
+        <h2 className="mq-card-title-v1_2">Minha jornada</h2>
         <p className="mq-subtitle-v1_2 text-[0.65rem] sm:text-[0.8rem]">{nivelAtual}</p>
         <p className="mq-card-meta-v1_2 text-[0.65rem] sm:text-[0.8rem]">{descricaoNivel}</p>
       </div>

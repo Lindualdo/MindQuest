@@ -12,6 +12,8 @@
   --mq-v1_2-shadow: 0px 8px 24px rgba(28, 37, 65, 0.04);
 
   font-family: 'Inter', 'SF Pro Display', 'SF Pro Text', -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.35;
   background-color: var(--mq-v1_2-bg);
   color: var(--mq-v1_2-text);
 }
@@ -24,7 +26,7 @@
 }
 
 .mq-app-v1_2 .mq-card-title-v1_2 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--mq-v1_2-text);
   margin: 0;
@@ -82,7 +84,7 @@
 }
 
 .mq-app-v1_2 .mq-card-heading-v1_2 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--mq-v1_2-text);
 }

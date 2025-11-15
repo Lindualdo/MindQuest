@@ -37,7 +37,7 @@ const CardConversas = ({
       style={{ backgroundColor: 'rgba(255,228,208,0.4)', borderColor: 'rgba(249,115,22,0.12)', boxShadow: '0 8px 16px rgba(249,115,22,0.08)' }}
     >
       <header className="flex flex-col gap-1">
-        <p className="mq-card-heading-v1_2 text-[0.95rem]">💬 Conversas</p>
+        <p className="mq-card-title-v1_2">💬 Conversas</p>
         <div className="flex flex-wrap items-center justify-between gap-1 text-[0.78rem] font-semibold" style={{ color: '#1C2541' }}>
           <span className="inline-flex items-center gap-1.5" style={{ color: '#F97316' }}>
             <Flame size={14} /> {streakAtual} dia{streakAtual > 1 ? 's' : ''} seguido
@@ -67,7 +67,7 @@ const CardConversas = ({
       </div>
 
       <div className="mt-4 rounded-2xl px-4 py-3" style={{ backgroundColor: '#FFF1F6', border: '1px solid rgba(217,3,104,0.25)' }}>
-        <p className="mq-card-heading-v1_2 text-[0.85rem]">💡 Próxima conversa desbloqueia</p>
+        <p className="mq-card-heading-v1_2">💡 Próxima conversa desbloqueia</p>
         <ul className="mt-2 list-disc space-y-1 pl-4 text-[0.75rem]" style={{ color: '#1C2541' }}>
           <li>+75 XP base</li>
           <li>+{xpBonus} XP bônus</li>

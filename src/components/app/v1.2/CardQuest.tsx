@@ -68,7 +68,7 @@ const CardQuestAtiva = ({
             <Target size={18} />
           </div>
           <div className="flex-1 space-y-1">
-            <h3 className="mq-card-heading-v1_2 text-[0.95rem]">{titulo}</h3>
+            <h3 className="mq-card-title-v1_2 text-base sm:text-lg">{titulo}</h3>
             {descricao && (
               <p className="mq-card-meta-v1_2 text-[0.8rem]" style={{ color: '#4F5779' }}>
                 {descricao}
