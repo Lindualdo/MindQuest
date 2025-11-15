@@ -4,6 +4,7 @@ import CardConversas from '@/components/app/v1.2/CardConversas';
 import CardJornada from '@/components/app/v1.2/CardJornada';
 import CardQuestAtiva from '@/components/app/v1.2/CardQuest';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import FraseTransformacao from '@/components/app/v1.2/FraseTransformacao';
 import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
 import SabotadoresDashboardPage from '@/pages/App/SabotadoresDashboardPage';
 import EmocoesDashboardPageV12 from '@/pages/App/v1.2/dash_emocoes/EmocoesDashboardPageV12';
@@ -228,6 +229,7 @@ const HomeV1_2 = () => {
   return (
     <div className="mq-app-v1_2 min-h-screen">
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
+      <FraseTransformacao floating />
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 pb-24 pt-6 sm:gap-6">
         {showLoadingBanner && (
           <p className="rounded-2xl bg-white/70 px-4 py-2 text-center text-xs font-medium text-slate-600 shadow-sm">
