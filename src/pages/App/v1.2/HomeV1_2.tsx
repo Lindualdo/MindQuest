@@ -180,6 +180,12 @@ const HomeV1_2 = () => {
     });
 
     const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const isSameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
 
     return Array.from({ length: 7 }, (_, index) => {
       const date = new Date(referencia);
@@ -193,6 +199,7 @@ const HomeV1_2 = () => {
         label: labels[date.getDay()] ?? labels[0],
         dataLabel: formatDisplay(date),
         status: normalized,
+        isHoje: isSameDay(date, hoje),
       };
     });
   }, [dashboardData?.checkins_historico]);
