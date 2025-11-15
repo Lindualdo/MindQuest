@@ -16,6 +16,7 @@ import InsightDetailPage from '@/pages/App/InsightDetailPage';
 import PainelQuestsPage from '@/pages/App/PainelQuestsPage';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
+import type { CheckinDiario } from '@/types/emotions';
 
 const formatEmotion = (nome?: string | null, percentual?: number | null) => {
   if (!nome) {
@@ -132,16 +133,69 @@ const HomeV1_2 = () => {
       recorde: card?.streak?.recorde ?? 0,
       progressoAtual: card?.progresso?.atual ?? 0,
       progressoMeta: card?.progresso?.meta ?? 1,
-      beneficios: card?.beneficios ?? [
-        '+75 XP base',
-        '+40 XP bônus',
-        'Novo insight personalizado',
-        'Progresso na Quest ativa',
-      ],
+      beneficios: card?.beneficios ?? ['+75 XP base', '+40 XP bônus', 'Novo insight personalizado'],
       xpBonus: card?.xp?.bonus_proxima_meta ?? 40,
       ultimaConversaLabel: card?.ultima_conversa?.label ?? undefined,
     };
   }, [conversasCard]);
+
+  const diasConversas = useMemo(() => {
+    const historico = dashboardData?.checkins_historico ?? [];
+
+    const parseDate = (value?: string | null) => {
+      if (!value) return null;
+      const parts = value.split('-');
+      if (parts.length !== 3) return null;
+      const [year, month, day] = parts.map(Number);
+      if ([year, month, day].some((part) => Number.isNaN(part))) return null;
+      return new Date(year, month - 1, day);
+    };
+
+    const formatKey = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const formatDisplay = (date: Date) => {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      return `${day}/${month}`;
+    };
+
+    const mapa = new Map<string, CheckinDiario>();
+    historico.forEach((item) => {
+      if (item?.data_checkin) {
+        mapa.set(item.data_checkin, item);
+      }
+    });
+
+    let referencia = parseDate(historico[0]?.data_checkin ?? null) ?? new Date();
+    historico.forEach((item) => {
+      const parsed = parseDate(item?.data_checkin);
+      if (parsed && parsed > referencia) {
+        referencia = parsed;
+      }
+    });
+
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(referencia);
+      date.setDate(referencia.getDate() - (6 - index));
+      const key = formatKey(date);
+      const checkin = mapa.get(key);
+      const status = checkin?.status_resposta;
+      const normalized: 'respondido' | 'perdido' | 'pendente' | 'default' =
+        status === 'respondido' || status === 'perdido' || status === 'pendente' ? status : 'default';
+      return {
+        label: labels[date.getDay()] ?? labels[0],
+        dataLabel: formatDisplay(date),
+        status: normalized,
+      };
+    });
+  }, [dashboardData?.checkins_historico]);
 
   const {
     questTitulo,
@@ -237,20 +291,6 @@ const HomeV1_2 = () => {
           </p>
         )}
 
-        <CardPanoramaEmocional
-          humorAtual={humorAtual}
-          humorMedio={humorMedio}
-          energiaPositiva={energiaPositiva}
-          emocaoDominante={emocaoDominante}
-          emocaoDominante2={emocaoDominante2}
-          sabotadorAtivo={sabotadorAtivo}
-          sabotadorDescricao={sabotadorDescricao}
-          onExplorar={handleExplore}
-          onVerSabotadores={handleVerSabotadores}
-          onVerEmocoes={handleVerEmocoes}
-          onVerInsights={handleVerInsights}
-        />
-
         <CardConversas
           streakAtual={streakAtual}
           recorde={recorde}
@@ -259,6 +299,7 @@ const HomeV1_2 = () => {
           beneficios={beneficios}
           xpBonus={xpBonus}
           ultimaConversaLabel={ultimaConversaLabel}
+          diasSemana={diasConversas}
           onVerInsights={handleVerInsights}
           onExplorarHistorico={handleExplorarConversas}
         />
@@ -275,6 +316,20 @@ const HomeV1_2 = () => {
           status={questStatus}
           ultimaAtualizacaoLabel={questAtualizacaoLabel}
           onAbrirPainel={handleVerPainelQuests}
+        />
+
+        <CardPanoramaEmocional
+          humorAtual={humorAtual}
+          humorMedio={humorMedio}
+          energiaPositiva={energiaPositiva}
+          emocaoDominante={emocaoDominante}
+          emocaoDominante2={emocaoDominante2}
+          sabotadorAtivo={sabotadorAtivo}
+          sabotadorDescricao={sabotadorDescricao}
+          onExplorar={handleExplore}
+          onVerSabotadores={handleVerSabotadores}
+          onVerEmocoes={handleVerEmocoes}
+          onVerInsights={handleVerInsights}
         />
 
         <CardJornada
