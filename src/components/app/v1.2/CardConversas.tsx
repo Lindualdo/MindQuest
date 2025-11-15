@@ -74,14 +74,14 @@ const CardConversas = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
-      className="mq-card-v1_2 px-4 py-6 sm:px-5"
+      className="mq-card-v1_2 px-4 py-6 sm:px-6"
       style={{
         backgroundColor: '#FFF9F5',
         borderColor: 'rgba(255,153,110,0.25)',
         boxShadow: '0 10px 18px rgba(255,153,110,0.08)',
       }}
     >
-      <header className="flex flex-col gap-2">
+      <header className="flex flex-col gap-2.5">
         <p className="mq-card-title-v1_2 text-lg sm:text-xl">🗓️ Diário de conversas</p>
         <div
           className="flex flex-wrap items-center justify-between gap-1 text-[0.85rem] font-semibold"
@@ -94,14 +94,17 @@ const CardConversas = ({
         </div>
       </header>
 
-      <div className="mt-4">
+      <div className="mt-5">
         <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(255,153,110,0.18)' }}>
           <div
             className="mq-bar-fill-v1_2"
             style={{ width: `${progresso}%`, backgroundColor: '#FF9072' }}
           />
         </div>
-        <div className="mt-3 flex items-center justify-between text-[0.82rem] font-semibold" style={{ color: '#1C2541' }}>
+        <div
+          className="mt-3 flex items-center justify-between text-[0.82rem] font-semibold"
+          style={{ color: '#1C2541' }}
+        >
           <span>
             {progressoAtual} conversa{progressoAtual > 1 ? 's' : ''}
           </span>
@@ -125,7 +128,7 @@ const CardConversas = ({
                   className="flex flex-col items-center text-center"
                 >
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border-2 text-[0.8rem] font-semibold sm:h-10 sm:w-10 sm:text-sm"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border-2 text-[0.8rem] font-semibold leading-none sm:h-10 sm:w-10 sm:text-sm"
                     style={{
                       backgroundColor: config.bg,
                       borderColor: config.border,
@@ -149,10 +152,12 @@ const CardConversas = ({
       )}
 
       <div
-        className="mt-4 rounded-2xl px-4 py-3"
-        style={{ backgroundColor: '#FFF3EF', border: '1px solid rgba(255,153,110,0.3)' }}
+        className="mt-5 rounded-2xl px-4 py-3"
+        style={{ border: '1px solid rgba(255,153,110,0.3)' }}
       >
-        <p className="mq-card-heading-v1_2">💡 Próxima conversa desbloqueia</p>
+        <p className="mq-card-heading-v1_2 text-[0.95rem] font-semibold text-[#C14E2B]">
+          💡 Próxima conversa desbloqueia
+        </p>
         <ul className="mt-2 list-disc space-y-1 pl-4 text-[0.75rem]" style={{ color: '#1C2541' }}>
           <li>+75 XP base</li>
           <li>+{xpBonus} XP bônus</li>
@@ -171,7 +176,7 @@ const CardConversas = ({
         </ul>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
         {onVerInsights && (
           <button
             type="button"
