@@ -18,6 +18,7 @@ import ConquistasPage from './pages/App/ConquistasPage';
 import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
 import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
+import PainelQuestsPage from './pages/App/PainelQuestsPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
 import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
 import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
@@ -279,6 +280,14 @@ function App() {
     return (
       <AuthGuard>
         <FullChatPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'painelQuests') {
+    return (
+      <AuthGuard>
+        <PainelQuestsPage />
       </AuthGuard>
     );
   }

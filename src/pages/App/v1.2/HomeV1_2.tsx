@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import CardPanoramaEmocional from '@/components/app/v1.2/CardEmocoes';
 import CardConversas from '@/components/app/v1.2/CardConversas';
+import CardJornada from '@/components/app/v1.2/CardJornada';
 import CardQuestAtiva from '@/components/app/v1.2/CardQuest';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import HumorHistoryPage from '@/pages/App/HumorHistoryPage';
@@ -42,6 +43,10 @@ const HomeV1_2 = () => {
     questsCardLoading,
     questsCardError,
     loadQuestsCard,
+    jornadaCard,
+    jornadaCardLoading,
+    jornadaCardError,
+    loadJornadaCard,
   } = useDashboard();
 
   const userId = dashboardData?.usuario?.id;
@@ -53,7 +58,8 @@ const HomeV1_2 = () => {
     loadPanoramaCard(userId);
     loadConversasCard(userId);
     loadQuestsCard(userId);
-  }, [userId, loadPanoramaCard, loadConversasCard, loadQuestsCard]);
+    loadJornadaCard(userId);
+  }, [userId, loadPanoramaCard, loadConversasCard, loadQuestsCard, loadJornadaCard]);
 
   const cardData = panoramaCard;
 
@@ -102,6 +108,7 @@ const HomeV1_2 = () => {
   const handleVerSabotadores = () => setView('dashSabotadores');
   const handleVerEmocoes = () => setView('dashEmocoes');
   const handleVerInsights = () => setView('dashInsights');
+  const handleVerJornada = () => setView('proximosNiveis');
   const handleVerPainelQuests = () => setView('painelQuests');
   const handleExplorarConversas = () => {
     void openResumoConversas();
@@ -161,6 +168,30 @@ const HomeV1_2 = () => {
       questAtualizacaoLabel: quest?.ultima_atualizacao_label ?? null,
     };
   }, [questsCard]);
+
+  const {
+    jornadaDescricao,
+    jornadaNivelAtual,
+    jornadaProximoNivel,
+    jornadaXpAtual,
+    jornadaXpMeta,
+    jornadaXpRestante,
+    jornadaBeneficios,
+  } = useMemo(() => {
+    const card = jornadaCard;
+    const xpMeta = card?.xp?.meta ?? 1;
+    return {
+      jornadaDescricao: card?.nivel?.descricao ?? 'Sua jornada começa quando você mantém consistência.',
+      jornadaNivelAtual: card?.nivel?.atual ?? 'Nível 1 · Despertar',
+      jornadaProximoNivel: card?.nivel?.proximo ?? 'Próximo Nível',
+      jornadaXpAtual: card?.xp?.atual ?? 0,
+      jornadaXpMeta: xpMeta,
+      jornadaXpRestante: Math.max(card?.xp?.restante ?? xpMeta, 0),
+      jornadaBeneficios:
+        card?.beneficios ??
+        ['Liberar novas estratégias', 'Refinar hábitos emocionais', 'Desbloquear mentorias'],
+    };
+  }, [jornadaCard]);
 
   if (view === 'humorHistorico') {
     return <HumorHistoryPage />;
@@ -244,6 +275,17 @@ const HomeV1_2 = () => {
           onAbrirPainel={handleVerPainelQuests}
         />
 
+        <CardJornada
+          descricaoNivel={jornadaDescricao}
+          nivelAtual={jornadaNivelAtual}
+          xpAtual={jornadaXpAtual}
+          xpMeta={jornadaXpMeta}
+          proximoNivel={jornadaProximoNivel ?? 'Próximo nível'}
+          xpRestante={jornadaXpRestante}
+          beneficios={jornadaBeneficios}
+          onExplorarJornada={handleVerJornada}
+        />
+
         {panoramaCardError && (
           <p className="text-xs font-medium text-rose-600">
             Não foi possível carregar o panorama emocional: {panoramaCardError}
@@ -264,6 +306,14 @@ const HomeV1_2 = () => {
         )}
         {questsCardLoading && (
           <p className="text-xs font-medium text-slate-500">Carregando progresso das quests...</p>
+        )}
+        {jornadaCardError && (
+          <p className="text-xs font-medium text-rose-600">
+            Não foi possível carregar o card da jornada: {jornadaCardError}
+          </p>
+        )}
+        {jornadaCardLoading && (
+          <p className="text-xs font-medium text-slate-500">Carregando status da jornada...</p>
         )}
       </div>
     </div>

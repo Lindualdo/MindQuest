@@ -1,39 +1,37 @@
 {
-  "createdAt": "2025-11-14T16:48:00.000Z",
-  "id": "wbhCardConversasV12",
+  "createdAt": "2025-11-14T17:54:02.067Z",
+  "id": "xMAu6L2Rb1v9ipua",
   "name": "webhook_card_conversas",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "card/conversas",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-node-conversas",
+      "id": "7aad7bb3-15d5-4b7b-9324-eeef42428694",
       "name": "Webhook Card Conversas",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -960,
-        240
-      ]
+        16,
+        -320
+      ],
+      "webhookId": "bf5b9099-9114-4c84-b16f-6cc668992649"
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
       },
-      "id": "code-validate-params",
+      "id": "d2606cd7-1cdd-422e-ab3b-01c9fcb35b65",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -720,
-        240
+        256,
+        -320
       ]
     },
     {
@@ -44,13 +42,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "postgres-estado-conversas",
+      "id": "6b48def9-8e44-47cc-93bf-9b6aec363b66",
       "name": "Estado Conversas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        240
+        496,
+        -320
       ],
       "credentials": {
         "postgres": {
@@ -61,31 +59,28 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const rows = $input.all().map(item => item.json || {});\nconst find = (fn) => rows.find(fn) || {};\nconst sequencia = find(row => row.bloco === 'sequencia');\n\nconst metaAlvo = Number(sequencia.meta_alvo_dias ?? 3) || 3;\nconst streakAtual = Number(sequencia.sequencia_atual ?? 0) || 0;\nconst progressoAtual = Math.min(streakAtual, metaAlvo);\nconst percentual = metaAlvo > 0 ? Math.round((progressoAtual / metaAlvo) * 100) : 0;\n\nconst proximaMetaDias = Number(sequencia.proxima_meta_dias ?? (metaAlvo >= 3 ? metaAlvo + 2 : 5)) || 5;\nconst xpBase = Number(sequencia.xp_base_diaria ?? 75) || 0;\nconst xpBonus = Number(sequencia.xp_bonus_proxima_meta ?? sequencia.xp_bonus_meta ?? 0) || 0;\n\nconst ultimaConversacaoIso = sequencia.ultima_conversa_em || null;\n\nfunction humanizeDiff(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  let diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  diffMs -= days * 86_400_000;\n  const hours = Math.floor(diffMs / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) parts.push('menos de 1h');\n  return `há ${parts.join(' e ')}`;\n}\n\nconst beneficios = [];\nif (xpBase > 0) beneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus`);\nbeneficios.push('Novo insight personalizado');\nbeneficios.push('Progresso na Quest ativa');\n\nconst response = {\n  success: true,\n  usuario_id: sequencia.user_id || null,\n  card_conversas: {\n    streak: {\n      atual: streakAtual,\n      recorde: Number(sequencia.sequencia_recorde ?? streakAtual) || 0,\n      meta_codigo: sequencia.meta_sequencia_codigo || 'streak_003',\n      proxima_meta_codigo: sequencia.proxima_meta_codigo || 'streak_005'\n    },\n    progresso: {\n      atual: progressoAtual,\n      meta: metaAlvo,\n      percentual,\n      label: `${progressoAtual}/${metaAlvo}`\n    },\n    ultima_conversa: {\n      timestamp: ultimaConversacaoIso,\n      label: humanizeDiff(ultimaConversacaoIso) || 'Sem registros recentes'\n    },\n    xp: {\n      base: xpBase,\n      bonus_proxima_meta: xpBonus,\n      proxima_meta_dias: proximaMetaDias,\n      proxima_meta_titulo: sequencia.meta_prox_titulo || null\n    },\n    beneficios\n  }\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
       },
-      "id": "code-montar-response",
+      "id": "871da11d-f008-4f3e-9725-e3363844499e",
       "name": "Montar Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        240
+        736,
+        -320
       ]
     },
     {
       "parameters": {
-        "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "respond-card-conversas",
+      "id": "7f5f6b32-ebef-4cab-8766-fc48230cfa41",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        0,
-        240
+        976,
+        -320
       ]
     }
   ],
@@ -139,8 +134,60 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "76e4c0c0-de99-4390-8ee8-51892e197433",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-14T17:54:02.067Z",
+      "role": "workflow:owner",
+      "workflowId": "xMAu6L2Rb1v9ipua",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

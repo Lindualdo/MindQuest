@@ -62,6 +62,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   questsCardUserId: null,
   questsCardLoading: false,
   questsCardError: null,
+  jornadaCard: null,
+  jornadaCardUserId: null,
+  jornadaCardLoading: false,
+  jornadaCardError: null,
   conversasCard: null,
   conversasCardUserId: null,
   conversasCardLoading: false,
@@ -223,6 +227,52 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         questsCardLoading: false,
         questsCardError: error instanceof Error ? error.message : 'Erro ao carregar card de quests',
+      });
+    }
+  },
+
+  loadJornadaCard: async (usuarioIdParam) => {
+    const { dashboardData, jornadaCardUserId, jornadaCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        jornadaCardError: 'Usuário não informado para carregar card de jornada',
+        jornadaCardLoading: false,
+      });
+      return;
+    }
+
+    if (jornadaCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (jornadaCardLoading) {
+      return;
+    }
+
+    set({ jornadaCardLoading: true, jornadaCardError: null });
+
+    try {
+      const payload = await apiService.getJornadaCard(userId);
+      set({
+        jornadaCard: payload.card_jornada,
+        jornadaCardUserId: userId,
+        jornadaCardLoading: false,
+        jornadaCardError: null,
+      });
+    } catch (error) {
+      console.error('[JornadaCard] erro ao carregar card de jornada', error);
+      set({
+        jornadaCardLoading: false,
+        jornadaCardError: error instanceof Error ? error.message : 'Erro ao carregar card de jornada',
       });
     }
   },
@@ -407,6 +457,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           get().loadPanoramaCard(dashboardData.usuario.id),
           get().loadConversasCard(dashboardData.usuario.id),
           get().loadQuestsCard(dashboardData.usuario.id),
+          get().loadJornadaCard(dashboardData.usuario.id),
         ]);
       } else {
         set({
@@ -425,6 +476,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           questsCardUserId: null,
           questsCardLoading: false,
           questsCardError: 'Usuário inválido para card de quests',
+          jornadaCard: null,
+          jornadaCardUserId: null,
+          jornadaCardLoading: false,
+          jornadaCardError: 'Usuário inválido para card de jornada',
         });
       }
 
@@ -723,6 +778,10 @@ export const useDashboard = () => {
     questsCardLoading,
     questsCardError,
     loadQuestsCard,
+    jornadaCard,
+    jornadaCardLoading,
+    jornadaCardError,
+    loadJornadaCard,
     markQuestAsCompletedLocal,
     isAuthenticated
   } = useStore();
@@ -777,6 +836,10 @@ export const useDashboard = () => {
     questsCardLoading,
     questsCardError,
     loadQuestsCard,
+    jornadaCard,
+    jornadaCardLoading,
+    jornadaCardError,
+    loadJornadaCard,
     markQuestAsCompletedLocal,
     isAuthenticated
   };

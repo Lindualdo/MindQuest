@@ -1287,17 +1287,19 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
+          "value": "DJB5qWudX1Hqap1O",
           "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-            "messageText": "={{ $('organiza_json').first().json.user_message }}   Acesse: https://mindquest.pt/app/auth?token?{{ $json.token_acesso }}"
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').item.json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $('Assistente de Reflexão').item.json.output }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
           },
           "matchingColumns": [],
           "schema": [
@@ -1308,83 +1310,16 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "messageText",
-              "displayName": "messageText",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        -64,
-        128
-      ],
-      "id": "84146ffe-2179-49fe-8ab2-c1676d5ba61f",
-      "name": "Call 'sw_send_message_with_retry'"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-            "messageText": "={{ $('organiza_json').first().json.user_message }} "
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "instanceName",
-              "displayName": "instanceName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "messageText",
@@ -1393,8 +1328,25 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
             }
           ],
           "attemptToConvertTypes": false,
@@ -1412,69 +1364,6 @@
       ],
       "id": "4dd208c7-deec-4a2f-90bb-f64dc23f405e",
       "name": "Call 'sw_send_message_with_retry'1"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "instanceName": "={{ $('start').first().json[\"body.instance\"] }}",
-            "remoteJid": "={{ $('start').first().json[\"body.data.key.remoteJid\"] }}",
-            "messageText": "=Nossa que legal que você quer conversar mais...\nMas nossa conversa já foi concluído. \n\nA ideia do Mindquest é te ajudar em reflexões mais profundas para seu desenvolvimento pessoal.\n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu App já está atualizado 🙌"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "instanceName",
-              "displayName": "instanceName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "messageText",
-              "displayName": "messageText",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        -1136,
-        -112
-      ],
-      "id": "f55db40b-6034-4c27-a95b-40a8e438c1c4",
-      "name": "Call 'sw_send_message_with_retry'2"
     },
     {
       "parameters": {
@@ -2195,6 +2084,170 @@
       "id": "14a2d5e4-19fb-441f-9e4b-47ffb3edc0eb",
       "name": "Wait",
       "webhookId": "e6206b5c-bf17-42cd-9fd6-864763200169"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "=Nossa que legal que você quer conversar mais...\nMas nossa conversa já foi concluído. \n\nA ideia do Mindquest é te ajudar em reflexões mais profundas para seu desenvolvimento pessoal.\n\nVolte em {{$('Calcula tempo restante').first().json.remaining_hm}} às {{$('Calcula tempo restante').first().json.unlock_clock}}. \n\nSeu App já está atualizado 🙌",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1120,
+        -80
+      ],
+      "id": "c368a86b-b9fb-4a4c-90ba-a0fda0c4e692",
+      "name": "Call 'sw_send_message_with_retry'3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $('Assistente de Reflexão').first().json.output }} Acesse: https://mindquest.pt/app/auth?token?{{ $json.token_acesso }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        128
+      ],
+      "id": "7cb6c63e-5100-474f-aca1-c0f4712f3958",
+      "name": "Call 'sw_send_message_with_retry'4"
     }
   ],
   "connections": {
@@ -2257,7 +2310,7 @@
       "main": [
         [
           {
-            "node": "Call 'sw_send_message_with_retry'2",
+            "node": "Call 'sw_send_message_with_retry'3",
             "type": "main",
             "index": 0
           }
@@ -2344,7 +2397,7 @@
       "main": [
         [
           {
-            "node": "Call 'sw_send_message_with_retry'2",
+            "node": "Call 'sw_send_message_with_retry'3",
             "type": "main",
             "index": 0
           }
@@ -2567,7 +2620,7 @@
       "main": [
         [
           {
-            "node": "Call 'sw_send_message_with_retry'",
+            "node": "Call 'sw_send_message_with_retry'4",
             "type": "main",
             "index": 0
           }
@@ -2597,17 +2650,6 @@
         [
           {
             "node": "organiza_json",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call 'sw_send_message_with_retry'": {
-      "main": [
-        [
-          {
-            "node": "Chat Memory  - Get1",
             "type": "main",
             "index": 0
           }
@@ -2836,6 +2878,17 @@
           }
         ]
       ]
+    },
+    "Call 'sw_send_message_with_retry'4": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory  - Get1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2851,24 +2904,17 @@
         "json": {
           "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.id": "2A95B2EA9D6EF30DF742",
+          "body.data.key.id": "2A93A76E9750656E801B",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
-          "body.data.message.conversation": "Sim",
+          "body.data.message.conversation": "Oi",
           "body.data.messageType": "conversation"
-        }
-      }
-    ],
-    "Call 'sw_xp_conversas'": [
-      {
-        "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
         }
       }
     ]
   },
-  "versionId": "1e8f6f74-64d0-4768-a08d-586d82d437d0",
+  "versionId": "3f4d6100-02c7-4c58-9a5e-b6926de7828a",
   "triggerCount": 0,
   "shared": [
     {

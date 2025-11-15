@@ -1,39 +1,37 @@
 {
-  "createdAt": "2025-11-15T10:12:00.000Z",
-  "id": "wbhCardQuestsV12",
+  "createdAt": "2025-11-14T19:49:49.539Z",
+  "id": "hti7QqpmITtikMOa",
   "name": "webhook_card_quests",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "card/quests",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-card-quests",
+      "id": "0b9472f9-00c6-475a-940c-7765fce366b3",
       "name": "Webhook Card Quests",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -960,
-        200
-      ]
+        400,
+        -320
+      ],
+      "webhookId": "d5ea8f26-8b83-41e0-a1d0-464b92238380"
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
       },
-      "id": "code-validate-quests",
+      "id": "b6e80480-77f6-45cf-9f11-7b402ce78dbe",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -720,
-        200
+        640,
+        -320
       ]
     },
     {
@@ -44,13 +42,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "postgres-quests-state",
+      "id": "29225048-c567-4cdc-8986-5f861e9061d6",
       "name": "Estado Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        200
+        880,
+        -320
       ],
       "credentials": {
         "postgres": {
@@ -61,31 +59,28 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const row = $input.first()?.json || {};\n\nconst meta = Number(row.progresso_meta ?? 1) || 1;\nconst atual = Math.min(Number(row.progresso_atual ?? 0) || 0, meta);\nconst percentual = meta > 0 ? Math.round((atual / meta) * 100) : 0;\n\nconst beneficios = [];\nconst xpBase = Number(row.xp_base_default ?? 150) || 150;\nconst xpBonus = Number(row.xp_bonus_recorrencia ?? 30) || 0;\n\nbeneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus (recorrência)`);\nbeneficios.push('Novo insight aplicado na prática');\nbeneficios.push('Progresso em hábitos chaves');\n\nfunction humanizeDate(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  const diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) return 'agora';\n  return `há ${parts.join(' e ')}`;\n}\n\nconst quest = row.quest_id\n  ? {\n      id: row.quest_id,\n      titulo: row.titulo ?? 'Quest personalizada',\n      descricao: row.descricao ?? 'Continue avançando na sua jornada.',\n      status: row.status ?? 'pendente',\n      prioridade: row.prioridade ?? null,\n      recorrencia: row.recorrencia ?? null,\n      progresso: {\n        atual,\n        meta,\n        percentual,\n        label: `${atual}/${meta}`,\n      },\n      xp_recompensa: Number(row.xp_calculado ?? xpBase) || xpBase,\n      ultima_atualizacao: row.atualizado_em ?? null,\n      ultima_atualizacao_label: humanizeDate(row.atualizado_em),\n    }\n  : null;\n\nconst response = {\n  success: true,\n  usuario_id: row.user_id ?? null,\n  card_quests: {\n    quest,\n    snapshot: {\n      total_concluidas: Number(row.total_quests_concluidas ?? 0) || 0,\n      total_personalizadas: Number(row.total_quests_personalizadas ?? 0) || 0,\n      xp_base_total: Number(row.xp_base_sum ?? 0) || 0,\n      xp_bonus_total: Number(row.xp_bonus_sum ?? 0) || 0,\n    },\n    beneficios,\n    recompensas: {\n      xp_base: xpBase,\n      xp_bonus_recorrencia: xpBonus,\n    },\n  },\n};\n\nreturn [{ json: response }];"
       },
-      "id": "code-build-quest-response",
+      "id": "2e92b13e-4071-42eb-bbbd-b164849a398b",
       "name": "Montar Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        200
+        1120,
+        -320
       ]
     },
     {
       "parameters": {
-        "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "respond-card-quests",
+      "id": "6d1d211c-e2b0-4979-bd00-598fa223f2bb",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        0,
-        200
+        1360,
+        -320
       ]
     }
   ],
@@ -139,8 +134,60 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "019de3fd-4aea-4ea7-86d4-0c08d7719f49",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-14T19:49:49.539Z",
+      "role": "workflow:owner",
+      "workflowId": "hti7QqpmITtikMOa",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

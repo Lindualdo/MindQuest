@@ -411,6 +411,33 @@ export interface QuestCardResponse {
   card_quests: QuestCardData;
 }
 
+export interface JornadaCardData {
+  nivel: {
+    atual: string | null;
+    descricao: string | null;
+    proximo: string | null;
+    proximo_descricao: string | null;
+  };
+  xp: {
+    atual: number;
+    meta: number;
+    restante: number;
+    percentual: number;
+  };
+  snapshot: {
+    xp_base_total: number;
+    xp_bonus_total: number;
+    atualizado_em: string | null;
+  };
+  beneficios: string[];
+}
+
+export interface JornadaCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_jornada: JornadaCardData;
+}
+
 export interface ConversasCardData {
   streak: {
     atual: number;
@@ -515,6 +542,10 @@ export interface StoreState {
   questsCardUserId: string | null;
   questsCardLoading: boolean;
   questsCardError: string | null;
+  jornadaCard: JornadaCardData | null;
+  jornadaCardUserId: string | null;
+  jornadaCardLoading: boolean;
+  jornadaCardError: string | null;
   conversasCard: ConversasCardData | null;
   conversasCardUserId: string | null;
   conversasCardLoading: boolean;
@@ -533,7 +564,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
@@ -545,6 +576,7 @@ export interface StoreState {
   loadPanoramaCard: (usuarioId?: string) => Promise<void>;
   loadQuestsCard: (usuarioId?: string) => Promise<void>;
   markQuestAsCompletedLocal: (questId: string) => void;
+  loadJornadaCard: (usuarioId?: string) => Promise<void>;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
 }
 

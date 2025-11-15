@@ -2,38 +2,36 @@
   "createdAt": "2025-11-14T12:27:57.408Z",
   "id": "zumEm0S27nyCEaDP",
   "name": "webhook_card_emocoes",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "card/emocoes",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "b58c45cc-9a51-4946-a97e-9fac5b65b4d2",
+      "id": "794a651b-08a6-4103-b9b9-65bc25432964",
       "name": "Webhook Card Emoções",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -960,
-        240
-      ]
+        -224,
+        368
+      ],
+      "webhookId": "33423fbf-31d8-49c6-ad83-9da047c61601"
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
       },
-      "id": "b9f46c0b-9a0c-4669-b7a9-3e5fbf6c83c4",
+      "id": "e49bcd0e-a60c-4f7e-a15d-09b75fdd9a20",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -720,
-        240
+        16,
+        368
       ]
     },
     {
@@ -44,13 +42,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "c3f1a65d-2767-4b8c-9434-0d7ce07d0f3b",
+      "id": "72c58e34-d0ea-4203-9c8b-c5bc2cb07abd",
       "name": "Humor_Medio",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        80
+        256,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -67,13 +65,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "14083411-1f01-4a63-b0d5-f3e4b2c35feb",
+      "id": "33a20e36-f5e1-4784-bd8a-14940c482c37",
       "name": "Analise_PANAS",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        240
+        256,
+        368
       ],
       "credentials": {
         "postgres": {
@@ -90,13 +88,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "1f1f3f47-9dc4-4fc0-8f58-fa0aeaf13ba0",
+      "id": "8fdb0143-67ec-43fa-b1e9-63a67e693bc1",
       "name": "Emocoes_Dominantes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        400
+        256,
+        528
       ],
       "credentials": {
         "postgres": {
@@ -113,13 +111,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "6b4c259d-0417-4b47-80e2-9955533f7df6",
+      "id": "535ed51d-758f-40ee-b782-4be9898b2dc1",
       "name": "Sabotador_Ativo",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        560
+        256,
+        688
       ],
       "credentials": {
         "postgres": {
@@ -130,45 +128,41 @@
     },
     {
       "parameters": {
-        "operation": "multiplex",
         "numberInputs": 4
       },
-      "id": "8fd7dbad-cb0d-4fa0-907b-7d8487302b89",
+      "id": "812549e0-68ec-4b62-a586-4d4309407d35",
       "name": "Merge Dados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -240,
-        320
+        496,
+        448
       ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
         "jsCode": "const rows = $input.all().map(item => item.json || {});\n\nfunction findRow(bloco) {\n  return rows.find((row) => row.bloco === bloco) || null;\n}\n\nconst humorRow = findRow('humor');\nconst panasRow = findRow('panas');\nconst sabotadorRow = findRow('sabotador');\nconst emocaoRows = rows.filter((row) => row.bloco === 'emocoes');\n\nconst humorMedia = humorRow?.humor_medio_7d ?? null;\nconst humorAtual = humorRow?.humor_atual ?? humorMedia;\n\nconst response = {\n  success: true,\n  usuario_id: humorRow?.user_id || panasRow?.user_id || sabotadorRow?.user_id || emocaoRows[0]?.user_id || null,\n  card_panorama_emocional: {\n    humor: {\n      media_7d: humorMedia,\n      atual: humorAtual,\n      amostras: humorRow?.total_registros ?? 0,\n      ultima_data: humorRow?.ultima_data ?? null,\n      ultima_hora: humorRow?.ultima_hora ?? null,\n    },\n    energia: {\n      percentual_positiva: panasRow?.percentual_positivas ?? 0,\n      percentual_negativa: panasRow?.percentual_negativas ?? 0,\n      percentual_neutra: panasRow?.percentual_neutras ?? 0,\n      categoria: panasRow?.resultado_panas ?? 'NEUTRA',\n    },\n    emocoes_dominantes: emocaoRows.map((row) => ({\n      nome: row.emocao_nome ?? 'Emoção',\n      emoji: row.emoji ?? '❤️',\n      percentual: row.percentual ?? 0,\n    })),\n    sabotador: sabotadorRow\n      ? {\n          id: sabotadorRow.sabotador_id,\n          nome: sabotadorRow.nome,\n          emoji: sabotadorRow.emoji,\n          apelido: sabotadorRow.apelido_personalizado,\n          contexto: sabotadorRow.contexto_principal,\n          insight: sabotadorRow.insight_atual,\n          contramedida: sabotadorRow.contramedida_ativa,\n          intensidade_media: sabotadorRow.intensidade_media,\n          total_deteccoes: sabotadorRow.total_deteccoes,\n          conversas_afetadas: sabotadorRow.conversas_afetadas,\n        }\n      : null,\n  },\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
       },
-      "id": "ac8b61f2-0fc3-4fd6-852a-23ec61a4d6f7",
+      "id": "d8c757c0-1598-4008-95ae-ad789de9fac9",
       "name": "Montar Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        0,
-        320
+        736,
+        448
       ]
     },
     {
       "parameters": {
-        "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "b7aa6120-58c5-4a77-b18b-59541a1366df",
+      "id": "ea0ff123-20c0-4235-9b6b-f6f2af46e705",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        240,
-        320
+        976,
+        448
       ]
     }
   ],
@@ -278,11 +272,67 @@
     }
   },
   "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "02a286bb-34a1-4b57-b209-6846647c45f8",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-14T12:27:57.408Z",
+      "role": "workflow:owner",
+      "workflowId": "zumEm0S27nyCEaDP",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }
