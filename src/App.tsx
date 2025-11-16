@@ -26,6 +26,7 @@ import InsightsDashboardPage from './pages/App/InsightsDashboardPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_2 from './pages/App/v1.2/HomeV1_2';
+import HomeV1_2_2 from './pages/App/v1.2/HomeV1_2_2';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 import { authService } from './services/authService';
 
@@ -77,6 +78,7 @@ function App() {
   const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
   const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
   const isAppPreviewV12 = resolvedPath === '/app/1.2';
+  const isAppPreviewV12_2 = resolvedPath === '/app/1.2.2';
   const isRootPath = resolvedPath === '/';
   const redirectHandledRef = useRef(false);
 
@@ -105,6 +107,14 @@ function App() {
     return (
       <AuthGuard>
         <HomeV1_2 />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppPreviewV12_2) {
+    return (
+      <AuthGuard>
+        <HomeV1_2_2 />
       </AuthGuard>
     );
   }
