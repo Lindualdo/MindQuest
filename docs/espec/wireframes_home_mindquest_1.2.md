@@ -10,8 +10,6 @@
 +--------------------------------------------------+
 | TOP BAR                                          |
 +--------------------------------------------------+
-| TRILHA                                           |
-+--------------------------------------------------+
 | SNAPSHOT · NÍVEL / XP                            |
 +--------------------------------------------------+
 | CARD · CONVERSAS (DIA ATUAL)                     |
@@ -39,19 +37,7 @@
 
 ---
 
-## 3. Trilha (Contexto da Jornada)
-
-```text
-+--------------------------------------------------+
-| Conversas → Quests → Transformação → Família     |
-+--------------------------------------------------+
-```
-
-- Mantém o chip/trilha atual, reforçando o **caminho de evolução** que o usuário está percorrendo.
-
----
-
-## 4. Snapshot · Nível / XP
+## 3. Snapshot · Nível / XP
 
 ```text
 +--------------------------------------------------+
@@ -66,16 +52,19 @@
 
 ---
 
-## 5. Card · Conversas (Dia atual)
+## 4. Card · Conversas (Dia atual)
 
 ```text
 +--------------------------------------------------+
-| Conversas de hoje                                |
+| Diário de conversas                              |
 | Última conversa há 1 dia e 4h                    |
-| Streak: 3 dias seguidos · Recorde: 7 dias        |
-| Mini linha 7 dias: ○ ● ○ ● ● ○ ●                 |
+| 🔥 Streak realizado: 2/3 dias   Recorde 7 dias  |
+| [███████████░░░░░░░░░░░░░░░░░]                  |
+|                                                 |
+| ○   ●   ○   ●   ●   ○   ●                       |
+| D   S   T   Q   Q   S   S                       |
 | Próxima conversa desbloqueia:                    |
-| • +75 XP base  • +40 XP bônus  • Novo insight    |
+| 75 XP base  ···  40 XP bônus  ···  novo insight  |
 | Pontos focais + insight do dia:                  |
 | "Projeto pessoal travado..."                     |
 | "Primeiro passo simples definido..."             |
@@ -91,7 +80,7 @@
 
 ---
 
-## 6. Resumo · Emoções / Humor (snapshot)
+## 5. Resumo · Emoções / Humor (snapshot)
 
 ```text
 +--------------------------------------------------+
@@ -111,7 +100,7 @@
 
 ---
 
-## 7. Nav inferior
+## 6. Nav inferior
 
 ```text
 +--------------------------------------------------+
@@ -123,4 +112,3 @@
 - `CONVERSAS` → diário completo, insights por dia, histórico detalhado.
 - `QUESTS` → painel de quests ativas, pendentes e concluídas.
 - `JORNADA` → página de conquistas e níveis, com mural de vitórias.
-
