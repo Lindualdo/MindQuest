@@ -197,6 +197,18 @@ const HomeV1_2_2 = () => {
 
   const handleVerPainelEmocional = () => setView('dashEmocoes');
 
+  const handleNavHome = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavConversas = () => {
+    void openResumoConversas();
+  };
+
+  const handleNavQuests = () => setView('painelQuests');
+
+  const handleNavConquistas = () => setView('conquistas');
+
   const showLoading =
     panoramaCardLoading || conversasCardLoading || jornadaCardLoading;
 
@@ -267,7 +279,7 @@ const HomeV1_2_2 = () => {
             <div className="flex items-center justify-between text-[0.8rem] font-medium">
               <span className="inline-flex items-center gap-1 text-[#F97316]">
                 <Flame size={14} />
-                Seguidas:
+                Streak realizado:
                 {' '}
                 {streakProgressoAtual}
                 /
@@ -343,7 +355,7 @@ const HomeV1_2_2 = () => {
 
           <div className="mt-3 rounded-2xl bg-white/85 px-3 py-2">
             <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#6B21A8]">
-              Pontos focais + insight do dia
+              Insight do dia
             </p>
             <p className="mt-1 line-clamp-1 text-[0.8rem] text-[#1F2937]">
               {pontosInsightLinha1}
@@ -353,67 +365,59 @@ const HomeV1_2_2 = () => {
             </p>
           </div>
 
+          <div className="mt-3 rounded-2xl bg-[#F2F6FF] px-3 py-2">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#1D3557]">
+              Minhas emoções — visão rápida
+            </p>
+            <p className="mt-1 text-[0.8rem] text-[#1C2541]">
+              Humor:
+              {' '}
+              <span className="font-semibold">{humorAtual.toFixed(1)}</span>
+              {' '}
+              · Energia:
+              {' '}
+              <span className="font-semibold">
+                {Math.round(energiaPositiva)}
+                %
+              </span>
+            </p>
+            <p className="mt-1 text-[0.8rem] text-[#1C2541]">
+              Emoção dominante:
+              {' '}
+              <span className="font-semibold">{emocaoDominante}</span>
+            </p>
+            <p className="mt-1 text-[0.75rem] text-[#4B5563]">
+              Sabotador ativo:
+              {' '}
+              <span className="font-semibold">{sabotadorAtivo}</span>
+            </p>
+            <div className="mt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleVerPainelEmocional}
+                className="mq-link-inline-v1_2 text-[0.78rem]"
+              >
+                Ver painel emocional
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
           <div className="mt-3 flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={handleVerInsights}
-              className="mq-cta-primary-v1_2 px-4 py-1.5 text-[0.8rem]"
+              className="mq-link-inline-v1_2 text-[0.8rem]"
             >
-              Ver insights de hoje
+              Explorar insights
+              <span aria-hidden="true">→</span>
             </button>
             <button
               type="button"
               onClick={handleVerHistorico}
-              className="mq-cta-secondary-v1_2 px-4 py-1.5 text-[0.8rem]"
+              className="mq-link-inline-v1_2 text-[0.8rem]"
             >
-              Histórico
-            </button>
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mq-card-v1_2 px-4 py-3"
-          style={{
-            backgroundColor: '#F2F6FF',
-            borderColor: 'rgba(48,131,220,0.2)',
-            boxShadow: '0 10px 18px rgba(48,131,220,0.08)',
-          }}
-        >
-          <p className="mq-eyebrow-v1_2 mb-1" style={{ color: '#1D3557' }}>
-            Minhas emoções — visão rápida
-          </p>
-          <p className="text-[0.8rem] text-[#1C2541]">
-            Humor:
-            {' '}
-            <span className="font-semibold">{humorAtual.toFixed(1)}</span>
-            {' '}
-            · Energia:
-            {' '}
-            <span className="font-semibold">
-              {Math.round(energiaPositiva)}
-              %
-            </span>
-          </p>
-          <p className="mt-1 text-[0.8rem] text-[#1C2541]">
-            Emoção dominante:
-            {' '}
-            <span className="font-semibold">{emocaoDominante}</span>
-          </p>
-          <p className="mt-1 text-[0.75rem] text-[#4B5563]">
-            Sabotador ativo:
-            {' '}
-            <span className="font-semibold">{sabotadorAtivo}</span>
-          </p>
-          <div className="mt-2 flex justify-end">
-            <button
-              type="button"
-              onClick={handleVerPainelEmocional}
-              className="mq-link-inline-v1_2 text-[0.78rem]"
-            >
-              Ver painel emocional
+              Histórico de conversas
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -433,6 +437,39 @@ const HomeV1_2_2 = () => {
           </div>
         )}
       </main>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/40 bg-[#F5EBF3]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-md items-center justify-between px-6 py-2 text-[0.78rem] font-medium">
+          <button
+            type="button"
+            onClick={handleNavHome}
+            className="text-[#D90368]"
+          >
+            Home
+          </button>
+          <button
+            type="button"
+            onClick={handleNavConversas}
+            className="text-[#1C2541]"
+          >
+            Conversas
+          </button>
+          <button
+            type="button"
+            onClick={handleNavQuests}
+            className="text-[#1C2541]"
+          >
+            Quests
+          </button>
+          <button
+            type="button"
+            onClick={handleNavConquistas}
+            className="text-[#1C2541]"
+          >
+            Conquistas
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };
