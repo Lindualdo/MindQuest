@@ -11,13 +11,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "7aad7bb3-15d5-4b7b-9324-eeef42428694",
+      "id": "874cf95c-9f09-4865-b61c-ca2fa4bc51cf",
       "name": "Webhook Card Conversas",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        16,
-        -320
+        1216,
+        -192
       ],
       "webhookId": "bf5b9099-9114-4c84-b16f-6cc668992649"
     },
@@ -25,13 +25,13 @@
       "parameters": {
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
       },
-      "id": "d2606cd7-1cdd-422e-ab3b-01c9fcb35b65",
+      "id": "d038f90d-35a7-4011-bcc3-9303b13db5e1",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        -320
+        1456,
+        -192
       ]
     },
     {
@@ -42,13 +42,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "6b48def9-8e44-47cc-93bf-9b6aec363b66",
+      "id": "f753b735-9aa0-4e03-a9e2-40c74aa34674",
       "name": "Estado Conversas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        496,
-        -320
+        1696,
+        -192
       ],
       "credentials": {
         "postgres": {
@@ -59,29 +59,52 @@
     },
     {
       "parameters": {
-        "jsCode": "const rows = $input.all().map(item => item.json || {});\nconst find = (fn) => rows.find(fn) || {};\nconst sequencia = find(row => row.bloco === 'sequencia');\n\nconst metaAlvo = Number(sequencia.meta_alvo_dias ?? 3) || 3;\nconst streakAtual = Number(sequencia.sequencia_atual ?? 0) || 0;\nconst progressoAtual = Math.min(streakAtual, metaAlvo);\nconst percentual = metaAlvo > 0 ? Math.round((progressoAtual / metaAlvo) * 100) : 0;\n\nconst proximaMetaDias = Number(sequencia.proxima_meta_dias ?? (metaAlvo >= 3 ? metaAlvo + 2 : 5)) || 5;\nconst xpBase = Number(sequencia.xp_base_diaria ?? 75) || 0;\nconst xpBonus = Number(sequencia.xp_bonus_proxima_meta ?? sequencia.xp_bonus_meta ?? 0) || 0;\n\nconst ultimaConversacaoIso = sequencia.ultima_conversa_em || null;\n\nfunction humanizeDiff(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  let diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  diffMs -= days * 86_400_000;\n  const hours = Math.floor(diffMs / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) parts.push('menos de 1h');\n  return `há ${parts.join(' e ')}`;\n}\n\nconst beneficios = [];\nif (xpBase > 0) beneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus`);\nbeneficios.push('Novo insight personalizado');\nbeneficios.push('Progresso na Quest ativa');\n\nconst response = {\n  success: true,\n  usuario_id: sequencia.user_id || null,\n  card_conversas: {\n    streak: {\n      atual: streakAtual,\n      recorde: Number(sequencia.sequencia_recorde ?? streakAtual) || 0,\n      meta_codigo: sequencia.meta_sequencia_codigo || 'streak_003',\n      proxima_meta_codigo: sequencia.proxima_meta_codigo || 'streak_005'\n    },\n    progresso: {\n      atual: progressoAtual,\n      meta: metaAlvo,\n      percentual,\n      label: `${progressoAtual}/${metaAlvo}`\n    },\n    ultima_conversa: {\n      timestamp: ultimaConversacaoIso,\n      label: humanizeDiff(ultimaConversacaoIso) || 'Sem registros recentes'\n    },\n    xp: {\n      base: xpBase,\n      bonus_proxima_meta: xpBonus,\n      proxima_meta_dias: proximaMetaDias,\n      proxima_meta_titulo: sequencia.meta_prox_titulo || null\n    },\n    beneficios\n  }\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+        "jsCode": "const getFirstItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getAllItems = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list.map((entry) => entry?.json || {});\n};\n\nconst sequencia = getFirstItem('Estado Conversas');\nconst historicoRows = getAllItems('Historico Semanal');\n\nconst metaAlvo = Number(sequencia.meta_alvo_dias ?? 3) || 3;\nconst streakAtual = Number(sequencia.sequencia_atual ?? 0) || 0;\nconst progressoAtual = Math.min(streakAtual, metaAlvo);\nconst percentual = metaAlvo > 0 ? Math.round((progressoAtual / metaAlvo) * 100) : 0;\n\nconst proximaMetaDias = Number(sequencia.proxima_meta_dias ?? (metaAlvo >= 3 ? metaAlvo + 2 : 5)) || 5;\nconst xpBase = Number(sequencia.xp_base_diaria ?? 75) || 0;\nconst xpBonus = Number(sequencia.xp_bonus_proxima_meta ?? sequencia.xp_bonus_meta ?? 0) || 0;\n\nconst ultimaConversacaoIso = sequencia.ultima_conversa_em || null;\n\nfunction humanizeDiff(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  let diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  diffMs -= days * 86_400_000;\n  const hours = Math.floor(diffMs / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) parts.push('menos de 1h');\n  return `há ${parts.join(' e ')}`;\n}\n\nconst beneficios = [];\nif (xpBase > 0) beneficios.push(`+${xpBase} XP base`);\nif (xpBonus > 0) beneficios.push(`+${xpBonus} XP bônus`);\nbeneficios.push('Novo insight personalizado');\nbeneficios.push('Progresso na Quest ativa');\n\nconst historico = historicoRows.map((row) => {\n  const conversas = Number(row.total_interactions ?? (row.chat_id ? 1 : 0)) || 0;\n  const temConversa = Boolean(row.chat_id || conversas > 0);\n  return {\n    data: row.data ?? null,\n    humor: Number(row.pico_diario ?? row.humor_medio ?? 0) || 0,\n    energia: Number(row.energia_media ?? 0) || 0,\n    conversas,\n    tem_conversa: temConversa,\n    emoji: row.emoji ?? null,\n    emocao: row.emocao_nome ?? null,\n    ultima_hora: row.horario_fim ?? row.horario_inicio ?? null,\n  };\n});\n\nconst response = {\n  success: true,\n  usuario_id: sequencia.user_id || null,\n  card_conversas: {\n    streak: {\n      atual: streakAtual,\n      recorde: Number(sequencia.sequencia_recorde ?? streakAtual) || 0,\n      meta_codigo: sequencia.meta_sequencia_codigo || 'streak_003',\n      proxima_meta_codigo: sequencia.proxima_meta_codigo || 'streak_005'\n    },\n    progresso: {\n      atual: progressoAtual,\n      meta: metaAlvo,\n      percentual,\n      label: `${progressoAtual}/${metaAlvo}`\n    },\n    ultima_conversa: {\n      timestamp: ultimaConversacaoIso,\n      label: humanizeDiff(ultimaConversacaoIso) || 'Sem registros recentes'\n    },\n    xp: {\n      base: xpBase,\n      bonus_proxima_meta: xpBonus,\n      proxima_meta_dias: proximaMetaDias,\n      proxima_meta_titulo: sequencia.meta_prox_titulo || null\n    },\n    historico_diario: historico,\n    beneficios\n  }\n};\n\nreturn [{ json: response }];"
       },
-      "id": "871da11d-f008-4f3e-9725-e3363844499e",
+      "id": "3e66dfa9-62f9-45b2-bc8d-04f41ab1324c",
       "name": "Montar Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        736,
-        -320
+        1936,
+        -192
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "7f5f6b32-ebef-4cab-8766-fc48230cfa41",
+      "id": "9227b18c-b56d-4e50-b9e1-a02e03ecd902",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        976,
-        -320
+        2208,
+        -64
       ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '6 days' AS inicio,\n         CURRENT_DATE                     AS fim\n),\ndias AS (\n  SELECT generate_series(inicio, fim, INTERVAL '1 day')::date AS data\n  FROM periodo\n),\nregistros AS (\n  SELECT uhe.*\n  FROM public.usuarios_humor_energia uhe\n  JOIN periodo p ON uhe.data_registro BETWEEN p.inicio AND p.fim\n  WHERE uhe.usuario_id = $1\n),\nultimos_por_dia AS (\n  SELECT DISTINCT ON (data_registro)\n         data_registro, hora_registro, detectado_em, humor_dia, energia_nivel,\n         periodo_dia, variacao_humor, variacao_energia, justificativa_humor,\n         confianca_analise, chat_id\n  FROM registros\n  ORDER BY data_registro, detectado_em DESC, hora_registro DESC\n),\nlinha_base AS (\n  SELECT d.data AS data_registro,\n         AVG(r.humor_dia)::numeric(4,2)     AS humor_medio_dia,\n         AVG(r.energia_nivel)::numeric(4,2) AS energia_media_dia\n  FROM dias d\n  LEFT JOIN registros r ON r.data_registro = d.data\n  GROUP BY d.data\n),\nemocao_conversa AS (\n  SELECT ue.chat_id,\n         ep.nome AS emocao_nome,\n         ep.emoji,\n         ROW_NUMBER() OVER (\n           PARTITION BY ue.chat_id\n           ORDER BY ue.intensidade DESC NULLS LAST,\n                    ue.detectado_em DESC NULLS LAST,\n                    ue.criado_em DESC NULLS LAST\n         ) AS ordem\n  FROM public.usuarios_emocoes ue\n  JOIN periodo p ON COALESCE(ue.detectado_em, p.fim) BETWEEN p.inicio AND p.fim\n  LEFT JOIN public.emocoes_plutchik ep ON ep.id = ue.emocao_id\n  WHERE ue.usuario_id = $1\n),\nconversas AS (\n  SELECT uc.id AS chat_id,\n         uc.data_conversa,\n         uc.horario_inicio,\n         uc.horario_fim,\n         uc.total_interactions,\n         uc.status,\n         ec.emocao_nome,\n         ec.emoji\n  FROM public.usr_chat uc\n  JOIN periodo p ON uc.data_conversa BETWEEN p.inicio AND p.fim\n  LEFT JOIN emocao_conversa ec ON ec.chat_id = uc.id AND ec.ordem = 1\n  WHERE uc.usuario_id = $1\n)\nSELECT\n  lb.data_registro                                    AS data,\n  lb.humor_medio_dia                                  AS humor_medio,\n  lb.energia_media_dia                                AS energia_media,\n  up.humor_dia                                        AS pico_diario,\n  up.variacao_humor,\n  up.variacao_energia,\n  up.periodo_dia,\n  up.justificativa_humor,\n  up.confianca_analise,\n  conv.chat_id,\n  conv.horario_inicio,\n  conv.horario_fim,\n  conv.total_interactions,\n  conv.status,\n  conv.emocao_nome,\n  conv.emoji\nFROM linha_base lb\nLEFT JOIN ultimos_por_dia up\n  ON up.data_registro = lb.data_registro\nLEFT JOIN conversas conv\n  ON conv.data_conversa = lb.data_registro\nORDER BY lb.data_registro;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "id": "92158a06-9880-4361-bfb8-55443cbb6fa0",
+      "name": "Historico Semanal",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1696,
+        128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -111,7 +134,7 @@
       "main": [
         [
           {
-            "node": "Montar Response",
+            "node": "Historico Semanal",
             "type": "main",
             "index": 0
           }
@@ -128,6 +151,17 @@
           }
         ]
       ]
+    },
+    "Historico Semanal": {
+      "main": [
+        [
+          {
+            "node": "Montar Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -136,7 +170,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "76e4c0c0-de99-4390-8ee8-51892e197433",
+  "versionId": "0e46a832-b923-4d21-8048-8b53bd6da190",
   "triggerCount": 1,
   "shared": [
     {

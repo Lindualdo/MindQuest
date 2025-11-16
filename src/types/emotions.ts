@@ -438,6 +438,17 @@ export interface JornadaCardResponse {
   card_jornada: JornadaCardData;
 }
 
+export interface ConversaHistoricoDiarioEntry {
+  data: string | null;
+  humor: number;
+  energia: number;
+  conversas: number;
+  tem_conversa: boolean;
+  emoji: string | null;
+  emocao: string | null;
+  ultima_hora: string | null;
+}
+
 export interface ConversasCardData {
   streak: {
     atual: number;
@@ -461,6 +472,7 @@ export interface ConversasCardData {
     proxima_meta_dias: number;
     proxima_meta_titulo: string | null;
   };
+  historico_diario?: ConversaHistoricoDiarioEntry[];
   beneficios: string[];
 }
 

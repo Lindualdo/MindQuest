@@ -16,7 +16,6 @@ import InsightDetailPage from '@/pages/App/InsightDetailPage';
 import PainelQuestsPage from '@/pages/App/PainelQuestsPage';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
-import type { CheckinDiario } from '@/types/emotions';
 
 const formatEmotion = (nome?: string | null, percentual?: number | null) => {
   if (!nome) {
@@ -140,69 +139,81 @@ const HomeV1_2 = () => {
   }, [conversasCard]);
 
   const diasConversas = useMemo(() => {
-    const historico = dashboardData?.checkins_historico ?? [];
+    const historico = Array.isArray(conversasCard?.historico_diario)
+      ? conversasCard?.historico_diario ?? []
+      : [];
+
+    if (!historico.length) {
+      return [];
+    }
+
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
 
     const parseDate = (value?: string | null) => {
       if (!value) return null;
-      const parts = value.split('-');
-      if (parts.length !== 3) return null;
-      const [year, month, day] = parts.map(Number);
-      if ([year, month, day].some((part) => Number.isNaN(part))) return null;
-      return new Date(year, month - 1, day);
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        const [year, month, day] = value.split('-').map(Number);
+        if ([year, month, day].some((part) => Number.isNaN(part))) return null;
+        const parsed = new Date(year, (month ?? 1) - 1, day ?? 1);
+        parsed.setHours(0, 0, 0, 0);
+        return parsed;
+      }
+      date.setHours(0, 0, 0, 0);
+      return date;
     };
 
-    const formatKey = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const formatDisplay = (date: Date) => {
+    const formatDisplay = (date: Date | null) => {
+      if (!date) return '--/--';
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       return `${day}/${month}`;
     };
 
-    const mapa = new Map<string, CheckinDiario>();
-    historico.forEach((item) => {
-      if (item?.data_checkin) {
-        mapa.set(item.data_checkin, item);
-      }
-    });
-
-    let referencia = parseDate(historico[0]?.data_checkin ?? null) ?? new Date();
-    historico.forEach((item) => {
-      const parsed = parseDate(item?.data_checkin);
-      if (parsed && parsed > referencia) {
-        referencia = parsed;
-      }
-    });
-
-    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
     const isSameDay = (a: Date, b: Date) =>
       a.getFullYear() === b.getFullYear() &&
       a.getMonth() === b.getMonth() &&
       a.getDate() === b.getDate();
 
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(referencia);
-      date.setDate(referencia.getDate() - (6 - index));
-      const key = formatKey(date);
-      const checkin = mapa.get(key);
-      const status = checkin?.status_resposta;
-      const normalized: 'respondido' | 'perdido' | 'pendente' | 'default' =
-        status === 'respondido' || status === 'perdido' || status === 'pendente' ? status : 'default';
+    const sorted = [...historico].sort((a, b) => {
+      const da = parseDate(a?.data ?? null);
+      const db = parseDate(b?.data ?? null);
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da.getTime() - db.getTime();
+    });
+
+    const limited = sorted.slice(-7);
+
+    return limited.map((dia, index) => {
+      const parsedDate = parseDate(dia?.data ?? null);
+      const labelIndex = parsedDate ? parsedDate.getDay() : index % labels.length;
+      const label = labels[labelIndex] ?? labels[0];
+      const conversas = typeof dia?.conversas === 'number' ? dia.conversas : Number(dia?.conversas ?? 0) || 0;
+      const temConversa = Boolean(dia?.tem_conversa || conversas > 0);
+      let status: 'respondido' | 'perdido' | 'pendente' | 'default' = 'default';
+
+      if (temConversa) {
+        status = 'respondido';
+      } else if (parsedDate) {
+        if (isSameDay(parsedDate, hoje)) {
+          status = 'pendente';
+        } else if (parsedDate < hoje) {
+          status = 'perdido';
+        }
+      }
+
       return {
-        label: labels[date.getDay()] ?? labels[0],
-        dataLabel: formatDisplay(date),
-        status: normalized,
-        isHoje: isSameDay(date, hoje),
+        label,
+        dataLabel: formatDisplay(parsedDate),
+        status,
+        isHoje: parsedDate ? isSameDay(parsedDate, hoje) : false,
       };
     });
-  }, [dashboardData?.checkins_historico]);
+  }, [conversasCard?.historico_diario]);
 
   const {
     questTitulo,
