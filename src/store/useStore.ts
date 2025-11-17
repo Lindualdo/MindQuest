@@ -74,6 +74,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   conversasCardUserId: null,
   conversasCardLoading: false,
   conversasCardError: null,
+  weeklyProgressCard: null,
+  weeklyProgressCardUserId: null,
+  weeklyProgressCardLoading: false,
+  weeklyProgressCardError: null,
   // full chat
   selectedChatId: null,
   fullChatDetail: null,
@@ -412,6 +416,55 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         conversasCardLoading: false,
         conversasCardError: error instanceof Error ? error.message : 'Erro ao carregar card de conversas',
+      });
+    }
+  },
+
+  loadWeeklyProgressCard: async (usuarioIdParam) => {
+    const { dashboardData, weeklyProgressCardUserId, weeklyProgressCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        weeklyProgressCardError: 'Usuário não informado para carregar card semanal',
+        weeklyProgressCardLoading: false,
+      });
+      return;
+    }
+
+    if (weeklyProgressCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (weeklyProgressCardLoading) {
+      return;
+    }
+
+    set({
+      weeklyProgressCardLoading: true,
+      weeklyProgressCardError: null,
+    });
+
+    try {
+      const payload = await apiService.getWeeklyProgressCard(userId);
+      set({
+        weeklyProgressCard: payload.card_weekly_progress,
+        weeklyProgressCardUserId: userId,
+        weeklyProgressCardLoading: false,
+        weeklyProgressCardError: null,
+      });
+    } catch (error) {
+      console.error('[WeeklyProgressCard] erro ao carregar card semanal', error);
+      set({
+        weeklyProgressCardLoading: false,
+        weeklyProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar card semanal',
       });
     }
   },
@@ -828,6 +881,10 @@ export const useDashboard = () => {
     conversasCardLoading,
     conversasCardError,
     loadConversasCard,
+    weeklyProgressCard,
+    weeklyProgressCardLoading,
+    weeklyProgressCardError,
+    loadWeeklyProgressCard,
     questsCard,
     questsCardLoading,
     questsCardError,
@@ -890,6 +947,10 @@ export const useDashboard = () => {
     conversasCardLoading,
     conversasCardError,
     loadConversasCard,
+    weeklyProgressCard,
+    weeklyProgressCardLoading,
+    weeklyProgressCardError,
+    loadWeeklyProgressCard,
     questsCard,
     questsCardLoading,
     questsCardError,

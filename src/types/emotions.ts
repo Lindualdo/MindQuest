@@ -500,6 +500,40 @@ export interface ConversasCardResponse {
   card_conversas: ConversasCardData;
 }
 
+export type WeeklyProgressStatus = 'concluido' | 'parcial' | 'pendente';
+
+export interface WeeklyProgressDay {
+  data: string | null;
+  label: string | null;
+  totalXp: number;
+  xpBase: number;
+  xpBonus: number;
+  xpConversa: number;
+  xpQuests: number;
+  metaDia: number;
+  metaConversa: number;
+  metaQuests: number;
+  status: WeeklyProgressStatus;
+}
+
+export interface WeeklyProgressCardData {
+  usuarioId: string | null;
+  semanaInicio: string | null;
+  semanaFim: string | null;
+  streakAtualDias: number;
+  xpSemanaTotal: number;
+  xpMetaSemana?: number;
+  percentualMeta?: number;
+  diasConcluidos?: number;
+  dias: WeeklyProgressDay[];
+}
+
+export interface WeeklyProgressCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_weekly_progress: WeeklyProgressCardData;
+}
+
 // Dashboard Data - estrutura principal
 export interface DashboardData {
   usuario: {
@@ -584,6 +618,10 @@ export interface StoreState {
   conversasCardUserId: string | null;
   conversasCardLoading: boolean;
   conversasCardError: string | null;
+  weeklyProgressCard: WeeklyProgressCardData | null;
+  weeklyProgressCardUserId: string | null;
+  weeklyProgressCardLoading: boolean;
+  weeklyProgressCardError: string | null;
   // full chat detail
   selectedChatId: string | null;
   fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
@@ -613,6 +651,7 @@ export interface StoreState {
   markQuestAsCompletedLocal: (questId: string) => void;
   loadJornadaCard: (usuarioId?: string) => Promise<void>;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
+  loadWeeklyProgressCard: (usuarioId?: string) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil

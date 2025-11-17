@@ -21,6 +21,10 @@ const HomeV1_3 = () => {
     insightCardLoading,
     insightCardError,
     loadInsightCard,
+    weeklyProgressCard,
+    weeklyProgressCardLoading,
+    weeklyProgressCardError,
+    loadWeeklyProgressCard,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -41,6 +45,11 @@ const HomeV1_3 = () => {
     if (!userId || insightCard || insightCardLoading) return;
     loadInsightCard(userId);
   }, [userId, insightCard, insightCardLoading, loadInsightCard]);
+
+  useEffect(() => {
+    if (!userId || weeklyProgressCard || weeklyProgressCardLoading) return;
+    loadWeeklyProgressCard(userId);
+  }, [userId, weeklyProgressCard, weeklyProgressCardLoading, loadWeeklyProgressCard]);
 
   const moodSummary = useMemo(() => {
     if (!panoramaCard) {
@@ -107,6 +116,7 @@ const HomeV1_3 = () => {
   };
 
   const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
+  const weeklySummary = weeklyProgressCard ?? mockWeeklyXpSummary;
 
   return (
     <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
@@ -154,8 +164,13 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.14 }}
         >
-          <CardWeeklyProgress summary={mockWeeklyXpSummary} onContinue={handleContinue} />
+          <CardWeeklyProgress summary={weeklySummary} onContinue={handleContinue} />
         </motion.div>
+        {!weeklyProgressCardLoading && weeklyProgressCardError && (
+          <p className="text-center text-[0.72rem] font-medium text-rose-600">
+            Não conseguimos atualizar o progresso semanal agora.
+          </p>
+        )}
       </main>
 
       <BottomNavV1_3

@@ -18,6 +18,7 @@ import type {
   ConversasCardResponse,
   QuestCardResponse,
   JornadaCardResponse,
+  WeeklyProgressCardResponse,
 } from '../types/emotions';
 
 interface ApiResponse {
@@ -965,6 +966,32 @@ class ApiService {
     }
 
     return payload as ConversasCardResponse;
+  }
+
+  public async getWeeklyProgressCard(userId: string): Promise<WeeklyProgressCardResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/card/weekly-progress?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar card de progresso semanal');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object' || !('card_weekly_progress' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado no card de progresso semanal');
+    }
+
+    return payload as WeeklyProgressCardResponse;
   }
 
   public async getQuestsCard(userId: string): Promise<QuestCardResponse> {

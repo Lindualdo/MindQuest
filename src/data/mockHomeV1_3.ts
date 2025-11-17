@@ -1,16 +1,18 @@
-import type { WeeklyXpSummary } from '@/components/app/v1.3/CardWeeklyProgress';
+import type { WeeklyProgressCardData } from '@/types/emotions';
 import type { MoodEnergySummary } from '@/components/app/v1.3/CardMoodEnergy';
 import type { InsightCardData } from '@/types/emotions';
 
 export const MOCK_USUARIO_ID = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24';
 
-export const mockWeeklyXpSummary: WeeklyXpSummary = {
+export const mockWeeklyXpSummary: WeeklyProgressCardData = {
   usuarioId: MOCK_USUARIO_ID,
   semanaInicio: '2025-11-10',
   semanaFim: '2025-11-16',
   streakAtualDias: 2,
   xpSemanaTotal: 2715,
   xpMetaSemana: 3000,
+  percentualMeta: 91,
+  diasConcluidos: 2,
   dias: [
     {
       data: '2025-11-10',
@@ -18,6 +20,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 0,
       xpBase: 0,
       xpBonus: 0,
+      xpConversa: 0,
+      xpQuests: 0,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'pendente',
     },
     {
       data: '2025-11-11',
@@ -25,6 +33,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 0,
       xpBase: 0,
       xpBonus: 0,
+      xpConversa: 0,
+      xpQuests: 0,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'pendente',
     },
     {
       data: '2025-11-12',
@@ -32,6 +46,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 615,
       xpBase: 0,
       xpBonus: 615,
+      xpConversa: 15,
+      xpQuests: 600,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'parcial',
     },
     {
       data: '2025-11-13',
@@ -39,6 +59,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 0,
       xpBase: 0,
       xpBonus: 0,
+      xpConversa: 0,
+      xpQuests: 0,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'pendente',
     },
     {
       data: '2025-11-14',
@@ -46,6 +72,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 0,
       xpBase: 0,
       xpBonus: 0,
+      xpConversa: 0,
+      xpQuests: 0,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'pendente',
     },
     {
       data: '2025-11-15',
@@ -53,6 +85,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 2100,
       xpBase: 2100,
       xpBonus: 0,
+      xpConversa: 15,
+      xpQuests: 2085,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'concluido',
     },
     {
       data: '2025-11-16',
@@ -60,6 +98,12 @@ export const mockWeeklyXpSummary: WeeklyXpSummary = {
       totalXp: 0,
       xpBase: 0,
       xpBonus: 0,
+      xpConversa: 0,
+      xpQuests: 0,
+      metaDia: 45,
+      metaConversa: 15,
+      metaQuests: 30,
+      status: 'pendente',
     },
   ],
 };

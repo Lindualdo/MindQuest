@@ -1,5 +1,5 @@
 
-import { ArrowUpRight } from 'lucide-react';
+
 import { getEnergiaDescriptor, getHumorDescriptor } from '@/data/humorEnergyCatalog';
 
 export type MoodEnergySummary = {
@@ -43,7 +43,7 @@ const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
       <div className="grid items-start gap-4 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <div className="flex flex-col items-center">
           <p className="text-[0.8rem] font-semibold text-[#111827]">
-            Humor
+            Meu humor
           </p>
           <div className="mt-2 w-full max-w-[140px]">
             <svg viewBox="0 0 120 80" className="w-full">
@@ -113,7 +113,7 @@ const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
         <div className="flex h-full items-center gap-3">
           <div className="flex h-full flex-col items-center">
             <p className="text-[0.8rem] font-semibold text-[#111827]">
-              Energia
+              Minha energia
             </p>
             <div className="flex flex-1 flex-col items-center justify-center">
               <div className="mt-2 flex flex-col items-center">

@@ -1,41 +1,20 @@
 import { Flame } from 'lucide-react';
-
-export type WeeklyXpDay = {
-  data: string; // ISO date (YYYY-MM-DD)
-  label: string; // Dia da semana curto, ex.: Seg, Ter
-  totalXp: number;
-  xpBase: number;
-  xpBonus: number;
-};
-
-export type WeeklyXpSummary = {
-  usuarioId: string;
-  semanaInicio: string; // ISO date
-  semanaFim: string; // ISO date
-  streakAtualDias: number;
-  xpSemanaTotal: number;
-  xpMetaSemana?: number;
-  dias: WeeklyXpDay[];
-};
+import type { WeeklyProgressCardData } from '@/types/emotions';
 
 type Props = {
-  summary: WeeklyXpSummary;
+  summary: WeeklyProgressCardData;
   onContinue: () => void;
 };
 
 const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
-  const { dias, streakAtualDias, xpSemanaTotal, xpMetaSemana } = summary;
+  const dias = summary.dias ?? [];
+  const { streakAtualDias, xpSemanaTotal, xpMetaSemana, percentualMeta } = summary;
 
-  const maxXp = Math.max(
-    ...dias.map((dia) => dia.totalXp || 0),
-    xpMetaSemana ?? 0,
-    1,
-  );
-
-  const progressoMeta =
-    xpMetaSemana && xpMetaSemana > 0
-      ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))
-      : undefined;
+  const progressoMeta = typeof percentualMeta === 'number'
+    ? percentualMeta
+    : xpMetaSemana && xpMetaSemana > 0
+        ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))
+        : undefined;
 
   return (
     <section
@@ -46,34 +25,68 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         Meu progresso semanal
       </p>
 
+      <div className="mt-2">
+        <div className="relative h-2 w-full rounded-full bg-slate-200">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
+            style={{
+              width: `${Math.min(
+                100,
+                (xpMetaSemana && xpMetaSemana > 0
+                  ? (xpSemanaTotal / xpMetaSemana) * 100
+                  : 100),
+              ).toFixed(0)}%`,
+            }}
+          />
+        </div>
+        <div className="mt-1 flex items-center justify-between text-[0.75rem] font-semibold text-[#475569]">
+          <span className="text-[#1C2541]">
+            {xpSemanaTotal}
+            {' '}
+            pts
+          </span>
+          <span>
+            {xpMetaSemana ? `${xpMetaSemana} pts` : 'Meta'}
+          </span>
+        </div>
+      </div>
+
       <div className="mt-3 h-24 w-full">
         <div className="flex h-full items-end justify-between gap-1.5">
           {dias.map((dia) => {
-            const hasXp = dia.totalXp > 0;
-            const heightPercent = (dia.totalXp / maxXp) * 100;
-            const barHeight = Math.max(16, (heightPercent / 100) * 80);
-            const isUltimoComXp = hasXp && dia === [...dias].reverse().find((d) => d.totalXp > 0);
-
-            const barColor = hasXp
-              ? isUltimoComXp
-                ? '#22C55E'
-                : '#7EBDC2'
-              : '#CBD5E1';
+            const metaDia = dia.metaDia ?? 0;
+            const ratio = metaDia > 0 ? Math.min(dia.totalXp / metaDia, 1) : 0;
+            const barColor = (() => {
+              switch (dia.status) {
+                case 'concluido':
+                  return '#22C55E';
+                case 'parcial':
+                  return '#86EFAC';
+                default:
+                  return '#CBD5E1';
+              }
+            })();
+            const trackHeight = 80;
+            const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
 
             return (
               <div
                 key={dia.data}
                 className="flex flex-1 flex-col items-center justify-end gap-1"
               >
-                <div
-                  className="w-3 rounded-full"
-                  style={{
-                    height: `${barHeight}px`,
-                    backgroundColor: barColor,
-                  }}
-                />
+                <div className="relative w-3 overflow-hidden rounded-full bg-slate-200" style={{ height: `${trackHeight}px` }}>
+                  {fillHeight > 0 && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 rounded-full"
+                      style={{
+                        height: `${fillHeight}px`,
+                        backgroundColor: barColor,
+                      }}
+                    />
+                  )}
+                </div>
                 <span className="text-[0.6rem] font-semibold text-[#1C2541]">
-                  {dia.label}
+                  {dia.label ?? '--'}
                 </span>
               </div>
             );
@@ -96,7 +109,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
           <p className="text-[0.7rem] font-medium text-[#475569]">
             {xpSemanaTotal}
             {' '}
-            XP nesta semana
+            pontos nesta semana
             {' · '}
             {progressoMeta}
             %
