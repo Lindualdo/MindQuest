@@ -1,5 +1,6 @@
 import type { WeeklyXpSummary } from '@/components/app/v1.3/CardWeeklyProgress';
 import type { MoodEnergySummary } from '@/components/app/v1.3/CardMoodEnergy';
+import type { InsightCardData } from '@/types/emotions';
 
 export const MOCK_USUARIO_ID = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24';
 
@@ -70,3 +71,15 @@ export const mockMoodEnergySummary: MoodEnergySummary = {
   energiaMediaSemana: 6.6,
 };
 
+export const mockInsightCard: InsightCardData = {
+  insight_id: 'mock-insight-001',
+  titulo: 'Gerenciar o peso emocional da urgência financeira 🔥',
+  descricao:
+    'Aldo vive pressão intensa para gerar renda e sente desgaste emocional acumulado. Sugira micro-pausas de respiração antes de decisões importantes para manter clareza.',
+  prioridade: 'alta',
+  categoria: 'emocional',
+  tipo: 'alerta',
+  chat_id: null,
+  data_conversa: null,
+  data_label: null,
+};

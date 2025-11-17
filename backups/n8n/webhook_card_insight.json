@@ -1,0 +1,182 @@
+{
+  "createdAt": "2025-11-15T15:12:00.000Z",
+  "id": "554a17f6-bf08-4570-a9fc-7cb4d631dbdd",
+  "name": "webhook_card_insight",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "card/insight",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "840c31ce-de9d-44af-89ea-bbd36f64012d",
+      "name": "Webhook Card Insight",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-440, 320],
+      "webhookId": "2f43ab26-7791-4872-a306-f6cac3e34c22"
+    },
+    {
+      "parameters": {
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+      },
+      "id": "2119b13c-f99e-4fae-9afe-cdc540a7c60b",
+      "name": "Validar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-200, 320]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH ranked_insights AS (\n  SELECT\n    i.id,\n    i.usuario_id,\n    i.chat_id,\n    i.titulo,\n    NULLIF(i.descricao, '') AS descricao,\n    NULLIF(i.resumo_situacao, '') AS resumo_situacao,\n    i.prioridade,\n    i.categoria,\n    i.tipo,\n    i.criado_em,\n    ROW_NUMBER() OVER (\n      ORDER BY COALESCE(i.criado_em, NOW()) DESC, i.id DESC\n    ) AS rn\n  FROM public.insights i\n  WHERE i.usuario_id = $1\n    AND (i.ativo IS DISTINCT FROM FALSE)\n)\nSELECT\n  $1::uuid AS user_id,\n  r.id AS insight_id,\n  r.chat_id,\n  r.titulo,\n  COALESCE(r.descricao, r.resumo_situacao, 'Insight em validação') AS descricao,\n  r.prioridade,\n  r.categoria,\n  r.tipo,\n  r.criado_em,\n  uc.data_conversa,\n  to_char(COALESCE(uc.data_conversa, r.criado_em::date), 'DD/MM') AS data_label\nFROM ranked_insights r\nLEFT JOIN public.usr_chat uc ON uc.id = r.chat_id\nWHERE r.rn = 1;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "id": "04ba9a07-e8ca-4027-91ea-ba846657522d",
+      "name": "Selecionar Insight",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [40, 320],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first()?.json || null;\n\nconst card = {\n  insight_id: row?.insight_id ?? null,\n  titulo: row?.titulo ?? 'Nenhum insight recente detectado',\n  descricao: row?.descricao ?? 'Assim que uma nova conversa for analisada, traremos um insight aqui.',\n  prioridade: row?.prioridade ?? null,\n  categoria: row?.categoria ?? null,\n  tipo: row?.tipo ?? null,\n  chat_id: row?.chat_id ?? null,\n  data_conversa: row?.data_conversa ?? null,\n  data_label: row?.data_label ?? null\n};\n\nreturn [{ json: {\n  success: true,\n  usuario_id: row?.user_id ?? null,\n  card_insight_ultima_conversa: card\n} }];"
+      },
+      "id": "4ec5a48a-04fd-457d-80d9-0bd3ee8f159c",
+      "name": "Montar Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [280, 320]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "fa0971b0-4e04-4b34-8822-07003fb146b1",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [520, 320]
+    }
+  ],
+  "connections": {
+    "Webhook Card Insight": {
+      "main": [
+        [
+          {
+            "node": "Validar Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Params": {
+      "main": [
+        [
+          {
+            "node": "Selecionar Insight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar Insight": {
+      "main": [
+        [
+          {
+            "node": "Montar Card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Card": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "73996eba-d214-460f-9d8f-57e57e9c63c5",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-15T15:12:00.000Z",
+      "role": "workflow:owner",
+      "workflowId": "554a17f6-bf08-4570-a9fc-7cb4d631dbdd",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

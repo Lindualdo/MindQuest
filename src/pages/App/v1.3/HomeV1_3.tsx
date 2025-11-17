@@ -6,7 +6,7 @@ import CardInsightUltimaConversa from '@/components/app/v1.3/CardInsightUltimaCo
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import { useDashboard } from '@/store/useStore';
-import { mockWeeklyXpSummary, mockMoodEnergySummary } from '@/data/mockHomeV1_3';
+import { mockWeeklyXpSummary, mockMoodEnergySummary, mockInsightCard } from '@/data/mockHomeV1_3';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
 
 const HomeV1_3 = () => {
@@ -17,6 +17,10 @@ const HomeV1_3 = () => {
     panoramaCard,
     panoramaCardLoading,
     loadPanoramaCard,
+    insightCard,
+    insightCardLoading,
+    insightCardError,
+    loadInsightCard,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -29,9 +33,14 @@ const HomeV1_3 = () => {
   const userId = dashboardData?.usuario?.id;
 
   useEffect(() => {
-    if (!userId || panoramaCardLoading) return;
+    if (!userId || panoramaCard || panoramaCardLoading) return;
     loadPanoramaCard(userId);
-  }, [userId, panoramaCardLoading, loadPanoramaCard]);
+  }, [userId, panoramaCard, panoramaCardLoading, loadPanoramaCard]);
+
+  useEffect(() => {
+    if (!userId || insightCard || insightCardLoading) return;
+    loadInsightCard(userId);
+  }, [userId, insightCard, insightCardLoading, loadInsightCard]);
 
   const moodSummary = useMemo(() => {
     if (!panoramaCard) {
@@ -97,6 +106,8 @@ const HomeV1_3 = () => {
     // Tela de configurações será implementada na próxima etapa.
   };
 
+  const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
+
   return (
     <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
@@ -126,8 +137,17 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.09 }}
         >
-          <CardInsightUltimaConversa onExplorarInsights={handleVerInsights} />
+          <CardInsightUltimaConversa
+            data={insightCardData}
+            loading={insightCardLoading}
+            onExplorarInsights={handleVerInsights}
+          />
         </motion.div>
+        {!insightCardLoading && insightCardError && (
+          <p className="text-center text-[0.72rem] font-medium text-rose-600">
+            Não conseguimos atualizar o insight agora.
+          </p>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}

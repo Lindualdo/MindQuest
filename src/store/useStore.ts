@@ -58,6 +58,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   panoramaCardUserId: null,
   panoramaCardLoading: false,
   panoramaCardError: null,
+  insightCard: null,
+  insightCardUserId: null,
+  insightCardLoading: false,
+  insightCardError: null,
   questsCard: null,
   questsCardUserId: null,
   questsCardLoading: false,
@@ -181,6 +185,52 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         panoramaCardLoading: false,
         panoramaCardError: error instanceof Error ? error.message : 'Erro ao carregar panorama emocional',
+      });
+    }
+  },
+
+  loadInsightCard: async (usuarioIdParam) => {
+    const { dashboardData, insightCardUserId, insightCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        insightCardError: 'Usuário não informado para carregar insight',
+        insightCardLoading: false,
+      });
+      return;
+    }
+
+    if (insightCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (insightCardLoading) {
+      return;
+    }
+
+    set({ insightCardLoading: true, insightCardError: null });
+
+    try {
+      const payload = await apiService.getInsightCard(userId);
+      set({
+        insightCard: payload.card_insight_ultima_conversa,
+        insightCardUserId: userId,
+        insightCardLoading: false,
+        insightCardError: null,
+      });
+    } catch (error) {
+      console.error('[InsightCard] erro ao carregar card de insight', error);
+      set({
+        insightCardLoading: false,
+        insightCardError: error instanceof Error ? error.message : 'Erro ao carregar insight',
       });
     }
   },
@@ -770,6 +820,10 @@ export const useDashboard = () => {
     panoramaCardLoading,
     panoramaCardError,
     loadPanoramaCard,
+    insightCard,
+    insightCardLoading,
+    insightCardError,
+    loadInsightCard,
     conversasCard,
     conversasCardLoading,
     conversasCardError,
@@ -828,6 +882,10 @@ export const useDashboard = () => {
     panoramaCardLoading,
     panoramaCardError,
     loadPanoramaCard,
+    insightCard,
+    insightCardLoading,
+    insightCardError,
+    loadInsightCard,
     conversasCard,
     conversasCardLoading,
     conversasCardError,

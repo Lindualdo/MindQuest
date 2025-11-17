@@ -372,6 +372,24 @@ export interface PanoramaCardResponse {
   card_panorama_emocional: PanoramaCardData;
 }
 
+export interface InsightCardData {
+  insight_id: string | null;
+  titulo: string;
+  descricao: string;
+  prioridade: string | null;
+  categoria: string | null;
+  tipo: TipoInsight | null;
+  chat_id: string | null;
+  data_conversa: string | null;
+  data_label: string | null;
+}
+
+export interface InsightCardResponse {
+  success: boolean;
+  usuario_id: string | null;
+  card_insight_ultima_conversa: InsightCardData;
+}
+
 export interface QuestCardQuest {
   id: string | null;
   titulo: string;
@@ -550,6 +568,10 @@ export interface StoreState {
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
   panoramaCardError: string | null;
+  insightCard: InsightCardData | null;
+  insightCardUserId: string | null;
+  insightCardLoading: boolean;
+  insightCardError: string | null;
   questsCard: QuestCardData | null;
   questsCardUserId: string | null;
   questsCardLoading: boolean;
@@ -586,6 +608,7 @@ export interface StoreState {
   loadResumoConversas: () => Promise<void>;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   loadPanoramaCard: (usuarioId?: string) => Promise<void>;
+  loadInsightCard: (usuarioId?: string) => Promise<void>;
   loadQuestsCard: (usuarioId?: string) => Promise<void>;
   markQuestAsCompletedLocal: (questId: string) => void;
   loadJornadaCard: (usuarioId?: string) => Promise<void>;
