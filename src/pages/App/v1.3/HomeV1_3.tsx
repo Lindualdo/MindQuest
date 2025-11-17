@@ -96,14 +96,17 @@ const HomeV1_3 = () => {
     setView('dashInsights');
   };
 
+  const handleVerHumor = () => {
+    setView('dashEmocoes');
+  };
+
   const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
 
-  const handleInsightDetail = () => {
-    const insightId = insightCard?.insight_id ?? insightCardData?.insight_id;
-    if (insightId) {
-      void openInsightDetail(insightId);
-    } else {
-      setView('insightDetail');
+  const handleInsightDetail = (insightId?: string | null) => {
+    const resolvedId = insightId ?? insightCard?.insight_id ?? insightCardData?.insight_id;
+    setView('insightDetail');
+    if (resolvedId) {
+      void openInsightDetail(resolvedId);
     }
   };
 
@@ -123,7 +126,7 @@ const HomeV1_3 = () => {
   };
 
   const handleNavConfig = () => {
-    setActiveTab('config');
+    setActiveTab('ajustes');
     // Tela de configurações será implementada na próxima etapa.
   };
 
@@ -160,7 +163,7 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.09 }}
         >
-          <CardMoodEnergy summary={moodSummary} onSaberMais={handleVerInsights} />
+          <CardMoodEnergy summary={moodSummary} onSaberMais={handleVerHumor} />
         </motion.div>
 
         <motion.div
@@ -171,7 +174,7 @@ const HomeV1_3 = () => {
           <CardInsightUltimaConversa
             data={insightCardData}
             loading={insightCardLoading}
-            onSaberMais={handleInsightDetail}
+            onSaberMais={(insightId) => handleInsightDetail(insightId)}
           />
         </motion.div>
         {!insightCardLoading && insightCardError && (

@@ -14,12 +14,13 @@ import { ChevronRight, Microscope } from 'lucide-react';
 import { useInsightsFilters, getCategoriaLabel } from '@/hooks/useInsightsFilters';
 import { useDashboard } from '@/store/useStore';
 import type { Insight } from '@/types/emotions';
-import InsightsFilterControls, {
+import InsightsFilterControls from './InsightsFilterControls';
+import {
   PRIORIDADE_OPTIONS,
   type CategoriaFiltroValue,
   type PrioridadeFiltroValue,
   type TipoFiltroValue,
-} from './InsightsFilterControls';
+} from './insightsFilterOptions';
 import { getInsightIcon, insightTypeMeta, prioridadeBadgeClasses } from '@/utils/insightsUi';
 import Card from '../ui/Card';
 

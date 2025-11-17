@@ -3,7 +3,7 @@ import type { InsightCardData } from '@/types/emotions';
 type Props = {
   data?: InsightCardData | null;
   loading?: boolean;
-  onSaberMais?: () => void;
+  onSaberMais?: (insightId: string | null) => void;
 };
 
 const fallbackInsight: InsightCardData = {
@@ -46,7 +46,7 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
         <div className="mt-3 flex justify-end">
           <button
             type="button"
-            onClick={onSaberMais}
+            onClick={() => onSaberMais(insight?.insight_id ?? null)}
             className="text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
             disabled={loading}
           >

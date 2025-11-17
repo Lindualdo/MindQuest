@@ -125,9 +125,8 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
                     {Array.from({ length: energiaSegments }).map((_, index) => {
                       const filled = index < energiaFillMedia;
                       return (
-                        // eslint-disable-next-line react/no-array-index-key
                         <div
-                          key={index}
+                          key={`energia-segment-${index}`}
                           className="h-4 w-3 rounded-[2px]"
                           style={{
                             backgroundColor: filled ? '#16A34A' : 'transparent',

@@ -13,6 +13,8 @@ import AuthGuard from './components/auth/AuthGuard';
 import HumorHistoryPage from './pages/App/HumorHistoryPage';
 import FullChatPage from './pages/App/FullChatPage';
 import InsightDetailPage from './pages/App/InsightDetailPage';
+import InsightDetailPageV13 from './pages/App/v1.3/InsightDetailPageV13';
+import DashPerfilPageV13 from './pages/App/v1.3/DashPerfilPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/App/ConquistasPage';
 import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
@@ -20,7 +22,7 @@ import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PainelQuestsPage from './pages/App/PainelQuestsPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
-import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
+import DashPerfilPage from './pages/App/DashPerfilPage';
 import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
 import InsightsDashboardPage from './pages/App/InsightsDashboardPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
@@ -121,14 +123,6 @@ function App() {
     );
   }
 
-  if (isAppPreviewV13) {
-    return (
-      <AuthGuard>
-        <HomeV1_3 />
-      </AuthGuard>
-    );
-  }
-
   const { 
     dashboardData, 
     refreshData, 
@@ -216,10 +210,40 @@ function App() {
     );
   }
 
+  if (isAppPreviewV13) {
+    let previewPage: JSX.Element;
+    switch (view) {
+      case 'insightDetail':
+        previewPage = <InsightDetailPageV13 />;
+        break;
+      case 'dashEmocoes':
+        previewPage = <DashPerfilPageV13 />;
+        break;
+      case 'dashInsights':
+        previewPage = <InsightsDashboardPage />;
+        break;
+      case 'painelQuests':
+        previewPage = <PainelQuestsPage />;
+        break;
+      case 'resumoConversas':
+        previewPage = <ResumoConversasPage />;
+        break;
+      default:
+        previewPage = <HomeV1_3 />;
+        break;
+    }
+
+    return (
+      <AuthGuard>
+        {previewPage}
+      </AuthGuard>
+    );
+  }
+
   if (isAppRoute && view === 'insightDetail') {
     return (
       <AuthGuard>
-        <InsightDetailPage />
+        {isAppPreviewV13 ? <InsightDetailPageV13 /> : <InsightDetailPage />}
       </AuthGuard>
     );
   }
@@ -251,7 +275,7 @@ function App() {
   if (isAppRoute && view === 'dashEmocoes') {
     return (
       <AuthGuard>
-        <EmocoesDashboardPage />
+        <DashPerfilPage />
       </AuthGuard>
     );
   }

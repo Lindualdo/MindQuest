@@ -1,6 +1,6 @@
 import { Home, Settings, Target, User } from 'lucide-react';
 
-type TabId = 'home' | 'perfil' | 'quests' | 'config';
+type TabId = 'home' | 'perfil' | 'quests' | 'ajustes';
 
 type Props = {
   active: TabId;
@@ -59,10 +59,10 @@ const BottomNavV1_3 = ({
           type="button"
           onClick={onConfig}
           className={baseItemClasses}
-          style={{ color: getColor('config') }}
+          style={{ color: getColor('ajustes') }}
         >
           <Settings size={18} />
-          <span>Config</span>
+          <span>Ajustes</span>
         </button>
       </div>
     </nav>

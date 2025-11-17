@@ -57,16 +57,18 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         <div className="flex h-full items-end justify-between gap-1">
           {dias.map((dia) => {
             const metaDia = dia.metaDia ?? 0;
-            const ratio = metaDia > 0 ? Math.min(dia.totalXp / metaDia, 1) : 0;
+            const metaConversa = dia.metaConversa ?? 0;
+            const metaQuests = dia.metaQuests ?? 0;
+            const progressoConversa = metaConversa > 0 ? Math.min(dia.xpConversa ?? 0, metaConversa) : 0;
+            const progressoQuests = metaQuests > 0 ? Math.min(dia.xpQuests ?? 0, metaQuests) : 0;
+            const progressoTotal = metaDia > 0 ? Math.min(metaDia, progressoConversa + progressoQuests) : dia.totalXp ?? 0;
+            const ratio = metaDia > 0 ? progressoTotal / metaDia : 0;
             const barColor = (() => {
-              switch (dia.status) {
-                case 'concluido':
-                  return '#22C55E';
-                case 'parcial':
-                  return '#86EFAC';
-                default:
-                  return '#CBD5E1';
-              }
+              const conversaOk = metaConversa === 0 || (dia.xpConversa ?? 0) >= metaConversa;
+              const questsOk = metaQuests === 0 || (dia.xpQuests ?? 0) >= metaQuests;
+              if (conversaOk && questsOk) return '#22C55E';
+              if ((dia.xpConversa ?? 0) > 0 || (dia.xpQuests ?? 0) > 0) return '#86EFAC';
+              return '#CBD5E1';
             })();
             const trackHeight = 56;
             const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;

@@ -77,7 +77,7 @@ const EmotionWheel: React.FC = () => {
   const labelClampMax = wheelSize - 12 + labelClampPadding;
 
   return (
-    <Card className="flex flex-col min-h-[360px]">
+    <Card className="flex flex-col min-h-[360px] border border-[#B6D6DF] bg-[#E8F3F5]">
       <div className="flex items-center gap-2 mb-6">
         <h3 className="text-xl font-semibold text-gray-800">Roda das emoções</h3>
         <div className="ml-auto relative">

@@ -815,6 +815,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   }
 }));
 
+if (typeof window !== 'undefined') {
+  (window as Window & { __MINDQUEST_STORE__?: typeof useStore }).__MINDQUEST_STORE__ = useStore;
+}
+
 // Hook customizado para verificar autenticação
 export const useAuth = () => {
   const { isAuthenticated, isLoading, error, initializeAuth } = useStore();
