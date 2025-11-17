@@ -43,7 +43,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
       <p className="text-sm font-semibold text-[#1C2541]">
-        Seu progresso semanal
+        Meu progresso semanal
       </p>
 
       <div className="mt-3 h-24 w-full">
@@ -121,4 +121,3 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
 };
 
 export default CardWeeklyProgress;
-

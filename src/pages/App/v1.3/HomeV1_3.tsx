@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import CardWeeklyProgress from '@/components/app/v1.3/CardWeeklyProgress';
 import CardMoodEnergy from '@/components/app/v1.3/CardMoodEnergy';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
+import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import { useDashboard } from '@/store/useStore';
 import { mockWeeklyXpSummary, mockMoodEnergySummary } from '@/data/mockHomeV1_3';
 import '@/components/app/v1.2/styles/mq-v1_2-styles.css';
@@ -12,6 +13,9 @@ const HomeV1_3 = () => {
     dashboardData,
     setView,
     openResumoConversas,
+    panoramaCard,
+    panoramaCardLoading,
+    loadPanoramaCard,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -21,7 +25,48 @@ const HomeV1_3 = () => {
     dashboardData?.usuario?.nome ??
     'Aldo';
 
-  const primeiroNome = nomeUsuario.split(' ')[0] ?? nomeUsuario;
+  const userId = dashboardData?.usuario?.id;
+
+  useEffect(() => {
+    if (!userId || panoramaCardLoading) return;
+    loadPanoramaCard(userId);
+  }, [userId, panoramaCardLoading, loadPanoramaCard]);
+
+  const moodSummary = useMemo(() => {
+    if (!panoramaCard) {
+      return mockMoodEnergySummary;
+    }
+
+    const humor = panoramaCard.humor;
+    const energia = panoramaCard.energia;
+
+    const humorAtual = Number(humor?.atual ?? mockMoodEnergySummary.humorHoje) || 1;
+    const humorMediaSemana = Number(humor?.media_7d ?? humorAtual) || humorAtual;
+
+    const energiaPercentSource =
+      typeof energia?.percentual_positiva !== 'undefined'
+        ? energia.percentual_positiva
+        : energia?.percentual_positivas;
+
+    const energiaPercentPositiva =
+      typeof energiaPercentSource === 'number'
+        ? energiaPercentSource
+        : Number(energiaPercentSource ?? 0) || 0;
+
+    const energiaMediaEscala10 = energiaPercentPositiva / 10;
+    const energiaNivelMedia = Math.max(
+      1,
+      Math.min(10, energiaMediaEscala10 || 1),
+    );
+    const energiaNivelHoje = energiaNivelMedia;
+
+    return {
+      humorHoje: humorAtual,
+      humorMediaSemana,
+      energiaHoje: energiaNivelHoje,
+      energiaMediaSemana: energiaNivelMedia,
+    };
+  }, [panoramaCard]);
 
   const handleContinue = () => {
     void openResumoConversas();
@@ -53,22 +98,7 @@ const HomeV1_3 = () => {
 
   return (
     <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
-      <header
-        className="border-b text-center"
-        style={{
-          backgroundColor: '#FAD0F0',
-          borderColor: 'rgba(28,37,65,0.06)',
-        }}
-      >
-        <div className="mx-auto flex w-full max-w-md items-center justify-center px-4 py-3">
-          <p className="text-sm font-semibold tracking-wide text-[#1C2541]">
-            OLÁ,
-            {' '}
-            {primeiroNome.toUpperCase()}
-            !
-          </p>
-        </div>
-      </header>
+      <HeaderV1_2 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         <motion.p
@@ -76,7 +106,7 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center text-[0.9rem] font-medium text-[#1C2541]"
         >
-          Comece agora a evoluir
+          Entenda como você está hoje e continue avançando
         </motion.p>
 
         <motion.div
@@ -84,7 +114,10 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <CardWeeklyProgress summary={mockWeeklyXpSummary} onContinue={handleContinue} />
+          <CardMoodEnergy
+            summary={moodSummary}
+            onVerInsights={handleVerInsights}
+          />
         </motion.div>
 
         <motion.div
@@ -92,10 +125,7 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
         >
-          <CardMoodEnergy
-            summary={mockMoodEnergySummary}
-            onVerInsights={handleVerInsights}
-          />
+          <CardWeeklyProgress summary={mockWeeklyXpSummary} onContinue={handleContinue} />
         </motion.div>
       </main>
 
@@ -111,4 +141,3 @@ const HomeV1_3 = () => {
 };
 
 export default HomeV1_3;
-
