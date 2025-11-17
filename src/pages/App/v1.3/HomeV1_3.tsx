@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import CardWeeklyProgress from '@/components/app/v1.3/CardWeeklyProgress';
 import CardMoodEnergy from '@/components/app/v1.3/CardMoodEnergy';
+import CardInsightUltimaConversa from '@/components/app/v1.3/CardInsightUltimaConversa';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import { useDashboard } from '@/store/useStore';
@@ -123,7 +124,15 @@ const HomeV1_3 = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
+          transition={{ delay: 0.09 }}
+        >
+          <CardInsightUltimaConversa onExplorarInsights={handleVerInsights} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14 }}
         >
           <CardWeeklyProgress summary={mockWeeklyXpSummary} onContinue={handleContinue} />
         </motion.div>
