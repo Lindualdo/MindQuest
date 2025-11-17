@@ -16,6 +16,10 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))
         : undefined;
 
+  const progressoTexto = progressoMeta !== undefined
+    ? `${xpSemanaTotal} pontos. ${progressoMeta}% da meta`
+    : `${xpSemanaTotal} pontos`;
+
   return (
     <section
       className="rounded-2xl bg-white px-4 py-3 shadow-md"
@@ -39,11 +43,9 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
             }}
           />
         </div>
-        <div className="mt-1 flex items-center justify-between text-[0.75rem] font-semibold text-[#475569]">
+        <div className="mt-1 flex items-center justify-between text-[0.7rem] font-semibold text-[#475569]">
           <span className="text-[#1C2541]">
-            {xpSemanaTotal}
-            {' '}
-            pts
+            {progressoTexto}
           </span>
           <span>
             {xpMetaSemana ? `${xpMetaSemana} pts` : 'Meta'}
@@ -51,8 +53,8 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         </div>
       </div>
 
-      <div className="mt-3 h-24 w-full">
-        <div className="flex h-full items-end justify-between gap-1.5">
+      <div className="mt-3 h-16 w-full">
+        <div className="flex h-full items-end justify-between gap-1">
           {dias.map((dia) => {
             const metaDia = dia.metaDia ?? 0;
             const ratio = metaDia > 0 ? Math.min(dia.totalXp / metaDia, 1) : 0;
@@ -66,7 +68,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
                   return '#CBD5E1';
               }
             })();
-            const trackHeight = 80;
+            const trackHeight = 56;
             const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
 
             return (
@@ -74,7 +76,10 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
                 key={dia.data}
                 className="flex flex-1 flex-col items-center justify-end gap-1"
               >
-                <div className="relative w-3 overflow-hidden rounded-full bg-slate-200" style={{ height: `${trackHeight}px` }}>
+                <div
+                  className="relative overflow-hidden rounded-full bg-slate-200"
+                  style={{ height: `${trackHeight}px`, width: '10px' }}
+                >
                   {fillHeight > 0 && (
                     <div
                       className="absolute bottom-0 left-0 right-0 rounded-full"
@@ -105,18 +110,6 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
             {streakAtualDias === 1 ? '' : 's'}
           </span>
         </div>
-        {progressoMeta !== undefined && (
-          <p className="text-[0.7rem] font-medium text-[#475569]">
-            {xpSemanaTotal}
-            {' '}
-            pontos nesta semana
-            {' · '}
-            {progressoMeta}
-            %
-            {' '}
-            da meta
-          </p>
-        )}
         <button
           type="button"
           onClick={onContinue}

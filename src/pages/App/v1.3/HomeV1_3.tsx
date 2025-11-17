@@ -136,6 +136,19 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
+          <CardWeeklyProgress summary={weeklySummary} onContinue={handleContinue} />
+        </motion.div>
+        {!weeklyProgressCardLoading && weeklyProgressCardError && (
+          <p className="text-center text-[0.72rem] font-medium text-rose-600">
+            Não conseguimos atualizar o progresso semanal agora.
+          </p>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.09 }}
+        >
           <CardMoodEnergy
             summary={moodSummary}
             onVerInsights={handleVerInsights}
@@ -145,7 +158,7 @@ const HomeV1_3 = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.09 }}
+          transition={{ delay: 0.14 }}
         >
           <CardInsightUltimaConversa
             data={insightCardData}
@@ -156,19 +169,6 @@ const HomeV1_3 = () => {
         {!insightCardLoading && insightCardError && (
           <p className="text-center text-[0.72rem] font-medium text-rose-600">
             Não conseguimos atualizar o insight agora.
-          </p>
-        )}
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14 }}
-        >
-          <CardWeeklyProgress summary={weeklySummary} onContinue={handleContinue} />
-        </motion.div>
-        {!weeklyProgressCardLoading && weeklyProgressCardError && (
-          <p className="text-center text-[0.72rem] font-medium text-rose-600">
-            Não conseguimos atualizar o progresso semanal agora.
           </p>
         )}
       </main>
