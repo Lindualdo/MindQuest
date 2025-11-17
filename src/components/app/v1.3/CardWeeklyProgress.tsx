@@ -22,7 +22,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
 
   return (
     <section
-      className="rounded-2xl bg-white px-4 py-3 shadow-md"
+      className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
       <p className="text-sm font-semibold text-[#1C2541]">
@@ -53,7 +53,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         </div>
       </div>
 
-      <div className="mt-3 h-16 w-full">
+      <div className="mt-5 h-16 w-full">
         <div className="flex h-full items-end justify-between gap-1">
           {dias.map((dia) => {
             const metaDia = dia.metaDia ?? 0;
@@ -113,10 +113,10 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         <button
           type="button"
           onClick={onContinue}
-          className="ml-2 rounded-full px-4 py-2 text-[0.8rem] font-semibold uppercase tracking-wide text-white"
+          className="ml-2 rounded-full px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-wide text-white"
           style={{
-            background: 'linear-gradient(135deg, #3083DC, #D90368)',
-            boxShadow: '0 8px 16px rgba(217,3,104,0.4)',
+            background: 'linear-gradient(135deg, #3083DC, #6EC3FF)',
+            boxShadow: '0 6px 12px rgba(48,131,220,0.35)',
           }}
         >
           Continuar

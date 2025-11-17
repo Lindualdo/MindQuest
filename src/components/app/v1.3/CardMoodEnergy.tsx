@@ -11,10 +11,10 @@ export type MoodEnergySummary = {
 
 type Props = {
   summary: MoodEnergySummary;
-  onVerInsights?: () => void;
+  onSaberMais?: () => void;
 };
 
-const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
+const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
   const humorHoje = Math.round(Math.max(1, Math.min(10, summary.humorHoje)));
   const humorMediaSemana = Math.round(
     Math.max(1, Math.min(10, summary.humorMediaSemana)),
@@ -37,7 +37,7 @@ const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
 
   return (
     <section
-      className="rounded-2xl bg-white px-4 py-3 shadow-md"
+      className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
       <div className="grid items-start gap-4 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
@@ -153,6 +153,18 @@ const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
           </span>
         </div>
       </div>
+
+      {onSaberMais && (
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={onSaberMais}
+            className="text-[0.75rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+          >
+            Saber mais →
+          </button>
+        </div>
+      )}
     </section>
   );
 };

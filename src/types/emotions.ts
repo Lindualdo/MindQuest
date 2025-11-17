@@ -360,6 +360,9 @@ export interface PanoramaCardData {
     percentual_positiva: number;
     percentual_negativa: number;
     percentual_neutra: number;
+    percentual_positivas?: number;
+    percentual_negativas?: number;
+    percentual_neutras?: number;
     categoria: string | null;
   };
   emocoes_dominantes: PanoramaCardEmotion[];
@@ -585,7 +588,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;

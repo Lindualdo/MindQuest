@@ -347,7 +347,6 @@ const HomeV1_2 = () => {
           onExplorar={handleExplore}
           onVerSabotadores={handleVerSabotadores}
           onVerEmocoes={handleVerEmocoes}
-          onVerInsights={handleVerInsights}
         />
 
         <CardJornada

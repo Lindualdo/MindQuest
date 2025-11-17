@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import CardWeeklyProgress from '@/components/app/v1.3/CardWeeklyProgress';
 import CardMoodEnergy from '@/components/app/v1.3/CardMoodEnergy';
 import CardInsightUltimaConversa from '@/components/app/v1.3/CardInsightUltimaConversa';
-import FraseTransformacao from '@/components/app/v1.2/FraseTransformacao';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import { useDashboard } from '@/store/useStore';
@@ -15,6 +14,7 @@ const HomeV1_3 = () => {
     dashboardData,
     setView,
     openResumoConversas,
+    openInsightDetail,
     panoramaCard,
     panoramaCardLoading,
     loadPanoramaCard,
@@ -96,6 +96,17 @@ const HomeV1_3 = () => {
     setView('dashInsights');
   };
 
+  const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
+
+  const handleInsightDetail = () => {
+    const insightId = insightCard?.insight_id ?? insightCardData?.insight_id;
+    if (insightId) {
+      void openInsightDetail(insightId);
+    } else {
+      setView('insightDetail');
+    }
+  };
+
   const handleNavHome = () => {
     setActiveTab('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -116,7 +127,6 @@ const HomeV1_3 = () => {
     // Tela de configurações será implementada na próxima etapa.
   };
 
-  const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
   const weeklySummary = weeklyProgressCard ?? mockWeeklyXpSummary;
 
   return (
@@ -124,12 +134,13 @@ const HomeV1_3 = () => {
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        <motion.div
+        <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
+          className="text-center text-[0.9rem] font-medium text-[#1C2541]"
         >
-          <FraseTransformacao />
-        </motion.div>
+          Descubra mais sobre você e destrave seu progresso
+        </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -149,10 +160,7 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.09 }}
         >
-          <CardMoodEnergy
-            summary={moodSummary}
-            onVerInsights={handleVerInsights}
-          />
+          <CardMoodEnergy summary={moodSummary} onSaberMais={handleVerInsights} />
         </motion.div>
 
         <motion.div
@@ -163,7 +171,7 @@ const HomeV1_3 = () => {
           <CardInsightUltimaConversa
             data={insightCardData}
             loading={insightCardLoading}
-            onExplorarInsights={handleVerInsights}
+            onSaberMais={handleInsightDetail}
           />
         </motion.div>
         {!insightCardLoading && insightCardError && (

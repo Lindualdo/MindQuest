@@ -3,7 +3,7 @@ import type { InsightCardData } from '@/types/emotions';
 type Props = {
   data?: InsightCardData | null;
   loading?: boolean;
-  onExplorarInsights?: () => void;
+  onSaberMais?: () => void;
 };
 
 const fallbackInsight: InsightCardData = {
@@ -19,7 +19,7 @@ const fallbackInsight: InsightCardData = {
   data_label: null,
 };
 
-const CardInsightUltimaConversa = ({ data, loading, onExplorarInsights }: Props) => {
+const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
   const insight = data ?? fallbackInsight;
   const title = loading ? 'Carregando insight...' : insight.titulo;
   const description = loading
@@ -28,7 +28,7 @@ const CardInsightUltimaConversa = ({ data, loading, onExplorarInsights }: Props)
 
   return (
     <section
-      className="rounded-2xl bg-white px-4 py-4 shadow-md"
+      className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-4 shadow-md"
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
       <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
@@ -38,19 +38,19 @@ const CardInsightUltimaConversa = ({ data, loading, onExplorarInsights }: Props)
         <h3 className="text-[0.95rem] font-semibold text-[#111827]">
           {title}
         </h3>
-        <p className="mt-2 text-[0.82rem] leading-relaxed text-[#4B5563]">
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-[#4B5563] line-clamp-2">
           {description}
         </p>
       </div>
-      {onExplorarInsights && (
+      {onSaberMais && (
         <div className="mt-3 flex justify-end">
           <button
             type="button"
-            onClick={onExplorarInsights}
-            className="text-[0.8rem] font-semibold text-[#2563EB] disabled:opacity-50"
+            onClick={onSaberMais}
+            className="text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
             disabled={loading}
           >
-            Explorar Insights →
+            Saber mais →
           </button>
         </div>
       )}
