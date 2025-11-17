@@ -45,7 +45,7 @@ const CardMoodEnergy = ({ summary, onVerInsights }: Props) => {
           <p className="text-[0.8rem] font-semibold text-[#111827]">
             Meu humor
           </p>
-          <div className="mt-2 w-full max-w-[140px]">
+          <div className="mt-2 w-full max-w-[120px]">
             <svg viewBox="0 0 120 80" className="w-full">
               <defs>
                 <linearGradient id="humor-gauge-v13" x1="0%" y1="0%" x2="100%" y2="0%">

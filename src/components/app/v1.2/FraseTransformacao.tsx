@@ -46,7 +46,7 @@ const FraseTransformacao = ({ floating = false }: Props) => {
             : 'inset 0 0 0 1px rgba(28,37,65,0.08)',
         }}
       >
-        <span className="font-semibold tracking-tight">Conversas → Quests → Transformação →</span>
+        <span className="font-semibold tracking-tight">Conversas → Quests → Conquistas →</span>
         <motion.span
           key={areas[indiceAtual]}
           initial={{ opacity: 0, y: floating ? 8 : 6 }}
