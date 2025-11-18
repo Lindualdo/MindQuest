@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Award, Calendar } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { computeLevelHistory } from '@/utils/gamificationView';
@@ -38,10 +38,6 @@ const ConquistasPage: React.FC = () => {
     [conquistasOrdenadas]
   );
 
-  const xpBonusTotal = conquistasOrdenadas.reduce(
-    (total, conquista) => total + conquista.xp_bonus,
-    0
-  );
   const categoriasUnicas = new Set(
     conquistasOrdenadas.map((conquista) => conquista.categoria)
   );
@@ -265,7 +261,7 @@ const ConquistasPage: React.FC = () => {
             <div className="relative mt-6 pl-6">
               <div className="absolute left-3 top-1 bottom-1 w-px bg-[#E8F3F5]" />
               <div className="space-y-4">
-                {levelHighlights.map((level, index) => (
+                {levelHighlights.map((level) => (
                   <div
                     key={level.nivel}
                     className="relative rounded-2xl border border-[#E8F3F5] bg-[#F9FBFC] p-4 shadow-sm"

@@ -92,10 +92,6 @@ const HomeV1_3 = () => {
     void openResumoConversas();
   };
 
-  const handleVerInsights = () => {
-    setView('dashInsights');
-  };
-
   const handleVerHumor = () => {
     setView('dashEmocoes');
   };

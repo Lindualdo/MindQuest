@@ -42,7 +42,7 @@ const DashPerfilPage: React.FC = () => {
   };
 
   const handleNavConfig = () => {
-    setActiveTab('config');
+    setActiveTab('ajustes');
   };
 
   return (

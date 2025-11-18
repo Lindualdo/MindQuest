@@ -111,7 +111,10 @@ const InsightDetailPageV13 = () => {
 
   const detail = insightDetail;
   const categoriaInfo = useMemo(() => (detail ? categoriaBadge(detail.categoria) : null), [detail]);
-  const prioridadeInfo = useMemo(() => (detail ? prioridadeBadge(detail.prioridade) : null), [detail]);
+  const prioridadeInfo = useMemo(
+    () => (detail ? prioridadeBadge(detail.prioridade) : null),
+    [detail],
+  );
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
@@ -149,7 +152,7 @@ const InsightDetailPageV13 = () => {
   };
 
   const handleNavConfig = () => {
-    setActiveTab('config');
+    setActiveTab('ajustes');
   };
 
   const renderContent = () => {
@@ -189,6 +192,9 @@ const InsightDetailPageV13 = () => {
       );
     }
 
+    const recursosSugeridos: InsightResource[] =
+      detail.recursos_sugeridos ?? [];
+
     return (
       <motion.section
         initial={{ opacity: 0, y: 12 }}
@@ -218,6 +224,18 @@ const InsightDetailPageV13 = () => {
         <p className="mt-2 text-sm text-[#475569]">
           {detail.descricao}
         </p>
+        {(prioridadeInfo || detail.prioridade) && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {prioridadeInfo && (
+              <span
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold ${prioridadeInfo.color}`}
+              >
+                <span className={`h-2 w-2 rounded-full ${prioridadeInfo.dot}`} />
+                Prioridade {prioridadeInfo.label}
+              </span>
+            )}
+          </div>
+        )}
 
         {detail.chat_id && (
           <button
@@ -247,13 +265,16 @@ const InsightDetailPageV13 = () => {
           })}
         </div>
 
-        {detail.recursos && detail.recursos.length > 0 && (
+        {recursosSugeridos.length > 0 && (
           <div className="mt-5 space-y-3">
             <p className="text-sm font-semibold text-[#1C2541]">
               Recursos recomendados
             </p>
-            {detail.recursos.map((resource) => (
-              <ResourceCard key={resource.id} resource={resource} />
+            {recursosSugeridos.map((resource) => (
+              <ResourceCard
+                key={`${resource.nome}-${resource.tipo}`}
+                resource={resource}
+              />
             ))}
           </div>
         )}

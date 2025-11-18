@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-11-16T10:00:00.000Z",
-  "id": "wkPgQz3Vf2Jt9XyA",
+  "createdAt": "2025-11-17T11:31:57.209Z",
+  "id": "gMb1UwtmEh5pkfxR",
   "name": "webhook_card_weekly_progress",
   "active": true,
   "isArchived": false,
@@ -11,13 +11,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "f1ee7ec3-3ced-4f7f-9a70-50e8687bf3e1",
+      "id": "83623f9b-1bce-47ac-b6b4-ca8f38d73594",
       "name": "Webhook Card Weekly Progress",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -480,
-        40
+        -32,
+        -256
       ],
       "webhookId": "645b50c5-e7dd-4b62-bf6f-1f83b681fb6f"
     },
@@ -25,13 +25,13 @@
       "parameters": {
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
       },
-      "id": "c2cbb7cf-e6c8-4ca7-a1c7-f5b5841a7b4c",
+      "id": "4fdeb684-d85e-426b-9217-4e8ad054834a",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        40
+        224,
+        -256
       ]
     },
     {
@@ -42,13 +42,13 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "7c51f1a0-3f6b-4db3-abf5-80be975ee2a0",
+      "id": "8e4ff190-e9a8-4179-a2ea-0cac95987685",
       "name": "Calcular Semana",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        0,
-        40
+        464,
+        -256
       ],
       "credentials": {
         "postgres": {
@@ -61,26 +61,26 @@
       "parameters": {
         "jsCode": "const row = $input.first()?.json || {};\nconst dias = Array.isArray(row.dias) ? row.dias : [];\n\nconst parsedDias = dias.map((dia) => {\n  const totalXp = Number(dia.totalXp ?? 0) || 0;\n  const metaDia = Number(dia.metaDia ?? 0) || 0;\n  const status = metaDia > 0 && totalXp >= metaDia\n    ? 'concluido'\n    : totalXp > 0\n      ? 'parcial'\n      : 'pendente';\n\n  return {\n    data: dia.data ?? null,\n    label: dia.label ?? null,\n    totalXp,\n    xpBase: Number(dia.xpBase ?? 0) || 0,\n    xpBonus: Number(dia.xpBonus ?? 0) || 0,\n    xpConversa: Number(dia.xpConversa ?? 0) || 0,\n    xpQuests: Number(dia.xpQuests ?? 0) || 0,\n    metaDia,\n    metaConversa: Number(dia.metaConversa ?? 0) || 0,\n    metaQuests: Number(dia.metaQuests ?? 0) || 0,\n    status\n  };\n});\n\nconst xpSemanaTotal = Number(row.xp_semana_total ?? 0) || 0;\nconst xpMetaSemana = Number(row.meta_semana_total ?? 0) || undefined;\nconst percentualMeta = xpMetaSemana && xpMetaSemana > 0\n  ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))\n  : undefined;\n\nconst diasConcluidos = parsedDias.filter((dia) => dia.metaDia > 0 && dia.totalXp >= dia.metaDia).length;\nconst streakDias = Number(row.streak_dias ?? 0) || 0;\n\nconst summary = {\n  usuarioId: row.usuario_id ?? null,\n  semanaInicio: row.semana_inicio ?? null,\n  semanaFim: row.semana_fim ?? null,\n  streakAtualDias: streakDias,\n  xpSemanaTotal,\n  xpMetaSemana,\n  dias: parsedDias\n};\n\nreturn [{\n  json: {\n    success: true,\n    usuario_id: summary.usuarioId,\n    card_weekly_progress: {\n      ...summary,\n      percentualMeta,\n      diasConcluidos\n    }\n  }\n}];"
       },
-      "id": "b4b6454e-27e6-4f46-949c-2f4ec0b1d6aa",
+      "id": "13b9f065-495a-437e-98a9-fa91efb4ccb0",
       "name": "Montar Card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        40
+        704,
+        -256
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "1a757f8f-5232-430e-9f53-6f5cb7c1c741",
+      "id": "87d3840f-bf1b-43ab-b32d-0254022a5c73",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        480,
-        40
+        944,
+        -256
       ]
     }
   ],
@@ -131,15 +131,63 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "saveExecutionProgress": true,
-    "saveManualExecutions": true
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "416b6cda-bcc0-4c6c-9df1-6f10f2f2b0c5",
-  "triggerCount": 0,
-  "shared": [],
+  "versionId": "a646495b-7227-435c-8596-3e6adddc89af",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-17T11:31:57.209Z",
+      "role": "workflow:owner",
+      "workflowId": "gMb1UwtmEh5pkfxR",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

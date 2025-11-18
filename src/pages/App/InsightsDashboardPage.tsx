@@ -9,12 +9,13 @@ import {
 } from 'lucide-react';
 
 import { useInsightsFilters, getCategoriaLabel } from '@/hooks/useInsightsFilters';
-import InsightsFilterControls, {
+import InsightsFilterControls from '@/components/dashboard/InsightsFilterControls';
+import {
   PRIORIDADE_OPTIONS,
   type CategoriaFiltroValue,
   type PrioridadeFiltroValue,
   type TipoFiltroValue,
-} from '@/components/dashboard/InsightsFilterControls';
+} from '@/components/dashboard/insightsFilterOptions';
 import { useDashboard } from '@/store/useStore';
 import type { Insight } from '@/types/emotions';
 import { getInsightIcon, insightTypeMeta, prioridadeBadgeClasses } from '@/utils/insightsUi';

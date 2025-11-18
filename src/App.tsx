@@ -22,7 +22,7 @@ import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PainelQuestsPage from './pages/App/PainelQuestsPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
-import DashPerfilPage from './pages/App/DashPerfilPage';
+import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
 import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
 import InsightsDashboardPage from './pages/App/InsightsDashboardPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
@@ -275,7 +275,7 @@ function App() {
   if (isAppRoute && view === 'dashEmocoes') {
     return (
       <AuthGuard>
-        <DashPerfilPage />
+        <EmocoesDashboardPage />
       </AuthGuard>
     );
   }
