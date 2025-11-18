@@ -344,10 +344,9 @@ const HumorHistoryPage: React.FC = () => {
                         </p>
                         <p>
                           Humor:{' '}
-                          <span className="font-semibold text-[#2563EB]">
-                            {selectedBar.humor.toFixed(1)}
+                          <span className="font-semibold text-[#2563EB] capitalize">
+                            {getHumorDescriptor(selectedBar.humor).titulo}
                           </span>
-                          {selectedBar.emocao && ` • ${selectedBar.emocao}`}
                         </p>
                         {selectedBar.justification && (
                           <p className="leading-relaxed">

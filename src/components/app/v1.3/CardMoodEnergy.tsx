@@ -26,9 +26,8 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
   );
 
   const humorDescriptor = getHumorDescriptor(humorHoje);
+  const humorMediaDescriptor = getHumorDescriptor(humorMediaSemana);
   const energiaDescriptor = getEnergiaDescriptor(energiaMediaSemana);
-
-  const humorLabelHoje = `${humorHoje} - ${humorDescriptor.titulo}`;
 
   const gaugeAngle = (Math.PI * humorHoje) / 10;
   const pointerX = 60 - 30 * Math.cos(gaugeAngle);
@@ -109,13 +108,13 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
             </svg>
           </div>
           <p className="mt-1 text-[0.8rem] font-semibold text-[#DC2626]">
-            {humorLabelHoje}
+            Atual: <span className="capitalize">{humorDescriptor.titulo}</span>
           </p>
           <p className="mt-0.5 text-[0.7rem] text-[#4B5563]">
-            Média da semana:
+            Humor médio:
             {' '}
-            <span className="font-semibold">
-              {humorMediaSemana}
+            <span className="font-semibold capitalize">
+              {humorMediaDescriptor.titulo}
             </span>
           </p>
         </div>
