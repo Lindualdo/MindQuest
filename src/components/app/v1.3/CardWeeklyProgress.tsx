@@ -25,11 +25,11 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
       className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
-      <p className="text-sm font-semibold text-[#1C2541]">
+      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
         Meu progresso semanal
       </p>
 
-      <div className="mt-2">
+      <div className="mt-4">
         <div className="relative h-2 w-full rounded-full bg-slate-200">
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"

@@ -102,6 +102,7 @@ const InsightDetailPageV13 = () => {
     insightDetailError,
     closeInsightDetail,
     setView,
+    openConversaResumo,
   } = useDashboard();
 
   const nomeUsuario =
@@ -132,7 +133,7 @@ const InsightDetailPageV13 = () => {
 
   const handleOpenConversation = () => {
     if (detail?.chat_id) {
-      window.open(`#chat/${detail.chat_id}`, '_blank', 'noopener,noreferrer');
+      openConversaResumo(String(detail.chat_id)).catch(() => null);
     }
   };
 
