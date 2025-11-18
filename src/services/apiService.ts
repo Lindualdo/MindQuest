@@ -19,6 +19,7 @@ import type {
   QuestCardResponse,
   JornadaCardResponse,
   WeeklyProgressCardResponse,
+  MapaMentalData,
 } from '../types/emotions';
 
 interface ApiResponse {
@@ -180,6 +181,10 @@ class ApiService {
    * Executa uma requisição HTTP genérica
    */
   private resolveUrl(endpoint: string, forceRemote = false): string {
+    if (/^https?:\/\//i.test(endpoint)) {
+      return endpoint;
+    }
+
     if (forceRemote) {
       return `${this.remoteBaseUrl}${endpoint}`;
     }
@@ -764,6 +769,106 @@ class ApiService {
     };
   }
 
+  private normalizeMapaMentalPayload(raw: unknown): MapaMentalData | null {
+    const unwrap = (value: unknown): unknown => {
+      if (value === null || value === undefined) {
+        return null;
+      }
+
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          return unwrap(parsed);
+        } catch {
+          return null;
+        }
+      }
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return null;
+        }
+        if (value.length === 1) {
+          return unwrap(value[0]);
+        }
+        return unwrap(value[0]);
+      }
+
+      if (typeof value === 'object') {
+        if ('data' in (value as Record<string, unknown>)) {
+          return unwrap((value as Record<string, unknown>).data);
+        }
+        if ('output' in (value as Record<string, unknown>)) {
+          return unwrap((value as Record<string, unknown>).output);
+        }
+        return value;
+      }
+
+      return null;
+    };
+
+    const payload = unwrap(raw);
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const candidate = payload as Record<string, unknown>;
+    if (!Array.isArray(candidate.areas)) {
+      return null;
+    }
+
+    const normalizeStringArray = (value: unknown): string[] => {
+      if (Array.isArray(value)) {
+        return value
+          .map((entry) => (typeof entry === 'string' ? entry.trim() : null))
+          .filter((entry): entry is string => Boolean(entry));
+      }
+      if (typeof value === 'string' && value.trim()) {
+        return [value.trim()];
+      }
+      return [];
+    };
+
+    const areas = candidate.areas.map((areaEntry) => {
+      if (!areaEntry || typeof areaEntry !== 'object') {
+        return null;
+      }
+      const areaObj = areaEntry as Record<string, unknown>;
+      const assuntosRaw = Array.isArray(areaObj.assuntos) ? areaObj.assuntos : [];
+      const assuntos = assuntosRaw
+        .map((assuntoEntry) => {
+          if (!assuntoEntry || typeof assuntoEntry !== 'object') {
+            return null;
+          }
+          const assuntoObj = assuntoEntry as Record<string, unknown>;
+          return {
+            assunto_central: typeof assuntoObj.assunto_central === 'string'
+              ? assuntoObj.assunto_central
+              : '',
+            mudanca_desejada: typeof assuntoObj.mudanca_desejada === 'string'
+              ? assuntoObj.mudanca_desejada
+              : '',
+            acoes_praticas: normalizeStringArray(assuntoObj.acoes_praticas),
+            resultado_esperado: typeof assuntoObj.resultado_esperado === 'string'
+              ? assuntoObj.resultado_esperado
+              : '',
+          };
+        })
+        .filter((assunto): assunto is MapaMentalData['areas'][number]['assuntos'][number] => Boolean(assunto));
+
+      return {
+        area: typeof areaObj.area === 'string' ? areaObj.area : 'Área sem nome',
+        assuntos,
+      };
+    }).filter((area): area is MapaMentalData['areas'][number] => Boolean(area));
+
+    return {
+      usuarioId: typeof candidate.usuarioId === 'string' ? candidate.usuarioId : null,
+      areas,
+      geradoEm: typeof candidate.geradoEm === 'string' ? candidate.geradoEm : null,
+    };
+  }
+
   private async makeRequest(
     endpoint: string,
     options: RequestInit = {},
@@ -992,6 +1097,28 @@ class ApiService {
     }
 
     return payload as WeeklyProgressCardResponse;
+  }
+
+  public async getMapaMental(userId: string): Promise<MapaMentalData> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `https://mindquest-n8n.cloudfy.live/webhook-test/mapa_mental?user_id=${encodeURIComponent(
+      userId,
+    )}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar mapa mental');
+    }
+
+    const payload = this.normalizeMapaMentalPayload(result.response);
+    if (!payload) {
+      throw new Error('Formato inesperado no mapa mental');
+    }
+
+    return payload;
   }
 
   public async getQuestsCard(userId: string): Promise<QuestCardResponse> {

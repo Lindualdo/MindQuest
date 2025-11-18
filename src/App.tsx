@@ -15,6 +15,9 @@ import FullChatPage from './pages/App/FullChatPage';
 import InsightDetailPage from './pages/App/InsightDetailPage';
 import InsightDetailPageV13 from './pages/App/v1.3/InsightDetailPageV13';
 import DashPerfilPageV13 from './pages/App/v1.3/DashPerfilPage';
+import HumorHistoryPageV13 from './pages/App/v1.3/HumorHistoryPageV13';
+import MapaMentalPage from './pages/App/v1.3/MapaMentalPage';
+import MapaMentalVisualPage from './pages/App/v1.3/MapaMentalVisualPage';
 import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/App/ConquistasPage';
 import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
@@ -210,6 +213,14 @@ function App() {
     );
   }
 
+  if (isAppRoute && view === 'humorHistorico') {
+    return (
+      <AuthGuard>
+        {isAppPreviewV13 ? <HumorHistoryPageV13 /> : <HumorHistoryPage />}
+      </AuthGuard>
+    );
+  }
+
   if (isAppPreviewV13) {
     let previewPage: JSX.Element;
     switch (view) {
@@ -228,6 +239,12 @@ function App() {
       case 'resumoConversas':
         previewPage = <ResumoConversasPage />;
         break;
+      case 'mapaMental':
+        previewPage = <MapaMentalPage />;
+        break;
+      case 'mapaMentalVisual':
+        previewPage = <MapaMentalVisualPage />;
+        break;
       default:
         previewPage = <HomeV1_3 />;
         break;
@@ -244,14 +261,6 @@ function App() {
     return (
       <AuthGuard>
         {isAppPreviewV13 ? <InsightDetailPageV13 /> : <InsightDetailPage />}
-      </AuthGuard>
-    );
-  }
-
-  if (isAppRoute && view === 'humorHistorico') {
-    return (
-      <AuthGuard>
-        <HumorHistoryPage />
       </AuthGuard>
     );
   }
@@ -276,6 +285,22 @@ function App() {
     return (
       <AuthGuard>
         <EmocoesDashboardPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'mapaMental') {
+    return (
+      <AuthGuard>
+        <MapaMentalPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'mapaMentalVisual') {
+    return (
+      <AuthGuard>
+        <MapaMentalVisualPage />
       </AuthGuard>
     );
   }

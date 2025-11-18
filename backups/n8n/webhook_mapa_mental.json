@@ -1,0 +1,174 @@
+{
+  "name": "webhook_mapa_mental",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select resumo_conversa from usr_chat where usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -496,
+        -32
+      ],
+      "id": "72c8d59a-8e15-45b8-9876-4da0891330c8",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Usando SOMENTE o array `resumos` abaixo, gere um JSON seguindo exatamente esta hierarquia: {\"usuarioId\":\"{{ $json.usuarioId ?? 'desconhecido' }}\",\"areas\":[{\"area\":\"Área de vida\",\"assuntos\":[{\"assunto_central\":\"Tema focal\",\"mudanca_desejada\":\"O que a pessoa quer mudar\",\"acoes_praticas\":[\"ação 1\",\"ação 2\"],\"resultado_esperado\":\"Qual resultado alcançará\"}]}]}. Identifique 3-5 áreas relevantes e, dentro de cada área, descreva 1-3 assuntos centrais com foco concreto de mudança. Cada ação prática deve ser curta, específica e orientada a hábito; mantenha frases em primeira pessoa do singular. Retorne APENAS JSON válido, sem texto adicional.\nRESUMOS: {{ $json.resumos }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é especialista MindQuest em mapas mentais visuais. Agrupe os resumos por áreas de vida (trabalho, saúde emocional, relacionamentos, saúde física etc.) e detalhe, para cada área, assuntos centrais com objetivo de mudança, ações práticas e resultados esperados. Priorize clareza e consistência com o formato solicitado."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "bde8a9ac-1bbc-4261-9740-d9fe2f1c81f1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resumos = items.map(item => item.json.resumo_conversa ?? '');\nreturn [\n  {\n    json: {\n      usuarioId: items[0]?.json.usuario_id ?? null,\n      totalResumos: resumos.length,\n      resumos,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -32
+      ],
+      "id": "c454c57b-0625-4491-91b5-00ff9c84a88c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        208
+      ],
+      "id": "f3ae4af5-74f8-46c6-9475-445f67fd6cc5",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "481dacae-3d52-4619-8b03-9a104696bef1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        -32
+      ],
+      "id": "90c86a00-c598-497f-b3bb-78cbf8bd8648",
+      "name": "Webhook",
+      "webhookId": "481dacae-3d52-4619-8b03-9a104696bef1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"usuarioId\":\"d949d81c-9235-41ce-8b3b-6b5d593c5e24\",\"areas\":[{\"area\":\"Saúde Emocional\",\"assuntos\":[{\"assunto_central\":\"Controle emocional nas operações\",\"mudanca_desejada\":\"Reduzir reações impulsivas durante trades\",\"acoes_praticas\":[\"Respiro profundo antes de operar\",\"Revisar checklist emocional a cada sessão\"],\"resultado_esperado\":\"Executar decisões financeiras com calma e disciplina\"}]}]}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        192
+      ],
+      "id": "38c397eb-0667-49db-9793-4c7e2e5e6fe1",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6532156b-6692-4fd8-9245-4cfadee85213",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+  },
+  "id": "YlZ5iI1QJuW9mxqu",
+  "tags": []
+}

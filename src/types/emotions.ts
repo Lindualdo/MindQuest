@@ -537,6 +537,24 @@ export interface WeeklyProgressCardResponse {
   card_weekly_progress: WeeklyProgressCardData;
 }
 
+export interface MapaMentalAssunto {
+  assunto_central: string;
+  mudanca_desejada: string;
+  acoes_praticas: string[];
+  resultado_esperado: string;
+}
+
+export interface MapaMentalArea {
+  area: string;
+  assuntos: MapaMentalAssunto[];
+}
+
+export interface MapaMentalData {
+  usuarioId: string | null;
+  areas: MapaMentalArea[];
+  geradoEm?: string | null;
+}
+
 // Dashboard Data - estrutura principal
 export interface DashboardData {
   usuario: {
@@ -588,7 +606,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -625,6 +643,10 @@ export interface StoreState {
   weeklyProgressCardUserId: string | null;
   weeklyProgressCardLoading: boolean;
   weeklyProgressCardError: string | null;
+  mapaMental: MapaMentalData | null;
+  mapaMentalUserId: string | null;
+  mapaMentalLoading: boolean;
+  mapaMentalError: string | null;
   // full chat detail
   selectedChatId: string | null;
   fullChatDetail: any | null; // ajustar tipagem quando payload final estiver definido
@@ -639,7 +661,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
@@ -655,6 +677,7 @@ export interface StoreState {
   loadJornadaCard: (usuarioId?: string) => Promise<void>;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
   loadWeeklyProgressCard: (usuarioId?: string) => Promise<void>;
+  loadMapaMental: (usuarioId?: string) => Promise<void>;
 }
 
 // Configurações personalizadas por perfil

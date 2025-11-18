@@ -1,6 +1,6 @@
-
-
+import { ArrowRight } from 'lucide-react';
 import { getEnergiaDescriptor, getHumorDescriptor } from '@/data/humorEnergyCatalog';
+import { useDashboard } from '@/store/useStore';
 
 export type MoodEnergySummary = {
   humorHoje: number; // 1-10
@@ -15,6 +15,8 @@ type Props = {
 };
 
 const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
+  const { setView } = useDashboard();
+
   const humorHoje = Math.round(Math.max(1, Math.min(10, summary.humorHoje)));
   const humorMediaSemana = Math.round(
     Math.max(1, Math.min(10, summary.humorMediaSemana)),
@@ -34,6 +36,14 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
 
   const energiaSegments = 5;
   const energiaFillMedia = Math.round((energiaMediaSemana / 10) * energiaSegments);
+
+  const handleViewHistory = () => {
+    if (onSaberMais) {
+      onSaberMais();
+      return;
+    }
+    setView('humorHistorico');
+  };
 
   return (
     <section
@@ -153,17 +163,16 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
         </div>
       </div>
 
-      {onSaberMais && (
-        <div className="mt-3 flex justify-end">
-          <button
-            type="button"
-            onClick={onSaberMais}
-            className="text-[0.75rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
-          >
-            Saber mais →
-          </button>
-        </div>
-      )}
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={handleViewHistory}
+          className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+        >
+          Saber mais
+          <ArrowRight size={14} />
+        </button>
+      </div>
     </section>
   );
 };

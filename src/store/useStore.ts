@@ -6,7 +6,13 @@
  */
 
 import { create } from 'zustand';
-import type { StoreState, DashboardData, ResumoConversasPayload, QuestSnapshot } from '../types/emotions';
+import type {
+  StoreState,
+  DashboardData,
+  ResumoConversasPayload,
+  QuestSnapshot,
+  MapaMentalData,
+} from '../types/emotions';
 
 // Importações dos serviços (usando sintaxe compatível)
 import { apiService } from '../services/apiService';
@@ -78,6 +84,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   weeklyProgressCardUserId: null,
   weeklyProgressCardLoading: false,
   weeklyProgressCardError: null,
+  mapaMental: null,
+  mapaMentalUserId: null,
+  mapaMentalLoading: false,
+  mapaMentalError: null,
   // full chat
   selectedChatId: null,
   fullChatDetail: null,
@@ -465,6 +475,55 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         weeklyProgressCardLoading: false,
         weeklyProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar card semanal',
+      });
+    }
+  },
+
+  loadMapaMental: async (usuarioIdParam) => {
+    const { dashboardData, mapaMentalUserId, mapaMentalLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        mapaMentalError: 'Usuário não informado para carregar mapa mental',
+        mapaMentalLoading: false,
+      });
+      return;
+    }
+
+    if (mapaMentalUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (mapaMentalLoading) {
+      return;
+    }
+
+    set({
+      mapaMentalLoading: true,
+      mapaMentalError: null,
+    });
+
+    try {
+      const payload = await apiService.getMapaMental(userId);
+      set({
+        mapaMental: payload,
+        mapaMentalUserId: userId,
+        mapaMentalLoading: false,
+        mapaMentalError: null,
+      });
+    } catch (error) {
+      console.error('[MapaMental] erro ao carregar dados', error);
+      set({
+        mapaMentalLoading: false,
+        mapaMentalError: error instanceof Error ? error.message : 'Erro ao carregar mapa mental',
       });
     }
   },
@@ -889,6 +948,10 @@ export const useDashboard = () => {
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadWeeklyProgressCard,
+    mapaMental,
+    mapaMentalLoading,
+    mapaMentalError,
+    loadMapaMental,
     questsCard,
     questsCardLoading,
     questsCardError,
@@ -955,6 +1018,10 @@ export const useDashboard = () => {
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadWeeklyProgressCard,
+    mapaMental,
+    mapaMentalLoading,
+    mapaMentalError,
+    loadMapaMental,
     questsCard,
     questsCardLoading,
     questsCardError,

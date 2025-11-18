@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Brain } from 'lucide-react';
 import CardWeeklyProgress from '@/components/app/v1.3/CardWeeklyProgress';
 import CardMoodEnergy from '@/components/app/v1.3/CardMoodEnergy';
 import CardInsightUltimaConversa from '@/components/app/v1.3/CardInsightUltimaConversa';
@@ -93,7 +94,7 @@ const HomeV1_3 = () => {
   };
 
   const handleVerHumor = () => {
-    setView('dashEmocoes');
+    setView('humorHistorico');
   };
 
   const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
@@ -124,6 +125,16 @@ const HomeV1_3 = () => {
   const handleNavConfig = () => {
     setActiveTab('ajustes');
     // Tela de configurações será implementada na próxima etapa.
+  };
+
+  const handleMapaMental = () => {
+    setActiveTab('perfil');
+    setView('mapaMental');
+  };
+
+  const handleMapaMentalVisual = () => {
+    setActiveTab('perfil');
+    setView('mapaMentalVisual');
   };
 
   const weeklySummary = weeklyProgressCard ?? mockWeeklyXpSummary;
@@ -178,6 +189,44 @@ const HomeV1_3 = () => {
             Não conseguimos atualizar o insight agora.
           </p>
         )}
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="rounded-3xl border border-white/50 bg-gradient-to-br from-[#E0E7FF] to-[#F5EBFF] p-4 text-[#1C2541] shadow"
+        >
+          <div className="flex items-start gap-3">
+            <div className="rounded-2xl bg-white/80 p-2 text-[#5B21B6]">
+              <Brain size={18} />
+            </div>
+            <div className="flex-1">
+              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[#7C6FE5]">
+                Insights conectados
+              </p>
+              <h3 className="text-base font-semibold">
+                Veja o mapa mental das conversas recentes
+              </h3>
+              <p className="mt-1 text-sm text-[#475467]">
+                Organizamos seus resumos por áreas de vida para descobrir padrões, focos e próximos passos.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleMapaMental}
+            className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-[#5B21B6] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#4C1D95]"
+          >
+            Abrir mapa mental
+          </button>
+          <button
+            type="button"
+            onClick={handleMapaMentalVisual}
+            className="mt-2 inline-flex w-full items-center justify-center rounded-2xl border border-[#5B21B6] px-4 py-2 text-sm font-semibold text-[#5B21B6] shadow-sm transition hover:bg-white"
+          >
+            Ver versão visual
+          </button>
+        </motion.div>
       </main>
 
       <BottomNavV1_3
