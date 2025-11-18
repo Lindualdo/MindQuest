@@ -1258,6 +1258,31 @@ class ApiService {
     return payload;
   }
 
+  public async getResumoConversaById(
+    conversaId: string
+  ): Promise<ResumoConversasPayload['conversas'][number]> {
+    if (!conversaId) {
+      throw new Error('Conversa inválida');
+    }
+
+    const params = new URLSearchParams({ conversa_id: conversaId });
+    const endpoint = `/resumo_conversas?${params.toString()}`;
+    console.info('[API] requisitando resumo individual de conversa:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar resumo da conversa');
+    }
+
+    const payload = this.extractResumoConversasPayload(result.response);
+    const conversa = payload?.conversas?.[0];
+    if (!conversa) {
+      throw new Error('Resumo da conversa não encontrado');
+    }
+
+    return conversa;
+  }
+
   // Conversa completa por chat_id
   public async getFullChat(chatId: string): Promise<any> {
     if (!chatId) throw new Error('chat_id inválido');

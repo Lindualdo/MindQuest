@@ -606,7 +606,7 @@ export interface StoreState {
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual';
+  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'conversaResumo' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual';
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -619,6 +619,10 @@ export interface StoreState {
   resumoConversas: ResumoConversasPayload | null;
   resumoConversasLoading: boolean;
   resumoConversasError: string | null;
+  conversaResumo: ResumoConversasPayload['conversas'][number] | null;
+  conversaResumoLoading: boolean;
+  conversaResumoError: string | null;
+  selectedConversationId: string | null;
   panoramaCard: PanoramaCardData | null;
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
@@ -661,7 +665,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual') => void;
+  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'conversaResumo' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual') => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
@@ -669,6 +673,9 @@ export interface StoreState {
   openResumoConversas: () => Promise<void>;
   closeResumoConversas: () => void;
   loadResumoConversas: () => Promise<void>;
+  openConversaResumo: (conversaId: string) => Promise<void>;
+  closeConversaResumo: () => void;
+  loadConversaResumo: (conversaId: string) => Promise<void>;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   loadPanoramaCard: (usuarioId?: string) => Promise<void>;
   loadInsightCard: (usuarioId?: string) => Promise<void>;

@@ -22,7 +22,10 @@ type ChartEntry = {
   humor: number;
   emoji: string | null;
   emocao: string | null;
-  raw: Record<string, unknown>;
+  justification: string;
+  conversationEmotion: string | null;
+  conversationEmoji: string | null;
+  conversationId: string | number | null;
   timestamp: number;
 };
 
@@ -38,7 +41,8 @@ const HumorHistoryPage: React.FC = () => {
     humorHistoricoLoading,
     humorHistoricoError,
     loadHumorHistorico,
-    setView
+    setView,
+    openConversaResumo
   } = useDashboard();
 
   const nomeUsuario =
@@ -123,13 +127,20 @@ const HumorHistoryPage: React.FC = () => {
         const humorValue = Number(entry.humor ?? entry.pico_dia ?? entry.humor_medio ?? 0);
         const emoji = entry.emoji ?? (entry.conversa ? entry.conversa.emoji : null);
         const emocao = entry.emocao ?? (entry.conversa ? entry.conversa.emocao : null);
+        const justification = normalizeJustificativa(entry.justificativa ?? entry.justification ?? '');
+        const conversationEmotion = entry.conversa?.emocao ?? entry.conversa?.emotion ?? null;
+        const conversationEmoji = entry.conversa?.emoji ?? null;
+        const conversationId = entry.conversa?.id ?? entry.conversa?.chat_id ?? entry.chat_id ?? null;
 
         return {
           label: dateLabel,
           humor: humorValue,
           emoji,
           emocao,
-          raw: entry as Record<string, unknown>,
+          justification,
+          conversationEmotion,
+          conversationEmoji,
+          conversationId,
           timestamp
         };
       })
@@ -205,6 +216,11 @@ const HumorHistoryPage: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+  };
+
+  const handleOpenResumoConversa = (conversaId: string | number) => {
+    if (!conversaId) return;
+    openConversaResumo(String(conversaId)).catch(() => null);
   };
 
   return (
@@ -333,16 +349,32 @@ const HumorHistoryPage: React.FC = () => {
                           </span>
                           {selectedBar.emocao && ` • ${selectedBar.emocao}`}
                         </p>
-                        {selectedBar.emocao && (
+                        {selectedBar.justification && (
+                          <p className="leading-relaxed">
+                            <span className="font-semibold text-[#1C2541]">Justificativa:</span>{' '}
+                            {selectedBar.justification}
+                          </p>
+                        )}
+                        {selectedBar.conversationEmotion && (
                           <p>
                             <span className="font-semibold text-[#1C2541]">Emoção predominante:</span>{' '}
-                            {selectedBar.emocao}
+                            {selectedBar.conversationEmotion}
+                            {selectedBar.conversationEmoji && ` ${selectedBar.conversationEmoji}`}
                           </p>
+                        )}
+                        {selectedBar.conversationId && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenResumoConversa(selectedBar.conversationId as string | number)}
+                            className="text-[0.7rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+                          >
+                            Ver resumo da conversa
+                          </button>
                         )}
                       </div>
                     ) : (
                       <p className="text-xs text-gray-500">
-                        Toque em uma barra para ver o registro correspondente.
+                        Toque em uma barra explorar detalhes.
                       </p>
                     )}
                   </div>

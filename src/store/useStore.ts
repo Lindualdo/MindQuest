@@ -60,6 +60,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   resumoConversas: null,
   resumoConversasLoading: false,
   resumoConversasError: null,
+  conversaResumo: null,
+  conversaResumoLoading: false,
+  conversaResumoError: null,
+  selectedConversationId: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -871,6 +875,49 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     set({
       view: 'dashboard'
     });
+  },
+
+  loadConversaResumo: async (conversaId) => {
+    if (!conversaId) {
+      set({ conversaResumoLoading: false, conversaResumoError: 'Conversa inválida' });
+      return;
+    }
+
+    try {
+      set({ conversaResumoLoading: true, conversaResumoError: null });
+      const resumo = await apiService.getResumoConversaById(conversaId);
+      set({ conversaResumo: resumo, conversaResumoLoading: false, conversaResumoError: null });
+    } catch (error) {
+      console.error('[ConversaResumo] erro ao carregar', error);
+      set({
+        conversaResumoLoading: false,
+        conversaResumoError: error instanceof Error ? error.message : 'Erro ao carregar resumo da conversa'
+      });
+    }
+  },
+
+  openConversaResumo: async (conversaId) => {
+    if (!conversaId) {
+      console.warn('[ConversaResumo] conversaId inválido');
+      return;
+    }
+    set({
+      view: 'conversaResumo',
+      selectedConversationId: conversaId,
+      conversaResumo: null,
+      conversaResumoError: null
+    });
+    await get().loadConversaResumo(conversaId);
+  },
+
+  closeConversaResumo: () => {
+    set({
+      view: 'humorHistorico',
+      conversaResumo: null,
+      conversaResumoError: null,
+      conversaResumoLoading: false,
+      selectedConversationId: null
+    });
   }
 }));
 
@@ -921,6 +968,13 @@ export const useDashboard = () => {
     openResumoConversas,
   closeResumoConversas,
   loadResumoConversas,
+  conversaResumo,
+  conversaResumoLoading,
+  conversaResumoError,
+  selectedConversationId,
+  openConversaResumo,
+  closeConversaResumo,
+  loadConversaResumo,
   // full chat
   openFullChat,
   closeFullChat,
@@ -992,6 +1046,13 @@ export const useDashboard = () => {
     openResumoConversas,
     closeResumoConversas,
     loadResumoConversas,
+    conversaResumo,
+    conversaResumoLoading,
+    conversaResumoError,
+    selectedConversationId,
+    openConversaResumo,
+    closeConversaResumo,
+    loadConversaResumo,
     openFullChat,
     closeFullChat,
     selectedChatId,

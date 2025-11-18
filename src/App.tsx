@@ -16,6 +16,7 @@ import InsightDetailPage from './pages/App/InsightDetailPage';
 import InsightDetailPageV13 from './pages/App/v1.3/InsightDetailPageV13';
 import DashPerfilPageV13 from './pages/App/v1.3/DashPerfilPage';
 import HumorHistoryPageV13 from './pages/App/v1.3/HumorHistoryPageV13';
+import ConversaResumoPageV13 from './pages/App/v1.3/ConversaResumoPageV13';
 import MapaMentalPage from './pages/App/v1.3/MapaMentalPage';
 import MapaMentalVisualPage from './pages/App/v1.3/MapaMentalVisualPage';
 import { useDashboard } from './store/useStore';
@@ -239,6 +240,9 @@ function App() {
       case 'resumoConversas':
         previewPage = <ResumoConversasPage />;
         break;
+      case 'conversaResumo':
+        previewPage = <ConversaResumoPageV13 />;
+        break;
       case 'mapaMental':
         previewPage = <MapaMentalPage />;
         break;
@@ -293,6 +297,14 @@ function App() {
     return (
       <AuthGuard>
         <MapaMentalPage />
+      </AuthGuard>
+    );
+  }
+
+  if (isAppRoute && view === 'conversaResumo') {
+    return (
+      <AuthGuard>
+        <ConversaResumoPageV13 />
       </AuthGuard>
     );
   }
