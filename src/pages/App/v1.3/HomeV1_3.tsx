@@ -172,9 +172,23 @@ const HomeV1_3 = () => {
         </motion.div>
 
         <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+        >
+          <CardSabotadorAtivo
+            sabotadorId={sabotadorAtivo?.id ?? null}
+            nome={sabotadorNome}
+            emoji={sabotadorEmoji}
+            descricao={sabotadorDescricao}
+            onSaberMais={sabotadorNome ? handleVerSabotador : undefined}
+          />
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14 }}
+          transition={{ delay: 0.22 }}
         >
           <CardInsightUltimaConversa
             data={insightCardData}
@@ -187,20 +201,6 @@ const HomeV1_3 = () => {
             Não conseguimos atualizar o insight agora.
           </p>
         )}
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18 }}
-        >
-          <CardSabotadorAtivo
-            sabotadorId={sabotadorAtivo?.id ?? null}
-            nome={sabotadorNome}
-            emoji={sabotadorEmoji}
-            descricao={sabotadorDescricao}
-            onVerPainel={sabotadorNome ? handleVerSabotador : undefined}
-          />
-        </motion.div>
 
 
       </main>

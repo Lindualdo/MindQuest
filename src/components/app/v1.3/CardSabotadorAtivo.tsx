@@ -24,7 +24,7 @@ const CardSabotadorAtivo = ({ sabotadorId, nome, emoji, descricao, onSaberMais }
   return (
     <section className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-4 shadow-md" style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}>
       <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
-        Sabotador mais ativo
+        Padrão mental — Meu sabotador
       </p>
       <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
         <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-[#111827]">

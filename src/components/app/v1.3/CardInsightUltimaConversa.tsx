@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react';
 import type { InsightCardData } from '@/types/emotions';
 
 type Props = {
@@ -47,10 +48,11 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
           <button
             type="button"
             onClick={() => onSaberMais(insight?.insight_id ?? null)}
-            className="text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
             disabled={loading}
           >
-            Saber mais →
+            Saber mais
+            <ArrowUpRight size={12} />
           </button>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { getEnergiaDescriptor, getHumorDescriptor } from '@/data/humorEnergyCatalog';
 import { useDashboard } from '@/store/useStore';
 
@@ -166,10 +166,10 @@ const CardMoodEnergy = ({ summary, onSaberMais }: Props) => {
         <button
           type="button"
           onClick={handleViewHistory}
-          className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
         >
           Saber mais
-          <ArrowRight size={14} />
+          <ArrowUpRight size={12} />
         </button>
       </div>
     </section>
