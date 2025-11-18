@@ -8,7 +8,8 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip
+  Tooltip,
+  Line
 } from 'recharts';
 import { ArrowLeft } from 'lucide-react';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
@@ -330,6 +331,15 @@ const HumorHistoryPage: React.FC = () => {
                               />
                             ))}
                           </Bar>
+                          <Line
+                            type="monotone"
+                            dataKey="humor"
+                            stroke="#94A3B8"
+                            strokeWidth={1.5}
+                            strokeDasharray="4 4"
+                            dot={false}
+                            activeDot={{ r: 4, fill: '#475569' }}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
