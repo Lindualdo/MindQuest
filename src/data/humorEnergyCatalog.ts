@@ -22,10 +22,10 @@ export const HUMOR_SCALE: ScaleItem[] = [
     descricaoCurta: 'Dia mais pesado. Pequenos passos já fazem diferença.',
   },
   {
-    id: 'equilibrado',
+    id: 'estável',
     min: 5,
     max: 6,
-    titulo: 'Equilibrado',
+    titulo: 'Estável',
     descricaoCurta: 'Oscilações normais. Bom momento para organizar prioridades.',
   },
   {
