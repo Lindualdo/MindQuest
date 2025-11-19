@@ -677,10 +677,19 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         weeklyQuestsProgressCardError: null,
       });
     } catch (error) {
-      console.error('[WeeklyQuestsProgressCard] erro ao carregar progresso de quests', error);
+      console.warn('[WeeklyQuestsProgressCard] Webhook ainda não existe no n8n, usando dados vazios', error);
+      // Temporário: dados vazios até webhook ser criado no n8n
       set({
+        weeklyQuestsProgressCard: {
+          card_weekly_progress: {
+            usuario_id: userId,
+            semana_atual: { inicio: '', fim: '' },
+            dias: []
+          }
+        },
+        weeklyQuestsProgressCardUserId: userId,
         weeklyQuestsProgressCardLoading: false,
-        weeklyQuestsProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar progresso de quests',
+        weeklyQuestsProgressCardError: null,
       });
     }
   },
