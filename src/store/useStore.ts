@@ -38,6 +38,7 @@ interface ExtendedStoreState extends StoreState {
   closeFullChat: () => void;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   concluirQuest: (questId?: string) => Promise<void>;
+  loadWeeklyQuestsProgressCard: (usuarioId?: string) => Promise<void>;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -91,10 +92,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   weeklyProgressCardUserId: null,
   weeklyProgressCardLoading: false,
   weeklyProgressCardError: null,
-  weeklyQuestsProgressCard: null,
-  weeklyQuestsProgressCardUserId: null,
-  weeklyQuestsProgressCardLoading: false,
-  weeklyQuestsProgressCardError: null,
   mapaMental: null,
   mapaMentalUserId: null,
   mapaMentalLoading: false,
@@ -396,7 +393,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   concluirQuest: async (questIdParam) => {
-    const { dashboardData, questSnapshot, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard, loadWeeklyQuestsProgressCard } = get();
+    const { dashboardData, questSnapshot, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard } = get();
     const usuarioId = dashboardData?.usuario?.id;
     const questId = questIdParam ?? questSnapshot?.quests_personalizadas?.[0]?.instancia_id ?? null;
 
@@ -489,7 +486,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       void loadQuestSnapshot(usuarioId);
       void loadQuestsCard(usuarioId);
       void loadWeeklyProgressCard(usuarioId);
-      void loadWeeklyQuestsProgressCard(usuarioId);
     } catch (error) {
       console.error('[ConcluirQuest] erro ao concluir', error);
       set({
@@ -590,52 +586,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         weeklyProgressCardLoading: false,
         weeklyProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar card semanal',
-      });
-    }
-  },
-
-  loadWeeklyQuestsProgressCard: async (usuarioIdParam) => {
-    const { dashboardData, weeklyQuestsProgressCardUserId, weeklyQuestsProgressCardLoading } = get();
-    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
-
-    if (!userId) {
-      const authUser = authService.getUserData();
-      if (authUser?.user?.id) {
-        userId = authUser.user.id;
-      }
-    }
-
-    if (!userId) {
-      set({
-        weeklyQuestsProgressCardError: 'Usuário não informado para carregar progresso de quests',
-        weeklyQuestsProgressCardLoading: false,
-      });
-      return;
-    }
-
-    if (weeklyQuestsProgressCardUserId === userId && !usuarioIdParam) {
-      return;
-    }
-
-    if (weeklyQuestsProgressCardLoading) {
-      return;
-    }
-
-    set({ weeklyQuestsProgressCardLoading: true, weeklyQuestsProgressCardError: null });
-
-    try {
-      const payload = await apiService.getWeeklyQuestsProgress(userId);
-      set({
-        weeklyQuestsProgressCard: payload.card_weekly_progress,
-        weeklyQuestsProgressCardUserId: userId,
-        weeklyQuestsProgressCardLoading: false,
-        weeklyQuestsProgressCardError: null,
-      });
-    } catch (error) {
-      console.error('[WeeklyQuestsProgressCard] erro ao carregar progresso de quests', error);
-      set({
-        weeklyQuestsProgressCardLoading: false,
-        weeklyQuestsProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar progresso de quests',
       });
     }
   },
@@ -1166,10 +1116,6 @@ export const useDashboard = () => {
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadWeeklyProgressCard,
-    weeklyQuestsProgressCard,
-    weeklyQuestsProgressCardLoading,
-    weeklyQuestsProgressCardError,
-    loadWeeklyQuestsProgressCard,
     mapaMental,
     mapaMentalLoading,
     mapaMentalError,
@@ -1248,10 +1194,6 @@ export const useDashboard = () => {
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadWeeklyProgressCard,
-    weeklyQuestsProgressCard,
-    weeklyQuestsProgressCardLoading,
-    weeklyQuestsProgressCardError,
-    loadWeeklyQuestsProgressCard,
     mapaMental,
     mapaMentalLoading,
     mapaMentalError,
