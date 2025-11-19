@@ -1,4 +1,4 @@
-# Jornada MindQuest — Estrutura de Tabelas e Pontuação
+# Jornada MindQuest — Guia de Referência
 
 ## 1. Fontes de Pontos
 
