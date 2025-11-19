@@ -53,7 +53,7 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
         </div>
       </div>
 
-      <div className="mt-5 h-16 w-full">
+      <div className="mt-5 h-20 w-full">
         <div className="flex h-full items-end justify-between gap-1">
           {dias.map((dia) => {
             const metaDia = dia.metaDia ?? 0;
@@ -73,10 +73,15 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
             const trackHeight = 56;
             const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
 
+            // Formatar data como DD/MM
+            const dataFormatada = dia.data 
+              ? new Date(dia.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+              : '--';
+
             return (
               <div
                 key={dia.data}
-                className="flex flex-1 flex-col items-center justify-end gap-1"
+                className="flex flex-1 flex-col items-center justify-end gap-0.5"
               >
                 <div
                   className="relative overflow-hidden rounded-full bg-slate-200"
@@ -92,8 +97,11 @@ const CardWeeklyProgress = ({ summary, onContinue }: Props) => {
                     />
                   )}
                 </div>
-                <span className="text-[0.6rem] font-semibold text-[#1C2541]">
+                <span className="text-[0.55rem] font-medium text-[#64748B]">
                   {dia.label ?? '--'}
+                </span>
+                <span className="text-[0.6rem] font-semibold text-[#1C2541]">
+                  {dataFormatada}
                 </span>
               </div>
             );
