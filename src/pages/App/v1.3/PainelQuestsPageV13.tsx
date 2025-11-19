@@ -20,12 +20,12 @@ const PainelQuestsPageV13: React.FC = () => {
     questsCard,
     questsCardLoading,
     questsCardError,
-    weeklyProgressCard,
-    weeklyProgressCardLoading,
-    weeklyProgressCardError,
+    weeklyQuestsProgressCard,
+    weeklyQuestsProgressCardLoading,
+    weeklyQuestsProgressCardError,
     loadQuestSnapshot,
     loadQuestsCard,
-    loadWeeklyProgressCard,
+    loadWeeklyQuestsProgressCard,
     concluirQuest,
     setView,
   } = useDashboard();
@@ -47,7 +47,7 @@ const PainelQuestsPageV13: React.FC = () => {
       hasRequestedData.current = false;
       return;
     }
-    if (questLoading || questsCardLoading || weeklyProgressCardLoading) return;
+    if (questLoading || questsCardLoading || weeklyQuestsProgressCardLoading) return;
     if (hasRequestedData.current) return;
 
     hasRequestedData.current = true;
@@ -55,15 +55,15 @@ const PainelQuestsPageV13: React.FC = () => {
     // Carrega tudo que precisa
     void loadQuestSnapshot(usuarioId);
     void loadQuestsCard(usuarioId);
-    void loadWeeklyProgressCard(usuarioId);
-  }, [usuarioId, questLoading, questsCardLoading, weeklyProgressCardLoading, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard]);
+    void loadWeeklyQuestsProgressCard(usuarioId);
+  }, [usuarioId, questLoading, questsCardLoading, weeklyQuestsProgressCardLoading, loadQuestSnapshot, loadQuestsCard, loadWeeklyQuestsProgressCard]);
 
   useEffect(() => {
     hasRequestedData.current = false;
   }, [usuarioId]);
 
-  // Dados da semana e progresso
-  const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
+  // Dados da semana e progresso (somente quests)
+  const weeklyData = weeklyQuestsProgressCard ?? mockWeeklyXpSummary;
   
   const diasSemana = useMemo(() => {
     // Se tiver dados do backend, usa. Se não, gera dias da semana atual

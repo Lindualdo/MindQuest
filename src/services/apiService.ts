@@ -1106,6 +1106,32 @@ class ApiService {
     return payload as WeeklyProgressCardResponse;
   }
 
+  public async getWeeklyQuestsProgress(userId: string): Promise<WeeklyProgressCardResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/quests/weekly-progress?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar progresso semanal de quests');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object' || !('card_weekly_progress' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado no progresso semanal de quests');
+    }
+
+    return payload as WeeklyProgressCardResponse;
+  }
+
   public async getMapaMental(userId: string): Promise<MapaMentalData> {
     if (!userId) {
       throw new Error('Usuário inválido');

@@ -1,0 +1,86 @@
+{
+  "name": "webhook_progresso_quests_semanal",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "card/quests-weekly-progress",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook_node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-400, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+      },
+      "id": "validate_node",
+      "name": "Validar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-200, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    (date_trunc('week', CURRENT_DATE + 1)::date - 1) AS semana_inicio\n), limites AS (\n  SELECT\n    usuario_id,\n    semana_inicio,\n    semana_inicio + 6 AS semana_fim\n  FROM params\n), dias AS (\n  SELECT\n    l.usuario_id,\n    generate_series(l.semana_inicio, l.semana_fim, INTERVAL '1 day')::date AS data\n  FROM limites l\n), meta_quest_base AS (\n  SELECT\n    uq.usuario_id,\n    uq.id AS quest_id,\n    COALESCE(\n      NULLIF(uq.config->'agenda'->>'pontos_diarios', '')::int,\n      NULLIF(uq.config->>'pontos_diarios', '')::int,\n      NULLIF(uq.config->>'xp_recompensa', '')::int,\n      30\n    ) AS pontos_planejados,\n    CASE\n      WHEN uq.config ? 'agenda' AND (uq.config->'agenda') ? 'dias_semana' THEN uq.config->'agenda'->'dias_semana'\n      WHEN uq.config ? 'dias_semana' THEN uq.config->'dias_semana'\n      ELSE '[]'::jsonb\n    END AS dias_json\n  FROM public.usuarios_quest uq\n  JOIN limites l ON l.usuario_id = uq.usuario_id\n  WHERE uq.status IN ('ativa', 'pendente')\n), meta_quest_agenda AS (\n  SELECT\n    mqb.usuario_id,\n    mqb.quest_id,\n    mqb.pontos_planejados,\n    COALESCE(\n      CASE\n        WHEN elem.value IS NULL OR trim(elem.value) = '' THEN 'todos'\n        ELSE lower(\n          translate(\n            trim(elem.value),\n            'áàâãäéèêëíìîïóòôõöúùûüç',\n            'aaaaaeeeeiiiiooooouuuuc'\n          )\n        )\n      END,\n      'todos'\n    ) AS dia_semana\n  FROM meta_quest_base mqb\n  LEFT JOIN LATERAL jsonb_array_elements_text(mqb.dias_json) elem(value) ON TRUE\n), meta_quest_diaria AS (\n  SELECT\n    d.usuario_id,\n    d.data,\n    COALESCE(SUM(\n      CASE\n        WHEN mqa.dia_semana IS NULL OR mqa.dia_semana = 'todos' THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('dom', 'domingo') AND EXTRACT(ISODOW FROM d.data) = 7 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('seg', 'segunda') AND EXTRACT(ISODOW FROM d.data) = 1 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('ter', 'terca', 'terça') AND EXTRACT(ISODOW FROM d.data) = 2 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('qua', 'quarta') AND EXTRACT(ISODOW FROM d.data) = 3 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('qui', 'quinta') AND EXTRACT(ISODOW FROM d.data) = 4 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('sex', 'sexta') AND EXTRACT(ISODOW FROM d.data) = 5 THEN mqa.pontos_planejados\n        WHEN mqa.dia_semana IN ('sab', 'sabado', 'sábado') AND EXTRACT(ISODOW FROM d.data) = 6 THEN mqa.pontos_planejados\n        ELSE 0\n      END\n    ), 0) AS meta_quests\n  FROM dias d\n  LEFT JOIN meta_quest_agenda mqa ON mqa.usuario_id = d.usuario_id\n  GROUP BY d.usuario_id, d.data\n), quests_concluidas AS (\n  SELECT\n    ch.usuario_id,\n    (ch.registrado_em AT TIME ZONE 'America/Sao_Paulo')::date AS data,\n    COALESCE(ch.xp_base, 0) AS xp_base,\n    COALESCE(ch.xp_bonus, 0) AS xp_bonus\n  FROM public.conquistas_historico ch\n  JOIN limites l ON l.usuario_id = ch.usuario_id\n  WHERE ch.tipo = 'quest'\n    AND (ch.registrado_em AT TIME ZONE 'America/Sao_Paulo')::date BETWEEN l.semana_inicio AND l.semana_fim\n), pontos_quest AS (\n  SELECT\n    d.usuario_id,\n    d.data,\n    COALESCE(SUM(qc.xp_base), 0) AS xp_base,\n    COALESCE(SUM(qc.xp_bonus), 0) AS xp_bonus\n  FROM dias d\n  LEFT JOIN quests_concluidas qc ON qc.usuario_id = d.usuario_id AND qc.data = d.data\n  GROUP BY d.usuario_id, d.data\n), resumo_dias AS (\n  SELECT\n    d.usuario_id,\n    d.data,\n    COALESCE(mqd.meta_quests, 0) AS meta_quests,\n    pq.xp_base AS xp_quests,\n    pq.xp_bonus,\n    pq.xp_base AS xp_total\n  FROM dias d\n  LEFT JOIN meta_quest_diaria mqd ON mqd.usuario_id = d.usuario_id AND mqd.data = d.data\n  LEFT JOIN pontos_quest pq ON pq.usuario_id = d.usuario_id AND pq.data = d.data\n)\nSELECT\n  l.usuario_id,\n  l.semana_inicio,\n  l.semana_fim,\n  COALESCE(SUM(r.xp_total), 0) AS xp_semana_total,\n  COALESCE(SUM(r.meta_quests), 0) AS meta_semana_total,\n  json_agg(\n    json_build_object(\n      'data', r.data::text,\n      'label', CASE EXTRACT(ISODOW FROM r.data)\n                 WHEN 7 THEN 'Dom'\n                 WHEN 1 THEN 'Seg'\n                 WHEN 2 THEN 'Ter'\n                 WHEN 3 THEN 'Qua'\n                 WHEN 4 THEN 'Qui'\n                 WHEN 5 THEN 'Sex'\n                 WHEN 6 THEN 'Sáb'\n               END,\n      'totalXp', r.xp_total,\n      'xpBase', r.xp_total,\n      'xpBonus', r.xp_bonus,\n      'xpQuests', r.xp_quests,\n      'metaDia', r.meta_quests\n    )\n    ORDER BY r.data\n  ) AS dias\nFROM limites l\nLEFT JOIN resumo_dias r ON r.usuario_id = l.usuario_id\nGROUP BY l.usuario_id, l.semana_inicio, l.semana_fim;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "id": "query_node",
+      "name": "Calcular Quests Semana",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [0, 0],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first()?.json || {};\nconst dias = Array.isArray(row.dias) ? row.dias : [];\n\nconst parsedDias = dias.map((dia) => {\n  const totalXp = Number(dia.totalXp ?? 0) || 0;\n  const metaDia = Number(dia.metaDia ?? 0) || 0;\n  const status = metaDia > 0 && totalXp >= metaDia\n    ? 'concluido'\n    : totalXp > 0\n      ? 'parcial'\n      : 'pendente';\n\n  return {\n    data: dia.data ?? null,\n    label: dia.label ?? null,\n    totalXp,\n    xpBase: Number(dia.xpBase ?? 0) || 0,\n    xpBonus: Number(dia.xpBonus ?? 0) || 0,\n    xpQuests: Number(dia.xpQuests ?? 0) || 0,\n    metaDia,\n    status\n  };\n});\n\nconst xpSemanaTotal = Number(row.xp_semana_total ?? 0) || 0;\nconst xpMetaSemana = Number(row.meta_semana_total ?? 0) || undefined;\nconst percentualMeta = xpMetaSemana && xpMetaSemana > 0\n  ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))\n  : undefined;\n\nconst summary = {\n  usuarioId: row.usuario_id ?? null,\n  semanaInicio: row.semana_inicio ?? null,\n  semanaFim: row.semana_fim ?? null,\n  xpSemanaTotal,\n  xpMetaSemana,\n  dias: parsedDias\n};\n\nreturn [{\n  json: {\n    success: true,\n    usuario_id: summary.usuarioId,\n    card_quests_weekly_progress: {\n      ...summary,\n      percentualMeta\n    }\n  }\n}];"
+      },
+      "id": "format_node",
+      "name": "Montar Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond_node",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [400, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Validar Params", "type": "main", "index": 0}]]
+    },
+    "Validar Params": {
+      "main": [[{"node": "Calcular Quests Semana", "type": "main", "index": 0}]]
+    },
+    "Calcular Quests Semana": {
+      "main": [[{"node": "Montar Card", "type": "main", "index": 0}]]
+    },
+    "Montar Card": {
+      "main": [[{"node": "Responder", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
+
