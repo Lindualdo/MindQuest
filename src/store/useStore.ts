@@ -639,6 +639,52 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
+  loadWeeklyQuestsProgressCard: async (usuarioIdParam) => {
+    const { dashboardData, weeklyQuestsProgressCardUserId, weeklyQuestsProgressCardLoading } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      set({
+        weeklyQuestsProgressCardError: 'Usuário não informado para carregar progresso de quests',
+        weeklyQuestsProgressCardLoading: false,
+      });
+      return;
+    }
+
+    if (weeklyQuestsProgressCardUserId === userId && !usuarioIdParam) {
+      return;
+    }
+
+    if (weeklyQuestsProgressCardLoading) {
+      return;
+    }
+
+    set({ weeklyQuestsProgressCardLoading: true, weeklyQuestsProgressCardError: null });
+
+    try {
+      const payload = await apiService.getWeeklyQuestsProgress(userId);
+      set({
+        weeklyQuestsProgressCard: payload.card_weekly_progress,
+        weeklyQuestsProgressCardUserId: userId,
+        weeklyQuestsProgressCardLoading: false,
+        weeklyQuestsProgressCardError: null,
+      });
+    } catch (error) {
+      console.error('[WeeklyQuestsProgressCard] erro ao carregar progresso de quests', error);
+      set({
+        weeklyQuestsProgressCardLoading: false,
+        weeklyQuestsProgressCardError: error instanceof Error ? error.message : 'Erro ao carregar progresso de quests',
+      });
+    }
+  },
+
   setAuthenticated: (auth) => {
     set({ isAuthenticated: auth });
   },
