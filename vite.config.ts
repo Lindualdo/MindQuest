@@ -32,9 +32,18 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => {
-            const suffix = path.replace(/^\/api/, '')
-            const prefix = basePathname ? basePathname : ''
-            return `${prefix}${suffix}`
+            // Excluir endpoints que são handlers do Vercel (não devem passar pelo proxy)
+            const vercelHandlers = ['/concluir-quest'];
+            const pathWithoutApi = path.replace(/^\/api/, '');
+            
+            // Se for um handler do Vercel, não fazer rewrite (deixa passar para o handler)
+            if (vercelHandlers.includes(pathWithoutApi)) {
+              return path; // Retorna o path original para o handler do Vercel processar
+            }
+            
+            const suffix = pathWithoutApi;
+            const prefix = basePathname ? basePathname : '';
+            return `${prefix}${suffix}`;
           },
         },
       }
