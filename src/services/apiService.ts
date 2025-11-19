@@ -1127,7 +1127,13 @@ class ApiService {
     }
 
     const endpoint = `/card/quests?user_id=${encodeURIComponent(userId)}`;
-    const result = await this.makeRequest(endpoint, undefined, true);
+    // Usa proxy em dev, remote em produção
+    const useProxy = this.useProxyPaths && typeof window !== 'undefined';
+    const result = await this.makeRequest(
+      endpoint,
+      undefined,
+      !useProxy // forceRemote = true apenas se não usar proxy
+    );
 
     if (!result.success) {
       throw new Error(result.error || 'Falha ao carregar card de quests');
