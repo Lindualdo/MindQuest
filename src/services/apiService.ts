@@ -19,6 +19,7 @@ import type {
   QuestCardResponse,
   JornadaCardResponse,
   WeeklyProgressCardResponse,
+  WeeklyProgressCardData,
   MapaMentalData,
 } from '../types/emotions';
 
