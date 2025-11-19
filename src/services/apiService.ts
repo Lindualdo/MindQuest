@@ -186,20 +186,14 @@ class ApiService {
     }
 
     if (forceRemote) {
-      const url = `${this.remoteBaseUrl}${endpoint}`;
-      console.log('[ApiService.resolveUrl] forceRemote=true:', url);
-      return url;
+      return `${this.remoteBaseUrl}${endpoint}`;
     }
 
     if (this.useProxyPaths && typeof window !== 'undefined') {
-      const url = `/api${endpoint}`;
-      console.log('[ApiService.resolveUrl] useProxy=true:', url);
-      return url;
+      return `/api${endpoint}`;
     }
 
-    const url = `${this.remoteBaseUrl}${endpoint}`;
-    console.log('[ApiService.resolveUrl] default:', url);
-    return url;
+    return `${this.remoteBaseUrl}${endpoint}`;
   }
 
   private toNumber(value: unknown, fallback: number | null = null): number | null {
@@ -900,8 +894,6 @@ class ApiService {
       if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer)) {
         body = JSON.stringify(body);
       }
-
-      console.log(`[ApiService.makeRequest] ${method} ${url}`, { body, headers });
 
       const response = await fetch(url, {
         ...options,
