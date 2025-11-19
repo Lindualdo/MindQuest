@@ -260,7 +260,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     key={index}
                     onClick={() => dia.dateObj && handleSelectDay(dia.dateObj)}
                     disabled={isFuturoDay}
-                    className={`flex flex-1 flex-col items-center gap-2 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-80'}`}
+                    className="flex flex-1 flex-col items-center gap-2 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {/* Container - TODAS as barras SEMPRE com mesma altura */}
                     <div className="relative h-20 w-full flex flex-col items-center justify-end">
