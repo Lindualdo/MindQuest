@@ -45,25 +45,43 @@ export default async function handler(req: any, res: any) {
   const remoteEndpoint = process.env.QUESTS_WEBHOOK_URL || DEFAULT_ENDPOINT;
 
   try {
-    const payload: Record<string, unknown> = {
-      usuario_id: usuarioId,
-    };
+    let upstreamResponse: Response;
 
-    if (source?.quests_personalizadas !== undefined) {
-      payload.quests_personalizadas = source.quests_personalizadas;
+    if (req.method === 'GET') {
+      // GET: usa query params (para card de quests)
+      const url = new URL(remoteEndpoint);
+      // Suporta tanto user_id quanto usuario_id
+      const userIdParam = source.user_id || source.usuario_id || usuarioId;
+      url.searchParams.set('user_id', userIdParam);
+
+      upstreamResponse = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      // POST: usa body (para snapshot de quests)
+      const payload: Record<string, unknown> = {
+        usuario_id: usuarioId,
+      };
+
+      if (source?.quests_personalizadas !== undefined) {
+        payload.quests_personalizadas = source.quests_personalizadas;
+      }
+
+      if (source?.atualizacoes_status !== undefined) {
+        payload.atualizacoes_status = source.atualizacoes_status;
+      }
+
+      upstreamResponse = await fetch(remoteEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
     }
-
-    if (source?.atualizacoes_status !== undefined) {
-      payload.atualizacoes_status = source.atualizacoes_status;
-    }
-
-    const upstreamResponse = await fetch(remoteEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
     const isJson = contentType.includes('application/json');

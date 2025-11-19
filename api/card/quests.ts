@@ -1,4 +1,4 @@
-const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/card/quests';
+const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/quests';
 
 const setCorsHeaders = (res: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
