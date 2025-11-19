@@ -1190,6 +1190,7 @@ class ApiService {
     questId: string;
     fonte?: string | null;
     comentario?: string | null;
+    dataReferencia?: string | null;
   }): Promise<{
     success: boolean;
     quest_id: string;
@@ -1218,6 +1219,10 @@ class ApiService {
 
     if (payload.comentario) {
       params.append('comentario', payload.comentario);
+    }
+
+    if (payload.dataReferencia) {
+      params.append('data_referencia', payload.dataReferencia);
     }
 
     const endpoint = `/concluir-quest?${params.toString()}`;

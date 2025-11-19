@@ -127,7 +127,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const handleConcluirQuest = (questId: string) => {
     if (questLoading) return;
-    void concluirQuest(questId);
+    void concluirQuest(questId, format(selectedDate, 'yyyy-MM-dd'));
   };
 
   const handleNavHome = () => {

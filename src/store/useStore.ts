@@ -37,7 +37,7 @@ interface ExtendedStoreState extends StoreState {
   openFullChat: (chatId: string) => Promise<void>;
   closeFullChat: () => void;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
-  concluirQuest: (questId?: string) => Promise<void>;
+  concluirQuest: (questId?: string, dataReferencia?: string) => Promise<void>;
   loadWeeklyQuestsProgressCard: (usuarioId?: string) => Promise<void>;
 }
 
@@ -392,12 +392,12 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
-  concluirQuest: async (questIdParam) => {
+  concluirQuest: async (questIdParam, dataReferenciaParam) => {
     const { dashboardData, questSnapshot, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard, loadWeeklyQuestsProgressCard } = get();
     const usuarioId = dashboardData?.usuario?.id;
     const questId = questIdParam ?? questSnapshot?.quests_personalizadas?.[0]?.instancia_id ?? null;
 
-    console.log('[ConcluirQuest] Iniciando:', { questIdParam, questId, usuarioId });
+    console.log('[ConcluirQuest] Iniciando:', { questIdParam, questId, usuarioId, dataReferencia: dataReferenciaParam });
 
     if (!usuarioId || !questId) {
       console.error('[ConcluirQuest] Validação falhou:', { usuarioId, questId });
@@ -415,6 +415,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         usuarioId,
         questId,
         fonte: 'app_v1.3',
+        dataReferencia: dataReferenciaParam,
       });
 
       set((state) => {
