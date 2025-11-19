@@ -92,8 +92,6 @@ const PainelQuestsPageV13: React.FC = () => {
   // Quests filtradas pelo dia selecionado
   const questsDoDia = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
-    const selectedDayStart = startOfDay(selectedDate);
-    const hojeStart = startOfDay(new Date());
     
     return todasQuests.filter((quest) => {
       // Se concluída, só mostra no dia da conclusão
@@ -106,16 +104,8 @@ const PainelQuestsPageV13: React.FC = () => {
         }
       }
       
-      // Se pendente ou ativa:
-      // - Mostra em qualquer dia passado ou presente (como atrasadas/disponíveis)
-      // - Não mostra em dias futuros (exceto hoje se for futuro)
-      const isSelectedPastOrToday = selectedDayStart <= hojeStart;
-      
-      if (!isSelectedPastOrToday) {
-        return false;
-      }
-      
-      // Quest pendente/ativa aparece em dias passados e hoje
+      // Se pendente ou ativa: mostra em todos os dias da semana
+      // (são quests diárias que podem ser feitas qualquer dia)
       return quest.status === 'pendente' || quest.status === 'ativa' || !quest.status;
     });
   }, [questSnapshot, selectedDate]);
