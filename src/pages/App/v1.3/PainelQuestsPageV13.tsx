@@ -265,7 +265,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     {/* Container - TODAS as barras SEMPRE com mesma altura */}
                     <div className="relative h-20 w-full flex flex-col items-center justify-end">
                          {/* Fundo cinza FIXO - mesma altura para TODOS os dias */}
-                         <div className="w-3 h-20 rounded-full bg-slate-200" />
+                         <div className="w-3 h-20 rounded-full bg-slate-300" />
                          
                          {/* Barra verde de progresso - sobe conforme quests concluídas */}
                          <div 
