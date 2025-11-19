@@ -126,6 +126,7 @@ Ao tratar de workflows n8n:
 - Nós básicos: use `n8n-nodes-base.code` (Code node) para lógica customizada, nunca `function`.
 - Sempre confirme o tipo/campos dos nós via MCP (`get_node_info`) antes de supor nomes antigos.
 - Verifique se `Code` está em `runOnceForAllItems` quando distribui o mesmo payload para vários destinos.
+- **Sub-workflows (sw_*) NUNCA devem ser ativados.** Eles rodam na mesma transação do workflow pai que os chama via `executeWorkflow`. Status `active=false` é correto e NÃO é erro.
 
 
 ## Debug de Execução (Padrão)

@@ -1210,25 +1210,25 @@ class ApiService {
       throw new Error('Quest inválida para conclusão');
     }
 
-    const body = {
+    const params = new URLSearchParams({
       usuario_id: payload.usuarioId,
       quest_id: payload.questId,
       fonte: payload.fonte ?? 'app_v1.3',
-      comentario: payload.comentario ?? null,
-    };
+    });
 
-    const endpoint = `/concluir-quest`;
+    if (payload.comentario) {
+      params.append('comentario', payload.comentario);
+    }
+
+    const endpoint = `/concluir-quest?${params.toString()}`;
     // Usa proxy em dev, remote em produção
     const useProxy = this.useProxyPaths && typeof window !== 'undefined';
     
-    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body });
+    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy });
     
     const result = await this.makeRequest(
       endpoint,
-      {
-        method: 'POST',
-        body,
-      },
+      undefined,
       !useProxy // forceRemote = true apenas se não usar proxy
     );
 
