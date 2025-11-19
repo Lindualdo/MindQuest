@@ -47,6 +47,8 @@ const readQuestId = (source: any): string | null => {
 };
 
 export default async function handler(req: any, res: any) {
+  console.log('[concluir-quest] Handler chamado:', { method: req.method, url: req.url, body: req.body });
+  
   setCorsHeaders(res);
 
   if (req.method === 'OPTIONS') {
@@ -55,6 +57,7 @@ export default async function handler(req: any, res: any) {
   }
 
   if (req.method !== 'POST') {
+    console.log('[concluir-quest] Método não suportado:', req.method);
     res.status(405).json({ success: false, error: 'Método não suportado' });
     return;
   }
@@ -63,17 +66,23 @@ export default async function handler(req: any, res: any) {
   const usuarioId = readUsuarioId(source);
   const questId = readQuestId(source);
 
+  console.log('[concluir-quest] Dados extraídos:', { usuarioId, questId, source });
+
   if (!usuarioId) {
+    console.log('[concluir-quest] Erro: usuario_id obrigatório');
     res.status(400).json({ success: false, error: 'usuario_id obrigatório' });
     return;
   }
 
   if (!questId) {
+    console.log('[concluir-quest] Erro: quest_id obrigatório');
     res.status(400).json({ success: false, error: 'quest_id obrigatório' });
     return;
   }
 
   const remoteEndpoint = process.env.CONCLUIR_QUEST_WEBHOOK_URL || DEFAULT_ENDPOINT;
+
+  console.log('[concluir-quest] Chamando webhook:', { remoteEndpoint, usuarioId, questId });
 
   try {
     const payload = {
@@ -83,6 +92,8 @@ export default async function handler(req: any, res: any) {
       comentario: source.comentario ?? null,
     };
 
+    console.log('[concluir-quest] Payload:', payload);
+
     const upstreamResponse = await fetch(remoteEndpoint, {
       method: 'POST',
       headers: {
@@ -90,6 +101,8 @@ export default async function handler(req: any, res: any) {
       },
       body: JSON.stringify(payload),
     });
+
+    console.log('[concluir-quest] Response status:', upstreamResponse.status, upstreamResponse.statusText);
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
     const isJson = contentType.includes('application/json');
