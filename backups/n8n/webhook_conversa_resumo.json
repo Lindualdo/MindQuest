@@ -14,35 +14,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        0,
-        0
+        -480,
+        -16
       ],
       "id": "39a1ab4c-66a0-4c27-a64c-df9b474012eb",
       "name": "Webhook",
       "webhookId": "daf2181d-3e1c-4c2f-aa4a-78c4616b778e"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1\n  AND criado_em::date BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE\nORDER BY criado_em DESC;\n",
-        "options": {
-          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}\n"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        208,
-        0
-      ],
-      "id": "cf8a3d82-2199-4ae3-826f-f81605748eed",
-      "name": "Execute a SQL query",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -52,11 +29,89 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        416,
-        0
+        608,
+        16
       ],
       "id": "c81020fc-cb83-4640-8bd4-10f4e5e5e831",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5a3fb558-2687-40d3-a1fc-c2463ae95fa1",
+              "leftValue": "={{ $json.query.conversa_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "49ce36f5-fbcf-43a7-a964-6bfaf020f869",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1\n  AND criado_em::date BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE\nORDER BY criado_em DESC;\n",
+        "options": {
+          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        128
+      ],
+      "id": "af018084-bb96-40b4-a6a1-49ce5cb174ba",
+      "name": "todos os resumos",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE id= '{{ $json.query.conversa_id }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "536f4762-f018-4937-b671-dcec8726463d",
+      "name": "todos os resumos1",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -64,14 +119,43 @@
       "main": [
         [
           {
-            "node": "Execute a SQL query",
+            "node": "If",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Execute a SQL query": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "todos os resumos1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "todos os resumos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "todos os resumos": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "todos os resumos1": {
       "main": [
         [
           {
@@ -96,35 +180,34 @@
         "json": {
           "headers": {
             "host": "mindquest-n8n.cloudfy.live",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/123.0.0.0",
             "accept": "*/*",
             "accept-encoding": "gzip, br",
-            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5,de;q=0.4,zh-CN;q=0.3,zh;q=0.2,it;q=0.1,pt-BR;q=0.1",
+            "accept-language": "en-US,en;q=0.9,pt-BR;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5",
             "cdn-loop": "cloudflare; loops=1",
-            "cf-connecting-ip": "2001:818:e374:a600:159:48f8:4174:3c89",
+            "cf-connecting-ip": "2001:818:e374:a600:5567:bd6e:1e6c:b2b",
             "cf-ipcountry": "PT",
-            "cf-ray": "98f76fe0b80fb17c-LIS",
+            "cf-ray": "9a0a7cb02f35e3b0-LIS",
             "cf-visitor": "{\"scheme\":\"https\"}",
-            "if-none-match": "W/\"2421-srDw9C/ik4m8KxyDMCimLrldfGc\"",
-            "origin": "http://localhost:5176",
+            "origin": "http://localhost:5173",
             "priority": "u=1, i",
-            "referer": "http://localhost:5176/",
-            "sec-ch-ua": "\"Opera\";v=\"120\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"",
+            "referer": "http://localhost:5173/",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"99\", \"Opera\";v=\"123\", \"Chromium\";v=\"139\"",
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": "\"macOS\"",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "cross-site",
-            "x-forwarded-for": "172.68.103.16",
+            "x-forwarded-for": "172.68.103.44",
             "x-forwarded-host": "mindquest-n8n.cloudfy.live",
             "x-forwarded-port": "443",
             "x-forwarded-proto": "https",
             "x-forwarded-server": "d49265bfcab0",
-            "x-real-ip": "172.68.103.16"
+            "x-real-ip": "172.68.103.44"
           },
           "params": {},
           "query": {
-            "user_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+            "conversa_id": "7531f26b-d553-45fc-8d58-8e23fe1e2b2b"
           },
           "body": {},
           "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/resumo_conversas",
@@ -133,7 +216,7 @@
       }
     ]
   },
-  "versionId": "490520f3-3476-4aad-a751-daf6c6aced8b",
+  "versionId": "12244489-db94-469d-a894-01d246538542",
   "triggerCount": 1,
   "shared": [
     {

@@ -1,0 +1,636 @@
+{
+  "createdAt": "2025-11-07T16:24:43.271Z",
+  "id": "ItBastfCTkWxm41M",
+  "name": "sw_xp_conversas",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "calcular_apenas_novos",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "id": "cb6211df-09af-4396-986d-98e66fa817c1",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\n  throw new Error('usuario_id obrigatório');\n}\nconst rawStringFlag = entrada.recalcular_completo ?? $json.recalcular_completo ?? entrada.force_recalcular ?? entrada.force ?? null;\nconst rawBooleanFlag = entrada.calcular_apenas_novos ?? $json.calcular_apenas_novos;\nconst recalcularCompleto = rawStringFlag === null\n  ? (rawBooleanFlag === false)\n  : (typeof rawStringFlag === 'string'\n      ? ['1','true','yes','y','sim'].includes(rawStringFlag.trim().toLowerCase())\n      : Boolean(rawStringFlag));\nreturn [{\n  json: {\n    usuario_id: usuarioId.trim(),\n    recalcular_completo: recalcularCompleto,\n  },\n}];"
+      },
+      "id": "6fe6f666-b6f8-476c-b184-959442a7c670",
+      "name": "Validar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1104,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  usuario_id,\n  xp_total,\n  total_xp_hoje,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  ultima_conversa_em,\n  sequencia_status\nFROM public.usuarios_conquistas\nWHERE usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "5a54300e-b629-4811-b300-d19d686d873d",
+      "name": "Ler Usuarios Conquistas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -688,
+        -208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  uc.id,\n  date(uc.data_conversa) AS dia,\n  uc.tem_reflexao,\n  COALESCE(uc.total_palavras_usuario, 0) AS total_palavras_usuario,\n  uc.data_conversa,\n  uc.atualizado_em\nFROM public.usr_chat uc\nWHERE uc.usuario_id = $1::uuid\n  AND uc.data_conversa >= NOW() - INTERVAL '45 days'\nORDER BY dia ASC, uc.data_conversa ASC;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "463a47d9-671c-41a0-8ad0-6a313e527213",
+      "name": "Ler Usr Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "alwaysOutputData": true,
+      "position": [
+        336,
+        -512
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || null;\n};\nconst getItems = (nodeName) => {\n  const list = $items(nodeName) || [];\n  return list.map((entry) => entry?.json || {});\n};\nconst estado = getItem('Ler Usuarios Conquistas');\nif (!estado) {\n  throw new Error('Estado do usuário não encontrado');\n}\nconst conversas = getItems('Ler Usr Chat');\nconst metasBrutas = getItems('Listar Metas Sequencia');\nconst metasSequencia = metasBrutas\n  .filter((row) => row.codigo && row.codigo.startsWith('streak_'))\n  .map((row) => ({\n    codigo: row.codigo,\n    dias: Number(row.dias_meta),\n    bonus: Number(row.xp_recompensa),\n    titulo: row.titulo || row.codigo,\n  }))\n  .filter((meta) =>\n    Number.isFinite(meta.dias) && meta.dias > 0 &&\n    Number.isFinite(meta.bonus) && meta.bonus >= 0\n  )\n  .sort((a, b) => a.dias - b.dias);\nif (!metasSequencia.length) {\n  throw new Error('Catálogo de metas: nenhum registro streak_* válido encontrado');\n}\nconst primeiraConversaMeta = metasBrutas.find((row) => row.codigo === 'primeira_conversa');\nconst bonusPrimeira = Number(primeiraConversaMeta?.xp_recompensa);\nif (!Number.isFinite(bonusPrimeira)) {\n  throw new Error('Catálogo de metas: registro \"primeira_conversa\" ausente ou sem xp_recompensa numérico');\n}\nconst baseMeta = metasBrutas.find((row) => row.codigo === 'conversa_diaria');\nconst xpBaseDiario = Number(baseMeta?.xp_recompensa);\nif (!Number.isFinite(xpBaseDiario) || xpBaseDiario <= 0) {\n  throw new Error('Catálogo de metas: registro \"conversa_diaria\" ausente ou sem xp_recompensa numérico positivo');\n}\nconst metas = metasSequencia;\nconst metaTargets = metas.map((meta) => ({ codigo: meta.codigo, dias: meta.dias }));\nconst XP_POR_DIA = xpBaseDiario;\nconst BONUS_PRIMEIRA_CONVERSA = bonusPrimeira;\nconst alvoDefault = metaTargets[0].dias;\nconst metaDefaultCodigo = metaTargets[0].codigo;\nconst toTimestamp = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return date.getTime();\n};\nconst toDay = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\n};\nconst parseStatus = () => {\n  const raw = estado.sequencia_status;\n  if (!raw) return { estado: 'ativa', reinicios: 0, alvo_conversas: alvoDefault };\n  if (typeof raw === 'object') {\n    return { estado: 'ativa', alvo_conversas: alvoDefault, ...raw };\n  }\n  try {\n    return { estado: 'ativa', alvo_conversas: alvoDefault, ...(JSON.parse(raw) || {}) };\n  } catch (error) {\n    return { estado: 'ativa', reinicios: 0, alvo_conversas: alvoDefault };\n  }\n};\nconst determineNextMeta = (streak) => {\n  for (const meta of metaTargets) {\n    if (streak < meta.dias) {\n      return meta;\n    }\n  }\n  return metaTargets[metaTargets.length - 1];\n};\nconst status = parseStatus();\nconst msDia = 24 * 60 * 60 * 1000;\nconst conversasOrdenadas = conversas\n  .map((entrada) => {\n    const timestamp = toTimestamp(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISO = toDay(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISOTexto = diaISO ? diaISO.toISOString() : null;\n    return { ...entrada, timestamp, diaISO, diaISOTexto };\n  })\n  .filter((entrada) => entrada.diaISO && entrada.diaISOTexto && Number.isFinite(entrada.timestamp))\n  .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst diasUnicosMap = new Map();\nfor (const conversa of conversasOrdenadas) {\n  const chave = conversa.diaISOTexto;\n  if (!chave) continue;\n  if (!diasUnicosMap.has(chave) || (conversa.timestamp || 0) < (diasUnicosMap.get(chave).timestamp || 0)) {\n    diasUnicosMap.set(chave, conversa);\n  }\n}\nconst diasUnicos = Array.from(diasUnicosMap.values()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst ultimaRegistradaTimestamp = toTimestamp(estado.ultima_conversa_em);\nconst ultimaDiaRegistrada = toDay(estado.ultima_conversa_em);\nlet xpBaseIncrement = 0;\nlet xpBonusIncrement = 0;\nlet sequenciaAtual = 0;\nlet sequenciaRecordeCalculado = 0;\nlet reinicios = Number(status.reinicios) || 0;\nlet metaAlcancadaIdxAnterior = metas.findIndex((meta) => meta.codigo === estado.meta_sequencia_codigo);\nif (metaAlcancadaIdxAnterior < 0) metaAlcancadaIdxAnterior = -1;\nlet metaAlcancadaIdx = metaAlcancadaIdxAnterior;\nlet alvoIdx = Math.max(metaAlcancadaIdxAnterior + 1, 0);\nconst resetMetaIndices = () => {\n  metaAlcancadaIdxAnterior = -1;\n  metaAlcancadaIdx = -1;\n  alvoIdx = 0;\n};\nconst applyReset = () => {\n  if (sequenciaAtual > 0) {\n    reinicios += 1;\n  }\n  sequenciaAtual = 0;\n  resetMetaIndices();\n};\nlet ultimoDiaSequencia = ultimaDiaRegistrada;\nlet ultimaTimestampProcessado = ultimaRegistradaTimestamp || null;\nlet diasNovos = 0;\nconst diasNovosDetalhes = [];\nconst streakEvents = [];\nfor (const diaInfo of diasUnicos) {\n  const diaISO = diaInfo.diaISO;\n  const timestamp = diaInfo.timestamp;\n  const diaEhNovo = !ultimaDiaRegistrada || diaISO.getTime() > ultimaDiaRegistrada.getTime();\n  if (diaEhNovo) {\n    xpBaseIncrement += XP_POR_DIA;\n    diasNovos += 1;\n    diasNovosDetalhes.push({\n      dia: diaISO.toISOString(),\n      conversa_id: (diaInfo && (diaInfo.conversa_id || diaInfo.id)) ? diaInfo.conversa_id || diaInfo.id : null,\n      data_conversa: diaInfo?.data_conversa || diaISO.toISOString(),\n    });\n  }\n  if (ultimoDiaSequencia) {\n    const diffDias = Math.floor((diaISO.getTime() - ultimoDiaSequencia.getTime()) / msDia);\n    if (diffDias > 1) {\n      applyReset();\n    }\n  }\n  sequenciaAtual += 1;\n  ultimoDiaSequencia = diaISO;\n  ultimaTimestampProcessado = timestamp ?? ultimaTimestampProcessado ?? timestamp;\n  if (sequenciaAtual > sequenciaRecordeCalculado) {\n    sequenciaRecordeCalculado = sequenciaAtual;\n  }\n  while (alvoIdx < metas.length && sequenciaAtual >= metas[alvoIdx].dias) {\n    if (diaEhNovo && alvoIdx > metaAlcancadaIdxAnterior) {\n      xpBonusIncrement += metas[alvoIdx].bonus;\n      streakEvents.push({\n        meta_codigo: metas[alvoIdx].codigo,\n        meta_titulo: metas[alvoIdx].titulo,\n        xp_bonus: metas[alvoIdx].bonus,\n        completado_em: diaISO.toISOString(),\n        dias: metas[alvoIdx].dias,\n      });\n    }\n    metaAlcancadaIdx = alvoIdx;\n    alvoIdx += 1;\n  }\n  metaAlcancadaIdxAnterior = metaAlcancadaIdx;\n}\nconst sequenciaRecorde = Math.max(sequenciaRecordeCalculado, Number(estado.sequencia_recorde) || 0);\nconst metaCodigoAtual = metaAlcancadaIdx >= 0 ? metas[metaAlcancadaIdx].codigo : metaDefaultCodigo;\nconst proximaMetaAlvo = determineNextMeta(sequenciaAtual);\nconst proximaCodigo = proximaMetaAlvo ? proximaMetaAlvo.codigo : null;\nconst alvoConversas = proximaMetaAlvo ? proximaMetaAlvo.dias : metaTargets[metaTargets.length - 1].dias;\nconst ultimaConversaISO = ultimoDiaSequencia ? ultimoDiaSequencia.toISOString() : estado.ultima_conversa_em || null;\nconst primeiraConversaDesbloqueada = !ultimaDiaRegistrada && diasNovos > 0;\nconst xpBonusPrimeira = primeiraConversaDesbloqueada ? BONUS_PRIMEIRA_CONVERSA : 0;\nconst xpBonusTotal = xpBonusIncrement + xpBonusPrimeira;\nconst xpTotalIncrement = xpBaseIncrement + xpBonusTotal;\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id,\n    xp_ganho: xpTotalIncrement,\n    xp_total_increment: xpTotalIncrement,\n    xp_base_increment: xpBaseIncrement,\n    xp_bonus_increment: xpBonusTotal,\n    sequencia_atual: sequenciaAtual,\n    sequencia_recorde: sequenciaRecorde,\n    meta_sequencia_codigo: metaCodigoAtual,\n    proxima_meta_codigo: proximaCodigo,\n    ultima_conversa_em: ultimaConversaISO,\n    sequencia_status: { ...status, estado: 'ativa', reinicios, alvo_conversas: alvoConversas },\n    dias_processados: diasUnicos.length,\n    dias_novos: diasNovos,\n    dias_novos_detalhes: diasNovosDetalhes,\n    primeira_conversa_desbloqueada: primeiraConversaDesbloqueada,\n    xp_bonus_primeira: xpBonusPrimeira,\n    streaks_conquistas: streakEvents,\n  },\n}];"
+      },
+      "id": "6d6cdaf6-e6ec-41b3-a60b-0ea4fd778ed7",
+      "name": "Calcular XP Conversas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::int AS xp_ganho,\n    $3::int AS sequencia_atual,\n    $4::int AS sequencia_recorde,\n    $5::varchar AS meta_codigo,\n    $6::varchar AS proxima_codigo,\n    NULLIF($7::text, '')::timestamptz AS ultima_conversa_em,\n    $8::jsonb AS sequencia_status,\n    $9::int AS xp_base_increment,\n    $10::int AS xp_bonus_increment\n),\natualizado AS (\n  UPDATE public.usuarios_conquistas r\n  SET\n    xp_total = r.xp_total + payload.xp_ganho,\n    xp_base = COALESCE(r.xp_base, 0) + payload.xp_base_increment,\n    xp_bonus = COALESCE(r.xp_bonus, 0) + payload.xp_bonus_increment,\n    total_xp_hoje = payload.xp_base_increment + payload.xp_bonus_increment,\n    sequencia_atual = payload.sequencia_atual,\n    sequencia_recorde = payload.sequencia_recorde,\n    meta_sequencia_codigo = payload.meta_codigo,\n    proxima_meta_codigo = payload.proxima_codigo,\n    ultima_conversa_em = COALESCE(payload.ultima_conversa_em, r.ultima_conversa_em),\n    sequencia_status = payload.sequencia_status,\n    atualizado_em = NOW()\n  FROM payload\n  WHERE r.usuario_id = payload.usuario_id\n  RETURNING r.usuario_id\n)\nSELECT\n  payload.usuario_id\nFROM payload\nLEFT JOIN atualizado ON atualizado.usuario_id = payload.usuario_id;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.xp_ganho || $json.xp_total_increment || 0,\n  $json.sequencia_atual || 0,\n  $json.sequencia_recorde || 0,\n  $json.meta_sequencia_codigo || 'streak_003',\n  $json.proxima_meta_codigo || 'streak_005',\n  ($json.ultima_conversa_em && $json.ultima_conversa_em !== '' ? $json.ultima_conversa_em : null),\n  JSON.stringify($json.sequencia_status || {}),\n  $json.xp_base_increment || 0,\n  $json.xp_bonus_increment || 0\n] }}"
+        }
+      },
+      "id": "0764743f-87cb-4787-a87a-884ab7c01ab3",
+      "name": "Atualizar Usuarios Conquistas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1760,
+        -608
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "71Ru87yaRA5SNjOQ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/71Ru87yaRA5SNjOQ",
+          "cachedResultName": "sw_calcula_jornada"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id || $item(0).$node['Checar Necessidade'].json.usuario_id || $item(0).$node['Validar Entrada'].json.usuario_id }}"
+          },
+          "matchingColumns": [
+            "usuario_id"
+          ],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "28af9b7d-e2a6-477b-baaa-8e41a6e4984b",
+      "name": "Atualizar Jornada",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2272,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseDay = (value) => {\n  if (!value) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());\n};\n\nconst today = new Date();\nconst todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());\n\nconst normalizeStatus = (raw) => {\n  if (raw && typeof raw === 'object') {\n    return { ...raw };\n  }\n  if (typeof raw === 'string') {\n    try {\n      const parsed = JSON.parse(raw);\n      if (parsed && typeof parsed === 'object') {\n        return { ...parsed };\n      }\n    } catch (_err) {\n      // ignore\n    }\n  }\n  return {};\n};\n\nreturn $input.all().map(({ json }) => {\n  const ultimaConversaoUtc = parseDay(json.ultima_conversa_em);\n  const diffDias = ultimaConversaoUtc === null\n    ? Number.POSITIVE_INFINITY\n    : Math.floor((todayUtc - ultimaConversaoUtc) / 86_400_000);\n\n  if (!Number.isFinite(diffDias) || diffDias > 1) {\n    const statusAtual = normalizeStatus(json.sequencia_status);\n    const reinicios = Number.isFinite(Number(statusAtual.reinicios))\n      ? Number(statusAtual.reinicios) + 1\n      : 1;\n\n    json.sequencia_atual = 0;\n    json.meta_sequencia_codigo = 'streak_003';\n    json.proxima_meta_codigo = 'streak_005';\n    json.sequencia_status = {\n      estado: 'reiniciada',\n      reinicios,\n      alvo_conversas: 3,\n      completado_em: null,\n      ultimo_reset_em: new Date().toISOString(),\n    };\n  }\n\n  return { json };\n});"
+      },
+      "id": "2c920c98-2de7-4d25-ac1d-66837b97b324",
+      "name": "Zerar Sequência se Gap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const estado = $json || {};\nconst entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst force = Boolean(entrada.recalcular_completo);\nconst hoje = new Date();\nconst hojeUtc = Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate());\nconst ultima = estado.ultima_conversa_em ? new Date(estado.ultima_conversa_em) : null;\nconst ultimaUtc = ultima ? Date.UTC(ultima.getUTCFullYear(), ultima.getUTCMonth(), ultima.getUTCDate()) : null;\nconst diffDias = ultimaUtc === null ? Number.POSITIVE_INFINITY : Math.max(0, Math.floor((hojeUtc - ultimaUtc) / 86_400_000));\nconst precisaRecalcular = force || diffDias >= 1;\nreturn [{\n  json: {\n    ...estado,\n    usuario_id: entrada.usuario_id ?? estado.usuario_id ?? null,\n    recalcular_completo: force,\n    precisa_recalcular: precisaRecalcular,\n    dias_desde_ultima_conversa: diffDias,\n  },\n}];"
+      },
+      "id": "5c3281c1-4d17-4cc2-bb76-d29f1e7fa216",
+      "name": "Checar Necessidade",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.precisa_recalcular }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "04171806-6397-4e91-ae8f-9465e7412e6d",
+      "name": "Precisa Recalcular?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $json || {};\nconst usuarioId = entrada.usuario_id;\nconst diasNovos = entrada.dias_novos || 0;\nconst xpBase = entrada.xp_base_increment || entrada.xp_base_diario || 0;\nif (!usuarioId || !diasNovos || !xpBase) {\n  return [];\n}\nconst detalhesOrigem = Array.isArray(entrada.dias_novos_detalhes) ? entrada.dias_novos_detalhes : [];\nconst ocorrencias = detalhesOrigem.map((item) => ({\n  dia: item && item.dia ? item.dia : null,\n  conversa_id: item && (item.conversa_id || item.id) ? (item.conversa_id || item.id) : null,\n  data_conversa: item && item.data_conversa ? item.data_conversa : (item && item.dia ? item.dia : null),\n}));\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    meta_codigo: 'conversa_diaria',\n    meta_titulo: 'Conversa diária',\n    xp_base_increment: xpBase,\n    recorrencia_increment: diasNovos,\n    ocorrencias,\n  },\n}];"
+      },
+      "id": "827491f7-282b-44c9-a3e2-c8ddda8a3d0d",
+      "name": "Preparar XP Diário",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::text AS meta_codigo,\n    $3::text AS meta_titulo,\n    $4::int AS xp_base_increment,\n    $5::jsonb AS ocorrencias,\n    $6::int AS recorrencia_increment\n),\natualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = COALESCE(ch.xp_base, 0) + payload.xp_base_increment,\n    detalhes = jsonb_set(\n      jsonb_set(\n        COALESCE(ch.detalhes, '{}'::jsonb),\n        '{recorrencia_total}',\n        to_jsonb(COALESCE((ch.detalhes->>'recorrencia_total')::int, 0) + payload.recorrencia_increment)\n      ),\n      '{ocorrencias}',\n      (COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || payload.ocorrencias)\n    ),\n    registrado_em = NOW()\n  FROM payload\n  WHERE ch.usuario_id = payload.usuario_id\n    AND ch.meta_codigo = payload.meta_codigo\n  RETURNING ch.id\n)\nINSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  detalhes,\n  registrado_em\n)\nSELECT\n  payload.usuario_id,\n  'conversa',\n  payload.meta_codigo,\n  payload.meta_titulo,\n  payload.xp_base_increment,\n  0,\n  jsonb_build_object(\n    'recorrencia_total', payload.recorrencia_increment,\n    'ocorrencias', payload.ocorrencias\n  ),\n  NOW()\nFROM payload\nWHERE NOT EXISTS (SELECT 1 FROM atualizado);\n",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.meta_codigo, $json.meta_titulo, $json.xp_base_increment || 0, JSON.stringify($json.ocorrencias || []), $json.recorrencia_increment || 0] }}"
+        }
+      },
+      "id": "7592b0de-b4a8-4545-aa1e-21a37d13b1ab",
+      "name": "Atualizar Historico Diario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1744,
+        -384
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $json || {};\nconst usuarioId = entrada.usuario_id;\nif (!usuarioId) {\n  return [];\n}\nconst conquistas = [];\nif (entrada.primeira_conversa_desbloqueada) {\n  conquistas.push({\n    usuario_id: usuarioId,\n    meta_codigo: 'primeira_conversa',\n    meta_titulo: 'Primeira conversa',\n    xp_base: 0,\n    xp_bonus: entrada.xp_bonus_primeira || 75,\n    detalhes: {\n      desbloqueada_em: entrada.ultima_conversa_em || new Date().toISOString(),\n    },\n  });\n}\nconst eventos = Array.isArray(entrada.streaks_conquistas) ? entrada.streaks_conquistas : [];\nfor (const evento of eventos) {\n  if (!evento || !evento.meta_codigo) continue;\n  conquistas.push({\n    usuario_id: usuarioId,\n    meta_codigo: evento.meta_codigo,\n    meta_titulo: evento.meta_titulo || evento.meta_codigo,\n    xp_base: 0,\n    xp_bonus: evento.xp_bonus || 0,\n    detalhes: {\n      completado_em: evento.completado_em || null,\n      dias: evento.dias || null,\n    },\n  });\n}\nreturn conquistas.map((item) => ({ json: item }));"
+      },
+      "id": "4260d3ab-cb96-485e-84c5-391af4bddc11",
+      "name": "Preparar Conquistas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.conquistas_historico (\n  usuario_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  detalhes,\n  registrado_em\n)\nVALUES (\n  $1::uuid,\n  'conversa',\n  $2::text,\n  $3::text,\n  $4::int,\n  $5::int,\n  COALESCE($6::jsonb, '{}'::jsonb),\n  NOW()\n);",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.meta_codigo, $json.meta_titulo, $json.xp_base || 0, $json.xp_bonus || 0, JSON.stringify($json.detalhes || {})] }}"
+        }
+      },
+      "id": "8aa8adc0-c051-44c3-9e7f-52a39b6c4105",
+      "name": "Registrar Historico Bonus",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1744,
+        -176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $items('Validar Entrada', 0, 0) || [];\nconst payload = entrada[0]?.json || {};\nreturn [{ json: { usuario_id: payload.usuario_id || null } }];"
+      },
+      "id": "b92ce33f-023e-4db7-b45f-4e0ffc1cfafa",
+      "name": "Retornar Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst usuarioId = entrada.usuario_id || $json.usuario_id || null;\nif (!usuarioId) {\n  return [];\n}\nreturn [{ json: { usuario_id: usuarioId } }];"
+      },
+      "id": "05fac74e-6ff2-497a-94c1-569aacd2eb60",
+      "name": "Garantir Retorno Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH alvo AS (\n  SELECT $1::uuid AS usuario_id\n)\nINSERT INTO public.usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status,\n  total_quests_concluidas,\n  total_quests_personalizadas,\n  total_xp_hoje,\n  ultima_conversa_em,\n  xp_base,\n  xp_bonus,\n  criado_em,\n  atualizado_em\n)\nSELECT\n  alvo.usuario_id,\n  0,\n  500,\n  1,\n  'Despertar',\n  0,\n  0,\n  'streak_003',\n  'streak_005',\n  jsonb_build_object('estado', 'ativa', 'alvo_conversas', 3, 'reinicios', 0, 'completado_em', NULL),\n  0,\n  0,\n  0,\n  NULL,\n  0,\n  0,\n  NOW(),\n  NOW()\nFROM alvo\nON CONFLICT (usuario_id) DO NOTHING\nRETURNING usuario_id;\n\nselect $1 as usuario_id",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "abe9cf6e-65f2-4718-88ec-48b60502b5dc",
+      "name": "Criar Registro Base",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -896,
+        -208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  codigo,\n  titulo,\n  xp_recompensa,\n  CASE\n    WHEN codigo = 'primeira_conversa' THEN 1\n    WHEN codigo = 'streak_003' THEN 3\n    WHEN codigo = 'streak_005' THEN 5\n    WHEN codigo = 'streak_007' THEN 7\n    WHEN codigo = 'streak_010' THEN 10\n    WHEN codigo = 'streak_015' THEN 15\n    WHEN codigo = 'streak_020' THEN 20\n    WHEN codigo = 'streak_025' THEN 25\n    WHEN codigo = 'streak_030' THEN 30\n  END AS dias_meta\nFROM public.metas_catalogo\nWHERE tipo = 'sequencia' OR codigo IN ('primeira_conversa','conversa_diaria')\nORDER BY dias_meta NULLS LAST, codigo;",
+        "options": {}
+      },
+      "id": "daf8c702-abc0-4b74-aaa1-d9e95c77bf8b",
+      "name": "Listar Metas Sequencia",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "ee9a5f04-bdaf-4a6b-93b0-8f7e2573b9e5",
+      "name": "Aguardar Metas XP",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        -384
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Validar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Usuarios Conquistas": {
+      "main": [
+        [
+          {
+            "node": "Checar Necessidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Usr Chat": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Metas XP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular XP Conversas": {
+      "main": [
+        [
+          {
+            "node": "Zerar Sequência se Gap",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar XP Diário",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar Conquistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Usuarios Conquistas": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Jornada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zerar Sequência se Gap": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Usuarios Conquistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checar Necessidade": {
+      "main": [
+        [
+          {
+            "node": "Precisa Recalcular?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Precisa Recalcular?": {
+      "main": [
+        [
+          {
+            "node": "Ler Usr Chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Garantir Retorno Batch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Listar Metas Sequencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retornar Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar XP Diário": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Historico Diario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Conquistas": {
+      "main": [
+        [
+          {
+            "node": "Registrar Historico Bonus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Garantir Retorno Batch": {
+      "main": [
+        [
+          {
+            "node": "Retornar Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Criar Registro Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Registro Base": {
+      "main": [
+        [
+          {
+            "node": "Ler Usuarios Conquistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar Metas Sequencia": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Metas XP",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Aguardar Metas XP": {
+      "main": [
+        [
+          {
+            "node": "Calcular XP Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff",
+          "calcular_apenas_novos": false
+        }
+      }
+    ]
+  },
+  "versionId": "e186842f-6ccf-40b8-bd9d-58888182c649",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-07T16:24:43.271Z",
+      "role": "workflow:owner",
+      "workflowId": "ItBastfCTkWxm41M",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

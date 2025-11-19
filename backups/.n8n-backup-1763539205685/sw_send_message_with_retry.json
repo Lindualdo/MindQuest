@@ -1,0 +1,419 @@
+{
+  "createdAt": "2025-10-22T18:20:20.342Z",
+  "id": "U44ZfEwFU77EUthb",
+  "name": "sw_send_message_with_retry",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instanceName"
+            },
+            {
+              "name": "remoteJid"
+            },
+            {
+              "name": "messageText"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1424,
+        192
+      ],
+      "id": "3ec0cd09-24db-475e-95c9-81f069215fd0",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $json.remoteJid }}",
+        "messageText": "={{ $json.messageText }}",
+        "options_message": {
+          "delay": "={{ 2000 }}",
+          "linkPreview": false
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        192
+      ],
+      "id": "de1c024a-c02f-4c4a-ad83-6dbdc3714c59",
+      "name": "Send Message",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? '').trim();\nconst statusUpper = statusRaw.toUpperCase();\nconst httpStatus = Number(response.statusCode ?? data.statusCode ?? response.code ?? 0) || null;\nconst messageId = data.key?.id ?? response.messageId ?? null;\nconst errorMessage = data.error ?? response.error ?? response.message ?? null;\nconst successFlag = String(response.success ?? '').toLowerCase() === 'true';\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED', 'READ']);\nconst acceptedStatuses = new Set(['ACCEPTED', 'PENDING', 'QUEUED', 'ACK', 'SCHEDULED']);\nconst failureStatuses = new Set(['FAILED', 'ERROR', 'REJECTED', 'BLOCKED', 'DENIED', 'UNAUTHORIZED', 'CANCELLED', 'INVALID']);\n\nlet outcome = 'unknown';\nif (successStatuses.has(statusUpper) || successFlag) {\n  outcome = 'success';\n} else if (acceptedStatuses.has(statusUpper)) {\n  outcome = 'accepted';\n} else if (failureStatuses.has(statusUpper)) {\n  outcome = 'failure';\n} else if (!statusUpper) {\n  if (successFlag) {\n    outcome = 'success';\n  } else if (httpStatus !== null && httpStatus >= 200 && httpStatus < 300) {\n    outcome = 'success';\n  }\n}\n\nconst shouldRetry = outcome === 'failure' || outcome === 'unknown';\nconst success = outcome === 'success' || outcome === 'accepted';\nconst pendingDelivery = outcome === 'accepted';\nconst finalStatus = statusUpper || (pendingDelivery ? 'ACCEPTED' : success ? 'SUCCESS' : 'UNKNOWN');\n\nreturn [{\n  json: {\n    success,\n    delivered: outcome === 'success',\n    pendingDelivery,\n    shouldRetry,\n    isFailure: outcome === 'failure',\n    status: finalStatus,\n    httpStatus,\n    messageId,\n    firstResponse: response,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2304,
+        -48
+      ],
+      "id": "2ebddf4b-792c-42e7-9a08-c0cb9dfe3298",
+      "name": "Check Initial"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 3 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1808,
+        -64
+      ],
+      "id": "67b5b22f-9f99-4ad3-9622-476a169f62df",
+      "name": "Retry Delay",
+      "webhookId": "c70f06a7-7b09-46dc-9217-d26a00515d2d"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $('start').item.json.remoteJid }}",
+        "messageText": "={{ $('start').item.json.messageText }}",
+        "options_message": {
+          "delay": "={{ 2000 }}",
+          "linkPreview": false
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        -64
+      ],
+      "id": "184645cb-e6d2-4d40-9536-e4787869c0eb",
+      "name": "Send Message (retry)",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "evolutionApi": {
+          "id": "H4gurJcNVV0yrS90",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst response = $input.first()?.json ?? {};\nconst data = response.data ?? {};\nconst statusRaw = String(data.status ?? response.status ?? '').trim();\nconst statusUpper = statusRaw.toUpperCase();\nconst httpStatus = Number(response.statusCode ?? data.statusCode ?? response.code ?? 0) || null;\nconst messageId = data.key?.id ?? response.messageId ?? null;\nconst errorMessage = data.error ?? response.error ?? response.message ?? null;\nconst successFlag = String(response.success ?? '').toLowerCase() === 'true';\n\nconst successStatuses = new Set(['SUCCESS', 'SENT', 'DELIVERED', 'READ']);\nconst acceptedStatuses = new Set(['ACCEPTED', 'PENDING', 'QUEUED', 'ACK', 'SCHEDULED']);\nconst failureStatuses = new Set(['FAILED', 'ERROR', 'REJECTED', 'BLOCKED', 'DENIED', 'UNAUTHORIZED', 'CANCELLED', 'INVALID']);\n\nlet outcome = 'unknown';\nif (successStatuses.has(statusUpper) || successFlag) {\n  outcome = 'success';\n} else if (acceptedStatuses.has(statusUpper)) {\n  outcome = 'accepted';\n} else if (failureStatuses.has(statusUpper)) {\n  outcome = 'failure';\n} else if (!statusUpper) {\n  if (successFlag) {\n    outcome = 'success';\n  } else if (httpStatus !== null && httpStatus >= 200 && httpStatus < 300) {\n    outcome = 'success';\n  }\n}\n\nconst shouldRetry = outcome === 'failure' || outcome === 'unknown';\nconst success = outcome === 'success' || outcome === 'accepted';\nconst pendingDelivery = outcome === 'accepted';\nconst finalStatus = statusUpper || (pendingDelivery ? 'ACCEPTED' : success ? 'SUCCESS' : 'UNKNOWN');\n\nconst firstContext = $('Check Initial').first()?.json ?? {};\n\nreturn [{\n  json: {\n    success,\n    delivered: outcome === 'success',\n    pendingDelivery,\n    shouldRetry,\n    isFailure: outcome === 'failure',\n    status: finalStatus,\n    httpStatus,\n    messageId,\n    firstResponse: firstContext.firstResponse ?? firstContext,\n    lastResponse: response,\n    errorMessage\n  },\n  pairedItem: 0\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        -64
+      ],
+      "id": "d354092b-e18c-4168-ab3c-3f78e2bc86ed",
+      "name": "Check Retry"
+    },
+    {
+      "parameters": {
+        "jsCode": "const startData = $('start').first()?.json ?? {};\nconst initial = $('Check Initial').first()?.json ?? {};\nconst retry = $('Check Retry').first()?.json ?? {};\n\nreturn [{\n  json: {\n    message: 'Falha ao enviar mensagem após tentativas via Evolution API.',\n    remoteJid: startData.remoteJid ?? null,\n    instanceName: startData.instanceName ?? null,\n    messageText: startData.messageText ?? null,\n    initial,\n    retry,\n    timestamp: new Date().toISOString()\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        -192
+      ],
+      "id": "15f4ad26-df20-4cce-8ad4-f596c4df6611",
+      "name": "Build Failure Report"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first()?.json ?? {};\nthrow new Error(JSON.stringify(payload, null, 2));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -192
+      ],
+      "id": "7a8c5047-02bf-4427-bfb9-982e41038cfe",
+      "name": "Raise Failure"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        176
+      ],
+      "id": "c6ac5c0b-481f-41ef-b155-f45bb19d34c6",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6584398-e020-47f1-ae63-788c2bb25414",
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        -48
+      ],
+      "id": "acc5936a-dd6a-45df-8d20-985ddaa9d585",
+      "name": "shouldRetry"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "deb99412-312c-46d9-b4af-27e22ec72243",
+              "leftValue": "={{ $json.shouldRetry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1152,
+        -64
+      ],
+      "id": "6f49f48f-1c3d-4a5a-93b5-924a8fac4621",
+      "name": "Retry failed?"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Initial": {
+      "main": [
+        [
+          {
+            "node": "shouldRetry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry Delay": {
+      "main": [
+        [
+          {
+            "node": "Send Message (retry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message (retry)": {
+      "main": [
+        [
+          {
+            "node": "Check Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Retry": {
+      "main": [
+        [
+          {
+            "node": "Retry failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Failure Report": {
+      "main": [
+        [
+          {
+            "node": "Raise Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Raise Failure": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "shouldRetry": {
+      "main": [
+        [
+          {
+            "node": "Retry Delay",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Retry failed?": {
+      "main": [
+        [
+          {
+            "node": "Build Failure Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "d996e780-646c-4840-9716-a963bc7faae9",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-22T18:20:20.342Z",
+      "role": "workflow:owner",
+      "workflowId": "U44ZfEwFU77EUthb",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

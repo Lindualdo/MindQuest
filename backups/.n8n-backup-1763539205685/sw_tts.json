@@ -1,0 +1,207 @@
+{
+  "createdAt": "2025-11-08T21:15:40.375Z",
+  "id": "kbmJxJtDUZ1CU4Xt",
+  "name": "sw_tts",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instanceName"
+            },
+            {
+              "name": "remoteJidOrNumber"
+            },
+            {
+              "name": "messageText"
+            }
+          ]
+        }
+      },
+      "id": "n_start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1168,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.messageText }}",
+        "voice": "shimmer",
+        "options": {}
+      },
+      "id": "n_tts",
+      "name": "OpenAI TTS",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        -944,
+        80
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "iBbF6xeELJJicTdo",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "setAllData": false,
+        "sourceKey": "=data",
+        "destinationKey": "=mindquest",
+        "options": {
+          "encoding": "base64"
+        }
+      },
+      "id": "n_move",
+      "name": "Binary → Base64 JSON",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-audio",
+        "instanceName": "={{ $('start').item.json.instanceName }}",
+        "remoteJid": "={{ $('start').item.json.remoteJidOrNumber }}",
+        "media": "={{ $json.mindquest }}",
+        "fileName": "={{ $json.fileName || ('tts.' + ($('start').item.json.responseFormat || 'mp3')) }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        80
+      ],
+      "id": "4dddf5a4-10aa-4510-9058-cefe175e7a3e",
+      "name": "Evolution: Send Audio (base64)",
+      "credentials": {
+        "evolutionApi": {
+          "id": "foSAtmXVyX4ygfQv",
+          "name": "MindQuest"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "OpenAI TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI TTS": {
+      "main": [
+        [
+          {
+            "node": "Binary → Base64 JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Binary → Base64 JSON": {
+      "main": [
+        [
+          {
+            "node": "Evolution: Send Audio (base64)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionTimeout": 180,
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "instanceName": "MindQuest",
+          "remoteJidOrNumber": "351932786582@s.whatsapp.net",
+          "messageText": "Oi, Aldo. Vejo que enviou \"jupter123\". Gostaria de saber se quer compartilhar algo específico ou se prefere seguir conversando sobre seus planos e estratégias? Estou aqui para ajudar no que precisar."
+        }
+      }
+    ]
+  },
+  "versionId": "a060aca5-21a9-4289-9a95-88fdbe707ddc",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-08T21:15:40.375Z",
+      "role": "workflow:owner",
+      "workflowId": "kbmJxJtDUZ1CU4Xt",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

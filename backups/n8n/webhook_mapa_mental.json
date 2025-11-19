@@ -1,5 +1,9 @@
 {
+  "createdAt": "2025-11-18T13:00:45.380Z",
+  "id": "YlZ5iI1QJuW9mxqu",
   "name": "webhook_mapa_mental",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -10,10 +14,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -496,
-        -32
+        -224,
+        240
       ],
-      "id": "72c8d59a-8e15-45b8-9876-4da0891330c8",
+      "id": "f9810d74-f194-4bf8-af67-88b788d98e86",
       "name": "Execute a SQL query",
       "credentials": {
         "postgres": {
@@ -34,10 +38,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        -96,
-        -32
+        176,
+        240
       ],
-      "id": "bde8a9ac-1bbc-4261-9740-d9fe2f1c81f1",
+      "id": "f4633838-f965-46ad-8107-2b1c69f8a8b4",
       "name": "AI Agent"
     },
     {
@@ -47,10 +51,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -288,
-        -32
+        -16,
+        240
       ],
-      "id": "c454c57b-0625-4491-91b5-00ff9c84a88c",
+      "id": "e5e75704-fc05-40a4-b135-711d041c4170",
       "name": "Code in JavaScript"
     },
     {
@@ -60,10 +64,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -208,
-        208
+        80,
+        544
       ],
-      "id": "f3ae4af5-74f8-46c6-9475-445f67fd6cc5",
+      "id": "bf6f078a-4778-4817-9430-b830e3f6543a",
       "name": "OpenRouter Chat Model",
       "credentials": {
         "openRouterApi": {
@@ -74,16 +78,17 @@
     },
     {
       "parameters": {
-        "path": "481dacae-3d52-4619-8b03-9a104696bef1",
+        "path": "mapa_mental",
+        "responseMode": "responseNode",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -704,
-        -32
+        -432,
+        240
       ],
-      "id": "90c86a00-c598-497f-b3bb-78cbf8bd8648",
+      "id": "d9142c50-a867-4e53-b06c-096a4a9ddc0b",
       "name": "Webhook",
       "webhookId": "481dacae-3d52-4619-8b03-9a104696bef1"
     },
@@ -95,14 +100,26 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        112,
-        192
+        384,
+        464
       ],
-      "id": "38c397eb-0667-49db-9793-4c7e2e5e6fe1",
+      "id": "3a8e7c68-1703-4c7c-b5fb-4260e07a1d48",
       "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        624,
+        240
+      ],
+      "id": "b4524316-7d35-4008-8af9-9d0e5e83c3f3",
+      "name": "Respond to Webhook"
     }
   ],
-  "pinData": {},
   "connections": {
     "Execute a SQL query": {
       "main": [
@@ -133,6 +150,11 @@
             "node": "AI Agent",
             "type": "ai_languageModel",
             "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
           }
         ]
       ]
@@ -158,17 +180,79 @@
           }
         ]
       ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6532156b-6692-4fd8-9245-4cfadee85213",
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "8b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7"
+    "templateCredsSetupCompleted": true
   },
-  "id": "YlZ5iI1QJuW9mxqu",
+  "pinData": {},
+  "versionId": "b0b0fda6-4813-4f19-905e-f09986f7eab5",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-18T13:00:45.380Z",
+      "role": "workflow:owner",
+      "workflowId": "YlZ5iI1QJuW9mxqu",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }
