@@ -889,17 +889,10 @@ class ApiService {
             ...((options.headers as Record<string, string>) || {}),
           };
 
-      // Serializar body se for objeto e não for string/FormData/Blob
-      let body = options.body;
-      if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer)) {
-        body = JSON.stringify(body);
-      }
-
       const response = await fetch(url, {
         ...options,
         method,
         headers,
-        body,
       });
 
       const contentType = response.headers.get('content-type') || '';
@@ -1219,31 +1212,18 @@ class ApiService {
     };
 
     const endpoint = `/concluir-quest`;
+    // Usa proxy em dev, remote em produção
+    const useProxy = this.useProxyPaths && typeof window !== 'undefined';
     
-    // SEMPRE chamar diretamente o n8n em produção (não usar handler local)
-    // Montar query params para GET
-    const queryParams = new URLSearchParams({
-      usuario_id: body.usuario_id,
-      quest_id: body.quest_id,
-    });
-    if (body.fonte) queryParams.set('fonte', body.fonte);
-    if (body.comentario) queryParams.set('comentario', body.comentario);
-    
-    const endpointWithParams = `${endpoint}?${queryParams.toString()}`;
-    const fullUrl = `${this.remoteBaseUrl}${endpointWithParams}`;
-    
-    console.log('[ApiService.concluirQuest] Chamando:', { 
-      endpoint: endpointWithParams, 
-      fullUrl,
-      forceRemote: true
-    });
+    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body });
     
     const result = await this.makeRequest(
-      endpointWithParams,
+      endpoint,
       {
-        method: 'GET',
+        method: 'POST',
+        body,
       },
-      true // forceRemote = true sempre (chama direto n8n produção)
+      !useProxy // forceRemote = true apenas se não usar proxy
     );
 
     console.log('[ApiService.concluirQuest] Resultado:', result);
