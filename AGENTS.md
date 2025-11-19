@@ -73,6 +73,16 @@ Ao tratar de workflows n8n:
   - `Adicionar workflow n8n para concluir quest`
   - `Integrar botão concluir com webhook de persistência`
 
+## Commits Após Implementação (Obrigatório)
+- **SEMPRE fazer commit após concluir uma implementação ou correção.**
+- Processo:
+  1. Verificar alterações: `git status`
+  2. Adicionar arquivos: `git add -A` ou `git add <arquivos-específicos>`
+  3. Fazer commit com mensagem descritiva seguindo padrão acima
+  4. Não fazer push automático (aguardar aprovação do usuário)
+- Exceções: commits apenas para testes/debug locais podem ser omitidos se não forem relevantes.
+- Mensagem deve descrever o que foi feito de forma clara e concisa.
+
 ## Setup Postgres
 - `config/postgres.env` centraliza as variáveis de conexão.
 - Carregue-as com `source config/postgres.env` antes das queries.
