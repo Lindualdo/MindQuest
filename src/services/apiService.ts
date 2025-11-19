@@ -1198,20 +1198,28 @@ class ApiService {
     const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     const useProxy = isDev ? this.useProxyPaths : true; // Em dev usa proxy se configurado, em prod sempre usa /api
     
+    // Montar query params para GET
+    const queryParams = new URLSearchParams({
+      usuario_id: body.usuario_id,
+      quest_id: body.quest_id,
+    });
+    if (body.fonte) queryParams.set('fonte', body.fonte);
+    if (body.comentario) queryParams.set('comentario', body.comentario);
+    
+    const endpointWithParams = `${endpoint}?${queryParams.toString()}`;
+    
     console.log('[ApiService.concluirQuest] Chamando:', { 
-      endpoint, 
+      endpoint: endpointWithParams, 
       useProxy, 
       isDev,
-      body, 
       forceRemote: !useProxy,
-      url: useProxy ? `/api${endpoint}` : `${this.remoteBaseUrl}${endpoint}`
+      url: useProxy ? `/api${endpointWithParams}` : `${this.remoteBaseUrl}${endpointWithParams}`
     });
     
     const result = await this.makeRequest(
-      endpoint,
+      endpointWithParams,
       {
-        method: 'POST',
-        body: JSON.stringify(body), // Serializar explicitamente
+        method: 'GET',
       },
       !useProxy // forceRemote = true em dev (direto n8n), false em prod (via handler Vercel)
     );

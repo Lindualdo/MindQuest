@@ -56,13 +56,13 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET') {
     console.log('[concluir-quest] Método não suportado:', req.method);
     res.status(405).json({ success: false, error: 'Método não suportado' });
     return;
   }
 
-  const source = req.body ?? {};
+  const source = req.query ?? {};
   const usuarioId = readUsuarioId(source);
   const questId = readQuestId(source);
 
@@ -82,24 +82,24 @@ export default async function handler(req: any, res: any) {
 
   const remoteEndpoint = process.env.CONCLUIR_QUEST_WEBHOOK_URL || DEFAULT_ENDPOINT;
 
-  console.log('[concluir-quest] Chamando webhook:', { remoteEndpoint, usuarioId, questId });
+  // Montar query params para GET
+  const queryParams = new URLSearchParams({
+    usuario_id: usuarioId,
+    quest_id: questId,
+  });
+  if (source.fonte) queryParams.set('fonte', String(source.fonte));
+  if (source.comentario) queryParams.set('comentario', String(source.comentario));
+
+  const webhookUrl = `${remoteEndpoint}?${queryParams.toString()}`;
+
+  console.log('[concluir-quest] Chamando webhook:', { webhookUrl, usuarioId, questId });
 
   try {
-    const payload = {
-      usuario_id: usuarioId,
-      quest_id: questId,
-      fonte: source.fonte ?? 'app_v1.3',
-      comentario: source.comentario ?? null,
-    };
-
-    console.log('[concluir-quest] Payload:', payload);
-
-    const upstreamResponse = await fetch(remoteEndpoint, {
-      method: 'POST',
+    const upstreamResponse = await fetch(webhookUrl, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
     });
 
     console.log('[concluir-quest] Response status:', upstreamResponse.status, upstreamResponse.statusText);
