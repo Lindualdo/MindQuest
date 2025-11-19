@@ -175,7 +175,7 @@ const PainelQuestsPageV13: React.FC = () => {
       hasRequestedData.current = false;
       void loadQuestSnapshot(usuarioId);
       void loadQuestsCard(usuarioId);
-      void loadWeeklyProgressCard(usuarioId);
+      void loadWeeklyQuestsProgressCard(usuarioId);
     }
   };
 
@@ -232,30 +232,33 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Barra de dias da semana
+  // Barra de dias da semana (somente quests)
   const renderWeeklyBar = () => {
     return (
       <div className="mb-6 flex h-24 items-end justify-between gap-1 rounded-2xl bg-white px-3 pb-3 pt-4 shadow-sm">
         {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, new Date());
+            const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
             
-            // Altura da barra baseada no progresso
+            // Altura da barra baseada no progresso DE QUESTS APENAS
             const meta = dia.metaDia || 1;
-            const realizado = dia.totalXp || 0;
+            const realizado = dia.xpQuests || 0; // APENAS XP de quests
             const ratio = Math.min(1, realizado / meta);
             const barHeight = Math.max(4, ratio * 48); // max 48px altura
             
             // Cor da barra
-            let barColor = '#CBD5E1'; // Cinza default
-            if (realizado >= meta && meta > 0) barColor = '#22C55E'; // Verde full
-            else if (realizado > 0) barColor = '#86EFAC'; // Verde claro
+            let barColor = '#E2E8F0'; // Cinza default (futuro ou sem dados)
+            if (!isFuturoDay && realizado > 0) {
+              barColor = realizado >= meta ? '#10B981' : '#3B82F6'; // Verde completo, azul parcial
+            }
             
             return (
                 <button
                     key={index}
-                    onClick={() => handleSelectDay(dia.dateObj)}
-                    className={`group flex flex-1 flex-col items-center justify-end gap-2 transition-all ${isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-80'}`}
+                    onClick={() => dia.dateObj && handleSelectDay(dia.dateObj)}
+                    disabled={isFuturoDay}
+                    className={`group flex flex-1 flex-col items-center justify-end gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-80'}`}
                 >
                     {/* Barra */}
                     <div className="relative h-14 w-full flex items-end justify-center">
@@ -305,13 +308,13 @@ const PainelQuestsPageV13: React.FC = () => {
               <button
                 type="button"
                 onClick={handleRefresh}
-                disabled={questLoading || questsCardLoading || weeklyProgressCardLoading}
+                disabled={questLoading || questsCardLoading || weeklyQuestsProgressCardLoading}
                 className="inline-flex items-center justify-center rounded-full bg-white p-1.5 text-[#1C2541] shadow transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Recarregar"
               >
                 <RefreshCw 
                   size={16} 
-                  className={questLoading || questsCardLoading || weeklyProgressCardLoading ? 'animate-spin' : ''} 
+                  className={questLoading || questsCardLoading || weeklyQuestsProgressCardLoading ? 'animate-spin' : ''} 
                 />
               </button>
             </div>
@@ -380,7 +383,7 @@ const PainelQuestsPageV13: React.FC = () => {
         </div>
         
         {/* Erros */}
-        {(questError || questsCardError || weeklyProgressCardError) && (
+        {(questError || questsCardError || weeklyQuestsProgressCardError) && (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-center text-xs text-red-600">
             Alguns dados não puderam ser carregados no momento.
           </div>
