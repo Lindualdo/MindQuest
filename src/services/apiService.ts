@@ -1201,11 +1201,19 @@ class ApiService {
     };
 
     const endpoint = `/concluir-quest`;
-    // SEMPRE usar o handler do Vercel (/api/concluir-quest) que então chama o n8n
-    // Não usar proxy direto para o n8n, pois o handler do Vercel precisa processar
-    const useProxy = true; // Sempre usar /api para passar pelo handler do Vercel
+    // Em dev: usar proxy direto para n8n (handlers Vercel não funcionam localmente)
+    // Em prod: usar handler Vercel /api/concluir-quest que então chama n8n
+    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const useProxy = isDev ? this.useProxyPaths : true; // Em dev usa proxy se configurado, em prod sempre usa /api
     
-    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body, url: `/api${endpoint}` });
+    console.log('[ApiService.concluirQuest] Chamando:', { 
+      endpoint, 
+      useProxy, 
+      isDev,
+      body, 
+      forceRemote: !useProxy,
+      url: useProxy ? `/api${endpoint}` : `${this.remoteBaseUrl}${endpoint}`
+    });
     
     const result = await this.makeRequest(
       endpoint,
@@ -1213,7 +1221,7 @@ class ApiService {
         method: 'POST',
         body: JSON.stringify(body), // Serializar explicitamente
       },
-      false // forceRemote = false para usar /api (handler Vercel)
+      !useProxy // forceRemote = true em dev (direto n8n), false em prod (via handler Vercel)
     );
 
     console.log('[ApiService.concluirQuest] Resultado:', result);
