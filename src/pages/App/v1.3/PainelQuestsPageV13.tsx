@@ -162,9 +162,19 @@ const PainelQuestsPageV13: React.FC = () => {
     setView('dashboard');
   };
 
-  const handleMarcarConclusao = () => {
+  const handleMarcarConclusao = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
+    console.log('[PainelQuests] handleMarcarConclusao chamado', { destaque, questLoading, questsCard, pendentes });
+    
     if (!destaque?.id) {
       console.error('[PainelQuests] destaque.id não encontrado', { destaque });
+      return;
+    }
+    
+    if (questLoading) {
+      console.warn('[PainelQuests] Já está processando uma conclusão');
       return;
     }
     
@@ -172,6 +182,12 @@ const PainelQuestsPageV13: React.FC = () => {
     const questId = questsCard?.quest?.id 
       || pendentes.find(q => q.instancia_id === destaque.id || q.meta_codigo === destaque.id)?.instancia_id
       || destaque.id;
+    
+    console.log('[PainelQuests] Quest ID encontrado:', questId, { 
+      questsCardQuestId: questsCard?.quest?.id,
+      destaqueId: destaque.id,
+      pendentesIds: pendentes.map(q => ({ instancia_id: q.instancia_id, meta_codigo: q.meta_codigo }))
+    });
     
     // Valida se é UUID (formato esperado pelo webhook)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -365,7 +381,10 @@ const PainelQuestsPageV13: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={handleMarcarConclusao}
+                  onClick={(e) => {
+                    console.log('[PainelQuests] Botão clicado!', { destaque, questLoading, disabled: !destaque || questLoading });
+                    handleMarcarConclusao(e);
+                  }}
                   disabled={!destaque || questLoading}
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0EA5E9] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow disabled:cursor-not-allowed disabled:opacity-70"
                 >
