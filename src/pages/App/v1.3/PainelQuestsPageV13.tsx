@@ -288,6 +288,18 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const loadingState = questLoading || questsCardLoading;
 
+  // Debug: log do estado atual
+  useEffect(() => {
+    console.log('[PainelQuests] Estado atualizado:', {
+      destaque: destaque?.id,
+      questLoading,
+      questsCardLoading,
+      loadingState,
+      pendentesCount: pendentes.length,
+      questsCardQuestId: questsCard?.quest?.id,
+    });
+  }, [destaque, questLoading, questsCardLoading, loadingState, pendentes.length, questsCard?.quest?.id]);
+
   return (
     <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
@@ -382,11 +394,28 @@ const PainelQuestsPageV13: React.FC = () => {
                 <button
                   type="button"
                   onClick={(e) => {
-                    console.log('[PainelQuests] Botão clicado!', { destaque, questLoading, disabled: !destaque || questLoading });
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('[PainelQuests] Botão clicado!', { 
+                      destaque, 
+                      questLoading, 
+                      disabled: !destaque || questLoading,
+                      event: e,
+                      target: e.target,
+                      currentTarget: e.currentTarget
+                    });
+                    if (!destaque || questLoading) {
+                      console.warn('[PainelQuests] Botão desabilitado, ignorando click');
+                      return;
+                    }
                     handleMarcarConclusao(e);
+                  }}
+                  onMouseDown={(e) => {
+                    console.log('[PainelQuests] Botão mouseDown', e);
                   }}
                   disabled={!destaque || questLoading}
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0EA5E9] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow disabled:cursor-not-allowed disabled:opacity-70"
+                  style={{ pointerEvents: (!destaque || questLoading) ? 'none' : 'auto' }}
                 >
                   <CheckCircle2 size={16} className={questLoading ? 'animate-spin' : undefined} />
                   {questLoading ? 'Concluindo...' : 'Marcar como concluída'}
