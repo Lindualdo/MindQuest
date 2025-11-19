@@ -24,6 +24,12 @@ Meta Diária = 1 conversa (15 pts) + quests ativas do dia (30 pts cada)
 - Meta é **sempre fixa** por dia
 - Streaks não alteram a meta, apenas dão bônus
 
+**Cálculo de Quests Ativas:**
+Uma quest está "ativa" em um dia se:
+- `status IN ('ativa', 'pendente')` (quests concluídas não contam)
+- `janela_inicio <= dia <= janela_fim` (dentro do período de disponibilidade)
+- Quest diária concluída hoje conta na meta de hoje, mas reseta para amanhã
+
 ---
 
 ## 3. Tabelas Principais
@@ -36,7 +42,16 @@ Meta Diária = 1 conversa (15 pts) + quests ativas do dia (30 pts cada)
 ### `usuarios_quest`
 - **Função:** Repositório histórico de quests do usuário
 - **Equivalente para conversas:** `usr_chat`
-- **Campos importantes:** `status`, `xp_concedido`, `referencia_data`
+- **Campos importantes:**
+  - `status`: `'ativa'`, `'pendente'`, `'concluida'`
+  - `xp_concedido`: XP total concedido pela quest (deve bater com `conquistas_historico`)
+  - `referencia_data`: Data de referência da quest
+  - `janela_inicio` / `janela_fim`: Período em que a quest está disponível
+  - `config`: JSON com `titulo`, `recorrencia`, `agenda`, `dias_semana`
+- **Janelas de Ativação:**
+  - Definem o período em que uma quest está "ativa"
+  - Quests diárias resetam para `pendente` após conclusão se ainda estiverem dentro da janela
+  - Após `janela_fim`, quest permanece `concluida` e não reseta
 
 ### `usuarios_conquistas`
 - **Função:** Saldo consolidado/acumulado de XP do usuário
@@ -275,7 +290,10 @@ FROM quests_concluidas qc, pontos_quest_historico pqh, saldo_conquistas sc;
 
 - **`webhook_concluir_quest`**: Marca quest como concluída (acionado pelo app)
   - Atualiza `usuarios_quest.status = 'concluida'`
-  - Calcula e registra XP
+  - Calcula e registra XP via `sw_xp_quest`
+  - **Reset automático:** Quests diárias retornam para `status='pendente'` após conclusão
+    - Condição: `config.recorrencia = 'diaria'` E `CURRENT_DATE BETWEEN janela_inicio AND janela_fim`
+    - Garante que quests diárias estejam disponíveis novamente no próximo ciclo
   - Atualiza totais e jornada
 
 - **`webhook_progresso_semanal`**: Retorna dados do card de progresso (home)
@@ -305,10 +323,39 @@ FROM quests_concluidas qc, pontos_quest_historico pqh, saldo_conquistas sc;
 - `usr_chat.data_conversa`: Usar `::date` diretamente (sem conversão de timezone)
 - `conquistas_historico.registrado_em`: Usar `AT TIME ZONE 'America/Sao_Paulo'` para converter
 
-### Registro Consolidado
-- Em `conquistas_historico`, conversas recorrentes geram **1 único registro** com `meta_codigo = 'conversa_diaria'`
-- O campo `xp_base` neste registro contém a soma de **todos os dias com conversa** (ex: 30 dias × 15 pts = 450 pts)
+### Registro Consolidado em `conquistas_historico`
+
+**Para Conversas:**
+- Geram **1 único registro** com `meta_codigo = 'conversa_diaria'`
+- O campo `xp_base` contém a soma de **todos os dias com conversa** (ex: 30 dias × 15 pts = 450 pts)
+- Campo `detalhes` (JSON) armazena as ocorrências individuais:
+  ```json
+  {
+    "ocorrencias": [
+      {"dia": "2025-11-16", ...},
+      {"dia": "2025-11-18", ...}
+    ],
+    "recorrencia_total": 30
+  }
+  ```
 - Streaks são registrados separadamente com `meta_codigo` como `streak_003`, `streak_005`, etc.
+
+**Para Quests Recorrentes:**
+- Geram **1 único registro por quest** (não 1 por conclusão)
+- O campo `xp_base` contém a soma de **todas as conclusões** da quest
+- Campo `detalhes` (JSON) armazena as conclusões individuais:
+  ```json
+  {
+    "quest_id": "...",
+    "recorrencia": "diaria",
+    "ocorrencias": [
+      {"dia": "2025-11-18", "xp_base": 30, "xp_bonus": 6},
+      {"dia": "2025-11-19", "xp_base": 30, "xp_bonus": 6}
+    ]
+  }
+  ```
+
+**IMPORTANTE:** Para calcular XP por período (ex: semana), é necessário filtrar as ocorrências dentro do campo `detalhes`, não apenas somar `xp_base` do registro principal.
 
 ### Estrutura de Pontos
 ```
@@ -317,6 +364,41 @@ xp_total = xp_base + xp_bonus
 xp_base = pontos de conversas diárias (conversa_diaria) + pontos de quests (xp_base_quest)
 xp_bonus = pontos de streaks + pontos de bônus de recorrência de quests
 ```
+
+---
+
+## 8. Problemas Comuns e Soluções
+
+### Meta Semanal Zerada no Painel de Quests
+
+**Sintoma:** 
+- Card home mostra meta correta (conversas + quests)
+- Painel de quests mostra meta = 0 pts
+
+**Causa Raiz:**
+- Quests diárias concluídas não estavam sendo resetadas para `status='pendente'`
+- Query de meta busca apenas quests com `status IN ('ativa', 'pendente')`
+- Todas as quests ficavam `status='concluida'` permanentemente
+
+**Solução Implementada:**
+- Adicionado nó "Resetar Quest Diaria" no `webhook_concluir_quest`
+- Executa após calcular XP, antes de retornar resposta
+- Reseta quests diárias para `pendente` se ainda estiverem dentro da janela
+- Query: `UPDATE usuarios_quest SET status='pendente', progresso_atual=0, progresso_percentual=0, concluido_em=NULL WHERE config->>'recorrencia'='diaria' AND CURRENT_DATE BETWEEN janela_inicio AND janela_fim`
+
+### Divergência de XP entre Painel e Card Home
+
+**Sintoma:**
+- XP diferente entre `webhook_progresso_semanal` (home) e `webhook_progresso_quests_semanal` (painel)
+
+**Causa Raiz:**
+- Webhook estava somando `xp_base` total de `conquistas_historico` sem filtrar por período
+- Campo `xp_base` contém soma acumulada de TODAS as ocorrências históricas, não apenas da semana
+
+**Solução:**
+- Filtrar ocorrências dentro do campo `detalhes` (JSON) pelo período desejado
+- Contar apenas ocorrências com `dia >= inicio_semana AND dia <= fim_semana`
+- Não somar `xp_base` diretamente do registro principal
 
 ---
 
