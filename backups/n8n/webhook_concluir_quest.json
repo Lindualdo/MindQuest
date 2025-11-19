@@ -39,13 +39,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
+        "query": "UPDATE public.usuarios_quest\nSET\n  status = 'concluida',\n  progresso_atual = progresso_meta,\n  progresso_percentual = 100,\n  concluido_em = CURRENT_TIMESTAMP,\n  atualizado_em = CURRENT_TIMESTAMP\nWHERE id = $1::uuid\n  AND usuario_id = $2::uuid\n  AND status = 'ativa'\nRETURNING\n  id AS quest_id,\n  usuario_id,\n  status,\n  progresso_meta,\n  progresso_atual,\n  progresso_percentual,\n  xp_concedido,\n  concluido_em,\n  atualizado_em;",
         "options": {
           "queryReplacement": "={{ [$json.quest_id, $json.usuario_id] }}"
-        },
-        "query": "SELECT\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.progresso_percentual,\n  uq.xp_concedido,\n  uq.config,\n  uq.referencia_data,\n  uq.contexto_origem,\n  uq.atualizado_em,\n  COALESCE(uq.config->>'meta_codigo', uq.id::text) AS meta_codigo_resolvido,\n  COALESCE(uq.config->>'titulo', 'Quest personalizada') AS titulo_resolvido,\n  uq.config->>'descricao' AS descricao_resolvida,\n  COALESCE((uq.config->>'xp_recompensa')::int, 0) AS xp_base_config,\n  COALESCE((uq.config->>'xp_bonus_recorrencia')::int, 0) AS xp_bonus_config,\n  mc.titulo AS meta_titulo,\n  mc.xp_recompensa AS xp_meta_base\nFROM public.usuarios_quest uq\nLEFT JOIN public.metas_catalogo mc\n  ON mc.codigo = COALESCE(uq.config->>'meta_codigo', uq.id::text)\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid\nLIMIT 1;"
+        }
       },
-      "id": "node_fetch",
-      "name": "Carregar Quest",
+      "id": "node_update_status",
+      "name": "Atualizar Status",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
@@ -54,17 +54,17 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
+          "id": "postgres_mindquest",
+          "name": "Postgres - MindQuest"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const quest = $input.first()?.json;\nif (!quest || !quest.quest_id) {\n  throw new Error('Quest não encontrada para o usuário');\n}\nif (quest.status === 'concluida') {\n  throw new Error('Quest já estava concluída');\n}\n\nconst toNumber = (value, fallback = 0) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst xpBase = toNumber(quest.xp_base_config ?? quest.xp_meta_base, 0);\nconst xpBonus = toNumber(quest.xp_bonus_config, 0);\nconst xpTotal = xpBase + xpBonus;\n\nreturn [{\n  json: {\n    usuario_id: quest.usuario_id,\n    quest_id: quest.quest_id,\n    meta_codigo: quest.meta_codigo_resolvido,\n    meta_titulo: quest.meta_titulo ?? quest.titulo_resolvido ?? 'Quest personalizada',\n    xp_base: xpBase,\n    xp_bonus: xpBonus,\n    xp_total: xpTotal,\n    progresso_meta: toNumber(quest.progresso_meta, 1) || 1,\n    fonte: $json.fonte ?? null,\n    comentario: $json.comentario ?? null,\n    referencia_data: quest.referencia_data ?? null,\n  }\n}];"
+        "jsCode": "const item = $input.first()?.json ?? {};\n\nif (!item.quest_id) {\n  throw new Error('Quest não encontrada ou já concluída');\n}\n\nreturn [{\n  json: {\n    usuario_id: item.usuario_id,\n    quest_id: item.quest_id,\n    status: item.status\n  }\n}];"
       },
-      "id": "node_prepare",
-      "name": "Preparar Atualizacao",
+      "id": "node_check_update",
+      "name": "Validar Atualização",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -74,37 +74,81 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "options": {
-          "queryReplacement": "={{ [$json.quest_id, $json.usuario_id, $json.xp_total] }}"
+        "workflowId": {
+          "__rl": true,
+          "value": "bTeLj5qOKQo9PDMO",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/bTeLj5qOKQo9PDMO",
+          "cachedResultName": "sw_xp_quest"
         },
-        "query": "UPDATE public.usuarios_quest\nSET status = 'concluida',\n    progresso_atual = COALESCE(progresso_meta, 1),\n    progresso_percentual = 100,\n    concluido_em = NOW(),\n    xp_concedido = $3::int,\n    atualizado_em = NOW()\nWHERE id = $1::uuid\n  AND usuario_id = $2::uuid;"
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "quests_personalizadas": "[]",
+            "atualizacoes_status": "[]"
+          },
+          "matchingColumns": [
+            "usuario_id"
+          ],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "quests_personalizadas",
+              "displayName": "quests_personalizadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "atualizacoes_status",
+              "displayName": "atualizacoes_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": false,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
       },
-      "id": "node_update",
-      "name": "Atualizar Usuarios Quest",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "id": "node_call_xp_quest",
+      "name": "Calcular XP Quest",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [
         -240,
         0
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
+        "query": "SELECT\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.progresso_percentual,\n  uq.xp_concedido,\n  uq.config,\n  uq.referencia_data,\n  uq.contexto_origem,\n  uq.concluido_em,\n  uq.atualizado_em,\n  uc.xp_total,\n  uc.xp_base,\n  uc.xp_bonus,\n  uc.total_quests_concluidas,\n  uc.total_quests_personalizadas\nFROM public.usuarios_quest uq\nLEFT JOIN public.usuarios_conquistas uc ON uc.usuario_id = uq.usuario_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid\nLIMIT 1;",
         "options": {
-          "queryReplacement": "={{ [$('Preparar Atualizacao').item.json.usuario_id, $('Preparar Atualizacao').item.json.meta_codigo, $('Preparar Atualizacao').item.json.meta_titulo, $('Preparar Atualizacao').item.json.xp_base, $('Preparar Atualizacao').item.json.xp_bonus, $('Preparar Atualizacao').item.json.quest_id, $('Preparar Atualizacao').item.json.fonte, $('Preparar Atualizacao').item.json.comentario, $('Preparar Atualizacao').item.json.referencia_data] }}"
-        },
-        "query": "INSERT INTO public.conquistas_historico\n  (usuario_id, tipo, meta_codigo, meta_titulo, xp_base, xp_bonus, detalhes)\nVALUES (\n  $1::uuid,\n  'quest_personalizada',\n  $2::text,\n  $3::text,\n  $4::int,\n  $5::int,\n  jsonb_build_object(\n    'quest_id', $6::uuid,\n    'fonte', $7::text,\n    'comentario', $8::text,\n    'referencia_data', $9::date\n  )\n)\nRETURNING id;"
+          "queryReplacement": "={{ [$('Validar Atualização').item.json.quest_id, $('Validar Atualização').item.json.usuario_id] }}"
+        }
       },
-      "id": "node_history",
-      "name": "Registrar Historico",
+      "id": "node_fetch_final",
+      "name": "Buscar Quest Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
@@ -113,116 +157,36 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
+          "id": "postgres_mindquest",
+          "name": "Postgres - MindQuest"
         }
       }
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "options": {
-          "queryReplacement": "={{ [$('Preparar Atualizacao').item.json.usuario_id, $('Preparar Atualizacao').item.json.quest_id, $('Preparar Atualizacao').item.json.xp_total, $('Preparar Atualizacao').item.json.xp_base, $('Preparar Atualizacao').item.json.xp_bonus] }}"
-        },
-        "query": "UPDATE public.usuarios_conquistas\nSET\n  xp_total = xp_total + $3::int,\n  xp_base = xp_base + $4::int,\n  xp_bonus = xp_bonus + $5::int,\n  total_quests_concluidas = total_quests_concluidas + 1,\n  total_quests_personalizadas = total_quests_personalizadas + 1,\n  atualizado_em = NOW()\nWHERE usuario_id = $1::uuid\nRETURNING *;"
+        "jsCode": "const item = $input.first()?.json ?? {};\n\nreturn [{\n  json: {\n    success: true,\n    quest_id: item.quest_id,\n    usuario_id: item.usuario_id,\n    status: item.status,\n    xp_adicionado: item.xp_concedido || 0,\n    xp_base: item.xp_base || 0,\n    xp_bonus: item.xp_bonus || 0,\n    total_quests_concluidas: item.total_quests_concluidas || 0,\n    total_quests_personalizadas: item.total_quests_personalizadas || 0,\n    quest: {\n      id: item.quest_id,\n      status: item.status,\n      progresso_meta: item.progresso_meta,\n      progresso_atual: item.progresso_atual,\n      progresso_percentual: item.progresso_percentual,\n      xp_concedido: item.xp_concedido,\n      config: item.config,\n      concluido_em: item.concluido_em,\n      atualizado_em: item.atualizado_em\n    }\n  }\n}];"
       },
-      "id": "node_state",
-      "name": "Atualizar Usuarios Conquistas",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "id": "node_format_response",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         240,
         0
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const estado = $items('Atualizar Usuarios Conquistas', 0, 0)?.[0]?.json ?? {};\nconst payload = $input.first()?.json ?? {};\n\nconst xpTotal = Number(estado.xp_total) || 0;\nconst metrics = {\n  sequencia_recorde: Number(estado.sequencia_recorde) || 0,\n  total_quests_personalizadas: Number(estado.total_quests_personalizadas) || 0,\n  total_quests_concluidas: Number(estado.total_quests_concluidas) || 0,\n  sabotadores_identificados: 0,\n  quests_concluidas: Number(estado.total_quests_concluidas) || 0,\n  quests_desafiadoras: 0,\n  quests_recorrentes_21: 0,\n  areas_vida_distintas: 0,\n  quests_compartilhar: 0,\n  quests_proprias: 0,\n  falhas_recuperadas: 0,\n  projetos_impacto: 0,\n};\nmetrics.ciclos30 = Math.floor(metrics.sequencia_recorde / 30);\n\nconst LEVELS = [\n  { level: 1, minXp: 0, requirements: () => true },\n  { level: 2, minXp: 500, requirements: (m) => m.sequencia_recorde >= 7 && m.sabotadores_identificados >= 3 && (m.total_quests_personalizadas >= 3 || m.quests_concluidas >= 3) },\n  { level: 3, minXp: 1200, requirements: (m) => m.sequencia_recorde >= 10 && m.quests_concluidas >= 5 && m.quests_desafiadoras >= 1 },\n  { level: 4, minXp: 2200, requirements: (m) => m.sequencia_recorde >= 15 && m.quests_concluidas >= 8 && m.quests_recorrentes_21 >= 1 },\n  { level: 5, minXp: 3600, requirements: (m) => m.sequencia_recorde >= 20 && m.quests_concluidas >= 12 && m.falhas_recuperadas >= 1 },\n  { level: 6, minXp: 5400, requirements: (m) => m.sequencia_recorde >= 25 && m.quests_concluidas >= 15 && m.areas_vida_distintas >= 3 },\n  { level: 7, minXp: 7400, requirements: (m) => m.sequencia_recorde >= 30 && m.quests_concluidas >= 20 && m.quests_proprias >= 2 },\n  { level: 8, minXp: 9800, requirements: (m) => m.ciclos30 >= 2 && m.quests_concluidas >= 25 && m.quests_compartilhar >= 3 },\n  { level: 9, minXp: 12600, requirements: (m) => m.sequencia_recorde >= 45 && m.quests_concluidas >= 30 && m.projetos_impacto >= 1 },\n  { level: 10, minXp: 16000, requirements: (m) => m.sequencia_recorde >= 365 && m.projetos_impacto >= 1 },\n];\n\nconst xpEligible = LEVELS.reduce((acc, lvl) => (xpTotal >= lvl.minXp ? lvl.level : acc), 1);\nlet criteriaEligible = 1;\nfor (const lvl of LEVELS) {\n  if (lvl.level > xpEligible) break;\n  if (lvl.requirements(metrics)) {\n    criteriaEligible = lvl.level;\n  } else {\n    break;\n  }\n}\nconst targetLevel = Math.min(xpEligible, criteriaEligible);\n\nreturn [{\n  json: {\n    ...payload,\n    usuario_id: estado.usuario_id || payload.usuario_id,\n    xp_total: xpTotal,\n    target_nivel: targetLevel,\n  }\n}];"
-      },
-      "id": "node_calc_jornada",
-      "name": "Calcular Jornada",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        480,
-        0
       ]
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.target_nivel || 1] }}"
-        },
-        "query": "WITH nivel_destino AS (\n  SELECT *\n  FROM public.jornada_niveis\n  WHERE nivel = $2::int\n)\nUPDATE public.usuarios_conquistas uc\nSET\n  xp_proximo_nivel = COALESCE(nivel_destino.xp_proximo_nivel, uc.xp_proximo_nivel),\n  nivel_atual = COALESCE(nivel_destino.nivel, uc.nivel_atual),\n  titulo_nivel = COALESCE(nivel_destino.nome, uc.titulo_nivel),\n  atualizado_em = NOW()\nFROM nivel_destino\nWHERE uc.usuario_id = $1::uuid\nRETURNING uc.usuario_id, uc.nivel_atual, uc.titulo_nivel, uc.xp_proximo_nivel;"
-      },
-      "id": "node_update_jornada",
-      "name": "Atualizar Nível Jornada",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        720,
-        0
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "options": {
-          "queryReplacement": "={{ [$('Preparar Atualizacao').item.json.quest_id] }}"
-        },
-        "query": "SELECT\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.progresso_percentual,\n  uq.concluido_em,\n  uq.xp_concedido,\n  uq.config\nFROM public.usuarios_quest uq\nWHERE uq.id = $1::uuid;"
-      },
-      "id": "node_snapshot",
-      "name": "Buscar Quest Atualizada",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        960,
-        0
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const quest = $items('Buscar Quest Atualizada', 0, 0)?.[0]?.json ?? {};\nconst estado = $items('Atualizar Usuarios Conquistas', 0, 0)?.[0]?.json ?? {};\nconst historico = $items('Registrar Historico', 0, 0)?.[0]?.json ?? {};\nconst payload = $input.first()?.json ?? {};\n\nreturn [{\n  json: {\n    success: true,\n    quest_id: payload.quest_id,\n    usuario_id: payload.usuario_id,\n    status: quest.status ?? 'concluida',\n    xp_adicionado: payload.xp_total,\n    xp_base: payload.xp_base,\n    xp_bonus: payload.xp_bonus,\n    total_quests_concluidas: estado.total_quests_concluidas ?? null,\n    total_quests_personalizadas: estado.total_quests_personalizadas ?? null,\n    historico_id: historico.id ?? null,\n    quest: quest,\n  }\n}];"
-      },
-      "id": "node_response",
-      "name": "Montar Resposta",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1200,
-        0
-      ]
-    },
-    {
-      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "node_reply",
-      "name": "Responder",
+      "id": "node_respond",
+      "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
+      "typeVersion": 1.1,
       "position": [
-        1440,
+        480,
         0
       ]
     }
@@ -243,106 +207,62 @@
       "main": [
         [
           {
-            "node": "Carregar Quest",
+            "node": "Atualizar Status",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Carregar Quest": {
+    "Atualizar Status": {
       "main": [
         [
           {
-            "node": "Preparar Atualizacao",
+            "node": "Validar Atualização",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar Atualizacao": {
+    "Validar Atualização": {
       "main": [
         [
           {
-            "node": "Atualizar Usuarios Quest",
+            "node": "Calcular XP Quest",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Usuarios Quest": {
+    "Calcular XP Quest": {
       "main": [
         [
           {
-            "node": "Registrar Historico",
+            "node": "Buscar Quest Final",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Registrar Historico": {
+    "Buscar Quest Final": {
       "main": [
         [
           {
-            "node": "Atualizar Usuarios Conquistas",
+            "node": "Formatar Resposta",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Usuarios Conquistas": {
+    "Formatar Resposta": {
       "main": [
         [
           {
-            "node": "Calcular Jornada",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calcular Jornada": {
-      "main": [
-        [
-          {
-            "node": "Atualizar Nível Jornada",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Atualizar Nível Jornada": {
-      "main": [
-        [
-          {
-            "node": "Buscar Quest Atualizada",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Quest Atualizada": {
-      "main": [
-        [
-          {
-            "node": "Montar Resposta",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Montar Resposta": {
-      "main": [
-        [
-          {
-            "node": "Responder",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -350,62 +270,13 @@
       ]
     }
   },
-  "settings": {},
-  "staticData": null,
-  "meta": null,
   "pinData": {},
-  "versionId": "18de1604-b834-4131-887d-19780493fd6c",
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
   "triggerCount": 1,
-  "shared": [
-    {
-      "createdAt": "2025-11-19T11:51:06.793Z",
-      "role": "workflow:owner",
-      "workflowId": "YF4CyvHY0BbLWNwC",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
-  "tags": []
+  "updatedAt": "2025-11-19T18:30:00.000Z",
+  "versionId": "v1.3"
 }
