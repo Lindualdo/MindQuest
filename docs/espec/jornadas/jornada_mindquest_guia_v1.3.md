@@ -402,6 +402,240 @@ xp_bonus = pontos de streaks + pontos de bônus de recorrência de quests
 
 ---
 
+## 9. Fluxo Completo End-to-End
+
+### Visão Geral do Ciclo
+
+```
+Usuário conversa → Quest gerada → XP calculado → Exibição no App → Conclusão manual → Reset automático
+```
+
+### Passo a Passo Detalhado
+
+#### **1. Usuário faz uma conversa**
+
+**Onde:** Chat com IA (Mentor)
+
+**O que acontece:**
+- Mensagem armazenada em `usr_chat` com `data_conversa`
+- Webhook/job aciona `sw_xp_conversas`
+
+**Workflow responsável:** `sw_xp_conversas`
+- Lê conversas de `usr_chat`
+- Calcula XP (15 pts base + streaks)
+- Registra em `conquistas_historico` (tipo='conversa')
+- Atualiza `usuarios_conquistas` (saldo consolidado)
+- Chama `sw_calcula_jornada` (atualiza nível)
+
+---
+
+#### **2. Sistema cria as quests**
+
+**Quando:** Job batch ou geração sob demanda
+
+**Workflow responsável:** `job_batch_generate_quests` ou `sw_criar_quest`
+- Analisa perfil do usuário
+- Cria quests personalizadas em `usuarios_quest`
+- Define:
+  - `status = 'ativa'` ou `'pendente'`
+  - `janela_inicio` / `janela_fim` (período de disponibilidade)
+  - `config` (título, recorrência, agenda)
+  - `progresso_meta` e `progresso_atual`
+
+**Resultado:** Quests disponíveis para o usuário no período da janela
+
+---
+
+#### **3. Sistema calcula XP inicial**
+
+**Quando:** Após criar quest ou ao inicializar usuário
+
+**Workflow responsável:** `sw_xp_quest`
+- Lê quests de `usuarios_quest`
+- Calcula XP para novas quests (30 pts base + 6 bônus se recorrente)
+- Registra em `conquistas_historico` (tipo='quest')
+- Atualiza `usuarios_conquistas` (saldo consolidado)
+- Chama `sw_calcula_jornada` (atualiza nível)
+
+**Nota:** Este cálculo inicial não é obrigatório; XP é calculado principalmente na conclusão
+
+---
+
+#### **4. Home do app mostra progresso (conversas + quests)**
+
+**Tela:** Home / Dashboard principal
+
+**Webhook responsável:** `webhook_progresso_semanal`
+
+**O que exibe:**
+- **Progresso semanal:** XP realizado vs meta da semana
+- **Detalhamento por dia:** Barra vertical para cada dia (dom-sáb)
+- **Fonte de dados:**
+  - XP conversas: filtra `conquistas_historico.detalhes.ocorrencias[]` pelo período
+  - XP quests: filtra `conquistas_historico.detalhes.ocorrencias[]` pelo período (tipo='quest')
+  - Meta diária: `15 pts (conversa) + 30 pts × (quests ativas no dia)`
+
+**Dados retornados:**
+```json
+{
+  "xp_semana_total": 120,
+  "meta_semana": 105,
+  "dias": [
+    {
+      "dia": "2025-11-17",
+      "dia_semana": "domingo",
+      "xp_dia": 15,
+      "meta_dia": 15,
+      "xp_conversas": 15,
+      "xp_quests": 0
+    },
+    {...}
+  ]
+}
+```
+
+---
+
+#### **5. Painel de quests mostra andamento (apenas quests)**
+
+**Tela:** Painel de Quests (v1.3)
+
+**Webhook responsável:** `webhook_progresso_quests_semanal`
+
+**O que exibe:**
+- **Progresso semanal de quests:** XP de quests vs meta de quests
+- **Detalhamento por dia:** Barra vertical para cada dia (dom-sáb)
+- **Lista de quests do dia:** Ao clicar em uma barra, mostra quests pendentes e concluídas
+- **Fonte de dados:**
+  - XP quests: filtra `conquistas_historico` (tipo='quest') pelo período
+  - Meta diária: `30 pts × (quests ativas no dia)` (ignora conversas)
+  - Quests do dia: busca de `usuarios_quest` filtrando por status e data
+
+**Dados retornados:**
+```json
+{
+  "xp_semana_total": 90,
+  "meta_semana": 630,
+  "dias": [
+    {
+      "dia": "2025-11-19",
+      "dia_semana": "quarta-feira",
+      "xp_dia": 60,
+      "meta_dia": 90,
+      "xp_quests": 60,
+      "quests_concluidas": 2,
+      "quests_pendentes": 1
+    },
+    {...}
+  ]
+}
+```
+
+**Interação:**
+- Usuário clica em uma barra (dia específico)
+- App filtra `questSnapshot.quests_personalizadas` pelo dia selecionado
+- Exibe lista de quests pendentes e concluídas daquele dia
+
+---
+
+#### **6. Usuário conclui uma quest**
+
+**Ação:** Clique no botão "Concluir" em uma quest pendente
+
+**Webhook responsável:** `webhook_concluir_quest`
+
+**Fluxo interno:**
+1. **Normalizar Entrada:** Valida parâmetros (`usuario_id`, `quest_id`, `data_referencia`)
+2. **Atualizar Status:**
+   - `UPDATE usuarios_quest SET status='concluida', concluido_em=...`
+   - Aceita quests com `status IN ('ativa', 'pendente')`
+   - Usa `data_referencia` se fornecida (permite conclusão retroativa)
+3. **Validar Atualização:** Verifica se quest foi encontrada
+4. **Calcular XP Quest:** Chama `sw_xp_quest` com `atualizacoes_status` contendo a quest concluída
+5. **Resetar Quest Diária (NOVO!):**
+   - Se `config.recorrencia = 'diaria'` E dentro da janela
+   - `UPDATE usuarios_quest SET status='pendente', progresso_atual=0, concluido_em=NULL`
+   - Quest volta a estar disponível imediatamente
+6. **Buscar Quest Final:** Retorna estado atualizado com XP calculado
+7. **Formatar Resposta:** Retorna JSON para o frontend
+8. **Respond to Webhook:** Envia resposta HTTP
+
+**Resultado:**
+- Quest marcada como concluída
+- XP registrado em `conquistas_historico` (append em `detalhes.ocorrencias[]`)
+- `usuarios_conquistas` atualizado (saldo consolidado)
+- Nível/jornada atualizado (via `sw_calcula_jornada`)
+- **Quest diária resetada para `pendente`** (disponível novamente)
+
+**Payload de requisição:**
+```
+GET /concluir-quest?usuario_id=<uuid>&quest_id=<uuid>&data_referencia=2025-11-19
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "quest_id": "...",
+  "usuario_id": "...",
+  "status": "pendente",
+  "xp_adicionado": 36,
+  "xp_base": 30,
+  "xp_bonus": 6
+}
+```
+
+---
+
+#### **7. App atualiza automaticamente após conclusão**
+
+**Frontend (React):** `useStore.ts` → `concluirQuest()`
+
+**O que acontece após o webhook responder:**
+```typescript
+// 1. Marca quest como concluída localmente
+void loadQuestSnapshot(usuarioId);
+
+// 2. Atualiza card de progresso da home
+void loadWeeklyProgressCard(usuarioId); // webhook_progresso_semanal
+
+// 3. Atualiza painel de quests
+void loadWeeklyQuestsProgressCard(usuarioId); // webhook_progresso_quests_semanal
+
+// 4. Atualiza card de quests na home
+void loadQuestsCard(usuarioId);
+```
+
+**Resultado visual:**
+- Barra de progresso atualiza em tempo real
+- Quest aparece como concluída no dia correto
+- Meta e XP realizado refletem a conclusão
+- **Quest diária volta para lista de pendentes** (após reload)
+
+---
+
+### Resumo dos Webhooks por Funcionalidade
+
+| Funcionalidade | Webhook | Descrição |
+|----------------|---------|-----------|
+| **Card Home (progresso geral)** | `webhook_progresso_semanal` | XP conversas + quests vs meta semanal |
+| **Painel Quests (detalhamento)** | `webhook_progresso_quests_semanal` | XP e lista de quests por dia |
+| **Snapshot de Quests** | `webhook_quests` | Lista completa de quests personalizadas |
+| **Concluir Quest** | `webhook_concluir_quest` | Marca quest como concluída, calcula XP e reseta diárias |
+
+---
+
+### Diferenças entre os Webhooks de Progresso
+
+| Aspecto | `webhook_progresso_semanal` | `webhook_progresso_quests_semanal` |
+|---------|----------------------------|-----------------------------------|
+| **Escopo** | Conversas + Quests | Apenas Quests |
+| **Meta Diária** | 15 pts + (30 × quests ativas) | 30 × quests ativas |
+| **XP Exibido** | `xp_conversas` + `xp_quests` | Apenas `xp_quests` |
+| **Uso** | Card de progresso na home | Painel detalhado de quests |
+
+---
+
 ## OBS
 
 - Para detalhes de campos e schema das tabelas, consultar diretamente a base PostgreSQL
