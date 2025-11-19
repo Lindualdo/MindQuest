@@ -186,14 +186,20 @@ class ApiService {
     }
 
     if (forceRemote) {
-      return `${this.remoteBaseUrl}${endpoint}`;
+      const url = `${this.remoteBaseUrl}${endpoint}`;
+      console.log('[ApiService.resolveUrl] forceRemote=true:', url);
+      return url;
     }
 
     if (this.useProxyPaths && typeof window !== 'undefined') {
-      return `/api${endpoint}`;
+      const url = `/api${endpoint}`;
+      console.log('[ApiService.resolveUrl] useProxy=true:', url);
+      return url;
     }
 
-    return `${this.remoteBaseUrl}${endpoint}`;
+    const url = `${this.remoteBaseUrl}${endpoint}`;
+    console.log('[ApiService.resolveUrl] default:', url);
+    return url;
   }
 
   private toNumber(value: unknown, fallback: number | null = null): number | null {
