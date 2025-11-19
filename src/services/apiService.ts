@@ -1126,7 +1126,7 @@ class ApiService {
       throw new Error('Usuário inválido');
     }
 
-    const endpoint = `/card/quests?user_id=${encodeURIComponent(userId)}`;
+    const endpoint = `/quests?user_id=${encodeURIComponent(userId)}`;
     // Usa proxy em dev, remote em produção
     const useProxy = this.useProxyPaths && typeof window !== 'undefined';
     const result = await this.makeRequest(
