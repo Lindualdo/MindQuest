@@ -231,25 +231,31 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Barra de dias da semana (somente quests)
+  // Barra de dias da semana (somente quests) - padrão fixo como home
   const renderWeeklyBar = () => {
     return (
-      <div className="mb-6 flex h-24 items-end justify-between gap-1 rounded-2xl bg-white px-3 pb-3 pt-4 shadow-sm">
+      <div className="mb-6 flex h-28 items-end justify-between gap-2 rounded-2xl bg-white px-4 pb-4 pt-3 shadow-sm">
         {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
             const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
             
-            // Altura da barra baseada no progresso DE QUESTS APENAS
+            // Cálculo do progresso DE QUESTS APENAS
             const meta = dia.metaDia || 1;
             const realizado = dia.xpQuests || 0; // APENAS XP de quests
             const ratio = meta > 0 ? Math.min(1, realizado / meta) : 0;
-            const barHeight = ratio > 0 ? Math.max(8, ratio * 48) : 4; // mínimo 4px se zero, 8px se > 0
+            const percentual = Math.round(ratio * 100);
             
-            // Cor da barra
-            let barColor = '#E2E8F0'; // Cinza default (futuro ou sem dados)
+            // Cor da barra (mesmo padrão da home)
+            let barColor = '#CBD5E1'; // Cinza claro padrão (sem progresso)
             if (!isFuturoDay && realizado > 0 && meta > 0) {
-              barColor = ratio >= 1 ? '#10B981' : '#3B82F6'; // Verde completo (100%), azul parcial
+              if (percentual >= 100) {
+                barColor = '#10B981'; // Verde: meta completa
+              } else if (percentual >= 50) {
+                barColor = '#3B82F6'; // Azul: progresso bom
+              } else {
+                barColor = '#60A5FA'; // Azul claro: progresso inicial
+              }
             }
             
             return (
@@ -257,14 +263,18 @@ const PainelQuestsPageV13: React.FC = () => {
                     key={index}
                     onClick={() => dia.dateObj && handleSelectDay(dia.dateObj)}
                     disabled={isFuturoDay}
-                    className={`group flex flex-1 flex-col items-center justify-end gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-70 hover:opacity-90'}`}
+                    className={`group flex flex-1 flex-col items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
-                    {/* Barra */}
-                    <div className="relative h-14 w-full flex items-end justify-center">
+                    {/* Container da barra - altura fixa */}
+                    <div className="relative h-16 w-full flex items-end justify-center">
+                         {/* Fundo cinza claro - sempre visível */}
+                         <div className="absolute bottom-0 w-3 h-full rounded-full bg-gray-100" />
+                         
+                         {/* Barra de progresso */}
                          <div 
-                            className={`w-2.5 rounded-full transition-all duration-300 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-1' : ''}`}
+                            className={`relative w-3 rounded-full transition-all duration-500 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-2' : ''}`}
                             style={{ 
-                                height: `${barHeight}px`, 
+                                height: `${Math.max(4, percentual)}%`, 
                                 backgroundColor: barColor 
                             }} 
                          />
