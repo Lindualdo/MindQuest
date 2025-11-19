@@ -393,7 +393,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   concluirQuest: async (questIdParam) => {
-    const { dashboardData, questSnapshot, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard } = get();
+    const { dashboardData, questSnapshot, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard, loadWeeklyQuestsProgressCard } = get();
     const usuarioId = dashboardData?.usuario?.id;
     const questId = questIdParam ?? questSnapshot?.quests_personalizadas?.[0]?.instancia_id ?? null;
 
@@ -486,6 +486,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       void loadQuestSnapshot(usuarioId);
       void loadQuestsCard(usuarioId);
       void loadWeeklyProgressCard(usuarioId);
+      void loadWeeklyQuestsProgressCard(usuarioId);
     } catch (error) {
       console.error('[ConcluirQuest] erro ao concluir', error);
       set({
