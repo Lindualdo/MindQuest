@@ -231,10 +231,10 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Barra de dias da semana (somente quests) - padrão EXATO da home
+  // Barra de dias da semana (somente quests) - TODAS com mesma altura
   const renderWeeklyBar = () => {
     return (
-      <div className="mb-6 flex items-end justify-between gap-2 rounded-2xl bg-white px-4 py-4 shadow-sm">
+      <div className="mb-6 flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-4 shadow-sm">
         {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
@@ -245,12 +245,12 @@ const PainelQuestsPageV13: React.FC = () => {
             const realizado = dia.xpQuests || 0; // APENAS XP de quests
             const percentual = meta > 0 ? Math.min(100, Math.round((realizado / meta) * 100)) : 0;
             
-            // Cor da barra de progresso (mesmo padrão da home)
-            let barColor = '#10B981'; // Verde padrão
-            if (realizado === 0) {
-              barColor = 'transparent'; // Sem cor se zero
+            // Cor da barra de progresso
+            let barColor = '#10B981'; // Verde escuro quando 100%
+            if (percentual === 0) {
+              barColor = 'transparent'; // Transparente quando zero
             } else if (percentual >= 100) {
-              barColor = '#10B981'; // Verde: completo
+              barColor = '#10B981'; // Verde escuro: completo
             } else {
               barColor = '#86EFAC'; // Verde claro: parcial
             }
@@ -262,12 +262,12 @@ const PainelQuestsPageV13: React.FC = () => {
                     disabled={isFuturoDay}
                     className={`flex flex-1 flex-col items-center gap-2 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-80'}`}
                 >
-                    {/* Container da barra - SEMPRE altura fixa 64px */}
-                    <div className="relative h-16 w-full flex items-end justify-center">
-                         {/* Fundo cinza - altura FIXA representando a meta total */}
-                         <div className="w-3 h-16 rounded-full bg-slate-200" />
+                    {/* Container - TODAS as barras SEMPRE com mesma altura */}
+                    <div className="relative h-20 w-full flex flex-col items-center justify-end">
+                         {/* Fundo cinza FIXO - mesma altura para TODOS os dias */}
+                         <div className="w-3 h-20 rounded-full bg-slate-200" />
                          
-                         {/* Barra de progresso colorida - sobe de baixo para cima */}
+                         {/* Barra verde de progresso - sobe conforme quests concluídas */}
                          <div 
                             className={`absolute bottom-0 w-3 rounded-full transition-all duration-500 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-2' : ''}`}
                             style={{ 
