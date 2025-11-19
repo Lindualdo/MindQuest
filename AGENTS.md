@@ -66,12 +66,27 @@ Ao tratar de workflows n8n:
 
 ## Mensagens de Commit
 - Sempre usar português brasileiro (PT-BR) nas mensagens de commit.
-- Formato: verbo no infinitivo + objeto direto (ex.: "Corrigir loop infinito no painel de quests").
-- Máximo 50 caracteres no título; detalhes opcionais após linha em branco.
+- Formato: `[LABEL] verbo no infinitivo + objeto direto`
+- Máximo 50 caracteres no título (sem contar o label); detalhes opcionais após linha em branco.
+- Labels disponíveis:
+  - `[fix]` - Correção de bugs ou erros
+  - `[feat]` - Nova funcionalidade
+  - `[refactor]` - Refatoração de código sem mudança de comportamento
+  - `[docs]` - Documentação
+  - `[style]` - Formatação, espaços, etc (sem mudança de código)
+  - `[test]` - Testes
+  - `[chore]` - Tarefas de manutenção, dependências, build
+  - `[perf]` - Melhorias de performance
+  - `[n8n]` - Alterações em workflows n8n
+  - `[api]` - Alterações em endpoints/APIs
+  - `[ui]` - Alterações na interface/componentes visuais
 - Exemplos:
-  - `Corrigir loop infinito no carregamento de quests`
-  - `Adicionar workflow n8n para concluir quest`
-  - `Integrar botão concluir com webhook de persistência`
+  - `[fix] Corrigir loop infinito no carregamento de quests`
+  - `[feat] Adicionar workflow n8n para concluir quest`
+  - `[n8n] Integrar botão concluir com webhook de persistência`
+  - `[api] Criar endpoint /concluir-quest usando webhook_concluir_quest`
+  - `[ui] Adicionar logs de debug no botão de conclusão`
+  - `[refactor] Padronizar exportação de funções no useStore`
 
 ## Commits Após Implementação (Obrigatório)
 - **SEMPRE fazer commit após concluir uma implementação ou correção.**
