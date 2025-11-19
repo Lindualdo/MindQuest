@@ -4,13 +4,15 @@
 
 ### Conversas
 - **Pontuação:** 15 pts por dia (apenas a primeira conversa do dia conta)
-- **Streaks:** Geram bônus, mas **não impactam na meta diária**
+- **Streaks:** Geram bônus (8-90 pts), mas **não impactam na meta diária**
 - **Repositório:** `usr_chat` (histórico de todas as conversas)
+- **IMPORTANTE:** Bônus de streaks **NÃO contam** na meta/progresso semanal, apenas no XP total para mudança de nível
 
 ### Quests
 - **Pontuação:** 30 pts fixos por quest concluída
 - **Bônus recorrência:** 6 pts por ciclo completo (se aplicável)
 - **Repositório:** `usuarios_quest` (histórico de todas as quests)
+- **IMPORTANTE:** Bônus (6 pts) **NÃO conta** na meta/progresso semanal, apenas no XP total para mudança de nível
 
 ---
 
@@ -22,13 +24,17 @@ Meta Diária = 1 conversa (15 pts) + quests ativas do dia (30 pts cada)
 ```
 
 - Meta é **sempre fixa** por dia
-- Streaks não alteram a meta, apenas dão bônus
+- **Bônus NÃO contam na meta:** Streaks e bônus de recorrência apenas aumentam XP total
 
 **Cálculo de Quests Ativas:**
 Uma quest está "ativa" em um dia se:
 - `status IN ('ativa', 'pendente')` (quests concluídas não contam)
 - `janela_inicio <= dia <= janela_fim` (dentro do período de disponibilidade)
 - Quest diária concluída hoje conta na meta de hoje, mas reseta para amanhã
+
+**Bônus vs Progresso:**
+- **Para meta/progresso semanal:** Usa apenas pts base (15 conversas + 30 quests)
+- **Para mudança de nível:** Usa XP total (base + bônus)
 
 ---
 
@@ -365,6 +371,12 @@ xp_base = pontos de conversas diárias (conversa_diaria) + pontos de quests (xp_
 xp_bonus = pontos de streaks + pontos de bônus de recorrência de quests
 ```
 
+**REGRA CRÍTICA - Uso de Bônus:**
+- **Meta e Progresso Semanal:** Usa APENAS `xp_base` (conversas 15 pts + quests 30 pts)
+- **Mudança de Nível/Jornada:** Usa `xp_total` (base + bônus)
+- **Bônus incluem:** Streaks de conversa (8-90 pts) + Recorrência de quest (6 pts)
+- **Exemplo:** Quest concluída = 30 pts (conta na meta) + 6 pts bônus (não conta na meta, só no nível)
+
 ---
 
 ## 8. Problemas Comuns e Soluções
@@ -399,6 +411,29 @@ xp_bonus = pontos de streaks + pontos de bônus de recorrência de quests
 - Filtrar ocorrências dentro do campo `detalhes` (JSON) pelo período desejado
 - Contar apenas ocorrências com `dia >= inicio_semana AND dia <= fim_semana`
 - Não somar `xp_base` diretamente do registro principal
+
+### XP Base vs XP Bônus no Progresso Semanal
+
+**Regra Fundamental:**
+```
+Progresso Semanal = apenas xp_base (15 conversas + 30 quests)
+XP Total (Nível) = xp_base + xp_bonus (base + streaks + recorrência)
+```
+
+**Por quê?**
+- **Meta semanal** é baseada em ações concretas (conversar 1x/dia + concluir N quests)
+- **Bônus** são extras por consistência/engajamento, não afetam se o usuário cumpriu a meta do dia
+- **Nível/Jornada** usa XP total (base + bônus) para refletir o progresso geral do usuário
+
+**Exemplo Prático:**
+- Usuário conclui 1 quest diária → **30 pts** (conta na meta) + **6 pts bônus** (não conta na meta)
+- Meta do dia: 15 (conversa) + 30 (quest) = **45 pts**
+- XP realizado para meta: **45 pts** (100% da meta)
+- XP total para nível: **51 pts** (45 base + 6 bônus)
+
+**Implementação:**
+- Webhooks de progresso (`webhook_progresso_semanal`, `webhook_progresso_quests_semanal`) usam apenas `xp_base`
+- Workflow `sw_calcula_jornada` usa `xp_total` (base + bônus) de `usuarios_conquistas`
 
 ---
 
