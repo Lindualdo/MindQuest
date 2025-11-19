@@ -727,7 +727,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           get().loadQuestSnapshot(dashboardData.usuario.id),
           get().loadPanoramaCard(dashboardData.usuario.id),
           get().loadConversasCard(dashboardData.usuario.id),
-          get().loadQuestsCard(dashboardData.usuario.id),
+          // loadQuestsCard removido - carrega apenas ao abrir painel de quests (v1.3)
           get().loadJornadaCard(dashboardData.usuario.id),
         ]);
       } else {
