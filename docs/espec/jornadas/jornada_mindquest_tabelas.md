@@ -278,10 +278,17 @@ FROM quests_concluidas qc, pontos_quest_historico pqh, saldo_conquistas sc;
   - Calcula e registra XP
   - Atualiza totais e jornada
 
-- **`webhook_progresso_semanal`**: Retorna dados do card de progresso
+- **`webhook_progresso_semanal`**: Retorna dados do card de progresso (home)
   - Busca em `usr_chat` (conversas da semana)
   - Busca em `conquistas_historico` (XP da semana)
   - Calcula metas diárias e semanais
+  - **Inclui:** conversas + quests
+
+- **`webhook_progresso_quests_semanal`**: Retorna progresso semanal **somente de quests** (painel de quests)
+  - Busca em `usuarios_quest` (quests da semana)
+  - Busca em `conquistas_historico` com filtro `tipo='quest'`
+  - Calcula metas diárias baseadas apenas em quests ativas
+  - **Ignora:** conversas (exibe apenas progresso de quests)
 
 ### Ordem de Execução (Setup/Reset)
 
