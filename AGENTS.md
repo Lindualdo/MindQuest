@@ -98,6 +98,16 @@ Ao tratar de workflows n8n:
 - Exceções: commits apenas para testes/debug locais podem ser omitidos se não forem relevantes.
 - Mensagem deve descrever o que foi feito de forma clara e concisa.
 
+## Debug de APIs e Webhooks
+- **SEMPRE usar logs de execução do n8n para localizar webhooks e debugar problemas de API.**
+- Processo:
+  1. Identificar o webhook relacionado ao problema
+  2. Usar `n8n_list_workflows` para localizar o workflow
+  3. Usar `n8n_list_executions` para encontrar execuções recentes
+  4. Usar `n8n_get_execution` para analisar logs e payloads
+  5. Comparar payloads de entrada/saída com o esperado pelo frontend
+- Nunca supor formato de resposta; sempre verificar nos logs de execução.
+
 ## Setup Postgres
 - `config/postgres.env` centraliza as variáveis de conexão.
 - Carregue-as com `source config/postgres.env` antes das queries.
