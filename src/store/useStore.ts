@@ -64,6 +64,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   conversaResumoLoading: false,
   conversaResumoError: null,
   selectedConversationId: null,
+  conversaResumoReturnView: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -901,22 +902,28 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       console.warn('[ConversaResumo] conversaId inválido');
       return;
     }
+    const { view, conversaResumoReturnView } = get();
+    const originView = view === 'conversaResumo' ? conversaResumoReturnView ?? 'humorHistorico' : view;
     set({
       view: 'conversaResumo',
       selectedConversationId: conversaId,
       conversaResumo: null,
-      conversaResumoError: null
+      conversaResumoError: null,
+      conversaResumoReturnView: originView
     });
     await get().loadConversaResumo(conversaId);
   },
 
   closeConversaResumo: () => {
+    const { conversaResumoReturnView } = get();
+    const fallbackView = conversaResumoReturnView ?? 'humorHistorico';
     set({
-      view: 'humorHistorico',
+      view: fallbackView,
       conversaResumo: null,
       conversaResumoError: null,
       conversaResumoLoading: false,
-      selectedConversationId: null
+      selectedConversationId: null,
+      conversaResumoReturnView: null
     });
   }
 }));

@@ -27,6 +27,7 @@ const HomeV1_3 = () => {
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadWeeklyProgressCard,
+    openSabotadorDetail,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -133,8 +134,14 @@ const HomeV1_3 = () => {
   const sabotadorEmoji = sabotadorAtivo?.emoji ?? null;
   const sabotadorDescricao = sabotadorAtivo?.contexto_principal ?? sabotadorAtivo?.insight_atual ?? null;
   const handleVerSabotador = () => {
-    setActiveTab('perfil');
-    setView('dashSabotadores');
+    const id = sabotadorAtivo?.id ?? null;
+    if (id) {
+      setActiveTab('perfil');
+      openSabotadorDetail(id);
+    } else {
+      setActiveTab('perfil');
+      openSabotadorDetail();
+    }
   };
 
   return (

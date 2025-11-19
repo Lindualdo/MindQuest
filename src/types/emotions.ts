@@ -601,12 +601,30 @@ export interface DashboardData {
 }
 
 // Store state interface
+export type ViewId =
+  | 'dashboard'
+  | 'humorHistorico'
+  | 'insightDetail'
+  | 'conquistas'
+  | 'proximosNiveis'
+  | 'sabotadorDetail'
+  | 'resumoConversas'
+  | 'conversaResumo'
+  | 'panasDetail'
+  | 'fullChatDetail'
+  | 'dashEmocoes'
+  | 'dashSabotadores'
+  | 'dashInsights'
+  | 'painelQuests'
+  | 'mapaMental'
+  | 'mapaMentalVisual';
+
 export interface StoreState {
   dashboardData: DashboardData;
   isLoading: boolean;
   periodo: 'semana' | 'mes' | 'trimestre';
   ultimaAtualizacao: string;
-  view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'conversaResumo' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual';
+  view: ViewId;
   humorHistorico: HumorHistoricoPayload | null;
   humorHistoricoPeriodo?: { inicio: string; fim: string } | null;
   humorHistoricoLoading: boolean;
@@ -623,6 +641,7 @@ export interface StoreState {
   conversaResumoLoading: boolean;
   conversaResumoError: string | null;
   selectedConversationId: string | null;
+  conversaResumoReturnView: ViewId | null;
   panoramaCard: PanoramaCardData | null;
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
@@ -665,7 +684,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: 'dashboard' | 'humorHistorico' | 'insightDetail' | 'conquistas' | 'proximosNiveis' | 'sabotadorDetail' | 'resumoConversas' | 'conversaResumo' | 'panasDetail' | 'fullChatDetail' | 'dashEmocoes' | 'dashSabotadores' | 'dashInsights' | 'painelQuests' | 'mapaMental' | 'mapaMentalVisual') => void;
+  setView: (view: ViewId) => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;

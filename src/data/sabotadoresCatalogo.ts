@@ -31,7 +31,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
   overview: {
     titulo: 'Sabotadores - Conceito',
     descricao:
-      'Padrões mentais automáticos que surgem como mecanismos de proteção e acabam sabotando decisões e bem-estar emocional quando mantidos na vida adulta.',
+      'Sabotadores são padrões mentais automáticos. Surgem como mecanismos de proteção mas acabam interferindo em decisões e bem-estar emocional. São relacionados com suas crenças e sua percepção sobre o mundo ao seu redor.',
     origem: [
       'Na infância agiam como guardiões para lidar com ameaças reais ou imaginárias e garantir sobrevivência física/emocional.',
       'Na vida adulta permanecem como lentes invisíveis que distorcem a forma como interpretamos e reagimos ao mundo.',
@@ -248,7 +248,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
         ],
       },
       funcaoOriginal:
-        'Garantir respeito e afeto ao impressionar figuras de autoridade e familiares através de resultados.',
+        'Garantir respeito e afeto ao impressionar pessoas importantes e familiares através de resultados.',
       estrategiasAntidoto: [
         'Definir metas de bem-estar tão importantes quanto metas técnicas.',
         'Praticar check-ins emocionais semanais.',

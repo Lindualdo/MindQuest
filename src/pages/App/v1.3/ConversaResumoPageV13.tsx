@@ -38,14 +38,13 @@ const ConversaResumoPageV13 = () => {
 
   useEffect(() => {
     if (!selectedConversationId) {
-      setView('humorHistorico');
       return;
     }
 
     if (!conversaResumo || conversaIdAtual !== String(selectedConversationId)) {
       void loadConversaResumo(selectedConversationId);
     }
-  }, [selectedConversationId, conversaResumo, conversaIdAtual, loadConversaResumo, setView]);
+  }, [selectedConversationId, conversaResumo, conversaIdAtual, loadConversaResumo]);
 
   const paragraphs = useMemo(() => {
     const texto = conversaResumo?.resumo_conversa?.trim();

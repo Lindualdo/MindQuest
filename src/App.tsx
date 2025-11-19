@@ -23,6 +23,7 @@ import { useDashboard } from './store/useStore';
 import ConquistasPage from './pages/App/ConquistasPage';
 import ProximosNiveisPage from './pages/App/ProximosNiveisPage';
 import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
+import SabotadorDetailPageV13 from './pages/App/v1.3/SabotadorDetailPageV13';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PainelQuestsPage from './pages/App/PainelQuestsPage';
 import PanasDetailPage from './pages/App/PanasDetailPage';
@@ -160,6 +161,13 @@ function App() {
     }
   }, [isRootPath]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [view]);
+
   if (isLandingRoute) {
     return <ComecarAgoraLandingPage />;
   }
@@ -242,6 +250,9 @@ function App() {
         break;
       case 'conversaResumo':
         previewPage = <ConversaResumoPageV13 />;
+        break;
+      case 'sabotadorDetail':
+        previewPage = <SabotadorDetailPageV13 />;
         break;
       case 'mapaMental':
         previewPage = <MapaMentalPage />;
@@ -336,7 +347,7 @@ function App() {
   if (isAppRoute && view === 'sabotadorDetail') {
     return (
       <AuthGuard>
-        <SabotadorDetailPage />
+        {isAppPreviewV13 ? <SabotadorDetailPageV13 /> : <SabotadorDetailPage />}
       </AuthGuard>
     );
   }

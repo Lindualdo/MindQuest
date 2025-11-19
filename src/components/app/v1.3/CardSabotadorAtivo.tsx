@@ -27,10 +27,10 @@ const CardSabotadorAtivo = ({ sabotadorId, nome, emoji, descricao, onSaberMais }
         Padrão mental — Meu sabotador
       </p>
       <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
-        <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-[#111827]">
+        <h3 className="flex items-center gap-2 text-[0.95rem] font-semibold text-[#111827]">
           {iconeEmoji && <span>{iconeEmoji}</span>}
           <span>{titulo}</span>
-        </div>
+        </h3>
         <p className="mt-2 text-[0.82rem] leading-relaxed text-[#4B5563] line-clamp-2">
           {detalhes}
         </p>
