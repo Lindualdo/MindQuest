@@ -99,8 +99,6 @@ const QuestPanel: React.FC = () => {
 
   const {
     quests_personalizadas: questsPersonalizadas = [],
-    xp_total = 0,
-    xp_proximo_nivel,
   } = computedSnapshot;
 
   return (
@@ -115,11 +113,6 @@ const QuestPanel: React.FC = () => {
           </span>
           <div className="space-y-0.5">
             <h3 className="text-xl font-semibold text-[#1C2541]">Quests</h3>
-            {xp_proximo_nivel != null && xp_total != null && xp_proximo_nivel > xp_total ? (
-              <p className="text-sm text-[#475467]">
-                Faltam {Math.max(xp_proximo_nivel - xp_total, 0)} XP para o próximo nível
-              </p>
-            ) : null}
           </div>
         </div>
       </div>

@@ -96,9 +96,9 @@ const PainelQuestsPage: React.FC = () => {
             </div>
             <div className="rounded-2xl border border-[#C4EBDD] bg-[#ECFDF3] px-4 py-3 text-sm text-[#0F766E]">
               <p className="font-semibold">Recompensas</p>
-              <p>+{questAtiva?.xp_recompensa ?? questsCard?.recompensas?.xp_base ?? 150} XP</p>
+              <p>+{questAtiva?.xp_recompensa ?? questsCard?.recompensas?.xp_base ?? 150} pontos</p>
               {questsCard?.recompensas?.xp_bonus_recorrencia ? (
-                <p>+{questsCard.recompensas.xp_bonus_recorrencia} XP recorrência</p>
+                <p>+{questsCard.recompensas.xp_bonus_recorrencia} pontos recorrência</p>
               ) : null}
               {questAtiva?.ultima_atualizacao_label && (
                 <p className="mt-1 text-xs text-[#059669]">
