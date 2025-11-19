@@ -889,10 +889,19 @@ class ApiService {
             ...((options.headers as Record<string, string>) || {}),
           };
 
+      // Serializar body se for objeto e não for string/FormData/Blob
+      let body = options.body;
+      if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer)) {
+        body = JSON.stringify(body);
+      }
+
+      console.log(`[ApiService.makeRequest] ${method} ${url}`, { body, headers });
+
       const response = await fetch(url, {
         ...options,
         method,
         headers,
+        body,
       });
 
       const contentType = response.headers.get('content-type') || '';
@@ -1189,13 +1198,13 @@ class ApiService {
     // Usa proxy em dev, remote em produção
     const useProxy = this.useProxyPaths && typeof window !== 'undefined';
     
-    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body });
+    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body, forceRemote: !useProxy });
     
     const result = await this.makeRequest(
       endpoint,
       {
         method: 'POST',
-        body,
+        body: JSON.stringify(body), // Serializar explicitamente
       },
       !useProxy // forceRemote = true apenas se não usar proxy
     );
