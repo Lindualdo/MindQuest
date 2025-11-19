@@ -700,6 +700,7 @@ export interface StoreState {
   loadInsightCard: (usuarioId?: string) => Promise<void>;
   loadQuestsCard: (usuarioId?: string) => Promise<void>;
   markQuestAsCompletedLocal: (questId: string) => void;
+  concluirQuest: (questId?: string) => Promise<void>;
   loadJornadaCard: (usuarioId?: string) => Promise<void>;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
   loadWeeklyProgressCard: (usuarioId?: string) => Promise<void>;

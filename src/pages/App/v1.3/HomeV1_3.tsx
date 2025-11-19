@@ -135,10 +135,20 @@ const HomeV1_3 = () => {
   };
 
   const weeklySummary = weeklyProgressCard ?? mockWeeklyXpSummary;
-  const sabotadorAtivo = dashboardData?.sabotadores?.padrao_principal;
-  const sabotadorNome = sabotadorAtivo?.nome ?? sabotadorAtivo?.apelido_personalizado ?? null;
-  const sabotadorEmoji = sabotadorAtivo?.emoji ?? null;
-  const sabotadorDescricao = sabotadorAtivo?.contexto_principal ?? sabotadorAtivo?.insight_atual ?? null;
+  const sabotadorAtivo = panoramaCard?.sabotador ?? dashboardData?.sabotadores?.padrao_principal ?? null;
+  const sabotadorNome =
+    sabotadorAtivo?.nome ??
+    sabotadorAtivo?.apelido_personalizado ??
+    dashboardData?.sabotadores?.padrao_principal?.nome ??
+    null;
+  const sabotadorEmoji =
+    sabotadorAtivo?.emoji ?? dashboardData?.sabotadores?.padrao_principal?.emoji ?? null;
+  const sabotadorDescricao =
+    sabotadorAtivo?.contexto ??
+    sabotadorAtivo?.insight ??
+    dashboardData?.sabotadores?.padrao_principal?.contexto_principal ??
+    dashboardData?.sabotadores?.padrao_principal?.insight_atual ??
+    null;
   const handleVerSabotador = () => {
     const id = sabotadorAtivo?.id ?? null;
     if (id) {

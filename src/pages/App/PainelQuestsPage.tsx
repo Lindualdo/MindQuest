@@ -15,6 +15,7 @@ const PainelQuestsPage: React.FC = () => {
     loadQuestSnapshot,
     questsCard,
     markQuestAsCompletedLocal,
+    concluirQuest,
   } = useDashboard();
 
   const usuarioId = dashboardData?.usuario?.id;
@@ -38,7 +39,7 @@ const PainelQuestsPage: React.FC = () => {
 
   const handleMarcarConclusao = () => {
     if (questAtiva?.id) {
-      markQuestAsCompletedLocal(questAtiva.id);
+      void concluirQuest(questAtiva.id);
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, RefreshCw, Sparkles, CheckCircle2, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Sparkles, CheckCircle2, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -32,7 +32,7 @@ const PainelQuestsPageV13: React.FC = () => {
     questsCardError,
     loadQuestSnapshot,
     loadQuestsCard,
-    markQuestAsCompletedLocal,
+    concluirQuest,
     setView,
   } = useDashboard();
 
@@ -77,9 +77,9 @@ const PainelQuestsPageV13: React.FC = () => {
   );
 
   const destaque: QuestDestaque | null = useMemo(() => {
-    if (questsCard?.quest) {
+    if (questsCard?.quest?.id) {
       return {
-        id: questsCard.quest.id ?? 'quest-card',
+        id: questsCard.quest.id,
         titulo: questsCard.quest.titulo,
         descricao: questsCard.quest.descricao ?? null,
         prioridade: questsCard.quest.prioridade,
@@ -122,15 +122,9 @@ const PainelQuestsPageV13: React.FC = () => {
     setView('dashboard');
   };
 
-  const handleRefresh = () => {
-    if (!usuarioId) return;
-    void loadQuestSnapshot(usuarioId);
-    void loadQuestsCard(usuarioId);
-  };
-
   const handleMarcarConclusao = () => {
     if (!destaque?.id) return;
-    markQuestAsCompletedLocal(destaque.id);
+    void concluirQuest(destaque.id);
   };
 
   const handleNavHome = () => {
@@ -234,14 +228,6 @@ const PainelQuestsPageV13: React.FC = () => {
             <ArrowLeft size={16} />
             Voltar
           </button>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            className="inline-flex items-center gap-1 rounded-full border border-[#CBD5F5] bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541]"
-          >
-            <RefreshCw size={14} className={loadingState ? 'animate-spin' : ''} />
-            Atualizar
-          </button>
         </div>
 
         <Card className="!p-0 overflow-hidden" hover={false}>
@@ -322,11 +308,11 @@ const PainelQuestsPageV13: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleMarcarConclusao}
-                  disabled={!destaque}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0EA5E9] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow"
+                  disabled={!destaque || questLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#0EA5E9] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <CheckCircle2 size={16} />
-                  Marcar como concluída
+                  <CheckCircle2 size={16} className={questLoading ? 'animate-spin' : undefined} />
+                  {questLoading ? 'Concluindo...' : 'Marcar como concluída'}
                 </button>
               </>
             )}

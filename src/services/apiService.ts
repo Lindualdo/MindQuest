@@ -1147,6 +1147,79 @@ class ApiService {
     return payload as QuestCardResponse;
   }
 
+  public async concluirQuest(payload: {
+    usuarioId: string;
+    questId: string;
+    fonte?: string | null;
+    comentario?: string | null;
+  }): Promise<{
+    success: boolean;
+    quest_id: string;
+    usuario_id: string;
+    status: string;
+    xp_adicionado: number;
+    xp_base: number;
+    xp_bonus: number;
+    total_quests_concluidas?: number | null;
+    total_quests_personalizadas?: number | null;
+    historico_id?: string | null;
+    quest?: Record<string, unknown>;
+  }> {
+    if (!payload.usuarioId) {
+      throw new Error('Usuário inválido para concluir quest');
+    }
+    if (!payload.questId) {
+      throw new Error('Quest inválida para conclusão');
+    }
+
+    const body = {
+      usuario_id: payload.usuarioId,
+      quest_id: payload.questId,
+      fonte: payload.fonte ?? 'app_v1.3',
+      comentario: payload.comentario ?? null,
+    };
+
+    const endpoint = `/concluir-quest`;
+    const result = await this.makeRequest(
+      endpoint,
+      {
+        method: 'POST',
+        body,
+      },
+      true
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao concluir quest');
+    }
+
+    let data: unknown = result.response;
+    if (Array.isArray(data)) {
+      data = data[0];
+    } else if (data && typeof data === 'object' && 'data' in (data as Record<string, unknown>)) {
+      const nested = (data as Record<string, unknown>).data;
+      data = Array.isArray(nested) ? nested[0] : nested;
+    }
+
+    if (!data || typeof data !== 'object') {
+      throw new Error('Resposta inesperada ao concluir quest');
+    }
+
+    return data as {
+      success: boolean;
+      quest_id: string;
+      usuario_id: string;
+      status: string;
+      xp_adicionado: number;
+      xp_base: number;
+      xp_bonus: number;
+      total_quests_concluidas?: number | null;
+      total_quests_personalizadas?: number | null;
+      historico_id?: string | null;
+      quest?: Record<string, unknown>;
+    };
+  }
+
   public async getJornadaCard(userId: string): Promise<JornadaCardResponse> {
     if (!userId) {
       throw new Error('Usuário inválido');
