@@ -38,7 +38,8 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<QuestTab>('pendentes');
   const [activeNavTab, setActiveNavTab] = useState<TabId>('quests');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const hoje = useMemo(() => new Date(), []); // Fixar hoje no mount
+  const [selectedDate, setSelectedDate] = useState<Date>(hoje);
   const hasRequestedData = useRef(false);
 
   // Carregar dados
@@ -66,29 +67,27 @@ const PainelQuestsPageV13: React.FC = () => {
   const weeklyData = weeklyQuestsProgressCard ?? mockWeeklyXpSummary;
   
   const diasSemana = useMemo(() => {
-    // Se tiver dados do backend, usa. Se não, gera dias da semana atual
-    if (weeklyData.dias && weeklyData.dias.length > 0) {
-      return weeklyData.dias.map(d => ({
-        ...d,
-        dateObj: d.data ? parseISO(d.data) : null
-      }));
-    }
+    // SEMPRE gera DOM-SAB da semana corrente
+    const inicioSemana = startOfWeek(hoje, { weekStartsOn: 0 }); // 0 = domingo
     
-    const hoje = new Date();
-    const inicio = startOfWeek(hoje, { weekStartsOn: 0 });
     return Array.from({ length: 7 }).map((_, i) => {
-      const data = addDays(inicio, i);
+      const data = addDays(inicioSemana, i);
+      const dataStr = format(data, 'yyyy-MM-dd');
+      
+      // Buscar dados do backend para este dia específico
+      const diaBackend = weeklyData.dias?.find(d => d.data === dataStr);
+      
       return {
-        data: format(data, 'yyyy-MM-dd'),
-        label: format(data, 'EEE', { locale: ptBR }).slice(0, 3),
-        metaDia: 0,
-        totalXp: 0,
-        xpConversa: 0,
-        xpQuests: 0,
+        data: dataStr,
+        label: format(data, 'EEE', { locale: ptBR }).slice(0, 3).toUpperCase(),
+        metaDia: diaBackend?.metaDia || 0,
+        totalXp: diaBackend?.totalXp || 0,
+        xpConversa: diaBackend?.xpConversa || 0,
+        xpQuests: diaBackend?.xpQuests || 0, // SOMENTE quests
         dateObj: data
       };
     });
-  }, [weeklyData]);
+  }, [weeklyData, hoje]);
 
   // Quests filtradas pelo dia selecionado
   const questsDoDia = useMemo(() => {
@@ -238,19 +237,19 @@ const PainelQuestsPageV13: React.FC = () => {
       <div className="mb-6 flex h-24 items-end justify-between gap-1 rounded-2xl bg-white px-3 pb-3 pt-4 shadow-sm">
         {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
-            const isHoje = dia.dateObj && isSameDay(dia.dateObj, new Date());
+            const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
             const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
             
             // Altura da barra baseada no progresso DE QUESTS APENAS
             const meta = dia.metaDia || 1;
             const realizado = dia.xpQuests || 0; // APENAS XP de quests
-            const ratio = Math.min(1, realizado / meta);
-            const barHeight = Math.max(4, ratio * 48); // max 48px altura
+            const ratio = meta > 0 ? Math.min(1, realizado / meta) : 0;
+            const barHeight = ratio > 0 ? Math.max(8, ratio * 48) : 4; // mínimo 4px se zero, 8px se > 0
             
             // Cor da barra
             let barColor = '#E2E8F0'; // Cinza default (futuro ou sem dados)
-            if (!isFuturoDay && realizado > 0) {
-              barColor = realizado >= meta ? '#10B981' : '#3B82F6'; // Verde completo, azul parcial
+            if (!isFuturoDay && realizado > 0 && meta > 0) {
+              barColor = ratio >= 1 ? '#10B981' : '#3B82F6'; // Verde completo (100%), azul parcial
             }
             
             return (
@@ -258,12 +257,12 @@ const PainelQuestsPageV13: React.FC = () => {
                     key={index}
                     onClick={() => dia.dateObj && handleSelectDay(dia.dateObj)}
                     disabled={isFuturoDay}
-                    className={`group flex flex-1 flex-col items-center justify-end gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-80'}`}
+                    className={`group flex flex-1 flex-col items-center justify-end gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-70 hover:opacity-90'}`}
                 >
                     {/* Barra */}
                     <div className="relative h-14 w-full flex items-end justify-center">
                          <div 
-                            className={`w-2.5 rounded-full transition-all duration-500 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-2' : ''}`}
+                            className={`w-2.5 rounded-full transition-all duration-300 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-1' : ''}`}
                             style={{ 
                                 height: `${barHeight}px`, 
                                 backgroundColor: barColor 
@@ -272,11 +271,19 @@ const PainelQuestsPageV13: React.FC = () => {
                     </div>
                     
                     {/* Label Dia */}
-                    <div className="flex flex-col items-center">
-                        <span className={`text-[10px] font-bold uppercase ${isSelected ? 'text-[#0EA5E9]' : 'text-[#64748B]'}`}>
+                    <div className="flex flex-col items-center gap-0.5">
+                        <span className={`text-[10px] font-bold ${
+                          isHoje 
+                            ? 'text-[#0EA5E9]' 
+                            : isSelected 
+                            ? 'text-[#1C2541]' 
+                            : 'text-[#94A3B8]'
+                        }`}>
                             {dia.label}
                         </span>
-                        {isHoje && <div className="mt-0.5 h-1 w-1 rounded-full bg-[#0EA5E9]" />}
+                        {isHoje && (
+                          <div className="h-1.5 w-1.5 rounded-full bg-[#0EA5E9]" />
+                        )}
                     </div>
                 </button>
             );
