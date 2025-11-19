@@ -26,6 +26,7 @@ import SabotadorDetailPage from './pages/App/SabotadorDetailPage';
 import SabotadorDetailPageV13 from './pages/App/v1.3/SabotadorDetailPageV13';
 import ResumoConversasPage from './pages/App/ResumoConversasPage';
 import PainelQuestsPage from './pages/App/PainelQuestsPage';
+import PainelQuestsPageV13 from './pages/App/v1.3/PainelQuestsPageV13';
 import PanasDetailPage from './pages/App/PanasDetailPage';
 import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
 import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
@@ -243,7 +244,7 @@ function App() {
         previewPage = <InsightsDashboardPage />;
         break;
       case 'painelQuests':
-        previewPage = <PainelQuestsPage />;
+        previewPage = <PainelQuestsPageV13 />;
         break;
       case 'resumoConversas':
         previewPage = <ResumoConversasPage />;
@@ -379,7 +380,7 @@ function App() {
   if (isAppRoute && view === 'painelQuests') {
     return (
       <AuthGuard>
-        <PainelQuestsPage />
+      {isAppPreviewV13 ? <PainelQuestsPageV13 /> : <PainelQuestsPage />}
       </AuthGuard>
     );
   }

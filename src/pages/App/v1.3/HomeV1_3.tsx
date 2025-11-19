@@ -14,7 +14,6 @@ const HomeV1_3 = () => {
   const {
     dashboardData,
     setView,
-    openResumoConversas,
     openInsightDetail,
     panoramaCard,
     panoramaCardLoading,
@@ -28,6 +27,8 @@ const HomeV1_3 = () => {
     weeklyProgressCardError,
     loadWeeklyProgressCard,
     openSabotadorDetail,
+    loadQuestSnapshot,
+    loadQuestsCard,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -91,7 +92,12 @@ const HomeV1_3 = () => {
   }, [panoramaCard]);
 
   const handleContinue = () => {
-    void openResumoConversas();
+    if (userId) {
+      void loadQuestSnapshot(userId);
+      void loadQuestsCard(userId);
+    }
+    setActiveTab('quests');
+    setView('painelQuests');
   };
 
   const handleVerHumor = () => {
