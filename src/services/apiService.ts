@@ -1180,14 +1180,21 @@ class ApiService {
     };
 
     const endpoint = `/concluir-quest`;
+    // Usa proxy em dev, remote em produção
+    const useProxy = this.useProxyPaths && typeof window !== 'undefined';
+    
+    console.log('[ApiService.concluirQuest] Chamando:', { endpoint, useProxy, body });
+    
     const result = await this.makeRequest(
       endpoint,
       {
         method: 'POST',
         body,
       },
-      true
+      !useProxy // forceRemote = true apenas se não usar proxy
     );
+
+    console.log('[ApiService.concluirQuest] Resultado:', result);
 
     if (!result.success) {
       throw new Error(result.error || 'Falha ao concluir quest');

@@ -396,7 +396,10 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     const usuarioId = dashboardData?.usuario?.id;
     const questId = questIdParam ?? questSnapshot?.quests_personalizadas?.[0]?.instancia_id ?? null;
 
+    console.log('[ConcluirQuest] Iniciando:', { questIdParam, questId, usuarioId });
+
     if (!usuarioId || !questId) {
+      console.error('[ConcluirQuest] Validação falhou:', { usuarioId, questId });
       set({
         questError: 'Usuário ou quest inválidos para conclusão',
         questLoading: false,

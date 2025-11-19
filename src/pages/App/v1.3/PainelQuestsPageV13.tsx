@@ -128,8 +128,20 @@ const PainelQuestsPageV13: React.FC = () => {
 
     const meta = Math.max(quest.progresso_meta ?? 1, 1);
     const atual = Math.min(quest.progresso_atual ?? 0, meta);
+    
+    // Prioriza xp_recompensa da quest, depois recompensas do card, depois fallback
+    const xpBase = quest.xp_recompensa ?? questsCard?.recompensas?.xp_base ?? 30;
+    const xpBonus = quest.recorrencia && quest.recorrencia !== 'unica' 
+      ? (questsCard?.recompensas?.xp_bonus_recorrencia ?? 6)
+      : null;
+    
+    // O webhook precisa de instancia_id (UUID), não meta_codigo
+    if (!quest.instancia_id) {
+      console.warn('[PainelQuests] Quest sem instancia_id:', quest);
+    }
+    
     return {
-      id: quest.instancia_id ?? quest.meta_codigo,
+      id: quest.instancia_id || quest.meta_codigo, // Fallback apenas para exibição
       titulo: quest.titulo,
       descricao: quest.descricao,
       prioridade: quest.prioridade,
@@ -138,8 +150,8 @@ const PainelQuestsPageV13: React.FC = () => {
       progressoMeta: meta,
       percentual: Math.round((atual / meta) * 100),
       ultimaAtualizacao: quest.concluido_em,
-      recompensaBase: questsCard?.recompensas?.xp_base ?? null,
-      recompensaBonus: questsCard?.recompensas?.xp_bonus_recorrencia ?? null,
+      recompensaBase: xpBase,
+      recompensaBonus: xpBonus,
     };
   }, [pendentes, questsCard]);
 
@@ -151,8 +163,26 @@ const PainelQuestsPageV13: React.FC = () => {
   };
 
   const handleMarcarConclusao = () => {
-    if (!destaque?.id) return;
-    void concluirQuest(destaque.id);
+    if (!destaque?.id) {
+      console.error('[PainelQuests] destaque.id não encontrado', { destaque });
+      return;
+    }
+    
+    // Busca instancia_id da quest original se disponível
+    const questId = questsCard?.quest?.id 
+      || pendentes.find(q => q.instancia_id === destaque.id || q.meta_codigo === destaque.id)?.instancia_id
+      || destaque.id;
+    
+    // Valida se é UUID (formato esperado pelo webhook)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(questId)) {
+      console.error('[PainelQuests] ID inválido (não é UUID):', questId, { destaque, pendentes });
+      // O erro será mostrado via questError do store
+      return;
+    }
+    
+    console.log('[PainelQuests] Concluindo quest:', questId, { destaque, questId });
+    void concluirQuest(questId);
   };
 
   const handleNavHome = () => {

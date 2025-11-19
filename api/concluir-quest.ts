@@ -1,0 +1,122 @@
+const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/concluir-quest';
+
+const setCorsHeaders = (res: any) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+};
+
+const readUsuarioId = (source: any): string | null => {
+  const candidates = [
+    source?.usuario_id,
+    source?.usuarioId,
+    source?.user_id,
+    source?.userId,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+  }
+
+  return null;
+};
+
+const readQuestId = (source: any): string | null => {
+  const candidates = [
+    source?.quest_id,
+    source?.questId,
+    source?.instancia_id,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+  }
+
+  return null;
+};
+
+export default async function handler(req: any, res: any) {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ success: false, error: 'Método não suportado' });
+    return;
+  }
+
+  const source = req.body ?? {};
+  const usuarioId = readUsuarioId(source);
+  const questId = readQuestId(source);
+
+  if (!usuarioId) {
+    res.status(400).json({ success: false, error: 'usuario_id obrigatório' });
+    return;
+  }
+
+  if (!questId) {
+    res.status(400).json({ success: false, error: 'quest_id obrigatório' });
+    return;
+  }
+
+  const remoteEndpoint = process.env.CONCLUIR_QUEST_WEBHOOK_URL || DEFAULT_ENDPOINT;
+
+  try {
+    const payload = {
+      usuario_id: usuarioId,
+      quest_id: questId,
+      fonte: source.fonte ?? 'app_v1.3',
+      comentario: source.comentario ?? null,
+    };
+
+    const upstreamResponse = await fetch(remoteEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const contentType = upstreamResponse.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
+
+    if (!upstreamResponse.ok) {
+      res.status(upstreamResponse.status).json(
+        typeof body === 'string'
+          ? { success: false, error: body || 'Erro desconhecido' }
+          : body
+      );
+      return;
+    }
+
+    // Retorna a resposta do webhook diretamente
+    if (isJson) {
+      res.status(200).json(body);
+      return;
+    }
+
+    res.status(200).send(body);
+  } catch (error) {
+    console.error('[concluir-quest] erro:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Erro ao conectar ao serviço de quests' 
+    });
+  }
+}
+
