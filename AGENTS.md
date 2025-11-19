@@ -118,6 +118,7 @@ Ao tratar de workflows n8n:
 ## Boas práticas · lições n8n
 - Mapear nós/ID via `n8n_get_workflow` antes de editar, evitando nomes desatualizados.
 - Usar `n8n_update_partial_workflow` para mudanças cirúrgicas; evitar full update sem necessidade.
+- **ATENÇÃO com nós Postgres:** Ao atualizar nós Postgres via MCP, sempre envie o objeto `parameters` COMPLETO, contendo `operation`, `query` e `options`. Se atualizar apenas a `operation`, o n8n pode resetar a `query` ou reverter para o padrão `insert`, causando erros.
 - Após alterações, rodar `n8n_get_workflow_structure` para validar nomes, conexões e garantir consistência.
 - Ajustar expressões (`$items`, `$node`) sempre que renomear nós para não quebrar dependências.
 - Testar execuções manualmente após mudanças relevantes ou documentar se não foi possível testar.

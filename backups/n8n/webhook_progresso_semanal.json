@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-11-17T11:31:57.209Z",
   "id": "gMb1UwtmEh5pkfxR",
-  "name": "webhook_card_weekly_progress",
+  "name": "webhook_progresso_semanal",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -136,7 +136,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "a646495b-7227-435c-8596-3e6adddc89af",
+  "versionId": "e7e913fa-2f14-4762-85d6-c8409f2978b9",
   "triggerCount": 1,
   "shared": [
     {

@@ -2,7 +2,7 @@
   "createdAt": "2025-11-14T19:49:49.539Z",
   "id": "hti7QqpmITtikMOa",
   "name": "webhook_card_quests",
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {
@@ -19,7 +19,8 @@
         400,
         -320
       ],
-      "webhookId": "d5ea8f26-8b83-41e0-a1d0-464b92238380"
+      "webhookId": "d5ea8f26-8b83-41e0-a1d0-464b92238380",
+      "disabled": false
     },
     {
       "parameters": {
@@ -136,7 +137,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "019de3fd-4aea-4ea7-86d4-0c08d7719f49",
+  "versionId": "86f2078d-8ad5-49fe-b532-a14c94dcd11b",
   "triggerCount": 1,
   "shared": [
     {

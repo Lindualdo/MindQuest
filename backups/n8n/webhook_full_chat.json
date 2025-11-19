@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-10-16T11:52:20.583Z",
   "id": "CGdzaV8rqARmJCwO",
-  "name": "webhook_conversa_full",
+  "name": "webhook_full_chat",
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -127,7 +127,7 @@
       }
     ]
   },
-  "versionId": "bc646940-6b34-4697-bd0b-b457cdfc9a07",
+  "versionId": "4e3dbc47-f791-4861-84e3-fbba9a4aab9b",
   "triggerCount": 1,
   "shared": [
     {
