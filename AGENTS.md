@@ -64,6 +64,15 @@ Ao tratar de workflows n8n:
 ## Padrões de Resposta
 - Ver "ATENÇÃO — Comunicação Essencial" e "Formatos Rápidos".
 
+## Mensagens de Commit
+- Sempre usar português brasileiro (PT-BR) nas mensagens de commit.
+- Formato: verbo no infinitivo + objeto direto (ex.: "Corrigir loop infinito no painel de quests").
+- Máximo 50 caracteres no título; detalhes opcionais após linha em branco.
+- Exemplos:
+  - `Corrigir loop infinito no carregamento de quests`
+  - `Adicionar workflow n8n para concluir quest`
+  - `Integrar botão concluir com webhook de persistência`
+
 ## Setup Postgres
 - `config/postgres.env` centraliza as variáveis de conexão.
 - Carregue-as com `source config/postgres.env` antes das queries.

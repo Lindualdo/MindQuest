@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Sparkles, CheckCircle2, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
@@ -43,16 +43,44 @@ const PainelQuestsPageV13: React.FC = () => {
     'Aldo';
 
   const [activeTab, setActiveTab] = useState<TabId>('quests');
+  const hasRequestedSnapshot = useRef(false);
+  const hasRequestedCard = useRef(false);
 
   useEffect(() => {
-    if (!usuarioId) return;
-    if (!questSnapshot && !questLoading) {
-      void loadQuestSnapshot(usuarioId);
+    if (!usuarioId) {
+      hasRequestedSnapshot.current = false;
+      hasRequestedCard.current = false;
+      return;
     }
-    if (!questsCard && !questsCardLoading) {
-      void loadQuestsCard(usuarioId);
+    if (questSnapshot) {
+      hasRequestedSnapshot.current = true;
+      return;
     }
-  }, [usuarioId, questSnapshot, questLoading, questsCard, questsCardLoading, loadQuestSnapshot, loadQuestsCard]);
+    if (questLoading) return;
+    if (hasRequestedSnapshot.current) return;
+    hasRequestedSnapshot.current = true;
+    void loadQuestSnapshot(usuarioId);
+  }, [usuarioId, questSnapshot, questLoading]);
+
+  useEffect(() => {
+    if (!usuarioId) {
+      hasRequestedCard.current = false;
+      return;
+    }
+    if (questsCard) {
+      hasRequestedCard.current = true;
+      return;
+    }
+    if (questsCardLoading) return;
+    if (hasRequestedCard.current) return;
+    hasRequestedCard.current = true;
+    void loadQuestsCard(usuarioId);
+  }, [usuarioId, questsCard, questsCardLoading]);
+
+  useEffect(() => {
+    hasRequestedSnapshot.current = false;
+    hasRequestedCard.current = false;
+  }, [usuarioId]);
 
   const questsPersonalizadas = questSnapshot?.quests_personalizadas ?? [];
 
