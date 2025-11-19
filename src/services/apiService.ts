@@ -1193,11 +1193,8 @@ class ApiService {
     };
 
     const endpoint = `/concluir-quest`;
-    // Em dev: usar proxy direto para n8n (handlers Vercel não funcionam localmente)
-    // Em prod: usar handler Vercel /api/concluir-quest que então chama n8n
-    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const useProxy = isDev ? this.useProxyPaths : true; // Em dev usa proxy se configurado, em prod sempre usa /api
     
+    // SEMPRE chamar diretamente o n8n em produção (não usar handler local)
     // Montar query params para GET
     const queryParams = new URLSearchParams({
       usuario_id: body.usuario_id,
@@ -1207,13 +1204,12 @@ class ApiService {
     if (body.comentario) queryParams.set('comentario', body.comentario);
     
     const endpointWithParams = `${endpoint}?${queryParams.toString()}`;
+    const fullUrl = `${this.remoteBaseUrl}${endpointWithParams}`;
     
     console.log('[ApiService.concluirQuest] Chamando:', { 
       endpoint: endpointWithParams, 
-      useProxy, 
-      isDev,
-      forceRemote: !useProxy,
-      url: useProxy ? `/api${endpointWithParams}` : `${this.remoteBaseUrl}${endpointWithParams}`
+      fullUrl,
+      forceRemote: true
     });
     
     const result = await this.makeRequest(
@@ -1221,7 +1217,7 @@ class ApiService {
       {
         method: 'GET',
       },
-      !useProxy // forceRemote = true em dev (direto n8n), false em prod (via handler Vercel)
+      true // forceRemote = true sempre (chama direto n8n produção)
     );
 
     console.log('[ApiService.concluirQuest] Resultado:', result);
