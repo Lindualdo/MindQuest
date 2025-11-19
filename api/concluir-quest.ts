@@ -2,7 +2,7 @@ const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/concluir-qu
 
 const setCorsHeaders = (res: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 };
