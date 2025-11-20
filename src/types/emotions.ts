@@ -219,6 +219,16 @@ export interface QuestPersonalizadaResumo {
   xp_recompensa?: number | null;
   prioridade?: string | null;
   recorrencia?: string | null;
+  recorrencias?: {
+    tipo: string;
+    janela: { inicio: string; fim: string };
+    dias: Array<{
+      data: string;
+      status: string;
+      xp_previsto?: number;
+      concluido_em?: string | null;
+    }>;
+  } | null;
 }
 
 export interface QuestSnapshot {

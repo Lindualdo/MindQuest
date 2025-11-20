@@ -265,6 +265,9 @@ class ApiService {
         quest.recorrencia ??
           (configObj && typeof configObj.recorrencia !== 'undefined' ? configObj.recorrencia : null)
       ),
+      recorrencias: quest.recorrencias && typeof quest.recorrencias === 'object' && !Array.isArray(quest.recorrencias)
+        ? (quest.recorrencias as QuestPersonalizadaResumo['recorrencias'])
+        : null,
     };
   }
 
