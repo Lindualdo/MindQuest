@@ -417,75 +417,15 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         dataReferencia: dataReferenciaParam,
       });
 
-      set((state) => {
-        const snapshotAtual = state.questSnapshot;
-        let novoSnapshot = snapshotAtual;
-        if (snapshotAtual?.quests_personalizadas) {
-          novoSnapshot = {
-            ...snapshotAtual,
-            quests_personalizadas: snapshotAtual.quests_personalizadas.map((quest) => {
-              if (quest.instancia_id !== questId) return quest;
-              const meta = quest.progresso_meta ?? 1;
-              return {
-                ...quest,
-                status: (resultado.status as QuestStatus) ?? 'concluida',
-                progresso_atual: meta,
-                concluido_em:
-                  (resultado.quest?.concluido_em as string | null | undefined) ?? new Date().toISOString(),
-              };
-            }),
-          };
-        }
-
-        let novoDashboard = state.dashboardData;
-        if (novoDashboard?.questSnapshot && novoSnapshot) {
-          novoDashboard = {
-            ...novoDashboard,
-            questSnapshot: novoSnapshot,
-          };
-        }
-
-        let novoQuestsCard = state.questsCard;
-        if (state.questsCard?.quest && state.questsCard.quest.id === questId) {
-          novoQuestsCard = {
-            ...state.questsCard,
-            quest: {
-              ...state.questsCard.quest,
-              status: resultado.status ?? 'concluida',
-              progresso: {
-                ...state.questsCard.quest.progresso,
-                atual: state.questsCard.quest.progresso.meta,
-                percentual: 100,
-              },
-              ultima_atualizacao: new Date().toISOString(),
-              ultima_atualizacao_label: 'agora',
-            },
-            snapshot: state.questsCard.snapshot
-              ? {
-                  ...state.questsCard.snapshot,
-                  total_concluidas:
-                    (resultado.total_quests_concluidas as number | null | undefined) ??
-                    state.questsCard.snapshot.total_concluidas,
-                  total_personalizadas:
-                    (resultado.total_quests_personalizadas as number | null | undefined) ??
-                    state.questsCard.snapshot.total_personalizadas,
-                }
-              : state.questsCard.snapshot,
-          };
-        }
-
-        return {
-          questSnapshot: novoSnapshot ?? state.questSnapshot,
-          dashboardData: novoDashboard ?? state.dashboardData,
-          questsCard: novoQuestsCard ?? state.questsCard,
-        };
-      });
-
       set({ questLoading: false, questError: null });
 
-      void loadQuestSnapshot(usuarioId);
-      void loadQuestsCard(usuarioId);
-      void loadWeeklyProgressCard(usuarioId);
+      // Recarregar todos os dados do servidor para garantir consistência
+      // Especialmente importante para quests recorrentes que têm o campo 'recorrencias' atualizado
+      await Promise.all([
+        loadQuestSnapshot(usuarioId),
+        loadQuestsCard(usuarioId),
+        loadWeeklyProgressCard(usuarioId),
+      ]);
     } catch (error) {
       console.error('[ConcluirQuest] erro ao concluir', error);
       set({
