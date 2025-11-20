@@ -21,12 +21,12 @@ const PainelQuestsPageV13: React.FC = () => {
     questsCard,
     questsCardLoading,
     questsCardError,
-    weeklyQuestsProgressCard,
-    weeklyQuestsProgressCardLoading,
-    weeklyQuestsProgressCardError,
+    weeklyProgressCard,
+    weeklyProgressCardLoading,
+    weeklyProgressCardError,
     loadQuestSnapshot,
     loadQuestsCard,
-    loadWeeklyQuestsProgressCard,
+    loadWeeklyProgressCard,
     concluirQuest,
     setView,
   } = useDashboard();
@@ -49,7 +49,7 @@ const PainelQuestsPageV13: React.FC = () => {
       hasRequestedData.current = false;
       return;
     }
-    if (questLoading || questsCardLoading || weeklyQuestsProgressCardLoading) return;
+    if (questLoading || questsCardLoading || weeklyProgressCardLoading) return;
     if (hasRequestedData.current) return;
 
     hasRequestedData.current = true;
@@ -57,15 +57,15 @@ const PainelQuestsPageV13: React.FC = () => {
     // Carrega tudo que precisa
     void loadQuestSnapshot(usuarioId);
     void loadQuestsCard(usuarioId);
-    void loadWeeklyQuestsProgressCard(usuarioId);
-  }, [usuarioId, questLoading, questsCardLoading, weeklyQuestsProgressCardLoading, loadQuestSnapshot, loadQuestsCard, loadWeeklyQuestsProgressCard]);
+    void loadWeeklyProgressCard(usuarioId);
+  }, [usuarioId, questLoading, questsCardLoading, weeklyProgressCardLoading, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard]);
 
   useEffect(() => {
     hasRequestedData.current = false;
   }, [usuarioId]);
 
   // Dados da semana e progresso (somente quests)
-  const weeklyData = weeklyQuestsProgressCard ?? mockWeeklyXpSummary;
+  const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
   
   const diasSemana = useMemo(() => {
     // SEMPRE gera DOM-SAB da semana corrente
@@ -224,8 +224,9 @@ const PainelQuestsPageV13: React.FC = () => {
 
   // Barra de progresso semanal (somente quests)
   const renderWeeklyProgressBar = () => {
-    const metaSemanal = weeklyData.xpMetaSemana ?? 0;
-    const xpSemanal = weeklyData.xpSemanaTotal ?? 0;
+    // Calcular totais da semana (somente quests)
+    const metaSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.metaQuests ?? 0), 0);
+    const xpSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.xpQuests ?? 0), 0);
     const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((xpSemanal / metaSemanal) * 100)) : 0;
 
     return (
@@ -264,7 +265,7 @@ const PainelQuestsPageV13: React.FC = () => {
               const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
               const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
               
-              const metaDia = dia.metaDia ?? 0;
+              const metaDia = dia.metaQuests ?? 0;
               const progressoQuests = metaDia > 0 ? Math.min(dia.xpQuests ?? 0, metaDia) : dia.xpQuests ?? 0;
               const ratio = metaDia > 0 ? progressoQuests / metaDia : 0;
               
@@ -405,12 +406,12 @@ const PainelQuestsPageV13: React.FC = () => {
         {/* Card de Conversas */}
         <div className="mt-6">
           <CardConversasV13
-            xpPrevisto={15 * 7} // 15 XP por conversa × 7 dias = 105 XP
-            xpRealizado={diasSemana.filter(dia => dia.xpConversa >= 15).length * 15} // Dias com conversa × 15 XP
+            xpPrevisto={diasSemana.reduce((sum, dia) => sum + (dia.metaConversa ?? 0), 0)} // Soma das metas de conversa da semana
+            xpRealizado={diasSemana.reduce((sum, dia) => sum + (dia.xpConversa ?? 0), 0)} // Soma dos XP de conversas realizados
             diasSemana={diasSemana.map((dia) => ({
               label: dia.label,
               dataLabel: format(dia.dateObj, 'dd/MM'),
-              status: (dia.xpConversa >= 15 
+              status: ((dia.xpConversa ?? 0) > 0
                 ? 'respondido' 
                 : isSameDay(dia.dateObj, hoje) 
                   ? 'pendente' 
@@ -423,7 +424,7 @@ const PainelQuestsPageV13: React.FC = () => {
         </div>
         
         {/* Erros */}
-        {(questError || questsCardError || weeklyQuestsProgressCardError) && (
+        {(questError || questsCardError || weeklyProgressCardError) && (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-center text-xs text-red-600">
             Alguns dados não puderam ser carregados no momento.
           </div>

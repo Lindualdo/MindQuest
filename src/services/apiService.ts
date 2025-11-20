@@ -1079,7 +1079,7 @@ class ApiService {
       throw new Error('Usuário inválido');
     }
 
-    const endpoint = `/card/weekly-progress?user_id=${encodeURIComponent(userId)}`;
+    const endpoint = `/progresso-semanal?user_id=${encodeURIComponent(userId)}`;
     const result = await this.makeRequest(endpoint, undefined, true);
 
     if (!result.success) {
@@ -1098,37 +1098,6 @@ class ApiService {
     }
 
     return payload as WeeklyProgressCardResponse;
-  }
-
-  public async getWeeklyQuestsProgress(userId: string): Promise<WeeklyProgressCardResponse> {
-    if (!userId) {
-      throw new Error('Usuário inválido');
-    }
-
-    const endpoint = `/card/quests-weekly-progress?user_id=${encodeURIComponent(userId)}`;
-    const result = await this.makeRequest(endpoint, undefined, true);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Falha ao carregar progresso semanal de quests');
-    }
-
-    let payload: unknown = result.response;
-    if (Array.isArray(payload)) {
-      payload = payload[0];
-    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
-      payload = (payload as Record<string, unknown>).data;
-    }
-
-    if (!payload || typeof payload !== 'object' || !('card_quests_weekly_progress' in (payload as Record<string, unknown>))) {
-      throw new Error('Formato inesperado no progresso semanal de quests');
-    }
-
-    const response = payload as Record<string, unknown>;
-    return {
-      success: response.success as boolean,
-      usuario_id: response.usuario_id as string,
-      card_weekly_progress: response.card_quests_weekly_progress as WeeklyProgressCardData
-    };
   }
 
   public async getMapaMental(userId: string): Promise<MapaMentalData> {
