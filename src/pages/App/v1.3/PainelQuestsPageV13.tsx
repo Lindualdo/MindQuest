@@ -82,6 +82,8 @@ const PainelQuestsPageV13: React.FC = () => {
         data: dataStr,
         label: format(data, 'EEE', { locale: ptBR }).slice(0, 3).toUpperCase(),
         metaDia: diaBackend?.metaDia || 0,
+        metaConversa: diaBackend?.metaConversa || 0,
+        metaQuests: diaBackend?.metaQuests || 0,
         totalXp: diaBackend?.totalXp || 0,
         xpConversa: diaBackend?.xpConversa || 0,
         xpQuests: diaBackend?.xpQuests || 0, // SOMENTE quests
@@ -93,23 +95,39 @@ const PainelQuestsPageV13: React.FC = () => {
   // Quests filtradas pelo dia selecionado
   const questsDoDia = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     
     return todasQuests.filter((quest) => {
+      // Se a quest é recorrente e tem o campo 'recorrencias'
+      if (quest.recorrencias && Array.isArray(quest.recorrencias.dias)) {
+        const diaQuest = quest.recorrencias.dias.find(
+          (d: any) => d.data && d.data === selectedDateStr
+        );
+        if (diaQuest) {
+          // Se o dia da quest está concluído, mostra na aba de concluídas
+          if (diaQuest.status === 'concluida') {
+            return activeTab === 'concluidas';
+          }
+          // Se o dia da quest está pendente, mostra na aba de pendentes
+          return activeTab === 'pendentes';
+        }
+      }
+      
+      // Lógica original para quests não recorrentes ou sem 'recorrencias'
       // Se concluída, só mostra no dia da conclusão
       if (quest.concluido_em) {
         try {
           const dataConclusao = parseISO(quest.concluido_em);
-          return isSameDay(dataConclusao, selectedDate);
+          return isSameDay(dataConclusao, selectedDate) && activeTab === 'concluidas';
         } catch {
           return false;
         }
       }
       
-      // Se pendente ou ativa: mostra em todos os dias da semana
-      // (são quests diárias que podem ser feitas qualquer dia)
-      return quest.status === 'pendente' || quest.status === 'ativa' || !quest.status;
+      // Se pendente ou ativa: mostra na aba de pendentes
+      return (quest.status === 'pendente' || quest.status === 'ativa' || !quest.status) && activeTab === 'pendentes';
     });
-  }, [questSnapshot, selectedDate]);
+  }, [questSnapshot, selectedDate, activeTab]);
 
   const pendentes = useMemo(
     () => questsDoDia.filter(q => !q.concluido_em && q.status !== 'concluida'),
