@@ -16,19 +16,11 @@
 - ✅ `webhook_progresso_quests_semanal` (painel) usa `recorrencias` para calcular meta
 - ✅ Queries otimizadas com `CROSS JOIN LATERAL jsonb_array_elements`
 
-## ⏳ Pendente
-
 ### 4. Criação de Quests (`sw_xp_quest`)
-**O que precisa ser feito:**
-- Adicionar um node Code antes do INSERT em `usuarios_quest`
-- Usar a função em `data/funcao_popular_recorrencias.js`
-- Garantir que `recorrencias` seja populado ao criar quest com `recorrencia != 'unica'`
-
-**Onde implementar:**
-- Workflow: `sw_xp_quest` (ID: `bTeLj5qOKQo9PDMO`)
-- Buscar o nó que faz INSERT/UPDATE em `usuarios_quest`
-- Adicionar node Code antes chamado "Popular Recorrencias"
-- Copiar código de `data/funcao_popular_recorrencias.js`
+- ✅ Query de INSERT atualizada com CTE `recorrencias_quest`
+- ✅ Campo `recorrencias` populado automaticamente ao criar quest
+- ✅ Lógica integrada: gera agenda de dias entre `prazo_inicio` e `prazo_fim`
+- ✅ Suporta qualquer tipo de recorrência diferente de 'unica'
 
 **Estrutura do JSONB:**
 ```json
