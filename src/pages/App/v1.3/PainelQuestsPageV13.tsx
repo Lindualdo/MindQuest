@@ -92,6 +92,20 @@ const PainelQuestsPageV13: React.FC = () => {
     });
   }, [weeklyData, hoje]);
 
+  // Função auxiliar para normalizar data (extrai apenas YYYY-MM-DD de timestamp ou data)
+  const normalizeDateStr = (dateStr: string | null | undefined): string | null => {
+    if (!dateStr) return null;
+    // Se já está no formato YYYY-MM-DD, retorna direto
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Se é timestamp, extrai apenas a data
+    try {
+      const date = parseISO(dateStr);
+      return format(date, 'yyyy-MM-dd');
+    } catch {
+      return null;
+    }
+  };
+
   // Quests filtradas pelo dia selecionado (TODAS as quests do dia, independente do status)
   const questsDoDia = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
@@ -100,9 +114,11 @@ const PainelQuestsPageV13: React.FC = () => {
     return todasQuests.filter((quest) => {
       // Se a quest é recorrente e tem o campo 'recorrencias'
       if (quest.recorrencias && Array.isArray(quest.recorrencias.dias)) {
-        const diaQuest = quest.recorrencias.dias.find(
-          (d: any) => d.data && d.data === selectedDateStr
-        );
+        const diaQuest = quest.recorrencias.dias.find((d: any) => {
+          if (!d.data) return false;
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
         // Se encontrou o dia na recorrencia, inclui a quest (independente do status)
         return diaQuest !== undefined;
       }
@@ -128,7 +144,11 @@ const PainelQuestsPageV13: React.FC = () => {
     return questsDoDia.filter((q) => {
       // Se é recorrente, verifica o status do dia específico
       if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
-        const diaQuest = q.recorrencias.dias.find((d: any) => d.data === selectedDateStr);
+        const diaQuest = q.recorrencias.dias.find((d: any) => {
+          if (!d.data) return false;
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
         return diaQuest && diaQuest.status !== 'concluida';
       }
       // Para quests não recorrentes
@@ -141,7 +161,11 @@ const PainelQuestsPageV13: React.FC = () => {
     return questsDoDia.filter((q) => {
       // Se é recorrente, verifica o status do dia específico
       if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
-        const diaQuest = q.recorrencias.dias.find((d: any) => d.data === selectedDateStr);
+        const diaQuest = q.recorrencias.dias.find((d: any) => {
+          if (!d.data) return false;
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
         return diaQuest && diaQuest.status === 'concluida';
       }
       // Para quests não recorrentes
