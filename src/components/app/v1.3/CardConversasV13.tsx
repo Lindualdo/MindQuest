@@ -25,10 +25,10 @@ const CardConversasV13 = ({
     { bg: string; border: string; icon: string; color: string }
   > = {
     respondido: {
-      bg: 'rgba(255,159,122,0.18)',
-      border: 'rgba(255,159,122,0.7)',
+      bg: '#DCEEF6',
+      border: '#0EA5E9',
       icon: '✓',
-      color: '#C14E2B',
+      color: '#0EA5E9',
     },
     perdido: {
       bg: 'rgba(232,235,244,0.8)',
@@ -37,10 +37,10 @@ const CardConversasV13 = ({
       color: '#6D7692',
     },
     pendente: {
-      bg: 'rgba(255,238,209,0.8)',
-      border: 'rgba(224,177,103,0.8)',
+      bg: '#FEF3C7',
+      border: '#FCD34D',
       icon: '…',
-      color: '#B07229',
+      color: '#D97706',
     },
     default: {
       bg: 'rgba(232,235,244,0.8)',
@@ -55,27 +55,29 @@ const CardConversasV13 = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
-      className="mq-card-v1_2 px-4 py-4 sm:px-6"
-      style={{
-        backgroundColor: '#FFF9F5',
-        borderColor: 'rgba(255,153,110,0.25)',
-        boxShadow: '0 10px 18px rgba(255,153,110,0.08)',
-      }}
+      className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
+      style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
+      {/* Título */}
+      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
+        Conversas da semana
+      </p>
+
       {/* Barra de Progresso */}
-      <div>
-        <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(255,153,110,0.18)' }}>
+      <div className="mt-4">
+        <div className="relative h-2 w-full rounded-full bg-slate-200">
           <div
-            className="mq-bar-fill-v1_2"
-            style={{ width: `${progresso}%`, backgroundColor: '#FF9072' }}
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
+            style={{ width: `${progresso}%` }}
           />
         </div>
-        <div
-          className="mt-2 flex items-center justify-between text-[0.75rem] font-semibold"
-          style={{ color: '#1C2541' }}
-        >
-          <span>{xpRealizado} pontos. {progresso}% da meta</span>
-          <span>{xpPrevisto} pts</span>
+        <div className="mt-1 flex items-center justify-between text-[0.7rem] font-semibold text-[#475569]">
+          <span className="text-[#1C2541]">
+            {xpRealizado} pontos. {progresso}% da meta
+          </span>
+          <span>
+            {xpPrevisto} pts
+          </span>
         </div>
       </div>
 
@@ -96,7 +98,7 @@ const CardConversasV13 = ({
                       backgroundColor: config.bg,
                       borderColor: config.border,
                       color: config.color,
-                      boxShadow: dia.isHoje ? '0 0 0 2px rgba(255,144,114,0.35)' : 'none',
+                      boxShadow: dia.isHoje ? '0 0 0 2px rgba(14,165,233,0.35)' : 'none',
                     }}
                   >
                     {config.icon}

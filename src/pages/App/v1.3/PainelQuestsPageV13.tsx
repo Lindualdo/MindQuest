@@ -92,7 +92,7 @@ const PainelQuestsPageV13: React.FC = () => {
     });
   }, [weeklyData, hoje]);
 
-  // Quests filtradas pelo dia selecionado
+  // Quests filtradas pelo dia selecionado (TODAS as quests do dia, independente do status)
   const questsDoDia = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
     const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
@@ -103,41 +103,51 @@ const PainelQuestsPageV13: React.FC = () => {
         const diaQuest = quest.recorrencias.dias.find(
           (d: any) => d.data && d.data === selectedDateStr
         );
-        if (diaQuest) {
-          // Se o dia da quest está concluído, mostra na aba de concluídas
-          if (diaQuest.status === 'concluida') {
-            return activeTab === 'concluidas';
-          }
-          // Se o dia da quest está pendente, mostra na aba de pendentes
-          return activeTab === 'pendentes';
-        }
+        // Se encontrou o dia na recorrencia, inclui a quest (independente do status)
+        return diaQuest !== undefined;
       }
       
-      // Lógica original para quests não recorrentes ou sem 'recorrencias'
+      // Lógica para quests não recorrentes ou sem 'recorrencias'
       // Se concluída, só mostra no dia da conclusão
       if (quest.concluido_em) {
         try {
           const dataConclusao = parseISO(quest.concluido_em);
-          return isSameDay(dataConclusao, selectedDate) && activeTab === 'concluidas';
+          return isSameDay(dataConclusao, selectedDate);
         } catch {
           return false;
         }
       }
       
-      // Se pendente ou ativa: mostra na aba de pendentes
-      return (quest.status === 'pendente' || quest.status === 'ativa' || !quest.status) && activeTab === 'pendentes';
+      // Se pendente ou ativa: mostra em todos os dias da semana (são quests diárias)
+      return quest.status === 'pendente' || quest.status === 'ativa' || !quest.status;
     });
-  }, [questSnapshot, selectedDate, activeTab]);
+  }, [questSnapshot, selectedDate]);
 
-  const pendentes = useMemo(
-    () => questsDoDia.filter(q => !q.concluido_em && q.status !== 'concluida'),
-    [questsDoDia]
-  );
+  const pendentes = useMemo(() => {
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    return questsDoDia.filter((q) => {
+      // Se é recorrente, verifica o status do dia específico
+      if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
+        const diaQuest = q.recorrencias.dias.find((d: any) => d.data === selectedDateStr);
+        return diaQuest && diaQuest.status !== 'concluida';
+      }
+      // Para quests não recorrentes
+      return !q.concluido_em && q.status !== 'concluida';
+    });
+  }, [questsDoDia, selectedDate]);
 
-  const concluidas = useMemo(
-    () => questsDoDia.filter(q => q.concluido_em || q.status === 'concluida'),
-    [questsDoDia]
-  );
+  const concluidas = useMemo(() => {
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    return questsDoDia.filter((q) => {
+      // Se é recorrente, verifica o status do dia específico
+      if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
+        const diaQuest = q.recorrencias.dias.find((d: any) => d.data === selectedDateStr);
+        return diaQuest && diaQuest.status === 'concluida';
+      }
+      // Para quests não recorrentes
+      return q.concluido_em || q.status === 'concluida';
+    });
+  }, [questsDoDia, selectedDate]);
 
   const handleBack = () => {
     setView('dashboard');
@@ -359,6 +369,26 @@ const PainelQuestsPageV13: React.FC = () => {
             </button>
         </div>
 
+        {/* Card de Conversas */}
+        <div className="mb-6">
+          <CardConversasV13
+            xpPrevisto={diasSemana.reduce((sum, dia) => sum + (dia.metaConversa ?? 0), 0)} // Soma das metas de conversa da semana
+            xpRealizado={diasSemana.reduce((sum, dia) => sum + (dia.xpConversa ?? 0), 0)} // Soma dos XP de conversas realizados
+            diasSemana={diasSemana.map((dia) => ({
+              label: dia.label,
+              dataLabel: format(dia.dateObj, 'dd/MM'),
+              status: ((dia.xpConversa ?? 0) > 0
+                ? 'respondido' 
+                : isSameDay(dia.dateObj, hoje) 
+                  ? 'pendente' 
+                  : isFuture(dia.dateObj) 
+                    ? 'default' 
+                    : 'perdido') as 'respondido' | 'perdido' | 'pendente' | 'default',
+              isHoje: isSameDay(dia.dateObj, hoje),
+            }))}
+          />
+        </div>
+
         {/* Barra de Progresso Semanal */}
         {renderWeeklyProgressBar()}
 
@@ -421,25 +451,6 @@ const PainelQuestsPageV13: React.FC = () => {
             )}
         </div>
 
-        {/* Card de Conversas */}
-        <div className="mt-6">
-          <CardConversasV13
-            xpPrevisto={diasSemana.reduce((sum, dia) => sum + (dia.metaConversa ?? 0), 0)} // Soma das metas de conversa da semana
-            xpRealizado={diasSemana.reduce((sum, dia) => sum + (dia.xpConversa ?? 0), 0)} // Soma dos XP de conversas realizados
-            diasSemana={diasSemana.map((dia) => ({
-              label: dia.label,
-              dataLabel: format(dia.dateObj, 'dd/MM'),
-              status: ((dia.xpConversa ?? 0) > 0
-                ? 'respondido' 
-                : isSameDay(dia.dateObj, hoje) 
-                  ? 'pendente' 
-                  : isFuture(dia.dateObj) 
-                    ? 'default' 
-                    : 'perdido') as 'respondido' | 'perdido' | 'pendente' | 'default',
-              isHoje: isSameDay(dia.dateObj, hoje),
-            }))}
-          />
-        </div>
         
         {/* Erros */}
         {(questError || questsCardError || weeklyProgressCardError) && (
