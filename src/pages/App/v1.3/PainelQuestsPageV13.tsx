@@ -178,9 +178,23 @@ const PainelQuestsPageV13: React.FC = () => {
     setActiveNavTab('home');
   };
 
-  const handleConcluirQuest = (questId: string) => {
+  const handleConcluirQuest = async (questId: string) => {
     if (questLoading) return;
-    void concluirQuest(questId, format(selectedDate, 'yyyy-MM-dd'));
+    
+    try {
+      await concluirQuest(questId, format(selectedDate, 'yyyy-MM-dd'));
+      // Recarregar dados após conclusão para garantir que o estado esteja atualizado
+      // Especialmente importante para quests recorrentes que atualizam o campo 'recorrencias'
+      if (usuarioId) {
+        hasRequestedData.current = false;
+        await Promise.all([
+          loadQuestSnapshot(usuarioId),
+          loadWeeklyProgressCard(usuarioId),
+        ]);
+      }
+    } catch (error) {
+      console.error('[handleConcluirQuest] Erro ao concluir quest:', error);
+    }
   };
 
   const handleNavHome = () => {
