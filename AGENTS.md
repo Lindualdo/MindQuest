@@ -127,6 +127,25 @@ Ao tratar de workflows n8n:
 - Sempre confirme o tipo/campos dos nós via MCP (`get_node_info`) antes de supor nomes antigos.
 - Verifique se `Code` está em `runOnceForAllItems` quando distribui o mesmo payload para vários destinos.
 - **Sub-workflows (sw_*) NUNCA devem ser ativados.** Eles rodam na mesma transação do workflow pai que os chama via `executeWorkflow`. Status `active=false` é correto e NÃO é erro.
+- **CRÍTICO - Atualização de nodes Postgres via MCP:** Ao usar `n8n_update_partial_workflow` para atualizar nodes Postgres, **SEMPRE incluir TODOS os parâmetros necessários no mesmo update**:
+  - `operation`: "executeQuery" (ou outra operação válida)
+  - `query`: SQL completa (não pode estar vazia)
+  - `options`: objeto com `queryReplacement` se necessário
+  - **NUNCA atualizar apenas um campo** (ex: só `options`), pois o n8n reseta os outros campos para valores padrão (ex: `operation` vira "insert").
+  - Exemplo correto:
+    ```json
+    {
+      "type": "updateNode",
+      "nodeId": "abc-123",
+      "updates": {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * FROM table WHERE id = $1",
+          "options": {"queryReplacement": "={{ [$json.id] }}"}
+        }
+      }
+    }
+    ```
 
 
 ## Debug de Execução (Padrão)
