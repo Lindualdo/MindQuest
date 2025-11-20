@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
+import CardConversasV13 from '@/components/app/v1.3/CardConversasV13';
 import { useDashboard } from '@/store/useStore';
 import type { QuestPersonalizadaResumo } from '@/types/emotions';
 import { mockWeeklyXpSummary } from '@/data/mockHomeV1_3';
@@ -399,6 +400,40 @@ const PainelQuestsPageV13: React.FC = () => {
                     )}
                 </>
             )}
+        </div>
+
+        {/* Card de Conversas */}
+        <div className="mt-6">
+          <CardConversasV13
+            streakAtual={dashboardData?.sequencia_atual ?? 1}
+            recorde={dashboardData?.sequencia_recorde ?? 17}
+            progressoAtual={weeklyData.xpConversa > 0 ? Math.ceil(weeklyData.xpConversa / 75) : 1}
+            progressoMeta={3}
+            beneficios={[
+              'Novo insight personalizado',
+              'Progresso em hábitos chaves',
+            ]}
+            xpBonus={8}
+            ultimaConversaLabel="há 2 dias e 12 h"
+            diasSemana={diasSemana.map((dia) => ({
+              label: dia.label,
+              dataLabel: format(dia.dateObj, 'dd/MM'),
+              status: (dia.xpConversa >= 75 
+                ? 'respondido' 
+                : isSameDay(dia.dateObj, hoje) 
+                  ? 'pendente' 
+                  : isFuture(dia.dateObj) 
+                    ? 'default' 
+                    : 'perdido') as 'respondido' | 'perdido' | 'pendente' | 'default',
+              isHoje: isSameDay(dia.dateObj, hoje),
+            }))}
+            onExplorarHistorico={() => {
+              console.log('Explorar histórico de conversas');
+            }}
+            onVerInsights={() => {
+              console.log('Ver insights');
+            }}
+          />
         </div>
         
         {/* Erros */}
