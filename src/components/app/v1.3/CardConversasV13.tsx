@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Flame, MessageCircle } from 'lucide-react';
 
 type DiaConversa = {
   label: string;
@@ -9,35 +8,17 @@ type DiaConversa = {
 };
 
 type Props = {
-  streakAtual: number;
-  recorde: number;
-  progressoAtual: number;
-  progressoMeta: number;
-  beneficios: string[];
-  xpBonus?: number;
-  ultimaConversaLabel?: string;
+  xpPrevisto: number;
+  xpRealizado: number;
   diasSemana?: DiaConversa[];
-  onConversar?: () => void;
-  onExplorarHistorico?: () => void;
-  onVerInsights?: () => void;
 };
 
 const CardConversasV13 = ({
-  streakAtual,
-  recorde,
-  progressoAtual,
-  progressoMeta,
-  beneficios,
-  xpBonus = 40,
-  ultimaConversaLabel,
+  xpPrevisto,
+  xpRealizado,
   diasSemana = [],
-  onConversar,
-  onExplorarHistorico,
-  onVerInsights,
 }: Props) => {
-  const progresso = Math.min(100, Math.round((progressoAtual / progressoMeta) * 100));
-  const diaLabel = streakAtual === 1 ? 'dia' : 'dias';
-  const seguidoLabel = streakAtual === 1 ? 'seguido' : 'seguidos';
+  const progresso = xpPrevisto > 0 ? Math.min(100, Math.round((xpRealizado / xpPrevisto) * 100)) : 0;
 
   const statusConfig: Record<
     DiaConversa['status'],
@@ -74,27 +55,15 @@ const CardConversasV13 = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.08 }}
-      className="mq-card-v1_2 px-4 py-6 sm:px-6"
+      className="mq-card-v1_2 px-4 py-4 sm:px-6"
       style={{
         backgroundColor: '#FFF9F5',
         borderColor: 'rgba(255,153,110,0.25)',
         boxShadow: '0 10px 18px rgba(255,153,110,0.08)',
       }}
     >
-      <header className="flex flex-col gap-2.5">
-        <p className="mq-card-title-v1_2 text-lg sm:text-xl">🗓️ Diário de conversas</p>
-        <div
-          className="flex flex-wrap items-center justify-between gap-1 text-[0.85rem] font-semibold"
-          style={{ color: '#1C2541' }}
-        >
-          <span className="inline-flex items-center gap-1.5" style={{ color: '#F97316' }}>
-            <Flame size={14} /> {streakAtual} {diaLabel} {seguidoLabel}
-          </span>
-          <span className="mq-card-meta-v1_2 font-medium">Recorde {recorde} dias</span>
-        </div>
-      </header>
-
-      <div className="mt-5">
+      {/* Barra de Progresso */}
+      <div>
         <div className="mq-bar-track-v1_2" style={{ backgroundColor: 'rgba(255,153,110,0.18)' }}>
           <div
             className="mq-bar-fill-v1_2"
@@ -102,21 +71,15 @@ const CardConversasV13 = ({
           />
         </div>
         <div
-          className="mt-3 flex items-center justify-between text-[0.82rem] font-semibold"
+          className="mt-2 flex items-center justify-between text-[0.75rem] font-semibold"
           style={{ color: '#1C2541' }}
         >
-          <span>
-            {progressoAtual} conversa{progressoAtual > 1 ? 's' : ''}
-          </span>
-          <span>
-            Meta {progressoMeta} conversa{progressoMeta > 1 ? 's' : ''}
-          </span>
+          <span>{xpRealizado} pontos. {progresso}% da meta</span>
+          <span>{xpPrevisto} pts</span>
         </div>
-        <p className="mq-card-meta-v1_2 mt-1 text-[0.72rem]">
-          {ultimaConversaLabel ?? 'Última conversa há 1 dia e 4h'}
-        </p>
       </div>
 
+      {/* Dias da Semana */}
       {diasSemana.length > 0 && (
         <div className="mt-4">
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
@@ -150,51 +113,6 @@ const CardConversasV13 = ({
           </div>
         </div>
       )}
-
-      <div
-        className="mt-5 rounded-2xl px-4 py-3"
-        style={{ border: '1px solid rgba(255,153,110,0.3)' }}
-      >
-        <p className="mq-card-heading-v1_2 text-[0.95rem] font-semibold text-[#C14E2B]">
-          💡 Próxima conversa desbloqueia
-        </p>
-        <ul className="mt-2 list-disc space-y-1 pl-4 text-[0.75rem]" style={{ color: '#1C2541' }}>
-          <li>+75 XP base</li>
-          <li>+{xpBonus} XP bônus</li>
-          {beneficios
-            .filter((beneficio) => {
-              const texto = beneficio.toLowerCase();
-              return (
-                !texto.includes('xp base') &&
-                !texto.includes('xp bônus') &&
-                !texto.includes('progresso na quest')
-              );
-            })
-            .map((beneficio) => (
-              <li key={beneficio}>{beneficio}</li>
-            ))}
-        </ul>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        {onVerInsights && (
-          <button
-            type="button"
-            onClick={onVerInsights}
-            className="mq-link-inline-v1_2 text-[0.75rem] sm:text-[0.85rem]"
-            style={{ color: '#3083DC' }}
-          >
-            Ver insights <span aria-hidden="true">→</span>
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={onExplorarHistorico}
-          className="mq-link-inline-v1_2 text-[0.75rem] sm:text-[0.85rem]"
-        >
-          Explorar histórico <span aria-hidden="true">→</span>
-        </button>
-      </div>
     </motion.section>
   );
 };
