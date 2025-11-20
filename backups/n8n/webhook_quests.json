@@ -107,29 +107,6 @@
       "name": "Montar Resposta"
     },
     {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH dias AS (\n    SELECT generate_series(\n        (CURRENT_DATE - INTERVAL '13 day')::date,\n        CURRENT_DATE,\n        INTERVAL '1 day'\n    )::date AS dia\n)\nSELECT\n    d.dia,\n    EXISTS (\n        SELECT 1\n        FROM public.usr_chat uc\n        WHERE uc.usuario_id = $1::uuid\n          AND DATE(uc.data_conversa) = d.dia\n    ) AS conversou\nFROM dias d\nORDER BY d.dia DESC;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id] }}"
-        }
-      },
-      "id": "de53c231-bf04-421c-835a-69cd9a03f174",
-      "name": "Consultar Usr Chat 14d",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -432,
-        272
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
       "parameters": {},
       "id": "9e01dce7-45a6-4e8b-b32e-6debe17f9acd",
       "name": "Aguardar Dados",
@@ -158,11 +135,6 @@
         [
           {
             "node": "Ler Usuarios Conquistas",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Consultar Usr Chat 14d",
             "type": "main",
             "index": 0
           }
@@ -209,17 +181,6 @@
             "node": "Montar Resposta",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Consultar Usr Chat 14d": {
-      "main": [
-        [
-          {
-            "node": "Aguardar Dados",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
@@ -272,7 +233,7 @@
       }
     ]
   },
-  "versionId": "b09e9f4d-e1cc-4b41-b0f4-eb8d6e53d4c1",
+  "versionId": "0a29f405-216f-4aa4-a200-9d528415a296",
   "triggerCount": 1,
   "shared": [
     {
