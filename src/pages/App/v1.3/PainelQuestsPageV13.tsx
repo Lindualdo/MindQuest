@@ -234,7 +234,7 @@ const PainelQuestsPageV13: React.FC = () => {
       >
         {/* Título */}
         <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
-          Minhas missões da semana
+          Quests da semana
         </p>
 
         {/* Barra de progresso horizontal */}
