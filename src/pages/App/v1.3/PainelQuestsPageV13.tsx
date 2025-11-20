@@ -221,71 +221,104 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Barra de dias da semana (somente quests) - TODAS com mesma altura
-  const renderWeeklyBar = () => {
+  // Barra de progresso semanal (somente quests)
+  const renderWeeklyProgressBar = () => {
+    const metaSemanal = weeklyData.xpMetaSemana ?? 0;
+    const xpSemanal = weeklyData.xpSemanaTotal ?? 0;
+    const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((xpSemanal / metaSemanal) * 100)) : 0;
+
     return (
-      <div className="mb-6 flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-4 shadow-sm">
-        {diasSemana.map((dia, index) => {
-            const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
-            const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
-            const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
-            
-            // Cálculo do progresso DE QUESTS APENAS
-            const meta = dia.metaDia || 1;
-            const realizado = dia.xpQuests || 0; // APENAS XP de quests
-            const percentual = meta > 0 ? Math.min(100, Math.round((realizado / meta) * 100)) : 0;
-            
-            // Cor da barra de progresso
-            let barColor = '#10B981'; // Verde escuro quando 100%
-            if (percentual === 0) {
-              barColor = 'transparent'; // Transparente quando zero
-            } else if (percentual >= 100) {
-              barColor = '#10B981'; // Verde escuro: completo
-            } else {
-              barColor = '#86EFAC'; // Verde claro: parcial
-            }
-            
-            return (
+      <section
+        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
+        style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+      >
+        {/* Título */}
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
+          Minhas missões da semana
+        </p>
+
+        {/* Barra de progresso horizontal */}
+        <div className="mt-4">
+          <div className="relative h-2 w-full rounded-full bg-slate-200">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
+              style={{ width: `${percentualMeta}%` }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[0.7rem] font-semibold text-[#475569]">
+            <span className="text-[#1C2541]">
+              {xpSemanal} pontos. {percentualMeta}% da meta
+            </span>
+            <span>
+              {metaSemanal} pts
+            </span>
+          </div>
+        </div>
+
+        {/* Barras verticais dos dias */}
+        <div className="mt-5 h-20 w-full">
+          <div className="flex h-full items-end justify-between gap-1">
+            {diasSemana.map((dia, index) => {
+              const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
+              const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
+              const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
+              
+              const metaDia = dia.metaDia ?? 0;
+              const progressoQuests = metaDia > 0 ? Math.min(dia.xpQuests ?? 0, metaDia) : dia.xpQuests ?? 0;
+              const ratio = metaDia > 0 ? progressoQuests / metaDia : 0;
+              
+              // Cor da barra
+              const questsOk = metaDia === 0 || (dia.xpQuests ?? 0) >= metaDia;
+              const barColor = questsOk ? '#22C55E' : (dia.xpQuests ?? 0) > 0 ? '#86EFAC' : '#CBD5E1';
+              
+              const trackHeight = 56;
+              const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
+
+              // Formatar data como DD/MM
+              const dataFormatada = dia.dateObj 
+                ? dia.dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+                : '--';
+
+              return (
                 <button
-                    key={index}
-                    onClick={() => dia.dateObj && handleSelectDay(dia.dateObj)}
-                    disabled={isFuturoDay}
-                    className="flex flex-1 flex-col items-center gap-2 disabled:cursor-not-allowed"
+                  key={index}
+                  onClick={() => dia.dateObj && !isFuturoDay && handleSelectDay(dia.dateObj)}
+                  disabled={isFuturoDay}
+                  className={`flex flex-1 flex-col items-center justify-end gap-0.5 transition-all ${
+                    isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                  } ${isSelected ? 'scale-105' : ''}`}
                 >
-                    {/* Container - TODAS as barras SEMPRE com mesma altura */}
-                    <div className="relative h-20 w-full flex flex-col items-center justify-end">
-                         {/* Fundo cinza FIXO - mesma altura para TODOS os dias com borda no dia corrente */}
-                         <div className={`w-3 h-20 rounded-full bg-slate-300 ${isHoje ? 'ring-1 ring-[#0EA5E9]' : ''}`} />
-                         
-                         {/* Barra verde de progresso - sobe conforme quests concluídas */}
-                         <div 
-                            className={`absolute bottom-0 w-3 rounded-full transition-all duration-500 ${isSelected ? 'ring-2 ring-[#0EA5E9] ring-offset-2' : ''}`}
-                            style={{ 
-                                height: `${percentual}%`, 
-                                backgroundColor: barColor 
-                            }} 
-                         />
-                    </div>
-                    
-                    {/* Label Dia */}
-                    <div className="flex flex-col items-center gap-0.5">
-                        <span className={`text-[10px] font-bold ${
-                          isHoje 
-                            ? 'text-[#0EA5E9]' 
-                            : isSelected 
-                            ? 'text-[#1C2541]' 
-                            : 'text-[#64748B]'
-                        }`}>
-                            {dia.label}
-                        </span>
-                        {isHoje && (
-                          <div className="h-1 w-1 rounded-full bg-[#0EA5E9]" />
-                        )}
-                    </div>
+                  <div
+                    className="relative overflow-hidden rounded-full bg-slate-200"
+                    style={{ height: `${trackHeight}px`, width: '10px' }}
+                  >
+                    {fillHeight > 0 && (
+                      <div
+                        className="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-500"
+                        style={{
+                          height: `${fillHeight}px`,
+                          backgroundColor: barColor,
+                        }}
+                      />
+                    )}
+                  </div>
+                  <span className={`text-[0.6rem] font-semibold ${
+                    isSelected ? 'text-[#1C2541]' : 'text-[#64748B]'
+                  }`}>
+                    {dia.label ?? '--'}
+                  </span>
+                  <span className={`text-[0.6rem] font-bold ${
+                    isHoje ? 'text-[#0EA5E9]' : isSelected ? 'text-[#1C2541]' : 'text-[#64748B]'
+                  }`}>
+                    {dataFormatada}
+                  </span>
                 </button>
-            );
-        })}
-      </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 h-px w-full bg-slate-200" />
+        </div>
+      </section>
     );
   };
 
@@ -294,7 +327,7 @@ const PainelQuestsPageV13: React.FC = () => {
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar e refresh */}
+        {/* Botão voltar */}
         <div className="mb-4 flex items-center justify-between">
             <button
             type="button"
@@ -304,28 +337,10 @@ const PainelQuestsPageV13: React.FC = () => {
             <ArrowLeft size={16} />
             Voltar
             </button>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-[#1C2541]">
-                  {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
-              </span>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={questLoading || questsCardLoading || weeklyQuestsProgressCardLoading}
-                className="inline-flex items-center justify-center rounded-full bg-white p-1.5 text-[#1C2541] shadow transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Recarregar"
-              >
-                <RefreshCw 
-                  size={16} 
-                  className={questLoading || questsCardLoading || weeklyQuestsProgressCardLoading ? 'animate-spin' : ''} 
-                />
-              </button>
-            </div>
         </div>
 
-        {/* Barra Semanal Interativa */}
-        {renderWeeklyBar()}
+        {/* Barra de Progresso Semanal */}
+        {renderWeeklyProgressBar()}
 
         {/* Abas */}
         <div className="mb-4 flex gap-2 rounded-2xl bg-white/80 p-1.5 shadow-sm">
