@@ -405,12 +405,12 @@ const PainelQuestsPageV13: React.FC = () => {
         {/* Card de Conversas */}
         <div className="mt-6">
           <CardConversasV13
-            xpPrevisto={75 * 7} // 75 XP por conversa × 7 dias = 525 XP
-            xpRealizado={diasSemana.filter(dia => dia.xpConversa >= 75).length * 75} // Dias com conversa × 75 XP
+            xpPrevisto={15 * 7} // 15 XP por conversa × 7 dias = 105 XP
+            xpRealizado={diasSemana.filter(dia => dia.xpConversa >= 15).length * 15} // Dias com conversa × 15 XP
             diasSemana={diasSemana.map((dia) => ({
               label: dia.label,
               dataLabel: format(dia.dateObj, 'dd/MM'),
-              status: (dia.xpConversa >= 75 
+              status: (dia.xpConversa >= 15 
                 ? 'respondido' 
                 : isSameDay(dia.dateObj, hoje) 
                   ? 'pendente' 
