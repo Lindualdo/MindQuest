@@ -124,7 +124,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   loadQuestSnapshot: async (usuarioIdParam) => {
-    const { dashboardData: stateDashboard } = get();
+    const { dashboardData: stateDashboard, questSnapshot, questLoading } = get();
     const usuarioId = usuarioIdParam ?? stateDashboard?.usuario?.id;
 
     if (!usuarioId) {
@@ -133,6 +133,16 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         questError: 'Usuário não informado para carregar quests',
         questLoading: false,
       });
+      return;
+    }
+
+    // Se já tem snapshot carregado e não foi passado usuarioIdParam explícito, não recarrega
+    if (questSnapshot && !usuarioIdParam && stateDashboard?.usuario?.id === usuarioId) {
+      return;
+    }
+
+    // Se já está carregando, aguardar
+    if (questLoading) {
       return;
     }
 

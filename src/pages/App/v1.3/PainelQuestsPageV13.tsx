@@ -37,25 +37,24 @@ const PainelQuestsPageV13: React.FC = () => {
   const [activeNavTab, setActiveNavTab] = useState<TabId>('quests');
   const hoje = useMemo(() => new Date(), []); // Fixar hoje no mount
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
-  const hasRequestedData = useRef(false);
-
-  // Carregar dados APENAS uma vez ao montar
+  // Carregar dados apenas se não existirem no estado global (evita chamadas duplicadas)
   useEffect(() => {
     if (!usuarioId) return;
-    if (hasRequestedData.current) return;
-    if (questLoading || weeklyProgressCardLoading) return;
-
-    hasRequestedData.current = true;
     
-    // Carrega apenas o necessário: snapshot (já tem todas as quests) + progresso semanal
-    void loadQuestSnapshot(usuarioId);
-    void loadWeeklyProgressCard(usuarioId);
-  }, [usuarioId]);
-
-  // Resetar flag quando usuarioId mudar
-  useEffect(() => {
-    hasRequestedData.current = false;
-  }, [usuarioId]);
+    // Se já tem dados carregados, não precisa recarregar (vem da home ou já foi carregado)
+    if (questSnapshot && weeklyProgressCard) return;
+    
+    // Se já está carregando, aguardar
+    if (questLoading || weeklyProgressCardLoading) return;
+    
+    // Carrega apenas o que falta
+    if (!questSnapshot) {
+      void loadQuestSnapshot(usuarioId);
+    }
+    if (!weeklyProgressCard) {
+      void loadWeeklyProgressCard(usuarioId);
+    }
+  }, [usuarioId]); // Dependências mínimas: só usuarioId
 
   // Dados da semana e progresso (somente quests)
   const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
@@ -212,7 +211,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const handleRefresh = () => {
     if (usuarioId) {
-      hasRequestedData.current = false;
+      // Força recarregar ao clicar em refresh
       void loadQuestSnapshot(usuarioId);
       void loadWeeklyProgressCard(usuarioId);
     }
