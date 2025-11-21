@@ -62,9 +62,14 @@ const DashPerfilPage: React.FC = () => {
         </div>
 
         {/* Título da página */}
-        <h1 className="mb-6 text-center text-2xl font-bold text-[#1C2541]">
-          Meu Perfil — Dados Semanais
-        </h1>
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-[#1C2541]">
+            Meu Perfil
+          </h1>
+          <p className="mt-1 text-xs text-slate-500">
+            Dados Semanais
+          </p>
+        </div>
 
         {/* Card da Roda das Emoções */}
         <EmotionWheel />
