@@ -227,7 +227,7 @@ const PainelQuestsPageV13: React.FC = () => {
     const xpRecompensa = quest.xp_recompensa ?? 30;
 
     return (
-      <Card key={questId} className="!p-4" hover={false}>
+      <Card key={questId} className="!p-4 !bg-[#E8F3F5]" hover={false}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-1">
             <h3 className={`text-sm font-semibold ${isConcluida ? 'text-gray-500 line-through' : 'text-[#1C2541]'}`}>
@@ -484,7 +484,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     {pendentes.length > 0 ? (
                         pendentes.map(quest => renderQuestItem(quest, false))
                     ) : (
-                        <Card className="!p-8 text-center" hover={false}>
+                        <Card className="!p-8 !bg-[#E8F3F5] text-center" hover={false}>
                             <div className="flex flex-col items-center gap-2 text-[#94A3B8]">
                                 <TrendingUp size={32} />
                                 <p className="text-sm font-medium">Tudo feito por aqui!</p>
@@ -499,7 +499,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     {concluidas.length > 0 ? (
                         concluidas.map(quest => renderQuestItem(quest, true))
                     ) : (
-                        <Card className="!p-8 text-center" hover={false}>
+                        <Card className="!p-8 !bg-[#E8F3F5] text-center" hover={false}>
                             <div className="flex flex-col items-center gap-2 text-[#94A3B8]">
                                 <Sparkles size={32} />
                                 <p className="text-sm font-medium">Nenhuma conclusão ainda.</p>
