@@ -963,6 +963,19 @@ class DataAdapter {
 
   private processDistribuicaoEmocoes(data: ApiData): PlutchikEmotion[] {
     const emocoes = data.distribuicao_emocoes || this.getDefaultApiData().distribuicao_emocoes;
+    return this.processRodaEmocoes(emocoes);
+  }
+
+  public processRodaEmocoes(emocoes: {
+    alegria: number;
+    confianca: number;
+    medo: number;
+    surpresa: number;
+    tristeza: number;
+    angustia: number;
+    raiva: number;
+    expectativa: number;
+  }): PlutchikEmotion[] {
     const total = Object.values(emocoes).reduce((sum, val) => sum + (val || 0), 0);
     
     if (total === 0) {

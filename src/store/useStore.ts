@@ -223,6 +223,40 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
+  loadRodaEmocoes: async (usuarioIdParam) => {
+    const { dashboardData } = get();
+    let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
+
+    if (!userId) {
+      const authUser = authService.getUserData();
+      if (authUser?.user?.id) {
+        userId = authUser.user.id;
+      }
+    }
+
+    if (!userId) {
+      console.warn('[RodaEmocoes] abortando: usuário não informado');
+      return;
+    }
+
+    try {
+      const payload = await apiService.getRodaEmocoes(userId);
+      const rodaEmocoesProcessada = dataAdapter.processRodaEmocoes(payload.roda_emocoes);
+
+      const currentDashboard = get().dashboardData;
+      set({
+        dashboardData: currentDashboard
+          ? {
+              ...currentDashboard,
+              roda_emocoes: rodaEmocoesProcessada,
+            }
+          : currentDashboard,
+      });
+    } catch (error) {
+      console.error('[RodaEmocoes] erro ao carregar roda de emoções', error);
+    }
+  },
+
   loadInsightCard: async (usuarioIdParam) => {
     const { dashboardData, insightCardUserId, insightCardLoading } = get();
     let userId = usuarioIdParam ?? dashboardData?.usuario?.id;
@@ -746,6 +780,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           get().loadConversasCard(dashboardData.usuario.id),
           // loadQuestsCard removido - carrega apenas ao abrir painel de quests (v1.3)
           get().loadJornadaCard(dashboardData.usuario.id),
+          get().loadRodaEmocoes(dashboardData.usuario.id),
         ]);
       } else {
         set({

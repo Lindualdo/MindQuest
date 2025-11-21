@@ -434,6 +434,21 @@ export interface PanoramaCardResponse {
   card_panorama_emocional: PanoramaCardData;
 }
 
+export interface RodaEmocoesResponse {
+  success: boolean;
+  roda_emocoes: {
+    alegria: number;
+    confianca: number;
+    medo: number;
+    surpresa: number;
+    tristeza: number;
+    angustia: number;
+    raiva: number;
+    expectativa: number;
+  };
+  timestamp: string;
+}
+
 export interface InsightCardData {
   insight_id: string | null;
   titulo: string;

@@ -23,6 +23,7 @@ import type {
   WeeklyProgressCardData,
   MapaMentalData,
   BigFivePerfilResponse,
+  RodaEmocoesResponse,
 } from '../types/emotions';
 
 interface ApiResponse {
@@ -1526,6 +1527,32 @@ class ApiService {
     }
 
     return payload as BigFivePerfilResponse;
+  }
+
+  public async getRodaEmocoes(userId: string): Promise<RodaEmocoesResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/roda/emocoes?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar roda de emoções');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object' || !('roda_emocoes' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado na roda de emoções');
+    }
+
+    return payload as RodaEmocoesResponse;
   }
 }
 
