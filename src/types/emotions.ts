@@ -526,6 +526,7 @@ export interface WeeklyProgressDay {
   metaDia: number;
   metaConversa: number;
   metaQuests: number;
+  qtdQuestsPrevistas?: number; // Quantidade de quests planejadas para o dia
   status: WeeklyProgressStatus;
 }
 
