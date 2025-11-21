@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
@@ -49,8 +48,9 @@ const DashPerfilPage: React.FC = () => {
     <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
       <HeaderV1_2 nomeUsuario={nomeUsuario} />
 
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        <div className="flex items-center gap-2">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
+        {/* Botão voltar */}
+        <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
             onClick={handleBack}
@@ -59,23 +59,15 @@ const DashPerfilPage: React.FC = () => {
             <ArrowLeft size={16} />
             Voltar
           </button>
-          <div className="flex-1 text-right text-[0.7rem] font-semibold text-[#1C2541] uppercase tracking-wide">
-            Meu Perfil — dados semanais
-          </div>
         </div>
 
-        <div className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-3 py-2 text-[0.72rem] font-semibold text-[#1C2541]">
-          Atualizado semanalmente com base nos seus check-ins mais recentes.
-        </div>
+        {/* Título da página */}
+        <h1 className="mb-6 text-center text-2xl font-bold text-[#1C2541]">
+          Meu Perfil — Dados Semanais
+        </h1>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-3"
-        >
-          <EmotionWheel />
-        </motion.div>
+        {/* Card da Roda das Emoções */}
+        <EmotionWheel />
       </main>
 
       <BottomNavV1_3
