@@ -133,16 +133,19 @@ const HomeV1_3 = () => {
   const sabotadorAtivo = panoramaCard?.sabotador ?? dashboardData?.sabotadores?.padrao_principal ?? null;
   const sabotadorNome =
     sabotadorAtivo?.nome ??
-    sabotadorAtivo?.apelido_personalizado ??
+    (sabotadorAtivo && 'apelido' in sabotadorAtivo ? sabotadorAtivo.apelido : null) ??
+    dashboardData?.sabotadores?.padrao_principal?.apelido ??
     dashboardData?.sabotadores?.padrao_principal?.nome ??
     null;
   const sabotadorEmoji =
     sabotadorAtivo?.emoji ?? dashboardData?.sabotadores?.padrao_principal?.emoji ?? null;
   const sabotadorDescricao =
-    sabotadorAtivo?.contexto ??
-    sabotadorAtivo?.insight ??
+    (sabotadorAtivo && 'contexto' in sabotadorAtivo ? sabotadorAtivo.contexto : null) ??
+    (sabotadorAtivo && 'insight' in sabotadorAtivo ? sabotadorAtivo.insight : null) ??
+    (sabotadorAtivo && 'contexto_principal' in sabotadorAtivo ? sabotadorAtivo.contexto_principal : null) ??
+    (sabotadorAtivo && 'insight_contexto' in sabotadorAtivo ? sabotadorAtivo.insight_contexto : null) ??
     dashboardData?.sabotadores?.padrao_principal?.contexto_principal ??
-    dashboardData?.sabotadores?.padrao_principal?.insight_atual ??
+    dashboardData?.sabotadores?.padrao_principal?.insight_contexto ??
     null;
   const handleVerSabotador = () => {
     const id = sabotadorAtivo?.id ?? null;
