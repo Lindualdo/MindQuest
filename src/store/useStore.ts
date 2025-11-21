@@ -103,6 +103,9 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   questSnapshot: null,
   questLoading: false,
   questError: null,
+  questDetail: null,
+  questDetailLoading: false,
+  questDetailError: null,
 
   // Actions básicas
   setError: (error) => {
@@ -925,6 +928,47 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     });
   },
 
+  openQuestDetail: async (questId) => {
+    const { dashboardData } = get();
+    const userId = dashboardData?.usuario?.id;
+
+    if (!userId) {
+      console.warn('[openQuestDetail] usuário indisponível');
+      return;
+    }
+
+    set({
+      view: 'questDetail',
+      questDetailLoading: true,
+      questDetailError: null
+    });
+
+    try {
+      const detail = await apiService.getQuestDetail(userId, questId);
+      set({
+        questDetail: detail,
+        questDetailLoading: false,
+        questDetailError: null
+      });
+    } catch (error) {
+      console.error('Erro ao carregar quest detalhada:', error);
+      set({
+        questDetailLoading: false,
+        questDetailError: error instanceof Error ? error.message : 'Erro ao carregar quest',
+        questDetail: null
+      });
+    }
+  },
+
+  closeQuestDetail: () => {
+    set({
+      view: 'painelQuests',
+      questDetail: null,
+      questDetailError: null,
+      questDetailLoading: false
+    });
+  },
+
   openSabotadorDetail: (sabotadorId) => {
     const { dashboardData } = get();
     const fallbackId = dashboardData?.sabotadores?.padrao_principal?.id ?? null;
@@ -1083,8 +1127,12 @@ export const useDashboard = () => {
     selectedInsightId,
     insightDetail,
     insightDetailLoading,
-    insightDetailError
-  ,
+    insightDetailError,
+    openQuestDetail,
+    closeQuestDetail,
+    questDetail,
+    questDetailLoading,
+    questDetailError,
     selectedSabotadorId,
     openSabotadorDetail,
     resumoConversas,
@@ -1164,6 +1212,11 @@ export const useDashboard = () => {
     insightDetail,
     insightDetailLoading,
     insightDetailError,
+    openQuestDetail,
+    closeQuestDetail,
+    questDetail,
+    questDetailLoading,
+    questDetailError,
     selectedSabotadorId,
     openSabotadorDetail,
     resumoConversas,
