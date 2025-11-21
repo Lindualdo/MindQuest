@@ -350,3 +350,4 @@ export function getEmojiPerfil(nomeEn: string): string {
   return perfil?.emoji || '🧩';
 }
 
+

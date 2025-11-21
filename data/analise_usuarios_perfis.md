@@ -94,3 +94,4 @@
 
 O `dashboardData` já possui `perfil_big_five` mas parece estar vindo do endpoint antigo. Pode ser necessário criar um novo endpoint ou ajustar o existente para buscar da tabela `usuarios_perfis`.
 
+
