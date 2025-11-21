@@ -79,6 +79,7 @@ const PainelQuestsPageV13: React.FC = () => {
         totalXp: diaBackend?.totalXp || 0,
         xpConversa: diaBackend?.xpConversa || 0,
         xpQuests: diaBackend?.xpQuests || 0, // SOMENTE quests
+        qtdQuestsPrevistas: diaBackend?.qtdQuestsPrevistas || 0, // Quantidade de quests planejadas
         dateObj: data
       };
     });
@@ -339,9 +340,18 @@ const PainelQuestsPageV13: React.FC = () => {
                   } ${isSelected ? 'scale-105' : ''}`}
                 >
                   <div
-                    className="relative overflow-hidden rounded-full bg-slate-200"
+                    className="relative overflow-visible rounded-full bg-slate-200"
                     style={{ height: `${trackHeight}px`, width: '10px' }}
                   >
+                    {/* Número discreto no topo - apenas quando há quests previstas */}
+                    {metaDia > 0 && (dia.qtdQuestsPrevistas ?? 0) > 0 && (
+                      <span
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 text-[0.6rem] font-semibold text-slate-400 leading-none"
+                        title={`${dia.qtdQuestsPrevistas} quests planejadas · ${metaDia} pts`}
+                      >
+                        {dia.qtdQuestsPrevistas}
+                      </span>
+                    )}
                     {fillHeight > 0 && (
                       <div
                         className="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-500"
@@ -413,29 +423,45 @@ const PainelQuestsPageV13: React.FC = () => {
         {renderWeeklyProgressBar()}
 
         {/* Abas */}
-        <div className="mb-4 flex gap-2 rounded-2xl bg-white/80 p-1.5 shadow-sm">
-          <button
-            type="button"
-            onClick={() => setActiveTab('pendentes')}
-            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
-              activeTab === 'pendentes'
-                ? 'bg-[#0EA5E9] text-white shadow-sm'
-                : 'text-[#64748B] hover:text-[#1C2541]'
-            }`}
-          >
-            Pendentes ({pendentes.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('concluidas')}
-            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
-              activeTab === 'concluidas'
-                ? 'bg-[#0EA5E9] text-white shadow-sm'
-                : 'text-[#64748B] hover:text-[#1C2541]'
-            }`}
-          >
-            Concluídas ({concluidas.length})
-          </button>
+        <div className="mb-4 border-b border-slate-200">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('pendentes')}
+              className={`relative flex-1 border-b-2 px-4 pb-3 pt-2 text-center text-sm font-semibold transition-all duration-200 ease-out ${
+                activeTab === 'pendentes'
+                  ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 active:scale-[0.98]'
+              }`}
+            >
+              Pendentes
+              <span className={`ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors ${
+                activeTab === 'pendentes'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-200 text-slate-600'
+              }`}>
+                {pendentes.length}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('concluidas')}
+              className={`relative flex-1 border-b-2 px-4 pb-3 pt-2 text-center text-sm font-semibold transition-all duration-200 ease-out ${
+                activeTab === 'concluidas'
+                  ? 'border-[#0EA5E9] text-[#0EA5E9]'
+                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 active:scale-[0.98]'
+              }`}
+            >
+              Concluídas
+              <span className={`ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors ${
+                activeTab === 'concluidas'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-200 text-slate-600'
+              }`}>
+                {concluidas.length}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Lista de Quests */}
