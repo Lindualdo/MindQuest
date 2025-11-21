@@ -22,6 +22,7 @@ import type {
   WeeklyProgressCardResponse,
   WeeklyProgressCardData,
   MapaMentalData,
+  BigFivePerfilResponse,
 } from '../types/emotions';
 
 interface ApiResponse {
@@ -1499,6 +1500,32 @@ class ApiService {
    */
   public getBaseUrl(): string {
     return this.remoteBaseUrl;
+  }
+
+  public async getPerfilBigFive(userId: string): Promise<BigFivePerfilResponse> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const endpoint = `/perfil-big-five?user_id=${encodeURIComponent(userId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar perfil Big Five');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      throw new Error('Formato inesperado no perfil Big Five');
+    }
+
+    return payload as BigFivePerfilResponse;
   }
 }
 

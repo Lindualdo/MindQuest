@@ -794,3 +794,36 @@ export interface AnaliseProsodia {
   pausas_frequencia: number;
   variacao_expressiva: number; // 0-100
 }
+
+// Perfil Big Five (calculado da tabela usuarios_perfis)
+export interface BigFivePerfilScores {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+}
+
+export interface TracoOrdenado {
+  nome: string;
+  nome_pt: string;
+  score: number;
+}
+
+export interface BigFivePerfilData {
+  usuario_id: string;
+  perfil_primario: string | null;
+  perfil_secundario: string | null;
+  scores: BigFivePerfilScores;
+  tracos_ordenados: TracoOrdenado[];
+  resumo_perfil: string | null;
+  confianca_media: number;
+  ultima_atualizacao: string | null;
+  total_registros: number;
+}
+
+export interface BigFivePerfilResponse {
+  success: boolean;
+  perfil?: BigFivePerfilData;
+  error?: string;
+}

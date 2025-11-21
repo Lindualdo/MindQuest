@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import EmotionWheel from '@/components/dashboard/EmotionWheel';
+import CardPerfilBigFive from '@/components/dashboard/CardPerfilBigFive';
 import { useDashboard } from '@/store/useStore';
 
 const DashPerfilPage: React.FC = () => {
@@ -64,11 +65,13 @@ const DashPerfilPage: React.FC = () => {
         {/* Título da página */}
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-[#1C2541]">
-            Meu Perfil
+            Perfil comportamental
           </h1>
-          <p className="mt-1 text-xs text-slate-500">
-            Dados Semanais
-          </p>
+        </div>
+
+        {/* Card Perfil Big Five */}
+        <div className="mb-4">
+          <CardPerfilBigFive />
         </div>
 
         {/* Card da Roda das Emoções */}
