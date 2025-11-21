@@ -27,8 +27,6 @@ const HomeV1_3 = () => {
     weeklyProgressCardError,
     loadWeeklyProgressCard,
     openSabotadorDetail,
-    loadQuestSnapshot,
-    loadQuestsCard,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -92,10 +90,7 @@ const HomeV1_3 = () => {
   }, [panoramaCard]);
 
   const handleContinue = () => {
-    if (userId) {
-      void loadQuestSnapshot(userId);
-      void loadQuestsCard(userId);
-    }
+    // Não precisa carregar aqui - o painel verifica se tem dados e carrega apenas se necessário
     setActiveTab('quests');
     setView('painelQuests');
   };

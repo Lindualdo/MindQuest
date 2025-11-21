@@ -1131,12 +1131,11 @@ class ApiService {
     }
 
     const endpoint = `/quests?user_id=${encodeURIComponent(userId)}`;
-    // Usa proxy em dev, remote em produção
-    const useProxy = this.useProxyPaths && typeof window !== 'undefined';
+    // SEMPRE chama servidor remoto (não usar proxy local)
     const result = await this.makeRequest(
       endpoint,
       undefined,
-      !useProxy // forceRemote = true apenas se não usar proxy
+      true // forceRemote = true sempre
     );
 
     if (!result.success) {
