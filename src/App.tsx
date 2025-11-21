@@ -14,6 +14,7 @@ import HumorHistoryPage from './pages/App/HumorHistoryPage';
 import FullChatPage from './pages/App/FullChatPage';
 import InsightDetailPage from './pages/App/InsightDetailPage';
 import InsightDetailPageV13 from './pages/App/v1.3/InsightDetailPageV13';
+import QuestDetailPageV13 from './pages/App/v1.3/QuestDetailPageV13';
 import DashPerfilPageV13 from './pages/App/v1.3/DashPerfilPage';
 import HumorHistoryPageV13 from './pages/App/v1.3/HumorHistoryPageV13';
 import ConversaResumoPageV13 from './pages/App/v1.3/ConversaResumoPageV13';
@@ -245,6 +246,9 @@ function App() {
         break;
       case 'painelQuests':
         previewPage = <PainelQuestsPageV13 />;
+        break;
+      case 'questDetail':
+        previewPage = <QuestDetailPageV13 />;
         break;
       case 'resumoConversas':
         previewPage = <ResumoConversasPage />;
