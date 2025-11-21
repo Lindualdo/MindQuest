@@ -55,16 +55,34 @@ WITH params AS (
     COALESCE(SUM(xp_previsto), 0) AS meta_quests
   FROM quests_recorrentes
   GROUP BY usuario_id, data
-), quests_concluidas AS (
+), quests_concluidas_raw AS (
+  -- Busca quests concluídas usando conquistas_historico.detalhes e usuarios_quest.recorrencias
   SELECT
     ch.usuario_id,
-    (ch.registrado_em AT TIME ZONE 'America/Sao_Paulo')::date AS data,
+    ch.detalhes->>'quest_id' AS quest_id,
+    COALESCE((dia_elem->>'concluido_em')::date, (dia_elem->>'data')::date) AS data,
     COALESCE(ch.xp_base, 0) AS xp_base,
-    COALESCE(ch.xp_bonus, 0) AS xp_bonus
+    COALESCE(ch.xp_bonus, 0) AS xp_bonus,
+    ROW_NUMBER() OVER (PARTITION BY ch.detalhes->>'quest_id', COALESCE((dia_elem->>'concluido_em')::date, (dia_elem->>'data')::date) ORDER BY ch.registrado_em DESC) AS rn
   FROM public.conquistas_historico ch
   JOIN limites l ON l.usuario_id = ch.usuario_id
+  LEFT JOIN public.usuarios_quest uq ON uq.id = (ch.detalhes->>'quest_id')::uuid
+    AND uq.recorrencias IS NOT NULL
+  LEFT JOIN LATERAL jsonb_array_elements(uq.recorrencias->'dias') AS dia_elem 
+    ON (dia_elem->>'status') = 'concluida'
   WHERE ch.tipo = 'quest'
-    AND (ch.registrado_em AT TIME ZONE 'America/Sao_Paulo')::date BETWEEN l.semana_inicio AND l.semana_fim
+    AND ch.detalhes->>'quest_id' IS NOT NULL
+    AND COALESCE((dia_elem->>'concluido_em')::date, (dia_elem->>'data')::date) BETWEEN l.semana_inicio AND l.semana_fim
+), quests_concluidas AS (
+  -- Remove duplicatas (pega apenas o registro mais recente por quest_id e data) e agrupa por data
+  SELECT
+    usuario_id,
+    data,
+    SUM(xp_base) AS xp_base,
+    SUM(xp_bonus) AS xp_bonus
+  FROM quests_concluidas_raw
+  WHERE rn = 1
+  GROUP BY usuario_id, data
 ), pontos_quest AS (
   SELECT
     d.usuario_id,

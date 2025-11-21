@@ -11,13 +11,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "5b68f6e1-04c3-4c52-900a-d7c5428625c6",
+      "id": "19162385-f973-49ec-b83a-714f8831a486",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        144,
-        160
+        0,
+        0
       ],
       "webhookId": "fb885634-496c-466f-b897-d2b75db029c7",
       "onError": "continueRegularOutput"
@@ -26,49 +26,26 @@
       "parameters": {
         "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\n\nconst usuarioId = [query.usuario_id, query.user_id, query.usuarioId, query.userId].find((value) => typeof value === 'string' && value.trim().length > 0);\nconst questId = query.quest_id ?? query.questId ?? query.instancia_id;\nconst dataReferencia = query.data_referencia ?? query.dataReferencia;\n\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\nif (!questId || typeof questId !== 'string' || questId.trim().length === 0) {\n  throw new Error('quest_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId.trim(),\n    quest_id: questId.trim(),\n    data_referencia: dataReferencia && typeof dataReferencia === 'string' ? dataReferencia.trim() : null,\n    fonte: typeof query.fonte === 'string' ? query.fonte.trim() || 'app_v1.3' : 'app_v1.3',\n    comentario: typeof query.comentario === 'string' ? query.comentario.trim() || null : null,\n  }\n}];"
       },
-      "id": "fd141ea2-3b5b-4bf0-b484-9bbc21b5bb6b",
+      "id": "bb9b30ba-66a0-4902-8579-689d742d0a1c",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        160
+        240,
+        0
       ]
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH quest_info AS (\n  SELECT id, usuario_id, recorrencias\n  FROM usuarios_quest\n  WHERE id = $1::uuid AND usuario_id = $2::uuid AND status IN ('ativa', 'pendente')\n)\nUPDATE usuarios_quest uq\nSET\n  recorrencias = jsonb_set(\n    recorrencias,\n    ARRAY['dias', (\n      SELECT (idx - 1)::text\n      FROM quest_info qi, jsonb_array_elements(qi.recorrencias->'dias') WITH ORDINALITY arr(elem, idx)\n      WHERE (elem->>'data')::date = COALESCE($3::date, CURRENT_DATE)\n    )],\n    jsonb_build_object(\n      'data', COALESCE($3, CURRENT_DATE::text),\n      'status', 'concluida',\n      'xp_previsto', (recorrencias->'dias'->0->>'xp_previsto')::int,\n      'concluido_em', COALESCE(($3 || ' 23:59:59')::text, CURRENT_TIMESTAMP::text)\n    )\n  ),\n  atualizado_em = CURRENT_TIMESTAMP\nFROM quest_info qi\nWHERE uq.id = qi.id\nRETURNING\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.progresso_percentual,\n  uq.xp_concedido,\n  NULL::timestamp AS concluido_em,\n  uq.atualizado_em;",
-        "options": {
-          "queryReplacement": "={{ [$json.quest_id, $json.usuario_id, $json.data_referencia] }}"
-        }
+        "jsCode": "const normalizarItem = $input.first()?.json ?? {};\nconst questId = normalizarItem.quest_id;\nconst usuarioId = normalizarItem.usuario_id;\nconst dataReferencia = normalizarItem.data_referencia;\n\nif (!questId || !usuarioId) {\n  throw new Error('Quest não encontrada ou dados inválidos');\n}\n\n// Validar que a quest existe e está ativa/pendente\n// Não atualizar recorrencias - apenas validar\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    quest_id: questId,\n    data_referencia: dataReferencia || null\n  }\n}];"
       },
-      "id": "2e870f2c-290f-47cf-b835-f327ce83a367",
-      "name": "Atualizar Recorrencia",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        624,
-        160
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first()?.json ?? {};\n\nif (!item.quest_id) {\n  throw new Error('Quest não encontrada ou já concluída');\n}\n\nreturn [{\n  json: {\n    usuario_id: item.usuario_id,\n    quest_id: item.quest_id,\n    status: item.status\n  }\n}];"
-      },
-      "id": "f1fda4b5-abca-46f1-ab8d-004e23d42aba",
+      "id": "7b600f2a-a5d4-4002-9b6d-2f26946bb94c",
       "name": "Validar Atualização",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        864,
-        160
+        672,
+        0
       ]
     },
     {
@@ -85,21 +62,18 @@
           "value": {
             "usuario_id": "={{ $json.usuario_id }}",
             "quests_personalizadas": "[]",
-            "atualizacoes_status": "={{ JSON.stringify([{instancia_id: $json.quest_id, novo_status: 'concluida', progresso_atual: 0, xp_extra: 0}]) }}"
+            "atualizacoes_status": "={{ JSON.stringify([{instancia_id: $json.quest_id, novo_status: 'concluida', progresso_atual: 0, xp_extra: 0, data_referencia: $json.data_referencia}]) }}"
           },
-          "matchingColumns": [
-            "usuario_id"
-          ],
+          "matchingColumns": [],
           "schema": [
             {
               "id": "usuario_id",
               "displayName": "usuario_id",
-              "required": true,
+              "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "quests_personalizadas",
@@ -107,9 +81,8 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": false,
-              "type": "string",
-              "removed": false
+              "canBeUsedToMatch": true,
+              "type": "string"
             },
             {
               "id": "atualizacoes_status",
@@ -117,25 +90,22 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": false,
-              "type": "string",
-              "removed": false
+              "canBeUsedToMatch": true,
+              "type": "string"
             }
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "options": {}
       },
-      "id": "2a576a1d-51e0-4795-adf5-9e747e83cc0f",
+      "id": "3d6812f9-85c5-4e4a-8d84-465345060250",
       "name": "Calcular XP Quest",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1104,
-        160
+        960,
+        0
       ]
     },
     {
@@ -146,13 +116,13 @@
           "queryReplacement": "={{ [$('Validar Atualização').item.json.quest_id, $('Validar Atualização').item.json.usuario_id] }}"
         }
       },
-      "id": "4810ef3e-d485-4a40-9192-b790e9368b39",
+      "id": "c9760067-6254-45cd-ab53-e82eb080b2a6",
       "name": "Buscar Quest Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1344,
-        160
+        1200,
+        0
       ],
       "credentials": {
         "postgres": {
@@ -165,13 +135,13 @@
       "parameters": {
         "jsCode": "const item = $input.first()?.json ?? {};\n\nreturn [{\n  json: {\n    success: true,\n    quest_id: item.quest_id,\n    usuario_id: item.usuario_id,\n    status: item.status,\n    xp_adicionado: item.xp_concedido || 0,\n    xp_base: item.xp_base || 0,\n    xp_bonus: item.xp_bonus || 0,\n    total_quests_concluidas: item.total_quests_concluidas || 0,\n    total_quests_personalizadas: item.total_quests_personalizadas || 0,\n    quest: {\n      id: item.quest_id,\n      status: item.status,\n      progresso_meta: item.progresso_meta,\n      progresso_atual: item.progresso_atual,\n      progresso_percentual: item.progresso_percentual,\n      xp_concedido: item.xp_concedido,\n      config: item.config,\n      concluido_em: item.concluido_em,\n      atualizado_em: item.atualizado_em\n    }\n  }\n}];"
       },
-      "id": "49e2ee1f-9ee3-41b3-a839-aac9d1a1258e",
+      "id": "a2e79b6f-5ba1-4148-b6e3-0343dded1c13",
       "name": "Formatar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        160
+        1440,
+        0
       ]
     },
     {
@@ -180,38 +150,14 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "81d77147-895c-452c-853b-29a3d1baf30e",
+      "id": "2cd2bbfa-1594-4759-85ab-84a218591602",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1824,
-        160
+        1680,
+        0
       ]
-    },
-    {
-      "id": "reset-quest-node",
-      "name": "Resetar Quest Diaria",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1224,
-        160
-      ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE public.usuarios_quest\nSET\n  status = 'pendente',\n  progresso_atual = 0,\n  progresso_percentual = 0,\n  concluido_em = NULL,\n  atualizado_em = CURRENT_TIMESTAMP\nWHERE id = $1::uuid\n  AND usuario_id = $2::uuid\n  AND config->>'recorrencia' = 'diaria'\n  AND CURRENT_DATE BETWEEN janela_inicio AND janela_fim\nRETURNING \n  id AS quest_id,\n  status AS novo_status,\n  config->>'titulo' AS titulo;",
-        "options": {
-          "queryReplacement": "={{ [$('Validar Atualização').item.json.quest_id, $('Validar Atualização').item.json.usuario_id] }}"
-        }
-      },
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
     }
   ],
   "connections": {
@@ -226,44 +172,11 @@
         ]
       ]
     },
-    "Normalizar Entrada": {
-      "main": [
-        [
-          {
-            "node": "Atualizar Recorrencia",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Atualizar Recorrencia": {
-      "main": [
-        [
-          {
-            "node": "Validar Atualização",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Validar Atualização": {
       "main": [
         [
           {
             "node": "Calcular XP Quest",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calcular XP Quest": {
-      "main": [
-        [
-          {
-            "node": "Resetar Quest Diaria",
             "type": "main",
             "index": 0
           }
@@ -292,11 +205,22 @@
         ]
       ]
     },
-    "Resetar Quest Diaria": {
+    "Calcular XP Quest": {
       "main": [
         [
           {
             "node": "Buscar Quest Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Validar Atualização",
             "type": "main",
             "index": 0
           }
@@ -310,7 +234,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ae04f2ed-2214-4cfb-bb06-556ed074634f",
+  "versionId": "0f9102c2-631c-4566-8fe3-1873057ef0d8",
   "triggerCount": 1,
   "shared": [
     {
