@@ -158,7 +158,7 @@ function App() {
 
     if (hasTokenInQuery || hasStoredToken) {
       redirectHandledRef.current = true;
-      const target = hasTokenInQuery ? `/app${search}` : '/app';
+      const target = hasTokenInQuery ? `/app/1.3${search}` : '/app/1.3';
       window.location.replace(target);
     }
   }, [isRootPath]);
