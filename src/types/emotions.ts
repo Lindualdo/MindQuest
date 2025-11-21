@@ -316,6 +316,55 @@ export interface InsightDetail extends Insight {
   baseado_em?: string[];
 }
 
+export interface AreaVida {
+  id: string;
+  nome: string;
+  descricao?: string;
+  codigo?: string;
+}
+
+export interface QuestDetailInsight {
+  id: string;
+  titulo: string;
+  descricao?: string;
+  resumo_situacao?: string;
+  feedback_positivo?: string;
+  feedback_desenvolvimento?: string;
+  feedback_motivacional?: string;
+  recursos_sugeridos?: InsightResource[];
+  prioridade?: string;
+  categoria?: string;
+  tipo?: string;
+  icone?: string;
+}
+
+export interface QuestDetailSabotador {
+  id: string;
+  nome: string;
+  descricao?: string;
+  contextos_tipicos?: string[];
+  contramedidas_sugeridas?: string[];
+}
+
+export interface QuestDetail {
+  id: string;
+  usuario_id: string;
+  status: QuestStatus;
+  titulo: string;
+  descricao?: string;
+  xp_recompensa?: number | null;
+  prioridade?: string;
+  tipo?: string | null;
+  complexidade: number;
+  progresso_meta?: number | null;
+  progresso_atual: number;
+  xp_concedido: number;
+  recorrencias?: any | null;
+  area_vida?: AreaVida | null;
+  insight?: QuestDetailInsight | null;
+  sabotador?: QuestDetailSabotador | null;
+}
+
 export interface ResumoConversa {
   resumo_conversa: string;
   data_conversa?: string | null;
@@ -616,6 +665,7 @@ export type ViewId =
   | 'dashboard'
   | 'humorHistorico'
   | 'insightDetail'
+  | 'questDetail'
   | 'conquistas'
   | 'proximosNiveis'
   | 'sabotadorDetail'
