@@ -412,6 +412,11 @@ const PainelQuestsPageV13: React.FC = () => {
             </button>
         </div>
 
+        {/* Título da página */}
+        <h1 className="mb-6 text-2xl font-bold text-[#1C2541]">
+          Minhas missões da semana
+        </h1>
+
         {/* Card de Conversas */}
         <div className="mb-6">
           <CardConversasV13
