@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, RefreshCw, ArrowUpRight } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isSameDay, isFuture, addDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
@@ -25,6 +25,7 @@ const PainelQuestsPageV13: React.FC = () => {
     loadWeeklyProgressCard,
     concluirQuest,
     setView,
+    openQuestDetail,
   } = useDashboard();
 
   const usuarioId = dashboardData?.usuario?.id;
@@ -267,6 +268,18 @@ const PainelQuestsPageV13: React.FC = () => {
             </button>
           )}
         </div>
+        {questId && (
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => openQuestDetail(questId)}
+              className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+            >
+              Saber mais
+              <ArrowUpRight size={12} />
+            </button>
+          </div>
+        )}
       </Card>
     );
   };
