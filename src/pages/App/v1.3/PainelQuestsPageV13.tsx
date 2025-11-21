@@ -18,14 +18,10 @@ const PainelQuestsPageV13: React.FC = () => {
     questSnapshot,
     questLoading,
     questError,
-    questsCard,
-    questsCardLoading,
-    questsCardError,
     weeklyProgressCard,
     weeklyProgressCardLoading,
     weeklyProgressCardError,
     loadQuestSnapshot,
-    loadQuestsCard,
     loadWeeklyProgressCard,
     concluirQuest,
     setView,
@@ -43,23 +39,20 @@ const PainelQuestsPageV13: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
   const hasRequestedData = useRef(false);
 
-  // Carregar dados
+  // Carregar dados APENAS uma vez ao montar
   useEffect(() => {
-    if (!usuarioId) {
-      hasRequestedData.current = false;
-      return;
-    }
-    if (questLoading || questsCardLoading || weeklyProgressCardLoading) return;
+    if (!usuarioId) return;
     if (hasRequestedData.current) return;
+    if (questLoading || weeklyProgressCardLoading) return;
 
     hasRequestedData.current = true;
     
-    // Carrega tudo que precisa
+    // Carrega apenas o necessário: snapshot (já tem todas as quests) + progresso semanal
     void loadQuestSnapshot(usuarioId);
-    void loadQuestsCard(usuarioId);
     void loadWeeklyProgressCard(usuarioId);
-  }, [usuarioId, questLoading, questsCardLoading, weeklyProgressCardLoading, loadQuestSnapshot, loadQuestsCard, loadWeeklyProgressCard]);
+  }, [usuarioId]);
 
+  // Resetar flag quando usuarioId mudar
   useEffect(() => {
     hasRequestedData.current = false;
   }, [usuarioId]);
@@ -139,19 +132,17 @@ const PainelQuestsPageV13: React.FC = () => {
     });
   }, [questSnapshot, selectedDate]);
 
+  // SIMPLIFICADO: usar apenas o status que já vem do webhook em recorrencias.dias[].status
   const pendentes = useMemo(() => {
     const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     return questsDoDia.filter((q) => {
-      // Se é recorrente, verifica o status do dia específico
       if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
         const diaQuest = q.recorrencias.dias.find((d: any) => {
-          if (!d.data) return false;
           const diaNormalizado = normalizeDateStr(d.data);
           return diaNormalizado === selectedDateStr;
         });
         return diaQuest && diaQuest.status !== 'concluida';
       }
-      // Para quests não recorrentes
       return !q.concluido_em && q.status !== 'concluida';
     });
   }, [questsDoDia, selectedDate]);
@@ -159,16 +150,13 @@ const PainelQuestsPageV13: React.FC = () => {
   const concluidas = useMemo(() => {
     const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     return questsDoDia.filter((q) => {
-      // Se é recorrente, verifica o status do dia específico
       if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
         const diaQuest = q.recorrencias.dias.find((d: any) => {
-          if (!d.data) return false;
           const diaNormalizado = normalizeDateStr(d.data);
           return diaNormalizado === selectedDateStr;
         });
         return diaQuest && diaQuest.status === 'concluida';
       }
-      // Para quests não recorrentes
       return q.concluido_em || q.status === 'concluida';
     });
   }, [questsDoDia, selectedDate]);
@@ -218,11 +206,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const handleSelectDay = (data: Date | null) => {
     if (data) {
       setSelectedDate(data);
-      // Recarrega dados ao mudar de dia para garantir que as quests estejam atualizadas
-      if (usuarioId) {
-        hasRequestedData.current = false;
-        void loadQuestSnapshot(usuarioId);
-      }
+      // NÃO recarrega: os dados já vêm todos do webhook
     }
   };
 
@@ -230,8 +214,7 @@ const PainelQuestsPageV13: React.FC = () => {
     if (usuarioId) {
       hasRequestedData.current = false;
       void loadQuestSnapshot(usuarioId);
-      void loadQuestsCard(usuarioId);
-      void loadWeeklyQuestsProgressCard(usuarioId);
+      void loadWeeklyProgressCard(usuarioId);
     }
   };
 
@@ -491,7 +474,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
         
         {/* Erros */}
-        {(questError || questsCardError || weeklyProgressCardError) && (
+        {(questError || weeklyProgressCardError) && (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-center text-xs text-red-600">
             Alguns dados não puderam ser carregados no momento.
           </div>
