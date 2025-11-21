@@ -10,6 +10,7 @@ import { authService } from './authService';
 import type {
   HumorHistoricoPayload,
   InsightDetail,
+  QuestDetail,
   ResumoConversasPayload,
   QuestSnapshot,
   QuestStatus,
@@ -1426,6 +1427,46 @@ class ApiService {
     }
 
     return detail as InsightDetail;
+  }
+
+  public async getQuestDetail(
+    userId: string,
+    questId: string
+  ): Promise<QuestDetail> {
+    if (!userId || !questId) {
+      throw new Error('Parâmetros inválidos para carregar quest');
+    }
+
+    const params = new URLSearchParams({
+      user_id: userId,
+      quest_id: questId
+    });
+
+    const endpoint = `/quest-detail?${params.toString()}`;
+    console.info('[API] requisitando quest detalhada:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar detalhe da quest');
+    }
+
+    let response: unknown = result.response;
+
+    // Extrair quest_detail do response
+    if (response && typeof response === 'object' && 'quest_detail' in response) {
+      response = (response as Record<string, unknown>).quest_detail;
+    } else if (Array.isArray(response)) {
+      response = response[0];
+    } else if (response && typeof response === 'object' && 'data' in (response as Record<string, unknown>)) {
+      const nested = (response as Record<string, unknown>).data;
+      response = Array.isArray(nested) ? nested[0] : nested;
+    }
+
+    if (!response || typeof response !== 'object') {
+      throw new Error('Quest não encontrada ou formato inesperado');
+    }
+
+    return response as QuestDetail;
   }
 
   /**
