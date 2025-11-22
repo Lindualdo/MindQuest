@@ -1522,51 +1522,6 @@ class DataAdapter {
     };
   }
 
-  public convertApiToDashboard(rawApiPayload: ApiPayload): DashboardData {
-    const apiData = this.normalizeApiPayload(rawApiPayload);
-    const perfilDetectado = this.generatePerfilDetectado(apiData);
-    const humorMetrics = this.resolveHumorMetrics(apiData);
-    const cronotipoRaw = this.parseNullString<string>(apiData.user.cronotipo_detectado);
-
-    let cronotipo: 'matutino' | 'vespertino' | 'noturno' = 'matutino';
-    if (cronotipoRaw === 'vespertino') cronotipo = 'vespertino';
-    else if (cronotipoRaw === 'noturno') cronotipo = 'noturno';
-
-    const dashboardData: DashboardData = {
-      usuario: {
-        id: apiData.user.id,
-        nome: apiData.user.nome,
-        nome_preferencia: apiData.user.nome_preferencia,
-        cronotipo_detectado: cronotipo,
-        perfil_detectado: perfilDetectado
-      },
-      
-      mood_gauge: {
-        nivel_atual: humorMetrics.nivelAtual,
-        emoji_atual: humorMetrics.ultimaConversaEmoji,
-        tendencia_semanal: humorMetrics.tendencia,
-        cor_indicador: (() => {
-          if (humorMetrics.nivelAtual === null || humorMetrics.nivelAtual === undefined) {
-            return '#6B7280';
-          }
-          if (humorMetrics.nivelAtual >= 8) return '#10B981';
-          if (humorMetrics.nivelAtual >= 6) return '#F59E0B';
-          if (humorMetrics.nivelAtual >= 4) return '#F97316';
-          return '#EF4444'; // Vermelho para muito baixo
-        })()
-      },
-      
-      checkins_historico: this.processHistoricoDiario(apiData),
-      roda_emocoes: this.processDistribuicaoEmocoes(apiData),
-      distribuicao_panas: this.processPanas(apiData),
-      gamificacao: this.convertGamificacao(apiData.gamificacao, apiData.historico_resumo, apiData.proxima_jornada),
-      
-      sabotadores: {
-        padrao_principal: this.convertSabotador(apiData.sabotador)
-      },
-      
-      insights: this.processInsights(apiData),
-      alertas_background: [],
       
       metricas_periodo: {
         periodo_selecionado: humorMetrics.periodoTipo,
