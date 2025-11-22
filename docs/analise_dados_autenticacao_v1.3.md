@@ -244,11 +244,16 @@ Array<{
 
 ### ⚠️ **REVISAR** (Dados Parcialmente Usados)
 1. `gamificacao`:
-   - ✅ Manter: `streak_conversas_dias`
-   - ⚠️ Verificar: `quest_diaria_*`, `total_conversas`, `total_reflexoes`
-   - ❌ Remover: `xp_total`, `xp_proximo_nivel`, `nivel_atual`, `titulo_nivel`
-   - ❌ Remover: `conquistas_desbloqueadas`, `conquistas_proximas`
-   - ❌ Remover: `total_xp_ganho_hoje`, `ultima_conquista_*`
+   - ✅ Manter: `streak_conversas_dias` (usado)
+   - ❌ Remover: `xp_total`, `xp_proximo_nivel`, `nivel_atual`, `titulo_nivel` (não exibidos na v1.3)
+   - ❌ Remover: `quest_diaria_*` (v1.3 usa quests personalizadas via API separada)
+   - ❌ Remover: `conquistas_desbloqueadas`, `conquistas_proximas` (não usados)
+   - ❌ Remover: `total_xp_ganho_hoje`, `ultima_conquista_*` (não usados)
+   - ❌ Remover: `streak_protecao_*`, `melhor_streak` (não exibidos)
+   - ❌ Remover: `total_reflexoes`, `criado_em` (não usados)
+   - ⚠️ Verificar: `total_conversas` (usado indiretamente via historico_resumo)
+   - ⚠️ Verificar: `ultima_atualizacao` (pode ser usado)
+   - ⚠️ Verificar: `ultima_conversa_data` (pode ser usado indiretamente)
 
 ### ❌ **REMOVER** (Dados Não Usados)
 1. `proxima_jornada` (completo)
@@ -258,38 +263,67 @@ Array<{
 ## 🔧 Campos Específicos a Verificar
 
 ### Campos do `user`:
-- [ ] `whatsapp_numero` - usado?
-- [ ] `status_onboarding` - usado?
-- [ ] `criado_em` - usado?
+- [x] `whatsapp_numero` - ❌ **NÃO USADO** (apenas processado, nunca exibido) → **REMOVER**
+- [x] `status_onboarding` - ❌ **NÃO USADO** (apenas processado, nunca exibido) → **REMOVER**
+- [x] `criado_em` - ❌ **NÃO USADO** (apenas processado, nunca exibido) → **REMOVER**
 
 ### Campos do `gamificacao`:
-- [ ] `streak_protecao_usada` - usado?
-- [ ] `streak_protecao_resetada_em` - usado?
-- [ ] `ultima_conversa_data` - usado?
-- [ ] `melhor_streak` - usado?
-- [ ] `quest_diaria_*` - usado em quests?
-- [ ] `total_conversas` - usado?
-- [ ] `total_reflexoes` - usado?
-- [ ] `ultima_atualizacao` - usado?
-- [ ] `criado_em` - usado?
+- [x] `streak_protecao_usada` - ❌ **NÃO USADO** (processado mas não exibido)
+- [x] `streak_protecao_resetada_em` - ❌ **NÃO USADO** (processado mas não exibido)
+- [x] `ultima_conversa_data` - ⚠️ **VERIFICAR** (pode ser usado indiretamente)
+- [x] `melhor_streak` - ❌ **NÃO USADO** (processado mas não exibido na v1.3)
+- [x] `quest_diaria_*` - ❌ **NÃO USADO** (processado mas não exibido - v1.3 usa quests personalizadas)
+- [x] `total_conversas` - ⚠️ **USADO INDIRETAMENTE** (via historico_resumo)
+- [x] `total_reflexoes` - ❌ **NÃO USADO** (processado mas não exibido)
+- [x] `ultima_atualizacao` - ⚠️ **VERIFICAR** (pode ser usado)
+- [x] `criado_em` - ❌ **NÃO USADO** (processado mas não exibido)
 
 ### Campos do `sabotador`:
-- [ ] `total_deteccoes` - usado?
-- [ ] `intensidade_media` - usado?
-- [ ] `total_conversas` - usado?
+- [x] `total_deteccoes` - ❌ **NÃO USADO** (processado mas não exibido) → **REMOVER**
+- [x] `intensidade_media` - ❌ **NÃO USADO** (processado mas não exibido) → **REMOVER**
+- [x] `total_conversas` - ❌ **NÃO USADO** (processado mas não exibido) → **REMOVER**
 
 ### Campos do `perfil_big_five`:
-- [ ] `perfil_secundario` - usado?
+- [x] `perfil_secundario` - ✅ **USADO** (exibido em CardPerfilBigFive)
 
 ---
 
+## 📝 Decisões Finais
+
+### ✅ **MANTER** (Confirmado)
+- `user`: `id`, `nome`, `nome_preferencia`, `cronotipo_detectado`
+- `perfil_big_five`: todos os campos (incluindo `perfil_secundario`)
+- `sabotador`: `id`, `nome`, `emoji`, `apelido_personalizado`, `contexto_principal`, `insight_atual`, `contramedida_ativa`
+- `distribuicao_emocoes`: todos os campos
+- `panas`: todos os campos
+- `historico_diario`: todos os campos
+- `insights`: todos os campos
+- `gamificacao`: apenas `streak_conversas_dias`
+
+### ❌ **REMOVER** (Confirmado)
+- `proxima_jornada`: completo
+- `user`: `whatsapp_numero`, `status_onboarding`, `criado_em`
+- `gamificacao`: 
+  - `xp_total`, `xp_proximo_nivel`, `nivel_atual`, `titulo_nivel`
+  - `quest_diaria_*` (todos)
+  - `conquistas_desbloqueadas`, `conquistas_proximas`
+  - `total_xp_ganho_hoje`, `ultima_conquista_id`, `ultima_conquista_data`
+  - `streak_protecao_usada`, `streak_protecao_resetada_em`, `melhor_streak`
+  - `total_reflexoes`, `criado_em`
+- `sabotador`: `total_deteccoes`, `intensidade_media`, `total_conversas`
+
+### ⚠️ **MANTER POR ENQUANTO** (Verificar uso indireto)
+- `gamificacao.total_conversas` (usado via historico_resumo)
+- `gamificacao.ultima_atualizacao` (pode ser usado)
+- `gamificacao.ultima_conversa_data` (pode ser usado indiretamente)
+
 ## 📝 Próximos Passos
 
-1. **Verificar uso real** de cada campo marcado como "VERIFICAR"
-2. **Decidir** quais campos remover
-3. **Atualizar** `DashboardApiResponse` interface
-4. **Atualizar** `dataAdapter` para não processar campos removidos
-5. **Atualizar** backend (n8n) para não enviar campos desnecessários
+1. ✅ **Análise concluída** - campos identificados
+2. ⏳ **Decisão pendente** - confirmar remoção dos campos marcados
+3. ⏳ **Atualizar** `DashboardApiResponse` interface após decisão
+4. ⏳ **Atualizar** `dataAdapter` para não processar campos removidos
+5. ⏳ **Atualizar** backend (n8n) para não enviar campos desnecessários
 
 ---
 
