@@ -27,9 +27,9 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 - `src/components/app/v1.3/CardInsightUltimaConversa.tsx`
 - `src/components/app/v1.3/CardSabotadorAtivo.tsx`
 
-### Componentes v1.2 (usados por v1.3)
-- `src/components/app/v1.2/HeaderV1_2.tsx` ⚠️ **MANTER** (usado por todas as páginas v1.3)
-- `src/components/app/v1.2/styles/mq-v1_2-styles.css` ⚠️ **MANTER** (importado por HomeV1_3)
+### Componentes v1.3 (criados)
+- `src/components/app/v1.3/HeaderV1_3.tsx` ✅ **CRIADO** (substitui HeaderV1_2)
+- `src/components/app/v1.3/styles/mq-v1_3-styles.css` ✅ **CRIADO** (substitui mq-v1_2-styles.css)
 
 ---
 
@@ -60,11 +60,14 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 
 ---
 
-## 4. MANTER (Core — DashboardPage e InsightsDashboardPage)
+## 4. MANTER (Core — InsightsDashboardPage v1.3)
 
 ### Páginas Core
-- `src/pages/App/DashboardPage.tsx` (usado no App.tsx como fallback)
-- `src/pages/App/InsightsDashboardPage.tsx` (usado no App.tsx)
+- `src/pages/App/v1.3/InsightsDashboardPageV13.tsx` ✅ **CRIADO** (versão v1.3 com HeaderV1_2 e BottomNavV1_3)
+- `src/pages/App/InsightsDashboardPage.tsx` ❌ **REMOVER** (substituído por versão v1.3)
+
+### Páginas a REMOVER
+- ❌ `src/pages/App/DashboardPage.tsx` (usado apenas como fallback em rotas antigas; na v1.3 usa `HomeV1_3`)
 
 ### Componentes Dashboard (usados por Core ou v1.3)
 - `src/components/dashboard/Dashboard.tsx` (usado por DashboardPage)
@@ -90,6 +93,8 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 ## 5. REMOVER — Páginas Antigas (não v1.3)
 
 ### Páginas App (antigas)
+- ❌ `src/pages/App/DashboardPage.tsx` (fallback antigo; v1.3 usa HomeV1_3)
+- ❌ `src/pages/App/InsightsDashboardPage.tsx` (substituído por InsightsDashboardPageV13)
 - ❌ `src/pages/App/ConquistasPage.tsx`
 - ❌ `src/pages/App/ProximosNiveisPage.tsx`
 - ❌ `src/pages/App/EmocoesDashboardPage.tsx`
@@ -134,6 +139,8 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 ## 8. LIMPEZA NO App.tsx
 
 ### Imports a remover
+- ❌ `DashboardPage` (fallback antigo)
+- ❌ `InsightsDashboardPage` (substituído por InsightsDashboardPageV13)
 - ❌ `HumorHistoryPage`
 - ❌ `FullChatPage`
 - ❌ `InsightDetailPage`
@@ -152,19 +159,19 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 - ❌ `isAppPreviewV12` e `isAppPreviewV12_2` (previews v1.2)
 - ❌ `view === 'conquistas'`
 - ❌ `view === 'proximosNiveis'`
-- ❌ `view === 'dashEmocoes'` (versão antiga)
+- ❌ `view === 'dashEmocoes'` (versão antiga, v1.3 usa `DashPerfilPageV13`)
 - ❌ `view === 'dashSabotadores'`
 - ❌ `view === 'panasDetail'`
-- ❌ `view === 'resumoConversas'` (versão antiga)
+- ❌ `view === 'resumoConversas'` (versão antiga, v1.3 usa `ConversaResumoPageV13`)
 - ❌ `view === 'fullChatDetail'`
 - ❌ `view === 'painelQuests'` (versão antiga, manter apenas v1.3)
 - ❌ `view === 'sabotadorDetail'` (versão antiga, manter apenas v1.3)
 - ❌ `view === 'insightDetail'` (versão antiga, manter apenas v1.3)
 - ❌ `view === 'humorHistorico'` (versão antiga, manter apenas v1.3)
+- ❌ Fallback `DashboardPage` no final do App.tsx (linha 484) — substituir por redirecionamento para v1.3
 
 ### Manter no App.tsx
-- ✅ `DashboardPage` (fallback)
-- ✅ `InsightsDashboardPage` (usado)
+- ✅ `InsightsDashboardPageV13` (usado na v1.3 quando `view === 'dashInsights'`)
 - ✅ Todas as páginas v1.3
 - ✅ `ComecarAgoraLandingPage`
 - ✅ `ConversationGuidePage`
@@ -199,7 +206,7 @@ Remover todas as páginas e componentes que não são da v1.3 do app nem da pág
 
 ## 10. ARQUIVOS A DELETAR (resumo)
 
-### Páginas (15 arquivos)
+### Páginas (17 arquivos)
 ```
 src/pages/App/ConquistasPage.tsx
 src/pages/App/ProximosNiveisPage.tsx
@@ -217,8 +224,10 @@ src/pages/App/v1.2/HomeV1_2_2.tsx
 src/pages/App/v1.2/dash_emocoes/EmocoesDashboardPageV12.tsx
 ```
 
-### Componentes v1.2 (5 arquivos)
+### Componentes v1.2 (7 arquivos - TODOS podem ser removidos)
 ```
+src/components/app/v1.2/HeaderV1_2.tsx (substituído por HeaderV1_3)
+src/components/app/v1.2/styles/mq-v1_2-styles.css (substituído por mq-v1_3-styles.css)
 src/components/app/v1.2/CardConversas.tsx
 src/components/app/v1.2/CardEmocoes.tsx
 src/components/app/v1.2/CardJornada.tsx
@@ -237,15 +246,17 @@ src/components/dashboard/MoodGauge.tsx
 src/components/dashboard/PanasChart.tsx
 ```
 
-**Total: 27 arquivos a deletar**
+**Total: 31 arquivos a deletar** (incluindo HeaderV1_2 e mq-v1_2-styles.css)
 
 ---
 
 ## 11. NOTAS IMPORTANTES
 
-- ⚠️ **HeaderV1_2** deve ser mantido pois é usado por todas as páginas v1.3
-- ⚠️ **mq-v1_2-styles.css** deve ser mantido pois é importado por HomeV1_3
+- ✅ **HeaderV1_3** criado em `src/components/app/v1.3/` — todas as páginas v1.3 agora usam HeaderV1_3
+- ✅ **mq-v1_3-styles.css** criado — todas as páginas v1.3 agora usam classes `mq-app-v1_3`
+- ✅ **HeaderV1_2** e **mq-v1_2-styles.css** podem ser removidos (substituídos por versões v1.3)
 - ✅ **MoodGauge** e **PanasChart** confirmados: usados apenas em páginas que serão removidas
+- ✅ **DashboardPage** pode ser removido: usado apenas como fallback em rotas antigas; v1.3 usa `HomeV1_3`
+- ✅ **InsightsDashboardPageV13** criado: versão v1.3 com HeaderV1_2 e BottomNavV1_3, seguindo padrão das outras páginas v1.3
 - ⚠️ Após remover, verificar se há referências quebradas em `useStore.ts` ou outros arquivos
-- ⚠️ Manter `DashboardPage` e `InsightsDashboardPage` pois são usados no App.tsx
 

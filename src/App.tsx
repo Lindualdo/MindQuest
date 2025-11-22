@@ -32,6 +32,7 @@ import PanasDetailPage from './pages/App/PanasDetailPage';
 import EmocoesDashboardPage from './pages/App/EmocoesDashboardPage';
 import SabotadoresDashboardPage from './pages/App/SabotadoresDashboardPage';
 import InsightsDashboardPage from './pages/App/InsightsDashboardPage';
+import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_2 from './pages/App/v1.2/HomeV1_2';
@@ -242,7 +243,7 @@ function App() {
         previewPage = <DashPerfilPageV13 />;
         break;
       case 'dashInsights':
-        previewPage = <InsightsDashboardPage />;
+        previewPage = <InsightsDashboardPageV13 />;
         break;
       case 'painelQuests':
         previewPage = <PainelQuestsPageV13 />;
@@ -344,7 +345,7 @@ function App() {
   if (isAppRoute && view === 'dashInsights') {
     return (
       <AuthGuard>
-        <InsightsDashboardPage />
+        {isAppPreviewV13 ? <InsightsDashboardPageV13 /> : <InsightsDashboardPage />}
       </AuthGuard>
     );
   }

@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, RefreshCw, ArrowUpRight } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isSameDay, isFuture, addDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import CardConversasV13 from '@/components/app/v1.3/CardConversasV13';
@@ -396,8 +397,8 @@ const PainelQuestsPageV13: React.FC = () => {
   };
 
   return (
-    <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
-      <HeaderV1_2 nomeUsuario={nomeUsuario} />
+    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+      <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
         {/* Botão voltar */}

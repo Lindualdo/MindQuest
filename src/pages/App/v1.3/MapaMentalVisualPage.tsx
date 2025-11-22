@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, RefreshCw, Sparkles, GitBranch } from 'lucide-react';
 
-import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import mapaMentalFallback from '@/data/mapaMental';
 import { useDashboard } from '@/store/useStore';
@@ -89,7 +90,7 @@ const MapaMentalVisualPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0B1120] text-slate-100">
-      <HeaderV1_2 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 pb-24 pt-6">
         <div className="flex flex-wrap items-center gap-3">

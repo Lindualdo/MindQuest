@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, Target, HeartPulse, ShieldCheck } from 'lucide-react';
-import HeaderV1_2 from '@/components/app/v1.2/HeaderV1_2';
+import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
@@ -62,8 +63,8 @@ const SabotadorDetailPageV13: React.FC = () => {
 
   if (!sabotador) {
     return (
-      <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
-        <HeaderV1_2 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
+      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+        <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card>
             <p className="text-sm text-[#475569]">
@@ -91,8 +92,8 @@ const SabotadorDetailPageV13: React.FC = () => {
   }
 
   return (
-    <div className="mq-app-v1_2 flex min-h-screen flex-col bg-[#F5EBF3]">
-      <HeaderV1_2 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
+    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+      <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         <div className="flex items-center gap-2">

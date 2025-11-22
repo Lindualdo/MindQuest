@@ -1,0 +1,104 @@
+/* Tokens v1.3 */
+.mq-app-v1_3 {
+  --mq-v1_3-bg: #F5EBF3;
+  --mq-v1_3-surface: #E8F3F5;
+  --mq-v1_3-card: #FFFFFF;
+  --mq-v1_3-border: rgba(28, 37, 65, 0.08);
+  --mq-v1_3-primary: #3083DC;
+  --mq-v1_3-accent: #D90368;
+  --mq-v1_3-text: #1C2541;
+  --mq-v1_3-muted: #E8F3F5;
+  --mq-v1_3-bar: #C5DDF2;
+  --mq-v1_3-shadow: 0px 8px 24px rgba(28, 37, 65, 0.04);
+
+  font-family: 'Inter', 'SF Pro Display', 'SF Pro Text', -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.35;
+  background-color: var(--mq-v1_3-bg);
+  color: var(--mq-v1_3-text);
+}
+
+.mq-app-v1_3 .mq-card-v1_3 {
+  border-radius: 28px;
+  background-color: var(--mq-v1_3-card);
+  border: 1px solid var(--mq-v1_3-border);
+  box-shadow: var(--mq-v1_3-shadow);
+}
+
+.mq-app-v1_3 .mq-card-title-v1_3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--mq-v1_3-text);
+  margin: 0;
+}
+
+.mq-app-v1_3 .mq-subtitle-v1_3 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--mq-v1_3-primary);
+}
+
+.mq-app-v1_3 .mq-bar-track-v1_3 {
+  width: 100%;
+  height: 0.55rem;
+  background-color: var(--mq-v1_3-bar);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mq-app-v1_3 .mq-bar-fill-v1_3 {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--mq-v1_3-primary);
+}
+
+.mq-app-v1_3 .mq-cta-primary-v1_3 {
+  border-radius: 999px;
+  background-color: var(--mq-v1_3-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.mq-app-v1_3 .mq-cta-secondary-v1_3 {
+  border-radius: 999px;
+  border: 1px solid var(--mq-v1_3-primary);
+  color: var(--mq-v1_3-primary);
+  font-weight: 600;
+  background: transparent;
+}
+
+.mq-app-v1_3 .mq-link-inline-v1_3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--mq-v1_3-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.mq-app-v1_3 .mq-link-inline-v1_3:hover {
+  color: var(--mq-v1_3-text);
+}
+
+.mq-app-v1_3 .mq-card-heading-v1_3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mq-v1_3-text);
+}
+
+.mq-app-v1_3 .mq-card-meta-v1_3 {
+  font-size: 0.75rem;
+  color: #7E8CA0;
+}
+
+.mq-app-v1_3 .mq-eyebrow-v1_3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: #7E8CA0;
+}
+
