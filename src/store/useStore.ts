@@ -31,7 +31,6 @@ interface ExtendedStoreState extends StoreState {
   setError: (error: string | null) => void;
   setAuthenticated: (auth: boolean) => void;
   initializeAuth: () => Promise<boolean>;
-  loadDashboardData: () => Promise<void>;
   openSabotadorDetail: (sabotadorId?: string) => void;
   // Full chat detail
   openFullChat: (chatId: string) => Promise<void>;
@@ -737,7 +736,30 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         isAuthenticated: true
       });
       
-      await get().loadDashboardData();
+      // Carregar dados do usuário após autenticação
+      const userData = authService.getUserData();
+      if (userData?.user?.id) {
+        // Criar dashboardData mínimo com dados do usuário
+        set({
+          dashboardData: {
+            usuario: {
+              id: userData.user.id,
+              nome: userData.user.nome,
+              nome_preferencia: userData.user.nome_preferencia,
+              cronotipo_detectado: userData.user.cronotipo_detectado || null,
+            },
+          },
+        });
+        
+        // Carregar cards necessários para o dashboard
+        await Promise.all([
+          get().loadQuestSnapshot(userData.user.id),
+          get().loadPanoramaCard(userData.user.id),
+          get().loadConversasCard(userData.user.id),
+          get().loadJornadaCard(userData.user.id),
+          get().loadRodaEmocoes(userData.user.id),
+        ]);
+      }
       return true;
 
     } catch (error) {
@@ -867,12 +889,30 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      await get().loadDashboardData();
+      const userData = authService.getUserData();
+      if (userData?.user?.id) {
+        // Recarregar todos os cards
+        await Promise.all([
+          get().loadQuestSnapshot(userData.user.id),
+          get().loadPanoramaCard(userData.user.id),
+          get().loadConversasCard(userData.user.id),
+          get().loadJornadaCard(userData.user.id),
+          get().loadRodaEmocoes(userData.user.id),
+        ]);
+        set({
+          isLoading: false,
+          error: null,
+          ultimaAtualizacao: new Date().toISOString(),
+          lastUpdated: new Date().toISOString(),
+        });
+      } else {
+        throw new Error('Usuário não autenticado');
+      }
     } catch (error) {
       console.error('Erro no refresh:', error);
       set({
         isLoading: false,
-        error: 'Erro ao atualizar dados'
+        error: error instanceof Error ? error.message : 'Erro ao atualizar dados',
       });
     }
   },
