@@ -1,0 +1,114 @@
+{
+  "name": "webhook_app_authentication",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auth/validate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "8bdb325c-fad4-404c-ac4a-43636032dd39",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1568,
+        688
+      ],
+      "webhookId": "9d6b39b5-4dde-442c-a4d6-8fb799ba9705"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    u.id as user_id,\n    u.nome,\n    u.nome_preferencia,\n    COALESCE(u.cronotipo_detectado, NULL) as cronotipo_detectado\nFROM usuarios u\nWHERE u.token_acesso = $1 \n  AND u.token_expira_em > CURRENT_TIMESTAMP\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.body.token }}"
+        }
+      },
+      "id": "a89eea39-2f9c-426f-8306-1df9868e1596",
+      "name": "01_Validar_Usuario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1344,
+        688
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst userRow = items[0]?.json || {};\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Validar se usuário foi encontrado\nif (!userRow.user_id) {\n  return [{\n    json: {\n      response: {\n        success: false,\n        error: 'Token inválido ou expirado'\n      }\n    }\n  }];\n}\n\n// Retornar apenas dados do usuário\nconst user = {\n  id: normalizeString(userRow.user_id),\n  nome: normalizeString(userRow.nome, 'Usuário'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, userRow.nome || 'Usuário'),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, null)\n};\n\nreturn [{\n  json: {\n    response: {\n      success: true,\n      user: user\n    }\n  }\n}];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        688
+      ],
+      "id": "b43955dd-13ae-4738-b3d5-45f9b5e7d47b",
+      "name": "organiza_dados"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.response }}",
+        "options": {}
+      },
+      "id": "f31e9fa0-c812-4029-8b9a-b2a4d975d77f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -816,
+        688
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "01_Validar_Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01_Validar_Usuario": {
+      "main": [
+        [
+          {
+            "node": "organiza_dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "organiza_dados": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+
