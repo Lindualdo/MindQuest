@@ -12,7 +12,7 @@ interface AuthResponse {
     id: string;
     nome: string;
     nome_preferencia: string;
-    status_onboarding: string;
+    cronotipo_detectado: string | null;
   };
   error?: string;
 }
