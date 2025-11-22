@@ -67,6 +67,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -91,6 +92,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -115,6 +117,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -140,6 +143,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -153,8 +157,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        640,
-        528
+        -816,
+        688
       ]
     },
     {
@@ -177,8 +181,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        528
+        -1072,
+        688
       ],
       "id": "b43955dd-13ae-4738-b3d5-45f9b5e7d47b",
       "name": "organiza_dados"
@@ -205,7 +209,8 @@
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -229,6 +234,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -252,7 +258,8 @@
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -276,6 +283,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     },
     {
@@ -300,6 +308,7 @@
           "name": "Postgres account"
         }
       },
+      "disabled": true,
       "continueOnFail": true
     }
   ],
@@ -319,47 +328,7 @@
       "main": [
         [
           {
-            "node": "04_Sabotador",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "roda_emocoes",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "07_Analise_PANAS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "08_Historico_Diario",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "09_Insights",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Big_five",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Humor",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 4
-          },
-          {
-            "node": "Gameficacao",
+            "node": "organiza_dados",
             "type": "main",
             "index": 0
           }
@@ -412,13 +381,7 @@
     },
     "Merge": {
       "main": [
-        [
-          {
-            "node": "organiza_dados",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "organiza_dados": {
@@ -540,7 +503,7 @@
       }
     ]
   },
-  "versionId": "1e19efb1-022e-4984-9b0f-dc93d6c857f1",
+  "versionId": "c5e5a0b8-531f-4bc0-b899-6d95a7b41372",
   "triggerCount": 1,
   "shared": [
     {

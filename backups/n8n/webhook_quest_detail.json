@@ -1,73 +1,193 @@
 {
+  "createdAt": "2025-11-21T18:16:08.741Z",
+  "id": "pTtnu2YVLGuV7IxM",
   "name": "webhook_quest_detail",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
+      "parameters": {
+        "path": "quest-detail",
+        "responseMode": "responseNode",
+        "options": {}
+      },
       "name": "Webhook Quest Detail",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [0, 0],
-      "parameters": {
-        "path": "quest-detail",
-        "responseMode": "responseNode"
-      }
+      "position": [
+        656,
+        -256
+      ],
+      "id": "5b8e7143-f9f1-43f5-b46e-61afc09f59f9",
+      "webhookId": "1198e512-ffcb-4d90-9b7f-e60e9b0a817f"
     },
     {
+      "parameters": {
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\nconst questId = $json.query?.quest_id ?? $json.body?.quest_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório.');\n}\n\nif (typeof questId !== 'string' || questId.trim() === '') {\n  throw new Error('Parâmetro quest_id é obrigatório.');\n}\n\nreturn [{ json: { user_id: userId.trim(), quest_id: questId.trim() } }];"
+      },
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [200, 0],
-      "parameters": {
-        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\nconst questId = $json.query?.quest_id ?? $json.body?.quest_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório.');\n}\n\nif (typeof questId !== 'string' || questId.trim() === '') {\n  throw new Error('Parâmetro quest_id é obrigatório.');\n}\n\nreturn [{ json: { user_id: userId.trim(), quest_id: questId.trim() } }];"
-      }
+      "position": [
+        864,
+        -256
+      ],
+      "id": "caeab552-dd6f-45a8-a211-d262547c3d9a"
     },
     {
-      "name": "Buscar Quest Detail",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [400, 0],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
       "parameters": {
         "operation": "executeQuery",
         "query": "SELECT\n  uq.id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.xp_concedido,\n  uq.complexidade,\n  uq.config->>'titulo' AS titulo,\n  uq.config->>'descricao' AS descricao,\n  uq.config->>'xp_recompensa' AS xp_recompensa,\n  uq.config->>'prioridade' AS prioridade,\n  uq.config->>'tipo' AS tipo,\n  uq.recorrencias,\n  uq.area_vida_id,\n  av.nome AS area_vida_nome,\n  av.descricao AS area_vida_descricao,\n  av.codigo AS area_vida_codigo,\n  uq.insight_id,\n  i.titulo AS insight_titulo,\n  i.descricao AS insight_descricao,\n  i.resumo_situacao AS insight_resumo,\n  i.feedback_positivo AS insight_feedback_positivo,\n  i.feedback_desenvolvimento AS insight_feedback_desenvolvimento,\n  i.feedback_motivacional AS insight_feedback_motivacional,\n  i.recursos_sugeridos AS insight_recursos_sugeridos,\n  i.prioridade AS insight_prioridade,\n  i.categoria AS insight_categoria,\n  i.tipo AS insight_tipo,\n  i.icone AS insight_icone,\n  uq.sabotador_id,\n  sc.nome AS sabotador_nome,\n  sc.descricao AS sabotador_descricao,\n  sc.contextos_tipicos AS sabotador_contextos,\n  sc.contramedidas_sugeridas AS sabotador_contramedidas\nFROM public.usuarios_quest uq\nLEFT JOIN public.areas_vida_catalogo av ON av.id = uq.area_vida_id\nLEFT JOIN public.insights i ON i.id = uq.insight_id\nLEFT JOIN public.sabotadores_catalogo sc ON sc.id = uq.sabotador_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid;",
         "options": {
           "queryReplacement": "={{ [$json.quest_id, $json.user_id] }}"
         }
+      },
+      "name": "Buscar Quest Detail",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        -256
+      ],
+      "id": "a00bad81-20a0-47d6-b51b-983c11cabe52",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
       }
     },
     {
+      "parameters": {
+        "jsCode": "const row = $input.first()?.json || {};\n\nif (!row.id) {\n  throw new Error('Quest não encontrada');\n}\n\nreturn [{\n  json: {\n    success: true,\n    quest_detail: {\n      id: row.id,\n      usuario_id: row.usuario_id,\n      status: row.status,\n      titulo: row.titulo || 'Quest sem título',\n      descricao: row.descricao || '',\n      xp_recompensa: row.xp_recompensa ? parseInt(row.xp_recompensa) : null,\n      prioridade: row.prioridade || 'media',\n      tipo: row.tipo || null,\n      complexidade: row.complexidade || 0,\n      progresso_meta: row.progresso_meta,\n      progresso_atual: row.progresso_atual || 0,\n      xp_concedido: row.xp_concedido || 0,\n      recorrencias: row.recorrencias || null,\n      area_vida: row.area_vida_id ? {\n        id: row.area_vida_id,\n        nome: row.area_vida_nome,\n        descricao: row.area_vida_descricao,\n        codigo: row.area_vida_codigo\n      } : null,\n      insight: row.insight_id ? {\n        id: row.insight_id,\n        titulo: row.insight_titulo,\n        descricao: row.insight_descricao,\n        resumo_situacao: row.insight_resumo,\n        feedback_positivo: row.insight_feedback_positivo,\n        feedback_desenvolvimento: row.insight_feedback_desenvolvimento,\n        feedback_motivacional: row.insight_feedback_motivacional,\n        recursos_sugeridos: row.insight_recursos_sugeridos || [],\n        prioridade: row.insight_prioridade,\n        categoria: row.insight_categoria,\n        tipo: row.insight_tipo,\n        icone: row.insight_icone\n      } : null,\n      sabotador: row.sabotador_id ? {\n        id: row.sabotador_id,\n        nome: row.sabotador_nome,\n        descricao: row.sabotador_descricao,\n        contextos_tipicos: row.sabotador_contextos || [],\n        contramedidas_sugeridas: row.sabotador_contramedidas || []\n      } : null\n    }\n  }\n}];"
+      },
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [600, 0],
-      "parameters": {
-        "jsCode": "const row = $input.first()?.json || {};\n\nif (!row.id) {\n  throw new Error('Quest não encontrada');\n}\n\nreturn [{\n  json: {\n    success: true,\n    quest_detail: {\n      id: row.id,\n      usuario_id: row.usuario_id,\n      status: row.status,\n      titulo: row.titulo || 'Quest sem título',\n      descricao: row.descricao || '',\n      xp_recompensa: row.xp_recompensa ? parseInt(row.xp_recompensa) : null,\n      prioridade: row.prioridade || 'media',\n      tipo: row.tipo || null,\n      complexidade: row.complexidade || 0,\n      progresso_meta: row.progresso_meta,\n      progresso_atual: row.progresso_atual || 0,\n      xp_concedido: row.xp_concedido || 0,\n      recorrencias: row.recorrencias || null,\n      area_vida: row.area_vida_id ? {\n        id: row.area_vida_id,\n        nome: row.area_vida_nome,\n        descricao: row.area_vida_descricao,\n        codigo: row.area_vida_codigo\n      } : null,\n      insight: row.insight_id ? {\n        id: row.insight_id,\n        titulo: row.insight_titulo,\n        descricao: row.insight_descricao,\n        resumo_situacao: row.insight_resumo,\n        feedback_positivo: row.insight_feedback_positivo,\n        feedback_desenvolvimento: row.insight_feedback_desenvolvimento,\n        feedback_motivacional: row.insight_feedback_motivacional,\n        recursos_sugeridos: row.insight_recursos_sugeridos || [],\n        prioridade: row.insight_prioridade,\n        categoria: row.insight_categoria,\n        tipo: row.insight_tipo,\n        icone: row.insight_icone\n      } : null,\n      sabotador: row.sabotador_id ? {\n        id: row.sabotador_id,\n        nome: row.sabotador_nome,\n        descricao: row.sabotador_descricao,\n        contextos_tipicos: row.sabotador_contextos || [],\n        contramedidas_sugeridas: row.sabotador_contramedidas || []\n      } : null\n    }\n  }\n}];"
-      }
+      "position": [
+        1264,
+        -256
+      ],
+      "id": "2778bfb1-cac8-4bfd-9049-15e985492176"
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
-      "position": [800, 0],
-      "parameters": {}
+      "position": [
+        1456,
+        -256
+      ],
+      "id": "d9df0467-9648-445e-be1a-a1ab86b63ba1"
     }
   ],
   "connections": {
     "Webhook Quest Detail": {
-      "main": [[{"node": "Validar Params", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Validar Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar Params": {
-      "main": [[{"node": "Buscar Quest Detail", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Buscar Quest Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Quest Detail": {
-      "main": [[{"node": "Montar Resposta", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Montar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Montar Resposta": {
-      "main": [[{"node": "Responder Webhook", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "95e71413-1432-47aa-9e7d-ba7e1ced709f",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-21T18:16:08.741Z",
+      "role": "workflow:owner",
+      "workflowId": "pTtnu2YVLGuV7IxM",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }

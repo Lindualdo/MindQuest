@@ -12,10 +12,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        160,
-        64
+        384,
+        144
       ],
-      "id": "72ed82d5-b607-41c7-8abf-157f402e3380",
+      "id": "6231036d-b2d2-4e98-acb0-12217b82c6e1",
       "name": "Responder"
     },
     {
@@ -29,10 +29,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -432,
-        -96
+        -208,
+        -16
       ],
-      "id": "f9872254-5402-4312-b0a4-a5946e4079f1",
+      "id": "248853ed-4f91-42af-843f-85b1a1281b81",
       "name": "Listar Usuarios Quest",
       "credentials": {
         "postgres": {
@@ -52,10 +52,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
-        64
+        -432,
+        144
       ],
-      "id": "3df2788c-8fca-4859-9ae5-a42c0df6b787",
+      "id": "dbb84df2-16f3-4b00-a0a4-741fbced31a8",
       "name": "Ler Usuarios Conquistas",
       "credentials": {
         "postgres": {
@@ -71,10 +71,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -896,
-        64
+        -672,
+        144
       ],
-      "id": "214c289c-60ca-4d55-8f66-e699a42bd44a",
+      "id": "ac0356b3-4b7d-475d-abb0-7a0eb9473516",
       "name": "Validar Entrada"
     },
     {
@@ -86,47 +86,39 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1120,
-        64
+        -896,
+        144
       ],
-      "id": "49e50fe8-9bec-4d22-9793-1d88c78fd766",
+      "id": "f6b2f9cb-a97f-4de0-9ddb-ca87187cb80d",
       "name": "Webhook",
       "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getItems = (nodeName) => {\n  try {\n    const list = $items(nodeName, 0, 0) || [];\n    return list.map((entry) => entry?.json || {});\n  } catch (err) {\n    // Se o node não foi executado, retorna array vazio\n    return [];\n  }\n};\n\nconst toNumber = (value, fallback = null) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst parseJson = (value) => {\n  if (!value) return null;\n  if (typeof value === 'object') return value;\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  try {\n    return JSON.parse(trimmed);\n  } catch (_err) {\n    return null;\n  }\n};\n\nfunction humanizeDate(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  const diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) return 'agora';\n  return `há ${parts.join(' e ')}`;\n}\n\n// Função para extrair XP de uma quest (prioriza recorrencias)\nfunction extractXpRecompensa(quest) {\n  const config = parseJson(quest.config) || {};\n  const recorrencias = parseJson(quest.recorrencias) || null;\n  \n  // 1. Tentar extrair de recorrencias->dias[0]->xp_previsto\n  if (recorrencias && Array.isArray(recorrencias.dias) && recorrencias.dias.length > 0) {\n    const xpPrevisto = toNumber(recorrencias.dias[0]?.xp_previsto, null);\n    if (xpPrevisto !== null) return xpPrevisto;\n  }\n  \n  // 2. Tentar xp_recompensa da quest\n  const xpQuestField = toNumber(quest.xp_recompensa, null);\n  if (xpQuestField !== null) return xpQuestField;\n  \n  // 3. Tentar config->xp_recompensa\n  const xpConfigField = toNumber(config?.xp_recompensa, null);\n  if (xpConfigField !== null) return xpConfigField;\n  \n  // 4. Fallback: vazio (melhor não mostrar que mostrar incoerente)\n  return null;\n}\n\n// Função para normalizar data para YYYY-MM-DD (sempre remove timestamp)\nfunction normalizarData(data) {\n  if (!data) return null;\n  const str = String(data);\n  // Remove timestamp se existir - sempre retorna YYYY-MM-DD\n  const normalized = str.split('T')[0].split(' ')[0];\n  // Garantir formato YYYY-MM-DD (mínimo 10 caracteres)\n  if (normalized.length >= 10) {\n    return normalized.substring(0, 10);\n  }\n  return null;\n}\n\n// Função simplificada para enriquecer recorrencias com status de conclusão\nfunction enriquecerRecorrencias(recorrencias, datasConcluidas) {\n  if (!recorrencias || !Array.isArray(recorrencias.dias)) {\n    return recorrencias;\n  }\n  \n  // Garantir que datasConcluidas é array\n  const datas = Array.isArray(datasConcluidas) ? datasConcluidas : [];\n  \n  // Enriquecer cada dia com status\n  const diasEnriquecidos = recorrencias.dias.map((dia) => {\n    const dataDia = normalizarData(dia.data);\n    \n    if (!dataDia) {\n      return {\n        ...dia,\n        status: 'pendente'\n      };\n    }\n    \n    // Verificar se esta data está nas datas concluídas (comparação direta)\n    const estaConcluida = datas.includes(dataDia);\n    \n    return {\n      ...dia,\n      status: estaConcluida ? 'concluida' : 'pendente'\n    };\n  });\n  \n  return {\n    ...recorrencias,\n    dias: diasEnriquecidos\n  };\n}\n\nconst estado = getItem('Ler Usuarios Conquistas');\nconst questsRaw = getItems('Listar Usuarios Quest');\n// Conclusões agora vêm junto com as quests (campo datas_concluidas)\n// Encontrar a primeira quest ativa ou pendente\nconst questAtiva = questsRaw\n  .filter((q) => q.status === 'ativa' || q.status === 'pendente')\n  .sort((a, b) => {\n    // Prioriza 'ativa' sobre 'pendente'\n    if (a.status === 'ativa' && b.status !== 'ativa') return -1;\n    if (a.status !== 'ativa' && b.status === 'ativa') return 1;\n    // Depois ordena por atualizado_em (mais recente primeiro)\n    const dateA = a.atualizado_em ? new Date(a.atualizado_em).getTime() : 0;\n    const dateB = b.atualizado_em ? new Date(b.atualizado_em).getTime() : 0;\n    return dateB - dateA;\n  })[0] || null;\n\n// Formatar quest\nlet quest = null;\nif (questAtiva) {\n  const config = parseJson(questAtiva.config) || {};\n  const meta = Math.max(toNumber(questAtiva.progresso_meta, 1) || 1, 1);\n  const atual = Math.min(toNumber(questAtiva.progresso_atual, 0) || 0, meta);\n  const percentual = meta > 0 ? Math.round((atual / meta) * 100) : 0;\n  \n  const xpRecompensa = extractXpRecompensa(questAtiva);\n  \n  quest = {\n    id: questAtiva.instancia_id || questAtiva.meta_codigo || null,\n    titulo: questAtiva.titulo || config?.titulo || 'Quest personalizada',\n    descricao: questAtiva.descricao || config?.descricao || null,\n    status: questAtiva.status || 'pendente',\n    prioridade: questAtiva.prioridade || config?.prioridade || null,\n    recorrencia: questAtiva.recorrencia || config?.recorrencia || null,\n    progresso: {\n      atual,\n      meta,\n      percentual,\n      label: `${atual}/${meta}`,\n    },\n    xp_recompensa: xpRecompensa,\n    ultima_atualizacao: questAtiva.atualizado_em || null,\n    ultima_atualizacao_label: humanizeDate(questAtiva.atualizado_em),\n  };\n}\n\n// Calcular snapshot\nconst totalPersonalizadas = questsRaw.length;\nconst totalConcluidas = questsRaw.filter((q) => q.status === 'concluida' || q.concluido_em).length;\n\n// Calcular XP total (soma de xp_concedido das quests concluídas)\nlet xpBaseTotal = 0;\nlet xpBonusTotal = 0;\nquestsRaw.forEach((q) => {\n  if (q.status === 'concluida' || q.concluido_em) {\n    const xpConcedido = toNumber(q.xp_concedido, 0) || 0;\n    xpBaseTotal += xpConcedido;\n  }\n});\n\n// Valores padrão de recompensas\nconst xpBase = 30;\nconst xpBonusRecorrencia = 0;\n\n// Gerar beneficios\nconst beneficios = [];\nbeneficios.push(`+${xpBase} XP base`);\nif (xpBonusRecorrencia > 0) beneficios.push(`+${xpBonusRecorrencia} XP bônus (recorrência)`);\nbeneficios.push('Novo insight aplicado na prática');\nbeneficios.push('Progresso em hábitos chaves');\n\n// Formatar todas as quests para o formato QuestSnapshot\nconst questsPersonalizadas = questsRaw.map((q) => {\n  const xpRecompensa = extractXpRecompensa(q);\n  const config = parseJson(q.config) || {};\n  const recorrencias = parseJson(q.recorrencias) || null;\n  \n  // Enriquecer recorrencias com status de conclusão (datas_concluidas vem junto com a quest)\n  const datasConcluidas = q.datas_concluidas || [];\n  const recorrenciasEnriquecidas = enriquecerRecorrencias(recorrencias, datasConcluidas);\n  \n  return {\n    instancia_id: q.instancia_id || q.meta_codigo || null,\n    meta_codigo: q.meta_codigo || q.instancia_id || null,\n    titulo: q.titulo || config?.titulo || 'Quest personalizada',\n    descricao: q.descricao || config?.descricao || null,\n    status: q.status || 'pendente',\n    concluido_em: q.concluido_em || null,\n    progresso_meta: toNumber(q.progresso_meta, 1) || 1,\n    progresso_atual: toNumber(q.progresso_atual, 0) || 0,\n    xp_recompensa: xpRecompensa,\n    prioridade: q.prioridade || config?.prioridade || null,\n    recorrencia: q.recorrencia || config?.recorrencia || null,\n    recorrencias: recorrenciasEnriquecidas,\n    atualizado_em: q.atualizado_em || null,\n  };\n});\n\nconst usuarioId = estado.usuario_id || $json.usuario_id || null;\n\n// Montar resposta com card_quests E quests_personalizadas (formato QuestSnapshot)\nconst response = {\n  success: true,\n  usuario_id: usuarioId,\n  // Formato QuestSnapshot (para loadQuestSnapshot)\n  xp_total: toNumber(estado.xp_total, 0) || 0,\n  xp_proximo_nivel: toNumber(estado.xp_proximo_nivel, null),\n  nivel_atual: toNumber(estado.nivel_atual, 1) || 1,\n  titulo_nivel: estado.titulo_nivel || null,\n  sequencia_atual: toNumber(estado.sequencia_atual, 0) || 0,\n  sequencia_recorde: toNumber(estado.sequencia_recorde, 0) || 0,\n  meta_sequencia_codigo: estado.meta_sequencia_codigo || null,\n  proxima_meta_codigo: estado.proxima_meta_codigo || null,\n  sequencia_status: estado.sequencia_status || null,\n  quests_personalizadas: questsPersonalizadas,\n  // Formato card_quests (para loadQuestsCard)\n  card_quests: {\n    quest,\n    snapshot: {\n      total_concluidas: totalConcluidas,\n      total_personalizadas: totalPersonalizadas,\n      xp_base_total: xpBaseTotal,\n      xp_bonus_total: xpBonusTotal,\n    },\n    beneficios,\n    recompensas: {\n      xp_base: xpBase,\n      xp_bonus_recorrencia: xpBonusRecorrencia,\n    },\n  },\n};\n\nreturn [{ json: response }];"
+        "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getItems = (nodeName) => {\n  try {\n    const list = $items(nodeName, 0, 0) || [];\n    return list.map((entry) => entry?.json || {});\n  } catch (err) {\n    return [];\n  }\n};\n\nconst toNumber = (value, fallback = null) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst parseJson = (value) => {\n  if (!value) return null;\n  if (typeof value === 'object') return value;\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  try {\n    return JSON.parse(trimmed);\n  } catch (_err) {\n    return null;\n  }\n};\n\nfunction humanizeDate(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  const diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) return 'agora';\n  return `há ${parts.join(' e ')}`;\n}\n\nfunction extractXpRecompensa(quest) {\n  const config = parseJson(quest.config) || {};\n  const recorrencias = parseJson(quest.recorrencias) || null;\n  \n  if (recorrencias && Array.isArray(recorrencias.dias) && recorrencias.dias.length > 0) {\n    const xpPrevisto = toNumber(recorrencias.dias[0]?.xp_previsto, null);\n    if (xpPrevisto !== null) return xpPrevisto;\n  }\n  \n  const xpQuestField = toNumber(quest.xp_recompensa, null);\n  if (xpQuestField !== null) return xpQuestField;\n  \n  const xpConfigField = toNumber(config?.xp_recompensa, null);\n  if (xpConfigField !== null) return xpConfigField;\n  \n  return null;\n}\n\nfunction normalizarData(data) {\n  if (!data) return null;\n  const str = String(data);\n  const normalized = str.split('T')[0].split(' ')[0];\n  if (normalized.length >= 10) {\n    return normalized.substring(0, 10);\n  }\n  return null;\n}\n\nfunction enriquecerRecorrencias(recorrencias, datasConcluidas) {\n  if (!recorrencias || !Array.isArray(recorrencias.dias)) {\n    return recorrencias;\n  }\n  \n  const datas = Array.isArray(datasConcluidas) ? datasConcluidas : [];\n  \n  const diasEnriquecidos = recorrencias.dias.map((dia) => {\n    const dataDia = normalizarData(dia.data);\n    \n    if (!dataDia) {\n      return {\n        ...dia,\n        status: 'pendente'\n      };\n    }\n    \n    const estaConcluida = datas.includes(dataDia);\n    \n    return {\n      ...dia,\n      status: estaConcluida ? 'concluida' : 'pendente'\n    };\n  });\n  \n  return {\n    ...recorrencias,\n    dias: diasEnriquecidos\n  };\n}\n\nconst estado = getItem('Ler Usuarios Conquistas');\nconst questsRaw = getItems('Listar Usuarios Quest');\n\nconst questAtiva = questsRaw\n  .filter((q) => q.status === 'ativa' || q.status === 'pendente')\n  .sort((a, b) => {\n    if (a.status === 'ativa' && b.status !== 'ativa') return -1;\n    if (a.status !== 'ativa' && b.status === 'ativa') return 1;\n    const dateA = a.atualizado_em ? new Date(a.atualizado_em).getTime() : 0;\n    const dateB = b.atualizado_em ? new Date(b.atualizado_em).getTime() : 0;\n    return dateB - dateA;\n  })[0] || null;\n\nlet quest = null;\nif (questAtiva) {\n  const config = parseJson(questAtiva.config) || {};\n  const meta = Math.max(toNumber(questAtiva.progresso_meta, 1) || 1, 1);\n  const atual = Math.min(toNumber(questAtiva.progresso_atual, 0) || 0, meta);\n  const percentual = meta > 0 ? Math.round((atual / meta) * 100) : 0;\n  \n  const xpRecompensa = extractXpRecompensa(questAtiva);\n  \n  quest = {\n    id: questAtiva.instancia_id || questAtiva.meta_codigo || null,\n    titulo: questAtiva.titulo || config?.titulo || 'Quest personalizada',\n    descricao: questAtiva.descricao || config?.descricao || null,\n    status: questAtiva.status || 'pendente',\n    prioridade: questAtiva.prioridade || config?.prioridade || null,\n    recorrencia: questAtiva.recorrencia || config?.recorrencia || null,\n    progresso: {\n      atual,\n      meta,\n      percentual,\n      label: `${atual}/${meta}`,\n    },\n    xp_recompensa: xpRecompensa,\n    ultima_atualizacao: questAtiva.atualizado_em || null,\n    ultima_atualizacao_label: humanizeDate(questAtiva.atualizado_em),\n  };\n}\n\nconst totalPersonalizadas = questsRaw.length;\nconst totalConcluidas = questsRaw.filter((q) => q.status === 'concluida' || q.concluido_em).length;\n\nlet xpBaseTotal = 0;\nlet xpBonusTotal = 0;\nquestsRaw.forEach((q) => {\n  if (q.status === 'concluida' || q.concluido_em) {\n    const xpConcedido = toNumber(q.xp_concedido, 0) || 0;\n    xpBaseTotal += xpConcedido;\n  }\n});\n\nconst xpBase = 30;\nconst xpBonusRecorrencia = 0;\n\nconst beneficios = [];\nbeneficios.push(`+${xpBase} XP base`);\nif (xpBonusRecorrencia > 0) beneficios.push(`+${xpBonusRecorrencia} XP bônus (recorrência)`);\nbeneficios.push('Novo insight aplicado na prática');\nbeneficios.push('Progresso em hábitos chaves');\n\nconst questsPersonalizadas = questsRaw.map((q) => {\n  const xpRecompensa = extractXpRecompensa(q);\n  const config = parseJson(q.config) || {};\n  const recorrencias = parseJson(q.recorrencias) || null;\n  \n  const datasConcluidas = q.datas_concluidas || [];\n  const recorrenciasEnriquecidas = enriquecerRecorrencias(recorrencias, datasConcluidas);\n  \n  return {\n    instancia_id: q.instancia_id || q.meta_codigo || null,\n    meta_codigo: q.meta_codigo || q.instancia_id || null,\n    titulo: q.titulo || config?.titulo || 'Quest personalizada',\n    descricao: q.descricao || config?.descricao || null,\n    status: q.status || 'pendente',\n    concluido_em: q.concluido_em || null,\n    progresso_meta: toNumber(q.progresso_meta, 1) || 1,\n    progresso_atual: toNumber(q.progresso_atual, 0) || 0,\n    xp_recompensa: xpRecompensa,\n    prioridade: q.prioridade || config?.prioridade || null,\n    recorrencia: q.recorrencia || config?.recorrencia || null,\n    recorrencias: recorrenciasEnriquecidas,\n    atualizado_em: q.atualizado_em || null,\n  };\n});\n\nconst usuarioId = estado.usuario_id || $json.usuario_id || null;\n\nconst response = {\n  success: true,\n  usuario_id: usuarioId,\n  xp_total: toNumber(estado.xp_total, 0) || 0,\n  xp_proximo_nivel: toNumber(estado.xp_proximo_nivel, null),\n  nivel_atual: toNumber(estado.nivel_atual, 1) || 1,\n  titulo_nivel: estado.titulo_nivel || null,\n  sequencia_atual: toNumber(estado.sequencia_atual, 0) || 0,\n  sequencia_recorde: toNumber(estado.sequencia_recorde, 0) || 0,\n  meta_sequencia_codigo: estado.meta_sequencia_codigo || null,\n  proxima_meta_codigo: estado.proxima_meta_codigo || null,\n  sequencia_status: estado.sequencia_status || null,\n  quests_personalizadas: questsPersonalizadas,\n  card_quests: {\n    quest,\n    snapshot: {\n      total_concluidas: totalConcluidas,\n      total_personalizadas: totalPersonalizadas,\n      xp_base_total: xpBaseTotal,\n      xp_bonus_total: xpBonusTotal,\n    },\n    beneficios,\n    recompensas: {\n      xp_base: xpBase,\n      xp_bonus_recorrencia: xpBonusRecorrencia,\n    },\n  },\n};\n\nreturn [{ json: response }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        64
+        176,
+        144
       ],
-      "id": "c5aa0b1b-c5c8-4519-8f41-54a1334ed198",
+      "id": "70fdf1ce-66f4-4179-ae4e-82652f41e91b",
       "name": "Montar Resposta"
     },
     {
       "parameters": {},
-      "id": "9e01dce7-45a6-4e8b-b32e-6debe17f9acd",
+      "id": "a0fd9e1b-a9ae-4a24-b378-9f2e86302a4b",
       "name": "Aguardar Dados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -272,
-        64
+        -48,
+        144
       ]
     },
     {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "name": "Buscar Conclusoes Historico",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -432,
-        64
-      ],
       "parameters": {
         "operation": "executeQuery",
         "query": "SELECT\n  ch.meta_codigo AS quest_id,\n  jsonb_agg(\n    DISTINCT (occ->>'data_concluida')::date::text\n  ) AS datas_concluidas\nFROM public.conquistas_historico ch\nCROSS JOIN LATERAL jsonb_array_elements(ch.detalhes->'ocorrencias') AS occ\nWHERE ch.usuario_id = $1::uuid\n  AND ch.tipo = 'quest'\n  AND (occ->>'data_concluida') IS NOT NULL\nGROUP BY ch.meta_codigo;",
@@ -134,6 +126,14 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
+      "id": "637d6d20-91f2-4522-a1df-e3aeee092380",
+      "name": "Buscar Conclusoes Historico",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -208,
+        144
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -150,6 +150,11 @@
         [
           {
             "node": "Listar Usuarios Quest",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Conclusoes Historico",
             "type": "main",
             "index": 0
           }
@@ -210,6 +215,17 @@
           }
         ]
       ]
+    },
+    "Buscar Conclusoes Historico": {
+      "main": [
+        [
+          {
+            "node": "Aguardar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -259,7 +275,7 @@
       }
     ]
   },
-  "versionId": "97860963-9354-4a83-ba95-ab3b9b16d4f3",
+  "versionId": "b0cdafbb-bb20-4a29-9032-3efb3d12d09e",
   "triggerCount": 1,
   "shared": [
     {

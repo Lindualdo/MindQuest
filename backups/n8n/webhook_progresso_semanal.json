@@ -11,12 +11,12 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "83623f9b-1bce-47ac-b6b4-ca8f38d73594",
+      "id": "380bbfab-3375-41fd-921a-acb85e35d634",
       "name": "Webhook Card Weekly Progress",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -32,
+        656,
         -256
       ],
       "webhookId": "645b50c5-e7dd-4b62-bf6f-1f83b681fb6f"
@@ -25,12 +25,12 @@
       "parameters": {
         "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
       },
-      "id": "4fdeb684-d85e-426b-9217-4e8ad054834a",
+      "id": "e1e3e93c-9791-4ed1-99b0-96524efdfd85",
       "name": "Validar Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
+        912,
         -256
       ]
     },
@@ -42,12 +42,12 @@
           "queryReplacement": "={{ $json.user_id }}"
         }
       },
-      "id": "8e4ff190-e9a8-4179-a2ea-0cac95987685",
+      "id": "6f280135-12cc-4989-b2af-2dd8890edcb8",
       "name": "Calcular Semana",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        464,
+        1152,
         -256
       ],
       "credentials": {
@@ -61,12 +61,12 @@
       "parameters": {
         "jsCode": "const row = $input.first()?.json || {};\nconst dias = Array.isArray(row.dias) ? row.dias : [];\n\nconst parsedDias = dias.map((dia) => {\n  const totalXp = Number(dia.totalXp ?? 0) || 0;\n  const metaDia = Number(dia.metaDia ?? 0) || 0;\n  const status = metaDia > 0 && totalXp >= metaDia\n    ? 'concluido'\n    : totalXp > 0\n      ? 'parcial'\n      : 'pendente';\n\n  return {\n    data: dia.data ?? null,\n    label: dia.label ?? null,\n    totalXp,\n    xpBase: Number(dia.xpBase ?? 0) || 0,\n    xpBonus: Number(dia.xpBonus ?? 0) || 0,\n    xpConversa: Number(dia.xpConversa ?? 0) || 0,\n    xpQuests: Number(dia.xpQuests ?? 0) || 0,\n    metaDia,\n    metaConversa: Number(dia.metaConversa ?? 0) || 0,\n    metaQuests: Number(dia.metaQuests ?? 0) || 0,\n    qtdQuestsPrevistas: Number(dia.qtdQuestsPrevistas ?? 0) || 0,\n    status\n  };\n});\n\nconst xpSemanaTotal = Number(row.xp_semana_total ?? 0) || 0;\nconst xpMetaSemana = Number(row.meta_semana_total ?? 0) || undefined;\nconst percentualMeta = xpMetaSemana && xpMetaSemana > 0\n  ? Math.min(100, Math.round((xpSemanaTotal / xpMetaSemana) * 100))\n  : undefined;\n\nconst diasConcluidos = parsedDias.filter((dia) => dia.metaDia > 0 && dia.totalXp >= dia.metaDia).length;\nconst streakDias = Number(row.streak_dias ?? 0) || 0;\n\nconst summary = {\n  usuarioId: row.usuario_id ?? null,\n  semanaInicio: row.semana_inicio ?? null,\n  semanaFim: row.semana_fim ?? null,\n  streakAtualDias: streakDias,\n  xpSemanaTotal,\n  xpMetaSemana,\n  dias: parsedDias\n};\n\nreturn [{\n  json: {\n    success: true,\n    usuario_id: summary.usuarioId,\n    card_weekly_progress: {\n      ...summary,\n      percentualMeta,\n      diasConcluidos\n    }\n  }\n}];"
       },
-      "id": "13b9f065-495a-437e-98a9-fa91efb4ccb0",
+      "id": "f7a3bdce-5003-46f6-b276-b6d087c47ffd",
       "name": "Montar Card",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
+        1392,
         -256
       ]
     },
@@ -74,12 +74,12 @@
       "parameters": {
         "options": {}
       },
-      "id": "87d3840f-bf1b-43ab-b32d-0254022a5c73",
+      "id": "eb244b7f-060c-4a8b-8037-c3261ad2d598",
       "name": "Responder Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        944,
+        1632,
         -256
       ]
     }
@@ -136,7 +136,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "0704a130-e830-4a42-8835-6cdf297a3cf5",
+  "versionId": "d8b2cb37-27b2-42f2-b279-7a4a00ffb44e",
   "triggerCount": 1,
   "shared": [
     {
