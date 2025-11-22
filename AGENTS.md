@@ -64,6 +64,22 @@ Ao tratar de workflows n8n:
 ## Padrões de Resposta
 - Ver "ATENÇÃO — Comunicação Essencial" e "Formatos Rápidos".
 
+## Documentação (Obrigatório)
+- **SEMPRE incluir data e hora do sistema ao criar ou alterar documentos:**
+  - Formato: `**Data:** YYYY-MM-DD HH:MM` ou `**Última atualização:** YYYY-MM-DD HH:MM`
+  - Incluir no cabeçalho do documento (primeiras linhas)
+  - Atualizar a data sempre que o documento for modificado
+  - Exemplo:
+    ```markdown
+    # Título do Documento
+    
+    **Data:** 2025-01-22 14:30
+    **Última atualização:** 2025-01-22 14:30
+    ```
+- **Para documentos com múltiplas versões:**
+  - Manter histórico de alterações quando relevante
+  - Sempre indicar qual é a versão mais atual
+
 ## Mensagens de Commit
 - Sempre usar português brasileiro (PT-BR) nas mensagens de commit.
 - Formato: `[LABEL] verbo no infinitivo + objeto direto`
