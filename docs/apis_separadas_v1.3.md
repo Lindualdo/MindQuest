@@ -7,26 +7,31 @@
 
 ## 📋 Resumo Executivo
 
-Dados que **NÃO são do usuário** e devem ser movidos para **APIs separadas**:
+### Status das APIs
 
-1. ✅ **Perfil Big Five** → `/perfil` (já existe API dedicada)
-2. ⚠️ **Sabotador** → `/sabotador` (verificar se já existe)
-3. ✅ **Distribuição Emoções** → `/emocoes` (já existe - humor, panas e emoções)
-4. ✅ **PANAS** → `/emocoes` (já existe - incluído na API de emoções)
-5. ✅ **Histórico Diário** → `/historico/diario` (já existe API dedicada)
-6. ⚠️ **Insights** → `/insights` (verificar se já existe)
-7. ❌ **Gamificação** → Não usado mais na v1.3
+1. ✅ **Perfil Big Five** → `/perfil` - **JÁ EXISTE** (`getPerfilBigFive()`)
+2. ⚠️ **Sabotador** → Verificar se tem API dedicada ou vem via outro card
+3. ✅ **Emoções (distribuição + PANAS + humor)** → `/card/emocoes` - **JÁ EXISTE** (`getPanoramaCard()`)
+4. ✅ **Histórico Diário** → `/humor-historico` - **JÁ EXISTE** (`getHumorHistorico()`)
+5. ⚠️ **Insights** → `/card/insight` - **JÁ EXISTE** (`getInsightCard()`) - verificar se precisa de endpoint separado
+6. ❌ **Gamificação** → **NÃO USADO MAIS** na v1.3
+
+### Conclusão
+
+**Apenas Sabotador precisa ser verificado** - todos os outros dados já têm APIs dedicadas funcionando.
 
 ---
 
 ## 🔌 Especificação das APIs
 
-### 1. GET `/perfil`
+### 1. GET `/perfil` ✅ **JÁ EXISTE**
 **Descrição:** Retorna perfil Big Five do usuário
+
+**Status:** ✅ API já existe e está funcionando
 
 **Request:**
 ```http
-GET /webhook/perfil?token={token}
+GET /webhook/perfil?user_id={userId}
 ```
 
 **Response:**
@@ -49,7 +54,7 @@ GET /webhook/perfil?token={token}
 
 **Uso no Frontend:**
 - `DashPerfilPage` → CardPerfilBigFive
-- Carregar via `loadPanoramaCard()` ou nova função `loadPerfil()`
+- Carregar via `getPerfilBigFive()` (já existe em `apiService.ts`)
 
 ---
 
@@ -85,75 +90,59 @@ GET /webhook/sabotador?token={token}
 
 ---
 
-### 3. GET `/emocoes/distribuicao`
-**Descrição:** Retorna distribuição das 8 emoções primárias
+### 3. GET `/emocoes` ✅ **JÁ EXISTE**
+**Descrição:** Retorna distribuição das 8 emoções primárias + análise PANAS + humor
+
+**Status:** ✅ API já existe e está funcionando
 
 **Request:**
 ```http
-GET /webhook/emocoes/distribuicao?token={token}
+GET /webhook/card/emocoes?user_id={userId}
 ```
 
 **Response:**
 ```json
 {
   "success": true,
-  "usuario_id": "uuid",
-  "distribuicao_emocoes": {
-    "alegria": 25,
-    "confianca": 20,
-    "medo": 10,
-    "surpresa": 15,
-    "tristeza": 8,
-    "angustia": 5,
-    "raiva": 12,
-    "expectativa": 5
+  "card_panorama_emocional": {
+    "distribuicao_emocoes": {
+      "alegria": 25,
+      "confianca": 20,
+      "medo": 10,
+      "surpresa": 15,
+      "tristeza": 8,
+      "angustia": 5,
+      "raiva": 12,
+      "expectativa": 5
+    },
+    "panas": {
+      "positivas": 45,
+      "negativas": 20,
+      "neutras": 35,
+      "total": 100,
+      "percentual_positivas": 45,
+      "percentual_negativas": 20,
+      "percentual_neutras": 35
+    },
+    "humor": { ... }
   }
 }
 ```
 
 **Uso no Frontend:**
-- `DashPerfilPage` → EmotionWheel
-- Carregar via `loadRodaEmocoes()` (já existe)
+- `DashPerfilPage` → EmotionWheel + CardPerfilBigFive
+- Carregar via `getPanoramaCard()` (já existe em `apiService.ts`)
 
 ---
 
-### 4. GET `/emocoes/panas`
-**Descrição:** Retorna análise PANAS (emoções positivas/negativas/neutras)
-
-**Request:**
-```http
-GET /webhook/emocoes/panas?token={token}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "usuario_id": "uuid",
-  "panas": {
-    "positivas": 45,
-    "negativas": 20,
-    "neutras": 35,
-    "total": 100,
-    "percentual_positivas": 45,
-    "percentual_negativas": 20,
-    "percentual_neutras": 35
-  }
-}
-```
-
-**Uso no Frontend:**
-- `DashPerfilPage` → CardPerfilBigFive
-- Carregar via `loadPanoramaCard()` (já inclui PANAS)
-
----
-
-### 5. GET `/historico/diario`
+### 5. GET `/historico/diario` ✅ **JÁ EXISTE**
 **Descrição:** Retorna histórico de check-ins diários
 
+**Status:** ✅ API já existe e está funcionando
+
 **Request:**
 ```http
-GET /webhook/historico/diario?token={token}&periodo=semana
+GET /webhook/humor-historico?user_id={userId}
 ```
 
 **Response:**
@@ -161,7 +150,9 @@ GET /webhook/historico/diario?token={token}&periodo=semana
 {
   "success": true,
   "usuario_id": "uuid",
-  "historico_diario": [
+  "serie": [...],
+  "periodo": {...},
+  "detalhes": [
     {
       "data": "2024-11-22",
       "humor": 7,
@@ -178,7 +169,7 @@ GET /webhook/historico/diario?token={token}&periodo=semana
 - `HumorHistoryPageV13`
 - `HomeV1_3` → CardMoodEnergy
 - `checkins_historico` (Dashboard)
-- Carregar via `loadPanoramaCard()` ou nova função `loadHistoricoDiario()`
+- Carregar via `getHumorHistorico()` (já existe em `apiService.ts`)
 
 ---
 
@@ -218,31 +209,12 @@ GET /webhook/insights?token={token}
 
 ---
 
-### 7. GET `/gamificacao` - ⚠️ AVALIAR
-**Descrição:** Retorna dados de gamificação (se ainda necessário)
+### 7. GET `/gamificacao` ❌ **NÃO USADO MAIS**
+**Descrição:** Dados de gamificação não são mais usados na v1.3
 
-**Request:**
-```http
-GET /webhook/gamificacao?token={token}
-```
+**Status:** ❌ Removido - não necessário na v1.3
 
-**Response:**
-```json
-{
-  "success": true,
-  "usuario_id": "uuid",
-  "gamificacao": {
-    "streak_conversas_dias": 5
-  }
-}
-```
-
-**Uso no Frontend:**
-- ⚠️ **Verificar se ainda é usado na v1.3**
-- Na v1.3 não exibimos níveis/jornada
-- Streak pode ser usado indiretamente
-
-**Decisão:** Avaliar se ainda é necessário ou pode ser removido completamente.
+**Decisão:** Não criar API - v1.3 não usa gamificação (níveis, jornada, conquistas)
 
 ---
 
