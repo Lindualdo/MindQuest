@@ -773,69 +773,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
-  /**
-   * Carrega dados do dashboard da API
-   */
-  loadDashboardData: async (): Promise<void> => {
-    set({ isLoading: true, error: null });
-
-    try {
-      const apiData = await apiService.getDashboardData();
-      
-      if (!apiData) {
-        throw new Error('Nenhum dado retornado pela API');
-      }
-
-     const dashboardData = dataAdapter.convertApiToDashboard(apiData);
-      set({
-        dashboardData,
-        isLoading: false,
-        error: null,
-        ultimaAtualizacao: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
-      });
-
-      if (dashboardData?.usuario?.id) {
-        await Promise.all([
-          get().loadQuestSnapshot(dashboardData.usuario.id),
-          get().loadPanoramaCard(dashboardData.usuario.id),
-          get().loadConversasCard(dashboardData.usuario.id),
-          // loadQuestsCard removido - carrega apenas ao abrir painel de quests (v1.3)
-          get().loadJornadaCard(dashboardData.usuario.id),
-          get().loadRodaEmocoes(dashboardData.usuario.id),
-        ]);
-      } else {
-        set({
-          questSnapshot: null,
-          questLoading: false,
-          questError: 'Usuário inválido para quests',
-          panoramaCard: null,
-          panoramaCardUserId: null,
-          panoramaCardLoading: false,
-          panoramaCardError: 'Usuário inválido para panorama emocional',
-          conversasCard: null,
-          conversasCardUserId: null,
-          conversasCardLoading: false,
-          conversasCardError: 'Usuário inválido para card de conversas',
-          questsCard: null,
-          questsCardUserId: null,
-          questsCardLoading: false,
-          questsCardError: 'Usuário inválido para card de quests',
-          jornadaCard: null,
-          jornadaCardUserId: null,
-          jornadaCardLoading: false,
-          jornadaCardError: 'Usuário inválido para card de jornada',
-        });
-      }
-
-    } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error);
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Erro ao carregar dados'
-      });
-    }
-  },
 
   /**
    * Atualiza período selecionado
