@@ -9,13 +9,13 @@
 
 Dados que **NÃO são do usuário** e devem ser movidos para **APIs separadas**:
 
-1. **Perfil Big Five** → `/perfil`
-2. **Sabotador** → `/sabotador`
-3. **Distribuição Emoções** → `/emocoes/distribuicao`
-4. **PANAS** → `/emocoes/panas`
-5. **Histórico Diário** → `/historico/diario`
-6. **Insights** → `/insights`
-7. **Gamificação** → `/gamificacao` (avaliar necessidade)
+1. ✅ **Perfil Big Five** → `/perfil` (já existe API dedicada)
+2. ⚠️ **Sabotador** → `/sabotador` (verificar se já existe)
+3. ✅ **Distribuição Emoções** → `/emocoes` (já existe - humor, panas e emoções)
+4. ✅ **PANAS** → `/emocoes` (já existe - incluído na API de emoções)
+5. ✅ **Histórico Diário** → `/historico/diario` (já existe API dedicada)
+6. ⚠️ **Insights** → `/insights` (verificar se já existe)
+7. ❌ **Gamificação** → Não usado mais na v1.3
 
 ---
 
