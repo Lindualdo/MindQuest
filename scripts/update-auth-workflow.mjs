@@ -11,14 +11,21 @@ if (!apiKey) {
 
 async function fetchJson(relativePath, options = {}) {
   const url = new URL(relativePath, apiRoot);
-  const res = await fetch(url, {
-    ...options,
+  
+  const fetchOptions = {
+    method: options.method || 'GET',
     headers: {
       'X-N8N-API-KEY': apiKey,
       'Content-Type': 'application/json',
       ...(options.headers || {})
     }
-  });
+  };
+  
+  if (options.body) {
+    fetchOptions.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+  }
+  
+  const res = await fetch(url, fetchOptions);
 
   if (!res.ok) {
     const text = await res.text();
