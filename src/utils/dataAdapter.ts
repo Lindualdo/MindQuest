@@ -1521,28 +1521,6 @@ class DataAdapter {
       periodoFim,
     };
   }
-
-      
-      metricas_periodo: {
-        periodo_selecionado: humorMetrics.periodoTipo,
-        data_inicio: humorMetrics.periodoInicio,
-        data_fim: humorMetrics.periodoFim,
-        total_checkins: humorMetrics.conversasTotal,
-        taxa_resposta: (() => {
-          const total = humorMetrics.conversasTotal;
-          const completas = humorMetrics.conversasCompletas;
-          if (!total || total === 0) return 0;
-          return (completas / total) * 100;
-        })(),
-        humor_medio: typeof humorMetrics.humorMedio === 'number' && Number.isFinite(humorMetrics.humorMedio)
-          ? humorMetrics.humorMedio
-          : 0,
-        emocao_dominante: humorMetrics.ultimaConversaEmocao
-      }
-    };
-
-    return dashboardData;
-  }
 }
 
 export const dataAdapter = new DataAdapter();
