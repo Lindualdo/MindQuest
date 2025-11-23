@@ -43,7 +43,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    COALESCE(uq.contexto_origem, '') AS contexto_origem,\n    uq.progresso_meta,\n    uq.progresso_atual,\n    uq.concluido_em,\n    uq.ativado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.complexidade,\n    uq.config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('pendente','ativa')\n)\nSELECT json_build_object(\n  'quests_ativas',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', quests.id,\n      'status', quests.status,\n      'contexto_origem', quests.contexto_origem,\n      'progresso_meta', quests.progresso_meta,\n      'progresso_atual', quests.progresso_atual,\n      'concluido_em', quests.concluido_em,\n      'criado_em', quests.ativado_em,\n      'area_vida_id', quests.area_vida_id,\n      'sabotador_id', quests.sabotador_id,\n      'insight_id', quests.insight_id,\n      'complexidade', quests.complexidade,\n      'titulo', quests.config->>'titulo',\n      'descricao', quests.config->>'descricao',\n      'prioridade', quests.config->>'prioridade',\n      'recorrencia', quests.config->>'recorrencia',\n      'payload_extra', COALESCE(quests.config->'payload_extra', '{}'::jsonb),\n      'config', quests.config\n    )\n    ORDER BY quests.concluido_em NULLS FIRST, quests.ativado_em DESC\n  ), '[]'::json)\n) AS contexto\nFROM quests;",
+        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.quest_estagio,\n    uq.catalogo_id,\n    COALESCE(uq.config->>'contexto_origem', '') AS contexto_origem,\n    uq.concluido_em,\n    uq.ativado_em,\n    uq.config,\n    uq.recorrencias\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('pendente','ativa')\n)\nSELECT json_build_object(\n  'quests_ativas',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', quests.id,\n      'status', quests.status,\n      'quest_estagio', quests.quest_estagio,\n      'catalogo_id', quests.catalogo_id,\n      'contexto_origem', quests.contexto_origem,\n      'concluido_em', quests.concluido_em,\n      'criado_em', quests.ativado_em,\n      'titulo', quests.config->>'titulo',\n      'descricao', quests.config->>'descricao',\n      'prioridade', quests.config->>'prioridade',\n      'recorrencia', quests.config->>'recorrencia',\n      'payload_extra', COALESCE(quests.config->'payload_extra', '{}'::jsonb),\n      'config', quests.config,\n      'recorrencias', quests.recorrencias\n    )\n    ORDER BY quests.concluido_em NULLS FIRST, quests.ativado_em DESC\n  ), '[]'::json)\n) AS contexto\nFROM quests;",
         "options": {
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
@@ -583,12 +583,13 @@
     "start": [
       {
         "json": {
-          "usuario_id": "0847d8a7-4fba-45f2-9470-a7eeacaa4bd4"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": null
         }
       }
     ]
   },
-  "versionId": "f634ae7a-ea17-4056-bc0f-35ff366f81b3",
+  "versionId": "14c63500-874d-42ee-8ece-cd8116468082",
   "triggerCount": 0,
   "shared": [
     {

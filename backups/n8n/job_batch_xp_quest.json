@@ -44,10 +44,10 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "bTeLj5qOKQo9PDMO",
+          "value": "LKjU8NE9aNHw7kEh",
           "mode": "list",
-          "cachedResultUrl": "/workflow/bTeLj5qOKQo9PDMO",
-          "cachedResultName": "sw_xp_quest"
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "cachedResultName": "sw_criar_quest"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -68,14 +68,14 @@
               "type": "string"
             },
             {
-              "id": "calcular_apenas_novos",
-              "displayName": "calcular_apenas_novos",
+              "id": "chat_id",
+              "displayName": "chat_id",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "boolean",
-              "removed": true
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -170,7 +170,7 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "b21505b4-f659-480b-b27e-82a179d6e890",
+  "versionId": "32061e7b-0ec8-4bb8-90dd-2b5249931f65",
   "triggerCount": 1,
   "shared": [
     {

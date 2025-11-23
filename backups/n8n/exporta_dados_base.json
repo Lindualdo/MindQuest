@@ -58,19 +58,11 @@
         },
         "table": {
           "__rl": true,
-          "value": "quest_estado_usuario",
+          "value": "usuarios_conquistas",
           "mode": "list",
-          "cachedResultName": "quest_estado_usuario"
+          "cachedResultName": "usuarios_conquistas"
         },
         "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "usuario_id",
-              "value": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff"
-            }
-          ]
-        },
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -232,9 +224,9 @@
         },
         "table": {
           "__rl": true,
-          "value": "quest_modelos",
+          "value": "conquistas_historico",
           "mode": "list",
-          "cachedResultName": "quest_modelos"
+          "cachedResultName": "conquistas_historico"
         },
         "returnAll": true,
         "options": {}
@@ -319,7 +311,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "dad3cdab-5a7f-4c9f-9516-49e936d15f84",
+  "versionId": "5c9feef3-af11-4854-88fa-adb62b81b22f",
   "triggerCount": 0,
   "shared": [
     {

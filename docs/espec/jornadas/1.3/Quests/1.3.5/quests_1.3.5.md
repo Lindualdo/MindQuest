@@ -1,9 +1,11 @@
 # Resumo do Entendimento — Quests no MindQuest v1.3.5
 
 **Data:** 2025-11-23 08:01  
-**Última atualização:** 2025-11-23 12:27  
+**Última atualização:** 2025-11-23 17:23  
 **Versão:** 1.3.5  
 **Objetivo:** Documentar entendimento consolidado sobre o sistema de Quests para refactor
+
+> **📋 Ver também:** [Unificação de Conversas e Quests](./unificacao_conversas_quests.md) — Documentação detalhada da unificação implementada
 
 ---
 
@@ -50,6 +52,12 @@
   - Estrutura: `{ ocorrencias: [{ data_planejada, data_concluida, data_registrada, xp_base, xp_bonus }], total_concluidas }`
   - **Verificação de conclusão:** Compara `COUNT(recorrencias->dias[])` (planejado) vs `total_concluidas` (executado)
 - **Consolidação:** `usuarios_conquistas` — pontuação total para nível
+
+#### Relacionamentos Unificados
+- **`usuarios_quest.catalogo_id`:** FK para `quests_catalogo.id` (busca XP do catálogo)
+- **`conquistas_historico.usuarios_quest_id`:** FK para `usuarios_quest.id` (relacionamento unificado)
+- **`conquistas_historico.meta_codigo`:** Mantido para compatibilidade (legado)
+- **`conquistas_historico.tipo`:** `'quest'` ou `'conversa'` (mantido para contagem/filtros)
 
 ### Estágios da Jornada (Baseados em `jornada_niveis`)
 
@@ -99,9 +107,11 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
 ### Fluxo de Estágios da Quest
 
 1. **Criação:** Quest nasce como `a_fazer` com recorrências sugeridas em `recorrencias`
+   - **Exceção:** Quest `reflexao_diaria` (conversas) nasce como `fazendo` (não precisa aprovação)
 2. **Aprovação/Planejamento:** Quando usuário aprova/ajusta recorrências → `fazendo`
    - **Nota:** Interface de aprovação será criada no futuro
    - Por enquanto, sistema trata apenas `fazendo` e `feito`
+   - **Conversas:** Já nascem em `fazendo`, usuário não pode alterar recorrências
 3. **Conclusão:** Quando todas recorrências concluídas → `feito`
    - Verificação: `COUNT(recorrencias->dias[])` <= `conquistas_historico.detalhes->total_concluidas`
 
@@ -131,7 +141,30 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
 
 ### Padrões Automáticos
 - **Quest recorrente de sistema (sabotador):** Sempre presente, relacionada ao sabotador mais ativo
-- **Quest de conversa diária:** Meta automática (1 conversa/dia = 15 pts base)
+- **Quest de reflexão diária (`reflexao_diaria`):** Criada automaticamente se usuário não tiver quests
+  - Recorrências para os dias restantes da semana (hoje até sábado)
+  - Semana sempre de domingo a sábado
+  - XP: 10 pontos (configurável no catálogo)
+
+### Regras Específicas para Conversas (`reflexao_diaria`)
+
+**Diferenças em relação a outras quests:**
+
+1. **Estágio inicial:** Sempre criada com `quest_estagio = 'fazendo'` (não `a_fazer`)
+   - Conversas não precisam de aprovação do usuário
+   - Já nascem prontas para execução
+
+2. **Recorrências fixas:** Usuário **não pode alterar** as recorrências
+   - Meta: ser feita todos os dias da semana
+   - Recorrências definidas automaticamente pelo sistema
+
+3. **Histórico único:** Sempre terá um único registro em `conquistas_historico`
+   - `tipo = 'conversa'`
+   - `usuarios_quest_id` aponta para a quest `reflexao_diaria`
+   - Todas as ocorrências ficam em `detalhes->ocorrencias[]`
+   - Campo `detalhes->total_concluidas` contabiliza todas as conversas
+
+4. **Identificação:** Campo `config->conversa = true` para identificar quests de conversa
 
 ### Geração Automática
 - **Inputs:** 
@@ -186,11 +219,38 @@ Transformação do usuário
 
 ---
 
+## Sistema de Pontuação (XP)
+
+### Regras Unificadas
+- **XP Base:** Buscado de `quests_catalogo.xp` via `catalogo_id` em `usuarios_quest`
+- **Valor padrão:** 10 XP para todas as quests (configurável por quest no catálogo)
+- **Bônus:** Desabilitado por enquanto (0 XP bônus)
+- **Quest personalizada:** Se não tiver `catalogo_id`, usa 10 XP como padrão
+- **Conversas:** Tratadas como quests (`reflexao_diaria`), mesmo sistema de XP
+
+### Estrutura de Dados
+- **`quests_catalogo.xp`:** Campo que armazena XP de cada quest
+- **`usuarios_quest.catalogo_id`:** Relacionamento com catálogo (FK para `quests_catalogo.id`)
+- **`conquistas_historico.usuarios_quest_id`:** Relacionamento unificado (FK para `usuarios_quest.id`)
+- **`conquistas_historico.meta_codigo`:** Mantido para compatibilidade (legado)
+
+### Unificação Conversas/Quests
+- **Tudo é quest:** Conversas agora são quests do catálogo (`reflexao_diaria`)
+- **Mesma lógica:** Mesma estrutura de dados, mesma lógica de XP
+- **Tipo mantido:** Campo `tipo` em `conquistas_historico` mantido como `'conversa'` ou `'quest'` apenas para contagem/filtros
+- **Tabela removida:** `metas_catalogo` foi removida (XP agora vem de `quests_catalogo`)
+
+> **📋 Detalhes completos:** Ver [Unificação de Conversas e Quests](./unificacao_conversas_quests.md)
+
+---
+
 ## Status Atual vs Planejado
 
 ### ✅ Implementado
 - Conversas, insights e geração de quests
-- Sistema de pontuação (XP base + bônus)
+- **Sistema de pontuação unificado:** XP buscado de `quests_catalogo.xp`
+- **Unificação conversas/quests:** Tudo tratado como quest, mesma lógica
+- **Quest inicial automática:** Cria `reflexao_diaria` se usuário não tiver quests
 - Progresso semanal (card na home)
 - Painel de quests com detalhes
 - **Sistema de estágios da quest:** `a_fazer`, `fazendo`, `feito`

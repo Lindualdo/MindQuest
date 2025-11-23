@@ -21,26 +21,26 @@
           ]
         }
       },
-      "id": "82d76f7e-e1ad-45b3-a8de-cf5634338269",
+      "id": "69ed3319-986f-4b1d-a55c-be432cabf5f4",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2304,
-        160
+        -208,
+        208
       ]
     },
     {
       "parameters": {
         "jsCode": "const item = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      if (Array.isArray(parsed)) return parsed;\n    } catch (error) {}\n  }\n  return [];\n};\n\nconst usuarioId = item.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nconst quests = parseList(item.quests_personalizadas);\nconst updates = parseList(item.atualizacoes_status);\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    novas_quests: quests,\n    atualizacoes: updates\n  }\n}];"
       },
-      "id": "2b93fc6b-f25d-4c1c-b288-3a33db1fd395",
+      "id": "50f6cbd7-1336-43d6-b19c-8e7d77c8690a",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2080,
-        160
+        16,
+        208
       ]
     },
     {
@@ -55,7 +55,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $json.usuario_id }}"
+            "usuario_id": "={{ $('start').first().json.usuario_id }}"
           },
           "matchingColumns": [
             "usuario_id"
@@ -75,34 +75,32 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "options": {}
       },
-      "id": "925f33d1-36c5-4cc2-81a4-cffcb87277ae",
+      "id": "cf4e9915-7939-4eb2-91a3-96bf1bdfd2da",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -32,
-        240
+        1632,
+        208
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.contexto_origem,\n    uq.progresso_meta,\n    uq.progresso_atual,\n    uq.progresso_percentual,\n    uq.ativado_em,\n    uq.atualizado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.complexidade,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  u.usuario_id,\n  u.nivel_atual,\n  u.titulo_nivel,\n  u.xp_total,\n  u.total_quests_concluidas,\n  u.total_quests_personalizadas,\n  u.sequencia_status,\n  COALESCE(jsonb_agg(quests) FILTER (WHERE quests.id IS NOT NULL), '[]'::jsonb) AS quests_ativas\nFROM public.usuarios_conquistas u\nLEFT JOIN quests ON TRUE\nWHERE u.usuario_id = $1::uuid\nGROUP BY\n  u.usuario_id,\n  u.nivel_atual,\n  u.titulo_nivel,\n  u.xp_total,\n  u.total_quests_concluidas,\n  u.total_quests_personalizadas,\n  u.sequencia_status;",
+        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.ativado_em,\n    uq.atualizado_em,\n    uq.catalogo_id,\n    uq.quest_estagio,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  u.usuario_id,\n  u.nivel_atual,\n  u.titulo_nivel,\n  u.xp_total,\n  u.total_quests_concluidas,\n  u.total_quests_personalizadas,\n  u.sequencia_status,\n  COALESCE(jsonb_agg(quests) FILTER (WHERE quests.id IS NOT NULL), '[]'::jsonb) AS quests_ativas\nFROM public.usuarios_conquistas u\nLEFT JOIN quests ON TRUE\nWHERE u.usuario_id = $1::uuid\nGROUP BY\n  u.usuario_id,\n  u.nivel_atual,\n  u.titulo_nivel,\n  u.xp_total,\n  u.total_quests_concluidas,\n  u.total_quests_personalizadas,\n  u.sequencia_status;",
         "options": {
           "queryReplacement": "={{ [ $json.usuario_id ] }}"
         }
       },
-      "id": "9d5789dc-8505-478f-99b7-af7700b59569",
+      "id": "4cf8a608-807c-4c5d-811d-80041aa583f6",
       "name": "Buscar Estado e Quests",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1744,
-        0
+        272,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -115,30 +113,30 @@
       "parameters": {
         "jsCode": "const entradaLista = $items(\"Normalizar Entrada\") || [];\nconst entrada = (entradaLista[0] && entradaLista[0].json) || {};\nconst estado = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    novas_quests: Array.isArray(entrada.novas_quests) ? entrada.novas_quests : [],\n    atualizacoes: Array.isArray(entrada.atualizacoes) ? entrada.atualizacoes : [],\n    estado_inicial: estado\n  }\n}];"
       },
-      "id": "5fab6a59-1f5b-47db-822e-faf03d10c89e",
+      "id": "dc18732b-eef8-4043-9a92-f18a274e603c",
       "name": "Preparar Operacoes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1520,
-        0
+        496,
+        208
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    COALESCE(rec->>'prioridade', 'media') AS prioridade,\n    COALESCE(rec->>'recorrencia', 'unica') AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    GREATEST(1, COALESCE((rec->>'progresso_meta')::int, 1)) AS progresso_meta,\n    COALESCE(rec->>'status_inicial', 'pendente') AS status_inicial,\n    NULLIF(rec->>'area_vida_id', '')::uuid AS area_vida_id,\n    NULLIF(rec->>'sabotador_id', '') AS sabotador_id,\n    NULLIF(rec->>'insight_id', '')::uuid AS insight_id,\n    COALESCE((rec->>'complexidade')::smallint, 0) AS complexidade,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra,\n    COALESCE((rec->>'xp_recompensa')::int, 30) AS xp_recompensa\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\nrecorrencias_quest AS (\n  SELECT\n    rows.*,\n    CASE\n      WHEN rows.recorrencia != 'unica' AND rows.prazo_inicio IS NOT NULL AND rows.prazo_fim IS NOT NULL THEN\n        jsonb_build_object(\n          'tipo', rows.recorrencia,\n          'janela', jsonb_build_object('inicio', rows.prazo_inicio::text, 'fim', rows.prazo_fim::text),\n          'dias', (\n            SELECT jsonb_agg(\n              jsonb_build_object(\n                'data', dia::date::text,\n                'status', 'pendente',\n                'xp_previsto', rows.xp_recompensa,\n                'concluido_em', NULL\n              ) ORDER BY dia\n            )\n            FROM generate_series(rows.prazo_inicio, rows.prazo_fim, '1 day') AS dia\n          )\n        )\n      ELSE NULL\n    END AS recorrencias\n  FROM rows\n),\ninserted AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    janela_inicio,\n    janela_fim,\n    contexto_origem,\n    referencia_data,\n    reiniciada_em,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    cancelado_em,\n    area_vida_id,\n    sabotador_id,\n    insight_id,\n    complexidade,\n    config,\n    recorrencias\n  )\n  SELECT\n    gen_random_uuid(),\n    rq.usuario_id,\n    rq.status_inicial,\n    0,\n    rq.progresso_meta,\n    0,\n    0,\n    0,\n    rq.prazo_inicio,\n    rq.prazo_fim,\n    rq.contexto_origem,\n    rq.prazo_inicio,\n    NULL,\n    NOW(),\n    NOW(),\n    NULL,\n    NULL,\n    rq.area_vida_id,\n    rq.sabotador_id,\n    rq.insight_id,\n    rq.complexidade,\n    jsonb_build_object(\n      'titulo', rq.titulo,\n      'descricao', rq.descricao,\n      'prioridade', rq.prioridade,\n      'recorrencia', rq.recorrencia,\n      'payload_extra', rq.payload_extra\n    ),\n    rq.recorrencias\n  FROM recorrencias_quest rq\n  RETURNING id\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas\nFROM payload;",
+        "query": "WITH payload AS (\n  SELECT $1::uuid AS usuario_id\n),\nverificar_quests AS (\n  SELECT COUNT(*) AS total_quests\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status NOT IN ('cancelada', 'vencida')\n),\nbuscar_reflexao_diaria AS (\n  SELECT id\n  FROM public.quests_catalogo\n  WHERE codigo = 'reflexao_diaria'\n  LIMIT 1\n),\ncriar_quest_inicial AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    catalogo_id,\n    status,\n    janela_inicio,\n    janela_fim,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    config,\n    recorrencias,\n    quest_estagio\n  )\n  SELECT\n    gen_random_uuid(),\n    (SELECT usuario_id FROM payload),\n    brd.id,\n    'ativa',\n    CURRENT_DATE,\n    (date_trunc('week', CURRENT_DATE) + INTERVAL '6 days')::date,\n    NOW(),\n    NOW(),\n    NULL,\n    jsonb_build_object(\n      'titulo', 'Reflexão Diária',\n      'descricao', 'Conversa com seu Assistente de reflexão',\n      'prioridade', 'alta',\n      'recorrencia', 'diaria',\n      'conversa', true,\n      'contexto_origem', 'sistema'\n    ),\n    jsonb_build_object(\n      'tipo', 'diaria',\n      'janela', jsonb_build_object(\n        'inicio', CURRENT_DATE::text,\n        'fim', (date_trunc('week', CURRENT_DATE) + INTERVAL '6 days')::date::text\n      ),\n      'dias', (\n        SELECT jsonb_agg(\n          jsonb_build_object(\n            'data', dia::date::text,\n            'xp_previsto', 10\n          ) ORDER BY dia\n        )\n        FROM generate_series(\n          CURRENT_DATE,\n          (date_trunc('week', CURRENT_DATE) + INTERVAL '6 days')::date,\n          '1 day'\n        ) AS dia\n      )\n    ),\n    'fazendo'\n  FROM buscar_reflexao_diaria brd\n  CROSS JOIN verificar_quests vq\n  WHERE vq.total_quests = 0\n  RETURNING id\n)\nSELECT\n  (SELECT usuario_id FROM payload) AS usuario_id,\n  COALESCE((SELECT COUNT(*) FROM criar_quest_inicial), 0) AS quest_inicial_criada;",
         "options": {
-          "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.novas_quests || []), JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}) ] }}"
+          "queryReplacement": "={{ [ $json.usuario_id ] }}"
         }
       },
-      "id": "a7128186-26fe-4ac7-abd9-b7a05d0259fa",
-      "name": "Inserir Instancias",
+      "id": "5a3fc3f7-a8e6-4978-a9e3-c55ccf513b36",
+      "name": "Verificar e Criar Quest Inicial",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1312,
-        0
+        736,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -150,18 +148,41 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS atualizacoes,\n    $3::jsonb AS estado_inicial,\n    $4::jsonb AS novas_quests,\n    $5::int AS xp_base_quest,\n    $6::int AS xp_bonus_recorrencia\n),\nupdates AS (\n  SELECT\n    payload.usuario_id,\n    (rec->>'instancia_id')::uuid AS instancia_id,\n    COALESCE(rec->>'novo_status', 'pendente') AS novo_status,\n    COALESCE((rec->>'progresso_atual')::int, 0) AS progresso_atual,\n    COALESCE((rec->>'xp_extra')::int, 0) AS xp_extra,\n    COALESCE((rec->>'data_referencia')::date, CURRENT_DATE) AS data_referencia\n  FROM payload,\n       jsonb_array_elements(payload.atualizacoes) rec\n  WHERE rec ? 'instancia_id'\n),\nalvos AS (\n  SELECT\n    uq.id,\n    uq.usuario_id,\n    uq.status AS status_atual,\n    uq.progresso_meta,\n    uq.progresso_atual AS progresso_atual_atual,\n    uq.concluido_em AS concluido_em_anterior,\n    uq.recorrencias,\n    updates.novo_status,\n    updates.progresso_atual,\n    updates.xp_extra,\n    updates.data_referencia,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM updates\n  JOIN public.usuarios_quest uq ON uq.id = updates.instancia_id\n  WHERE uq.usuario_id = updates.usuario_id\n),\nalvos_enriquecidos AS (\n  SELECT\n    alvos.*,\n    COALESCE(alvos.config->>'recorrencia', 'unica') AS recorrencia,\n    CASE WHEN alvos.novo_status = 'concluida' THEN payload.xp_base_quest ELSE 0 END AS xp_base_evento,\n    CASE WHEN alvos.novo_status = 'concluida' AND COALESCE(alvos.config->>'recorrencia', 'unica') <> 'unica' THEN payload.xp_bonus_recorrencia ELSE 0 END AS xp_bonus_evento,\n    (\n      SELECT dia_elem->>'data'\n      FROM jsonb_array_elements(alvos.recorrencias->'dias') AS dia_elem\n      WHERE (dia_elem->>'data')::date = alvos.data_referencia\n      LIMIT 1\n    ) AS data_planejada\n  FROM alvos, payload\n),\natualizados AS (\n  UPDATE public.usuarios_quest uq\n  SET\n    status = CASE\n      WHEN ae.novo_status IN ('pendente','ativa','concluida','vencida','cancelada','reiniciada') THEN ae.novo_status\n      ELSE uq.status\n    END,\n    progresso_atual = ae.progresso_atual,\n    progresso_percentual = CASE\n      WHEN uq.progresso_meta > 0 THEN LEAST(100, GREATEST(0, ROUND(ae.progresso_atual::numeric / uq.progresso_meta::numeric * 100)))\n      ELSE uq.progresso_percentual\n    END,\n    atualizado_em = NOW(),\n    concluido_em = CASE\n      WHEN ae.novo_status = 'concluida' AND uq.concluido_em IS NULL THEN NOW()\n      ELSE uq.concluido_em\n    END,\n    reiniciada_em = CASE WHEN ae.novo_status = 'reiniciada' THEN NOW() ELSE uq.reiniciada_em END\n  FROM alvos_enriquecidos ae\n  WHERE uq.id = ae.id\n  RETURNING uq.id, ae.usuario_id, ae.novo_status, ae.recorrencia, ae.xp_base_evento, ae.xp_bonus_evento, ae.xp_extra, ae.config, ae.data_referencia, ae.data_planejada, COALESCE(ae.config->>'titulo', 'Quest Personalizada') AS quest_titulo\n),\nhistorico_atualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = ch.xp_base + upd.xp_base_evento,\n    xp_bonus = ch.xp_bonus + (upd.xp_bonus_evento + upd.xp_extra),\n    detalhes = jsonb_set(\n      jsonb_set(\n        jsonb_set(\n          COALESCE(ch.detalhes, '{}'::jsonb),\n          '{data_conclusao}',\n          to_jsonb(upd.data_referencia::text)\n        ),\n        '{total_concluidas}',\n        to_jsonb((COALESCE((ch.detalhes->>'total_concluidas')::int, 0) + 1))\n      ),\n      '{ocorrencias}',\n      (\n        COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || \n        jsonb_build_array(\n          jsonb_build_object(\n            'data_planejada', COALESCE(upd.data_planejada, upd.data_referencia::text),\n            'data_concluida', upd.data_referencia::text,\n            'data_registrada', NOW()::text,\n            'xp_base', upd.xp_base_evento,\n            'xp_bonus', upd.xp_bonus_evento + upd.xp_extra\n          )\n        )\n      )\n    ),\n    registrado_em = NOW()\n  FROM atualizados upd\n  WHERE ch.usuario_id = upd.usuario_id\n    AND ch.meta_codigo = upd.id::text\n    AND ch.tipo = 'quest'\n    AND upd.novo_status = 'concluida'\n  RETURNING ch.id, upd.id AS quest_id\n),\nhistorico_inserido AS (\n  INSERT INTO public.conquistas_historico (\n    usuario_id,\n    tipo,\n    meta_codigo,\n    meta_titulo,\n    xp_base,\n    xp_bonus,\n    registrado_em,\n    detalhes\n  )\n  SELECT\n    upd.usuario_id,\n    'quest',\n    upd.id::text,\n    upd.quest_titulo,\n    upd.xp_base_evento,\n    upd.xp_bonus_evento + upd.xp_extra,\n    NOW(),\n    jsonb_build_object(\n      'recorrencia', upd.recorrencia,\n      'data_conclusao', upd.data_referencia::text,\n      'total_concluidas', 1,\n      'ocorrencias', jsonb_build_array(\n        jsonb_build_object(\n          'data_planejada', COALESCE(upd.data_planejada, upd.data_referencia::text),\n          'data_concluida', upd.data_referencia::text,\n          'data_registrada', NOW()::text,\n          'xp_base', upd.xp_base_evento,\n          'xp_bonus', upd.xp_bonus_evento + upd.xp_extra\n        )\n      )\n    )\n  FROM atualizados upd\n  WHERE upd.novo_status = 'concluida'\n    AND NOT EXISTS (\n      SELECT 1 FROM historico_atualizado hau WHERE hau.quest_id = upd.id\n    )\n  RETURNING id\n),\nxp_totais AS (\n  SELECT\n    COALESCE(SUM(upd.xp_base_evento), 0) AS xp_base_total,\n    COALESCE(SUM(upd.xp_bonus_evento + upd.xp_extra), 0) AS xp_bonus_total,\n    COUNT(*) FILTER (WHERE upd.novo_status = 'concluida') AS concluidas,\n    COUNT(*) FILTER (WHERE upd.novo_status = 'reiniciada') AS reinicios\n  FROM atualizados upd\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas rj\n  SET\n    xp_total = rj.xp_total + ((SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais)),\n    xp_base = COALESCE(rj.xp_base, 0) + (SELECT xp_base_total FROM xp_totais),\n    xp_bonus = COALESCE(rj.xp_bonus, 0) + (SELECT xp_bonus_total FROM xp_totais),\n    total_quests_concluidas = rj.total_quests_concluidas + (SELECT concluidas FROM xp_totais),\n    total_xp_hoje = (SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais),\n    atualizado_em = NOW()\n  WHERE rj.usuario_id = (SELECT usuario_id FROM payload LIMIT 1)\n  RETURNING rj.usuario_id\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  ((SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais)) AS xp_ganho,\n  (SELECT xp_base_total FROM xp_totais) AS xp_base_total,\n  (SELECT xp_bonus_total FROM xp_totais) AS xp_bonus_total,\n  (SELECT concluidas FROM xp_totais) AS quests_concluidas,\n  (SELECT reinicios FROM xp_totais) AS reinicios\nFROM payload;",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS novas_quests,\n    $3::jsonb AS atualizacoes,\n    $4::jsonb AS estado_inicial\n),\nrows AS (\n  SELECT\n    payload.usuario_id,\n    rec->>'titulo' AS titulo,\n    rec->>'descricao' AS descricao,\n    rec->>'contexto_origem' AS contexto_origem,\n    COALESCE(rec->>'prioridade', 'media') AS prioridade,\n    COALESCE(rec->>'recorrencia', 'unica') AS recorrencia,\n    (rec->>'prazo_inicio')::date AS prazo_inicio,\n    (rec->>'prazo_fim')::date AS prazo_fim,\n    COALESCE(rec->>'status_inicial', 'pendente') AS status_inicial,\n    COALESCE(rec->'payload_extra', '{}'::jsonb) AS payload_extra,\n    COALESCE((rec->>'xp_recompensa')::int, 10) AS xp_recompensa\n  FROM payload,\n       jsonb_array_elements(payload.novas_quests) rec\n),\nrecorrencias_quest AS (\n  SELECT\n    rows.*,\n    CASE\n      WHEN rows.recorrencia != 'unica' AND rows.prazo_inicio IS NOT NULL AND rows.prazo_fim IS NOT NULL THEN\n        jsonb_build_object(\n          'tipo', rows.recorrencia,\n          'janela', jsonb_build_object('inicio', rows.prazo_inicio::text, 'fim', rows.prazo_fim::text),\n          'dias', (\n            SELECT jsonb_agg(\n              jsonb_build_object(\n                'data', dia::date::text,\n                'xp_previsto', rows.xp_recompensa\n              ) ORDER BY dia\n            )\n            FROM generate_series(rows.prazo_inicio, rows.prazo_fim, '1 day') AS dia\n          )\n        )\n      ELSE NULL\n    END AS recorrencias\n  FROM rows\n),\ninserted AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    status,\n    janela_inicio,\n    janela_fim,\n    ativado_em,\n    atualizado_em,\n    concluido_em,\n    config,\n    recorrencias,\n    quest_estagio\n  )\n  SELECT\n    gen_random_uuid(),\n    rq.usuario_id,\n    rq.status_inicial,\n    rq.prazo_inicio,\n    rq.prazo_fim,\n    NOW(),\n    NOW(),\n    NULL,\n    jsonb_build_object(\n      'titulo', rq.titulo,\n      'descricao', rq.descricao,\n      'prioridade', rq.prioridade,\n      'recorrencia', rq.recorrencia,\n      'contexto_origem', rq.contexto_origem,\n      'payload_extra', rq.payload_extra\n    ),\n    rq.recorrencias,\n    'a_fazer'\n  FROM recorrencias_quest rq\n  RETURNING id\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas\n  SET\n    total_quests_personalizadas = total_quests_personalizadas + (SELECT COUNT(*) FROM inserted),\n    atualizado_em = NOW()\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n  RETURNING total_quests_personalizadas\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  COALESCE((SELECT COUNT(*) FROM inserted), 0) AS novas_inseridas\nFROM payload;",
         "options": {
-          "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}), JSON.stringify($json.novas_quests || []), $json.xp_base_quest || 0, $json.xp_bonus_recorrencia || 0 ] }}"
+          "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.novas_quests || []), JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}) ] }}"
         }
       },
-      "id": "20d9bdec-60fa-4047-8814-e49ff5519834",
+      "id": "5f80c97e-8ed6-45e6-82ff-426a70dddba5",
+      "name": "Inserir Instancias",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        976,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::jsonb AS atualizacoes,\n    $3::jsonb AS estado_inicial,\n    $4::jsonb AS novas_quests\n),\nupdates AS (\n  SELECT\n    payload.usuario_id,\n    (rec->>'instancia_id')::uuid AS instancia_id,\n    COALESCE(rec->>'novo_status', 'pendente') AS novo_status,\n    COALESCE((rec->>'xp_extra')::int, 0) AS xp_extra,\n    COALESCE((rec->>'data_referencia')::date, CURRENT_DATE) AS data_referencia\n  FROM payload,\n       jsonb_array_elements(payload.atualizacoes) rec\n  WHERE rec ? 'instancia_id'\n),\nalvos AS (\n  SELECT\n    uq.id,\n    uq.usuario_id,\n    uq.status AS status_atual,\n    uq.catalogo_id,\n    uq.quest_estagio,\n    uq.concluido_em AS concluido_em_anterior,\n    uq.recorrencias,\n    updates.novo_status,\n    updates.xp_extra,\n    updates.data_referencia,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM updates\n  JOIN public.usuarios_quest uq ON uq.id = updates.instancia_id\n  WHERE uq.usuario_id = updates.usuario_id\n),\nbuscar_xp AS (\n  SELECT\n    alvos.id,\n    alvos.usuario_id,\n    alvos.status_atual,\n    alvos.catalogo_id,\n    alvos.quest_estagio,\n    alvos.concluido_em_anterior,\n    alvos.recorrencias,\n    alvos.novo_status,\n    alvos.xp_extra,\n    alvos.data_referencia,\n    alvos.config,\n    COALESCE(qc.xp, 10) AS xp_base_quest\n  FROM alvos\n  LEFT JOIN public.quests_catalogo qc ON qc.id = alvos.catalogo_id\n),\nalvos_enriquecidos AS (\n  SELECT\n    buscar_xp.*,\n    COALESCE(buscar_xp.config->>'recorrencia', 'unica') AS recorrencia,\n    CASE WHEN buscar_xp.novo_status = 'concluida' THEN buscar_xp.xp_base_quest ELSE 0 END AS xp_base_evento,\n    0 AS xp_bonus_evento,\n    (\n      SELECT dia_elem->>'data'\n      FROM jsonb_array_elements(buscar_xp.recorrencias->'dias') AS dia_elem\n      WHERE (dia_elem->>'data')::date = buscar_xp.data_referencia\n      LIMIT 1\n    ) AS data_planejada,\n    (\n      SELECT COUNT(*) FROM jsonb_array_elements(buscar_xp.recorrencias->'dias') AS dia_elem\n    ) AS total_planejadas,\n    (\n      SELECT COALESCE((ch.detalhes->>'total_concluidas')::int, 0)\n      FROM public.conquistas_historico ch\n      WHERE ch.usuario_id = buscar_xp.usuario_id\n        AND ch.meta_codigo = buscar_xp.id::text\n        AND ch.tipo = 'quest'\n      LIMIT 1\n    ) AS total_concluidas_anterior\n  FROM buscar_xp\n),\natualizados AS (\n  UPDATE public.usuarios_quest uq\n  SET\n    status = CASE\n      WHEN ae.novo_status IN ('pendente','ativa','concluida','vencida','cancelada') THEN ae.novo_status\n      ELSE uq.status\n    END,\n    atualizado_em = NOW(),\n    concluido_em = CASE\n      WHEN ae.novo_status = 'concluida' AND uq.concluido_em IS NULL THEN NOW()\n      ELSE uq.concluido_em\n    END,\n    quest_estagio = CASE\n      WHEN ae.novo_status = 'concluida' AND (ae.total_concluidas_anterior + 1) >= COALESCE(ae.total_planejadas, 1) THEN 'feito'\n      WHEN uq.quest_estagio = 'a_fazer' AND uq.recorrencias IS NOT NULL THEN 'fazendo'\n      ELSE COALESCE(uq.quest_estagio, 'a_fazer')\n    END\n  FROM alvos_enriquecidos ae\n  WHERE uq.id = ae.id\n  RETURNING uq.id, ae.usuario_id, ae.novo_status, ae.recorrencia, ae.xp_base_evento, ae.xp_bonus_evento, ae.xp_extra, ae.config, ae.data_referencia, ae.data_planejada, COALESCE(ae.config->>'titulo', 'Quest Personalizada') AS quest_titulo\n),\nhistorico_atualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = ch.xp_base + upd.xp_base_evento,\n    xp_bonus = ch.xp_bonus + (upd.xp_bonus_evento + upd.xp_extra),\n    detalhes = jsonb_set(\n      jsonb_set(\n        jsonb_set(\n          COALESCE(ch.detalhes, '{}'::jsonb),\n          '{data_conclusao}',\n          to_jsonb(upd.data_referencia::text)\n        ),\n        '{total_concluidas}',\n        to_jsonb((COALESCE((ch.detalhes->>'total_concluidas')::int, 0) + 1))\n      ),\n      '{ocorrencias}',\n      (\n        COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || \n        jsonb_build_array(\n          jsonb_build_object(\n            'data_planejada', COALESCE(upd.data_planejada, upd.data_referencia::text),\n            'data_concluida', upd.data_referencia::text,\n            'data_registrada', NOW()::text,\n            'xp_base', upd.xp_base_evento,\n            'xp_bonus', upd.xp_bonus_evento + upd.xp_extra\n          )\n        )\n      )\n    ),\n    registrado_em = NOW()\n  FROM atualizados upd\n  WHERE ch.usuario_id = upd.usuario_id\n    AND ch.meta_codigo = upd.id::text\n    AND ch.tipo = 'quest'\n    AND upd.novo_status = 'concluida'\n  RETURNING ch.id, upd.id AS quest_id\n),\nhistorico_inserido AS (\n  INSERT INTO public.conquistas_historico (\n    usuario_id,\n    tipo,\n    meta_codigo,\n    meta_titulo,\n    xp_base,\n    xp_bonus,\n    registrado_em,\n    detalhes\n  )\n  SELECT\n    upd.usuario_id,\n    'quest',\n    upd.id::text,\n    upd.quest_titulo,\n    upd.xp_base_evento,\n    upd.xp_bonus_evento + upd.xp_extra,\n    NOW(),\n    jsonb_build_object(\n      'recorrencia', upd.recorrencia,\n      'data_conclusao', upd.data_referencia::text,\n      'total_concluidas', 1,\n      'ocorrencias', jsonb_build_array(\n        jsonb_build_object(\n          'data_planejada', COALESCE(upd.data_planejada, upd.data_referencia::text),\n          'data_concluida', upd.data_referencia::text,\n          'data_registrada', NOW()::text,\n          'xp_base', upd.xp_base_evento,\n          'xp_bonus', upd.xp_bonus_evento + upd.xp_extra\n        )\n      )\n    )\n  FROM atualizados upd\n  WHERE upd.novo_status = 'concluida'\n    AND NOT EXISTS (\n      SELECT 1 FROM historico_atualizado hau WHERE hau.quest_id = upd.id\n    )\n  RETURNING id\n),\nxp_totais AS (\n  SELECT\n    COALESCE(SUM(upd.xp_base_evento), 0) AS xp_base_total,\n    COALESCE(SUM(upd.xp_bonus_evento + upd.xp_extra), 0) AS xp_bonus_total,\n    COUNT(*) FILTER (WHERE upd.novo_status = 'concluida') AS concluidas\n  FROM atualizados upd\n),\natualiza_estado AS (\n  UPDATE public.usuarios_conquistas rj\n  SET\n    xp_total = rj.xp_total + ((SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais)),\n    xp_base = COALESCE(rj.xp_base, 0) + (SELECT xp_base_total FROM xp_totais),\n    xp_bonus = COALESCE(rj.xp_bonus, 0) + (SELECT xp_bonus_total FROM xp_totais),\n    total_quests_concluidas = rj.total_quests_concluidas + (SELECT concluidas FROM xp_totais),\n    total_xp_hoje = (SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais),\n    atualizado_em = NOW()\n  WHERE rj.usuario_id = (SELECT usuario_id FROM payload LIMIT 1)\n  RETURNING rj.usuario_id\n)\nSELECT\n  payload.usuario_id,\n  payload.novas_quests,\n  payload.atualizacoes,\n  payload.estado_inicial,\n  ((SELECT xp_base_total FROM xp_totais) + (SELECT xp_bonus_total FROM xp_totais)) AS xp_ganho,\n  (SELECT xp_base_total FROM xp_totais) AS xp_base_total,\n  (SELECT xp_bonus_total FROM xp_totais) AS xp_bonus_total,\n  (SELECT concluidas FROM xp_totais) AS quests_concluidas,\n  0 AS reinicios\nFROM payload;",
+        "options": {
+          "queryReplacement": "={{ [ $json.usuario_id, JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}), JSON.stringify($json.novas_quests || []) ] }}"
+        }
+      },
+      "id": "c7cbda67-fe5e-4fad-8cb1-3d03aa48e4d7",
       "name": "Aplicar Atualizacoes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -480,
-        240
+        1184,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -178,13 +199,13 @@
           "queryReplacement": "={{ [ $json.usuario_id, $json.xp_ganho, $json.quests_concluidas, $json.reinicios, JSON.stringify($json.novas_quests || []), JSON.stringify($json.atualizacoes || []), JSON.stringify($json.estado_inicial || {}) ] }}"
         }
       },
-      "id": "7f3490c3-0323-4818-8ff5-2e256b27d4a4",
+      "id": "3fcfdd61-e730-4870-bdd7-5ad07f2c3152",
       "name": "Atualizar Estado",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -256,
-        240
+        1408,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -196,18 +217,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH personalizadas AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.contexto_origem,\n    uq.progresso_meta,\n    uq.progresso_atual,\n    uq.concluido_em,\n    uq.ativado_em,\n    uq.atualizado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.complexidade,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status,\n  COALESCE(jsonb_agg(personalizadas) FILTER (WHERE personalizadas.id IS NOT NULL), '[]'::jsonb) AS quests_personalizadas\nFROM public.usuarios_conquistas rj\nLEFT JOIN personalizadas ON TRUE\nWHERE rj.usuario_id = $1::uuid\nGROUP BY\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status;",
+        "query": "WITH personalizadas AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.catalogo_id,\n    uq.quest_estagio,\n    uq.concluido_em,\n    uq.ativado_em,\n    uq.atualizado_em,\n    COALESCE(uq.config, '{}'::jsonb) AS config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n)\nSELECT\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status,\n  COALESCE(jsonb_agg(personalizadas) FILTER (WHERE personalizadas.id IS NOT NULL), '[]'::jsonb) AS quests_personalizadas\nFROM public.usuarios_conquistas rj\nLEFT JOIN personalizadas ON TRUE\nWHERE rj.usuario_id = $1::uuid\nGROUP BY\n  rj.usuario_id,\n  rj.xp_total,\n  rj.nivel_atual,\n  rj.titulo_nivel,\n  rj.xp_proximo_nivel,\n  rj.sequencia_atual,\n  rj.sequencia_recorde,\n  rj.meta_sequencia_codigo,\n  rj.proxima_meta_codigo,\n  rj.sequencia_status;",
         "options": {
           "queryReplacement": "={{ [ $json.usuario_id ] }}"
         }
       },
-      "id": "ef0b0d91-401a-448d-ac97-541d4f0c1c47",
+      "id": "bc763aeb-46a8-4d67-879c-6abcf422f5ac",
       "name": "Buscar Snapshot Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        176,
-        240
+        1840,
+        208
       ],
       "credentials": {
         "postgres": {
@@ -220,58 +241,13 @@
       "parameters": {
         "jsCode": "const estadoItems = $items(\"Atualizar Estado\", 0, 0) || [];\nconst estadoAtualizado = (estadoItems[0] && estadoItems[0].json) || {};\nconst snapshotFinal = $input.item.json || {};\n\nconst parseList = (value) => {\n  if (!value) return [];\n  if (Array.isArray(value)) return value;\n  if (typeof value === 'string') {\n    try {\n      const parsed = JSON.parse(value);\n      return Array.isArray(parsed) ? parsed : [];\n    } catch (error) {\n      return [];\n    }\n  }\n  return [];\n};\n\nconst toNumber = (value, fallback = 0) => {\n  const numeric = Number(value);\n  return Number.isFinite(numeric) ? numeric : fallback;\n};\n\nconst filaItems = $items(\"Preparar Operacoes\", 0, 0) || [];\nconst filaEspera = parseList(filaItems[0]?.json?.fila_espera);\n\nreturn [{\n  json: {\n    usuario_id: estadoAtualizado.usuario_id ?? snapshotFinal.usuario_id ?? null,\n    xp_total: toNumber(estadoAtualizado.xp_total ?? snapshotFinal.xp_total ?? 0),\n    nivel_atual: estadoAtualizado.nivel_atual ?? snapshotFinal.nivel_atual ?? null,\n    titulo_nivel: estadoAtualizado.titulo_nivel ?? snapshotFinal.titulo_nivel ?? null,\n    xp_proximo_nivel: toNumber(estadoAtualizado.xp_proximo_nivel ?? snapshotFinal.xp_proximo_nivel ?? 0),\n    xp_ganho: toNumber(estadoAtualizado.xp_ganho, 0),\n    quests_concluidas_no_evento: toNumber(estadoAtualizado.quests_concluidas, 0),\n    reinicios_registrados: toNumber(estadoAtualizado.reinicios, 0),\n    novas_quests_registradas: parseList(estadoAtualizado.novas_quests),\n    atualizacoes_processadas: parseList(estadoAtualizado.atualizacoes),\n    fila_espera: filaEspera,\n    snapshot_final: snapshotFinal\n  }\n}];\n"
       },
-      "id": "929b9bc1-63b6-460c-b669-e74074f4b32a",
+      "id": "4bf4e6ea-352c-417c-8ede-5652101ba58a",
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
-        240
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT codigo, xp_recompensa FROM public.metas_catalogo WHERE codigo IN ('xp_base_quest','xp_bonus_recorrencia');",
-        "options": {}
-      },
-      "id": "41dedede-3b17-4295-bd1d-8dbcc73d905a",
-      "name": "Listar Config Quest",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -1712,
-        272
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const payload = $input.item?.json ?? {};\nconst configItems = $items('Listar Config Quest') || [];\nconst configMap = configItems.reduce((acc, item) => {\n  const row = item?.json || {};\n  if (row.codigo) acc[row.codigo] = Number(row.xp_recompensa);\n  return acc;\n}, {});\nconst xpBase = configMap['xp_base_quest'];\nconst xpBonusRecorrencia = configMap['xp_bonus_recorrencia'];\nif (!Number.isFinite(xpBase) || xpBase <= 0) {\n  throw new Error('Catálogo de metas: \"xp_base_quest\" ausente ou inválido');\n}\nif (!Number.isFinite(xpBonusRecorrencia) || xpBonusRecorrencia < 0) {\n  throw new Error('Catálogo de metas: \"xp_bonus_recorrencia\" ausente ou inválido');\n}\nreturn [{ json: { ...payload, xp_base_quest: xpBase, xp_bonus_recorrencia: xpBonusRecorrencia } }];"
-      },
-      "id": "913e004c-d62f-48c5-8b9c-50044e5e7644",
-      "name": "Anexar Config Quest",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -672,
-        240
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "a571121b-a356-484c-b5fd-6afb7b2daafd",
-      "name": "Esperar Config Quest",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -864,
-        240
+        2064,
+        208
       ]
     }
   ],
@@ -294,11 +270,6 @@
             "node": "Buscar Estado e Quests",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Listar Config Quest",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -318,7 +289,7 @@
       "main": [
         [
           {
-            "node": "Esperar Config Quest",
+            "node": "Aplicar Atualizacoes",
             "type": "main",
             "index": 0
           }
@@ -373,40 +344,18 @@
       "main": [
         [
           {
+            "node": "Verificar e Criar Quest Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar e Criar Quest Inicial": {
+      "main": [
+        [
+          {
             "node": "Inserir Instancias",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Anexar Config Quest": {
-      "main": [
-        [
-          {
-            "node": "Aplicar Atualizacoes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Listar Config Quest": {
-      "main": [
-        [
-          {
-            "node": "Esperar Config Quest",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Esperar Config Quest": {
-      "main": [
-        [
-          {
-            "node": "Anexar Config Quest",
             "type": "main",
             "index": 0
           }
@@ -423,14 +372,14 @@
     "start": [
       {
         "json": {
-          "usuario_id": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff",
-          "quests_personalizadas": "[]",
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "quests_personalizadas": "[{\"titulo\":\"Prática diária de respiração consciente para foco\",\"descricao\":\"Executar exercícios de respiração consciente todos os dias para reduzir ansiedade e manter o foco presente durante o trabalho.\",\"contexto_origem\":\"gestão da ansiedade e foco na mente agitada\",\"prioridade\":\"alta\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-24\",\"prazo_fim\":\"2025-11-30\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"area_vida_id\":\"11111111-1111-4111-8111-111111111111\",\"sabotador_id\":null,\"insight_id\":\"8427c12a-0414-4c5e-a6be-b6f65598d97d\",\"complexidade\":2,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Dividir metas do app em etapas diárias realistas\",\"descricao\":\"Fracionar as grandes metas do desenvolvimento do app em pequenas tarefas diárias para reduzir a pressão do prazo e celebrar cada avanço.\",\"contexto_origem\":\"controle do perfeccionismo e pressão interna para cumprir prazos\",\"prioridade\":\"alta\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-24\",\"prazo_fim\":\"2025-11-30\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"area_vida_id\":\"22222222-2222-4222-8222-222222222222\",\"sabotador_id\":null,\"insight_id\":\"8427c12a-0414-4c5e-a6be-b6f65598d97d\",\"complexidade\":3,\"payload_extra\":{\"canal\":\"app\"}},{\"titulo\":\"Pausas conscientes com técnica Pomodoro\",\"descricao\":\"Implementar pausas regulares usando a técnica Pomodoro para evitar sobrecarga mental e manter energia durante o desenvolvimento do app.\",\"contexto_origem\":\"risco de sobrecarga mental por longas horas de trabalho sem pausas\",\"prioridade\":\"alta\",\"recorrencia\":\"diaria\",\"prazo_inicio\":\"2025-11-24\",\"prazo_fim\":\"2025-11-30\",\"progresso_meta\":7,\"status_inicial\":\"pendente\",\"area_vida_id\":\"22222222-2222-4222-8222-222222222222\",\"sabotador_id\":null,\"insight_id\":\"8029200f-c852-46cc-a926-e95123940707\",\"complexidade\":3,\"payload_extra\":{\"canal\":\"app\"}}]",
           "atualizacoes_status": "[]"
         }
       }
     ]
   },
-  "versionId": "76425673-d125-4b04-bf3a-9c0fd5902b6d",
+  "versionId": "c7f1e5b2-1acf-45c4-b018-b8a62935b62e",
   "triggerCount": 0,
   "shared": [
     {
