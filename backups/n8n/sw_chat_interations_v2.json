@@ -49,7 +49,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN perfis_big_five p\n  ON p.usuario_id = u.id\nWHERE u.id = $1;\n",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN usuarios_perfis p\n  ON p.usuario_id = u.id\nWHERE u.id = $1;\n",
         "options": {
           "queryReplacement": "={{ $('start').item.json.usr_id }}"
         }
@@ -1296,7 +1296,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "instanceName": "={{ $('start').first().json['body.instance'] }}",
-            "remoteJidOrNumber": "={{ $('start').item.json['body.data.key.remoteJid'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
             "messageText": "={{ $('Assistente de Reflexão').item.json.output }}",
             "linkPreview": "false",
             "minDelayMs": "3000"
@@ -2904,7 +2904,7 @@
         "json": {
           "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.id": "2A169BFCA3CFFB3EC182",
+          "body.data.key.id": "2A245B49EEF48EA7C3F0",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
@@ -2914,7 +2914,7 @@
       }
     ]
   },
-  "versionId": "5c1de357-6384-4ca8-a9aa-eed0417c901d",
+  "versionId": "a4824a8d-5d39-42d6-a490-f8fa84ac4d66",
   "triggerCount": 0,
   "shared": [
     {

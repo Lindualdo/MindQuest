@@ -2,7 +2,7 @@
   "createdAt": "2025-11-14T17:54:02.067Z",
   "id": "xMAu6L2Rb1v9ipua",
   "name": "webhook_card_conversas",
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {

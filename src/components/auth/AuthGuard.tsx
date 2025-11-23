@@ -31,14 +31,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, [initializeAuth, authChecked]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || !isAuthenticated) {
       return;
     }
 
     const currentPath = window.location.pathname.toLowerCase();
     // Redirecionar para /app/1.3 após autenticação bem-sucedida
-    if (isAuthenticated && (currentPath === '/auth' || currentPath === '/app/auth')) {
-      window.history.replaceState({}, document.title, '/app/1.3');
+    if (currentPath === '/auth' || currentPath === '/app/auth' || currentPath === '/app') {
+      const search = window.location.search;
+      window.history.replaceState({}, document.title, `/app/1.3${search}`);
     }
   }, [isAuthenticated]);
 

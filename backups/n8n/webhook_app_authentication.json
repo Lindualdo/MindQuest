@@ -12,13 +12,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "8bdb325c-fad4-404c-ac4a-43636032dd39",
+      "id": "8ba9d6fa-aab2-4886-967c-4e40cff4e8a6",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1568,
-        688
+        -2048,
+        -272
       ],
       "webhookId": "9d6b39b5-4dde-442c-a4d6-8fb799ba9705"
     },
@@ -30,13 +30,13 @@
           "queryReplacement": "={{ $json.body.token }}"
         }
       },
-      "id": "a89eea39-2f9c-426f-8306-1df9868e1596",
+      "id": "3141b8c7-1ea1-41c6-813b-3e1b9fa14605",
       "name": "01_Validar_Usuario",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1344,
-        688
+        -1824,
+        -272
       ],
       "credentials": {
         "postgres": {
@@ -47,270 +47,31 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH periodo AS (\n  SELECT\n    CURRENT_DATE - INTERVAL '6 days' AS inicio,\n    CURRENT_DATE                     AS fim\n),\nconversas_periodo AS (\n  SELECT COUNT(*) AS total_conversas\n  FROM usr_chat uc\n  JOIN periodo p ON uc.data_conversa BETWEEN p.inicio AND p.fim\n  WHERE uc.usuario_id = $1\n),\nsabotadores_periodo AS (\n  SELECT\n    us.sabotador_id,\n    COUNT(*)                    AS total_deteccoes,\n    COUNT(DISTINCT us.chat_id)  AS conversas_afetadas\n  FROM usuarios_sabotadores us\n  JOIN usr_chat uc ON uc.id = us.chat_id\n  JOIN periodo p   ON uc.data_conversa BETWEEN p.inicio AND p.fim\n  WHERE us.usuario_id = $1\n  GROUP BY us.sabotador_id\n),\nsabotador_top AS (\n  SELECT\n    sp.sabotador_id,\n    sp.total_deteccoes,\n    sp.conversas_afetadas,\n    MAX(us.apelido_personalizado) AS apelido_personalizado,\n    MAX(us.contexto_principal)    AS contexto_principal,\n    MAX(us.insight_atual)         AS insight_atual,\n    MAX(us.contramedida_ativa)    AS contramedida_ativa,\n    MAX(us.intensidade_media)     AS intensidade_media,\n    MAX(us.atualizado_em)         AS ultima_atualizacao\n  FROM sabotadores_periodo sp\n  JOIN usuarios_sabotadores us\n    ON us.usuario_id = $1\n   AND us.sabotador_id = sp.sabotador_id\n  GROUP BY sp.sabotador_id, sp.total_deteccoes, sp.conversas_afetadas\n  ORDER BY sp.total_deteccoes DESC,\n           sp.conversas_afetadas DESC,\n           MAX(us.atualizado_em) DESC\n  LIMIT 1\n)\nSELECT\n  st.sabotador_id,\n  sc.nome,\n  sc.emoji,\n  st.apelido_personalizado,\n  st.total_deteccoes,\n  cp.total_conversas,\n  st.conversas_afetadas,\n  st.contexto_principal,\n  st.insight_atual,\n  st.contramedida_ativa,\n  st.intensidade_media\nFROM sabotador_top st\nJOIN sabotadores_catalogo sc ON sc.id = st.sabotador_id\nCROSS JOIN conversas_periodo cp;\n",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "8655b84a-fac4-47a1-930a-861e82a78a05",
-      "name": "04_Sabotador",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        880
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH periodo AS (\n  SELECT\n    CURRENT_DATE - INTERVAL '7 days' AS inicio,\n    CURRENT_DATE + INTERVAL '1 day'  AS fim_exclusivo\n),\nemocao_classificada AS (\n  SELECT\n    CASE\n      WHEN LOWER(emocao_id) IN ('joy','trust','anticipation') THEN 'POSITIVA'\n      WHEN LOWER(emocao_id) IN ('sadness','fear','anger','disgust') THEN 'NEGATIVA'\n      WHEN LOWER(emocao_id) = 'surprise' THEN 'NEUTRA'\n      ELSE 'NEUTRA'\n    END AS categoria\n  FROM usuarios_emocoes ue\n  JOIN periodo p\n    ON ue.detectado_em >= p.inicio\n   AND ue.detectado_em <  p.fim_exclusivo\n  WHERE ue.usuario_id = $1\n    AND ue.intensidade >= 45\n)\nSELECT\n  COUNT(*) FILTER (WHERE categoria = 'POSITIVA') AS positivas,\n  COUNT(*) FILTER (WHERE categoria = 'NEGATIVA') AS negativas,\n  COUNT(*) FILTER (WHERE categoria = 'NEUTRA')   AS neutras,\n  COUNT(*)                                       AS total,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_positivas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_negativas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEUTRA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_neutras,\n  CASE\n    WHEN COUNT(*) = 0 THEN 'NEUTRA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'POSITIVA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'NEGATIVA'\n    ELSE 'NEUTRA'\n  END AS resultado_panas\nFROM emocao_classificada;\n",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "aa6be4be-8af0-46d8-8d61-4bd31dc79010",
-      "name": "07_Analise_PANAS",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        480
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '6 days' AS inicio,\n         CURRENT_DATE                     AS fim\n),\ndias AS (\n  SELECT generate_series(inicio, fim, INTERVAL '1 day')::date AS data\n  FROM periodo\n),\n\nregistros AS (\n  SELECT uhe.*\n  FROM public.usuarios_humor_energia uhe\n  JOIN periodo p ON uhe.data_registro BETWEEN p.inicio AND p.fim\n  WHERE uhe.usuario_id = $1\n),\nultimos_por_dia AS (\n  SELECT DISTINCT ON (data_registro)\n         data_registro, hora_registro, detectado_em, humor_dia, energia_nivel,\n         periodo_dia, variacao_humor, variacao_energia, justificativa_humor,\n         confianca_analise, chat_id\n  FROM registros\n  ORDER BY data_registro, detectado_em DESC, hora_registro DESC\n),\nlinha_base AS (\n  SELECT d.data AS data_registro,\n         AVG(r.humor_dia)::numeric(4,2)     AS humor_medio_dia,\n         AVG(r.energia_nivel)::numeric(4,2) AS energia_media_dia\n  FROM dias d\n  LEFT JOIN registros r ON r.data_registro = d.data\n  GROUP BY d.data\n),\nemocao_conversa AS (\n  SELECT ue.chat_id,\n         ep.nome AS emocao_nome,\n         ep.emoji,\n         ROW_NUMBER() OVER (\n           PARTITION BY ue.chat_id\n           ORDER BY ue.intensidade DESC NULLS LAST,\n                    ue.detectado_em DESC NULLS LAST,\n                    ue.criado_em DESC NULLS LAST\n         ) AS ordem\n  FROM public.usuarios_emocoes ue\n  JOIN periodo p ON COALESCE(ue.detectado_em, p.fim) BETWEEN p.inicio AND p.fim\n  LEFT JOIN public.emocoes_plutchik ep ON ep.id = ue.emocao_id\n  WHERE ue.usuario_id = $1\n),\nconversas AS (\n  SELECT uc.id AS chat_id,\n         uc.data_conversa,\n         uc.horario_inicio,\n         uc.horario_fim,\n         uc.total_interactions,\n         uc.status,\n         ec.emocao_nome,\n         ec.emoji\n  FROM public.usr_chat uc\n  JOIN periodo p ON uc.data_conversa BETWEEN p.inicio AND p.fim\n  LEFT JOIN emocao_conversa ec ON ec.chat_id = uc.id AND ec.ordem = 1\n  WHERE uc.usuario_id = $1\n)\n\nSELECT\n  lb.data_registro                                    AS data,\n  lb.humor_medio_dia                                  AS humor_medio,\n  lb.energia_media_dia                                AS energia_media,\n  up.humor_dia                                        AS pico_diario,\n  up.variacao_humor,\n  up.variacao_energia,\n  up.periodo_dia,\n  up.justificativa_humor,\n  up.confianca_analise,\n  conv.chat_id,\n  conv.horario_inicio,\n  conv.horario_fim,\n  conv.total_interactions,\n  conv.status,\n  conv.emocao_nome,\n  conv.emoji\nFROM linha_base lb\nLEFT JOIN ultimos_por_dia up\n  ON up.data_registro = lb.data_registro\nLEFT JOIN conversas conv\n  ON conv.data_conversa = lb.data_registro\nORDER BY lb.data_registro;\n",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "514384f6-6f42-4337-a40c-f05766fef788",
-      "name": "08_Historico_Diario",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        1056
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT \n    id,\n    tipo,\n    categoria,\n    titulo,\n    descricao,\n    icone,\n    prioridade,\n    criado_em as data_criacao\nFROM insights\nWHERE usuario_id = $1\n  AND ativo = true\nORDER BY \n    CASE prioridade \n        WHEN 'alta' THEN 1 \n        WHEN 'media' THEN 2 \n        WHEN 'baixa' THEN 3 \n    END,\n    criado_em DESC;",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "e3734a0e-72d4-44f8-a67e-764d62774ed7",
-      "name": "09_Insights",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        1232
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ $json.response }}",
         "options": {}
       },
-      "id": "f31e9fa0-c812-4029-8b9a-b2a4d975d77f",
+      "id": "cc0475ed-22fd-40ad-b0f3-d5d759cb5574",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        -816,
-        688
+        -1296,
+        -272
       ]
     },
     {
       "parameters": {
-        "numberInputs": 10
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        144,
-        432
-      ],
-      "id": "49444524-494e-486a-a8e7-b3e9925d33c6",
-      "name": "Merge"
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst userRow = items[0]?.json || {};\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Validar se usuário foi encontrado\nif (!userRow.user_id) {\n  return [{\n    json: {\n      response: {\n        success: false,\n        error: 'Token inválido ou expirado'\n      }\n    }\n  }];\n}\n\n// Retornar apenas dados do usuário\nconst user = {\n  id: normalizeString(userRow.user_id),\n  nome: normalizeString(userRow.nome, 'Usuário'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, userRow.nome || 'Usuário'),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, null)\n};\n\nreturn [{\n  json: {\n    response: {\n      success: true,\n      user: user\n    }\n  }\n}];\n",
-        "mode": "runOnceForAllItems"
+        "jsCode": "const items = $input.all();\nconst userRow = items[0]?.json || {};\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Validar se usuário foi encontrado\nif (!userRow.user_id) {\n  return [{\n    json: {\n      response: {\n        success: false,\n        error: 'Token inválido ou expirado'\n      }\n    }\n  }];\n}\n\n// Retornar apenas dados do usuário\nconst user = {\n  id: normalizeString(userRow.user_id),\n  nome: normalizeString(userRow.nome, 'Usuário'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, userRow.nome || 'Usuário'),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, null)\n};\n\nreturn [{\n  json: {\n    response: {\n      success: true,\n      user: user\n    }\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1072,
-        688
+        -1552,
+        -272
       ],
-      "id": "b43955dd-13ae-4738-b3d5-45f9b5e7d47b",
+      "id": "2578e50e-aefa-4fb9-b0f3-571ca2f12f97",
       "name": "organiza_dados"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT \n    pb.usuario_id,\n    COALESCE(pb.openness::text, 'null') as openness,\n    COALESCE(pb.conscientiousness::text, 'null') as conscientiousness,\n    COALESCE(pb.extraversion::text, 'null') as extraversion,\n    COALESCE(pb.agreeableness::text, 'null') as agreeableness,\n    COALESCE(pb.neuroticism::text, 'null') as neuroticism,\n    COALESCE(pb.confiabilidade::text, 'null') as confiabilidade,\n    COALESCE(pb.perfil_primario, 'null') as perfil_primario,\n    COALESCE(pb.perfil_secundario, 'null') as perfil_secundario\nFROM perfis_big_five pb\nWHERE pb.usuario_id = $1;",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        320
-      ],
-      "id": "5c9aebf8-69d8-489f-9308-9364d661b664",
-      "name": "Big_five",
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH emocoes_semana AS (\n    SELECT \n        emocao_id,\n        SUM(intensidade) as intensidade_total\n    FROM usuarios_emocoes\n    WHERE usuario_id = $1\n      AND detectado_em >= CURRENT_DATE - INTERVAL '7 days'\n    GROUP BY emocao_id\n)\nSELECT \n    json_build_object(\n        'alegria', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'joy'), 0),\n        'confianca', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'trust'), 0),\n        'medo', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'fear'), 0),\n        'surpresa', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'surprise'), 0),\n        'tristeza', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'sadness'), 0),\n        'angustia', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'disgust'), 0),\n        'raiva', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'anger'), 0),\n        'expectativa', COALESCE((SELECT intensidade_total FROM emocoes_semana WHERE emocao_id = 'anticipation'), 0)\n    )::text as emocoes_contagem;",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "f628bb38-a0b9-4f6a-a9fc-9da278c5d463",
-      "name": "roda_emocoes",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        144
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT\n    usuario_id,\n    data_registro,\n    hora_registro,\n    detectado_em,\n    humor_dia\n  FROM usuarios_humor_energia\n  WHERE usuario_id = $1\n    AND data_registro BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE\n),\nstats AS (\n  SELECT\n    AVG(humor_dia) AS humor_medio,\n    COUNT(*)      AS conversas_total\n  FROM base\n),\nultimo AS (\n  SELECT *\n  FROM base\n  ORDER BY data_registro DESC,\n           hora_registro DESC NULLS LAST,\n           detectado_em DESC NULLS LAST\n  LIMIT 1\n)\nSELECT\n  ultimo.humor_dia                                       AS humor_atual,\n  ROUND(stats.humor_medio::numeric, 2)                   AS humor_medio_7d,\n  CASE\n    WHEN stats.humor_medio > 0\n      THEN ROUND(((ultimo.humor_dia - stats.humor_medio) / stats.humor_medio) * 100, 1)\n    ELSE NULL\n  END                                                    AS diferenca_percentual,\n  ultimo.data_registro                                   AS ultima_data,\n  ultimo.hora_registro                                   AS ultima_hora,\n  COALESCE(stats.conversas_total, 0)                     AS conversas_total\nFROM ultimo\nCROSS JOIN stats;\n",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        -48
-      ],
-      "id": "fbb134d1-89b1-4c71-b8c1-457b7c692437",
-      "name": "Humor",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT $1::uuid AS usuario_id\n),\nsnapshot AS (\n  SELECT g.*\n  FROM public.gamificacao g\n  JOIN base ON base.usuario_id = g.usuario_id\n  ORDER BY COALESCE(g.atualizado_em, g.criado_em) DESC\n  LIMIT 1\n),\nstats AS (\n  SELECT\n    uq.usuario_id,\n    COALESCE(SUM(uq.xp_concedido), 0) AS xp_total,\n    COALESCE(SUM(uq.xp_concedido) FILTER (\n      WHERE uq.concluido_em IS NOT NULL\n        AND uq.concluido_em::date = CURRENT_DATE\n    ), 0) AS xp_total_hoje,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_conversas'), 0) AS total_conversas,\n    COALESCE(MAX(uq.progresso_atual) FILTER (WHERE qc.gatilho_tipo = 'total_reflexoes'), 0) AS total_reflexoes,\n    COALESCE(MAX(uq.atualizado_em)::date, NULL) AS ultima_conversa_data\n  FROM public.usuarios_quest uq\n  JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  GROUP BY uq.usuario_id\n),\ndaily_status AS (\n  SELECT\n    dq.status AS status_norm,\n    dq.progresso_percentual AS progresso_norm,\n    COALESCE(NULLIF(qc.descricao, ''), qc.titulo) AS descricao_norm,\n    dq.referencia_data AS data_norm\n  FROM (\n    SELECT\n      uq.*,\n      ROW_NUMBER() OVER (\n        PARTITION BY qc.codigo\n        ORDER BY uq.referencia_data DESC NULLS LAST, uq.atualizado_em DESC NULLS LAST\n      ) AS ordem\n    FROM public.usuarios_quest uq\n    JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE qc.categoria = 'habit_daily'\n      AND uq.referencia_data = CURRENT_DATE\n  ) dq\n  JOIN public.quest_catalogo qc ON qc.id = dq.quest_id\n  WHERE dq.ordem = 1\n  LIMIT 1\n),\nconquistas_completas AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', qc.codigo,\n      'nome', qc.titulo,\n      'emoji', '🏆',\n      'xp_bonus', qc.xp_recompensa,\n      'categoria', qc.categoria,\n      'desbloqueada_em', uq.concluido_em\n    )\n    ORDER BY uq.concluido_em DESC NULLS LAST\n  ) AS conquistas\n  FROM public.usuarios_quest uq\n  JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status = 'completa'\n    AND qc.categoria <> 'habit_daily'\n),\nhabitos_snapshot AS (\n  SELECT COALESCE(jsonb_agg(\n    jsonb_build_object(\n      'quest_id', latest.id,\n      'codigo', latest.codigo,\n      'titulo', latest.titulo,\n      'status', latest.status,\n      'vence_em', latest.referencia_data,\n      'progresso_atual', latest.progresso_atual,\n      'progresso_meta', latest.progresso_meta,\n      'atualizado_em', latest.atualizado_em\n    )\n    ORDER BY\n      CASE latest.status\n        WHEN 'completa' THEN 0\n        WHEN 'ativa' THEN 1\n        WHEN 'pendente' THEN 2\n        ELSE 3\n      END,\n      latest.codigo\n  ), '[]'::jsonb) AS itens\n  FROM (\n    SELECT DISTINCT ON (qc.codigo)\n      uq.id,\n      qc.codigo,\n      qc.titulo,\n      uq.status,\n      uq.referencia_data,\n      uq.progresso_atual,\n      uq.progresso_meta,\n      uq.atualizado_em\n    FROM public.usuarios_quest uq\n    JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE qc.categoria = 'habit_daily'\n    ORDER BY qc.codigo, uq.atualizado_em DESC NULLS LAST, uq.id DESC\n  ) latest\n),\ncategorias_evolucao AS (\n  SELECT COALESCE(jsonb_agg(\n    jsonb_build_object(\n      'codigo', stats.categoria,\n      'nome', initcap(replace(stats.categoria, '_', ' ')),\n      'total_conquistas', stats.total_conquistas,\n      'ultima_atualizacao', stats.ultima_atualizacao,\n      'ultima_conclusao', stats.ultima_conclusao\n    )\n    ORDER BY stats.categoria\n  ), '[]'::jsonb) AS itens\n  FROM (\n    SELECT\n      qc.categoria,\n      COUNT(*) AS total_conquistas,\n      MAX(uq.atualizado_em) AS ultima_atualizacao,\n      MAX(uq.concluido_em) AS ultima_conclusao\n    FROM public.usuarios_quest uq\n    JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE uq.status = 'completa'\n    GROUP BY qc.categoria\n  ) stats\n),\nfallback AS (\n  SELECT\n    0::int AS xp_total,\n    400::int AS xp_proximo_nivel,\n    1::int AS nivel_atual,\n    'Nível 1'::varchar AS titulo_nivel,\n    0::int AS streak_conversas_dias,\n    false::boolean AS streak_protecao_usada,\n    NULL::date AS streak_protecao_resetada_em,\n    NULL::date AS ultima_conversa_data,\n    0::int AS melhor_streak,\n    'pendente'::varchar AS quest_diaria_status,\n    0::int AS quest_diaria_progresso,\n    'Complete sua conversa diária'::text AS quest_diaria_descricao,\n    CURRENT_DATE AS quest_diaria_data,\n    0::int AS quest_streak_dias,\n    '[]'::jsonb AS conquistas_desbloqueadas,\n    '[]'::jsonb AS conquistas_proximas,\n    0::int AS total_conversas,\n    0::int AS total_reflexoes,\n    0::int AS total_xp_ganho_hoje,\n    NULL::uuid AS ultima_conquista_id,\n    NULL::timestamp AS ultima_conquista_data,\n    NOW()::timestamp AS criado_em,\n    NOW()::timestamp AS atualizado_em\n),\nxp_valor AS (\n  SELECT COALESCE(snap.xp_total, st.xp_total, fb.xp_total) AS xp_total\n  FROM fallback fb\n  LEFT JOIN snapshot snap ON TRUE\n  LEFT JOIN stats st ON TRUE\n  LIMIT 1\n),\nnivel_atual AS (\n  SELECT gn.*\n  FROM public.gamificacao_niveis gn\n  JOIN xp_valor xv ON xv.xp_total >= gn.xp_minimo\n  ORDER BY gn.xp_minimo DESC\n  LIMIT 1\n),\nnivel_proximo AS (\n  SELECT gn.*\n  FROM public.gamificacao_niveis gn\n  JOIN xp_valor xv ON gn.xp_minimo > xv.xp_total\n  ORDER BY gn.xp_minimo\n  LIMIT 1\n),\nproximas_conquistas AS (\n  SELECT COALESCE(jsonb_agg(\n    jsonb_build_object(\n      'id', pr.codigo,\n      'nome', pr.nome,\n      'emoji', '🔒',\n      'xp_bonus', pr.xp_recompensa,\n      'categoria', pr.categoria,\n      'status', pr.status,\n      'progresso_percentual', pr.progresso_percentual,\n      'progresso_atual', pr.progresso_atual,\n      'progresso_meta', pr.progresso_meta\n    )\n    ORDER BY\n      CASE pr.status WHEN 'ativa' THEN 0 ELSE 1 END,\n      pr.ordem_inicial NULLS LAST,\n      pr.ativado_em DESC NULLS LAST\n  ), '[]'::jsonb) AS conquistas\n  FROM (\n    SELECT\n      qc.codigo,\n      qc.titulo AS nome,\n      qc.categoria,\n      qc.xp_recompensa,\n      uq.status,\n      uq.progresso_percentual,\n      uq.progresso_atual,\n      uq.progresso_meta,\n      qc.ordem_inicial,\n      uq.ativado_em\n    FROM public.usuarios_quest uq\n    JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n    JOIN base ON base.usuario_id = uq.usuario_id\n    WHERE qc.categoria <> 'habit_daily'\n      AND uq.status <> 'completa'\n  ) pr\n)\nSELECT jsonb_build_object(\n  'xp_total', COALESCE(snap.xp_total, st.xp_total, fb.xp_total),\n  'xp_proximo_nivel', COALESCE(snap.xp_proximo_nivel, np.xp_minimo, fb.xp_proximo_nivel),\n  'nivel_atual', COALESCE(snap.nivel_atual, na.nivel, fb.nivel_atual),\n  'titulo_nivel', COALESCE(snap.titulo_nivel, na.titulo, fb.titulo_nivel),\n  'streak_conversas_dias', COALESCE(snap.streak_conversas_dias, fb.streak_conversas_dias),\n  'streak_protecao_usada', COALESCE(snap.streak_protecao_usada, fb.streak_protecao_usada),\n  'streak_protecao_resetada_em', COALESCE(snap.streak_protecao_resetada_em, fb.streak_protecao_resetada_em),\n  'ultima_conversa_data', COALESCE(snap.ultima_conversa_data, st.ultima_conversa_data, fb.ultima_conversa_data),\n  'melhor_streak', COALESCE(snap.melhor_streak, fb.melhor_streak),\n  'quest_diaria_status', COALESCE(daily_status.status_norm, snap.quest_diaria_status, fb.quest_diaria_status),\n  'quest_diaria_progresso', COALESCE(daily_status.progresso_norm, snap.quest_diaria_progresso, fb.quest_diaria_progresso),\n  'quest_diaria_descricao', COALESCE(daily_status.descricao_norm, snap.quest_diaria_descricao, fb.quest_diaria_descricao),\n  'quest_diaria_data', COALESCE(daily_status.data_norm, snap.quest_diaria_data, fb.quest_diaria_data),\n  'quest_streak_dias', COALESCE(snap.quest_streak_dias, fb.quest_streak_dias),\n  'habitos_ativos', COALESCE(snap.habitos_ativos, habitos_snapshot.itens, '[]'::jsonb),\n  'conquistas_desbloqueadas', COALESCE(snap.conquistas_desbloqueadas, conquistas_completas.conquistas, fb.conquistas_desbloqueadas),\n  'conquistas_proximas', COALESCE(proximas_conquistas.conquistas, fb.conquistas_proximas),\n  'categorias_evolucao', COALESCE(categorias_evolucao.itens, '[]'::jsonb),\n  'total_conversas', COALESCE(snap.total_conversas, st.total_conversas, fb.total_conversas),\n  'total_reflexoes', COALESCE(snap.total_reflexoes, st.total_reflexoes, fb.total_reflexoes),\n  'total_xp_ganho_hoje', COALESCE(snap.total_xp_ganho_hoje, st.xp_total_hoje, fb.total_xp_ganho_hoje),\n  'ultima_conquista_id', COALESCE(snap.ultima_conquista_id, fb.ultima_conquista_id),\n  'ultima_conquista_data', COALESCE(snap.ultima_conquista_data, fb.ultima_conquista_data),\n  'ultima_atualizacao', COALESCE(snap.atualizado_em, fb.atualizado_em),\n  'criado_em', COALESCE(snap.criado_em, fb.criado_em)\n) AS gamificacao\nFROM base\nCROSS JOIN fallback fb\nLEFT JOIN snapshot snap ON TRUE\nLEFT JOIN stats st ON TRUE\nLEFT JOIN daily_status ON TRUE\nLEFT JOIN conquistas_completas ON TRUE\nLEFT JOIN habitos_snapshot ON TRUE\nLEFT JOIN categorias_evolucao ON TRUE\nLEFT JOIN proximas_conquistas ON TRUE\nLEFT JOIN nivel_atual na ON TRUE\nLEFT JOIN nivel_proximo np ON TRUE;\n",
-        "options": {
-          "queryReplacement": "={{ $json.user_id }}"
-        }
-      },
-      "id": "1a45e0cc-e98e-4625-8926-7dcba534289b",
-      "name": "Gameficacao",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -448,
-        688
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT $1::uuid AS usuario_id\n),\ngamificacao_estado AS (\n  SELECT g.xp_total, g.nivel_atual, g.titulo_nivel\n  FROM public.gamificacao g\n  JOIN base ON base.usuario_id = g.usuario_id\n  ORDER BY COALESCE(g.atualizado_em, g.criado_em) DESC\n  LIMIT 1\n),\nxp_somado AS (\n  SELECT COALESCE(SUM(uq.xp_concedido), 0) AS xp_total_quests\n  FROM public.usuarios_quest uq\n  JOIN base ON base.usuario_id = uq.usuario_id\n),\nxp_total AS (\n  SELECT COALESCE(g.xp_total, qs.xp_total_quests, 0) AS xp_total\n  FROM gamificacao_estado g\n  FULL JOIN xp_somado qs ON TRUE\n),\nnivel_atual AS (\n  SELECT gn.*\n  FROM public.gamificacao_niveis gn\n  JOIN xp_total xt ON xt.xp_total >= gn.xp_minimo\n  ORDER BY gn.xp_minimo DESC\n  LIMIT 1\n),\nproximo_nivel AS (\n  SELECT gn.*\n  FROM public.gamificacao_niveis gn\n  JOIN xp_total xt ON gn.xp_minimo > xt.xp_total\n  ORDER BY gn.xp_minimo\n  LIMIT 1\n),\ndesafios AS (\n  SELECT\n    uq.id AS usuario_quest_id,\n    qc.titulo,\n    qc.categoria,\n    qc.xp_recompensa,\n    uq.status,\n    uq.progresso_percentual,\n    uq.progresso_atual,\n    uq.progresso_meta,\n    uq.ativado_em,\n    ROW_NUMBER() OVER (\n      ORDER BY\n        CASE uq.status WHEN 'ativa' THEN 0 ELSE 1 END,\n        uq.progresso_percentual DESC,\n        qc.ordem_inicial NULLS LAST,\n        uq.ativado_em DESC\n    ) AS ordem\n  FROM public.usuarios_quest uq\n  JOIN public.quest_catalogo qc ON qc.id = uq.quest_id\n  JOIN base ON base.usuario_id = uq.usuario_id\n  WHERE uq.status IN ('pendente', 'ativa')\n    AND qc.categoria <> 'habit_daily'\n),\ndesafios_top AS (\n  SELECT jsonb_agg(\n    jsonb_build_object(\n      'usuario_quest_id', d.usuario_quest_id,\n      'titulo', d.titulo,\n      'categoria', d.categoria,\n      'xp_recompensa', d.xp_recompensa,\n      'status', d.status,\n      'progresso_percentual', d.progresso_percentual,\n      'progresso_atual', d.progresso_atual,\n      'progresso_meta', d.progresso_meta\n    )\n    ORDER BY d.ordem\n  ) AS desafios\n  FROM desafios d\n  WHERE d.ordem <= 5\n)\nSELECT jsonb_build_object(\n  'xp_total', xt.xp_total,\n  'nivel_atual', COALESCE(na.nivel, g.nivel_atual),\n  'titulo_atual', COALESCE(g.titulo_nivel, na.titulo),\n  'proximo_nivel', CASE\n    WHEN pn.nivel IS NULL THEN NULL\n    ELSE jsonb_build_object(\n      'nivel', pn.nivel,\n      'titulo', pn.titulo,\n      'xp_minimo', pn.xp_minimo,\n      'xp_restante', GREATEST(pn.xp_minimo - xt.xp_total, 0),\n      'descricao', pn.descricao\n    )\n  END,\n  'desafios', COALESCE(dt.desafios, '[]'::jsonb)\n) AS proxima_jornada\nFROM xp_total xt\nLEFT JOIN gamificacao_estado g ON TRUE\nLEFT JOIN nivel_atual na ON TRUE\nLEFT JOIN proximo_nivel pn ON TRUE\nLEFT JOIN desafios_top dt ON TRUE;\n",
-        "options": {
-          "queryReplacement": "={{ $('01_Validar_Usuario').item.json.user_id }}"
-        }
-      },
-      "id": "62fa6117-08d0-43be-84ad-cb3052dbbbac",
-      "name": "Proxima_Jornada",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -240,
-        704
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true,
-      "continueOnFail": true
     }
   ],
   "connections": {
@@ -336,55 +97,6 @@
         ]
       ]
     },
-    "04_Sabotador": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 6
-          }
-        ]
-      ]
-    },
-    "07_Analise_PANAS": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 3
-          }
-        ]
-      ]
-    },
-    "08_Historico_Diario": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 7
-          }
-        ]
-      ]
-    },
-    "09_Insights": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 8
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        []
-      ]
-    },
     "organiza_dados": {
       "main": [
         [
@@ -395,70 +107,13 @@
           }
         ]
       ]
-    },
-    "Big_five": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 2
-          }
-        ]
-      ]
-    },
-    "roda_emocoes": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Humor": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Gameficacao": {
-      "main": [
-        [
-          {
-            "node": "Proxima_Jornada",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 5
-          }
-        ]
-      ]
-    },
-    "Proxima_Jornada": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 9
-          }
-        ]
-      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120,
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
@@ -504,7 +159,7 @@
       }
     ]
   },
-  "versionId": "c5e5a0b8-531f-4bc0-b899-6d95a7b41372",
+  "versionId": "cc450e4f-ba6e-4a82-aed4-4ea1e73cdd4f",
   "triggerCount": 1,
   "shared": [
     {
