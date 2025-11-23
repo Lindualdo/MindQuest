@@ -6,7 +6,6 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
-import CardConversasV13 from '@/components/app/v1.3/CardConversasV13';
 import { useDashboard } from '@/store/useStore';
 import type { QuestPersonalizadaResumo } from '@/types/emotions';
 import { mockWeeklyXpSummary } from '@/data/mockHomeV1_3';
@@ -245,7 +244,6 @@ const PainelQuestsPageV13: React.FC = () => {
                   <CheckCircle2 size={12} />
                   Concluída
                 </span>
-                <span className="text-[10px] text-[#059669] mt-1">+{xpRecompensa} pts</span>
              </div>
           ) : (
             <button
@@ -288,9 +286,9 @@ const PainelQuestsPageV13: React.FC = () => {
   // Barra de progresso semanal (somente quests)
   const renderWeeklyProgressBar = () => {
     // Calcular totais da semana (somente quests)
-    const metaSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.metaQuests ?? 0), 0);
-    const xpSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.xpQuests ?? 0), 0);
-    const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((xpSemanal / metaSemanal) * 100)) : 0;
+    const metaSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.qtdQuestsPrevistas ?? 0), 0);
+    const questsConcluidas = (weeklyData.dias ?? []).filter(dia => (dia.xpQuests ?? 0) > 0).length;
+    const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((questsConcluidas / metaSemanal) * 100)) : 0;
 
     return (
       <section
@@ -303,21 +301,15 @@ const PainelQuestsPageV13: React.FC = () => {
         </p>
 
         {/* Barra de progresso horizontal */}
-        <div className="mt-4">
-          <div className="relative h-2 w-full rounded-full bg-slate-200">
+        <div className="mt-4 flex items-center gap-2">
+          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">0</span>
+          <div className="relative h-2 flex-1 rounded-full bg-slate-200">
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
               style={{ width: `${percentualMeta}%` }}
             />
           </div>
-          <div className="mt-1 flex items-center justify-between text-[0.7rem] font-semibold text-[#475569]">
-            <span className="text-[#1C2541]">
-              {xpSemanal} pontos. {percentualMeta}% da meta
-            </span>
-            <span>
-              {metaSemanal} pts
-            </span>
-          </div>
+          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{metaSemanal}</span>
         </div>
 
         {/* Barras verticais dos dias */}
@@ -328,16 +320,18 @@ const PainelQuestsPageV13: React.FC = () => {
               const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
               const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
               
-              const metaDia = dia.metaQuests ?? 0;
-              const progressoQuests = metaDia > 0 ? Math.min(dia.xpQuests ?? 0, metaDia) : dia.xpQuests ?? 0;
-              const ratio = metaDia > 0 ? progressoQuests / metaDia : 0;
+              const qtdPrevistas = dia.qtdQuestsPrevistas ?? 0;
+              const temProgresso = (dia.xpQuests ?? 0) > 0;
               
-              // Cor da barra
-              const questsOk = metaDia === 0 || (dia.xpQuests ?? 0) >= metaDia;
-              const barColor = questsOk ? '#22C55E' : (dia.xpQuests ?? 0) > 0 ? '#86EFAC' : '#CBD5E1';
+              // Calcular altura da barra (se tem progresso, considera todas quests concluídas)
+              // TODO: Refinar quando tivermos qtdQuestsConcluidas no backend
+              const ratio = qtdPrevistas > 0 && temProgresso ? 1 : 0;
+              
+              // Cor da barra (todas iguais)
+              const barColor = '#22C55E';
               
               const trackHeight = 56;
-              const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
+              const fillHeight = ratio > 0 ? trackHeight : 0; // Sempre altura completa quando preenchida
 
               // Formatar data como DD/MM
               const dataFormatada = dia.dateObj 
@@ -349,23 +343,20 @@ const PainelQuestsPageV13: React.FC = () => {
                   key={index}
                   onClick={() => dia.dateObj && !isFuturoDay && handleSelectDay(dia.dateObj)}
                   disabled={isFuturoDay}
-                  className={`flex flex-1 flex-col items-center justify-end gap-0.5 transition-all ${
+                  className={`flex flex-1 flex-col items-center justify-end gap-1 transition-all ${
                     isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                   } ${isSelected ? 'scale-105' : ''}`}
                 >
+                  {/* Número acima da barra */}
+                  <span className="text-[0.65rem] font-semibold text-[#94A3B8]">
+                    {qtdPrevistas}
+                  </span>
+                  
+                  {/* Barra vertical */}
                   <div
-                    className="relative overflow-visible rounded-full bg-slate-200"
-                    style={{ height: `${trackHeight}px`, width: '10px' }}
+                    className="relative overflow-hidden rounded-full bg-slate-300"
+                    style={{ height: `${trackHeight}px`, width: '12px' }}
                   >
-                    {/* Número discreto no topo - apenas quando há quests previstas */}
-                    {metaDia > 0 && (dia.qtdQuestsPrevistas ?? 0) > 0 && (
-                      <span
-                        className="absolute -top-2 left-1/2 -translate-x-1/2 text-[0.6rem] font-semibold text-slate-400 leading-none"
-                        title={`${dia.qtdQuestsPrevistas} quests planejadas · ${metaDia} pts`}
-                      >
-                        {dia.qtdQuestsPrevistas}
-                      </span>
-                    )}
                     {fillHeight > 0 && (
                       <div
                         className="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-500"
@@ -376,9 +367,8 @@ const PainelQuestsPageV13: React.FC = () => {
                       />
                     )}
                   </div>
-                  <span className={`text-[0.6rem] font-semibold ${
-                    isSelected ? 'text-[#1C2541]' : 'text-[#64748B]'
-                  }`}>
+                  
+                  <span className="text-[0.6rem] font-semibold text-[#64748B]">
                     {dia.label ?? '--'}
                   </span>
                   <span className={`text-[0.6rem] font-bold ${
@@ -417,26 +407,6 @@ const PainelQuestsPageV13: React.FC = () => {
         <h1 className="mb-6 text-center text-2xl font-bold text-[#1C2541]">
           Minhas missões da semana
         </h1>
-
-        {/* Card de Conversas */}
-        <div className="mb-6">
-          <CardConversasV13
-            xpPrevisto={diasSemana.reduce((sum, dia) => sum + (dia.metaConversa ?? 0), 0)} // Soma das metas de conversa da semana
-            xpRealizado={diasSemana.reduce((sum, dia) => sum + (dia.xpConversa ?? 0), 0)} // Soma dos XP de conversas realizados
-            diasSemana={diasSemana.map((dia) => ({
-              label: dia.label,
-              dataLabel: format(dia.dateObj, 'dd/MM'),
-              status: ((dia.xpConversa ?? 0) > 0
-                ? 'respondido' 
-                : isSameDay(dia.dateObj, hoje) 
-                  ? 'pendente' 
-                  : isFuture(dia.dateObj) 
-                    ? 'default' 
-                    : 'perdido') as 'respondido' | 'perdido' | 'pendente' | 'default',
-              isHoje: isSameDay(dia.dateObj, hoje),
-            }))}
-          />
-        </div>
 
         {/* Barra de Progresso Semanal */}
         {renderWeeklyProgressBar()}

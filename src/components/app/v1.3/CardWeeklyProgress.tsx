@@ -162,10 +162,10 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
             const metaQuests = dia?.metaQuests ?? 0;
             
             // Calcular altura da barra (baseado em progresso)
-            const ratio = metaQuests > 0 ? Math.min(1, xpQuests / metaQuests) : 0;
-            const trackHeight = 40; // Reduzido de 56 para 40
-            const fillHeight = ratio > 0 ? Math.max(3, ratio * trackHeight) : 0;
-            const barColor = ratio >= 1 ? '#22C55E' : ratio > 0 ? '#86EFAC' : '#CBD5E1';
+            const temProgresso = xpQuests > 0;
+            const trackHeight = 40;
+            const fillHeight = temProgresso ? trackHeight : 0;
+            const barColor = '#22C55E'; // Todas as barras preenchidas com a mesma cor
             
             const dataFormatada = format(data, 'dd/MM');
             const labelDia = format(data, 'EEE', { locale: ptBR }).slice(0, 3).toUpperCase();
@@ -202,7 +202,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
                 </span>
                 
                 {/* Data abaixo do label */}
-                <span className="text-[0.56rem] font-medium text-[#7E8CA0]">
+                <span className={`text-[0.56rem] font-medium ${isSameDay(data, hoje) ? 'text-[#0EA5E9] font-semibold' : 'text-[#7E8CA0]'}`}>
                   {dataFormatada}
                 </span>
               </div>
