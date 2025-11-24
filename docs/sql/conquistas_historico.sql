@@ -1,1 +1,0 @@
-select * from conquistas_historico

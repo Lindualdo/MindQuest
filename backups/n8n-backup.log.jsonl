@@ -1598,5 +1598,10 @@
         ]
       }
     ]
+  },
+  {
+    "dataBackup": "2025-11-24T08:05:54.696Z",
+    "pastas": [],
+    "observacao": "Nenhum workflow exportado; verifique token/permissões do n8n."
   }
 ]
