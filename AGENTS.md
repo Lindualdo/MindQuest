@@ -21,6 +21,12 @@ Princípios:
 - Se o usuário pedir implementação, explique em 1–2 linhas e entregue a solução.
 - SEMPRE faça uma analise e plano de trabalho ante de implementar
 
+🚨 REGRA CRÍTICA - NODES POSTGRES:
+- Ao atualizar nodes Postgres via n8n_update_partial_workflow, SEMPRE incluir operation, query e options no mesmo update
+- NUNCA atualizar apenas query ou apenas options
+- SEMPRE validar operation após update via n8n_get_workflow
+- Ver seção "CRÍTICO - Atualização de nodes Postgres via MCP" para checklist completo
+
 Estilo das respostas:
 - Ver seção "ATENÇÃO — Comunicação Essencial".
 
@@ -132,6 +138,13 @@ Ao tratar de workflows n8n:
 - Nunca copie host/porta/senha no chat; cite apenas o arquivo ou variáveis.
 
 ## Boas práticas · lições n8n
+
+**🚨 REGRA DE OURO - NODES POSTGRES:**
+- **SEMPRE** incluir `operation`, `query` e `options` no mesmo update
+- **NUNCA** atualizar apenas `query` ou apenas `options`
+- **SEMPRE** validar `operation` após update via `n8n_get_workflow`
+- Ver seção "CRÍTICO - Atualização de nodes Postgres via MCP" abaixo para checklist completo
+
 - Mapear nós/ID via `n8n_get_workflow` antes de editar, evitando nomes desatualizados.
 - Usar `n8n_update_partial_workflow` para mudanças cirúrgicas; evitar full update sem necessidade.
 - Após alterações, rodar `n8n_get_workflow_structure` para validar nomes, conexões e garantir consistência.
@@ -143,25 +156,67 @@ Ao tratar de workflows n8n:
 - Sempre confirme o tipo/campos dos nós via MCP (`get_node_info`) antes de supor nomes antigos.
 - Verifique se `Code` está em `runOnceForAllItems` quando distribui o mesmo payload para vários destinos.
 - **Sub-workflows (sw_*) NUNCA devem ser ativados.** Eles rodam na mesma transação do workflow pai que os chama via `executeWorkflow`. Status `active=false` é correto e NÃO é erro.
-- **CRÍTICO - Atualização de nodes Postgres via MCP:** Ao usar `n8n_update_partial_workflow` para atualizar nodes Postgres, **SEMPRE incluir TODOS os parâmetros necessários no mesmo update**:
-  - `operation`: "executeQuery" (ou outra operação válida)
-  - `query`: SQL completa (não pode estar vazia)
-  - `options`: objeto com `queryReplacement` se necessário
-  - **NUNCA atualizar apenas um campo** (ex: só `options`), pois o n8n reseta os outros campos para valores padrão (ex: `operation` vira "insert").
-  - Exemplo correto:
-    ```json
-    {
-      "type": "updateNode",
-      "nodeId": "abc-123",
-      "updates": {
-        "parameters": {
-          "operation": "executeQuery",
-          "query": "SELECT * FROM table WHERE id = $1",
-          "options": {"queryReplacement": "={{ [$json.id] }}"}
-        }
+- **🚨 CRÍTICO - Atualização de nodes Postgres via MCP - CHECKLIST OBRIGATÓRIO:**
+  
+  **ANTES de atualizar qualquer nó Postgres, seguir ESTE checklist:**
+  
+  1. **Ler o nó atual** via `n8n_get_workflow` para obter TODOS os parâmetros existentes
+  2. **Preparar o update** incluindo SEMPRE estes 3 campos no mesmo `parameters`:
+     - ✅ `operation`: "executeQuery" (ou outra operação válida)
+     - ✅ `query`: SQL completa (não pode estar vazia)
+     - ✅ `options`: objeto (pode ser `{}` vazio ou `{"queryReplacement": "..."}`)
+  3. **NUNCA atualizar apenas um campo** (ex: só `query` ou só `options`)
+  4. **Após o update, validar** via `n8n_get_workflow` se `operation` está correto
+  
+  **⚠️ ERRO COMUM:** Atualizar só a `query` sem incluir `operation` e `options` → n8n reseta `operation` para "Insert" (padrão)
+  
+  **✅ Template correto (copiar e adaptar):**
+  ```json
+  {
+    "type": "updateNode",
+    "nodeId": "abc-123",
+    "updates": {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM table WHERE id = $1",
+        "options": {"queryReplacement": "={{ [$json.id] }}"}
       }
     }
+  }
+  ```
+  
+  **✅ Exemplo com options vazio (quando não precisa queryReplacement):**
+  ```json
+  {
+    "type": "updateNode",
+    "nodeId": "abc-123",
+    "updates": {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM table",
+        "options": {}
+      }
+    }
+  }
+  ```
+  
+  **🔍 Validação pós-update (OBRIGATÓRIA):**
+  ```javascript
+  // Após atualizar, SEMPRE verificar:
+  const workflow = await n8n_get_workflow({id: "workflow-id"});
+  const node = workflow.nodes.find(n => n.id === "node-id");
+  if (node.parameters.operation !== "executeQuery") {
+    throw new Error("ERRO: operation não está como 'executeQuery'!");
+  }
+  ```
+  
+  **📝 Ferramentas de apoio:**
+  - **Template:** `templates/n8n_postgres_update.json` (exemplos prontos para copiar)
+  - **Script de validação:** `scripts/validate_postgres_node.mjs` (valida após update)
+    ```bash
+    node scripts/validate_postgres_node.mjs <workflow-id> <node-id>
     ```
+  - **Documentação:** `templates/README.md` (guia de uso completo)
 
 
 ## Debug de Execução (Padrão)

@@ -1,0 +1,63 @@
+{
+  "description": "Template para atualizar nodes Postgres via n8n_update_partial_workflow",
+  "note": "SEMPRE incluir operation, query e options no mesmo update",
+  "template": {
+    "type": "updateNode",
+    "nodeId": "SUBSTITUIR_PELO_NODE_ID",
+    "updates": {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SUBSTITUIR_PELA_QUERY_SQL",
+        "options": {
+          "queryReplacement": "={{ [$json.parametro] }}"
+        }
+      }
+    }
+  },
+  "examples": {
+    "com_queryReplacement": {
+      "type": "updateNode",
+      "nodeId": "abc-123",
+      "updates": {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * FROM table WHERE id = $1::uuid",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        }
+      }
+    },
+    "sem_queryReplacement": {
+      "type": "updateNode",
+      "nodeId": "abc-123",
+      "updates": {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * FROM table",
+          "options": {}
+        }
+      }
+    }
+  },
+  "checklist": [
+    "1. Ler nó atual via n8n_get_workflow para obter todos os parâmetros",
+    "2. Incluir operation: 'executeQuery'",
+    "3. Incluir query: SQL completa",
+    "4. Incluir options: {} ou {queryReplacement: '...'}",
+    "5. Validar após update via n8n_get_workflow"
+  ],
+  "common_errors": {
+    "atualizar_apenas_query": {
+      "erro": "Atualizar apenas 'query' sem 'operation' e 'options'",
+      "consequencia": "n8n reseta 'operation' para 'Insert' (padrão)",
+      "solucao": "Sempre incluir os 3 campos no mesmo update"
+    },
+    "esquecer_options": {
+      "erro": "Esquecer de incluir 'options'",
+      "consequencia": "n8n pode resetar outros campos",
+      "solucao": "Sempre incluir 'options', mesmo que vazio {}"
+    }
+  }
+}
+

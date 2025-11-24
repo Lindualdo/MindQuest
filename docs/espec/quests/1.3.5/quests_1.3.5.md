@@ -1,7 +1,7 @@
 # Resumo do Entendimento — Quests no MindQuest v1.3.5
 
 **Data:** 2025-11-23 08:01  
-**Última atualização:** 2025-11-23 17:23  
+**Última atualização:** 2025-01-22 19:00  
 **Versão:** 1.3.5  
 **Objetivo:** Documentar entendimento consolidado sobre o sistema de Quests para refactor
 
@@ -56,11 +56,13 @@
   - **Quando é atualizado:** Na criação/planejamento da quest
 
 - **`conquistas_historico.detalhes`** (JSONB) — **EXECUÇÃO / CONQUISTAS**
-  - **Propósito:** Ocorrências de quests concluídas (conquistas, XP)
-  - **Estrutura:** `{ ocorrencias: [{ data_planejada, data_concluida, data_registrada, xp_base, xp_bonus }], total_concluidas }`
+  - **Propósito:** Ocorrências de quests concluídas (conquistas, XP) — **Apenas para cálculo de XP/progresso**
+  - **Estrutura:** `{ ocorrencias: [{ data_planejada, data_concluida, data_registrada, xp_base, xp_bonus, usr_chat_id?, data_conversa? }], total_concluidas }`
   - **Conteúdo:** Histórico real de conclusões (o que o usuário realmente fez)
   - **Contém:** XP concedido, datas de conclusão, total de ocorrências concluídas
+  - **Para conversas:** Inclui `usr_chat_id` e `data_conversa` para auditoria e rastreabilidade
   - **Quando é atualizado:** A cada conclusão de recorrência
+  - **⚠️ IMPORTANTE:** Para conversas, a origem real dos dados está em `usr_chat` (não em `conquistas_historico`)
 
 - **Verificação de conclusão:** Compara `COUNT(recorrencias->dias[])` (planejado em `usuarios_quest.recorrencias`) vs `total_concluidas` (executado em `conquistas_historico.detalhes`)
 
@@ -167,6 +169,29 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
   - XP: 10 pontos (configurável no catálogo)
 
 ### Regras Específicas para Conversas (`reflexao_diaria`)
+
+**⚠️ ARQUITETURA CRÍTICA - Origem dos Dados:**
+
+1. **Origem real das conversas:** Tabela `usr_chat`
+   - **Fonte de verdade:** Todos os dados da conversa estão em `usr_chat` (id, data_conversa, horario_inicio, horario_fim, total_interactions, etc.)
+   - **Propósito:** Armazenar dados completos da conversa realizada pelo usuário
+
+2. **`conquistas_historico` para conversas:** Apenas para cálculo de XP/progresso
+   - **Propósito:** Visão focada em cálculo de XP e progresso (não é fonte de dados da conversa)
+   - **Estrutura:** `tipo = 'conversa'`, `usuarios_quest_id` aponta para quest `reflexao_diaria`
+   - **Ocorrências:** Cada ocorrência em `detalhes->ocorrencias[]` deve conter:
+     - `data_concluida`: Data da conversa (extraída de `usr_chat.data_conversa`)
+     - `data_planejada`: Data planejada (mesma que `data_concluida` para conversas)
+     - `data_registrada`: Quando foi registrado no histórico
+     - `xp_base`: XP concedido (buscado de `quests_catalogo.xp`)
+     - `xp_bonus`: Sempre 0 (bônus desabilitado)
+     - **⚠️ IMPORTANTE:** `usr_chat_id`: ID da conversa em `usr_chat` (para auditoria e rastreabilidade)
+     - **⚠️ IMPORTANTE:** `data_conversa`: Data da conversa (para facilitar consultas e auditoria)
+
+3. **`usuarios_quest` para conversas:** Criada para compatibilidade com outras quests
+   - **Propósito:** Manter compatibilidade com o sistema unificado de quests
+   - **Estrutura:** Quest `reflexao_diaria` criada automaticamente se usuário não tiver quests
+   - **Relacionamento:** `conquistas_historico.usuarios_quest_id` → `usuarios_quest.id`
 
 **Diferenças em relação a outras quests:**
 
