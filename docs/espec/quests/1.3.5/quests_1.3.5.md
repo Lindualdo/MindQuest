@@ -45,13 +45,33 @@
 - **`pendente`, `ativa`, `concluida`, `vencida`, `cancelada`:** Status operacional da quest
 
 #### Planejamento vs Execução
-- **Planejamento:** `usuarios_quest.recorrencias` (JSONB) — apenas planejamento
-  - Estrutura: `{ tipo, janela: { inicio, fim }, dias: [{ data, xp_previsto }] }`
-  - **Importante:** Não contém status de execução (apenas dados de planejamento)
-- **Execução:** `conquistas_historico.detalhes->ocorrencias[]` — histórico real de conclusões
-  - Estrutura: `{ ocorrencias: [{ data_planejada, data_concluida, data_registrada, xp_base, xp_bonus }], total_concluidas }`
-  - **Verificação de conclusão:** Compara `COUNT(recorrencias->dias[])` (planejado) vs `total_concluidas` (executado)
-- **Consolidação:** `usuarios_conquistas` — pontuação total para nível
+
+**⚠️ DISTINÇÃO CRÍTICA:**
+
+- **`usuarios_quest.recorrencias`** (JSONB) — **PLANEJAMENTO / META**
+  - **Propósito:** Recorrências da instância (quests planejadas)
+  - **Estrutura:** `{ tipo, janela: { inicio, fim }, dias: [{ data, xp_previsto }] }`
+  - **Conteúdo:** Apenas dados de planejamento (o que o usuário planejou fazer)
+  - **Não contém:** Status de execução ou dados de conclusão
+  - **Quando é atualizado:** Na criação/planejamento da quest
+
+- **`conquistas_historico.detalhes`** (JSONB) — **EXECUÇÃO / CONQUISTAS**
+  - **Propósito:** Ocorrências de quests concluídas (conquistas, XP)
+  - **Estrutura:** `{ ocorrencias: [{ data_planejada, data_concluida, data_registrada, xp_base, xp_bonus }], total_concluidas }`
+  - **Conteúdo:** Histórico real de conclusões (o que o usuário realmente fez)
+  - **Contém:** XP concedido, datas de conclusão, total de ocorrências concluídas
+  - **Quando é atualizado:** A cada conclusão de recorrência
+
+- **Verificação de conclusão:** Compara `COUNT(recorrencias->dias[])` (planejado em `usuarios_quest.recorrencias`) vs `total_concluidas` (executado em `conquistas_historico.detalhes`)
+
+- **⚠️ REGRA CRÍTICA - Criação de Histórico:**
+  - **Histórico só é criado quando há pelo menos 1 ocorrência concluída**
+  - **NÃO existe histórico para quests sem conclusões** (quests apenas planejadas)
+  - Quando criado: 1 registro em `conquistas_historico` por `usuarios_quest.id` (todas as recorrências concluídas em `detalhes->ocorrencias[]`)
+  - Aplica-se a **TODAS as quests** (incluindo conversas)
+  - Cada instância de quest tem um único histórico que acumula todas as recorrências concluídas
+
+- **Consolidação:** `usuarios_conquistas` — pontuação total para nível (soma de todos os XP de `conquistas_historico`)
 
 #### Relacionamentos Unificados
 - **`usuarios_quest.catalogo_id`:** FK para `quests_catalogo.id` (busca XP do catálogo)
@@ -158,11 +178,17 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
    - Meta: ser feita todos os dias da semana
    - Recorrências definidas automaticamente pelo sistema
 
-3. **Histórico único:** Sempre terá um único registro em `conquistas_historico`
+3. **Histórico único:** Terá um único registro em `conquistas_historico` quando houver pelo menos 1 conversa concluída
    - `tipo = 'conversa'`
    - `usuarios_quest_id` aponta para a quest `reflexao_diaria`
-   - Todas as ocorrências ficam em `detalhes->ocorrencias[]`
-   - Campo `detalhes->total_concluidas` contabiliza todas as conversas
+   - Todas as ocorrências concluídas ficam em `detalhes->ocorrencias[]`
+   - Campo `detalhes->total_concluidas` contabiliza todas as conversas concluídas
+   - **⚠️ REGRA CRÍTICA:** Histórico só existe quando há conclusões
+     - Se a quest `reflexao_diaria` tem conversas concluídas → **DEVE ter registro no histórico**
+     - Se não tem conversas concluídas → NÃO tem registro no histórico
+   - **⚠️ REGRA UNIFICADA:** Aplica-se a **TODAS as quests** (não apenas conversas)
+     - Histórico criado apenas quando há pelo menos 1 recorrência concluída
+     - Todas as recorrências concluídas da instância ficam em `detalhes->ocorrencias[]`
 
 4. **Identificação:** Campo `config->conversa = true` para identificar quests de conversa
 
@@ -225,7 +251,7 @@ Transformação do usuário
 - **XP Base:** Buscado de `quests_catalogo.xp` via `catalogo_id` em `usuarios_quest`
 - **Valor padrão:** 10 XP para todas as quests (configurável por quest no catálogo)
 - **Bônus:** Desabilitado por enquanto (0 XP bônus)
-- **Quest personalizada:** Se não tiver `catalogo_id`, usa 10 XP como padrão
+- **⚠️ CRÍTICO - Quest SEM catálogo:** **NÃO PERMITIDO** — Toda quest DEVE ter `catalogo_id`. Não há fallback de XP. Sistema não grava quests sem referência ao catálogo.
 - **Conversas:** Tratadas como quests (`reflexao_diaria`), mesmo sistema de XP
 
 ### Estrutura de Dados
