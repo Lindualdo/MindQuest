@@ -755,8 +755,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         await Promise.all([
           get().loadQuestSnapshot(userData.user.id),
           get().loadPanoramaCard(userData.user.id),
-          get().loadConversasCard(userData.user.id),
-          get().loadJornadaCard(userData.user.id),
           get().loadRodaEmocoes(userData.user.id),
         ]);
       }
@@ -832,8 +830,6 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         await Promise.all([
           get().loadQuestSnapshot(userData.user.id),
           get().loadPanoramaCard(userData.user.id),
-          get().loadConversasCard(userData.user.id),
-          get().loadJornadaCard(userData.user.id),
           get().loadRodaEmocoes(userData.user.id),
         ]);
         set({
