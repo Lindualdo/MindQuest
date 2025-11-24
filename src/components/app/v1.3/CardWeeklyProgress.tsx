@@ -160,8 +160,13 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
             // Calcular altura da barra baseado em quantidade de quests (não mais XP)
             const trackHeight = 40;
             let ratio = 0;
-            if (qtdPrevistas > 0 && qtdConcluidas > 0) {
+            if (qtdPrevistas > 0) {
+              // Se há quests previstas, calcular proporção normalmente
               ratio = Math.min(1, qtdConcluidas / qtdPrevistas);
+            } else if (qtdConcluidas > 0) {
+              // Se não há previstas mas há concluídas (ex: conversas), barra completa
+              // Porque se há algo concluído, significa que havia algo planejado
+              ratio = 1; // 100% da barra
             }
             const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0; // Mínimo de 4px quando tem progresso
             const barColor = '#22C55E'; // Verde para barras com progresso
@@ -174,9 +179,9 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
                 key={dataStr}
                 className="flex flex-1 flex-col items-center justify-end gap-0.5"
               >
-                {/* Número acima da barra */}
+                {/* Número acima da barra - mostrar concluídas se não há previstas */}
                 <span className="text-[0.65rem] font-semibold text-[#94A3B8]">
-                  {qtdPrevistas}
+                  {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                 </span>
                 
                 {/* Barra vertical */}

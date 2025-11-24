@@ -341,11 +341,12 @@ const PainelQuestsPageV13: React.FC = () => {
               // Calcular altura da barra baseado em quantidade de quests (não mais XP)
               // Progresso = quests concluídas / quests previstas
               let ratio = 0;
-              if (qtdPrevistas > 0 && qtdConcluidas > 0) {
+              if (qtdPrevistas > 0) {
+                // Se há quests previstas, calcular proporção normalmente
                 ratio = Math.min(1, qtdConcluidas / qtdPrevistas);
-              } else if (temProgresso) {
-                // Se tem progresso mas não tem previstas, mostra mínimo
-                ratio = 0.2;
+              } else if (qtdConcluidas > 0) {
+                // Se não há previstas mas há concluídas (ex: conversas), barra completa
+                ratio = 1;
               }
               
               // Barras com progresso em verde (igual na home)
@@ -369,9 +370,9 @@ const PainelQuestsPageV13: React.FC = () => {
                     isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                   } ${isSelected ? 'scale-105' : ''}`}
                 >
-                  {/* Número acima da barra */}
+                  {/* Número acima da barra - mostrar concluídas se não há previstas */}
                   <span className="text-[0.65rem] font-semibold text-[#94A3B8]">
-                    {qtdPrevistas}
+                    {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                   </span>
                   
                   {/* Barra vertical */}
