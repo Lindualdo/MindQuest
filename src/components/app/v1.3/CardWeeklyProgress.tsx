@@ -137,7 +137,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
         <p className="text-[0.7rem] font-semibold text-[#1C2541]">Quests</p>
         
         {/* Barra de progresso horizontal */}
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex items-center gap-4">
           <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{questsConcluidasSemanal}</span>
           <div className="relative h-2 flex-1 rounded-full bg-slate-200">
             <div
@@ -149,7 +149,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
         </div>
 
         {/* Barras verticais por dia */}
-        <div className="mt-6 flex h-14 items-end justify-between gap-1">
+        <div className="mt-8 flex h-14 items-end justify-between gap-1">
           {Array.from({ length: 7 }).map((_, i) => {
             const data = addDays(inicioSemana, i);
             const dataStr = format(data, 'yyyy-MM-dd');
@@ -180,7 +180,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
                 className="flex flex-1 flex-col items-center justify-end gap-0.5"
               >
                 {/* Número acima da barra - mostrar concluídas se não há previstas */}
-                <span className="text-[0.65rem] font-semibold text-[#94A3B8]">
+                <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5">
                   {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                 </span>
                 

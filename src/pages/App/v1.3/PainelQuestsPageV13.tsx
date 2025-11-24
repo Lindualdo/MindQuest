@@ -314,7 +314,7 @@ const PainelQuestsPageV13: React.FC = () => {
         </p>
 
         {/* Barra de progresso horizontal */}
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-4">
           <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{questsConcluidas}</span>
           <div className="relative h-2 flex-1 rounded-full bg-slate-200">
             <div
@@ -326,7 +326,7 @@ const PainelQuestsPageV13: React.FC = () => {
         </div>
 
         {/* Barras verticais dos dias */}
-        <div className="mt-5 h-20 w-full">
+        <div className="mt-8 h-20 w-full">
           <div className="flex h-full items-end justify-between gap-1">
             {diasSemana.map((dia, index) => {
               const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
@@ -371,7 +371,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   } ${isSelected ? 'scale-105' : ''}`}
                 >
                   {/* Número acima da barra - mostrar concluídas se não há previstas */}
-                  <span className="text-[0.65rem] font-semibold text-[#94A3B8]">
+                  <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5">
                     {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                   </span>
                   
