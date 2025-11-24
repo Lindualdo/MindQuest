@@ -182,3 +182,4 @@ Insights relevantes (máx. 3): [id, titulo, prioridade]
 *Sugestões baseadas em análise do catálogo e fluxo atual*
 
 
+
