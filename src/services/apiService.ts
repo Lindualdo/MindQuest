@@ -134,7 +134,7 @@ class ApiService {
       instancia_id: this.toString(quest.instancia_id),
       meta_codigo: this.toString(quest.meta_codigo) ?? '',
       status: (this.toString(quest.status) ?? 'pendente') as QuestStatus,
-      titulo: this.toString(quest.titulo) ?? 'Quest personalizada',
+      titulo: this.toString(quest.titulo) || (configObj && typeof configObj.titulo === 'string' ? configObj.titulo : null) || 'Quest personalizada',
       descricao: this.toString(quest.descricao),
       contexto_origem: this.toString(quest.contexto_origem),
       progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
@@ -157,6 +157,8 @@ class ApiService {
         quest.recorrencia ??
           (configObj && typeof configObj.recorrencia !== 'undefined' ? configObj.recorrencia : null)
       ),
+      tipo: this.toString(quest.tipo) ?? null,
+      catalogo_codigo: this.toString(quest.catalogo_codigo) ?? null,
       recorrencias: quest.recorrencias && typeof quest.recorrencias === 'object' && !Array.isArray(quest.recorrencias)
         ? (quest.recorrencias as QuestPersonalizadaResumo['recorrencias'])
         : null,

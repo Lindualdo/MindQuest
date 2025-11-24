@@ -22,11 +22,8 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
 
   // Meta semanal de quests (soma de qtdQuestsPrevistas, mínimo 15)
   const metaQuestsSemanal = Math.max(15, dias.reduce((sum, dia) => sum + (dia.qtdQuestsPrevistas ?? 0), 0));
-  // Quests concluídas (soma de qtdQuestsPrevistas dos dias com xpQuests > 0)
-  const questsConcluidasSemanal = dias.reduce((sum, dia) => {
-    const temProgresso = (dia.xpQuests ?? 0) > 0;
-    return sum + (temProgresso ? (dia.qtdQuestsPrevistas ?? 0) : 0);
-  }, 0);
+  // Quests concluídas (soma de qtdQuestsConcluidas por dia)
+  const questsConcluidasSemanal = dias.reduce((sum, dia) => sum + (dia.qtdQuestsConcluidas ?? 0), 0);
   const progressoQuests = metaQuestsSemanal > 0 
     ? Math.min(100, Math.round((questsConcluidasSemanal / metaQuestsSemanal) * 100))
     : 0;
@@ -141,7 +138,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
         
         {/* Barra de progresso horizontal */}
         <div className="mt-2 flex items-center gap-2">
-          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">0</span>
+          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{questsConcluidasSemanal}</span>
           <div className="relative h-2 flex-1 rounded-full bg-slate-200">
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
@@ -158,14 +155,16 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
             const dataStr = format(data, 'yyyy-MM-dd');
             const dia = dias.find(d => d.data === dataStr);
             const qtdPrevistas = dia?.qtdQuestsPrevistas ?? 0;
-            const xpQuests = dia?.xpQuests ?? 0;
-            const metaQuests = dia?.metaQuests ?? 0;
+            const qtdConcluidas = dia?.qtdQuestsConcluidas ?? 0;
             
-            // Calcular altura da barra (baseado em progresso)
-            const temProgresso = xpQuests > 0;
+            // Calcular altura da barra baseado em quantidade de quests (não mais XP)
             const trackHeight = 40;
-            const fillHeight = temProgresso ? trackHeight : 0;
-            const barColor = '#22C55E'; // Todas as barras preenchidas com a mesma cor
+            let ratio = 0;
+            if (qtdPrevistas > 0 && qtdConcluidas > 0) {
+              ratio = Math.min(1, qtdConcluidas / qtdPrevistas);
+            }
+            const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0; // Mínimo de 4px quando tem progresso
+            const barColor = '#22C55E'; // Verde para barras com progresso
             
             const dataFormatada = format(data, 'dd/MM');
             const labelDia = format(data, 'EEE', { locale: ptBR }).slice(0, 3).toUpperCase();

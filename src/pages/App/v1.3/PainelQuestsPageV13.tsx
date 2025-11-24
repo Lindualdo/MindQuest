@@ -81,6 +81,7 @@ const PainelQuestsPageV13: React.FC = () => {
         xpConversa: diaBackend?.xpConversa || 0,
         xpQuests: diaBackend?.xpQuests || 0, // SOMENTE quests
         qtdQuestsPrevistas: diaBackend?.qtdQuestsPrevistas || 0, // Quantidade de quests planejadas
+        qtdQuestsConcluidas: diaBackend?.qtdQuestsConcluidas || 0, // Quantidade de quests concluídas
         dateObj: data
       };
     });
@@ -225,6 +226,18 @@ const PainelQuestsPageV13: React.FC = () => {
   const renderQuestItem = (quest: QuestPersonalizadaResumo, isConcluida = false) => {
     const questId = quest.instancia_id || quest.meta_codigo;
     const xpRecompensa = quest.xp_recompensa ?? 30;
+    
+    // Verificar se é quest do tipo conversa (concluída automaticamente)
+    // Quest de reflexão diária não pode ser concluída manualmente pelo usuário
+    const configConversa = quest.config?.conversa;
+    const isConversaQuest = 
+      quest.catalogo_codigo === 'reflexao_diaria' ||
+      quest.tipo === 'reflexao_diaria' ||
+      quest.titulo === 'Reflexão Diária' ||
+      (configConversa !== undefined && configConversa !== null && (
+        configConversa === true || 
+        String(configConversa).toLowerCase() === 'true'
+      ));
 
     return (
       <Card key={questId} className="!p-4 !bg-[#E8F3F5]" hover={false}>
@@ -245,7 +258,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   Concluída
                 </span>
              </div>
-          ) : (
+          ) : !isConversaQuest ? (
             <button
               type="button"
               onClick={() => questId && handleConcluirQuest(questId)}
@@ -265,7 +278,7 @@ const PainelQuestsPageV13: React.FC = () => {
                 <CheckCircle2 size={20} />
               )}
             </button>
-          )}
+          ) : null}
         </div>
         {questId && (
           <div className="mt-3 flex justify-end">
@@ -285,9 +298,9 @@ const PainelQuestsPageV13: React.FC = () => {
 
   // Barra de progresso semanal (somente quests)
   const renderWeeklyProgressBar = () => {
-    // Calcular totais da semana (somente quests)
+    // Calcular totais da semana (somente quests - quantidade, não mais XP)
     const metaSemanal = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.qtdQuestsPrevistas ?? 0), 0);
-    const questsConcluidas = (weeklyData.dias ?? []).filter(dia => (dia.xpQuests ?? 0) > 0).length;
+    const questsConcluidas = (weeklyData.dias ?? []).reduce((sum, dia) => sum + (dia.qtdQuestsConcluidas ?? 0), 0);
     const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((questsConcluidas / metaSemanal) * 100)) : 0;
 
     return (
@@ -302,7 +315,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Barra de progresso horizontal */}
         <div className="mt-4 flex items-center gap-2">
-          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">0</span>
+          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{questsConcluidas}</span>
           <div className="relative h-2 flex-1 rounded-full bg-slate-200">
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
@@ -319,19 +332,28 @@ const PainelQuestsPageV13: React.FC = () => {
               const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
               const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
               const isFuturoDay = dia.dateObj && isFuture(dia.dateObj) && !isHoje;
+              const isPassado = dia.dateObj && !isHoje && !isFuturoDay;
               
               const qtdPrevistas = dia.qtdQuestsPrevistas ?? 0;
-              const temProgresso = (dia.xpQuests ?? 0) > 0;
+              const qtdConcluidas = dia.qtdQuestsConcluidas ?? 0;
+              const temProgresso = qtdConcluidas > 0;
               
-              // Calcular altura da barra (se tem progresso, considera todas quests concluídas)
-              // TODO: Refinar quando tivermos qtdQuestsConcluidas no backend
-              const ratio = qtdPrevistas > 0 && temProgresso ? 1 : 0;
+              // Calcular altura da barra baseado em quantidade de quests (não mais XP)
+              // Progresso = quests concluídas / quests previstas
+              let ratio = 0;
+              if (qtdPrevistas > 0 && qtdConcluidas > 0) {
+                ratio = Math.min(1, qtdConcluidas / qtdPrevistas);
+              } else if (temProgresso) {
+                // Se tem progresso mas não tem previstas, mostra mínimo
+                ratio = 0.2;
+              }
               
-              // Cor da barra (todas iguais)
-              const barColor = '#22C55E';
+              // Barras com progresso em verde (igual na home)
+              const barColor = '#22C55E'; // Verde para preenchimento quando tem progresso
+              const trackColor = '#CBD5E1'; // Cinza claro para fundo
               
               const trackHeight = 56;
-              const fillHeight = ratio > 0 ? trackHeight : 0; // Sempre altura completa quando preenchida
+              const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0; // Mínimo de 4px quando tem progresso
 
               // Formatar data como DD/MM
               const dataFormatada = dia.dateObj 
@@ -354,8 +376,12 @@ const PainelQuestsPageV13: React.FC = () => {
                   
                   {/* Barra vertical */}
                   <div
-                    className="relative overflow-hidden rounded-full bg-slate-300"
-                    style={{ height: `${trackHeight}px`, width: '12px' }}
+                    className="relative overflow-hidden rounded-full"
+                    style={{ 
+                      height: `${trackHeight}px`, 
+                      width: '12px',
+                      backgroundColor: trackColor
+                    }}
                   >
                     {fillHeight > 0 && (
                       <div
@@ -372,7 +398,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     {dia.label ?? '--'}
                   </span>
                   <span className={`text-[0.6rem] font-bold ${
-                    isHoje ? 'text-[#0EA5E9]' : isSelected ? 'text-[#1C2541]' : 'text-[#64748B]'
+                    isHoje ? 'text-[#0EA5E9]' : isSelected ? 'text-[#1C2541]' : isFuturoDay ? 'text-[#94A3B8]' : 'text-[#64748B]'
                   }`}>
                     {dataFormatada}
                   </span>

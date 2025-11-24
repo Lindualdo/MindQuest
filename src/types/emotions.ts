@@ -219,6 +219,8 @@ export interface QuestPersonalizadaResumo {
   xp_recompensa?: number | null;
   prioridade?: string | null;
   recorrencia?: string | null;
+  tipo?: string | null;
+  catalogo_codigo?: string | null;
   recorrencias?: {
     tipo: string;
     janela: { inicio: string; fim: string };
@@ -591,6 +593,7 @@ export interface WeeklyProgressDay {
   metaConversa: number;
   metaQuests: number;
   qtdQuestsPrevistas?: number; // Quantidade de quests planejadas para o dia
+  qtdQuestsConcluidas?: number; // Quantidade de quests concluídas no dia
   status: WeeklyProgressStatus;
 }
 

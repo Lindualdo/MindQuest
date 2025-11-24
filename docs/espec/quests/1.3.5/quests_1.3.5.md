@@ -1,7 +1,7 @@
 # Resumo do Entendimento — Quests no MindQuest v1.3.5
 
 **Data:** 2025-11-23 08:01  
-**Última atualização:** 2025-01-22 19:00  
+**Última atualização:** 2025-11-24 20:22  
 **Versão:** 1.3.5  
 **Objetivo:** Documentar entendimento consolidado sobre o sistema de Quests para refactor
 
@@ -179,6 +179,10 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
 2. **`conquistas_historico` para conversas:** Apenas para cálculo de XP/progresso
    - **Propósito:** Visão focada em cálculo de XP e progresso (não é fonte de dados da conversa)
    - **Estrutura:** `tipo = 'conversa'`, `usuarios_quest_id` aponta para quest `reflexao_diaria`
+   - **⚠️ REGRA CRÍTICA - Limite diário:** **Apenas 1 conversa por dia conta para XP**
+     - Se o usuário tiver múltiplas conversas no mesmo dia, apenas a primeira (ou única selecionada) é contabilizada para pontuação
+     - Todas as conversas são registradas em `usr_chat`, mas apenas 1 por dia gera ocorrência em `conquistas_historico`
+     - Isso explica diferenças entre total de conversas em `usr_chat` vs ocorrências em `conquistas_historico`
    - **Ocorrências:** Cada ocorrência em `detalhes->ocorrencias[]` deve conter:
      - `data_concluida`: Data da conversa (extraída de `usr_chat.data_conversa`)
      - `data_planejada`: Data planejada (mesma que `data_concluida` para conversas)
