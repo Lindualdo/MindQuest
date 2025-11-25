@@ -1,0 +1,3 @@
+leia as informações neste trecho abaixo para contexto antes dos próximos passos: leia e faça um resumo do seu entendimento
+prompt_inicial_chat.md (11-59)
+ 
