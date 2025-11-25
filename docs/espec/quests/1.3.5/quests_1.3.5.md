@@ -1,7 +1,7 @@
 # Resumo do Entendimento — Quests no MindQuest v1.3.5
 
 **Data:** 2025-11-23 08:01  
-**Última atualização:** 2025-11-24 20:22  
+**Última atualização:** 2025-01-22  
 **Versão:** 1.3.5  
 **Objetivo:** Documentar entendimento consolidado sobre o sistema de Quests para refactor
 
@@ -159,6 +159,110 @@ O sistema usa a tabela `jornada_niveis` existente (10 níveis) e os agrupa em 4 
 
 ---
 
+## 4.1. Detalhes da Quest (Tela de Instruções)
+
+### Objetivo
+
+A tela de detalhes da quest tem como objetivo **estimular e motivar o usuário a realizar as quests**, fornecendo informações completas que:
+- Explicam os **benefícios** da quest
+- Apresentam **fundamentos científicos** que validam a prática
+- Oferecem **instruções claras** sobre como aplicar
+- Disponibilizam **ferramentas e recursos** para suporte
+
+### Acesso
+
+- **Entrada:** Botão "Saber mais" em cada quest no painel (`PainelQuestsPageV13`)
+- **Fluxo:** `openQuestDetail(questId)` → `apiService.getQuestDetail()` → `QuestDetailPageV13`
+- **Endpoint:** `/quest-detail?user_id=...&quest_id=...` (webhook n8n: `webhook_quest_detail`)
+
+### Fonte de Dados
+
+**⚠️ ARQUITETURA ATUAL:**
+
+As informações detalhadas são buscadas da tabela `quests_catalogo` via relacionamento:
+- `usuarios_quest.catalogo_id` → `quests_catalogo.id`
+
+**Campos disponíveis em `quests_catalogo`:**
+
+1. **`base_cientifica`** (jsonb) — **FONTE ATUAL DE DADOS:**
+   - `objetivo` → **Benefícios** da quest
+   - `fundamentos` → **Referências científicas** (neurociência, TCC, estoicismo, etc.)
+   - `como_aplicar` → **Instruções passo a passo** de execução
+   - `links_referencias` → Array de links para referências externas
+   - `tipo` → Tipo da técnica (ex: "tecnica")
+
+2. **`instrucoes`** (jsonb) — **FONTE PRINCIPAL FUTURA:**
+   - Campo destinado a ser a fonte principal de informações detalhadas
+   - Atualmente vazio na maioria das quests
+   - Estrutura ainda a ser definida
+
+3. **Outros campos úteis:**
+   - `categoria` → Categoria da quest
+   - `dificuldade` → Nível de dificuldade (1-3)
+   - `tempo_estimado_min` → Tempo estimado para execução
+   - `descricao` → Descrição geral da quest
+
+### Informações Exibidas
+
+#### Seções Motivacionais
+
+1. **Benefícios** (`base_cientifica.objetivo`):
+   - Explica por que a quest é importante
+   - Mostra os ganhos de executá-la
+   - Estimula motivação intrínseca
+
+2. **Referências Científicas** (`base_cientifica.fundamentos`):
+   - Valida a prática com embasamento científico
+   - Cita áreas de conhecimento (neurociência, TCC, estoicismo)
+   - Aumenta confiança do usuário
+
+3. **Como Aplicar** (`base_cientifica.como_aplicar` OU `instrucoes`):
+   - Instruções passo a passo claras
+   - Exemplos práticos
+   - Facilita a execução
+
+4. **Ferramentas e Recursos** (`instrucoes` OU `base_cientifica.links_referencias`):
+   - Links de referência para aprofundamento
+   - Ferramentas adicionais de apoio
+   - Recursos complementares
+
+#### Informações Contextuais
+
+- **Área de vida** relacionada (se houver)
+- **Sabotador** associado (se houver)
+- **XP recompensa** ao concluir
+- **Status** e progresso da quest
+- **Botão de conclusão** (se pendente/ativa)
+
+### Exemplos de Dados no Banco
+
+**Quest: `micro_acao_coragem`:**
+- **Objetivo:** "Quebrar padrões de medo e criar novos caminhos neurais"
+- **Fundamentos:** "Neurociência: Quebra padrões neurais de medo/evitação, cria novos caminhos neurais (neuroplasticidade), fortalece autoconfiança"
+- **Como aplicar:** "Identifique 1 ação que gera desconforto leve mas é importante. Exemplos: ligar para alguém, iniciar conversa difícil, dizer não, pedir ajuda. Execute mesmo com desconforto."
+
+**Quest: `reconhecimento_progresso`:**
+- **Objetivo:** "Reforçar comportamentos positivos e reduzir foco no que falta"
+- **Fundamentos:** "TCC: Reforço positivo. Neurociência: Ativa sistema de recompensa (dopamina), reduz viés de negatividade"
+- **Como aplicar:** "Ao final do dia, liste 1-3 micro-vitórias (mesmo pequenas). Reconheça 1 progresso específico em área importante. Agradeça por 1 coisa específica (não genérica)."
+
+### Mudança Arquitetural
+
+**⚠️ IMPORTANTE:**
+- **ANTES:** Dados eram buscados de `insights` via `usuarios_quest.insight_id` (DEPRECADO)
+- **AGORA:** Dados vêm exclusivamente de `quests_catalogo` via `usuarios_quest.catalogo_id`
+- **Motivo:** Centralizar informações no catálogo para reutilização e consistência
+
+### Implementação
+
+- **Frontend:** `src/pages/App/v1.3/QuestDetailPageV13.tsx`
+- **Backend:** Workflow n8n `webhook_quest_detail` (ID: `pTtnu2YVLGuV7IxM`)
+- **Interface TypeScript:** `src/types/emotions.ts` → `QuestDetail`
+
+> **📋 Documentação técnica completa:** Ver `data/analise_detalhes_quests_catalogo.md`
+
+---
+
 ## 5. Quests Padrão do Sistema (Usuário Pode Mudar)
 
 ### Padrões Automáticos
@@ -308,11 +412,13 @@ Transformação do usuário
 - **Quest inicial automática:** Cria `reflexao_diaria` se usuário não tiver quests
 - Progresso semanal (card na home)
 - Painel de quests com detalhes
+- **Tela de detalhes da quest:** Exibe informações do catálogo para motivar execução
 - **Sistema de estágios da quest:** `a_fazer`, `fazendo`, `feito`
 - **Separação planejamento/execução:** `recorrencias` (planejamento) vs `conquistas_historico.detalhes` (execução)
 - **Verificação de conclusão:** Compara planejado vs executado automaticamente
 
 ### ⏳ A Implementar
+- **Detalhes da quest:** Integração completa com dados do catálogo (benefícios, fundamentos científicos, instruções)
 - Escolha de quests prioritárias (banco de quests)
 - Interface de aprovação/planejamento de recorrências
 - Gestão de slots (máx. 5 ativas com `quest_estagio = 'fazendo'`)
