@@ -1,8 +1,42 @@
 # Quests MindQuest v1.3.5 — Referência Técnica
 
 **Data:** 2025-11-24 20:30  
+**Última atualização:** 2025-01-22 14:00  
 **Versão:** 1.3.5  
 **Objetivo:** Referência técnica essencial para implementação
+
+---
+
+## Visão Geral — Processo de Transformação MindQuest
+
+**Fluxo completo:** `Conversa` → `Insights` → `Quests` → `Ações/Execução` → `Progresso/Transformação` → `Loop`
+
+### 1. CONVERSA
+- Usuário conversa com Assistente de Reflexão (IA)
+- Registro em: `usr_chat`
+
+### 2. INSIGHTS
+- Gerados com base nas conversas e relatos
+- Análise: emoções, Big Five, sabotadores
+- Registro em: `insights`
+
+### 3. QUESTS
+- Geradas com base em conversas + `quest_catalogo`
+- Micro-ações personalizadas pela IA
+- Registro em: `usuarios_quest` (vinculado a `quests_catalogo`)
+
+### 4. AÇÕES / EXECUÇÃO
+- Usuário executa quests (apoiado por Agente de Quest IA)
+- Instruções claras e fundamentadas
+- Registro de conclusões em: `conquistas_historico`
+
+### 5. PROGRESSO / TRANSFORMAÇÃO
+- Medido com gamificação (XP, níveis, estágios)
+- Transformação real de comportamento
+- Consolidação em: `usuarios_conquistas`
+- Feedback: alimenta novos insights e quests
+
+**Importância:** Sem Quests = Sem Transformação. As Quests são o elemento que converte reflexão em ação.
 
 ---
 
