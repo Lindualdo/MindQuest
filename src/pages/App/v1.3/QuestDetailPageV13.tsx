@@ -12,44 +12,13 @@ import {
   Brain,
   Users,
   CheckCircle2,
-  ArrowUpRight,
+  ExternalLink,
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
-import type { InsightResource } from '@/types/emotions';
 import { format } from 'date-fns';
-
-const feedbackConfigs: Array<{
-  key: 'feedback_positivo' | 'feedback_desenvolvimento' | 'feedback_motivacional';
-  label: string;
-  icon: React.ReactElement;
-  bg: string;
-  text: string;
-}> = [
-  {
-    key: 'feedback_positivo',
-    label: 'Por que é importante?',
-    icon: <Sparkles size={16} />, 
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-  },
-  {
-    key: 'feedback_desenvolvimento',
-    label: 'Como praticar?',
-    icon: <Target size={16} />, 
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-  },
-  {
-    key: 'feedback_motivacional',
-    label: 'Motivação',
-    icon: <Lightbulb size={16} />, 
-    bg: 'bg-indigo-50',
-    text: 'text-indigo-700',
-  },
-];
 
 const categoriaBadge = (categoria?: string) => {
   switch (categoria) {
@@ -86,27 +55,6 @@ const complexidadeBadge = (complexidade: number) => {
   return { label: 'Baixa', color: 'bg-emerald-100 text-emerald-700' };
 };
 
-const ResourceCard = ({ resource }: { resource: InsightResource }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-    <div className="mb-2 flex items-center justify-between">
-      <h4 className="text-sm font-semibold text-slate-800">{resource.nome}</h4>
-      <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 capitalize">
-        {resource.tipo}
-      </span>
-    </div>
-    <p className="mb-3 text-sm leading-relaxed text-slate-600">
-      {resource.descricao}
-    </p>
-    <div className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-700">
-      <BookOpen size={16} className="mt-1 text-indigo-500" />
-      <div>
-        <span className="font-medium text-indigo-600">Como aplicar:</span>
-        <p className="mt-1 leading-relaxed">{resource.aplicacao_pratica}</p>
-      </div>
-    </div>
-  </div>
-);
-
 const QuestDetailPageV13 = () => {
   const {
     dashboardData,
@@ -116,7 +64,6 @@ const QuestDetailPageV13 = () => {
     closeQuestDetail,
     setView,
     concluirQuest,
-    openInsightDetail,
   } = useDashboard();
 
   const nomeUsuario =
@@ -125,9 +72,9 @@ const QuestDetailPageV13 = () => {
     'Aldo';
 
   const detail = questDetail;
-  const categoriaInfo = useMemo(() => (detail?.insight?.categoria ? categoriaBadge(detail.insight.categoria) : null), [detail]);
   const prioridadeInfo = useMemo(() => (detail?.prioridade ? prioridadeBadge(detail.prioridade) : null), [detail]);
   const complexidadeInfo = useMemo(() => complexidadeBadge(detail?.complexidade ?? 0), [detail]);
+  const categoriaInfo = useMemo(() => (detail?.catalogo?.categoria ? categoriaBadge(detail.catalogo.categoria) : null), [detail]);
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
@@ -148,18 +95,11 @@ const QuestDetailPageV13 = () => {
     const hoje = format(new Date(), 'yyyy-MM-dd');
     try {
       await concluirQuest(detail.id, hoje);
-      // Aguardar um pouco e voltar
       setTimeout(() => {
         handleBack();
       }, 500);
     } catch (error) {
       console.error('Erro ao concluir quest:', error);
-    }
-  };
-
-  const handleOpenInsight = () => {
-    if (detail?.insight?.id) {
-      openInsightDetail(detail.insight.id);
     }
   };
 
@@ -219,9 +159,8 @@ const QuestDetailPageV13 = () => {
       );
     }
 
-    const recursosSugeridos: InsightResource[] = detail.insight?.recursos_sugeridos ?? [];
     const podeConcluir = detail.status === 'pendente' || detail.status === 'ativa';
-    const insightPrioridadeInfo = detail.insight?.prioridade ? prioridadeBadge(detail.insight.prioridade) : null;
+    const baseCientifica = detail.catalogo?.base_cientifica;
 
     return (
       <motion.section
@@ -239,6 +178,12 @@ const QuestDetailPageV13 = () => {
             Voltar
           </button>
           <div className="flex gap-2">
+            {categoriaInfo && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${categoriaInfo.color}`}>
+                {categoriaInfo.icon}
+                {categoriaInfo.label}
+              </span>
+            )}
             {detail.area_vida && (
               <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[0.7rem] font-semibold text-blue-700">
                 {detail.area_vida.nome}
@@ -275,70 +220,88 @@ const QuestDetailPageV13 = () => {
           )}
         </div>
 
-        {/* Por que é importante? */}
-        {detail.insight?.feedback_positivo && (
-          <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            <div className="mb-2 flex items-center gap-2 font-semibold">
+        {/* Benefícios */}
+        {baseCientifica?.objetivo && (
+          <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-emerald-900">
               <Sparkles size={16} />
-              <span>Por que é importante?</span>
+              <span>Benefícios</span>
             </div>
-            <p className="leading-relaxed text-[#1C2541]">
-              {detail.insight.feedback_positivo}
+            <p className="leading-relaxed text-emerald-800">
+              {baseCientifica.objetivo}
             </p>
           </div>
         )}
 
-        {/* Como praticar? */}
-        {recursosSugeridos.length > 0 && (
-          <div className="mb-4 space-y-3">
-            <p className="text-sm font-semibold text-[#1C2541]">
-              Como praticar?
+        {/* Referências Científicas */}
+        {baseCientifica?.fundamentos && (
+          <div className="mb-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-blue-900">
+              <BookOpen size={16} />
+              <span>Fundamentos Científicos</span>
+            </div>
+            <p className="leading-relaxed text-blue-800">
+              {baseCientifica.fundamentos}
             </p>
-            {recursosSugeridos.map((resource) => (
-              <ResourceCard
-                key={`${resource.nome}-${resource.tipo}`}
-                resource={resource}
-              />
-            ))}
           </div>
         )}
 
-        {detail.insight?.feedback_desenvolvimento && (
-          <div className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            <div className="mb-2 flex items-center gap-2 font-semibold">
+        {/* Como Aplicar */}
+        {baseCientifica?.como_aplicar && (
+          <div className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-amber-900">
               <Target size={16} />
-              <span>Orientação</span>
+              <span>Como Aplicar</span>
             </div>
-            <p className="leading-relaxed text-[#1C2541]">
-              {detail.insight.feedback_desenvolvimento}
+            <p className="whitespace-pre-line leading-relaxed text-amber-800">
+              {baseCientifica.como_aplicar}
             </p>
           </div>
         )}
 
-        {/* Motivação */}
-        {detail.insight?.feedback_motivacional && (
-          <div className="mb-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-4 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-indigo-700">
-              <Lightbulb size={16} />
-              <span>Motivação</span>
+        {/* Links de Referências */}
+        {baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
+          <div className="mb-4 rounded-2xl bg-purple-50 px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-purple-900">
+              <ExternalLink size={16} />
+              <span>Referências</span>
             </div>
-            <p className="leading-relaxed italic text-indigo-900">
-              {detail.insight.feedback_motivacional}
-            </p>
+            <ul className="space-y-2">
+              {baseCientifica.links_referencias.map((link, idx) => (
+                <li key={idx}>
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-purple-700 underline underline-offset-2 hover:text-purple-900"
+                  >
+                    {link}
+                    <ExternalLink size={12} />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        {/* Link para insight completo */}
-        {detail.insight && (
-          <div className="mb-4 flex justify-end">
-            <button
-              type="button"
-              onClick={handleOpenInsight}
-              className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
-            >
-              Saber mais sobre este insight
-              <ArrowUpRight size={12} />
-            </button>
+        {/* Informações Adicionais */}
+        {(detail.catalogo?.tempo_estimado_min || detail.catalogo?.dificuldade) && (
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Informações Adicionais
+            </p>
+            <div className="space-y-1">
+              {detail.catalogo.tempo_estimado_min && (
+                <p className="text-xs text-slate-600">
+                  <span className="font-medium">Tempo estimado:</span> {detail.catalogo.tempo_estimado_min} minutos
+                </p>
+              )}
+              {detail.catalogo.dificuldade && (
+                <p className="text-xs text-slate-600">
+                  <span className="font-medium">Dificuldade:</span> {detail.catalogo.dificuldade === 1 ? 'Fácil' : detail.catalogo.dificuldade === 2 ? 'Média' : 'Alta'}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -351,6 +314,29 @@ const QuestDetailPageV13 = () => {
             <p className="mt-1 text-sm font-semibold text-slate-800">{detail.area_vida.nome}</p>
             {detail.area_vida.descricao && (
               <p className="mt-1 text-xs text-slate-600">{detail.area_vida.descricao}</p>
+            )}
+          </div>
+        )}
+
+        {/* Sabotador */}
+        {detail.sabotador && (
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Sabotador Relacionado
+            </p>
+            <p className="mt-1 text-sm font-semibold text-slate-800">{detail.sabotador.nome}</p>
+            {detail.sabotador.descricao && (
+              <p className="mt-1 text-xs text-slate-600">{detail.sabotador.descricao}</p>
+            )}
+            {detail.sabotador.contramedidas_sugeridas && detail.sabotador.contramedidas_sugeridas.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs font-medium text-slate-700">Contramedidas:</p>
+                <ul className="mt-1 space-y-1">
+                  {detail.sabotador.contramedidas_sugeridas.map((contramedida, idx) => (
+                    <li key={idx} className="text-xs text-slate-600">• {contramedida}</li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         )}
