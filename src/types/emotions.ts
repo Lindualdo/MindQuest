@@ -325,27 +325,29 @@ export interface AreaVida {
   codigo?: string;
 }
 
-export interface QuestDetailInsight {
-  id: string;
-  titulo: string;
-  descricao?: string;
-  resumo_situacao?: string;
-  feedback_positivo?: string;
-  feedback_desenvolvimento?: string;
-  feedback_motivacional?: string;
-  recursos_sugeridos?: InsightResource[];
-  prioridade?: string;
-  categoria?: string;
-  tipo?: string;
-  icone?: string;
-}
-
 export interface QuestDetailSabotador {
   id: string;
   nome: string;
   descricao?: string;
   contextos_tipicos?: string[];
   contramedidas_sugeridas?: string[];
+}
+
+export interface QuestDetailCatalogoBaseCientifica {
+  tipo?: string;
+  objetivo?: string;
+  fundamentos?: string;
+  como_aplicar?: string;
+  links_referencias?: string[];
+}
+
+export interface QuestDetailCatalogo {
+  codigo?: string | null;
+  base_cientifica?: QuestDetailCatalogoBaseCientifica | null;
+  instrucoes?: Record<string, unknown> | null;
+  tempo_estimado_min?: number | null;
+  dificuldade?: number | null;
+  categoria?: string | null;
 }
 
 export interface QuestDetail {
@@ -363,8 +365,8 @@ export interface QuestDetail {
   xp_concedido: number;
   recorrencias?: any | null;
   area_vida?: AreaVida | null;
-  insight?: QuestDetailInsight | null;
   sabotador?: QuestDetailSabotador | null;
+  catalogo?: QuestDetailCatalogo | null;
 }
 
 export interface ResumoConversa {
