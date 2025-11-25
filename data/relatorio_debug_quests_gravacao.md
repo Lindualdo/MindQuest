@@ -149,3 +149,4 @@ historico_inserido AS (
 
 *Relatório gerado para discussão antes de implementar correções*
 
+
