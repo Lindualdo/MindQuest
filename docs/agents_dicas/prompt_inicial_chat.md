@@ -8,7 +8,7 @@
 ## Prompt para Copiar
 
 ```
-Olá! Vou trabalhar no sistema de quests do MindQuest v1.3.5. Segue contexto importante:
+Olá! vamos trabalhar no sistema de quests do MindQuest v1.3.5. Segue contexto importante:
 
 ## Contexto do Projeto
 - Stack: React/TypeScript (frontend) + n8n (backend/workflows) + PostgreSQL
@@ -58,7 +58,7 @@ Olá! Vou trabalhar no sistema de quests do MindQuest v1.3.5. Segue contexto imp
 - Testar queries no banco antes de aplicar em workflows
 - Seguir padrão de commits: [LABEL] verbo no infinitivo + objeto direto
 
-Estou pronto para trabalhar! Me diga qual é a tarefa.
+
 ```
 
 ---
