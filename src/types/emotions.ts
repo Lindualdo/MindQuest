@@ -759,6 +759,10 @@ export interface StoreState {
   questSnapshot: QuestSnapshot | null;
   questLoading: boolean;
   questError: string | null;
+  questDetail: QuestDetail | null;
+  questDetailLoading: boolean;
+  questDetailError: string | null;
+  questDetailSelectedDate: string | null; // Data selecionada no painel quando abriu o detalhe
   
   // Actions
   setPeriodo: (periodo: 'semana' | 'mes' | 'trimestre') => void;

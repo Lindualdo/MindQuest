@@ -284,7 +284,7 @@ const PainelQuestsPageV13: React.FC = () => {
           <div className="mt-3 flex justify-end">
             <button
               type="button"
-              onClick={() => openQuestDetail(questId)}
+              onClick={() => openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd'))}
               className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
             >
               Saber mais

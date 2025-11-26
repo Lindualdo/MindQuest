@@ -65,8 +65,9 @@ export default async function handler(req: any, res: any) {
   const source = req.query ?? {};
   const usuarioId = readUsuarioId(source);
   const questId = readQuestId(source);
+  const dataReferencia = source.data_referencia || source.dataReferencia;
 
-  console.log('[concluir-quest] Dados extraídos:', { usuarioId, questId, source });
+  console.log('[concluir-quest] Dados extraídos:', { usuarioId, questId, dataReferencia, source });
 
   if (!usuarioId) {
     console.log('[concluir-quest] Erro: usuario_id obrigatório');
@@ -89,10 +90,12 @@ export default async function handler(req: any, res: any) {
   });
   if (source.fonte) queryParams.set('fonte', String(source.fonte));
   if (source.comentario) queryParams.set('comentario', String(source.comentario));
+  if (source.data_referencia) queryParams.set('data_referencia', String(source.data_referencia));
+  if (source.dataReferencia) queryParams.set('data_referencia', String(source.dataReferencia));
 
   const webhookUrl = `${remoteEndpoint}?${queryParams.toString()}`;
 
-  console.log('[concluir-quest] Chamando webhook:', { webhookUrl, usuarioId, questId });
+  console.log('[concluir-quest] Chamando webhook:', { webhookUrl, usuarioId, questId, dataReferencia });
 
   try {
     const upstreamResponse = await fetch(webhookUrl, {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -7,10 +7,6 @@ import {
   Target,
   BookOpen,
   Loader2,
-  Lightbulb,
-  Heart,
-  Brain,
-  Users,
   CheckCircle2,
   ExternalLink,
 } from 'lucide-react';
@@ -19,41 +15,6 @@ import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 import { format } from 'date-fns';
-
-const categoriaBadge = (categoria?: string) => {
-  switch (categoria) {
-    case 'emocional':
-      return { label: 'Emocional', color: 'bg-rose-100 text-rose-700', icon: <Heart size={14} /> };
-    case 'comportamental':
-      return { label: 'Comportamental', color: 'bg-sky-100 text-sky-700', icon: <Target size={14} /> };
-    case 'social':
-      return { label: 'Social', color: 'bg-purple-100 text-purple-700', icon: <Users size={14} /> };
-    case 'cognitivo':
-      return { label: 'Cognitivo', color: 'bg-indigo-100 text-indigo-700', icon: <Brain size={14} /> };
-    default:
-      return { label: categoria || 'Geral', color: 'bg-gray-100 text-gray-600', icon: <Lightbulb size={14} /> };
-  }
-};
-
-const prioridadeBadge = (prioridade?: string) => {
-  switch (prioridade) {
-    case 'alta':
-      return { label: 'Alta', color: 'bg-red-100 text-red-700', dot: 'bg-red-500' };
-    case 'media':
-      return { label: 'Média', color: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' };
-    default:
-      return { label: 'Baixa', color: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' };
-  }
-};
-
-const complexidadeBadge = (complexidade: number) => {
-  if (complexidade >= 4) {
-    return { label: 'Alta', color: 'bg-red-100 text-red-700' };
-  } else if (complexidade >= 2) {
-    return { label: 'Média', color: 'bg-amber-100 text-amber-700' };
-  }
-  return { label: 'Baixa', color: 'bg-emerald-100 text-emerald-700' };
-};
 
 const QuestDetailPageV13 = () => {
   const {
@@ -64,6 +25,9 @@ const QuestDetailPageV13 = () => {
     closeQuestDetail,
     setView,
     concluirQuest,
+    openQuestDetail,
+    questSnapshot,
+    questDetailSelectedDate,
   } = useDashboard();
 
   const nomeUsuario =
@@ -72,9 +36,6 @@ const QuestDetailPageV13 = () => {
     'Aldo';
 
   const detail = questDetail;
-  const prioridadeInfo = useMemo(() => (detail?.prioridade ? prioridadeBadge(detail.prioridade) : null), [detail]);
-  const complexidadeInfo = useMemo(() => complexidadeBadge(detail?.complexidade ?? 0), [detail]);
-  const categoriaInfo = useMemo(() => (detail?.catalogo?.categoria ? categoriaBadge(detail.catalogo.categoria) : null), [detail]);
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
@@ -92,14 +53,84 @@ const QuestDetailPageV13 = () => {
 
   const handleConcluirQuest = async () => {
     if (!detail?.id) return;
-    const hoje = format(new Date(), 'yyyy-MM-dd');
+    
+    // REGRA: data_conclusao deve sempre ser do dia planejado
+    // data_registro deve ser do dia que foi feito a mudança de status (hoje)
+    
+    const hoje = new Date();
+    let dataReferencia: string;
+    
+    // Para quests recorrentes, usar a data do dia específico selecionado ou a mais recente não concluída
+    if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
+      const dias = (detail.recorrencias as any).dias;
+      if (Array.isArray(dias) && dias.length > 0) {
+        // Se há data selecionada no painel, usar ela (é a data planejada)
+        if (questDetailSelectedDate) {
+          dataReferencia = questDetailSelectedDate;
+        } else {
+          // Caso contrário, encontrar a data mais recente não concluída que seja <= hoje
+          const diasNaoConcluidos = dias
+            .filter((dia: any) => {
+              if (dia.status === 'concluida') return false;
+              if (!dia.data) return false;
+              try {
+                const dataDia = new Date(dia.data);
+                return dataDia <= hoje;
+              } catch {
+                return false;
+              }
+            })
+            .sort((a: any, b: any) => {
+              try {
+                const dataA = new Date(a.data);
+                const dataB = new Date(b.data);
+                return dataB.getTime() - dataA.getTime();
+              } catch {
+                return 0;
+              }
+            });
+          
+          if (diasNaoConcluidos.length > 0 && diasNaoConcluidos[0].data) {
+            dataReferencia = diasNaoConcluidos[0].data;
+          } else {
+            // Se não há dias não concluídos <= hoje, usar a data mais recente (pode ser futura)
+            const ultimoDia = dias[dias.length - 1];
+            if (ultimoDia && ultimoDia.data) {
+              dataReferencia = ultimoDia.data;
+            } else {
+              dataReferencia = format(hoje, 'yyyy-MM-dd');
+            }
+          }
+        }
+      } else {
+        dataReferencia = questDetailSelectedDate || format(hoje, 'yyyy-MM-dd');
+      }
+    } else {
+      // Para quests não recorrentes, usar a data selecionada no painel (data planejada)
+      // Se não houver data selecionada, usar a data atual como fallback
+      dataReferencia = questDetailSelectedDate || format(hoje, 'yyyy-MM-dd');
+    }
+    
+    console.log('[QuestDetail] Concluindo quest:', {
+      questId: detail.id,
+      dataReferencia,
+      dataSelecionada: questDetailSelectedDate,
+      status: detail.status,
+      temRecorrencias: !!detail.recorrencias
+    });
+    
     try {
-      await concluirQuest(detail.id, hoje);
-      setTimeout(() => {
-        handleBack();
-      }, 500);
+      await concluirQuest(detail.id, dataReferencia);
+      
+      // Aguardar um pouco para o backend processar
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Recarregar o questDetail para refletir o novo status
+      if (dashboardData?.usuario?.id) {
+        await openQuestDetail(detail.id, questDetailSelectedDate || undefined);
+      }
     } catch (error) {
-      console.error('Erro ao concluir quest:', error);
+      console.error('[QuestDetail] Erro ao concluir quest:', error);
     }
   };
 
@@ -159,7 +190,30 @@ const QuestDetailPageV13 = () => {
       );
     }
 
-    const podeConcluir = detail.status === 'pendente' || detail.status === 'ativa';
+    // Verificar se é quest do tipo conversa (concluída automaticamente)
+    // Quest de reflexão diária não pode ser concluída manualmente pelo usuário
+    const isConversaQuest = 
+      detail.catalogo?.codigo === 'reflexao_diaria' ||
+      detail.tipo === 'reflexao_diaria' ||
+      detail.titulo === 'Reflexão Diária';
+
+    // Para quests recorrentes, verificar se há algum dia não concluído
+    // Isso permite concluir quests de datas passadas mesmo que o status geral seja 'concluida'
+    let temDiaNaoConcluido = false;
+    if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
+      const dias = (detail.recorrencias as any).dias;
+      if (Array.isArray(dias)) {
+        temDiaNaoConcluido = dias.some((dia: any) => dia.status !== 'concluida');
+      }
+    }
+
+    // Permitir concluir quests que não estejam já concluídas e não sejam de conversa
+    // Para quests recorrentes, também permitir se houver algum dia não concluído
+    // Isso permite concluir quests de datas passadas que o usuário esqueceu de marcar
+    // Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
+    const podeConcluir = !isConversaQuest && 
+      detail.status && 
+      (detail.status !== 'concluida' || temDiaNaoConcluido);
     const baseCientifica = detail.catalogo?.base_cientifica;
 
     return (
@@ -177,30 +231,11 @@ const QuestDetailPageV13 = () => {
             <ArrowLeft size={16} />
             Voltar
           </button>
-          <div className="flex gap-2">
-            {categoriaInfo && (
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${categoriaInfo.color}`}>
-                {categoriaInfo.icon}
-                {categoriaInfo.label}
-              </span>
-            )}
-            {detail.area_vida && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[0.7rem] font-semibold text-blue-700">
-                {detail.area_vida.nome}
-              </span>
-            )}
-            {prioridadeInfo && (
-              <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${prioridadeInfo.color}`}>
-                <span className={`h-2 w-2 rounded-full ${prioridadeInfo.dot}`} />
-                {prioridadeInfo.label}
-              </span>
-            )}
-            {complexidadeInfo && (
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${complexidadeInfo.color}`}>
-                {complexidadeInfo.label}
-              </span>
-            )}
-          </div>
+          {detail.area_vida && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[0.7rem] font-semibold text-blue-700">
+              {detail.area_vida.nome}
+            </span>
+          )}
         </div>
 
         <div className="mb-4">
@@ -211,12 +246,6 @@ const QuestDetailPageV13 = () => {
             <p className="mt-2 text-sm leading-relaxed text-[#475569]">
               {detail.descricao}
             </p>
-          )}
-          {detail.xp_recompensa && (
-            <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1.5 text-sm font-semibold text-indigo-700">
-              <Sparkles size={14} />
-              +{detail.xp_recompensa} XP
-            </div>
           )}
         </div>
 

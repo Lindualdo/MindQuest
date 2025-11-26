@@ -105,6 +105,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   questDetail: null,
   questDetailLoading: false,
   questDetailError: null,
+  questDetailSelectedDate: null, // Data selecionada no painel quando abriu o detalhe
 
   // Actions básicas
   setError: (error) => {
@@ -520,10 +521,21 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           };
         }
 
+        // Atualizar questDetail se estiver aberto e for a mesma quest
+        let novoQuestDetail = state.questDetail;
+        if (state.questDetail && state.questDetail.id === questId) {
+          novoQuestDetail = {
+            ...state.questDetail,
+            status: (resultado.status as QuestStatus) ?? 'concluida',
+            progresso_atual: state.questDetail.progresso_meta ?? 1,
+          };
+        }
+
         return {
           questSnapshot: novoSnapshot ?? state.questSnapshot,
           dashboardData: novoDashboard ?? state.dashboardData,
           questsCard: novoQuestsCard ?? state.questsCard,
+          questDetail: novoQuestDetail ?? state.questDetail,
         };
       });
 
@@ -936,7 +948,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     });
   },
 
-  openQuestDetail: async (questId) => {
+  openQuestDetail: async (questId, dataSelecionada) => {
     const { dashboardData } = get();
     const userId = dashboardData?.usuario?.id;
 
@@ -948,7 +960,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     set({
       view: 'questDetail',
       questDetailLoading: true,
-      questDetailError: null
+      questDetailError: null,
+      questDetailSelectedDate: dataSelecionada || null
     });
 
     try {
@@ -963,7 +976,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       set({
         questDetailLoading: false,
         questDetailError: error instanceof Error ? error.message : 'Erro ao carregar quest',
-        questDetail: null
+        questDetail: null,
+        questDetailSelectedDate: null
       });
     }
   },
@@ -973,7 +987,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       view: 'painelQuests',
       questDetail: null,
       questDetailError: null,
-      questDetailLoading: false
+      questDetailLoading: false,
+      questDetailSelectedDate: null
     });
   },
 
