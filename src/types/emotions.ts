@@ -620,6 +620,8 @@ export interface WeeklyProgressCardData {
   xpMetaSemana?: number;
   percentualMeta?: number;
   diasConcluidos?: number;
+  qtdQuestsPrevistasSemana?: number;
+  qtdQuestsConcluidasSemana?: number;
   dias: WeeklyProgressDay[];
 }
 

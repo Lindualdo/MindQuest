@@ -20,10 +20,10 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
     ? Math.min(100, Math.round((xpConversaTotal / metaConversaTotal) * 100)) 
     : 0;
 
-  // Meta semanal de quests (soma de qtdQuestsPrevistas, mínimo 15)
-  const metaQuestsSemanal = Math.max(15, dias.reduce((sum, dia) => sum + (dia.qtdQuestsPrevistas ?? 0), 0));
-  // Quests concluídas (soma de qtdQuestsConcluidas por dia)
-  const questsConcluidasSemanal = dias.reduce((sum, dia) => sum + (dia.qtdQuestsConcluidas ?? 0), 0);
+  // Meta semanal de quests (usa valor do backend, padrão 7 se não vier)
+  const metaQuestsSemanal = summary.qtdQuestsPrevistasSemana ?? 7;
+  // Quests concluídas (usa valor do backend, senão soma dos dias)
+  const questsConcluidasSemanal = summary.qtdQuestsConcluidasSemana ?? dias.reduce((sum, dia) => sum + (dia.qtdQuestsConcluidas ?? 0), 0);
   const progressoQuests = metaQuestsSemanal > 0 
     ? Math.min(100, Math.round((questsConcluidasSemanal / metaQuestsSemanal) * 100))
     : 0;
