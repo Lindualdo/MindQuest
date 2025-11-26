@@ -24,3 +24,4 @@ dist-ssr
 *.sln
 *.sw?
 config/postgres.env
+backups/n8n-backup.log.jsonl
