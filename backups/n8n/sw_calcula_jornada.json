@@ -15,26 +15,26 @@
           ]
         }
       },
-      "id": "f1f92aaa-9318-4cc2-8325-e7e72b2e5626",
+      "id": "6644827b-4601-44ba-a505-118a94fe30d0",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        0,
-        0
+        208,
+        224
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || (typeof usuarioId !== 'string' && typeof usuarioId !== 'number')) {\n  throw new Error('usuario_id obrigatório');\n}\nreturn [{ json: { usuario_id: String(usuarioId).trim() } }];"
       },
-      "id": "2c47f697-2896-498a-8de8-2df7cc5352c7",
+      "id": "0a43e358-d9fb-4b1b-a532-bfdfe68b2b85",
       "name": "Validar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        0
+        432,
+        224
       ]
     },
     {
@@ -45,13 +45,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "208a85ec-cdfd-4f54-9775-5360f13e569a",
+      "id": "2238ff6e-ef12-4792-90b7-4e4add2f8282",
       "name": "Buscar XP",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        464,
-        0
+        624,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -68,13 +68,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0, $json.target_nivel || 1] }}"
         }
       },
-      "id": "3ab8600d-a22b-4729-9443-df30166bf724",
+      "id": "4b134d47-69d2-4003-9200-cbfeaf806ebe",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        704,
-        0
+        976,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -91,13 +91,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.target_estagio || 1] }}"
         }
       },
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "id": "0b6ebb6b-5fc9-401e-8dff-d4dbd7057d18",
       "name": "Atualizar Estágio Usuário",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        928,
-        0
+        1152,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -108,27 +108,27 @@
     },
     {
       "parameters": {},
-      "id": "be9e5045-9357-443e-beaf-bf20e53328f3",
+      "id": "2834b78f-1719-4f26-8ce3-6add5c153339",
       "name": "Fim",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1152,
-        0
+        1408,
+        224
       ]
     },
     {
-      "id": "b7a9f734-de7f-4dbb-95b4-73b01c2d0983",
+      "parameters": {
+        "jsCode": "const data = $json || {};\nconst xpTotal = Number(data.xp_total) || 0;\nconst metrics = {\n  sequencia_recorde: Number(data.sequencia_recorde) || 0,\n  total_quests_personalizadas: Number(data.total_quests_personalizadas) || 0,\n  total_quests_concluidas: Number(data.total_quests_concluidas) || 0,\n  sabotadores_identificados: Number(data.sabotadores_identificados) || 0,\n  quests_concluidas: Number(data.quests_concluidas) || 0,\n  quests_desafiadoras: Number(data.quests_desafiadoras) || 0,\n  quests_recorrentes_21: Number(data.quests_recorrentes_21) || 0,\n  areas_vida_distintas: Number(data.areas_vida_distintas) || 0,\n  quests_compartilhar: Number(data.quests_compartilhar) || 0,\n  quests_proprias: Number(data.quests_proprias) || 0,\n  falhas_recuperadas: Number(data.falhas_recuperadas) || 0,\n  projetos_impacto: Number(data.projetos_impacto) || 0,\n};\nmetrics.ciclos30 = Math.floor(metrics.sequencia_recorde / 30);\nconst LEVELS = [\n  { level: 1, minXp: 0, requirements: () => true },\n  { level: 2, minXp: 500, requirements: (m) => m.sequencia_recorde >= 7 && m.sabotadores_identificados >= 3 && (m.total_quests_personalizadas >= 3 || m.quests_concluidas >= 3) },\n  { level: 3, minXp: 1200, requirements: (m) => m.sequencia_recorde >= 10 && m.quests_concluidas >= 5 && m.quests_desafiadoras >= 1 },\n  { level: 4, minXp: 2200, requirements: (m) => m.sequencia_recorde >= 15 && m.quests_concluidas >= 8 && m.quests_recorrentes_21 >= 1 },\n  { level: 5, minXp: 3600, requirements: (m) => m.sequencia_recorde >= 20 && m.quests_concluidas >= 12 && m.falhas_recuperadas >= 1 },\n  { level: 6, minXp: 5400, requirements: (m) => m.sequencia_recorde >= 25 && m.quests_concluidas >= 15 && m.areas_vida_distintas >= 3 },\n  { level: 7, minXp: 7400, requirements: (m) => m.sequencia_recorde >= 30 && m.quests_concluidas >= 20 && m.quests_proprias >= 2 },\n  { level: 8, minXp: 9800, requirements: (m) => m.ciclos30 >= 2 && m.quests_concluidas >= 25 && m.quests_compartilhar >= 3 },\n  { level: 9, minXp: 12600, requirements: (m) => m.sequencia_recorde >= 45 && m.quests_concluidas >= 30 && m.projetos_impacto >= 1 },\n  { level: 10, minXp: 16000, requirements: (m) => m.sequencia_recorde >= 365 && m.projetos_impacto >= 1 },\n];\nconst xpEligible = LEVELS.reduce((acc, lvl) => (xpTotal >= lvl.minXp ? lvl.level : acc), 1);\nlet criteriaEligible = 1;\nfor (const lvl of LEVELS) {\n  if (lvl.level > xpEligible) break;\n  if (lvl.requirements(metrics)) {\n    criteriaEligible = lvl.level;\n  } else {\n    break;\n  }\n}\nconst targetLevel = Math.min(xpEligible, criteriaEligible);\n\n// Calcular estágio baseado no nível: 1-3=estágio1, 4-6=estágio2, 7-9=estágio3, 10=estágio4\nconst calcularEstagio = (nivel) => {\n  if (nivel <= 3) return 1;\n  if (nivel <= 6) return 2;\n  if (nivel <= 9) return 3;\n  return 4;\n};\n\nconst targetEstagio = calcularEstagio(targetLevel);\n\nreturn [{\n  json: {\n    usuario_id: data.usuario_id,\n    xp_total: xpTotal,\n    xp_eligible_level: xpEligible,\n    criteria_eligible_level: criteriaEligible,\n    target_nivel: targetLevel,\n    target_estagio: targetEstagio,\n  },\n}];"
+      },
+      "id": "c4f57c71-6a9a-4ec9-8578-18997ae743bf",
       "name": "Determinar Nível",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        584,
-        0
-      ],
-      "parameters": {
-        "jsCode": "const data = $json || {};\nconst xpTotal = Number(data.xp_total) || 0;\nconst metrics = {\n  sequencia_recorde: Number(data.sequencia_recorde) || 0,\n  total_quests_personalizadas: Number(data.total_quests_personalizadas) || 0,\n  total_quests_concluidas: Number(data.total_quests_concluidas) || 0,\n  sabotadores_identificados: Number(data.sabotadores_identificados) || 0,\n  quests_concluidas: Number(data.quests_concluidas) || 0,\n  quests_desafiadoras: Number(data.quests_desafiadoras) || 0,\n  quests_recorrentes_21: Number(data.quests_recorrentes_21) || 0,\n  areas_vida_distintas: Number(data.areas_vida_distintas) || 0,\n  quests_compartilhar: Number(data.quests_compartilhar) || 0,\n  quests_proprias: Number(data.quests_proprias) || 0,\n  falhas_recuperadas: Number(data.falhas_recuperadas) || 0,\n  projetos_impacto: Number(data.projetos_impacto) || 0,\n};\nmetrics.ciclos30 = Math.floor(metrics.sequencia_recorde / 30);\nconst LEVELS = [\n  { level: 1, minXp: 0, requirements: () => true },\n  { level: 2, minXp: 500, requirements: (m) => m.sequencia_recorde >= 7 && m.sabotadores_identificados >= 3 && (m.total_quests_personalizadas >= 3 || m.quests_concluidas >= 3) },\n  { level: 3, minXp: 1200, requirements: (m) => m.sequencia_recorde >= 10 && m.quests_concluidas >= 5 && m.quests_desafiadoras >= 1 },\n  { level: 4, minXp: 2200, requirements: (m) => m.sequencia_recorde >= 15 && m.quests_concluidas >= 8 && m.quests_recorrentes_21 >= 1 },\n  { level: 5, minXp: 3600, requirements: (m) => m.sequencia_recorde >= 20 && m.quests_concluidas >= 12 && m.falhas_recuperadas >= 1 },\n  { level: 6, minXp: 5400, requirements: (m) => m.sequencia_recorde >= 25 && m.quests_concluidas >= 15 && m.areas_vida_distintas >= 3 },\n  { level: 7, minXp: 7400, requirements: (m) => m.sequencia_recorde >= 30 && m.quests_concluidas >= 20 && m.quests_proprias >= 2 },\n  { level: 8, minXp: 9800, requirements: (m) => m.ciclos30 >= 2 && m.quests_concluidas >= 25 && m.quests_compartilhar >= 3 },\n  { level: 9, minXp: 12600, requirements: (m) => m.sequencia_recorde >= 45 && m.quests_concluidas >= 30 && m.projetos_impacto >= 1 },\n  { level: 10, minXp: 16000, requirements: (m) => m.sequencia_recorde >= 365 && m.projetos_impacto >= 1 },\n];\nconst xpEligible = LEVELS.reduce((acc, lvl) => (xpTotal >= lvl.minXp ? lvl.level : acc), 1);\nlet criteriaEligible = 1;\nfor (const lvl of LEVELS) {\n  if (lvl.level > xpEligible) break;\n  if (lvl.requirements(metrics)) {\n    criteriaEligible = lvl.level;\n  } else {\n    break;\n  }\n}\nconst targetLevel = Math.min(xpEligible, criteriaEligible);\n\n// Calcular estágio baseado no nível: 1-3=estágio1, 4-6=estágio2, 7-9=estágio3, 10=estágio4\nconst calcularEstagio = (nivel) => {\n  if (nivel <= 3) return 1;\n  if (nivel <= 6) return 2;\n  if (nivel <= 9) return 3;\n  return 4;\n};\n\nconst targetEstagio = calcularEstagio(targetLevel);\n\nreturn [{\n  json: {\n    usuario_id: data.usuario_id,\n    xp_total: xpTotal,\n    xp_eligible_level: xpEligible,\n    criteria_eligible_level: criteriaEligible,\n    target_nivel: targetLevel,\n    target_estagio: targetEstagio,\n  },\n}];"
-      }
+        800,
+        224
+      ]
     }
   ],
   "connections": {
@@ -213,7 +213,7 @@
       }
     ]
   },
-  "versionId": "dd65673a-eb5c-4e97-994c-1d466a65cb02",
+  "versionId": "a072372d-ac98-4c28-9cb0-d1f4b2fbb95e",
   "triggerCount": 0,
   "shared": [
     {

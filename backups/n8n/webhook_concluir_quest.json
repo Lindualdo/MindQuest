@@ -111,7 +111,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.progresso_meta,\n  uq.progresso_atual,\n  uq.progresso_percentual,\n  uq.xp_concedido,\n  uq.config,\n  uq.referencia_data,\n  uq.contexto_origem,\n  uq.concluido_em,\n  uq.atualizado_em,\n  uc.xp_total,\n  uc.xp_base,\n  uc.xp_bonus,\n  uc.total_quests_concluidas,\n  uc.total_quests_personalizadas\nFROM public.usuarios_quest uq\nLEFT JOIN public.usuarios_conquistas uc ON uc.usuario_id = uq.usuario_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid\nLIMIT 1;",
+        "query": "SELECT\n  uq.id AS quest_id,\n  uq.usuario_id,\n  uq.status,\n  uq.config,\n  uq.concluido_em,\n  uq.atualizado_em,\n  uq.recorrencias,\n  uq.catalogo_id,\n  uq.quest_estagio,\n  uc.xp_total,\n  uc.xp_base,\n  uc.xp_bonus,\n  uc.total_quests_concluidas,\n  uc.total_quests_personalizadas,\n  -- Calcular progresso a partir das recorrências e datas concluídas\n  COALESCE(\n    (\n      SELECT COUNT(*)\n      FROM jsonb_array_elements(uq.recorrencias->'dias') AS dia\n      WHERE dia->>'data' IS NOT NULL\n    ),\n    0\n  ) AS progresso_meta,\n  COALESCE(\n    (\n      SELECT COUNT(DISTINCT (occ->>'data_concluida')::date)\n      FROM public.conquistas_historico ch\n      CROSS JOIN LATERAL jsonb_array_elements(ch.detalhes->'ocorrencias') AS occ\n      WHERE ch.usuarios_quest_id = uq.id\n        AND ch.usuario_id = uq.usuario_id\n        AND ch.tipo = 'quest'\n        AND (occ->>'data_concluida') IS NOT NULL\n    ),\n    0\n  ) AS progresso_atual,\n  -- Buscar XP concedido do histórico de conquistas\n  COALESCE(\n    (\n      SELECT SUM((occ->>'xp_base')::int + COALESCE((occ->>'xp_bonus')::int, 0))\n      FROM public.conquistas_historico ch\n      CROSS JOIN LATERAL jsonb_array_elements(ch.detalhes->'ocorrencias') AS occ\n      WHERE ch.usuarios_quest_id = uq.id\n        AND ch.usuario_id = uq.usuario_id\n        AND ch.tipo = 'quest'\n    ),\n    0\n  ) AS xp_concedido\nFROM public.usuarios_quest uq\nLEFT JOIN public.usuarios_conquistas uc ON uc.usuario_id = uq.usuario_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid\nLIMIT 1;",
         "options": {
           "queryReplacement": "={{ [$('Validar Atualização').item.json.quest_id, $('Validar Atualização').item.json.usuario_id] }}"
         }
@@ -133,7 +133,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first()?.json ?? {};\n\nreturn [{\n  json: {\n    success: true,\n    quest_id: item.quest_id,\n    usuario_id: item.usuario_id,\n    status: item.status,\n    xp_adicionado: item.xp_concedido || 0,\n    xp_base: item.xp_base || 0,\n    xp_bonus: item.xp_bonus || 0,\n    total_quests_concluidas: item.total_quests_concluidas || 0,\n    total_quests_personalizadas: item.total_quests_personalizadas || 0,\n    quest: {\n      id: item.quest_id,\n      status: item.status,\n      progresso_meta: item.progresso_meta,\n      progresso_atual: item.progresso_atual,\n      progresso_percentual: item.progresso_percentual,\n      xp_concedido: item.xp_concedido,\n      config: item.config,\n      concluido_em: item.concluido_em,\n      atualizado_em: item.atualizado_em\n    }\n  }\n}];"
+        "jsCode": "const item = $input.first()?.json ?? {};\n\n// Calcular progresso percentual\nconst progressoMeta = item.progresso_meta || 0;\nconst progressoAtual = item.progresso_atual || 0;\nconst progressoPercentual = progressoMeta > 0 ? Math.round((progressoAtual / progressoMeta) * 100) : 0;\n\nreturn [{\n  json: {\n    success: true,\n    quest_id: item.quest_id,\n    usuario_id: item.usuario_id,\n    status: item.status,\n    xp_adicionado: item.xp_concedido || 0,\n    xp_base: item.xp_base || 0,\n    xp_bonus: item.xp_bonus || 0,\n    total_quests_concluidas: item.total_quests_concluidas || 0,\n    total_quests_personalizadas: item.total_quests_personalizadas || 0,\n    quest: {\n      id: item.quest_id,\n      status: item.status,\n      progresso_meta: progressoMeta,\n      progresso_atual: progressoAtual,\n      progresso_percentual: progressoPercentual,\n      xp_concedido: item.xp_concedido || 0,\n      config: item.config,\n      concluido_em: item.concluido_em,\n      atualizado_em: item.atualizado_em\n    }\n  }\n}];"
       },
       "id": "a2e79b6f-5ba1-4148-b6e3-0343dded1c13",
       "name": "Formatar Resposta",
@@ -228,13 +228,15 @@
       ]
     }
   },
-  "settings": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0f9102c2-631c-4566-8fe3-1873057ef0d8",
+  "versionId": "5c4a2121-f1d7-4356-b6b4-28a9168c8f13",
   "triggerCount": 1,
   "shared": [
     {

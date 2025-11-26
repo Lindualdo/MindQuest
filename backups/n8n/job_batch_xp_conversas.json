@@ -53,7 +53,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "usuario_id": "={{ $json.id }}",
-            "calcular_apenas_novos": true
+            "calcular_apenas_novos": false
           },
           "matchingColumns": [
             "usuario_id"
@@ -171,7 +171,7 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "fd3fc954-896a-43b0-bcf2-fb18025d1242",
+  "versionId": "b999fa56-7b6e-4e31-8228-c85ae150c47a",
   "triggerCount": 1,
   "shared": [
     {

@@ -39,6 +39,16 @@ async function fetchJson(relativePath, searchParams = {}) {
   const res = await fetch(url, { headers: { 'X-N8N-API-KEY': apiKey } });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      const errorBody = await res.text().catch(() => '');
+      throw new Error(
+        `Token N8N_API_KEY inválido ou expirado (401 Unauthorized). ` +
+        `Atualize o token no keychain executando: ` +
+        `security delete-generic-password -a "mindquest_backup_token" -s "mindquest_n8n_backup" && ./scripts/run-n8n-backup.sh\n` +
+        `URL: ${url}\n` +
+        `Resposta: ${errorBody}`
+      );
+    }
     throw new Error(`Falha ao acessar ${url}: ${res.status} ${res.statusText}`);
   }
 

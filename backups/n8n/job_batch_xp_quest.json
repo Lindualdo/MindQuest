@@ -16,8 +16,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        480,
-        -128
+        208,
+        -144
       ],
       "credentials": {
         "postgres": {
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        720,
-        -128
+        432,
+        -144
       ]
     },
     {
@@ -52,11 +52,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $json.id }}"
+            "usuario_id": "={{ $('Listar Usuários').first().json.id }}"
           },
-          "matchingColumns": [
-            "usuario_id"
-          ],
+          "matchingColumns": [],
           "schema": [
             {
               "id": "usuario_id",
@@ -74,8 +72,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             }
           ],
           "attemptToConvertTypes": false,
@@ -90,8 +87,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        944,
-        -128
+        736,
+        -144
       ]
     },
     {
@@ -107,8 +104,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        240,
-        -128
+        -32,
+        -144
       ],
       "id": "369dd598-9e2f-40c0-92d9-6fd022c5887e",
       "name": "Schedule Trigger"
@@ -168,9 +165,11 @@
       "recurrenceRules": []
     }
   },
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "32061e7b-0ec8-4bb8-90dd-2b5249931f65",
+  "versionId": "90371b53-31e4-42a8-a189-8e9adc8336aa",
   "triggerCount": 1,
   "shared": [
     {
