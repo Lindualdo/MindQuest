@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, RefreshCw, ArrowUpRight, Plus, Calendar } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, RefreshCw, ArrowUpRight } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isSameDay, isFuture, addDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
@@ -7,11 +7,10 @@ import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
-import type { QuestPersonalizadaResumo, QuestEstagio } from '@/types/emotions';
+import type { QuestPersonalizadaResumo } from '@/types/emotions';
 import { mockWeeklyXpSummary } from '@/data/mockHomeV1_3';
-import PlanejamentoQuestsPage from './PlanejamentoQuestsPage';
 
-type QuestTab = 'a_fazer' | 'fazendo' | 'feito';
+type QuestTab = 'pendentes' | 'concluidas';
 
 const PainelQuestsPageV13: React.FC = () => {
   const {
@@ -35,13 +34,10 @@ const PainelQuestsPageV13: React.FC = () => {
     dashboardData?.usuario?.nome ??
     'Aldo';
 
-  const [activeTab, setActiveTab] = useState<QuestTab>('a_fazer');
+  const [activeTab, setActiveTab] = useState<QuestTab>('pendentes');
   const [activeNavTab, setActiveNavTab] = useState<TabId>('quests');
-  const [showPlanejamento, setShowPlanejamento] = useState(false);
   const hoje = useMemo(() => new Date(), []); // Fixar hoje no mount
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
-  const hasRequestedData = useRef(false);
-
   // Carregar dados apenas se não existirem no estado global (evita chamadas duplicadas)
   useEffect(() => {
     if (!usuarioId) return;
@@ -105,43 +101,67 @@ const PainelQuestsPageV13: React.FC = () => {
     }
   };
 
-  // Função para obter estágio da quest
-  const getQuestEstagio = (quest: QuestPersonalizadaResumo): QuestEstagio => {
-    // Se tem quest_estagio explícito, usar
-    if (quest.quest_estagio && ['a_fazer', 'fazendo', 'feito'].includes(quest.quest_estagio)) {
-      return quest.quest_estagio as QuestEstagio;
-    }
-    
-    // Se está concluída, é "feito"
-    if (quest.concluido_em || quest.status === 'concluida') {
-      return 'feito';
-    }
-    
-    // Se está ativa ou pendente, verificar se tem progresso
-    if (quest.status === 'ativa' || (quest.status === 'pendente' && quest.progresso_atual > 0)) {
-      return 'fazendo';
-    }
-    
-    // Padrão: a_fazer
-    return 'a_fazer';
-  };
-
-  // Quests filtradas pelo estágio
-  const questsPorEstagio = useMemo(() => {
+  // Quests filtradas pelo dia selecionado (TODAS as quests do dia, independente do status)
+  const questsDoDia = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     
-    // Filtrar apenas quests não concluídas para "a fazer" e "fazendo"
-    const naoConcluidas = todasQuests.filter(q => {
-      const estagio = getQuestEstagio(q);
-      return estagio !== 'feito';
+    return todasQuests.filter((quest) => {
+      // Se a quest é recorrente e tem o campo 'recorrencias'
+      if (quest.recorrencias && Array.isArray(quest.recorrencias.dias)) {
+        const diaQuest = quest.recorrencias.dias.find((d: any) => {
+          if (!d.data) return false;
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
+        // Se encontrou o dia na recorrencia, inclui a quest (independente do status)
+        return diaQuest !== undefined;
+      }
+      
+      // Lógica para quests não recorrentes ou sem 'recorrencias'
+      // Se concluída, só mostra no dia da conclusão
+      if (quest.concluido_em) {
+        try {
+          const dataConclusao = parseISO(quest.concluido_em);
+          return isSameDay(dataConclusao, selectedDate);
+        } catch {
+          return false;
+        }
+      }
+      
+      // Se pendente ou ativa: mostra em todos os dias da semana (são quests diárias)
+      return quest.status === 'pendente' || quest.status === 'ativa' || !quest.status;
     });
-    
-    return {
-      a_fazer: naoConcluidas.filter(q => getQuestEstagio(q) === 'a_fazer'),
-      fazendo: naoConcluidas.filter(q => getQuestEstagio(q) === 'fazendo'),
-      feito: todasQuests.filter(q => getQuestEstagio(q) === 'feito'),
-    };
-  }, [questSnapshot]);
+  }, [questSnapshot, selectedDate]);
+
+  // SIMPLIFICADO: usar apenas o status que já vem do webhook em recorrencias.dias[].status
+  const pendentes = useMemo(() => {
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    return questsDoDia.filter((q) => {
+      if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
+        const diaQuest = q.recorrencias.dias.find((d: any) => {
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
+        return diaQuest && diaQuest.status !== 'concluida';
+      }
+      return !q.concluido_em && q.status !== 'concluida';
+    });
+  }, [questsDoDia, selectedDate]);
+
+  const concluidas = useMemo(() => {
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    return questsDoDia.filter((q) => {
+      if (q.recorrencias && Array.isArray(q.recorrencias.dias)) {
+        const diaQuest = q.recorrencias.dias.find((d: any) => {
+          const diaNormalizado = normalizeDateStr(d.data);
+          return diaNormalizado === selectedDateStr;
+        });
+        return diaQuest && diaQuest.status === 'concluida';
+      }
+      return q.concluido_em || q.status === 'concluida';
+    });
+  }, [questsDoDia, selectedDate]);
 
   const handleBack = () => {
     setView('dashboard');
@@ -154,6 +174,7 @@ const PainelQuestsPageV13: React.FC = () => {
     try {
       await concluirQuest(questId, format(selectedDate, 'yyyy-MM-dd'));
       // Recarregar dados após conclusão para garantir que o estado esteja atualizado
+      // Especialmente importante para quests recorrentes que atualizam o campo 'recorrencias'
       if (usuarioId) {
         hasRequestedData.current = false;
         await Promise.all([
@@ -187,11 +208,13 @@ const PainelQuestsPageV13: React.FC = () => {
   const handleSelectDay = (data: Date | null) => {
     if (data) {
       setSelectedDate(data);
+      // NÃO recarrega: os dados já vêm todos do webhook
     }
   };
 
   const handleRefresh = () => {
     if (usuarioId) {
+      // Força recarregar ao clicar em refresh
       void loadQuestSnapshot(usuarioId);
       void loadWeeklyProgressCard(usuarioId);
     }
@@ -199,21 +222,13 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const isFutureDate = isFuture(selectedDate) && !isSameDay(selectedDate, new Date());
 
-  // Renderizar quest item (versão simplificada para "a fazer")
-  const renderQuestItemSimples = (quest: QuestPersonalizadaResumo) => {
-    return (
-      <div key={quest.instancia_id || quest.meta_codigo} className="flex items-center justify-between py-2 border-b border-slate-200 last:border-b-0">
-        <span className="text-sm text-[#1C2541]">{quest.titulo}</span>
-      </div>
-    );
-  };
-
-  // Renderizar quest item completo (para "fazendo" e "feito")
+  // Renderizar quest item
   const renderQuestItem = (quest: QuestPersonalizadaResumo, isConcluida = false) => {
     const questId = quest.instancia_id || quest.meta_codigo;
     const xpRecompensa = quest.xp_recompensa ?? 30;
     
     // Verificar se é quest do tipo conversa (concluída automaticamente)
+    // Quest de reflexão diária não pode ser concluída manualmente pelo usuário
     const configConversa = quest.config?.conversa;
     const isConversaQuest = 
       quest.catalogo_codigo === 'reflexao_diaria' ||
@@ -324,19 +339,24 @@ const PainelQuestsPageV13: React.FC = () => {
               const temProgresso = qtdConcluidas > 0;
               
               // Calcular altura da barra baseado em quantidade de quests (não mais XP)
+              // Progresso = quests concluídas / quests previstas
               let ratio = 0;
               if (qtdPrevistas > 0) {
+                // Se há quests previstas, calcular proporção normalmente
                 ratio = Math.min(1, qtdConcluidas / qtdPrevistas);
               } else if (qtdConcluidas > 0) {
+                // Se não há previstas mas há concluídas (ex: conversas), barra completa
                 ratio = 1;
               }
               
-              const barColor = '#22C55E';
-              const trackColor = '#CBD5E1';
+              // Barras com progresso em verde (igual na home)
+              const barColor = '#22C55E'; // Verde para preenchimento quando tem progresso
+              const trackColor = '#CBD5E1'; // Cinza claro para fundo
               
               const trackHeight = 56;
-              const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
+              const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0; // Mínimo de 4px quando tem progresso
 
+              // Formatar data como DD/MM
               const dataFormatada = dia.dateObj 
                 ? dia.dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
                 : '--';
@@ -350,10 +370,12 @@ const PainelQuestsPageV13: React.FC = () => {
                     isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                   } ${isSelected ? 'scale-105' : ''}`}
                 >
+                  {/* Número acima da barra - mostrar concluídas se não há previstas */}
                   <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5">
                     {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                   </span>
                   
+                  {/* Barra vertical */}
                   <div
                     className="relative overflow-hidden rounded-full"
                     style={{ 
@@ -391,22 +413,6 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Se está na tela de planejamento, mostrar ela
-  if (showPlanejamento) {
-    return (
-      <PlanejamentoQuestsPage
-        onBack={() => setShowPlanejamento(false)}
-        usuarioId={usuarioId || ''}
-        onQuestCreated={() => {
-          setShowPlanejamento(false);
-          if (usuarioId) {
-            void loadQuestSnapshot(usuarioId);
-          }
-        }}
-      />
-    );
-  }
-
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
@@ -437,56 +443,38 @@ const PainelQuestsPageV13: React.FC = () => {
           <div className="flex gap-1">
             <button
               type="button"
-              onClick={() => setActiveTab('a_fazer')}
+              onClick={() => setActiveTab('pendentes')}
               className={`relative flex-1 border-b-2 px-4 pb-3 pt-2 text-center text-sm font-semibold transition-all duration-200 ease-out ${
-                activeTab === 'a_fazer'
+                activeTab === 'pendentes'
                   ? 'border-[#0EA5E9] text-[#0EA5E9]'
                   : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 active:scale-[0.98]'
               }`}
             >
-              A fazer
+              Pendentes
               <span className={`ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors ${
-                activeTab === 'a_fazer'
+                activeTab === 'pendentes'
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-slate-200 text-slate-600'
               }`}>
-                {questsPorEstagio.a_fazer.length}
+                {pendentes.length}
               </span>
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('fazendo')}
+              onClick={() => setActiveTab('concluidas')}
               className={`relative flex-1 border-b-2 px-4 pb-3 pt-2 text-center text-sm font-semibold transition-all duration-200 ease-out ${
-                activeTab === 'fazendo'
+                activeTab === 'concluidas'
                   ? 'border-[#0EA5E9] text-[#0EA5E9]'
                   : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 active:scale-[0.98]'
               }`}
             >
-              Fazendo
+              Concluídas
               <span className={`ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors ${
-                activeTab === 'fazendo'
+                activeTab === 'concluidas'
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-slate-200 text-slate-600'
               }`}>
-                {questsPorEstagio.fazendo.length}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('feito')}
-              className={`relative flex-1 border-b-2 px-4 pb-3 pt-2 text-center text-sm font-semibold transition-all duration-200 ease-out ${
-                activeTab === 'feito'
-                  ? 'border-[#0EA5E9] text-[#0EA5E9]'
-                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 active:scale-[0.98]'
-              }`}
-            >
-              Feito
-              <span className={`ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors ${
-                activeTab === 'feito'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-slate-200 text-slate-600'
-              }`}>
-                {questsPorEstagio.feito.length}
+                {concluidas.length}
               </span>
             </button>
           </div>
@@ -494,60 +482,25 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Lista de Quests */}
         <div className="space-y-3">
-            {activeTab === 'a_fazer' && (
+            {activeTab === 'pendentes' && (
                 <>
-                    {questsPorEstagio.a_fazer.length > 0 ? (
-                        <>
-                          <div className="space-y-1">
-                            {questsPorEstagio.a_fazer.map(quest => renderQuestItemSimples(quest))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setShowPlanejamento(true)}
-                            className="w-full mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#0EA5E9] px-4 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#0C8BD6] active:scale-[0.98] transition-all"
-                          >
-                            <Plus size={18} />
-                            Planejar
-                          </button>
-                        </>
+                    {pendentes.length > 0 ? (
+                        pendentes.map(quest => renderQuestItem(quest, false))
                     ) : (
                         <Card className="!p-8 !bg-[#E8F3F5] text-center" hover={false}>
                             <div className="flex flex-col items-center gap-2 text-[#94A3B8]">
                                 <TrendingUp size={32} />
-                                <p className="text-sm font-medium">Nenhuma quest a fazer</p>
-                                <button
-                                  type="button"
-                                  onClick={() => setShowPlanejamento(true)}
-                                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0EA5E9] px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-[#0C8BD6] active:scale-[0.98] transition-all"
-                                >
-                                  <Plus size={16} />
-                                  Planejar nova quest
-                                </button>
+                                <p className="text-sm font-medium">Tudo feito por aqui!</p>
                             </div>
                         </Card>
                     )}
                 </>
             )}
 
-            {activeTab === 'fazendo' && (
+            {activeTab === 'concluidas' && (
                 <>
-                    {questsPorEstagio.fazendo.length > 0 ? (
-                        questsPorEstagio.fazendo.map(quest => renderQuestItem(quest, false))
-                    ) : (
-                        <Card className="!p-8 !bg-[#E8F3F5] text-center" hover={false}>
-                            <div className="flex flex-col items-center gap-2 text-[#94A3B8]">
-                                <TrendingUp size={32} />
-                                <p className="text-sm font-medium">Nenhuma quest em andamento.</p>
-                            </div>
-                        </Card>
-                    )}
-                </>
-            )}
-
-            {activeTab === 'feito' && (
-                <>
-                    {questsPorEstagio.feito.length > 0 ? (
-                        questsPorEstagio.feito.map(quest => renderQuestItem(quest, true))
+                    {concluidas.length > 0 ? (
+                        concluidas.map(quest => renderQuestItem(quest, true))
                     ) : (
                         <Card className="!p-8 !bg-[#E8F3F5] text-center" hover={false}>
                             <div className="flex flex-col items-center gap-2 text-[#94A3B8]">

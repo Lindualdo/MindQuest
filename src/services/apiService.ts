@@ -13,6 +13,7 @@ import type {
   QuestDetail,
   ResumoConversasPayload,
   QuestSnapshot,
+  QuestPersonalizadaResumo,
   QuestStatus,
   PanoramaCardResponse,
   InsightCardResponse,
@@ -130,10 +131,17 @@ class ApiService {
         ? (quest.config as Record<string, unknown>)
         : null;
 
+    const questEstagioRaw = this.toString(quest.quest_estagio) ?? 
+      (configObj && typeof configObj.quest_estagio === 'string' ? configObj.quest_estagio : null);
+    const questEstagio = questEstagioRaw && ['a_fazer', 'fazendo', 'feito'].includes(questEstagioRaw)
+      ? (questEstagioRaw as QuestPersonalizadaResumo['quest_estagio'])
+      : null;
+
     return {
       instancia_id: this.toString(quest.instancia_id),
       meta_codigo: this.toString(quest.meta_codigo) ?? '',
       status: (this.toString(quest.status) ?? 'pendente') as QuestStatus,
+      quest_estagio: questEstagio,
       titulo: this.toString(quest.titulo) || (configObj && typeof configObj.titulo === 'string' ? configObj.titulo : null) || 'Quest personalizada',
       descricao: this.toString(quest.descricao),
       contexto_origem: this.toString(quest.contexto_origem),
@@ -159,6 +167,8 @@ class ApiService {
       ),
       tipo: this.toString(quest.tipo) ?? null,
       catalogo_codigo: this.toString(quest.catalogo_codigo) ?? null,
+      area_vida: this.toString(quest.area_vida) ?? 
+        (configObj && typeof configObj.area_vida === 'string' ? configObj.area_vida : null) as QuestPersonalizadaResumo['area_vida'],
       recorrencias: quest.recorrencias && typeof quest.recorrencias === 'object' && !Array.isArray(quest.recorrencias)
         ? (quest.recorrencias as QuestPersonalizadaResumo['recorrencias'])
         : null,
@@ -1091,6 +1101,58 @@ class ApiService {
     }
 
     return snapshot;
+  }
+
+  public async criarQuest(
+    usuarioId: string,
+    dados: {
+      titulo: string;
+      descricao?: string;
+      tipo?: string;
+      area_vida: string;
+      recorrencia_dias?: number | null;
+    }
+  ): Promise<{ success: boolean; quest_id?: string; error?: string }> {
+    if (!usuarioId) {
+      throw new Error('Usuário inválido');
+    }
+
+    if (!dados.titulo || !dados.titulo.trim()) {
+      throw new Error('Título é obrigatório');
+    }
+
+    if (!dados.area_vida) {
+      throw new Error('Área da vida é obrigatória');
+    }
+
+    const endpoint = '/criar-quest';
+
+    const result = await this.makeRequest(
+      endpoint,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          usuario_id: usuarioId,
+          titulo: dados.titulo.trim(),
+          descricao: dados.descricao || null,
+          tipo: dados.tipo || 'personalizada',
+          area_vida: dados.area_vida,
+          recorrencia_dias: dados.recorrencia_dias || null,
+        }),
+      },
+      true
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao criar quest');
+    }
+
+    const response = result.response;
+    if (response && typeof response === 'object' && 'success' in response) {
+      return response as { success: boolean; quest_id?: string; error?: string };
+    }
+
+    return { success: true };
   }
 
   public async getHumorHistorico(

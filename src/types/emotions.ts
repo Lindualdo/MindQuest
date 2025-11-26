@@ -205,10 +205,21 @@ export type QuestStatus =
   | 'cancelada'
   | 'reiniciada';
 
+export type QuestEstagio = 'a_fazer' | 'fazendo' | 'feito';
+
+export type QuestTipo = 'sabotador' | 'tcc' | 'reflexao_diaria' | 'personalizada' | string;
+
+export type QuestAreaVida = 
+  | 'Saúde Emocional'
+  | 'Trabalho e Finanças'
+  | 'Relacionamentos e Vida Pessoal'
+  | 'Saúde Física';
+
 export interface QuestPersonalizadaResumo {
   instancia_id: string | null;
   meta_codigo: string;
   status: QuestStatus;
+  quest_estagio?: QuestEstagio | null;
   titulo: string;
   descricao: string | null;
   contexto_origem: string | null;
@@ -219,8 +230,9 @@ export interface QuestPersonalizadaResumo {
   xp_recompensa?: number | null;
   prioridade?: string | null;
   recorrencia?: string | null;
-  tipo?: string | null;
+  tipo?: QuestTipo | null;
   catalogo_codigo?: string | null;
+  area_vida?: QuestAreaVida | null;
   recorrencias?: {
     tipo: string;
     janela: { inicio: string; fim: string };
