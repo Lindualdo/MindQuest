@@ -232,13 +232,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS usuarios_quest_id,\n    $3::text AS meta_codigo,\n    $4::text AS meta_titulo,\n    $5::int AS xp_base_increment,\n    $6::jsonb AS ocorrencias,\n    $7::int AS recorrencia_increment\n),\natualizado AS (\n  UPDATE public.conquistas_historico ch\n  SET\n    xp_base = COALESCE(ch.xp_base, 0) + payload.xp_base_increment,\n    detalhes = jsonb_set(\n      jsonb_set(\n        COALESCE(ch.detalhes, '{}'::jsonb),\n        '{total_concluidas}',\n        to_jsonb(COALESCE((ch.detalhes->>'total_concluidas')::int, 0) + payload.recorrencia_increment)\n      ),\n      '{ocorrencias}',\n      (COALESCE(ch.detalhes->'ocorrencias', '[]'::jsonb) || payload.ocorrencias)\n    ),\n    registrado_em = NOW()\n  FROM payload\n  WHERE ch.usuario_id = payload.usuario_id\n    AND ch.usuarios_quest_id = payload.usuarios_quest_id\n  RETURNING ch.id\n)\nINSERT INTO public.conquistas_historico (\n  usuario_id,\n  usuarios_quest_id,\n  tipo,\n  meta_codigo,\n  meta_titulo,\n  xp_base,\n  xp_bonus,\n  detalhes,\n  registrado_em\n)\nSELECT\n  payload.usuario_id,\n  payload.usuarios_quest_id,\n  'conversa',\n  payload.meta_codigo,\n  payload.meta_titulo,\n  payload.xp_base_increment,\n  0,\n  jsonb_build_object(\n    'total_concluidas', payload.recorrencia_increment,\n    'ocorrencias', payload.ocorrencias\n  ),\n  NOW()\nFROM payload\nWHERE NOT EXISTS (SELECT 1 FROM atualizado);\n",
+        "query": "WITH payload AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS usuarios_quest_id,\n    $3::jsonb AS ocorrencias,\n    $4::int AS xp_base_increment\n),\nocorrencias_expandidas AS (\n  SELECT\n    payload.usuarios_quest_id,\n    (occ->>'data_planejada')::date AS data_planejada,\n    (occ->>'data_concluida')::date AS data_concluida,\n    COALESCE((occ->>'xp_base')::int, payload.xp_base_increment / GREATEST(jsonb_array_length(payload.ocorrencias), 1)) AS xp_base_ocorrencia\n  FROM payload,\n       jsonb_array_elements(payload.ocorrencias) AS occ\n  WHERE occ->>'data_planejada' IS NOT NULL\n    AND occ->>'data_concluida' IS NOT NULL\n),\ninseridas AS (\n  INSERT INTO public.quests_recorrencias (\n    usuarios_quest_id,\n    data_planejada,\n    data_concluida,\n    status,\n    xp_base,\n    xp_bonus\n  )\n  SELECT\n    oe.usuarios_quest_id,\n    oe.data_planejada,\n    oe.data_concluida,\n    'concluida',\n    oe.xp_base_ocorrencia,\n    0\n  FROM ocorrencias_expandidas oe\n  WHERE NOT EXISTS (\n    SELECT 1 FROM public.quests_recorrencias qr\n    WHERE qr.usuarios_quest_id = oe.usuarios_quest_id\n      AND qr.data_planejada = oe.data_planejada\n  )\n  ON CONFLICT (usuarios_quest_id, data_planejada) DO UPDATE\n  SET\n    data_concluida = EXCLUDED.data_concluida,\n    status = 'concluida',\n    xp_base = EXCLUDED.xp_base,\n    atualizado_em = NOW()\n  RETURNING id\n)\nSELECT\n  payload.usuario_id,\n  payload.usuarios_quest_id,\n  COUNT(*) AS ocorrencias_inseridas\nFROM payload\nCROSS JOIN ocorrencias_expandidas\nGROUP BY payload.usuario_id, payload.usuarios_quest_id;\n",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.usuarios_quest_id, $json.meta_codigo, $json.meta_titulo, $json.xp_base_increment || 0, JSON.stringify($json.ocorrencias || []), $json.recorrencia_increment || 0] }}"
+          "queryReplacement": "={{ [$json.usuario_id, $json.usuarios_quest_id, JSON.stringify($json.ocorrencias || []), $json.xp_base_increment || 0] }}"
         }
       },
       "id": "99e11fae-af95-42f4-aa23-61f5fbfaeb6e",
-      "name": "Atualizar Historico Diario",
+      "name": "Inserir Recorrencias Conversas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
@@ -483,14 +483,14 @@
       "main": [
         [
           {
-            "node": "Atualizar Historico Diario",
+            "node": "Inserir Recorrencias Conversas",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Historico Diario": {
+    "Inserir Recorrencias Conversas": {
       "main": [
         [
           {
