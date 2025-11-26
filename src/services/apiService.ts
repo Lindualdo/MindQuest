@@ -1075,6 +1075,70 @@ class ApiService {
     return payload as JornadaCardResponse;
   }
 
+  public async ativarQuest(
+    usuarioId: string,
+    questId: string,
+    recorrenciaDias: number
+  ): Promise<{
+    success: boolean;
+    usuario_id: string;
+    quest_id: string;
+    quest_ativada: number;
+    recorrencias_criadas: number;
+    recorrencias?: Array<{
+      id: string;
+      data_planejada: string;
+      status: string;
+    }>;
+  }> {
+    if (!usuarioId || !questId || !recorrenciaDias) {
+      throw new Error('Parâmetros inválidos para ativar quest');
+    }
+
+    const params = new URLSearchParams();
+    params.append('usuario_id', usuarioId);
+    params.append('quest_id', questId);
+    params.append('recorrencia_dias', recorrenciaDias.toString());
+
+    const endpoint = `/ativar-quest?${params.toString()}`;
+    const useProxy = this.useProxyPaths && typeof window !== 'undefined';
+    
+    const result = await this.makeRequest(
+      endpoint,
+      undefined,
+      !useProxy
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao ativar quest');
+    }
+
+    let data: unknown = result.response;
+    if (Array.isArray(data)) {
+      data = data[0];
+    } else if (data && typeof data === 'object' && 'data' in (data as Record<string, unknown>)) {
+      const nested = (data as Record<string, unknown>).data;
+      data = Array.isArray(nested) ? nested[0] : nested;
+    }
+
+    if (!data || typeof data !== 'object') {
+      throw new Error('Resposta inesperada ao ativar quest');
+    }
+
+    return data as {
+      success: boolean;
+      usuario_id: string;
+      quest_id: string;
+      quest_ativada: number;
+      recorrencias_criadas: number;
+      recorrencias?: Array<{
+        id: string;
+        data_planejada: string;
+        status: string;
+      }>;
+    };
+  }
+
   public async getQuestSnapshot(usuarioId: string): Promise<QuestSnapshot> {
     if (!usuarioId) {
       throw new Error('Usuário inválido');
