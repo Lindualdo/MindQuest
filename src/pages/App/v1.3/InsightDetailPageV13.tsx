@@ -160,16 +160,29 @@ const InsightDetailPageV13 = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
   
-  // Verificar quantas quests já foram criadas manualmente para este insight
-  const questsDoInsight = useMemo(() => {
-    if (!detail?.id) return [];
-    return questSnapshot?.quests_personalizadas?.filter(
+  // Verificar quais resource_index já têm quests criadas para este insight
+  const resourceIndexesComQuest = useMemo(() => {
+    if (!detail?.id) return new Set<number>();
+    const quests = questSnapshot?.quests_personalizadas?.filter(
       q => q.insight_id === detail.id && 
       (q.config as any)?.contexto_origem === 'insight_manual'
     ) ?? [];
+    
+    const indexes = new Set<number>();
+    quests.forEach(q => {
+      const resourceIndex = (q.config as any)?.resource_index;
+      if (resourceIndex !== undefined && resourceIndex !== null) {
+        indexes.add(Number(resourceIndex));
+      }
+    });
+    
+    return indexes;
   }, [detail?.id, questSnapshot]);
   
-  const questsCriadasCount = questsDoInsight.length;
+  // Função para verificar se um resource_index específico já tem quest
+  const resourceJaTemQuest = (resourceIndex: number) => {
+    return resourceIndexesComQuest.has(resourceIndex);
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -207,8 +220,14 @@ const InsightDetailPageV13 = () => {
   const handleCriarQuestFromResource = async (resource: InsightResource, resourceIndex: number) => {
     if (!detail?.id || !detail?.titulo || criandoQuest) return;
     
+    // Verificar se este resource_index específico já tem quest criada
+    if (resourceJaTemQuest(resourceIndex)) {
+      alert('Você já criou uma quest para esta ação.');
+      return;
+    }
+    
     // Verificar se já foram criadas 2 quests para este insight
-    if (questsCriadasCount >= 2) {
+    if (resourceIndexesComQuest.size >= 2) {
       alert('Você já criou o máximo de 2 quests para este insight.');
       return;
     }
@@ -354,7 +373,7 @@ const InsightDetailPageV13 = () => {
                 resource={resource}
                 onCriarQuest={() => handleCriarQuestFromResource(resource, index)}
                 criandoQuest={criandoQuest === resource.nome}
-                disabled={questsCriadasCount >= 2}
+                disabled={resourceJaTemQuest(index) || resourceIndexesComQuest.size >= 2}
               />
             ))}
           </motion.div>
