@@ -268,14 +268,6 @@ const PainelQuestsPageV13: React.FC = () => {
     };
   }, [questSnapshot, selectedDate, hojeTemConversaConcluida, hoje]);
 
-  // Resumo do dia selecionado
-  const resumoDiaSelecionado = useMemo(() => {
-    const total = questsDoDiaSelecionado.a_fazer.length + 
-                  questsDoDiaSelecionado.fazendo.length + 
-                  questsDoDiaSelecionado.feito.length;
-    const concluidas = questsDoDiaSelecionado.feito.length;
-    return { total, concluidas };
-  }, [questsDoDiaSelecionado]);
 
   const handleBack = () => {
     setView('dashboard');
@@ -668,25 +660,6 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Barra de Progresso Semanal */}
         {renderWeeklyProgressBar()}
-
-        {/* Indicador do dia selecionado */}
-        <div className="mb-4 rounded-xl bg-gradient-to-r from-[#E0F2FE] to-[#F0F9FF] border-2 border-[#BAE6FD] px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#1C2541]">
-                Quests de {format(selectedDate, "dd/MM 'de' yyyy", { locale: ptBR })}
-              </p>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                {resumoDiaSelecionado.concluidas} de {resumoDiaSelecionado.total} concluídas
-              </p>
-            </div>
-            {isSameDay(selectedDate, hoje) && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-bold text-white">
-                Hoje
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Abas melhoradas */}
         <div className="mb-6">
