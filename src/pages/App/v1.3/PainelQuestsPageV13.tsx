@@ -193,13 +193,51 @@ const PainelQuestsPageV13: React.FC = () => {
     };
   }, [questSnapshot, hojeTemConversaConcluida]);
 
+  // Função auxiliar para obter estágio da quest considerando o dia selecionado
+  const getQuestEstagioParaDia = (quest: QuestPersonalizadaResumo, dataSelecionada: Date): QuestEstagio => {
+    const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
+    
+    // Buscar recorrência específica do dia selecionado
+    const recorrenciaDoDia = quest.recorrencias?.dias?.find((dia: any) => {
+      const dataDia = normalizeDateStr(dia.data);
+      return dataDia === dataStr;
+    });
+    
+    // Se encontrou recorrência do dia, usar o status dela
+    if (recorrenciaDoDia) {
+      if (recorrenciaDoDia.status === 'concluida') {
+        return 'feito';
+      }
+      if (recorrenciaDoDia.status === 'pendente') {
+        return 'fazendo';
+      }
+      if (recorrenciaDoDia.status === 'perdida') {
+        return 'feito'; // Perdida também vai para feito
+      }
+    }
+    
+    // Se quest está disponível e é o dia de hoje, é "a fazer"
+    if (quest.status === 'disponivel' && isSameDay(dataSelecionada, hoje)) {
+      return 'a_fazer';
+    }
+    
+    // Se não tem recorrência no dia mas quest está ativa, verificar status geral
+    if (quest.status === 'ativa' && !recorrenciaDoDia) {
+      // Quest ativa sem recorrência no dia = não aparece (mas por segurança retorna a_fazer)
+      return 'a_fazer';
+    }
+    
+    // Fallback: usar função geral
+    return getQuestEstagio(quest);
+  };
+
   // Filtrar quests por dia selecionado
   const questsDoDiaSelecionado = useMemo(() => {
     const dataStr = format(selectedDate, 'yyyy-MM-dd');
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
     const isHojeSelecionado = isSameDay(selectedDate, hoje);
     
-    // Filtrar quests que têm recorrência na data selecionada
+    // Filtrar quests que têm recorrência na data selecionada OU estão disponíveis (se for hoje)
     const questsDoDia = todasQuests.filter(quest => {
       // Excluir conversas
       const isConversa = 
@@ -222,10 +260,11 @@ const PainelQuestsPageV13: React.FC = () => {
       return temRecorrenciaNoDia;
     });
     
+    // Usar função específica que considera o dia selecionado
     return {
-      a_fazer: questsDoDia.filter(q => getQuestEstagio(q) === 'a_fazer'),
-      fazendo: questsDoDia.filter(q => getQuestEstagio(q) === 'fazendo'),
-      feito: questsDoDia.filter(q => getQuestEstagio(q) === 'feito'),
+      a_fazer: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'a_fazer'),
+      fazendo: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'fazendo'),
+      feito: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'feito'),
     };
   }, [questSnapshot, selectedDate, hojeTemConversaConcluida, hoje]);
 
