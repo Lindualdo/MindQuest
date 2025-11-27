@@ -160,11 +160,12 @@ const InsightDetailPageV13 = () => {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
   
-  // Verificar quantas quests já foram criadas para este insight
+  // Verificar quantas quests já foram criadas manualmente para este insight
   const questsDoInsight = useMemo(() => {
     if (!detail?.id) return [];
     return questSnapshot?.quests_personalizadas?.filter(
-      q => q.insight_id === detail.id
+      q => q.insight_id === detail.id && 
+      (q.config as any)?.contexto_origem === 'insight_manual'
     ) ?? [];
   }, [detail?.id, questSnapshot]);
   
