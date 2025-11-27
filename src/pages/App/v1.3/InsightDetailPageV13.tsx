@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -162,15 +162,19 @@ const InsightDetailPageV13 = () => {
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
   
   // Recarregar questSnapshot quando o insight é aberto para atualizar botões
+  const lastInsightIdRef = useRef<string | null>(null);
   useEffect(() => {
     const usuarioId = dashboardData?.usuario?.id;
-    if (detail?.id && usuarioId) {
-      // Forçar recarregamento sempre que o insight for aberto
+    const insightId = detail?.id;
+    
+    // Só recarregar se o insight mudou (não a cada render)
+    if (insightId && usuarioId && lastInsightIdRef.current !== insightId) {
+      lastInsightIdRef.current = insightId;
       loadQuestSnapshot(usuarioId).catch(err => {
         console.error('[InsightDetail] Erro ao recarregar snapshot:', err);
       });
     }
-  }, [detail?.id, dashboardData?.usuario?.id, loadQuestSnapshot]);
+  }, [detail?.id, dashboardData?.usuario?.id]);
   
   // Verificar quais resource_index já têm quests criadas para este insight
   const resourceIndexesComQuest = useMemo(() => {

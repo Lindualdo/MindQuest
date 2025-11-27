@@ -1,0 +1,26 @@
+Etapa 1: Limpeza concluída - 0 quests no banco
+Etapa 2: Navegação para home concluída
+Etapa 3: Insight detail aberto - 2 botões 'Criar Quest' visíveis
+Timestamp: Thu Nov 27 17:35:22 WET 2025
+Etapa 4: Quest criada - Redirecionado para painel de quests
+Aba 'A Fazer' mostra '1' quest
+                  id                  |         titulo          | resource_index |              insight_id              |   status   |         ativado_em         
+--------------------------------------+-------------------------+----------------+--------------------------------------+------------+----------------------------
+ 96c8c6db-fabb-4902-8b50-4a8d9bbd8cb4 | Validações Incrementais | 0              | e47edca9-88cb-4b71-8859-1fde6d08bf3b | disponivel | 2025-11-27 17:35:23.896799
+(1 row)
+
+
+Etapa 5: Voltando ao insight para verificar botão
+Timestamp: Thu Nov 27 17:35:55 WET 2025
+
+PROBLEMA CRÍTICO IDENTIFICADO:
+- Loop infinito de recarregamentos de snapshot detectado no console
+- Mais de 100 chamadas de loadQuestSnapshot em poucos segundos
+- Botão 'Criar Quest' AINDA VISÍVEL após criar quest (2 botões visíveis na snapshot)
+Timestamp: Thu Nov 27 17:36:21 WET 2025
+
+CORREÇÕES APLICADAS:
+- Adicionado useRef para rastrear insight_id e evitar recarregamentos desnecessários
+- Adicionado useRef para rastrear view e evitar recarregamentos desnecessários no painel
+- Removido loadQuestSnapshot das dependências do useEffect
+Timestamp: Thu Nov 27 17:37:01 WET 2025
