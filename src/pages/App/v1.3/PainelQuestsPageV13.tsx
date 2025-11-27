@@ -442,7 +442,12 @@ const PainelQuestsPageV13: React.FC = () => {
             {questId && (
               <button
                 type="button"
-                onClick={() => openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd'))}
+                onClick={() => {
+                  console.log('[PainelQuests] Abrindo detalhe da quest:', { questId, selectedDate: format(selectedDate, 'yyyy-MM-dd') });
+                  openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd')).catch(error => {
+                    console.error('[PainelQuests] Erro ao abrir detalhe:', error);
+                  });
+                }}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EA5E9] hover:text-[#0C8BD6] transition-colors"
               >
                 Ver detalhes
