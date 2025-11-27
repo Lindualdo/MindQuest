@@ -8,48 +8,22 @@
 ## Prompt para Copiar
 
 ```
-Olá! vamos trabalhar no sistema de quests do MindQuest v1.3.5. Segue contexto importante:
+Olá! vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importante:
 
 ## Contexto do Projeto
 - Stack: React/TypeScript (frontend) + n8n (backend/workflows) + PostgreSQL
-- Versão atual: 1.3.5
-- Documentação: docs/espec/quests/1.3.5/
+- Versão atual: 1.3.8
 
 ## Estrutura Principal
 
 ### Backend (n8n)
-- Webhooks principais:
-  - webhook_quests (ID: yvg9NkBsLF3mbr5f) - Lista quests do usuário
-  - webhook_progresso_semanal (ID: gMb1UwtmEh5pkfxR) - Progresso semanal
-  - webhook_concluir_quest (ID: YF4CyvHY0BbLWNwC) - Concluir quest
+
 - Sub-workflows: sw_xp_quest, sw_xp_conversas (NUNCA ativar, são chamados via executeWorkflow)
 - Regra crítica: Ao atualizar nodes Postgres via MCP, SEMPRE incluir operation, query e options no mesmo update
 
-### Frontend
-- Componentes principais:
-  - PainelQuestsPageV13 (src/pages/App/v1.3/PainelQuestsPageV13.tsx) - Página de quests
-  - CardWeeklyProgress (src/components/app/v1.3/CardWeeklyProgress.tsx) - Card na home
-  - Store: src/store/useStore.ts (gerencia estado global)
-  - ApiService: src/services/apiService.ts (camada de API)
-
-### Banco de Dados
-- Tabelas principais:
-  - usuarios_quest: Instâncias de quests (campos: id, status, catalogo_id, config, recorrencias)
-  - conquistas_historico: Histórico de conclusões (campos: usuarios_quest_id, tipo, detalhes)
-  - quests_catalogo: Catálogo de quests do sistema
-- Campos que NÃO existem em usuarios_quest: xp_concedido, progresso_meta, progresso_atual, progresso_percentual
-
-## Regras de Negócio Críticas
-
-1. Sistema conta QUANTIDADE de quests (não mais XP) para progresso
-2. Quests de conversa (reflexao_diaria) não podem ser concluídas manualmente
-3. Apenas 1 conversa por dia conta para XP
-4. Título de quest: prioriza config->>'titulo' sobre qc.titulo
-5. Joins com conquistas_historico: SEMPRE usar usuarios_quest_id (não meta_codigo)
 
 ## Documentação de Referência
-- docs/espec/quests/1.3.5/referencia_tecnica.md - Referência técnica completa
-- docs/espec/quests/1.3.5/quests_1.3.5_compacto.md - Especificação compacta
+- 1.3.8/espec_funcional_executiva.md
 - AGENTS.md - Boas práticas n8n e lições aprendidas
 
 ## Padrões de Resposta
@@ -57,6 +31,7 @@ Olá! vamos trabalhar no sistema de quests do MindQuest v1.3.5. Segue contexto i
 - Sempre validar operation após atualizar nodes Postgres
 - Testar queries no banco antes de aplicar em workflows
 - Seguir padrão de commits: [LABEL] verbo no infinitivo + objeto direto
+
 
 
 ```

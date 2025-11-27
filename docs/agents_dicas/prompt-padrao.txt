@@ -1,3 +1,24 @@
-leia as informações neste trecho abaixo para contexto antes dos próximos passos: leia e faça um resumo do seu entendimento
-prompt_inicial_chat.md (11-59)
- 
+leia as informações abaixo para contexto antes dos próximos passos: leia e faça um resumo do seu entendimento
+Vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importante:
+
+
+## Contexto do Projeto
+- Stack: React/TypeScript (frontend) + n8n (backend/workflows) + PostgreSQL
+- Versão atual: 1.3.8
+
+## Estrutura Principal
+
+### Backend (n8n)
+
+- Sub-workflows: sw_xp_quest, sw_xp_conversas (NUNCA ativar, são chamados via executeWorkflow)
+- Regra crítica: Ao atualizar nodes Postgres via MCP, SEMPRE incluir operation, query e options no mesmo update
+
+## Documentação de Referência
+- 1.3.8/espec_funcional_executiva.md
+- AGENTS.md - Boas práticas n8n e lições aprendidas
+
+## Padrões de Resposta
+- PT-BR, conciso e direto
+- Sempre validar operation após atualizar nodes Postgres
+- Testar queries no banco antes de aplicar em workflows
+- Seguir padrão de commits: [LABEL] verbo no infinitivo + objeto direto
