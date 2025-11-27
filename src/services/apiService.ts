@@ -1101,13 +1101,18 @@ class ApiService {
     params.append('recorrencia_dias', recorrenciaDias.toString());
 
     const endpoint = `/ativar-quest?${params.toString()}`;
+    // Usa proxy em dev, remote em produção (mesmo padrão de concluirQuest)
     const useProxy = this.useProxyPaths && typeof window !== 'undefined';
+    
+    console.log('[ApiService.ativarQuest] Chamando:', { endpoint, useProxy });
     
     const result = await this.makeRequest(
       endpoint,
       undefined,
-      !useProxy
+      !useProxy // forceRemote = true apenas se não usar proxy
     );
+    
+    console.log('[ApiService.ativarQuest] Resultado:', result);
 
     if (!result.success) {
       throw new Error(result.error || 'Falha ao ativar quest');

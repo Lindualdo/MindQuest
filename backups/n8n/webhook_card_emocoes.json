@@ -2,6 +2,7 @@
   "createdAt": "2025-11-14T12:27:57.408Z",
   "id": "zumEm0S27nyCEaDP",
   "name": "webhook_card_emocoes",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -282,6 +283,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "1cccd306-a780-4799-9c8c-03951ea696af",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

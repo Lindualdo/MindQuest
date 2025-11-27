@@ -2,6 +2,7 @@
   "createdAt": "2025-10-19T20:04:57.978Z",
   "id": "nOl6lnaGMpyg9S9J",
   "name": "sw_expert_bigfive_ocean",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -289,6 +290,7 @@
     ]
   },
   "versionId": "5335a811-5b5b-406d-9a7c-51cff7d0c292",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

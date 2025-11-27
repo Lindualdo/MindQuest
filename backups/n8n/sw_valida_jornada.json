@@ -2,6 +2,7 @@
   "createdAt": "2025-11-09T19:59:22.630Z",
   "id": "2myEbSm9D3X7sP2p",
   "name": "sw_valida_jornada",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -104,6 +105,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "49cded87-fae3-4e6d-a5f4-da188de00bcd",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

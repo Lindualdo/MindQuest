@@ -2,6 +2,7 @@
   "createdAt": "2025-11-14T17:54:02.067Z",
   "id": "xMAu6L2Rb1v9ipua",
   "name": "webhook_card_conversas",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -171,6 +172,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "0e46a832-b923-4d21-8048-8b53bd6da190",
+  "versionCounter": 1,
   "triggerCount": 1,
   "shared": [
     {

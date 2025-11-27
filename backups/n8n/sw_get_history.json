@@ -2,6 +2,7 @@
   "createdAt": "2025-10-18T15:32:30.610Z",
   "id": "HDTrSrJiBIv2FFks",
   "name": "sw_get_history",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -77,6 +78,7 @@
     ]
   },
   "versionId": "aaeafc1f-03a3-475f-bcd6-104311fd04b9",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

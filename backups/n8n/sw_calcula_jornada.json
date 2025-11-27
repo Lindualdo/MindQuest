@@ -2,6 +2,7 @@
   "createdAt": "2025-11-07T19:12:28.703Z",
   "id": "71Ru87yaRA5SNjOQ",
   "name": "sw_calcula_jornada",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -15,26 +16,26 @@
           ]
         }
       },
-      "id": "6644827b-4601-44ba-a505-118a94fe30d0",
+      "id": "73c7d0f5-bde3-4df8-8b97-2b26de5bc88b",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        208,
-        224
+        320,
+        272
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || (typeof usuarioId !== 'string' && typeof usuarioId !== 'number')) {\n  throw new Error('usuario_id obrigatório');\n}\nreturn [{ json: { usuario_id: String(usuarioId).trim() } }];"
       },
-      "id": "0a43e358-d9fb-4b1b-a532-bfdfe68b2b85",
+      "id": "6144d1d4-9c78-4859-83af-934e248fb988",
       "name": "Validar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        432,
-        224
+        544,
+        272
       ]
     },
     {
@@ -45,13 +46,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "2238ff6e-ef12-4792-90b7-4e4add2f8282",
+      "id": "4d1aae5d-ce65-45be-8db4-5db1e5435df6",
       "name": "Buscar XP",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        624,
-        224
+        736,
+        272
       ],
       "credentials": {
         "postgres": {
@@ -68,13 +69,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.xp_total || 0, $json.target_nivel || 1] }}"
         }
       },
-      "id": "4b134d47-69d2-4003-9200-cbfeaf806ebe",
+      "id": "834f6b74-c366-49a8-9ac2-1d9b3de63bc0",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        976,
-        224
+        1088,
+        272
       ],
       "credentials": {
         "postgres": {
@@ -91,13 +92,13 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.target_estagio || 1] }}"
         }
       },
-      "id": "0b6ebb6b-5fc9-401e-8dff-d4dbd7057d18",
+      "id": "68df295d-2643-4e6e-9cc1-1306b048f655",
       "name": "Atualizar Estágio Usuário",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1152,
-        224
+        1264,
+        272
       ],
       "credentials": {
         "postgres": {
@@ -108,26 +109,26 @@
     },
     {
       "parameters": {},
-      "id": "2834b78f-1719-4f26-8ce3-6add5c153339",
+      "id": "21425697-6329-4173-9a25-b080e03ccd03",
       "name": "Fim",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1408,
-        224
+        1520,
+        272
       ]
     },
     {
       "parameters": {
         "jsCode": "const data = $json || {};\nconst xpTotal = Number(data.xp_total) || 0;\nconst metrics = {\n  sequencia_recorde: Number(data.sequencia_recorde) || 0,\n  total_quests_personalizadas: Number(data.total_quests_personalizadas) || 0,\n  total_quests_concluidas: Number(data.total_quests_concluidas) || 0,\n  sabotadores_identificados: Number(data.sabotadores_identificados) || 0,\n  quests_concluidas: Number(data.quests_concluidas) || 0,\n  quests_desafiadoras: Number(data.quests_desafiadoras) || 0,\n  quests_recorrentes_21: Number(data.quests_recorrentes_21) || 0,\n  areas_vida_distintas: Number(data.areas_vida_distintas) || 0,\n  quests_compartilhar: Number(data.quests_compartilhar) || 0,\n  quests_proprias: Number(data.quests_proprias) || 0,\n  falhas_recuperadas: Number(data.falhas_recuperadas) || 0,\n  projetos_impacto: Number(data.projetos_impacto) || 0,\n};\nmetrics.ciclos30 = Math.floor(metrics.sequencia_recorde / 30);\nconst LEVELS = [\n  { level: 1, minXp: 0, requirements: () => true },\n  { level: 2, minXp: 500, requirements: (m) => m.sequencia_recorde >= 7 && m.sabotadores_identificados >= 3 && (m.total_quests_personalizadas >= 3 || m.quests_concluidas >= 3) },\n  { level: 3, minXp: 1200, requirements: (m) => m.sequencia_recorde >= 10 && m.quests_concluidas >= 5 && m.quests_desafiadoras >= 1 },\n  { level: 4, minXp: 2200, requirements: (m) => m.sequencia_recorde >= 15 && m.quests_concluidas >= 8 && m.quests_recorrentes_21 >= 1 },\n  { level: 5, minXp: 3600, requirements: (m) => m.sequencia_recorde >= 20 && m.quests_concluidas >= 12 && m.falhas_recuperadas >= 1 },\n  { level: 6, minXp: 5400, requirements: (m) => m.sequencia_recorde >= 25 && m.quests_concluidas >= 15 && m.areas_vida_distintas >= 3 },\n  { level: 7, minXp: 7400, requirements: (m) => m.sequencia_recorde >= 30 && m.quests_concluidas >= 20 && m.quests_proprias >= 2 },\n  { level: 8, minXp: 9800, requirements: (m) => m.ciclos30 >= 2 && m.quests_concluidas >= 25 && m.quests_compartilhar >= 3 },\n  { level: 9, minXp: 12600, requirements: (m) => m.sequencia_recorde >= 45 && m.quests_concluidas >= 30 && m.projetos_impacto >= 1 },\n  { level: 10, minXp: 16000, requirements: (m) => m.sequencia_recorde >= 365 && m.projetos_impacto >= 1 },\n];\nconst xpEligible = LEVELS.reduce((acc, lvl) => (xpTotal >= lvl.minXp ? lvl.level : acc), 1);\nlet criteriaEligible = 1;\nfor (const lvl of LEVELS) {\n  if (lvl.level > xpEligible) break;\n  if (lvl.requirements(metrics)) {\n    criteriaEligible = lvl.level;\n  } else {\n    break;\n  }\n}\nconst targetLevel = Math.min(xpEligible, criteriaEligible);\n\n// Calcular estágio baseado no nível: 1-3=estágio1, 4-6=estágio2, 7-9=estágio3, 10=estágio4\nconst calcularEstagio = (nivel) => {\n  if (nivel <= 3) return 1;\n  if (nivel <= 6) return 2;\n  if (nivel <= 9) return 3;\n  return 4;\n};\n\nconst targetEstagio = calcularEstagio(targetLevel);\n\nreturn [{\n  json: {\n    usuario_id: data.usuario_id,\n    xp_total: xpTotal,\n    xp_eligible_level: xpEligible,\n    criteria_eligible_level: criteriaEligible,\n    target_nivel: targetLevel,\n    target_estagio: targetEstagio,\n  },\n}];"
       },
-      "id": "c4f57c71-6a9a-4ec9-8578-18997ae743bf",
+      "id": "480f1870-23a9-4322-a162-5e6ca0a37419",
       "name": "Determinar Nível",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        224
+        912,
+        272
       ]
     }
   ],
@@ -213,7 +214,8 @@
       }
     ]
   },
-  "versionId": "a072372d-ac98-4c28-9cb0-d1f4b2fbb95e",
+  "versionId": "ba0430d3-259b-4cf1-a880-caa7afff0205",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

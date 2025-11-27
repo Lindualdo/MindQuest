@@ -2,6 +2,7 @@
   "createdAt": "2025-11-18T13:00:45.380Z",
   "id": "YlZ5iI1QJuW9mxqu",
   "name": "webhook_mapa_mental",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -202,6 +203,7 @@
   },
   "pinData": {},
   "versionId": "b0b0fda6-4813-4f19-905e-f09986f7eab5",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

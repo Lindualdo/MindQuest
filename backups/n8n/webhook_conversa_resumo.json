@@ -2,6 +2,7 @@
   "createdAt": "2025-10-12T07:55:47.675Z",
   "id": "v7HttxPItfsC82pA",
   "name": "webhook_conversa_resumo",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -217,6 +218,7 @@
     ]
   },
   "versionId": "12244489-db94-469d-a894-01d246538542",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

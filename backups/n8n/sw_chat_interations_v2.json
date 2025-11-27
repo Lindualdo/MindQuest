@@ -2,6 +2,7 @@
   "createdAt": "2025-10-22T11:58:40.049Z",
   "id": "aRonGjwfYoY1UUHH",
   "name": "sw_chat_interations_v2",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -2915,6 +2916,7 @@
     ]
   },
   "versionId": "a4824a8d-5d39-42d6-a490-f8fa84ac4d66",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

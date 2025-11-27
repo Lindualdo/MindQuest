@@ -32,18 +32,14 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => {
-            // Excluir endpoints que são handlers do Vercel (não devem passar pelo proxy)
-            const vercelHandlers = ['/concluir-quest'];
+            // Em dev, fazer proxy direto para o n8n (handlers do Vercel não funcionam localmente)
+            // Em produção, os handlers do Vercel interceptam antes do proxy
             const pathWithoutApi = path.replace(/^\/api/, '');
-            
-            // Se for um handler do Vercel, não fazer rewrite (deixa passar para o handler)
-            if (vercelHandlers.includes(pathWithoutApi)) {
-              return path; // Retorna o path original para o handler do Vercel processar
-            }
-            
-            const suffix = pathWithoutApi;
+            const suffix = pathWithoutApi.startsWith('/') ? pathWithoutApi : `/${pathWithoutApi}`;
             const prefix = basePathname ? basePathname : '';
-            return `${prefix}${suffix}`;
+            const finalPath = `${prefix}${suffix}`;
+            console.log('[Vite Proxy] Rewrite:', { original: path, final: finalPath });
+            return finalPath;
           },
         },
       }

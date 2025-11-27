@@ -2,6 +2,7 @@
   "createdAt": "2025-11-09T16:41:11.013Z",
   "id": "W0jsh3lHv2MXIIZ4",
   "name": "valida_xp_conversa",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -88,6 +89,7 @@
   },
   "pinData": {},
   "versionId": "5a29825f-b0cb-4910-a36f-b56949431730",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

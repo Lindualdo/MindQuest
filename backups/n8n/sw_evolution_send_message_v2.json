@@ -2,6 +2,7 @@
   "createdAt": "2025-11-08T20:18:46.472Z",
   "id": "DJB5qWudX1Hqap1O",
   "name": "sw_evolution_send_message_v2",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -244,6 +245,7 @@
     ]
   },
   "versionId": "e0fcae9e-5c87-4bb7-8de5-50ed1f1f9262",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

@@ -2,6 +2,7 @@
   "createdAt": "2025-10-03T14:54:43.940Z",
   "id": "Vbc4JHAR3388mLcv",
   "name": "sw_expert_sabotadores",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -187,6 +188,7 @@
     ]
   },
   "versionId": "41f59b3a-8c51-4378-8d83-a1d362f44483",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

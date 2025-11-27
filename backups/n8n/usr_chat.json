@@ -2,6 +2,7 @@
   "createdAt": "2025-09-23T18:04:11.192Z",
   "id": "6R8bagGlYkBwyyMC",
   "name": "usr_chat",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -583,6 +584,7 @@
     ]
   },
   "versionId": "8a8fea49-a432-44a3-b4c4-3a6226b32ce2",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

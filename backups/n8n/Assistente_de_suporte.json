@@ -2,6 +2,7 @@
   "createdAt": "2025-10-16T17:45:58.403Z",
   "id": "fll0b5m1Pq21FnkS",
   "name": "Assistente de suporte",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -144,6 +145,7 @@
   },
   "pinData": {},
   "versionId": "161b94ef-13c1-4339-a7b6-a22165111074",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

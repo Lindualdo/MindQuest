@@ -2,6 +2,7 @@
   "createdAt": "2025-11-17T09:21:58.283Z",
   "id": "LlL8f5Yv0dleQ11g",
   "name": "webhook_card_insight",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -137,6 +138,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "758173c4-d751-4823-970a-66e4f37e10c6",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

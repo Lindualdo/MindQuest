@@ -2,6 +2,7 @@
   "createdAt": "2025-09-24T12:07:20.876Z",
   "id": "r0CuG6F3S1TR8ohs",
   "name": "webhook_app_authentication",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -160,6 +161,7 @@
     ]
   },
   "versionId": "cc450e4f-ba6e-4a82-aed4-4ea1e73cdd4f",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

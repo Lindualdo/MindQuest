@@ -2,6 +2,7 @@
   "createdAt": "2025-11-21T21:14:04.779Z",
   "id": "0wrajE1i3w9sieeQ",
   "name": "webhook_perfil_big_five",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -137,6 +138,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "09c9f76c-9343-4d44-97fc-c8666d91e4dc",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

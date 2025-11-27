@@ -2,6 +2,7 @@
   "createdAt": "2025-11-21T21:59:50.038Z",
   "id": "mVzX9PQljx3IEm86",
   "name": "webhook_roda_emocoes",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -138,6 +139,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "e7e0e6d6-fd20-4372-af5c-57085ccf8218",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

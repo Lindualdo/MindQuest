@@ -2,6 +2,7 @@
   "createdAt": "2025-11-07T16:24:43.271Z",
   "id": "ItBastfCTkWxm41M",
   "name": "sw_xp_conversas",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -19,7 +20,7 @@
           ]
         }
       },
-      "id": "9d739790-e3ec-4d79-9fa1-a78c5e1459af",
+      "id": "49706cb5-3248-4933-b20b-46a7b89cbbbf",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -32,7 +33,7 @@
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\nconst usuarioId = entrada.usuario_id || entrada.id || $json.usuario_id;\nif (!usuarioId || typeof usuarioId !== 'string' || !usuarioId.trim()) {\n  throw new Error('usuario_id obrigatório');\n}\nconst rawStringFlag = entrada.recalcular_completo ?? $json.recalcular_completo ?? entrada.force_recalcular ?? entrada.force ?? null;\nconst rawBooleanFlag = entrada.calcular_apenas_novos ?? $json.calcular_apenas_novos;\nconst recalcularCompleto = rawStringFlag === null\n  ? (rawBooleanFlag === false)\n  : (typeof rawStringFlag === 'string'\n      ? ['1','true','yes','y','sim'].includes(rawStringFlag.trim().toLowerCase())\n      : Boolean(rawStringFlag));\nreturn [{\n  json: {\n    usuario_id: usuarioId.trim(),\n    recalcular_completo: recalcularCompleto,\n  },\n}];"
       },
-      "id": "0f455757-0ffb-475d-a3d1-eb9b7f4d1800",
+      "id": "e4cf1546-1942-40a2-ae77-bed12561fdb5",
       "name": "Validar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -49,7 +50,7 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "4be20898-e321-4a1e-a36d-bbee57c0ec91",
+      "id": "04318245-21d3-4ce2-9baf-1fc0542d7a88",
       "name": "Ler Usuarios Conquistas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -72,7 +73,7 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "b58ca5d0-c2e0-4cb7-85e7-0a8011b95647",
+      "id": "49be482b-b623-4a64-b419-4569a71b3d0c",
       "name": "Ler Usr Chat",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -92,7 +93,7 @@
       "parameters": {
         "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || null;\n};\nconst getItems = (nodeName) => {\n  const list = $items(nodeName) || [];\n  return list.map((entry) => entry?.json || {});\n};\nconst estado = getItem('Ler Usuarios Conquistas');\nif (!estado) {\n  throw new Error('Estado do usuário não encontrado');\n}\nconst conversas = getItems('Ler Usr Chat');\nconst questReflexao = getItem('Buscar XP Reflexao Diaria');\nif (!questReflexao) {\n  throw new Error('Quest reflexao_diaria não encontrada no catálogo');\n}\nconst xpBaseDiario = Number(questReflexao.xp_recompensa);\nif (!Number.isFinite(xpBaseDiario) || xpBaseDiario <= 0) {\n  throw new Error('XP da quest reflexao_diaria inválido ou não encontrado');\n}\nconst XP_POR_DIA = xpBaseDiario;\nconst toTimestamp = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return date.getTime();\n};\nconst toDay = (value) => {\n  if (!value && value !== 0) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\n};\nconst parseStatus = () => {\n  const raw = estado.sequencia_status;\n  if (!raw) return { estado: 'ativa', reinicios: 0 };\n  if (typeof raw === 'object') {\n    return { estado: 'ativa', ...raw };\n  }\n  try {\n    return { estado: 'ativa', ...(JSON.parse(raw) || {}) };\n  } catch (error) {\n    return { estado: 'ativa', reinicios: 0 };\n  }\n};\nconst status = parseStatus();\nconst msDia = 24 * 60 * 60 * 1000;\nconst conversasOrdenadas = conversas\n  .map((entrada) => {\n    const timestamp = toTimestamp(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISO = toDay(entrada.atualizado_em || entrada.data_conversa || entrada.dia);\n    const diaISOTexto = diaISO ? diaISO.toISOString() : null;\n    return { ...entrada, timestamp, diaISO, diaISOTexto };\n  })\n  .filter((entrada) => entrada.diaISO && entrada.diaISOTexto && Number.isFinite(entrada.timestamp))\n  .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst diasUnicosMap = new Map();\nfor (const conversa of conversasOrdenadas) {\n  const chave = conversa.diaISOTexto;\n  if (!chave) continue;\n  if (!diasUnicosMap.has(chave) || (conversa.timestamp || 0) < (diasUnicosMap.get(chave).timestamp || 0)) {\n    diasUnicosMap.set(chave, conversa);\n  }\n}\nconst diasUnicos = Array.from(diasUnicosMap.values()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));\nconst ultimaRegistradaTimestamp = toTimestamp(estado.ultima_conversa_em);\nconst ultimaDiaRegistrada = toDay(estado.ultima_conversa_em);\nlet xpBaseIncrement = 0;\nlet sequenciaAtual = 0;\nlet sequenciaRecordeCalculado = 0;\nlet reinicios = Number(status.reinicios) || 0;\nconst applyReset = () => {\n  if (sequenciaAtual > 0) {\n    reinicios += 1;\n  }\n  sequenciaAtual = 0;\n};\nlet ultimoDiaSequencia = ultimaDiaRegistrada;\nlet ultimaTimestampProcessado = ultimaRegistradaTimestamp || null;\nlet diasNovos = 0;\nconst diasNovosDetalhes = [];\nfor (const diaInfo of diasUnicos) {\n  const diaISO = diaInfo.diaISO;\n  const timestamp = diaInfo.timestamp;\n  const diaEhNovo = !ultimaDiaRegistrada || diaISO.getTime() > ultimaDiaRegistrada.getTime();\n  if (diaEhNovo) {\n    xpBaseIncrement += XP_POR_DIA;\n    diasNovos += 1;\n    diasNovosDetalhes.push({\n      dia: diaISO.toISOString(),\n      conversa_id: (diaInfo && (diaInfo.conversa_id || diaInfo.id)) ? diaInfo.conversa_id || diaInfo.id : null,\n      data_conversa: diaInfo?.data_conversa || diaISO.toISOString(),\n    });\n  }\n  if (ultimoDiaSequencia) {\n    const diffDias = Math.floor((diaISO.getTime() - ultimoDiaSequencia.getTime()) / msDia);\n    if (diffDias > 1) {\n      applyReset();\n    }\n  }\n  sequenciaAtual += 1;\n  ultimoDiaSequencia = diaISO;\n  ultimaTimestampProcessado = timestamp ?? ultimaTimestampProcessado ?? timestamp;\n  if (sequenciaAtual > sequenciaRecordeCalculado) {\n    sequenciaRecordeCalculado = sequenciaAtual;\n  }\n}\nconst sequenciaRecorde = Math.max(sequenciaRecordeCalculado, Number(estado.sequencia_recorde) || 0);\nconst ultimaConversaISO = ultimoDiaSequencia ? ultimoDiaSequencia.toISOString() : estado.ultima_conversa_em || null;\nconst xpTotalIncrement = xpBaseIncrement;\nreturn [{\n  json: {\n    usuario_id: estado.usuario_id,\n    xp_ganho: xpTotalIncrement,\n    xp_total_increment: xpTotalIncrement,\n    xp_base_increment: xpBaseIncrement,\n    sequencia_atual: sequenciaAtual,\n    sequencia_recorde: sequenciaRecorde,\n    ultima_conversa_em: ultimaConversaISO,\n    sequencia_status: { ...status, estado: 'ativa', reinicios },\n    dias_processados: diasUnicos.length,\n    dias_novos: diasNovos,\n    dias_novos_detalhes: diasNovosDetalhes,\n  },\n}];"
       },
-      "id": "f3d4a034-a0cf-403c-b5f1-5b59c4bf5b6c",
+      "id": "7864b7c9-8c3b-4aa7-9ebd-1c1fd77b1700",
       "name": "Calcular XP Conversas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -109,13 +110,13 @@
           "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.xp_ganho || $json.xp_total_increment || 0,\n  $json.sequencia_atual || 0,\n  $json.sequencia_recorde || 0,\n  ($json.ultima_conversa_em && $json.ultima_conversa_em !== '' ? $json.ultima_conversa_em : null),\n  JSON.stringify($json.sequencia_status || {}),\n  $json.xp_base_increment || 0\n] }}"
         }
       },
-      "id": "5b486d3e-31b6-441a-bda5-8f915d0cf129",
+      "id": "016bfb6a-ceed-4f95-99c5-0afe05af343a",
       "name": "Atualizar Usuarios Conquistas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -624,
-        -768
+        -352,
+        -736
       ],
       "credentials": {
         "postgres": {
@@ -160,20 +161,20 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "088b0f57-d8c8-44f1-b687-bb099d99561d",
+      "id": "675129c6-ae76-42bd-a5fa-8b402a62f562",
       "name": "Atualizar Jornada",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -112,
-        -432
+        -32,
+        -736
       ]
     },
     {
       "parameters": {
         "jsCode": "const parseDay = (value) => {\n  if (!value) return null;\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return null;\n  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());\n};\n\nconst today = new Date();\nconst todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());\n\nconst normalizeStatus = (raw) => {\n  if (raw && typeof raw === 'object') {\n    return { ...raw };\n  }\n  if (typeof raw === 'string') {\n    try {\n      const parsed = JSON.parse(raw);\n      if (parsed && typeof parsed === 'object') {\n        return { ...parsed };\n      }\n    } catch (_err) {\n      // ignore\n    }\n  }\n  return {};\n};\n\nreturn $input.all().map(({ json }) => {\n  const ultimaConversaoUtc = parseDay(json.ultima_conversa_em);\n  const diffDias = ultimaConversaoUtc === null\n    ? Number.POSITIVE_INFINITY\n    : Math.floor((todayUtc - ultimaConversaoUtc) / 86_400_000);\n\n  if (!Number.isFinite(diffDias) || diffDias > 1) {\n    const statusAtual = normalizeStatus(json.sequencia_status);\n    const reinicios = Number.isFinite(Number(statusAtual.reinicios))\n      ? Number(statusAtual.reinicios) + 1\n      : 1;\n\n    json.sequencia_atual = 0;\n    json.sequencia_status = {\n      estado: 'reiniciada',\n      reinicios,\n      ultimo_reset_em: new Date().toISOString(),\n    };\n  }\n\n  return { json };\n});"
       },
-      "id": "02b892c5-aea2-4ba2-b2f8-0e513b81f1c3",
+      "id": "c2e58654-f690-4461-887c-e3c86d1828a5",
       "name": "Zerar Sequência se Gap",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -186,7 +187,7 @@
       "parameters": {
         "jsCode": "const estado = $json || {};\nconst entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst force = Boolean(entrada.recalcular_completo);\nconst hoje = new Date();\nconst hojeUtc = Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate());\nconst ultima = estado.ultima_conversa_em ? new Date(estado.ultima_conversa_em) : null;\nconst ultimaUtc = ultima ? Date.UTC(ultima.getUTCFullYear(), ultima.getUTCMonth(), ultima.getUTCDate()) : null;\nconst diffDias = ultimaUtc === null ? Number.POSITIVE_INFINITY : Math.max(0, Math.floor((hojeUtc - ultimaUtc) / 86_400_000));\nconst precisaRecalcular = force || diffDias >= 1;\nreturn [{\n  json: {\n    ...estado,\n    usuario_id: entrada.usuario_id ?? estado.usuario_id ?? null,\n    recalcular_completo: force,\n    precisa_recalcular: precisaRecalcular,\n    dias_desde_ultima_conversa: diffDias,\n  },\n}];"
       },
-      "id": "9493c5ae-404f-4891-b176-386a7ab8299b",
+      "id": "d403ecb7-7f3c-4d85-a085-f880334fecc7",
       "name": "Checar Necessidade",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -207,7 +208,7 @@
         },
         "options": {}
       },
-      "id": "2414cff0-8e9d-4580-8de5-10ef75440504",
+      "id": "e821d79f-774b-4b22-92df-c7ac92cdcfab",
       "name": "Precisa Recalcular?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.1,
@@ -220,7 +221,7 @@
       "parameters": {
         "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || null;\n};\n// Buscar dados de 'Calcular XP Conversas' (onde estão dias_novos, xp_base_increment, etc)\nconst calcularXP = getItem('Calcular XP Conversas');\n// Buscar dados de 'Buscar ou Criar Quest Reflexao' (onde está usuarios_quest_id)\nconst questReflexao = getItem('Buscar ou Criar Quest Reflexao');\nif (!calcularXP || !questReflexao) {\n  return [];\n}\nconst usuarioId = calcularXP.usuario_id;\nconst diasNovos = calcularXP.dias_novos || 0;\nconst xpBase = calcularXP.xp_base_increment || calcularXP.xp_base_diario || 0;\nconst usuariosQuestId = questReflexao?.usuarios_quest_id || null;\nif (!usuarioId || !diasNovos || !xpBase || !usuariosQuestId) {\n  return [];\n}\nconst detalhesOrigem = Array.isArray(calcularXP.dias_novos_detalhes) ? calcularXP.dias_novos_detalhes : [];\nconst xpPorDia = diasNovos > 0 ? xpBase / diasNovos : 0;\nconst ocorrencias = detalhesOrigem.map((item) => ({\n  data_planejada: item && item.dia ? item.dia : null,\n  data_concluida: item && item.data_conversa ? item.data_conversa : (item && item.dia ? item.dia : null),\n  data_registrada: new Date().toISOString(),\n  xp_base: xpPorDia,\n  xp_bonus: 0,\n  usr_chat_id: item && item.conversa_id ? item.conversa_id : null,\n  data_conversa: item && item.data_conversa ? item.data_conversa : (item && item.dia ? item.dia : null),\n}));\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    usuarios_quest_id: usuariosQuestId,\n    meta_codigo: usuariosQuestId,\n    meta_titulo: 'Conversa diária',\n    xp_base_increment: xpBase,\n    recorrencia_increment: diasNovos,\n    ocorrencias,\n  },\n}];"
       },
-      "id": "e63cdc1c-df56-4f26-bd33-e28d499ffd1e",
+      "id": "f183d370-5e8a-43a4-a799-7f6092ab5b5f",
       "name": "Preparar XP Diário",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -237,7 +238,7 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.usuarios_quest_id, JSON.stringify($json.ocorrencias || []), $json.xp_base_increment || 0] }}"
         }
       },
-      "id": "99e11fae-af95-42f4-aa23-61f5fbfaeb6e",
+      "id": "46035dfd-e1fa-4b7d-a01a-6338490475ab",
       "name": "Inserir Recorrencias Conversas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -260,7 +261,7 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "39b8ac84-58dc-4825-8945-243ee86242fe",
+      "id": "eb0dff98-881e-4a28-b746-d1175f9c52c4",
       "name": "Buscar ou Criar Quest Reflexao",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -279,7 +280,7 @@
       "parameters": {
         "jsCode": "const entrada = $items('Validar Entrada', 0, 0) || [];\nconst payload = entrada[0]?.json || {};\nreturn [{ json: { usuario_id: payload.usuario_id || null } }];"
       },
-      "id": "a62fc329-8773-4bd1-b799-fd7dbb118047",
+      "id": "50410b8f-2c87-48d6-8e65-61f359129433",
       "name": "Retornar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -292,7 +293,7 @@
       "parameters": {
         "jsCode": "const entrada = ($items('Validar Entrada', 0, 0) || [])[0]?.json || {};\nconst usuarioId = entrada.usuario_id || $json.usuario_id || null;\nif (!usuarioId) {\n  return [];\n}\nreturn [{ json: { usuario_id: usuarioId } }];"
       },
-      "id": "140ca9fc-5000-466b-85cd-e9a4cff33745",
+      "id": "b595a191-517a-4371-854a-1a7c09aaee7b",
       "name": "Garantir Retorno Batch",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -309,7 +310,7 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "a4c04334-e3f2-4a75-8600-37ec6e944b7c",
+      "id": "21ee153f-e997-4609-995f-d479ca0703dc",
       "name": "Criar Registro Base",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -330,7 +331,7 @@
         "query": "-- Buscar quest reflexao_diaria do catálogo\nSELECT\n  codigo,\n  'Reflexão Diária' AS titulo,\n  COALESCE(xp, 10) AS xp_recompensa\nFROM public.quests_catalogo\nWHERE codigo = 'reflexao_diaria'\nLIMIT 1;",
         "options": {}
       },
-      "id": "21bf61f2-fe41-4eb3-b110-3893f02f855b",
+      "id": "083dc99b-d558-4d5e-a1b6-a9ee772c8daf",
       "name": "Buscar XP Reflexao Diaria",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -347,7 +348,7 @@
     },
     {
       "parameters": {},
-      "id": "b45ef194-1265-498a-80a7-410a61254db3",
+      "id": "95626b95-0ee5-42b2-a66b-c206ef390ed6",
       "name": "Aguardar Quest Reflexao",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
@@ -572,7 +573,8 @@
       }
     ]
   },
-  "versionId": "26a307f8-ed18-44f4-9d89-616725ae74fa",
+  "versionId": "8e686f32-cd7f-4a3e-92c8-70b50d23af15",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

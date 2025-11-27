@@ -2,6 +2,7 @@
   "createdAt": "2025-10-22T18:20:20.342Z",
   "id": "U44ZfEwFU77EUthb",
   "name": "sw_send_message_with_retry",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -363,6 +364,7 @@
   "meta": null,
   "pinData": {},
   "versionId": "d996e780-646c-4840-9716-a963bc7faae9",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {

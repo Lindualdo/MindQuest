@@ -2,6 +2,7 @@
   "createdAt": "2025-11-19T11:51:06.793Z",
   "id": "YF4CyvHY0BbLWNwC",
   "name": "webhook_concluir_quest",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -237,6 +238,7 @@
   },
   "pinData": {},
   "versionId": "5c4a2121-f1d7-4356-b6b4-28a9168c8f13",
+  "versionCounter": 2,
   "triggerCount": 1,
   "shared": [
     {

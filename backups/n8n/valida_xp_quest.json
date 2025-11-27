@@ -2,6 +2,7 @@
   "createdAt": "2025-11-09T16:41:24.959Z",
   "id": "ON74wQBQEnISKafq",
   "name": "valida_xp_quest",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -88,6 +89,7 @@
   },
   "pinData": {},
   "versionId": "4413a298-3fbf-4bf0-94bf-6547f1740312",
+  "versionCounter": 1,
   "triggerCount": 0,
   "shared": [
     {
