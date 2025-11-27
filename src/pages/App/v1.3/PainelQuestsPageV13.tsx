@@ -55,7 +55,6 @@ const PainelQuestsPageV13: React.FC = () => {
   const hoje = useMemo(() => new Date(), []);
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
   const hasRequestedData = useRef(false);
-  const lastViewRef = useRef<string | null>(null);
 
   // Carregar dados apenas se não existirem no estado global
   useEffect(() => {
