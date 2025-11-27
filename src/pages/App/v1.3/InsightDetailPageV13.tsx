@@ -165,7 +165,10 @@ const InsightDetailPageV13 = () => {
   useEffect(() => {
     const usuarioId = dashboardData?.usuario?.id;
     if (detail?.id && usuarioId) {
-      loadQuestSnapshot(usuarioId);
+      // Forçar recarregamento sempre que o insight for aberto
+      loadQuestSnapshot(usuarioId).catch(err => {
+        console.error('[InsightDetail] Erro ao recarregar snapshot:', err);
+      });
     }
   }, [detail?.id, dashboardData?.usuario?.id, loadQuestSnapshot]);
   

@@ -72,17 +72,14 @@ const PainelQuestsPageV13: React.FC = () => {
     }
   }, [usuarioId]);
 
-  // Recarregar snapshot quando a view mudar para painelQuests (vindo de outra tela)
+  // Sempre recarregar snapshot ao entrar no painel de quests para garantir dados atualizados
   useEffect(() => {
     if (view === 'painelQuests' && usuarioId && !questLoading) {
-      // Só recarregar se a view mudou de outra tela para painelQuests
-      if (lastViewRef.current && lastViewRef.current !== 'painelQuests') {
-        // Forçar recarregamento para garantir dados atualizados
-        void loadQuestSnapshot(usuarioId);
-      }
-      lastViewRef.current = view;
+      // Sempre forçar recarregamento ao entrar no painel
+      void loadQuestSnapshot(usuarioId);
+      void loadWeeklyProgressCard(usuarioId);
     }
-  }, [view, usuarioId, questLoading, loadQuestSnapshot]);
+  }, [view, usuarioId, questLoading, loadQuestSnapshot, loadWeeklyProgressCard]);
 
   const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
   

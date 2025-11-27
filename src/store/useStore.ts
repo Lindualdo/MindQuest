@@ -140,17 +140,13 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       return;
     }
 
-    // Se já tem snapshot carregado e não foi passado usuarioIdParam explícito, não recarrega
-    if (questSnapshot && !usuarioIdParam && stateDashboard?.usuario?.id === usuarioId) {
-      return;
-    }
-
+    // Se foi passado usuarioIdParam explicitamente, sempre recarregar (forçar atualização)
     // Se já está carregando, aguardar
-    if (questLoading) {
+    if (questLoading && !usuarioIdParam) {
       return;
     }
 
-    console.debug('[QuestSnapshot] carregando snapshot', { usuario_id: usuarioId });
+    console.debug('[QuestSnapshot] carregando snapshot', { usuario_id: usuarioId, forcar: !!usuarioIdParam });
     set({ questLoading: true, questError: null });
 
     try {
