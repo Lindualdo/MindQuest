@@ -459,11 +459,11 @@ const PainelQuestsPageV13: React.FC = () => {
   const renderWeeklyProgressBar = () => {
     return (
       <section
-        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
+        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-5 shadow-md"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
         {/* Barras verticais dos dias (navegação principal) */}
-        <div className="flex h-16 items-end justify-between gap-1.5">
+        <div className="flex h-20 items-end justify-between gap-1.5">
           {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
