@@ -459,11 +459,11 @@ const PainelQuestsPageV13: React.FC = () => {
   const renderWeeklyProgressBar = () => {
     return (
       <section
-        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
+        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
         {/* Barras verticais dos dias (navegação principal) */}
-        <div className="flex h-14 items-end justify-between gap-1">
+        <div className="flex h-16 items-end justify-between gap-1.5">
           {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
@@ -504,7 +504,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   } : {})
                 }}
               >
-                <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5">
+                <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5 whitespace-nowrap">
                   {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                 </span>
                 
@@ -657,7 +657,7 @@ const PainelQuestsPageV13: React.FC = () => {
         </div>
 
         {/* Título da página */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-[#1C2541] mb-2">
             Minhas Missões
           </h1>
