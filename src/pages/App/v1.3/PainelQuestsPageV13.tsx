@@ -759,7 +759,7 @@ const PainelQuestsPageV13: React.FC = () => {
                         Nenhuma quest a fazer
                       </p>
                       <p className="text-sm">
-                        Novas quests aparecerão aqui quando disponíveis
+                        Novas quests aparecerão aqui após a próxima conversa.
                       </p>
                     </div>
                   </div>
