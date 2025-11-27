@@ -173,14 +173,23 @@ const PainelQuestsPageV13: React.FC = () => {
     return 'a_fazer';
   };
 
-  // Quests filtradas pelo estágio
+  // Quests filtradas pelo estágio (EXCLUINDO reflexões diárias/conversas)
   const questsPorEstagio = useMemo(() => {
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
     
+    // Filtrar quests de reflexão diária (conversas) - não devem aparecer nas abas
+    const questsSemConversas = todasQuests.filter(q => {
+      const isConversa = 
+        q.catalogo_codigo === 'reflexao_diaria' ||
+        q.tipo === 'reflexao_diaria' ||
+        q.titulo === 'Reflexão Diária';
+      return !isConversa;
+    });
+    
     return {
-      a_fazer: todasQuests.filter(q => getQuestEstagio(q) === 'a_fazer'),
-      fazendo: todasQuests.filter(q => getQuestEstagio(q) === 'fazendo'),
-      feito: todasQuests.filter(q => getQuestEstagio(q) === 'feito'),
+      a_fazer: questsSemConversas.filter(q => getQuestEstagio(q) === 'a_fazer'),
+      fazendo: questsSemConversas.filter(q => getQuestEstagio(q) === 'fazendo'),
+      feito: questsSemConversas.filter(q => getQuestEstagio(q) === 'feito'),
     };
   }, [questSnapshot, hojeTemConversaConcluida]);
 
