@@ -67,6 +67,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   conversaResumoError: null,
   selectedConversationId: null,
   conversaResumoReturnView: null,
+  insightDetailReturnView: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -933,7 +934,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   ,
 
   openInsightDetail: async (insightId) => {
-    const { dashboardData } = get();
+    const { dashboardData, view } = get();
     const userId = dashboardData?.usuario?.id;
 
     if (!userId) {
@@ -941,11 +942,22 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       return;
     }
 
+    if (!insightId) {
+      console.warn('[openInsightDetail] insightId inválido');
+      return;
+    }
+
+    // Salvar a view de origem: se já estiver em insightDetail, usar o returnView salvo; caso contrário, usar a view atual
+    const originView = view === 'insightDetail' 
+      ? (get().insightDetailReturnView ?? 'dashboard') 
+      : view;
+
     set({
       view: 'insightDetail',
       selectedInsightId: insightId,
       insightDetailLoading: true,
-      insightDetailError: null
+      insightDetailError: null,
+      insightDetailReturnView: originView
     });
 
     try {
@@ -966,12 +978,16 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   closeInsightDetail: () => {
+    const { insightDetailReturnView } = get();
+    // Se veio da home (dashboard), voltar para dashboard; caso contrário, voltar para dashInsights
+    const fallbackView = insightDetailReturnView ?? 'dashboard';
     set({
-      view: 'dashInsights',
+      view: fallbackView,
       selectedInsightId: null,
       insightDetail: null,
       insightDetailError: null,
-      insightDetailLoading: false
+      insightDetailLoading: false,
+      insightDetailReturnView: null
     });
   },
 

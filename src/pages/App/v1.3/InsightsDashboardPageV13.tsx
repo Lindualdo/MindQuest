@@ -34,8 +34,16 @@ const TAB_OPTIONS = [
 const PRIORIDADE_CYCLE_ORDER = PRIORIDADE_OPTIONS.map(({ key }) => key);
 
 const InsightsDashboardPageV13: React.FC = () => {
-  const { dashboardData, setView, openInsightDetail } = useDashboard();
-  const { insights } = dashboardData;
+  const { dashboardData, setView, openInsightDetail, isLoading } = useDashboard();
+  const insights = dashboardData?.insights ?? [];
+
+  useEffect(() => {
+    console.log('[InsightsDashboard] Componente montado', { 
+      insightsCount: insights.length,
+      hasDashboardData: !!dashboardData,
+      isLoading 
+    });
+  }, [insights.length, dashboardData, isLoading]);
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
@@ -45,6 +53,9 @@ const InsightsDashboardPageV13: React.FC = () => {
     dashboardData?.usuario?.nome_preferencia ??
     dashboardData?.usuario?.nome ??
     'Aldo';
+
+  // Insights já devem estar carregados via dashboardData inicial
+  // Não carregar aqui para evitar loop infinito (refreshData não carrega insights)
 
   const {
     tipoFiltro,
@@ -204,6 +215,29 @@ const InsightsDashboardPageV13: React.FC = () => {
       onCategoriaFiltroChange={(value) => setCategoriaFiltro(value)}
     />
   );
+
+  // Mostrar loading enquanto carrega dados
+  if (isLoading && !insights.length) {
+    return (
+      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+        <HeaderV1_3 nomeUsuario={nomeUsuario} />
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
+          <Card>
+            <div className="space-y-3 text-center">
+              <p className="text-sm font-semibold text-[#1C2541]">Carregando insights...</p>
+            </div>
+          </Card>
+        </main>
+        <BottomNavV1_3
+          active={activeTab}
+          onHome={handleNavHome}
+          onPerfil={handleNavPerfil}
+          onQuests={handleNavQuests}
+          onConfig={handleNavConfig}
+        />
+      </div>
+    );
+  }
 
   if (!insights.length) {
     return (

@@ -208,8 +208,8 @@ const InsightDetailPageV13 = () => {
 
   const handleBack = () => {
     closeInsightDetail();
-    setView('dashboard');
-    setActiveTab('home');
+    // A navegação é feita pelo closeInsightDetail que usa insightDetailReturnView
+    // Se veio do painel de histórico, volta para lá; caso contrário, volta para dashInsights
   };
 
   const handleOpenConversation = () => {

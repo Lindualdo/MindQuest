@@ -5,6 +5,7 @@ type Props = {
   data?: InsightCardData | null;
   loading?: boolean;
   onSaberMais?: (insightId: string | null) => void;
+  onHistorico?: () => void;
 };
 
 const fallbackInsight: InsightCardData = {
@@ -20,7 +21,7 @@ const fallbackInsight: InsightCardData = {
   data_label: null,
 };
 
-const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
+const CardInsightUltimaConversa = ({ data, loading, onSaberMais, onHistorico }: Props) => {
   const insight = data ?? fallbackInsight;
   const title = loading ? 'Carregando insight...' : insight.titulo;
   const description = loading
@@ -32,9 +33,20 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
       className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-4 shadow-md"
       style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
     >
-      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
-        Insight da última conversa
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
+          Insight da última conversa
+        </p>
+        {onHistorico && (
+          <button
+            type="button"
+            onClick={onHistorico}
+            className="text-[0.65rem] font-medium text-[#2F76D1] hover:underline"
+          >
+            Histórico &gt;
+          </button>
+        )}
+      </div>
       <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
         <h3 className="text-[0.95rem] font-semibold text-[#111827]">
           {title}

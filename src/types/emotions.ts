@@ -715,6 +715,7 @@ export type ViewId =
   | 'dashEmocoes'
   | 'dashSabotadores'
   | 'dashInsights'
+  | 'insightsHistorico'
   | 'painelQuests'
   | 'mapaMental'
   | 'mapaMentalVisual';
@@ -742,6 +743,7 @@ export interface StoreState {
   conversaResumoError: string | null;
   selectedConversationId: string | null;
   conversaResumoReturnView: ViewId | null;
+  insightDetailReturnView: ViewId | null;
   panoramaCard: PanoramaCardData | null;
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;

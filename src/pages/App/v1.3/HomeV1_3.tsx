@@ -104,7 +104,6 @@ const HomeV1_3 = () => {
 
   const handleInsightDetail = (insightId?: string | null) => {
     const resolvedId = insightId ?? insightCard?.insight_id ?? insightCardData?.insight_id;
-    setView('insightDetail');
     if (resolvedId) {
       void openInsightDetail(resolvedId);
     }
@@ -222,6 +221,10 @@ const HomeV1_3 = () => {
             data={insightCardData}
             loading={insightCardLoading}
             onSaberMais={(insightId) => handleInsightDetail(insightId)}
+            onHistorico={() => {
+              console.log('[HomeV1_3] Navegando para insightsHistorico via link Histórico');
+              setView('insightsHistorico');
+            }}
           />
         </motion.div>
         {!insightCardLoading && insightCardError && (

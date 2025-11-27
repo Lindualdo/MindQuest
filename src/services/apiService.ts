@@ -1388,6 +1388,106 @@ class ApiService {
     return data;
   }
 
+  public async getInsightsHistorico(
+    userId: string
+  ): Promise<Array<{
+    id: string;
+    tipo: string;
+    categoria: string;
+    titulo: string;
+    descricao: string;
+    icone: string;
+    prioridade: string;
+    criado_em: string;
+  }>> {
+    if (!userId) {
+      throw new Error('Usuário inválido');
+    }
+
+    const params = new URLSearchParams({
+      user_id: userId
+    });
+
+    const endpoint = `/insights_historico?${params.toString()}`;
+    const finalUrl = this.resolveUrl(endpoint, false);
+    console.info('[API] requisitando histórico de insights:', finalUrl, 'useProxyPaths:', this.useProxyPaths);
+    const result = await this.makeRequest(endpoint, undefined, false);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar histórico de insights');
+    }
+
+    let payload: unknown = result.response;
+    
+    // Se for array direto, retorna
+    if (Array.isArray(payload)) {
+      return payload.map(item => ({
+        id: String(item.id || ''),
+        tipo: String(item.tipo || ''),
+        categoria: String(item.categoria || ''),
+        titulo: String(item.titulo || ''),
+        descricao: String(item.descricao || ''),
+        icone: String(item.icone || ''),
+        prioridade: String(item.prioridade || ''),
+        criado_em: String(item.criado_em || ''),
+      }));
+    }
+
+    // Se for objeto único, converte para array
+    if (payload && typeof payload === 'object' && payload !== null) {
+      const obj = payload as Record<string, unknown>;
+      // Verifica se tem propriedades de insight
+      if ('id' in obj && 'titulo' in obj) {
+        return [{
+          id: String(obj.id || ''),
+          tipo: String(obj.tipo || ''),
+          categoria: String(obj.categoria || ''),
+          titulo: String(obj.titulo || ''),
+          descricao: String(obj.descricao || ''),
+          icone: String(obj.icone || ''),
+          prioridade: String(obj.prioridade || ''),
+          criado_em: String(obj.criado_em || ''),
+        }];
+      }
+      
+      // Se tiver propriedade 'data', verifica se é array
+      if ('data' in obj) {
+        const nested = obj.data;
+        if (Array.isArray(nested)) {
+          return nested.map(item => ({
+            id: String(item.id || ''),
+            tipo: String(item.tipo || ''),
+            categoria: String(item.categoria || ''),
+            titulo: String(item.titulo || ''),
+            descricao: String(item.descricao || ''),
+            icone: String(item.icone || ''),
+            prioridade: String(item.prioridade || ''),
+            criado_em: String(item.criado_em || ''),
+          }));
+        }
+      }
+      
+      // Se for um objeto com propriedades que parecem ser um insight, mas não tem 'data'
+      // Pode ser que o n8n retornou um objeto único quando deveria ser array
+      // Verifica se tem todas as propriedades de insight
+      if ('id' in obj && 'titulo' in obj && 'categoria' in obj) {
+        // Retorna array com um único item
+        return [{
+          id: String(obj.id || ''),
+          tipo: String(obj.tipo || ''),
+          categoria: String(obj.categoria || ''),
+          titulo: String(obj.titulo || ''),
+          descricao: String(obj.descricao || ''),
+          icone: String(obj.icone || ''),
+          prioridade: String(obj.prioridade || ''),
+          criado_em: String(obj.criado_em || ''),
+        }];
+      }
+    }
+
+    return [];
+  }
+
   public async getInsightDetail(
     userId: string,
     insightId: string
