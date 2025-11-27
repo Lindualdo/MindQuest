@@ -197,6 +197,9 @@ const QuestDetailPageV13 = () => {
       detail.tipo === 'reflexao_diaria' ||
       detail.titulo === 'Reflexão Diária';
 
+    // Verificar se é quest custom (criada manualmente pelo usuário)
+    const isQuestCustom = detail.catalogo?.codigo === 'quest_custom';
+
     // Para quests recorrentes, verificar se há algum dia não concluído
     // Isso permite concluir quests de datas passadas mesmo que o status geral seja 'concluida'
     let temDiaNaoConcluido = false;
@@ -249,8 +252,8 @@ const QuestDetailPageV13 = () => {
           )}
         </div>
 
-        {/* Benefícios */}
-        {baseCientifica?.objetivo && (
+        {/* Benefícios - Ocultar para quests custom */}
+        {!isQuestCustom && baseCientifica?.objetivo && (
           <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-emerald-900">
               <Sparkles size={16} />
@@ -262,8 +265,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Referências Científicas */}
-        {baseCientifica?.fundamentos && (
+        {/* Referências Científicas - Ocultar para quests custom */}
+        {!isQuestCustom && baseCientifica?.fundamentos && (
           <div className="mb-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-blue-900">
               <BookOpen size={16} />
@@ -275,8 +278,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Como Aplicar */}
-        {baseCientifica?.como_aplicar && (
+        {/* Como Aplicar - Ocultar para quests custom */}
+        {!isQuestCustom && baseCientifica?.como_aplicar && (
           <div className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-amber-900">
               <Target size={16} />
@@ -288,8 +291,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Links de Referências */}
-        {baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
+        {/* Links de Referências - Ocultar para quests custom */}
+        {!isQuestCustom && baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
           <div className="mb-4 rounded-2xl bg-purple-50 px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-purple-900">
               <ExternalLink size={16} />
@@ -313,8 +316,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Informações Adicionais */}
-        {(detail.catalogo?.tempo_estimado_min || detail.catalogo?.dificuldade) && (
+        {/* Informações Adicionais - Ocultar para quests custom */}
+        {!isQuestCustom && (detail.catalogo?.tempo_estimado_min || detail.catalogo?.dificuldade) && (
           <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Informações Adicionais
