@@ -571,7 +571,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       });
 
       if (resultado.success && resultado.quest_id) {
-        // Recarregar snapshot de quests para incluir a nova quest
+        // Forçar recarregamento do snapshot passando usuarioId explicitamente
+        // Isso garante que o snapshot será recarregado mesmo se já existir um em cache
         await loadQuestSnapshot(usuarioId);
       }
 

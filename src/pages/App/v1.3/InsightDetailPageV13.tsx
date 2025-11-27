@@ -193,11 +193,17 @@ const InsightDetailPageV13 = () => {
 
     setCriandoQuest(resourceNome);
     try {
-      await criarQuestFromInsight(
+      const resultado = await criarQuestFromInsight(
         detail.id,
         resourceNome,
         undefined
       );
+      
+      if (resultado.success) {
+        // Aguardar um pouco para garantir que o snapshot foi recarregado
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
       // Navegar para o painel de quests
       setActiveTab('quests');
       setView('painelQuests');

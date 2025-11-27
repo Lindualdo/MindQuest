@@ -38,6 +38,7 @@ const PainelQuestsPageV13: React.FC = () => {
     concluirQuest,
     setView,
     openQuestDetail,
+    view,
   } = useDashboard();
 
   const usuarioId = dashboardData?.usuario?.id;
@@ -54,6 +55,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const hoje = useMemo(() => new Date(), []);
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
   const hasRequestedData = useRef(false);
+  const lastViewRef = useRef<string | null>(null);
 
   // Carregar dados apenas se não existirem no estado global
   useEffect(() => {
@@ -69,6 +71,18 @@ const PainelQuestsPageV13: React.FC = () => {
       void loadWeeklyProgressCard(usuarioId);
     }
   }, [usuarioId]);
+
+  // Recarregar snapshot quando a view mudar para painelQuests (vindo de outra tela)
+  useEffect(() => {
+    if (view === 'painelQuests' && usuarioId && !questLoading) {
+      // Só recarregar se a view mudou de outra tela para painelQuests
+      if (lastViewRef.current && lastViewRef.current !== 'painelQuests') {
+        // Forçar recarregamento para garantir dados atualizados
+        void loadQuestSnapshot(usuarioId);
+      }
+      lastViewRef.current = view;
+    }
+  }, [view, usuarioId, questLoading, loadQuestSnapshot]);
 
   const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
   
