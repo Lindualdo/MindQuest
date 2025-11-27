@@ -11,6 +11,7 @@ import {
   Heart,
   Brain,
   Users,
+  Plus,
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -74,24 +75,56 @@ const prioridadeBadge = (prioridade: string) => {
   }
 };
 
-const ResourceCard = ({ resource }: { resource: InsightResource }) => (
-  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-    <div className="mb-2 flex items-center justify-between">
-      <h4 className="text-sm font-semibold text-slate-800">{resource.nome}</h4>
-      <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 capitalize">
-        {resource.tipo}
-      </span>
+const ResourceCard = ({ 
+  resource, 
+  onCriarQuest,
+  criandoQuest 
+}: { 
+  resource: InsightResource;
+  onCriarQuest: () => void;
+  criandoQuest: boolean;
+}) => (
+  <div className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md">
+    <div className="mb-3 flex items-start justify-between gap-2">
+      <div className="flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-[#1C2541]">{resource.nome}</h4>
+          <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.65rem] font-medium text-[#64748B] capitalize">
+            {resource.tipo}
+          </span>
+        </div>
+        <p className="text-sm leading-relaxed text-[#475569]">
+          {resource.descricao}
+        </p>
+      </div>
     </div>
-    <p className="mb-3 text-sm leading-relaxed text-slate-600">
-      {resource.descricao}
-    </p>
-    <div className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm text-slate-700">
-      <BookOpen size={16} className="mt-1 text-indigo-500" />
-      <div>
-        <span className="font-medium text-indigo-600">Como aplicar:</span>
+    
+    <div className="mb-3 flex items-start gap-2 rounded-xl border border-white/60 bg-white/50 p-3 text-sm text-[#1C2541]">
+      <BookOpen size={16} className="mt-0.5 flex-shrink-0 text-indigo-500" />
+      <div className="flex-1">
+        <span className="font-semibold text-indigo-600">Como aplicar:</span>
         <p className="mt-1 leading-relaxed">{resource.aplicacao_pratica}</p>
       </div>
     </div>
+
+    <button
+      type="button"
+      onClick={onCriarQuest}
+      disabled={criandoQuest}
+      className="w-full rounded-xl border border-[#B6D6DF] bg-white px-3 py-2 text-xs font-semibold text-[#1C2541] shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+    >
+      {criandoQuest ? (
+        <>
+          <Loader2 size={14} className="animate-spin" />
+          Criando quest...
+        </>
+      ) : (
+        <>
+          <Plus size={14} />
+          Criar Quest
+        </>
+      )}
+    </button>
   </div>
 );
 
@@ -104,6 +137,7 @@ const InsightDetailPageV13 = () => {
     closeInsightDetail,
     setView,
     openConversaResumo,
+    criarQuestFromInsight,
   } = useDashboard();
 
   const nomeUsuario =
@@ -119,6 +153,7 @@ const InsightDetailPageV13 = () => {
   );
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -151,6 +186,27 @@ const InsightDetailPageV13 = () => {
   const handleNavQuests = () => {
     setActiveTab('quests');
     setView('painelQuests');
+  };
+
+  const handleCriarQuestFromResource = async (resourceNome: string) => {
+    if (!detail?.id || !detail?.titulo || criandoQuest) return;
+
+    setCriandoQuest(resourceNome);
+    try {
+      await criarQuestFromInsight(
+        detail.id,
+        resourceNome,
+        undefined
+      );
+      // Navegar para o painel de quests
+      setActiveTab('quests');
+      setView('painelQuests');
+    } catch (error) {
+      console.error('[handleCriarQuestFromResource] Erro ao criar quest:', error);
+      alert('Erro ao criar quest. Tente novamente.');
+    } finally {
+      setCriandoQuest(null);
+    }
   };
 
   const handleNavConfig = () => {
@@ -198,64 +254,96 @@ const InsightDetailPageV13 = () => {
       detail.recursos_sugeridos ?? [];
 
     return (
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-5 shadow"
-      >
-        <div className="mb-4 flex items-center justify-between">
+      <div className="space-y-4">
+        {/* Header: Voltar + Badges */}
+        <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541]"
+            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#1C2541] shadow-sm"
           >
             <ArrowLeft size={16} />
             Voltar
           </button>
-          {categoriaInfo && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] ${categoriaInfo.color}`}>
-              {categoriaInfo.icon}
-              {categoriaInfo.label}
-            </span>
-          )}
-        </div>
-
-        <h2 className="text-lg font-semibold text-[#1C2541]">
-          {detail.titulo}
-        </h2>
-        <p className="mt-2 text-sm text-[#475569]">
-          {detail.descricao}
-        </p>
-        {(prioridadeInfo || detail.prioridade) && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            {categoriaInfo && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] ${categoriaInfo.color}`}>
+                {categoriaInfo.icon}
+                {categoriaInfo.label}
+              </span>
+            )}
             {prioridadeInfo && (
-              <span
-                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold ${prioridadeInfo.color}`}
-              >
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${prioridadeInfo.color}`}>
                 <span className={`h-2 w-2 rounded-full ${prioridadeInfo.dot}`} />
-                Prioridade {prioridadeInfo.label}
+                {prioridadeInfo.label}
               </span>
             )}
           </div>
-        )}
+        </div>
 
-        {detail.chat_id && (
-          <button
-            type="button"
-            onClick={handleOpenConversation}
-            className="mt-3 inline-flex items-center gap-1 text-[0.72rem] font-semibold text-[#2563EB]"
+        {/* Título */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
+        >
+          <h2 className="text-lg font-semibold text-[#1C2541]">
+            {detail.titulo}
+          </h2>
+        </motion.div>
+
+        {/* Descrição */}
+        {detail.descricao && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
           >
-            Ver conversa
-          </button>
+            <p className="text-sm leading-relaxed text-[#475569]">
+              {detail.descricao}
+            </p>
+          </motion.div>
         )}
 
-        <div className="mt-4 space-y-3">
+        {/* Insights (Recursos) */}
+        {recursosSugeridos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="space-y-3"
+          >
+            <h3 className="px-1 text-sm font-semibold text-[#1C2541]">
+              Insights
+            </h3>
+            {recursosSugeridos.map((resource) => (
+              <ResourceCard
+                key={`${resource.nome}-${resource.tipo}`}
+                resource={resource}
+                onCriarQuest={() => handleCriarQuestFromResource(resource.nome)}
+                criandoQuest={criandoQuest === resource.nome}
+              />
+            ))}
+          </motion.div>
+        )}
+
+        {/* Feedback */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="space-y-3"
+        >
           {feedbackConfigs.map(({ key, label, icon, bg, text }) => {
             const content = detail[key];
             if (!content) return null;
             return (
-              <div key={key} className={`rounded-2xl px-3 py-2 text-sm ${bg} ${text}`}>
-                <div className="mb-1 flex items-center gap-2 font-semibold">
+              <div
+                key={key}
+                className={`rounded-2xl border border-[#B6D6DF] px-4 py-3 text-sm shadow-md ${bg} ${text}`}
+              >
+                <div className="mb-1.5 flex items-center gap-2 font-semibold">
                   {icon}
                   <span>{label}</span>
                 </div>
@@ -265,22 +353,26 @@ const InsightDetailPageV13 = () => {
               </div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {recursosSugeridos.length > 0 && (
-          <div className="mt-5 space-y-3">
-            <p className="text-sm font-semibold text-[#1C2541]">
-              Recursos recomendados
-            </p>
-            {recursosSugeridos.map((resource) => (
-              <ResourceCard
-                key={`${resource.nome}-${resource.tipo}`}
-                resource={resource}
-              />
-            ))}
-          </div>
+        {/* Link Ver Conversa (por último) */}
+        {detail.chat_id && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex justify-center pt-2"
+          >
+            <button
+              type="button"
+              onClick={handleOpenConversation}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#64748B] hover:text-[#2563EB] transition-colors"
+            >
+              Ver conversa
+            </button>
+          </motion.div>
         )}
-      </motion.section>
+      </div>
     );
   };
 

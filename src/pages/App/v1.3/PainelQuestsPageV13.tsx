@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, Calendar, ArrowUpRight, Settings2, Target } from 'lucide-react';
-import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isSameDay, isFuture, addDays, startOfDay } from 'date-fns';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target } from 'lucide-react';
+import { format, startOfWeek, parseISO, isSameDay, isFuture, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
-import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import type { QuestPersonalizadaResumo, QuestEstagio } from '@/types/emotions';
 import { mockWeeklyXpSummary } from '@/data/mockHomeV1_3';
@@ -106,11 +105,7 @@ const PainelQuestsPageV13: React.FC = () => {
       return dataDia === hojeStr && dia.status === 'concluida';
     });
     
-    // Verificar datas_concluidas
-    const datasConcluidas = questReflexao.datas_concluidas || [];
-    const temDataConcluidaHoje = Array.isArray(datasConcluidas) && datasConcluidas.includes(hojeStr);
-    
-    return temConcluidaHoje || temDataConcluidaHoje;
+    return temConcluidaHoje || false;
   }, [questSnapshot, hoje]);
 
   // Função para obter estágio da quest (CORRIGIDA)
@@ -131,8 +126,6 @@ const PainelQuestsPageV13: React.FC = () => {
     
     // PRIORIDADE 3: Se está ativa, verificar recorrências
     if (quest.status === 'ativa') {
-      const hojeStr = format(hoje, 'yyyy-MM-dd');
-      
       // CORREÇÃO: Quest de conversa - verificar se hoje foi concluída
       if (quest.catalogo_codigo === 'reflexao_diaria' || quest.tipo === 'reflexao_diaria') {
         // Se hoje teve conversa concluída, está em "feito"
@@ -158,6 +151,10 @@ const PainelQuestsPageV13: React.FC = () => {
       if (temConcluidas) {
         return 'feito';
       }
+      
+      // Quest ativa sem recorrências ou sem recorrências pendentes/concluídas = "a_fazer"
+      // (usuário pode planejar novas recorrências)
+      return 'a_fazer';
     }
     
     // PRIORIDADE 4: Se está disponível, é "a fazer"
@@ -173,57 +170,54 @@ const PainelQuestsPageV13: React.FC = () => {
     return 'a_fazer';
   };
 
-  // Quests filtradas pelo estágio (EXCLUINDO reflexões diárias/conversas)
-  const questsPorEstagio = useMemo(() => {
-    const todasQuests = questSnapshot?.quests_personalizadas ?? [];
-    
-    // Filtrar quests de reflexão diária (conversas) - não devem aparecer nas abas
-    const questsSemConversas = todasQuests.filter(q => {
-      const isConversa = 
-        q.catalogo_codigo === 'reflexao_diaria' ||
-        q.tipo === 'reflexao_diaria' ||
-        q.titulo === 'Reflexão Diária';
-      return !isConversa;
-    });
-    
-    return {
-      a_fazer: questsSemConversas.filter(q => getQuestEstagio(q) === 'a_fazer'),
-      fazendo: questsSemConversas.filter(q => getQuestEstagio(q) === 'fazendo'),
-      feito: questsSemConversas.filter(q => getQuestEstagio(q) === 'feito'),
-    };
-  }, [questSnapshot, hojeTemConversaConcluida]);
 
   // Função auxiliar para obter estágio da quest considerando o dia selecionado
   const getQuestEstagioParaDia = (quest: QuestPersonalizadaResumo, dataSelecionada: Date): QuestEstagio => {
     const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
     
-    // Buscar recorrência específica do dia selecionado
-    const recorrenciaDoDia = quest.recorrencias?.dias?.find((dia: any) => {
-      const dataDia = normalizeDateStr(dia.data);
-      return dataDia === dataStr;
-    });
-    
-    // Se encontrou recorrência do dia, usar o status dela
-    if (recorrenciaDoDia) {
-      if (recorrenciaDoDia.status === 'concluida') {
-        return 'feito';
-      }
-      if (recorrenciaDoDia.status === 'pendente') {
-        return 'fazendo';
-      }
-      if (recorrenciaDoDia.status === 'perdida') {
-        return 'feito'; // Perdida também vai para feito
-      }
-    }
-    
-    // Se quest está disponível e é o dia de hoje, é "a fazer"
-    if (quest.status === 'disponivel' && isSameDay(dataSelecionada, hoje)) {
+    // Se quest está disponível, sempre é "a fazer"
+    if (quest.status === 'disponivel') {
       return 'a_fazer';
     }
     
-    // Se não tem recorrência no dia mas quest está ativa, verificar status geral
-    if (quest.status === 'ativa' && !recorrenciaDoDia) {
-      // Quest ativa sem recorrência no dia = não aparece (mas por segurança retorna a_fazer)
+    // Se quest está inativa, verificar se tem recorrência concluída no dia
+    if (quest.status === 'inativa') {
+      const temRecorrenciaConcluidaNoDia = quest.recorrencias?.dias?.some((dia: any) => {
+        const dataDia = normalizeDateStr(dia.data);
+        return dataDia === dataStr && (dia.status === 'concluida' || dia.status === 'perdida');
+      });
+      return temRecorrenciaConcluidaNoDia ? 'feito' : 'a_fazer';
+    }
+    
+    // Se quest está ativa, verificar recorrências
+    if (quest.status === 'ativa') {
+      // Buscar recorrência específica do dia selecionado
+      const recorrenciaDoDia = quest.recorrencias?.dias?.find((dia: any) => {
+        const dataDia = normalizeDateStr(dia.data);
+        return dataDia === dataStr;
+      });
+      
+      // Se encontrou recorrência do dia, usar o status dela
+      if (recorrenciaDoDia) {
+        if (recorrenciaDoDia.status === 'concluida' || recorrenciaDoDia.status === 'perdida') {
+          return 'feito';
+        }
+        if (recorrenciaDoDia.status === 'pendente') {
+          return 'fazendo';
+        }
+      }
+      
+      // Quest ativa sem recorrência no dia específico: verificar se tem pendentes no geral
+      const temPendentes = quest.recorrencias?.dias?.some((dia: any) => {
+        const dataDia = normalizeDateStr(dia.data);
+        return dataDia && dia.status === 'pendente';
+      });
+      
+      if (temPendentes) {
+        return 'fazendo';
+      }
+      
+      // Quest ativa sem recorrências pendentes = "a fazer" (pode planejar novas)
       return 'a_fazer';
     }
     
@@ -235,9 +229,8 @@ const PainelQuestsPageV13: React.FC = () => {
   const questsDoDiaSelecionado = useMemo(() => {
     const dataStr = format(selectedDate, 'yyyy-MM-dd');
     const todasQuests = questSnapshot?.quests_personalizadas ?? [];
-    const isHojeSelecionado = isSameDay(selectedDate, hoje);
     
-    // Filtrar quests que têm recorrência na data selecionada OU estão disponíveis (se for hoje)
+    // Filtrar quests: mostrar todas disponíveis e ativas, ou as que têm recorrência no dia
     const questsDoDia = todasQuests.filter(quest => {
       // Excluir conversas
       const isConversa = 
@@ -246,9 +239,23 @@ const PainelQuestsPageV13: React.FC = () => {
         quest.titulo === 'Reflexão Diária';
       if (isConversa) return false;
       
-      // Se quest está disponível, mostrar apenas se for hoje (para planejar)
+      // Se quest está disponível, mostrar sempre (em "A Fazer")
       if (quest.status === 'disponivel') {
-        return isHojeSelecionado;
+        return true;
+      }
+      
+      // Se quest está ativa, mostrar sempre (pode estar em "A Fazer" ou "Fazendo")
+      if (quest.status === 'ativa') {
+        return true;
+      }
+      
+      // Se quest está inativa, mostrar apenas se tem recorrência concluída no dia (em "Feito")
+      if (quest.status === 'inativa') {
+        const temRecorrenciaConcluidaNoDia = quest.recorrencias?.dias?.some((dia: any) => {
+          const dataDia = normalizeDateStr(dia.data);
+          return dataDia === dataStr && dia.status === 'concluida';
+        });
+        return temRecorrenciaConcluidaNoDia;
       }
       
       // Verificar se tem recorrência na data selecionada
@@ -260,11 +267,20 @@ const PainelQuestsPageV13: React.FC = () => {
       return temRecorrenciaNoDia;
     });
     
+    // Ordenar por mais recentes (ativado_em DESC)
+    const ordenarPorRecente = (quests: QuestPersonalizadaResumo[]) => {
+      return [...quests].sort((a, b) => {
+        const dataA = a.ativado_em ? new Date(a.ativado_em).getTime() : 0;
+        const dataB = b.ativado_em ? new Date(b.ativado_em).getTime() : 0;
+        return dataB - dataA; // Mais recente primeiro
+      });
+    };
+
     // Usar função específica que considera o dia selecionado
     return {
-      a_fazer: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'a_fazer'),
-      fazendo: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'fazendo'),
-      feito: questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'feito'),
+      a_fazer: ordenarPorRecente(questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'a_fazer')),
+      fazendo: ordenarPorRecente(questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'fazendo')),
+      feito: ordenarPorRecente(questsDoDia.filter(q => getQuestEstagioParaDia(q, selectedDate) === 'feito')),
     };
   }, [questSnapshot, selectedDate, hojeTemConversaConcluida, hoje]);
 
@@ -449,7 +465,7 @@ const PainelQuestsPageV13: React.FC = () => {
                 type="button"
                 onClick={() => {
                   console.log('[PainelQuests] Abrindo detalhe da quest:', { questId, selectedDate: format(selectedDate, 'yyyy-MM-dd') });
-                  openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd')).catch(error => {
+                  openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd')).catch((error: unknown) => {
                     console.error('[PainelQuests] Erro ao abrir detalhe:', error);
                   });
                 }}

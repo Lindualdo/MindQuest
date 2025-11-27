@@ -198,8 +198,10 @@ export interface Gamificacao {
 }
 
 export type QuestStatus =
+  | 'disponivel'
   | 'pendente'
   | 'ativa'
+  | 'inativa'
   | 'concluida'
   | 'vencida'
   | 'cancelada'
@@ -226,6 +228,8 @@ export interface QuestPersonalizadaResumo {
   progresso_meta: number;
   progresso_atual: number;
   concluido_em: string | null;
+  ativado_em?: string | null;
+  atualizado_em?: string | null;
   config?: Record<string, unknown> | null;
   xp_recompensa?: number | null;
   prioridade?: string | null;

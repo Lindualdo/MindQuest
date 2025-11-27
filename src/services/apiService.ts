@@ -1224,6 +1224,63 @@ class ApiService {
     return { success: true };
   }
 
+  public async criarQuestManual(
+    usuarioId: string,
+    dados: {
+      titulo: string;
+      descricao?: string;
+      insight_id?: string;
+      area_vida_id?: string;
+    }
+  ): Promise<{ success: boolean; quest_id?: string; status?: string; error?: string }> {
+    if (!usuarioId) {
+      throw new Error('Usuário inválido');
+    }
+
+    if (!dados.titulo || !dados.titulo.trim()) {
+      throw new Error('Título é obrigatório');
+    }
+
+    const endpoint = '/criar-quest-manual';
+
+    // Montar query params para GET
+    const queryParams = new URLSearchParams({
+      user_id: usuarioId,
+      titulo: dados.titulo.trim(),
+    });
+
+    if (dados.descricao) {
+      queryParams.set('descricao', dados.descricao);
+    }
+
+    if (dados.insight_id) {
+      queryParams.set('insight_id', dados.insight_id);
+    }
+
+    if (dados.area_vida_id) {
+      queryParams.set('area_vida_id', dados.area_vida_id);
+    }
+
+    const result = await this.makeRequest(
+      `${endpoint}?${queryParams.toString()}`,
+      {
+        method: 'GET',
+      },
+      true
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Erro ao criar quest');
+    }
+
+    const response = result.response;
+    if (response && typeof response === 'object' && 'success' in response) {
+      return response as { success: boolean; quest_id?: string; status?: string; error?: string };
+    }
+
+    return { success: true };
+  }
+
   public async getHumorHistorico(
     userId: string,
     inicio?: string,

@@ -37,6 +37,7 @@ interface ExtendedStoreState extends StoreState {
   closeFullChat: () => void;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   concluirQuest: (questId?: string, dataReferencia?: string) => Promise<void>;
+  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string) => Promise<{ success: boolean; quest_id?: string }>;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -551,6 +552,33 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         questLoading: false,
         questError: error instanceof Error ? error.message : 'Erro ao concluir quest',
       });
+    }
+  },
+
+  criarQuestFromInsight: async (insightId, titulo, descricao) => {
+    const { dashboardData, loadQuestSnapshot } = get();
+    const usuarioId = dashboardData?.usuario?.id;
+
+    if (!usuarioId) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    try {
+      const resultado = await apiService.criarQuestManual(usuarioId, {
+        titulo,
+        descricao,
+        insight_id: insightId,
+      });
+
+      if (resultado.success && resultado.quest_id) {
+        // Recarregar snapshot de quests para incluir a nova quest
+        await loadQuestSnapshot(usuarioId);
+      }
+
+      return resultado;
+    } catch (error) {
+      console.error('[criarQuestFromInsight] erro ao criar quest', error);
+      throw error;
     }
   },
 
@@ -1183,6 +1211,7 @@ export const useDashboard = () => {
     questError,
     loadQuestSnapshot,
     concluirQuest,
+    criarQuestFromInsight,
     panoramaCard,
     panoramaCardLoading,
     panoramaCardError,
@@ -1266,6 +1295,7 @@ export const useDashboard = () => {
     questError,
     loadQuestSnapshot,
     concluirQuest,
+    criarQuestFromInsight,
     panoramaCard,
     panoramaCardLoading,
     panoramaCardError,
