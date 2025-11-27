@@ -4,20 +4,6 @@
 **Status:** Em revisão - aguardando validação  
 **Versão:** 1.0
 
-## Contexto
-
-Identificação do "sabotador mais ativo" de um usuário para criação de quests e exibição no card da home. Atualmente existem implementações diferentes entre:
-- Workflow `sw_criar_quest` (node "Buscar Sabotadores Recentes")
-- Webhook `webhook_card_emocoes` (node "Sabotador_Ativo")
-
-## Situação Atual
-
-**Problema identificado:**
-- Ambas as implementações estão incorretas
-- Workflow criar quest: ordena por data mais recente (não por atividade)
-- Webhook card home: usa filtro de período de 7 dias (deve ignorar período)
-- Ambos não calculam corretamente a intensidade média
-
 **Abordagem temporária adotada:**
 - Identificar sabotador mais ativo baseado em:
   1. Quantidade de registros (`total_deteccoes`)
@@ -25,8 +11,6 @@ Identificação do "sabotador mais ativo" de um usuário para criação de quest
   3. Intensidade média (`AVG(intensidade_media)`)
 - Ordenação: `total_deteccoes DESC, conversas_afetadas DESC, intensidade_media DESC`
 - Sem filtro de período (considera todos os registros do usuário)
-
-**Observação:** Encontrei várias abordagens diferentes, mas iria complicar muito a implementação agora e não tenho certeza qual escolher. Esta é uma solução temporária para unificar o comportamento.
 
 ## Questões para Revisão Futura
 
@@ -105,22 +89,6 @@ Tabela comparativa com 3 sabotadores fictícios:
 - **Com score composto**: Inquieto é o mais ativo (crônico + impacto médio alto)
 - **Se priorizar só frequência**: Ignora o Perfeccionista devastador
 - **Se priorizar só intensidade**: Superestima raros de alto impacto
-
-### Implementação SQL
-
-```sql
-SELECT
-  us.sabotador_id,
-  COUNT(*) AS total_deteccoes,
-  COUNT(DISTINCT us.chat_id) AS conversas_afetadas,
-  AVG(us.intensidade_media) AS intensidade_media,
-  COUNT(*) * AVG(us.intensidade_media) AS score_atividade
-FROM usuarios_sabotadores us
-WHERE us.usuario_id = $1::uuid
-GROUP BY us.sabotador_id
-ORDER BY score_atividade DESC
-LIMIT 1;
-```
 
 ## Ajustes Opcionais (Refinamentos Futuros)
 
