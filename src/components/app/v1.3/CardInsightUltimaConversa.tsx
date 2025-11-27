@@ -5,7 +5,6 @@ type Props = {
   data?: InsightCardData | null;
   loading?: boolean;
   onSaberMais?: (insightId: string | null) => void;
-  onVerHistorico?: () => void;
 };
 
 const fallbackInsight: InsightCardData = {
@@ -21,7 +20,7 @@ const fallbackInsight: InsightCardData = {
   data_label: null,
 };
 
-const CardInsightUltimaConversa = ({ data, loading, onSaberMais, onVerHistorico }: Props) => {
+const CardInsightUltimaConversa = ({ data, loading, onSaberMais }: Props) => {
   const insight = data ?? fallbackInsight;
   const title = loading ? 'Carregando insight...' : insight.titulo;
   const description = loading
@@ -44,30 +43,17 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais, onVerHistorico 
           {description}
         </p>
       </div>
-      {(onSaberMais || onVerHistorico) && (
-        <div className="mt-3 flex items-center justify-between">
-          {onVerHistorico && (
-            <button
-              type="button"
-              onClick={onVerHistorico}
-              className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
-              disabled={loading}
-            >
-              Ver histórico
-              <ArrowUpRight size={12} />
-            </button>
-          )}
-          {onSaberMais && (
-            <button
-              type="button"
-              onClick={() => onSaberMais(insight?.insight_id ?? null)}
-              className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
-              disabled={loading}
-            >
-              Saber mais
-              <ArrowUpRight size={12} />
-            </button>
-          )}
+      {onSaberMais && (
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => onSaberMais(insight?.insight_id ?? null)}
+            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
+            disabled={loading}
+          >
+            Saber mais
+            <ArrowUpRight size={12} />
+          </button>
         </div>
       )}
     </section>

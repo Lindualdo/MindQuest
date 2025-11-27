@@ -177,7 +177,13 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <CardWeeklyProgress summary={weeklySummary} onContinue={handleContinue} />
+          <CardWeeklyProgress 
+            summary={weeklySummary} 
+            onContinue={handleContinue}
+            onHistorico={async () => {
+              await openResumoConversas();
+            }}
+          />
         </motion.div>
         {!weeklyProgressCardLoading && weeklyProgressCardError && (
           <p className="text-center text-[0.72rem] font-medium text-rose-600">
@@ -216,9 +222,6 @@ const HomeV1_3 = () => {
             data={insightCardData}
             loading={insightCardLoading}
             onSaberMais={(insightId) => handleInsightDetail(insightId)}
-            onVerHistorico={async () => {
-              await openResumoConversas();
-            }}
           />
         </motion.div>
         {!insightCardLoading && insightCardError && (
