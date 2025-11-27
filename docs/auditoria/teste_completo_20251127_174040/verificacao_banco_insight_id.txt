@@ -1,0 +1,5 @@
+                  id                  |              insight_id              | contexto_origem | resource_index 
+--------------------------------------+--------------------------------------+-----------------+----------------
+ c8236195-c5f1-40db-9bef-b24e2b6e1ef4 | e47edca9-88cb-4b71-8859-1fde6d08bf3b | insight_manual  | 0
+(1 row)
+

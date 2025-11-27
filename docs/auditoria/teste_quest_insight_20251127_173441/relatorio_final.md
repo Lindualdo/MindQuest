@@ -77,17 +77,32 @@ O loop infinito de recarregamentos impede que:
 2. O `useMemo` que calcula `resourceIndexesComQuest` seja atualizado
 3. O componente re-renderize com os dados corretos
 
-## Próximos Passos
+## Correções Aplicadas
 
-1. **Corrigir loop infinito:**
-   - Revisar dependências do `useEffect` em `InsightDetailPageV13.tsx`
-   - Adicionar guardas para evitar recarregamentos desnecessários
-   - Usar `useRef` para rastrear se já foi recarregado
+### Correção 1: Loop Infinito de Recarregamentos
 
-2. **Corrigir ocultação de botão:**
-   - Após corrigir o loop, verificar se o `useMemo` está funcionando
-   - Garantir que o snapshot contém a quest criada
+**Problema:** `loadQuestSnapshot` estava nas dependências do `useEffect`, causando recarregamentos infinitos.
+
+**Solução:**
+- Adicionado `useRef` para rastrear `insight_id` e só recarregar quando mudar
+- Removido `loadQuestSnapshot` das dependências do `useEffect`
+- Adicionado `useRef` no painel de quests para rastrear mudanças de `view`
+
+**Arquivos modificados:**
+- `src/pages/App/v1.3/InsightDetailPageV13.tsx` (linhas 164-175)
+- `src/pages/App/v1.3/PainelQuestsPageV13.tsx` (linhas 75-87)
+
+### Próximos Passos
+
+1. **Retestar após correção do loop:**
+   - Verificar se o loop foi resolvido
+   - Verificar se o botão agora é ocultado corretamente
+   - Confirmar que a quest aparece imediatamente no painel
+
+2. **Se o botão ainda não ocultar:**
+   - Verificar se o snapshot contém a quest criada
    - Verificar se o `resourceIndexesComQuest` está sendo calculado corretamente
+   - Adicionar logs de debug para rastrear o estado
 
 ## Arquivos para Revisão
 

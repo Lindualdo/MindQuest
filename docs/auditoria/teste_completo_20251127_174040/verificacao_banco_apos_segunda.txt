@@ -1,0 +1,6 @@
+                  id                  |             titulo              | resource_index |              insight_id              |   status   
+--------------------------------------+---------------------------------+----------------+--------------------------------------+------------
+ 54e262e7-148e-44c0-8d45-0e5ec9641199 | Jornal de Sentimentos e Avanços | 1              | e47edca9-88cb-4b71-8859-1fde6d08bf3b | disponivel
+ c8236195-c5f1-40db-9bef-b24e2b6e1ef4 | Validações Incrementais         | 0              | e47edca9-88cb-4b71-8859-1fde6d08bf3b | disponivel
+(2 rows)
+
