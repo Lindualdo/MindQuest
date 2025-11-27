@@ -1235,7 +1235,7 @@ class ApiService {
       area_vida_id?: string;
       resource_index?: number;
     }
-  ): Promise<{ success: boolean; quest_id?: string; status?: string; error?: string }> {
+  ): Promise<{ success: boolean; quest_id?: string; status?: string; error?: string | null }> {
     if (!usuarioId) {
       throw new Error('Usuário inválido');
     }

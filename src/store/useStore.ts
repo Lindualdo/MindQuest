@@ -37,7 +37,7 @@ interface ExtendedStoreState extends StoreState {
   closeFullChat: () => void;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   concluirQuest: (questId?: string, dataReferencia?: string) => Promise<void>;
-  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string, instrucoes?: string, resourceIndex?: number) => Promise<{ success: boolean; quest_id?: string }>;
+  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string, instrucoes?: string, resourceIndex?: number) => Promise<{ success: boolean; quest_id?: string; error?: string | null }>;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
