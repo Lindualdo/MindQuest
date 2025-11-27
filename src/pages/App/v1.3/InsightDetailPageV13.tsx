@@ -143,6 +143,7 @@ const InsightDetailPageV13 = () => {
     openConversaResumo,
     criarQuestFromInsight,
     questSnapshot,
+    loadQuestSnapshot,
   } = useDashboard();
 
   const nomeUsuario =
@@ -159,6 +160,14 @@ const InsightDetailPageV13 = () => {
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
+  
+  // Recarregar questSnapshot quando o insight é aberto para atualizar botões
+  useEffect(() => {
+    const usuarioId = dashboardData?.usuario?.id;
+    if (detail?.id && usuarioId) {
+      loadQuestSnapshot(usuarioId);
+    }
+  }, [detail?.id, dashboardData?.usuario?.id, loadQuestSnapshot]);
   
   // Verificar quais resource_index já têm quests criadas para este insight
   const resourceIndexesComQuest = useMemo(() => {
