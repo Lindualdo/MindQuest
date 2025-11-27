@@ -356,7 +356,12 @@ const PainelQuestsPageV13: React.FC = () => {
 
   // Renderizar quest item completo para "fazendo" e "feito"
   const renderQuestItem = (quest: QuestPersonalizadaResumo, isConcluida = false) => {
+    // instancia_id é o ID da tabela usuarios_quest (uq.id), que é o que a API espera
     const questId = quest.instancia_id || quest.meta_codigo;
+    
+    if (!questId) {
+      console.warn('[PainelQuests] Quest sem ID válido:', quest);
+    }
     const xpRecompensa = quest.xp_recompensa ?? 30;
     
     const isConversaQuest = 
