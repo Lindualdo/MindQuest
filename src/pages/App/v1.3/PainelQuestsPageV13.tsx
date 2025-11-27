@@ -329,7 +329,11 @@ const PainelQuestsPageV13: React.FC = () => {
     const questId = quest.instancia_id || quest.meta_codigo;
     
     return (
-      <Card key={questId} className="!p-4 !bg-white hover:shadow-md transition-shadow" hover={true}>
+      <div 
+        key={questId} 
+        className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md hover:shadow-lg transition-all"
+        style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-[#1C2541]">{quest.titulo}</h3>
@@ -346,7 +350,7 @@ const PainelQuestsPageV13: React.FC = () => {
             <Settings2 size={16} />
           </button>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -365,7 +369,11 @@ const PainelQuestsPageV13: React.FC = () => {
     const percentual = meta > 0 ? Math.round((progresso / meta) * 100) : 0;
 
     return (
-      <Card key={questId} className="!p-5 !bg-white hover:shadow-lg transition-all" hover={true}>
+      <div 
+        key={questId} 
+        className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all"
+        style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+      >
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
@@ -443,7 +451,7 @@ const PainelQuestsPageV13: React.FC = () => {
             )}
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -663,7 +671,10 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Abas melhoradas */}
         <div className="mb-6">
-          <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-md">
+          <div 
+            className="flex gap-2 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-1.5 shadow-md"
+            style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+          >
             {(['a_fazer', 'fazendo', 'feito'] as QuestTab[]).map((tab) => {
               const isActive = activeTab === tab;
               // Usar quests do dia selecionado ao invés de todas
@@ -714,7 +725,10 @@ const PainelQuestsPageV13: React.FC = () => {
                   <div className="space-y-3">
                     {questsDoDiaSelecionado.a_fazer.map(quest => renderQuestItemSimples(quest))}
                   </div>
-                  <div className="mt-6 rounded-2xl bg-gradient-to-r from-[#E0F2FE] to-[#F0F9FF] p-4 border-2 border-[#BAE6FD]">
+                  <div 
+                    className="mt-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md"
+                    style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+                  >
                     <p className="text-sm text-[#64748B] text-center">
                       <Settings2 size={16} className="inline mr-2 text-[#0EA5E9]" />
                       Toque no ícone ao lado de cada quest para definir a recorrência
@@ -722,7 +736,10 @@ const PainelQuestsPageV13: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <Card className="!p-12 !bg-white text-center shadow-lg" hover={false}>
+                <div 
+                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+                >
                   <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
                     <div className="rounded-full bg-[#E0F2FE] p-6">
                       <Target size={48} className="text-[#0EA5E9]" />
@@ -736,7 +753,7 @@ const PainelQuestsPageV13: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
               )}
             </>
           )}
@@ -748,7 +765,10 @@ const PainelQuestsPageV13: React.FC = () => {
                   {questsDoDiaSelecionado.fazendo.map(quest => renderQuestItem(quest, false))}
                 </div>
               ) : (
-                <Card className="!p-12 !bg-white text-center shadow-lg" hover={false}>
+                <div 
+                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+                >
                   <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
                     <div className="rounded-full bg-[#FEF3C7] p-6">
                       <TrendingUp size={48} className="text-[#F59E0B]" />
@@ -762,7 +782,7 @@ const PainelQuestsPageV13: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
               )}
             </>
           )}
@@ -774,7 +794,10 @@ const PainelQuestsPageV13: React.FC = () => {
                   {questsDoDiaSelecionado.feito.map(quest => renderQuestItem(quest, true))}
                 </div>
               ) : (
-                <Card className="!p-12 !bg-white text-center shadow-lg" hover={false}>
+                <div 
+                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+                >
                   <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
                     <div className="rounded-full bg-[#ECFDF5] p-6">
                       <Sparkles size={48} className="text-[#059669]" />
@@ -788,7 +811,7 @@ const PainelQuestsPageV13: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
               )}
             </>
           )}
