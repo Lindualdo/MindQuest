@@ -37,7 +37,7 @@ interface ExtendedStoreState extends StoreState {
   closeFullChat: () => void;
   loadQuestSnapshot: (usuarioId?: string) => Promise<void>;
   concluirQuest: (questId?: string, dataReferencia?: string) => Promise<void>;
-  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string) => Promise<{ success: boolean; quest_id?: string }>;
+  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string, instrucoes?: string, resourceIndex?: number) => Promise<{ success: boolean; quest_id?: string }>;
 }
 
 const useStore = create<ExtendedStoreState>((set, get) => ({
@@ -555,7 +555,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
     }
   },
 
-  criarQuestFromInsight: async (insightId, titulo, descricao) => {
+  criarQuestFromInsight: async (insightId, titulo, descricao, instrucoes, resourceIndex) => {
     const { dashboardData, loadQuestSnapshot } = get();
     const usuarioId = dashboardData?.usuario?.id;
 
@@ -567,7 +567,9 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       const resultado = await apiService.criarQuestManual(usuarioId, {
         titulo,
         descricao,
+        instrucoes,
         insight_id: insightId,
+        resource_index: resourceIndex,
       });
 
       if (resultado.success && resultado.quest_id) {

@@ -145,6 +145,7 @@ class ApiService {
       titulo: this.toString(quest.titulo) || (configObj && typeof configObj.titulo === 'string' ? configObj.titulo : null) || 'Quest personalizada',
       descricao: this.toString(quest.descricao),
       contexto_origem: this.toString(quest.contexto_origem),
+      insight_id: this.toString(quest.insight_id) ?? null,
       progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
       progresso_atual: this.toNumber(quest.progresso_atual, 0) ?? 0,
       concluido_em: this.toString(quest.concluido_em),
@@ -1229,8 +1230,10 @@ class ApiService {
     dados: {
       titulo: string;
       descricao?: string;
+      instrucoes?: string;
       insight_id?: string;
       area_vida_id?: string;
+      resource_index?: number;
     }
   ): Promise<{ success: boolean; quest_id?: string; status?: string; error?: string }> {
     if (!usuarioId) {
@@ -1253,12 +1256,20 @@ class ApiService {
       queryParams.set('descricao', dados.descricao);
     }
 
+    if (dados.instrucoes) {
+      queryParams.set('instrucoes', dados.instrucoes);
+    }
+
     if (dados.insight_id) {
       queryParams.set('insight_id', dados.insight_id);
     }
 
     if (dados.area_vida_id) {
       queryParams.set('area_vida_id', dados.area_vida_id);
+    }
+
+    if (dados.resource_index !== undefined) {
+      queryParams.set('resource_index', String(dados.resource_index));
     }
 
     const result = await this.makeRequest(

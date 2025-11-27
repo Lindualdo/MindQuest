@@ -225,6 +225,7 @@ export interface QuestPersonalizadaResumo {
   titulo: string;
   descricao: string | null;
   contexto_origem: string | null;
+  insight_id?: string | null;
   progresso_meta: number;
   progresso_atual: number;
   concluido_em: string | null;
@@ -804,6 +805,7 @@ export interface StoreState {
   loadQuestsCard: (usuarioId?: string) => Promise<void>;
   markQuestAsCompletedLocal: (questId: string) => void;
   concluirQuest: (questId?: string) => Promise<void>;
+  criarQuestFromInsight: (insightId: string, titulo: string, descricao?: string, instrucoes?: string, resourceIndex?: number) => Promise<{ success: boolean; quest_id?: string }>;
   loadJornadaCard: (usuarioId?: string) => Promise<void>;
   loadConversasCard: (usuarioId?: string) => Promise<void>;
   loadWeeklyProgressCard: (usuarioId?: string) => Promise<void>;

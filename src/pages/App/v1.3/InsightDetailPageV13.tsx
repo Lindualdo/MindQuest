@@ -78,11 +78,13 @@ const prioridadeBadge = (prioridade: string) => {
 const ResourceCard = ({ 
   resource, 
   onCriarQuest,
-  criandoQuest 
+  criandoQuest,
+  disabled
 }: { 
   resource: InsightResource;
   onCriarQuest: () => void;
   criandoQuest: boolean;
+  disabled?: boolean;
 }) => (
   <div className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md">
     <div className="mb-3 flex items-start justify-between gap-2">
@@ -107,12 +109,13 @@ const ResourceCard = ({
       </div>
     </div>
 
-    <button
-      type="button"
-      onClick={onCriarQuest}
-      disabled={criandoQuest}
-      className="w-full rounded-xl border border-[#B6D6DF] bg-white px-3 py-2 text-xs font-semibold text-[#1C2541] shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-    >
+    {!disabled && (
+      <button
+        type="button"
+        onClick={onCriarQuest}
+        disabled={criandoQuest}
+        className="w-full rounded-xl border border-[#B6D6DF] bg-white px-3 py-2 text-xs font-semibold text-[#1C2541] shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+      >
       {criandoQuest ? (
         <>
           <Loader2 size={14} className="animate-spin" />
@@ -124,7 +127,8 @@ const ResourceCard = ({
           Criar Quest
         </>
       )}
-    </button>
+      </button>
+    )}
   </div>
 );
 
@@ -138,6 +142,7 @@ const InsightDetailPageV13 = () => {
     setView,
     openConversaResumo,
     criarQuestFromInsight,
+    questSnapshot,
   } = useDashboard();
 
   const nomeUsuario =
@@ -154,6 +159,16 @@ const InsightDetailPageV13 = () => {
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
+  
+  // Verificar quantas quests já foram criadas para este insight
+  const questsDoInsight = useMemo(() => {
+    if (!detail?.id) return [];
+    return questSnapshot?.quests_personalizadas?.filter(
+      q => q.insight_id === detail.id
+    ) ?? [];
+  }, [detail?.id, questSnapshot]);
+  
+  const questsCriadasCount = questsDoInsight.length;
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -188,25 +203,34 @@ const InsightDetailPageV13 = () => {
     setView('painelQuests');
   };
 
-  const handleCriarQuestFromResource = async (resourceNome: string) => {
+  const handleCriarQuestFromResource = async (resource: InsightResource, resourceIndex: number) => {
     if (!detail?.id || !detail?.titulo || criandoQuest) return;
+    
+    // Verificar se já foram criadas 2 quests para este insight
+    if (questsCriadasCount >= 2) {
+      alert('Você já criou o máximo de 2 quests para este insight.');
+      return;
+    }
 
-    setCriandoQuest(resourceNome);
+    setCriandoQuest(resource.nome);
     try {
       const resultado = await criarQuestFromInsight(
         detail.id,
-        resourceNome,
-        undefined
+        resource.nome,
+        resource.descricao,
+        resource.aplicacao_pratica,
+        resourceIndex
       );
       
       if (resultado.success) {
         // Aguardar um pouco para garantir que o snapshot foi recarregado
         await new Promise(resolve => setTimeout(resolve, 500));
+        // Navegar para o painel de quests
+        setActiveTab('quests');
+        setView('painelQuests');
+      } else if (resultado.error) {
+        alert(resultado.error);
       }
-      
-      // Navegar para o painel de quests
-      setActiveTab('quests');
-      setView('painelQuests');
     } catch (error) {
       console.error('[handleCriarQuestFromResource] Erro ao criar quest:', error);
       alert('Erro ao criar quest. Tente novamente.');
@@ -323,12 +347,13 @@ const InsightDetailPageV13 = () => {
             <h3 className="px-1 text-sm font-semibold text-[#1C2541]">
               Insights
             </h3>
-            {recursosSugeridos.map((resource) => (
+            {recursosSugeridos.map((resource, index) => (
               <ResourceCard
                 key={`${resource.nome}-${resource.tipo}`}
                 resource={resource}
-                onCriarQuest={() => handleCriarQuestFromResource(resource.nome)}
+                onCriarQuest={() => handleCriarQuestFromResource(resource, index)}
                 criandoQuest={criandoQuest === resource.nome}
+                disabled={questsCriadasCount >= 2}
               />
             ))}
           </motion.div>
