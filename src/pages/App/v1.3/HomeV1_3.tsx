@@ -27,6 +27,7 @@ const HomeV1_3 = () => {
     weeklyProgressCardError,
     loadWeeklyProgressCard,
     openSabotadorDetail,
+    openResumoConversas,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -215,6 +216,9 @@ const HomeV1_3 = () => {
             data={insightCardData}
             loading={insightCardLoading}
             onSaberMais={(insightId) => handleInsightDetail(insightId)}
+            onVerHistorico={async () => {
+              await openResumoConversas();
+            }}
           />
         </motion.div>
         {!insightCardLoading && insightCardError && (

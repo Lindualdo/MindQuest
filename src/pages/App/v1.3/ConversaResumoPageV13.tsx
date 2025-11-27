@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ArrowUpRight } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -17,6 +17,10 @@ const ConversaResumoPageV13 = () => {
     loadConversaResumo,
     closeConversaResumo,
     setView,
+    resumoConversas,
+    resumoConversasLoading,
+    resumoConversasError,
+    openConversaResumo,
   } = useDashboard();
 
   const nomeUsuario =
@@ -68,8 +72,18 @@ const ConversaResumoPageV13 = () => {
   }, [conversaResumo]);
 
   const handleBack = () => {
-    closeConversaResumo();
+    if (selectedConversationId) {
+      closeConversaResumo();
+    } else {
+      setView('dashboard');
+    }
     setActiveTab('home');
+  };
+
+  const handleOpenConversa = (conversaId: string | number) => {
+    if (conversaId) {
+      openConversaResumo(String(conversaId)).catch(() => null);
+    }
   };
 
   const handleNavHome = () => {
@@ -106,72 +120,139 @@ const ConversaResumoPageV13 = () => {
             Voltar
           </button>
           <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[#1C2541]">
-            Resumo da conversa
+            {selectedConversationId ? 'Resumo da conversa' : 'Histórico de conversas'}
           </div>
         </div>
 
-        <Card className="!p-0 overflow-hidden" hover={false}>
-          <div className="flex items-start gap-3 border-b border-white/40 bg-white/80 p-5">
-            <div className="rounded-2xl bg-[#E0F2FE] p-3">
-              <MessageSquare className="text-[#1D4ED8]" size={18} />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-[#1C2541]">Resumo da conversa</h2>
-            </div>
-          </div>
-
-          <div className="space-y-4 p-5">
-            {conversaResumoLoading && (
-              <p className="text-center text-sm text-[#475569]">Carregando resumo…</p>
-            )}
-
-            {conversaResumoError && (
-              <p className="text-center text-sm text-red-500">{conversaResumoError}</p>
-            )}
-
-            {!conversaResumoLoading && !conversaResumoError && !conversaResumo && (
-              <p className="text-center text-sm text-[#475569]">
-                Nenhum resumo disponível para esta conversa.
-              </p>
-            )}
-
-            {conversaResumo && (
-              <div className="space-y-4">
-                {conversaResumo.data_conversa && (
-                  <div className="flex items-center justify-between rounded-2xl border border-white/60 bg-white px-3 py-2 text-xs font-semibold text-[#475569]">
-                    <span>Conversa</span>
-                    <span className="rounded-full bg-[#E0F2FE] px-2 py-0.5 text-[0.65rem] font-semibold text-[#1D4ED8]">
-                      {format(new Date(conversaResumo.data_conversa), 'dd/MM/yyyy')}
-                    </span>
-                  </div>
-                )}
-
-                {paragraphs.length > 0 && (
-                  <div className="space-y-3 rounded-2xl border border-white/60 bg-white px-4 py-3 text-sm leading-relaxed text-[#1F2937]">
-                    {paragraphs.map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))}
-                  </div>
-                )}
-
-                {detalhesExtras.length > 0 && (
-                  <div className="space-y-2 rounded-2xl border border-white/60 bg-white px-4 py-3 text-xs text-[#475569]">
-                    {detalhesExtras.map(({ key, value }) => (
-                      <div key={key}>
-                        <p className="font-semibold uppercase tracking-wide text-[#94A3B8]">{key}</p>
-                        <p className="text-sm text-[#1F2937]">
-                          {typeof value === 'string' || typeof value === 'number'
-                            ? value
-                            : JSON.stringify(value)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {selectedConversationId ? (
+          <Card className="!p-0 overflow-hidden" hover={false}>
+            <div className="flex items-start gap-3 border-b border-white/40 bg-white/80 p-5">
+              <div className="rounded-2xl bg-[#E0F2FE] p-3">
+                <MessageSquare className="text-[#1D4ED8]" size={18} />
               </div>
-            )}
-          </div>
-        </Card>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-[#1C2541]">Resumo da conversa</h2>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5">
+              {conversaResumoLoading && (
+                <p className="text-center text-sm text-[#475569]">Carregando resumo…</p>
+              )}
+
+              {conversaResumoError && (
+                <p className="text-center text-sm text-red-500">{conversaResumoError}</p>
+              )}
+
+              {!conversaResumoLoading && !conversaResumoError && !conversaResumo && (
+                <p className="text-center text-sm text-[#475569]">
+                  Nenhum resumo disponível para esta conversa.
+                </p>
+              )}
+
+              {conversaResumo && (
+                <div className="space-y-4">
+                  {conversaResumo.data_conversa && (
+                    <div className="flex items-center justify-between rounded-2xl border border-white/60 bg-white px-3 py-2 text-xs font-semibold text-[#475569]">
+                      <span>Conversa</span>
+                      <span className="rounded-full bg-[#E0F2FE] px-2 py-0.5 text-[0.65rem] font-semibold text-[#1D4ED8]">
+                        {format(new Date(conversaResumo.data_conversa), 'dd/MM/yyyy')}
+                      </span>
+                    </div>
+                  )}
+
+                  {paragraphs.length > 0 && (
+                    <div className="space-y-3 rounded-2xl border border-white/60 bg-white px-4 py-3 text-sm leading-relaxed text-[#1F2937]">
+                      {paragraphs.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {detalhesExtras.length > 0 && (
+                    <div className="space-y-2 rounded-2xl border border-white/60 bg-white px-4 py-3 text-xs text-[#475569]">
+                      {detalhesExtras.map(({ key, value }) => (
+                        <div key={key}>
+                          <p className="font-semibold uppercase tracking-wide text-[#94A3B8]">{key}</p>
+                          <p className="text-sm text-[#1F2937]">
+                            {typeof value === 'string' || typeof value === 'number'
+                              ? value
+                              : JSON.stringify(value)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        ) : (
+          <Card className="!p-0 overflow-hidden" hover={false}>
+            <div className="flex items-start gap-3 border-b border-white/40 bg-white/80 p-5">
+              <div className="rounded-2xl bg-[#E0F2FE] p-3">
+                <MessageSquare className="text-[#1D4ED8]" size={18} />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-[#1C2541]">Histórico de conversas</h2>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5">
+              {resumoConversasLoading && (
+                <p className="text-center text-sm text-[#475569]">Carregando histórico…</p>
+              )}
+
+              {resumoConversasError && (
+                <p className="text-center text-sm text-red-500">{resumoConversasError}</p>
+              )}
+
+              {!resumoConversasLoading && !resumoConversasError && (!resumoConversas?.conversas || resumoConversas.conversas.length === 0) && (
+                <p className="text-center text-sm text-[#475569]">
+                  Nenhuma conversa encontrada.
+                </p>
+              )}
+
+              {resumoConversas?.conversas && resumoConversas.conversas.length > 0 && (
+                <div className="space-y-3">
+                  {resumoConversas.conversas.map((conversa, index) => {
+                    const conversaId = conversa.conversa_id ?? conversa.id ?? conversa.chat_id;
+                    const dataConversa = conversa.data_conversa ? new Date(conversa.data_conversa) : null;
+                    const titulo = (conversa as any).titulo || (dataConversa ? `Conversa de ${format(dataConversa, 'dd/MM/yyyy')}` : `Conversa ${index + 1}`);
+                    
+                    return (
+                      <button
+                        key={conversaId ?? `conversa-${index}`}
+                        type="button"
+                        onClick={() => conversaId && handleOpenConversa(conversaId)}
+                        className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 text-left shadow-md transition-all hover:bg-[#D1E7E9] hover:shadow-lg active:scale-[0.98]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-sm font-semibold text-[#1C2541]">
+                              {titulo}
+                            </h3>
+                            {dataConversa && (
+                              <p className="mt-1 text-xs text-[#64748B]">
+                                {format(dataConversa, 'dd/MM/yyyy')}
+                              </p>
+                            )}
+                            {conversa.resumo_conversa && (
+                              <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#475569]">
+                                {conversa.resumo_conversa.substring(0, 100)}...
+                              </p>
+                            )}
+                          </div>
+                          <ArrowUpRight className="ml-2 flex-shrink-0 text-[#2563EB]" size={16} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
       </main>
 
       <BottomNavV1_3
