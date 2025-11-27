@@ -211,9 +211,12 @@ const QuestDetailPageV13 = () => {
     }
 
     // Permitir concluir quests que não estejam já concluídas e não sejam de conversa
-    // Para quests recorrentes, também permitir se houver algum dia não concluído
-    // Isso permite concluir quests de datas passadas que o usuário esqueceu de marcar
-    // Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
+    // - Quests em status "disponivel" (a fazer) podem ser concluídas diretamente sem planejamento prévio
+    // - O sistema cria automaticamente o registro em quests_recorrencias quando a quest é concluída
+    // - Isso é especialmente útil para quests de execução única (sem recorrência)
+    // - Para quests recorrentes, também permitir se houver algum dia não concluído
+    // - Permite concluir quests de datas passadas que o usuário esqueceu de marcar
+    // - Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
     const podeConcluir = !isConversaQuest && 
       detail.status && 
       (detail.status !== 'concluida' || temDiaNaoConcluido);

@@ -28,7 +28,7 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 **Ciclo de Vida:** Disponível (criada, aguardando ativação) → Ativa (em execução com recorrências) → Inativa (todas ocorrências concluídas/vencidas, pode reativar). Conversas são sempre ativas e nunca expiram.
 
-**Recorrências:** Usuário define dias da semana. Cada dia gera ocorrência (pendente/concluída/perdida). Conversas têm recorrência diária automática, não precisam planejamento em `quests_recorrencias` (apenas registram concluídas).
+**Recorrências:** Usuário define dias da semana. Cada dia gera ocorrência (pendente/concluída/perdida). Conversas têm recorrência diária automática, não precisam planejamento em `quests_recorrencias` (apenas registram concluídas). **Quests podem ser concluídas diretamente sem planejamento prévio:** quando uma quest em status "disponivel" é concluída, o sistema cria automaticamente um registro em `quests_recorrencias` com status "concluida" para a data de conclusão. Isso permite flexibilidade para quests de execução única ou quando o usuário prefere concluir antes de planejar recorrências.
 
 ---
 
@@ -50,7 +50,7 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 **PainelQuestsPageV13:** Tela principal - 3 abas (A Fazer/Fazendo/Feito). Ativa quests, visualiza progresso, acessa detalhes.
 
-**QuestDetailPageV13:** Detalhes e execução - Informações completas, recorrências planejadas, histórico. Permite concluir ocorrências por data.
+**QuestDetailPageV13:** Detalhes e execução - Informações completas, recorrências planejadas, histórico. Permite concluir ocorrências por data. **Quests em status "disponivel" (a fazer) podem ser concluídas diretamente sem necessidade de planejamento prévio.** O sistema cria automaticamente o registro em `quests_recorrencias` quando a quest é concluída, mesmo sem recorrências planejadas. Isso é especialmente útil para quests de execução única (sem recorrência).
 
 **PlanejamentoQuestsPage:** Planejamento e ativação - Define recorrências (dias da semana) ao ativar quest. Visualiza disponíveis.
 
@@ -79,7 +79,7 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 **`webhook_quests`:** Listagem e snapshot - GET retorna quests do usuário (card/snapshot), POST atualiza status múltiplas quests.
 
-**`webhook_concluir_quest`:** Conclusão - Marca ocorrência como concluída, dispara cálculo XP e jornada.
+**`webhook_concluir_quest`:** Conclusão - Marca ocorrência como concluída, dispara cálculo XP e jornada. **Funciona para quests em qualquer status:** se a quest estiver em "disponivel" (a fazer) e não tiver recorrências planejadas, o sistema cria automaticamente um registro em `quests_recorrencias` com status "concluida" para a data de conclusão. Isso permite concluir quests de execução única ou concluir antes de planejar recorrências.
 
 **`webhook_ativar_quest`:** Ativação - Altera status para 'ativa', cria registros em `quests_recorrencias` conforme dias definidos.
 
@@ -93,5 +93,5 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 ---
 
-**Última atualização:** 2025-01-22
+**Última atualização:** 2025-11-27
 
