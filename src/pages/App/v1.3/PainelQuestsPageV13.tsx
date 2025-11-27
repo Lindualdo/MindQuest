@@ -193,6 +193,51 @@ const PainelQuestsPageV13: React.FC = () => {
     };
   }, [questSnapshot, hojeTemConversaConcluida]);
 
+  // Filtrar quests por dia selecionado
+  const questsDoDiaSelecionado = useMemo(() => {
+    const dataStr = format(selectedDate, 'yyyy-MM-dd');
+    const todasQuests = questSnapshot?.quests_personalizadas ?? [];
+    const isHojeSelecionado = isSameDay(selectedDate, hoje);
+    
+    // Filtrar quests que têm recorrência na data selecionada
+    const questsDoDia = todasQuests.filter(quest => {
+      // Excluir conversas
+      const isConversa = 
+        quest.catalogo_codigo === 'reflexao_diaria' ||
+        quest.tipo === 'reflexao_diaria' ||
+        quest.titulo === 'Reflexão Diária';
+      if (isConversa) return false;
+      
+      // Se quest está disponível, mostrar apenas se for hoje (para planejar)
+      if (quest.status === 'disponivel') {
+        return isHojeSelecionado;
+      }
+      
+      // Verificar se tem recorrência na data selecionada
+      const temRecorrenciaNoDia = quest.recorrencias?.dias?.some((dia: any) => {
+        const dataDia = normalizeDateStr(dia.data);
+        return dataDia === dataStr;
+      });
+      
+      return temRecorrenciaNoDia;
+    });
+    
+    return {
+      a_fazer: questsDoDia.filter(q => getQuestEstagio(q) === 'a_fazer'),
+      fazendo: questsDoDia.filter(q => getQuestEstagio(q) === 'fazendo'),
+      feito: questsDoDia.filter(q => getQuestEstagio(q) === 'feito'),
+    };
+  }, [questSnapshot, selectedDate, hojeTemConversaConcluida, hoje]);
+
+  // Resumo do dia selecionado
+  const resumoDiaSelecionado = useMemo(() => {
+    const total = questsDoDiaSelecionado.a_fazer.length + 
+                  questsDoDiaSelecionado.fazendo.length + 
+                  questsDoDiaSelecionado.feito.length;
+    const concluidas = questsDoDiaSelecionado.feito.length;
+    return { total, concluidas };
+  }, [questsDoDiaSelecionado]);
+
   const handleBack = () => {
     setView('dashboard');
     setActiveNavTab('home');
@@ -205,10 +250,12 @@ const PainelQuestsPageV13: React.FC = () => {
       await concluirQuest(questId, format(selectedDate, 'yyyy-MM-dd'));
       if (usuarioId) {
         hasRequestedData.current = false;
+        // Recarregar dados para atualizar status Fazendo → Feito
         await Promise.all([
           loadQuestSnapshot(usuarioId),
           loadWeeklyProgressCard(usuarioId),
         ]);
+        // Feedback visual: quest será removida de "Fazendo" e aparecerá em "Feito" automaticamente
       }
     } catch (error) {
       console.error('[handleConcluirQuest] Erro ao concluir quest:', error);
@@ -369,12 +416,8 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Barra de progresso semanal (igual à home)
+  // Navegador semanal (apenas barras verticais, sem barra horizontal)
   const renderWeeklyProgressBar = () => {
-    const metaSemanal = weeklyData.qtdQuestsPrevistasSemana ?? 7;
-    const questsConcluidas = weeklyData.qtdQuestsConcluidasSemana ?? 0;
-    const percentualMeta = metaSemanal > 0 ? Math.min(100, Math.round((questsConcluidas / metaSemanal) * 100)) : 0;
-
     return (
       <section
         className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
@@ -384,20 +427,8 @@ const PainelQuestsPageV13: React.FC = () => {
           Quests da Semana
         </p>
 
-        {/* Barra de progresso horizontal */}
-        <div className="mt-4 flex items-center gap-4">
-          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{questsConcluidas}</span>
-          <div className="relative h-2 flex-1 rounded-full bg-slate-200">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#22C55E] to-[#14B8A6]"
-              style={{ width: `${percentualMeta}%` }}
-            />
-          </div>
-          <span className="text-[0.65rem] font-semibold text-[#94A3B8] whitespace-nowrap">{metaSemanal}</span>
-        </div>
-
-        {/* Barras verticais dos dias (igual à home) */}
-        <div className="mt-8 flex h-14 items-end justify-between gap-1">
+        {/* Barras verticais dos dias (navegação principal) */}
+        <div className="mt-4 flex h-14 items-end justify-between gap-1">
           {diasSemana.map((dia, index) => {
             const isSelected = dia.dateObj && isSameDay(dia.dateObj, selectedDate);
             const isHoje = dia.dateObj && isSameDay(dia.dateObj, hoje);
@@ -428,8 +459,15 @@ const PainelQuestsPageV13: React.FC = () => {
                 onClick={() => dia.dateObj && !isFuturoDay && handleSelectDay(dia.dateObj)}
                 disabled={isFuturoDay}
                 className={`flex flex-1 flex-col items-center justify-end gap-0.5 transition-all ${
-                  isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-                } ${isSelected ? 'scale-105' : ''}`}
+                  isFuturoDay ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-105'
+                } ${isSelected ? 'scale-110' : ''}`}
+                style={{
+                  ...(isSelected ? {
+                    boxShadow: '0 0 0 2px rgba(14,165,233,0.5)',
+                    borderRadius: '8px',
+                    padding: '4px 2px',
+                  } : {})
+                }}
               >
                 <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5">
                   {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
@@ -596,12 +634,32 @@ const PainelQuestsPageV13: React.FC = () => {
         {/* Barra de Progresso Semanal */}
         {renderWeeklyProgressBar()}
 
+        {/* Indicador do dia selecionado */}
+        <div className="mb-4 rounded-xl bg-gradient-to-r from-[#E0F2FE] to-[#F0F9FF] border-2 border-[#BAE6FD] px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[#1C2541]">
+                Quests de {format(selectedDate, "dd/MM 'de' yyyy", { locale: ptBR })}
+              </p>
+              <p className="text-xs text-[#64748B] mt-0.5">
+                {resumoDiaSelecionado.concluidas} de {resumoDiaSelecionado.total} concluídas
+              </p>
+            </div>
+            {isSameDay(selectedDate, hoje) && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#0EA5E9] px-3 py-1 text-xs font-bold text-white">
+                Hoje
+              </span>
+            )}
+          </div>
+        </div>
+
         {/* Abas melhoradas */}
         <div className="mb-6">
           <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-md">
             {(['a_fazer', 'fazendo', 'feito'] as QuestTab[]).map((tab) => {
               const isActive = activeTab === tab;
-              const count = questsPorEstagio[tab].length;
+              // Usar quests do dia selecionado ao invés de todas
+              const count = questsDoDiaSelecionado[tab].length;
               const labels = {
                 a_fazer: 'A Fazer',
                 fazendo: 'Fazendo',
@@ -639,14 +697,14 @@ const PainelQuestsPageV13: React.FC = () => {
           </div>
         </div>
 
-        {/* Lista de Quests */}
+        {/* Lista de Quests (filtradas por dia selecionado) */}
         <div className="space-y-4 flex-1">
           {activeTab === 'a_fazer' && (
             <>
-              {questsPorEstagio.a_fazer.length > 0 ? (
+              {questsDoDiaSelecionado.a_fazer.length > 0 ? (
                 <>
                   <div className="space-y-3">
-                    {questsPorEstagio.a_fazer.map(quest => renderQuestItemSimples(quest))}
+                    {questsDoDiaSelecionado.a_fazer.map(quest => renderQuestItemSimples(quest))}
                   </div>
                   <div className="mt-6 rounded-2xl bg-gradient-to-r from-[#E0F2FE] to-[#F0F9FF] p-4 border-2 border-[#BAE6FD]">
                     <p className="text-sm text-[#64748B] text-center">
@@ -677,9 +735,9 @@ const PainelQuestsPageV13: React.FC = () => {
 
           {activeTab === 'fazendo' && (
             <>
-              {questsPorEstagio.fazendo.length > 0 ? (
+              {questsDoDiaSelecionado.fazendo.length > 0 ? (
                 <div className="space-y-4">
-                  {questsPorEstagio.fazendo.map(quest => renderQuestItem(quest, false))}
+                  {questsDoDiaSelecionado.fazendo.map(quest => renderQuestItem(quest, false))}
                 </div>
               ) : (
                 <Card className="!p-12 !bg-white text-center shadow-lg" hover={false}>
@@ -703,9 +761,9 @@ const PainelQuestsPageV13: React.FC = () => {
 
           {activeTab === 'feito' && (
             <>
-              {questsPorEstagio.feito.length > 0 ? (
+              {questsDoDiaSelecionado.feito.length > 0 ? (
                 <div className="space-y-4">
-                  {questsPorEstagio.feito.map(quest => renderQuestItem(quest, true))}
+                  {questsDoDiaSelecionado.feito.map(quest => renderQuestItem(quest, true))}
                 </div>
               ) : (
                 <Card className="!p-12 !bg-white text-center shadow-lg" hover={false}>
