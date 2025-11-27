@@ -255,8 +255,13 @@ const InsightDetailPageV13 = () => {
       );
       
       if (resultado.success) {
-        // Aguardar um pouco para garantir que o snapshot foi recarregado
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Recarregar snapshot explicitamente antes de navegar
+        const usuarioId = dashboardData?.usuario?.id;
+        if (usuarioId) {
+          await loadQuestSnapshot(usuarioId);
+        }
+        // Aguardar um pouco para garantir que o snapshot foi processado
+        await new Promise(resolve => setTimeout(resolve, 300));
         // Navegar para o painel de quests
         setActiveTab('quests');
         setView('painelQuests');
