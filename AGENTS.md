@@ -156,6 +156,11 @@ Ao tratar de workflows n8n:
 - Sempre confirme o tipo/campos dos nós via MCP (`get_node_info`) antes de supor nomes antigos.
 - Verifique se `Code` está em `runOnceForAllItems` quando distribui o mesmo payload para vários destinos.
 - **Sub-workflows (sw_*) NUNCA devem ser ativados.** Eles rodam na mesma transação do workflow pai que os chama via `executeWorkflow`. Status `active=false` é correto e NÃO é erro.
+- **🚨 REGRA CRÍTICA - WORKFLOWS DO AGENTE DE IA (NUNCA ALTERAR):**
+  - **NUNCA alterar os workflows `sw_xp_quest`, `sw_criar_quest` e `sw_xp_conversas` para atender demandas de interface.**
+  - Esses workflows são **exclusivos do agente de IA** executado após a conversa guiada.
+  - Alterações nesses workflows podem quebrar a lógica do agente de IA.
+  - Para demandas de interface, usar os workflows `webhook_*` correspondentes (ex: `webhook_concluir_quest`, `webhook_ativar_quest`, etc.).
 - **🚨 CRÍTICO - Atualização de nodes Postgres via MCP - CHECKLIST OBRIGATÓRIO:**
   
   **ANTES de atualizar qualquer nó Postgres, seguir ESTE checklist:**

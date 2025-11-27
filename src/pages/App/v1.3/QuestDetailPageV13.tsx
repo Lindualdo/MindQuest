@@ -28,6 +28,7 @@ const QuestDetailPageV13 = () => {
     openQuestDetail,
     questSnapshot,
     questDetailSelectedDate,
+    loadQuestSnapshot,
   } = useDashboard();
 
   const nomeUsuario =
@@ -38,6 +39,7 @@ const QuestDetailPageV13 = () => {
   const detail = questDetail;
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [isConcluindo, setIsConcluindo] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -52,7 +54,9 @@ const QuestDetailPageV13 = () => {
   };
 
   const handleConcluirQuest = async () => {
-    if (!detail?.id) return;
+    if (!detail?.id || isConcluindo) return;
+    
+    setIsConcluindo(true);
     
     // REGRA: data_conclusao deve sempre ser do dia planejado
     // data_registro deve ser do dia que foi feito a mudança de status (hoje)
@@ -125,12 +129,18 @@ const QuestDetailPageV13 = () => {
       // Aguardar um pouco para o backend processar
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Recarregar o questDetail para refletir o novo status
+      // Recarregar snapshot de quests para atualizar o status
       if (dashboardData?.usuario?.id) {
-        await openQuestDetail(detail.id, questDetailSelectedDate || undefined);
+        await loadQuestSnapshot(dashboardData.usuario.id);
       }
+      
+      // Voltar para o painel de quests
+      closeQuestDetail();
+      setView('painelQuests');
+      setActiveTab('quests');
     } catch (error) {
       console.error('[QuestDetail] Erro ao concluir quest:', error);
+      setIsConcluindo(false);
     }
   };
 
@@ -381,11 +391,21 @@ const QuestDetailPageV13 = () => {
           <button
             type="button"
             onClick={handleConcluirQuest}
-            className="w-full rounded-2xl bg-gradient-to-r from-[#0EA5E9] to-[#3B82F6] px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 active:scale-[0.98]"
+            disabled={isConcluindo}
+            className="w-full rounded-2xl bg-gradient-to-r from-[#0EA5E9] to-[#3B82F6] px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:hover:shadow-blue-500/30"
           >
             <div className="flex items-center justify-center gap-2">
-              <CheckCircle2 size={20} />
-              Concluir Quest
+              {isConcluindo ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Concluindo...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={20} />
+                  Concluir Quest
+                </>
+              )}
             </div>
           </button>
         )}

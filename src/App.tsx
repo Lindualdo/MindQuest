@@ -3,7 +3,7 @@
  * AÇÃO: App limpo - apenas v1.3, marketing e suporte
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle, BookOpen } from 'lucide-react';
 import AuthGuard from './components/auth/AuthGuard';
@@ -22,6 +22,7 @@ import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
+import { authService } from './services/authService';
 
 declare global {
   interface Window {
@@ -68,8 +69,11 @@ function App() {
     blogSegmentIndex >= 0 ? normalizedPath.slice(blogSegmentIndex) || '/blog' : normalizedPath;
   const isBlogPath = blogSegmentIndex >= 0;
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
+  const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
   const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
+  const isAppPreviewV13 = resolvedPath === '/app/1.3';
   const isRootPath = resolvedPath === '/';
+  const redirectHandledRef = useRef(false);
 
   if (typeof window !== 'undefined') {
     window.__MINDQUEST_ROUTING__ = {
@@ -105,26 +109,25 @@ function App() {
     await refreshData();
   };
 
-  // Redirecionar /app para /app/1.3 após autenticação (tratado no AuthGuard)
   useEffect(() => {
+    if (!isRootPath || redirectHandledRef.current) {
+      return;
+    }
+
     if (typeof window === 'undefined') {
       return;
     }
 
-    const isExactAppRoute = resolvedPath === '/app';
-    
-    if (isExactAppRoute) {
-      // Se há token na query string, preservar ao redirecionar
-      const search = window.location.search;
-      const hasTokenInQuery = /([?&])token=/i.test(search);
-      
-      if (hasTokenInQuery) {
-        // Token na URL - redirecionar imediatamente para /app/1.3 preservando token
-        window.location.replace(`/app/1.3${search}`);
-      }
-      // Caso contrário, o AuthGuard vai validar e redirecionar após autenticação
+    const search = window.location.search;
+    const hasTokenInQuery = /([?&])token=/i.test(search);
+    const hasStoredToken = authService.hasTokenAvailable();
+
+    if (hasTokenInQuery || hasStoredToken) {
+      redirectHandledRef.current = true;
+      const target = hasTokenInQuery ? `/app/1.3${search}` : '/app/1.3';
+      window.location.replace(target);
     }
-  }, [resolvedPath]);
+  }, [isRootPath]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -133,13 +136,7 @@ function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [view]);
 
-  // Rota raiz sempre mostra landing page pública (sem verificação de token)
-  if (isRootPath) {
-    return <ComecarAgoraLandingPage />;
-  }
-
-  // Rota /comecar-agora também mostra landing page
-  if (resolvedPath === '/comecar-agora') {
+  if (isLandingRoute) {
     return <ComecarAgoraLandingPage />;
   }
 
