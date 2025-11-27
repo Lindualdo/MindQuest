@@ -359,6 +359,7 @@ const PainelQuestsPageV13: React.FC = () => {
   // Renderizar quest item simplificado para "a fazer"
   const renderQuestItemSimples = (quest: QuestPersonalizadaResumo) => {
     const questId = quest.instancia_id || quest.meta_codigo;
+    const xpRecompensa = quest.xp_recompensa ?? 30;
     
     return (
       <div 
@@ -366,21 +367,48 @@ const PainelQuestsPageV13: React.FC = () => {
         className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md hover:shadow-lg transition-all"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-[#1C2541]">{quest.titulo}</h3>
-            {quest.descricao && (
-              <p className="text-xs text-[#64748B] mt-1 line-clamp-1">{quest.descricao}</p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-[#1C2541]">{quest.titulo}</h3>
+              {quest.descricao && (
+                <p className="text-xs text-[#64748B] mt-1 line-clamp-1">{quest.descricao}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => questId && handlePlanejarQuest(questId)}
+              className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#0EA5E9] text-white shadow-sm hover:bg-[#0C8BD6] active:scale-95 transition-all"
+              aria-label="Planejar quest"
+            >
+              <Settings2 size={16} />
+            </button>
+          </div>
+          
+          {/* XP e ações */}
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <Target size={14} className="text-[#0EA5E9]" />
+              <span className="text-xs font-semibold text-[#64748B]">
+                {xpRecompensa} XP
+              </span>
+            </div>
+            {questId && (
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('[PainelQuests] Abrindo detalhe da quest:', { questId, selectedDate: format(selectedDate, 'yyyy-MM-dd') });
+                  openQuestDetail(questId, format(selectedDate, 'yyyy-MM-dd')).catch((error: unknown) => {
+                    console.error('[PainelQuests] Erro ao abrir detalhe:', error);
+                  });
+                }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EA5E9] hover:text-[#0C8BD6] transition-colors"
+              >
+                Ver detalhes
+                <ArrowUpRight size={12} />
+              </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => questId && handlePlanejarQuest(questId)}
-            className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#0EA5E9] text-white shadow-sm hover:bg-[#0C8BD6] active:scale-95 transition-all"
-            aria-label="Planejar quest"
-          >
-            <Settings2 size={16} />
-          </button>
         </div>
       </div>
     );
