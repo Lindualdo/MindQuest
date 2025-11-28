@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Info, TrendingUp, Award, Target, Users, Brain } from 'lucide-react';
+import { Info, Award, Target, Brain } from 'lucide-react';
 import Card from '../ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { apiService } from '@/services/apiService';
@@ -73,7 +73,7 @@ const CardPerfilBigFive: React.FC = () => {
   const top3Traços = perfil.tracos_ordenados.slice(0, 3);
 
   return (
-    <Card className="!bg-[#E8F3F5] !border-[#B6D6DF] !shadow-md" style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}>
+    <Card className="!bg-[#E8F3F5] !border-[#B6D6DF] rounded-3xl" style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

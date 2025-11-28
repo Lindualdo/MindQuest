@@ -8,6 +8,7 @@ interface CardProps {
   hover?: boolean;
   glow?: boolean;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -15,7 +16,8 @@ const Card: React.FC<CardProps> = ({
   className,
   hover = true,
   glow = false,
-  onClick
+  onClick,
+  style
 }) => {
   return (
     <motion.div
@@ -24,6 +26,7 @@ const Card: React.FC<CardProps> = ({
       transition={{ duration: 0.3 }}
       whileHover={hover ? { scale: 1.02, y: -4 } : {}}
       onClick={onClick}
+      style={style}
       className={clsx(
         'glass-card rounded-2xl p-6 transition-all duration-300',
         hover && 'hover:shadow-2xl',
