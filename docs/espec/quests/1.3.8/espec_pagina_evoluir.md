@@ -125,4 +125,85 @@
 
 ---
 
-**Última atualização:** 2025-01-22 21:20
+---
+
+## Webhooks Criados
+
+### webhook_perfil_pessoal
+**ID:** Xo32TaonbDju1uF9  
+**Status:** ✅ Ativo  
+**URL:** `https://mindquest-n8n.cloudfy.live/webhook/perfil-pessoal`
+
+**GET - Buscar Perfil:**
+- **Entrada:** `?user_id=<uuid>`
+- **Saída:**
+  ```json
+  {
+    "success": true,
+    "perfil": {
+      "nome_preferencia": "string",
+      "nome_assistente": "string | null",
+      "tom_conversa": "empativo | interativo | educativo | equilibrado | direto | null",
+      "sobre_voce": "string | null"
+    }
+  }
+  ```
+
+**POST - Atualizar Perfil:**
+- **Entrada:**
+  ```json
+  {
+    "user_id": "uuid",
+    "nome_preferencia": "string",
+    "nome_assistente": "string | null",
+    "tom_conversa": "empativo | interativo | educativo | equilibrado | direto | null",
+    "sobre_voce": "string | null"
+  }
+  ```
+- **Saída:**
+  ```json
+  {
+    "success": true,
+    "perfil": {
+      "nome_preferencia": "string",
+      "nome_assistente": "string | null",
+      "tom_conversa": "string | null",
+      "sobre_voce": "string | null"
+    }
+  }
+  ```
+
+### webhook_objetivos
+**ID:** t2V2FjqurbcnvMvh  
+**Status:** ⏳ Inativo (ativar manualmente)  
+**URL:** `https://mindquest-n8n.cloudfy.live/webhook/objetivos`
+
+**GET - Buscar Objetivo:**
+- **Entrada:** `?user_id=<uuid>`
+- **Saída:**
+  ```json
+  {
+    "success": true,
+    "objetivo": "string | null"
+  }
+  ```
+
+**POST - Atualizar Objetivo:**
+- **Entrada:**
+  ```json
+  {
+    "user_id": "uuid",
+    "objetivo": "string | null"
+  }
+  ```
+- **Saída:**
+  ```json
+  {
+    "success": true,
+    "objetivo": "string | null"
+  }
+  ```
+
+---
+
+**Última atualização:** 2025-01-22 21:35

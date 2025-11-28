@@ -20,8 +20,17 @@ export const GET: APIRoute = async ({ url }) => {
       },
     });
 
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+
     if (!response.ok) {
+      const errorText = isJson ? await response.json() : await response.text();
       throw new Error(`Erro ao buscar objetivos: ${response.status}`);
+    }
+
+    if (!isJson) {
+      const htmlText = await response.text();
+      throw new Error('Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.');
     }
 
     const data = await response.json();
@@ -73,8 +82,17 @@ export const POST: APIRoute = async ({ request }) => {
       }),
     });
 
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+
     if (!response.ok) {
+      const errorText = isJson ? await response.json() : await response.text();
       throw new Error(`Erro ao salvar objetivos: ${response.status}`);
+    }
+
+    if (!isJson) {
+      const htmlText = await response.text();
+      throw new Error('Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.');
     }
 
     const data = await response.json();
