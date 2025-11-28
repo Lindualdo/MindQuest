@@ -79,7 +79,7 @@ const CardPerfilBigFive: React.FC = () => {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <Brain size={20} className="text-[#2F76D1]" />
-            <h3 className="text-lg font-bold text-[#1C2541]">Perfil Big Five</h3>
+            <h3 className="text-lg font-bold text-[#1C2541]">Perfil pessoal</h3>
           </div>
         </div>
         <button
