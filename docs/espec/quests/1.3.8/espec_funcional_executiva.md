@@ -18,6 +18,8 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 **Foco:** Desenvolvimento pessoal, mudança de padrões que travam progresso e realizações.
 
+Isso..
+
 ---
 
 ## 2. Quests - Ponto Central do Sistema
