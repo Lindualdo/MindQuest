@@ -89,9 +89,33 @@ MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas 
 
 **`webhook_criar-quest`:** Criação manual - Permite usuário criar quest personalizada via App.
 
-**APIs Vercel:** Proxies frontend → webhooks n8n - `/api/quests`, `/api/concluir-quest`, `/api/ativar-quest`, `/api/criar-quest`, `/api/card/quests`.
+**`webhook_evoluir_stats`:** Estatísticas de evolução - Retorna total de conversas, ações concluídas e XP total do usuário.
+
+**APIs Vercel:** Proxies frontend → webhooks n8n - `/api/quests`, `/api/concluir-quest`, `/api/ativar-quest`, `/api/criar-quest`, `/api/card/quests`, `/api/evoluir-stats`.
 
 ---
 
-**Última atualização:** 2025-11-27
+## 7. Regras de Cálculo - Conversas, Ações e Pontos (XPs)
+
+### Total de Conversas
+- **Fonte:** Tabela `usr_chat`
+- **Cálculo:** `COUNT(*)` de registros onde `usuario_id = X`
+- **Observação:** Conta todas as conversas registradas do usuário, independente de data ou status.
+
+### Total de Ações Concluídas
+- **Fonte:** Tabela `quests_recorrencias`
+- **Cálculo:** `COUNT(*)` de recorrências com `status = 'concluida'`
+- **Filtros obrigatórios:**
+  - `qr.status = 'concluida'`
+  - `qc.codigo != 'reflexao_diaria'` (excluir quests de conversa)
+- **Observação:** Conta apenas ocorrências concluídas de quests de ação (personalizadas, sabotador, TCC). Não inclui conversas.
+
+### Total de Pontos (XP)
+- **Fonte:** Tabela `usuarios_conquistas`
+- **Campo:** `xp_total`
+- **Observação:** XP acumulado total do usuário, incluindo conversas e quests concluídas.
+
+---
+
+**Última atualização:** 2025-11-28
 

@@ -21,6 +21,8 @@ const ConversaResumoPageV13 = () => {
     resumoConversasLoading,
     resumoConversasError,
     openConversaResumo,
+    closeResumoConversas,
+    resumoConversasReturnView,
   } = useDashboard();
 
   const nomeUsuario =
@@ -75,9 +77,16 @@ const ConversaResumoPageV13 = () => {
     if (selectedConversationId) {
       closeConversaResumo();
     } else {
-      setView('dashboard');
+      // Voltar para a página que chamou (salva em resumoConversasReturnView)
+      closeResumoConversas();
+      // Ajustar activeTab baseado na view de retorno
+      const returnView = resumoConversasReturnView ?? 'dashboard';
+      if (returnView === 'evoluir') {
+        setActiveTab('ajustes');
+      } else if (returnView === 'dashboard') {
+        setActiveTab('home');
+      }
     }
-    setActiveTab('home');
   };
 
   const handleOpenConversa = (conversaId: string | number) => {
