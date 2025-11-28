@@ -2,6 +2,32 @@ leia as informações abaixo para contexto antes dos próximos passos: leia e fa
 Vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importante:
 
 
+
+## 1. Visão Geral do MindQuest
+MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas em ações práticas. Identifica padrões mentais que travam o progresso e oferece micro-ações personalizadas (quests) para mudança comportamental.
+
+
+**Fluxo Central:**
+1. Usuário conversa com assistente de reflexão (IA) pelo WhatsApp
+2. Sistema gera insights, quests, calcula pontos e atualiza análise comportamental
+3. Usuário acompanha progresso no App e gerencia quests (define recorrências e ativa quests)
+4. Assistente de quests notifica e ajuda usuário a colocar em prática
+5. Transformação acontece: usuário conquista pontos no App e progresso na vida
+
+**Foco:** Desenvolvimento pessoal, mudança de padrões que travam progresso e realizações.
+
+
+## 2. Quests - Ponto Central do Sistema
+
+**Conceito:** Micro-ações personalizadas geradas automaticamente a partir de conversas, insights e sabotadores. Cada quest representa um passo prático para transformação comportamental.
+
+**Tipos:** Personalizada (IA contextual), Sabotador (superar padrões limitantes), TCC/Estoicismo (técnicas comportamentais), Conversa/Reflexão Diária (quest permanente especial).
+
+**Ciclo de Vida:** Disponível (criada, aguardando ativação) → Ativa (em execução com recorrências) → Inativa (todas ocorrências concluídas/vencidas, pode reativar). Conversas são sempre ativas e nunca expiram.
+
+**Recorrências:** Usuário define dias da semana. Cada dia gera ocorrência (pendente/concluída/perdida). Conversas têm recorrência diária automática, não precisam planejamento em `quests_recorrencias` (apenas registram concluídas). **Quests podem ser concluídas diretamente sem planejamento prévio:** quando uma quest em status "disponivel" é concluída, o sistema cria automaticamente um registro em `quests_recorrencias` com status "concluida" para a data de conclusão. Isso permite flexibilidade para quests de execução única ou quando o usuário prefere concluir antes de planejar recorrências.
+
+
 ## Contexto do Projeto
 - Stack: React/TypeScript (frontend) + n8n (backend/workflows) + PostgreSQL
 - Versão atual: 1.3.8
