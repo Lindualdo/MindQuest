@@ -24,5 +24,9 @@ Vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importa
 - Testar queries no banco antes de aplicar em workflows
 - Seguir padrão de commits: [LABEL] verbo no infinitivo + objeto direto
 
+## Estruturas de pastas e arquivos 
+- todas as páginas devem ficar em /pages/App/1.3
+- todos os components devem ficar em /components/app/v1.3
+
 
 
