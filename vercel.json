@@ -5,6 +5,18 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/api/humor-historico",
+      "destination": "/api/insights"
+    },
+    {
+      "source": "/api/resumo_conversas",
+      "destination": "/api/insights"
+    },
+    {
+      "source": "/api/insights_historico",
+      "destination": "/api/insights"
+    },
+    {
       "source": "/((?!api).*)",
       "destination": "/index.html"
     }

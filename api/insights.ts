@@ -1,41 +1,51 @@
-const REMOTE_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/insights';
+/**
+ * Router consolidado para webhooks de proxy
+ * Endpoints: /api/insights, /api/humor-historico, /api/resumo_conversas, /api/insights_historico
+ */
+import { setCorsHeaders } from './utils/cors';
 
-const setCorsHeaders = (res: any) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+const WEBHOOK_BASE_URL = 'https://mindquest-n8n.cloudfy.live/webhook';
+
+const ENDPOINT_MAP: Record<string, string> = {
+  'insights': '/insights',
+  'humor-historico': '/humor-historico',
+  'resumo_conversas': '/resumo_conversas',
+  'insights_historico': '/insights_historico',
 };
 
 const normalizeValues = (value: unknown): string[] => {
-  if (value === undefined || value === null) {
-    return [];
-  }
-
+  if (value === undefined || value === null) return [];
   if (Array.isArray(value)) {
     return value
       .map((entry) => (typeof entry === 'string' ? entry : JSON.stringify(entry)))
       .filter((entry): entry is string => Boolean(entry));
   }
-
   return [typeof value === 'string' ? value : JSON.stringify(value)];
 };
 
 export default async function handler(req: any, res: any) {
   setCorsHeaders(res);
-
+  
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
-
+  
   if (!['GET', 'POST'].includes(req.method)) {
     res.status(405).json({ success: false, error: 'Método não suportado' });
     return;
   }
 
+  // Detectar endpoint pelo path da URL
+  const url = new URL(req.url || '/api/insights', 'http://localhost');
+  const pathParts = url.pathname.split('/').filter(Boolean);
+  const endpointName = pathParts[pathParts.length - 1] || 'insights';
+  
+  const endpointPath = ENDPOINT_MAP[endpointName] || ENDPOINT_MAP['insights'];
+  const remoteEndpoint = `${WEBHOOK_BASE_URL}${endpointPath}`;
+
   try {
-    const upstreamUrl = new URL(REMOTE_ENDPOINT);
+    const upstreamUrl = new URL(remoteEndpoint);
     const source = req.method === 'GET' ? req.query : req.body ?? {};
 
     if (source && typeof source === 'object') {
@@ -48,9 +58,7 @@ export default async function handler(req: any, res: any) {
 
     const upstreamResponse = await fetch(upstreamUrl.toString(), {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
@@ -66,13 +74,10 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    if (isJson) {
-      res.status(200).json(body);
-      return;
-    }
-
-    res.status(200).send(body);
+    res.status(200).json(isJson ? body : body);
   } catch (error) {
+    console.error(`[insights-router/${endpointName}] Erro:`, error);
     res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço externo' });
   }
 }
+
