@@ -39,6 +39,7 @@ const PainelQuestsPageV13: React.FC = () => {
     setView,
     openQuestDetail,
     view,
+    painelQuestsReturnView,
   } = useDashboard();
 
   const usuarioId = dashboardData?.usuario?.id;
@@ -302,8 +303,17 @@ const PainelQuestsPageV13: React.FC = () => {
 
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveNavTab('home');
+    // Voltar para a página que chamou (salva em painelQuestsReturnView)
+    const returnView = painelQuestsReturnView ?? 'dashboard';
+    setView(returnView);
+    // Ajustar activeTab baseado na view de retorno
+    if (returnView === 'evoluir') {
+      setActiveNavTab('ajustes');
+    } else if (returnView === 'dashboard') {
+      setActiveNavTab('home');
+    } else {
+      setActiveNavTab('home');
+    }
   };
 
   const handleConcluirQuest = async (questId: string) => {
