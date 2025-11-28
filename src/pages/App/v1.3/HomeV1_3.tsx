@@ -127,7 +127,7 @@ const HomeV1_3 = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    // Tela de configurações será implementada na próxima etapa.
+    setView('evoluir');
   };
 
   const weeklySummary = weeklyProgressCard ?? mockWeeklyXpSummary;

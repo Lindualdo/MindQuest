@@ -19,6 +19,7 @@ import SabotadorDetailPageV13 from './pages/App/v1.3/SabotadorDetailPageV13';
 import PainelQuestsPageV13 from './pages/App/v1.3/PainelQuestsPageV13';
 import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13';
 import InsightsHistoricoPageV13 from './pages/App/v1.3/InsightsHistoricoPageV13';
+import EvoluirPageV13 from './pages/App/v1.3/EvoluirPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
@@ -232,6 +233,9 @@ function App() {
         break;
       case 'humorHistorico':
         page = <HumorHistoryPageV13 />;
+        break;
+      case 'evoluir':
+        page = <EvoluirPageV13 />;
         break;
       default:
         page = <HomeV1_3 />;

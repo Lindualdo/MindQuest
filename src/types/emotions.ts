@@ -718,7 +718,8 @@ export type ViewId =
   | 'insightsHistorico'
   | 'painelQuests'
   | 'mapaMental'
-  | 'mapaMentalVisual';
+  | 'mapaMentalVisual'
+  | 'evoluir';
 
 export interface StoreState {
   dashboardData: DashboardData;
