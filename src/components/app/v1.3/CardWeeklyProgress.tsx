@@ -134,7 +134,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
 
       {/* Seção Quests */}
       <div>
-        <p className="text-[0.7rem] font-semibold text-[#1C2541]">Quests</p>
+        <p className="text-[0.7rem] font-semibold text-[#1C2541]">Quests / Ações</p>
         
         {/* Barra de progresso horizontal */}
         <div className="mt-2 flex items-center gap-4">
@@ -215,18 +215,14 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
         </div>
       </div>
 
-      {/* Botão Continuar */}
+      {/* Botão CTA */}
       <div className="mt-3 flex justify-end">
         <button
           type="button"
           onClick={onContinue}
-          className="rounded-full px-4 py-2 text-[0.75rem] font-semibold uppercase tracking-wide text-white"
-          style={{
-            background: 'linear-gradient(135deg, #3083DC, #6EC3FF)',
-            boxShadow: '0 6px 12px rgba(48,131,220,0.35)',
-          }}
+          className="rounded-full bg-[#0EA5E9] px-4 py-2 text-[0.75rem] font-semibold uppercase tracking-wide text-white shadow-md hover:bg-[#0C8BD6] transition-colors"
         >
-          continuar
+          Ver detalhes
         </button>
       </div>
     </section>
