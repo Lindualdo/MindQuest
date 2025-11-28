@@ -119,15 +119,15 @@ export default async function handler(req: any, res: any) {
 
       const contentType = upstreamResponse.headers.get('content-type') || '';
       const isJson = contentType.includes('application/json');
-      const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
+      const responseBody = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
 
-      console.log('[objetivos] Webhook response body:', { isJson, body: typeof body === 'object' ? JSON.stringify(body) : body });
+      console.log('[objetivos] Webhook response body:', { isJson, responseBody: typeof responseBody === 'object' ? JSON.stringify(responseBody) : responseBody });
 
       if (!upstreamResponse.ok) {
         res.status(upstreamResponse.status).json(
-          typeof body === 'string'
-            ? { success: false, error: body || 'Erro desconhecido' }
-            : { ...(typeof body === 'object' ? body : {}), success: false }
+          typeof responseBody === 'string'
+            ? { success: false, error: responseBody || 'Erro desconhecido' }
+            : { ...(typeof responseBody === 'object' ? responseBody : {}), success: false }
         );
         return;
       }
@@ -141,8 +141,8 @@ export default async function handler(req: any, res: any) {
       }
 
       // Garantir formato de resposta esperado pelo frontend
-      const responseData = typeof body === 'object' && body !== null
-        ? { ...body, success: true }
+      const responseData = typeof responseBody === 'object' && responseBody !== null
+        ? { ...responseBody, success: true }
         : { success: true };
 
       console.log('[objetivos] Retornando resposta:', responseData);
