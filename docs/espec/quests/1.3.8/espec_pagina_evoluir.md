@@ -10,7 +10,7 @@
 - ✅ Cards de estatísticas (Conversas, Ações, Pontos) - implementado
 - ✅ Estrutura base com 4 seções - implementado
 - ✅ **Perfil Pessoal** - implementado
-- ⏳ Objetivos - a definir
+- ✅ **Objetivos** - implementado
 - ⏳ Personalizações - a definir
 - ⏳ Recursos - a definir
 
@@ -48,18 +48,40 @@
 - Como impacta geração de quests/insights? (usar `tom_conversa` e `sobre_voce` no prompt da IA)
 
 ### 2. Objetivos
+**O que o usuário precisa:**
+- Listar objetivos principais por ordem de prioridade (campo texto livre)
+- Editar objetivos conforme evolui
+
 **Campos:**
-- Meta principal (30-90 dias)
-- Áreas de foco: Autoconhecimento, Produtividade, Relacionamentos, Saúde emocional
+- Objetivos (texto livre - lista de objetivos por prioridade)
 
-**Visualizações:**
-- Progresso ao longo do tempo
-- Estatísticas de evolução
-- Histórico de conquistas
+**Persistência:**
+- Campo `objetivo` (TEXT) na tabela `usuarios`
+- Histórico de objetivos (tabela separada) para medir progresso
 
-**Pendências:**
-- Estrutura de dados para objetivos
-- Formato de visualização de progresso
+**Relação com Quests/Ações:**
+- **Quests personalizadas:** Foco nos objetivos definidos + conversas
+- **Quests sabotadores:** Trabalham padrões mentais (suporte para avançar)
+- **Quests TCC/Estoicismo:** Melhorias gerais (humor, energia, emoções)
+- **Áreas da vida:** Identificação automática nas conversas (já existe)
+
+**Identificação de Objetivos:**
+- Sistema identifica objetivos informados pelo usuário
+- Sistema identifica objetivos mencionados nas conversas
+- Cria lista de objetivos relacionada automaticamente com áreas da vida
+
+**Progresso:**
+- **Game/App:** Focado em pontos (XPs) - já existe
+- **Vida Real:** Focado em realização dos objetivos definidos e concluídos
+- **Feedback do usuário:** Usuário marca se objetivos foram alcançados (tela separada de Progresso)
+
+**Implementação:**
+- ✅ Página: `ObjetivosPageV13.tsx`
+- ✅ API: `api/objetivos.ts`
+- ✅ Webhook n8n: `webhook_objetivos` (ID: t2V2FjqurbcnvMvh)
+- ✅ SQL: `docs/sql/add_campo_objetivo.sql`
+- ✅ Campo `objetivo` (TEXT) na tabela `usuarios`
+- ⏳ Tela separada: Progresso (mostra evolução + feedback do usuário) - pendente
 
 ### 3. Personalizações
 **Configurações:**
@@ -103,4 +125,4 @@
 
 ---
 
-**Última atualização:** 2025-01-22 19:45
+**Última atualização:** 2025-01-22 21:20

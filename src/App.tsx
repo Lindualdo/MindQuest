@@ -21,6 +21,7 @@ import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13'
 import InsightsHistoricoPageV13 from './pages/App/v1.3/InsightsHistoricoPageV13';
 import EvoluirPageV13 from './pages/App/v1.3/EvoluirPageV13';
 import PerfilPessoalPageV13 from './pages/App/v1.3/PerfilPessoalPageV13';
+import ObjetivosPageV13 from './pages/App/v1.3/ObjetivosPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
@@ -240,6 +241,9 @@ function App() {
         break;
       case 'perfilPessoal':
         page = <PerfilPessoalPageV13 />;
+        break;
+      case 'objetivos':
+        page = <ObjetivosPageV13 />;
         break;
       default:
         page = <HomeV1_3 />;
