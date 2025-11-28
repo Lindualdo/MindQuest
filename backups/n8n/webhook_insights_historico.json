@@ -1,90 +1,56 @@
 {
-  "createdAt": "2025-10-12T07:55:47.675Z",
-  "id": "v7HttxPItfsC82pA",
-  "name": "webhook_conversa_resumo",
+  "createdAt": "2025-11-27T20:13:45.434Z",
+  "id": "Y435ZJF3humAmCLK",
+  "name": "webhook_insights_historico",
   "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "path": "resumo_conversas",
+        "path": "insights_historico",
         "responseMode": "responseNode",
         "options": {}
       },
+      "id": "webhook-node",
+      "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -480,
-        -16
+        -160,
+        0
       ],
-      "id": "39a1ab4c-66a0-4c27-a64c-df9b474012eb",
-      "name": "Webhook",
-      "webhookId": "daf2181d-3e1c-4c2f-aa4a-78c4616b778e"
+      "webhookId": "e4a33dac-668f-4733-aead-9e0bfa26c5ba"
     },
     {
       "parameters": {
-        "respondWith": "allIncomingItems",
-        "options": {}
+        "jsCode": "const user_id = $input.item.json.query?.user_id;\n\nif (!user_id) {\n  throw new Error('user_id é obrigatório');\n}\n\nreturn {\n  json: {\n    user_id\n  }\n};"
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
+      "id": "code-node",
+      "name": "Processar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        608,
-        16
-      ],
-      "id": "c81020fc-cb83-4640-8bd4-10f4e5e5e831",
-      "name": "Respond to Webhook"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "version": 2,
-            "leftValue": "",
-            "caseSensitive": true,
-            "typeValidation": "strict"
-          },
-          "conditions": [
-            {
-              "id": "5a3fb558-2687-40d3-a1fc-c2463ae95fa1",
-              "leftValue": "={{ $json.query.conversa_id }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -192,
-        -16
-      ],
-      "id": "49ce36f5-fbcf-43a7-a964-6bfaf020f869",
-      "name": "If"
+        32,
+        0
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1\nORDER BY criado_em DESC\nLIMIT 10;",
+        "query": "SELECT id, tipo, categoria, titulo, descricao, icone, prioridade, criado_em\nFROM public.insights\nWHERE usuario_id = $1::uuid\nORDER BY criado_em DESC\nLIMIT 10",
         "options": {
-          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}"
+          "queryReplacement": "={{ [$json.user_id] }}"
         }
       },
+      "id": "postgres-node",
+      "name": "Select insights",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
         224,
-        128
+        0
       ],
-      "id": "af018084-bb96-40b4-a6a1-49ce5cb174ba",
-      "name": "todos os resumos",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -94,23 +60,30 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE id= '{{ $json.query.conversa_id }}'",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        224,
-        -128
-      ],
-      "id": "536f4762-f018-4937-b671-dcec8726463d",
-      "name": "todos os resumos1",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
+        "options": {
+          "responseData": "firstEntryJson"
         }
+      },
+      "id": "respond-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        416,
+        0
+      ]
+    },
+    {
+      "id": "code-array-node",
+      "name": "Converter para Array",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst array = items.map(item => item.json);\nreturn [{ json: { data: array } }];"
       }
     }
   ],
@@ -119,43 +92,36 @@
       "main": [
         [
           {
-            "node": "If",
+            "node": "Processar Params",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "Processar Params": {
       "main": [
         [
           {
-            "node": "todos os resumos1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "todos os resumos",
+            "node": "Select insights",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "todos os resumos": {
+    "Select insights": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Converter para Array",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "todos os resumos1": {
+    "Converter para Array": {
       "main": [
         [
           {
@@ -169,32 +135,34 @@
   },
   "settings": {
     "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
   "pinData": {
     "Webhook": [
       {
         "json": {
           "headers": {
             "host": "mindquest-n8n.cloudfy.live",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 OPR/123.0.0.0",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0",
             "accept": "*/*",
             "accept-encoding": "gzip, br",
             "accept-language": "en-US,en;q=0.9,pt-BR;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5",
             "cdn-loop": "cloudflare; loops=1",
-            "cf-connecting-ip": "2001:818:e374:a600:5567:bd6e:1e6c:b2b",
+            "cf-connecting-ip": "2001:818:e374:a600:60e7:e66c:b6d4:94e1",
             "cf-ipcountry": "PT",
-            "cf-ray": "9a0a7cb02f35e3b0-LIS",
+            "cf-ray": "9a545c202d56e3c3-LIS",
             "cf-visitor": "{\"scheme\":\"https\"}",
             "origin": "http://localhost:5173",
             "priority": "u=1, i",
             "referer": "http://localhost:5173/",
-            "sec-ch-ua": "\"Not;A=Brand\";v=\"99\", \"Opera\";v=\"123\", \"Chromium\";v=\"139\"",
+            "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Opera\";v=\"124\"",
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": "\"macOS\"",
             "sec-fetch-dest": "empty",
@@ -209,23 +177,24 @@
           },
           "params": {},
           "query": {
-            "conversa_id": "7531f26b-d553-45fc-8d58-8e23fe1e2b2b"
+            "user_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+            "dias": "10"
           },
           "body": {},
-          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/resumo_conversas",
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook/insights_historico",
           "executionMode": "production"
         }
       }
     ]
   },
-  "versionId": "ea73012a-5d0b-470b-a280-1e8bd82dc3f1",
-  "versionCounter": 4,
+  "versionId": "456d9b98-dd6e-419e-be62-3b1e7d7a73e2",
+  "versionCounter": 48,
   "triggerCount": 1,
   "shared": [
     {
-      "createdAt": "2025-10-12T07:55:47.675Z",
+      "createdAt": "2025-11-27T20:13:45.434Z",
       "role": "workflow:owner",
-      "workflowId": "v7HttxPItfsC82pA",
+      "workflowId": "Y435ZJF3humAmCLK",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",

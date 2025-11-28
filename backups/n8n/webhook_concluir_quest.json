@@ -38,7 +38,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const normalizarItem = $input.first()?.json ?? {};\nconst questId = normalizarItem.quest_id;\nconst usuarioId = normalizarItem.usuario_id;\nconst dataReferencia = normalizarItem.data_referencia;\n\nif (!questId || !usuarioId) {\n  throw new Error('Quest não encontrada ou dados inválidos');\n}\n\n// Validar que a quest existe e está ativa/pendente\n// Não atualizar recorrencias - apenas validar\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    quest_id: questId,\n    data_referencia: dataReferencia || null\n  }\n}];"
+        "jsCode": "const normalizarItem = $input.first()?.json ?? {};\nconst questId = normalizarItem.quest_id;\nconst usuarioId = normalizarItem.usuario_id;\nconst dataReferencia = normalizarItem.data_referencia || new Date().toISOString().split('T')[0];\n\nif (!questId || !usuarioId) {\n  throw new Error('Quest não encontrada ou dados inválidos');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    quest_id: questId,\n    data_referencia: dataReferencia\n  }\n}];"
       },
       "id": "7b600f2a-a5d4-4002-9b6d-2f26946bb94c",
       "name": "Validar Atualização",
@@ -48,6 +48,29 @@
         672,
         0
       ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH dados AS (\n  SELECT\n    $1::uuid AS quest_id,\n    $2::uuid AS usuario_id,\n    $3::date AS data_referencia\n),\nquest_info AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.catalogo_id,\n    COALESCE(qc.xp, 10) AS xp_base\n  FROM public.usuarios_quest uq\n  LEFT JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.id = (SELECT quest_id FROM dados)\n    AND uq.usuario_id = (SELECT usuario_id FROM dados)\n  LIMIT 1\n),\nverificar_recorrencia AS (\n  SELECT COUNT(*) AS existe\n  FROM public.quests_recorrencias qr\n  WHERE qr.usuarios_quest_id = (SELECT quest_id FROM dados)\n    AND qr.data_planejada = (SELECT data_referencia FROM dados)\n),\ncriar_recorrencia AS (\n  INSERT INTO public.quests_recorrencias (\n    usuarios_quest_id,\n    data_planejada,\n    data_concluida,\n    status,\n    xp_base,\n    xp_bonus\n  )\n  SELECT\n    qi.id,\n    d.data_referencia,\n    d.data_referencia,\n    'concluida',\n    qi.xp_base,\n    0\n  FROM quest_info qi\n  CROSS JOIN dados d\n  CROSS JOIN verificar_recorrencia vr\n  WHERE qi.status = 'disponivel'\n    AND vr.existe = 0\n  RETURNING id\n)\nSELECT\n  d.quest_id,\n  d.usuario_id,\n  d.data_referencia,\n  COALESCE((SELECT COUNT(*) FROM criar_recorrencia), 0) AS recorrencia_criada\nFROM dados d;",
+        "options": {
+          "queryReplacement": "={{ [$('Validar Atualização').item.json.quest_id, $('Validar Atualização').item.json.usuario_id, $('Validar Atualização').item.json.data_referencia] }}"
+        }
+      },
+      "id": "bda90db3-1234-5678-9abc-def012345678",
+      "name": "Criar Recorrencia se Necessario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -105,7 +128,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        960,
+        1200,
         0
       ]
     },
@@ -122,7 +145,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1200,
+        1440,
         0
       ],
       "credentials": {
@@ -173,11 +196,44 @@
         ]
       ]
     },
+    "Normalizar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Validar Atualização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Validar Atualização": {
       "main": [
         [
           {
+            "node": "Criar Recorrencia se Necessario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Recorrencia se Necessario": {
+      "main": [
+        [
+          {
             "node": "Calcular XP Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular XP Quest": {
+      "main": [
+        [
+          {
+            "node": "Buscar Quest Final",
             "type": "main",
             "index": 0
           }
@@ -205,40 +261,20 @@
           }
         ]
       ]
-    },
-    "Calcular XP Quest": {
-      "main": [
-        [
-          {
-            "node": "Buscar Quest Final",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalizar Entrada": {
-      "main": [
-        [
-          {
-            "node": "Validar Atualização",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "5c4a2121-f1d7-4356-b6b4-28a9168c8f13",
-  "versionCounter": 2,
+  "versionId": "8e6c0360-b2b4-4b37-939b-099237a29e85",
+  "versionCounter": 4,
   "triggerCount": 1,
   "shared": [
     {

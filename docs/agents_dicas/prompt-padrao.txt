@@ -8,9 +8,11 @@ Vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importa
 
 ## Estrutura Principal
 
-### Backend (n8n)
-
-- Sub-workflows: sw_xp_quest, sw_xp_conversas (NUNCA ativar, são chamados via executeWorkflow)
+### Backend (n8n)- Boas Práticas n8n
+- Sub-workflows (sw_*): NUNCA ativar, rodam via executeWorkflow
+- Atualizar Postgres via MCP: SEMPRE incluir operation, query e options juntos
+- Validar operation após update: n8n_get_workflow para confirmar
+- Debug: Usar n8n_list_executions e n8n_get_execution com mode="summary"
 - Regra crítica: Ao atualizar nodes Postgres via MCP, SEMPRE incluir operation, query e options no mesmo update
 
 ## Documentação de Referência
@@ -19,6 +21,8 @@ Vamos trabalhar no sistema de quests do MindQuest v1.3.8. Segue contexto importa
 
 ## Padrões de Resposta
 - PT-BR, conciso e direto
-- Sempre validar operation após atualizar nodes Postgres
 - Testar queries no banco antes de aplicar em workflows
 - Seguir padrão de commits: [LABEL] verbo no infinitivo + objeto direto
+
+
+

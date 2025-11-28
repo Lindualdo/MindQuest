@@ -38,7 +38,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  uq.id,\n  uq.usuario_id,\n  uq.status,\n  uq.complexidade,\n  uq.config->>'titulo' AS titulo,\n  uq.config->>'descricao' AS descricao,\n  uq.config->>'xp_recompensa' AS xp_recompensa,\n  uq.config->>'prioridade' AS prioridade,\n  uq.config->>'tipo' AS tipo,\n  uq.recorrencias,\n  uq.quest_estagio,\n  uq.area_vida_id,\n  av.nome AS area_vida_nome,\n  av.descricao AS area_vida_descricao,\n  av.codigo AS area_vida_codigo,\n  uq.sabotador_id,\n  sc.nome AS sabotador_nome,\n  sc.descricao AS sabotador_descricao,\n  sc.contextos_tipicos AS sabotador_contextos,\n  sc.contramedidas_sugeridas AS sabotador_contramedidas,\n  qc.codigo AS catalogo_codigo,\n  qc.base_cientifica AS catalogo_base_cientifica,\n  qc.instrucoes AS catalogo_instrucoes,\n  qc.tempo_estimado_min AS catalogo_tempo_estimado,\n  qc.dificuldade AS catalogo_dificuldade,\n  qc.categoria AS catalogo_categoria,\n  qc.xp AS catalogo_xp\nFROM public.usuarios_quest uq\nLEFT JOIN public.areas_vida_catalogo av ON av.id = uq.area_vida_id\nLEFT JOIN public.sabotadores_catalogo sc ON sc.id = uq.sabotador_id\nLEFT JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid;",
+        "query": "SELECT\n  uq.id,\n  uq.usuario_id,\n  uq.status,\n  uq.config->>'titulo' AS titulo,\n  uq.config->>'descricao' AS descricao,\n  uq.config->>'xp_recompensa' AS xp_recompensa,\n  uq.config->>'prioridade' AS prioridade,\n  uq.config->>'tipo' AS tipo,\n  COALESCE(\n    (\n      SELECT jsonb_agg(\n        jsonb_build_object(\n          'id', qr.id,\n          'data_planejada', qr.data_planejada,\n          'data_concluida', qr.data_concluida,\n          'status', qr.status,\n          'xp_base', qr.xp_base,\n          'xp_bonus', qr.xp_bonus\n        )\n        ORDER BY qr.data_planejada\n      )\n      FROM public.quests_recorrencias qr\n      WHERE qr.usuarios_quest_id = uq.id\n    ),\n    '[]'::jsonb\n  ) AS recorrencias,\n  uq.area_vida_id,\n  av.nome AS area_vida_nome,\n  av.descricao AS area_vida_descricao,\n  av.codigo AS area_vida_codigo,\n  uq.sabotador_id,\n  sc.nome AS sabotador_nome,\n  sc.descricao AS sabotador_descricao,\n  sc.contextos_tipicos AS sabotador_contextos,\n  sc.contramedidas_sugeridas AS sabotador_contramedidas,\n  qc.codigo AS catalogo_codigo,\n  qc.base_cientifica AS catalogo_base_cientifica,\n  qc.instrucoes AS catalogo_instrucoes,\n  qc.tempo_estimado_min AS catalogo_tempo_estimado,\n  qc.dificuldade AS catalogo_dificuldade,\n  qc.categoria AS catalogo_categoria,\n  qc.xp AS catalogo_xp\nFROM public.usuarios_quest uq\nLEFT JOIN public.areas_vida_catalogo av ON av.id = uq.area_vida_id\nLEFT JOIN public.sabotadores_catalogo sc ON sc.id = uq.sabotador_id\nLEFT JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\nWHERE uq.id = $1::uuid\n  AND uq.usuario_id = $2::uuid;",
         "options": {
           "queryReplacement": "={{ [$json.quest_id, $json.user_id] }}"
         }
@@ -60,7 +60,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const row = $input.first()?.json || {};\n\nif (!row.id) {\n  throw new Error('Quest não encontrada');\n}\n\nreturn [{\n  json: {\n    success: true,\n    quest_detail: {\n      id: row.id,\n      usuario_id: row.usuario_id,\n      status: row.status,\n      titulo: row.titulo || 'Quest sem título',\n      descricao: row.descricao || '',\n      xp_recompensa: row.xp_recompensa ? parseInt(row.xp_recompensa) : (row.catalogo_xp ? parseInt(row.catalogo_xp) : null),\n      prioridade: row.prioridade || 'media',\n      tipo: row.tipo || null,\n      complexidade: row.complexidade || 0,\n      progresso_meta: null,\n      progresso_atual: 0,\n      xp_concedido: 0,\n      recorrencias: row.recorrencias || null,\n      quest_estagio: row.quest_estagio || 'a_fazer',\n      area_vida: row.area_vida_id ? {\n        id: row.area_vida_id,\n        nome: row.area_vida_nome,\n        descricao: row.area_vida_descricao,\n        codigo: row.area_vida_codigo\n      } : null,\n      sabotador: row.sabotador_id ? {\n        id: row.sabotador_id,\n        nome: row.sabotador_nome,\n        descricao: row.sabotador_descricao,\n        contextos_tipicos: row.sabotador_contextos || [],\n        contramedidas_sugeridas: row.sabotador_contramedidas || []\n      } : null,\n      catalogo: row.catalogo_codigo ? {\n        codigo: row.catalogo_codigo,\n        base_cientifica: row.catalogo_base_cientifica,\n        instrucoes: row.catalogo_instrucoes,\n        tempo_estimado_min: row.catalogo_tempo_estimado,\n        dificuldade: row.catalogo_dificuldade,\n        categoria: row.catalogo_categoria\n      } : null\n    }\n  }\n}];"
+        "jsCode": "const row = $input.first()?.json || {};\n\nif (!row.id) {\n  throw new Error('Quest não encontrada');\n}\n\n// Calcular estágio baseado no status\nlet questEstagio = 'a_fazer';\nif (row.status === 'disponivel') {\n  questEstagio = 'a_fazer';\n} else if (row.status === 'ativa') {\n  questEstagio = 'fazendo';\n} else if (row.status === 'inativa') {\n  questEstagio = 'feito';\n}\n\nreturn [{\n  json: {\n    success: true,\n    quest_detail: {\n      id: row.id,\n      usuario_id: row.usuario_id,\n      status: row.status,\n      titulo: row.titulo || 'Quest sem título',\n      descricao: row.descricao || '',\n      xp_recompensa: row.xp_recompensa ? parseInt(row.xp_recompensa) : (row.catalogo_xp ? parseInt(row.catalogo_xp) : null),\n      prioridade: row.prioridade || 'media',\n      tipo: row.tipo || null,\n      complexidade: 0,\n      progresso_meta: null,\n      progresso_atual: 0,\n      xp_concedido: 0,\n      recorrencias: row.recorrencias || null,\n      quest_estagio: questEstagio,\n      area_vida: row.area_vida_id ? {\n        id: row.area_vida_id,\n        nome: row.area_vida_nome,\n        descricao: row.area_vida_descricao,\n        codigo: row.area_vida_codigo\n      } : null,\n      sabotador: row.sabotador_id ? {\n        id: row.sabotador_id,\n        nome: row.sabotador_nome,\n        descricao: row.sabotador_descricao,\n        contextos_tipicos: row.sabotador_contextos || [],\n        contramedidas_sugeridas: row.sabotador_contramedidas || []\n      } : null,\n      catalogo: row.catalogo_codigo ? {\n        codigo: row.catalogo_codigo,\n        base_cientifica: row.catalogo_base_cientifica,\n        instrucoes: row.catalogo_instrucoes,\n        tempo_estimado_min: row.catalogo_tempo_estimado,\n        dificuldade: row.catalogo_dificuldade,\n        categoria: row.catalogo_categoria\n      } : null\n    }\n  }\n}];"
       },
       "name": "Montar Resposta",
       "type": "n8n-nodes-base.code",
@@ -132,13 +132,15 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "53c88874-b258-4e2c-96e0-9a0b34594435",
-  "versionCounter": 2,
+  "versionId": "f56ca994-5811-43c7-b5f1-62ffe70aa6df",
+  "versionCounter": 10,
   "triggerCount": 1,
   "shared": [
     {

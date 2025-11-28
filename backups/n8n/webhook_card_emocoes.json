@@ -38,7 +38,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH base AS (\n  SELECT\n    uhe.humor_dia,\n    uhe.data_registro,\n    uhe.hora_registro,\n    uhe.detectado_em\n  FROM usuarios_humor_energia uhe\n  WHERE uhe.usuario_id = $1\n    AND uhe.data_registro BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE\n),\nestatisticas AS (\n  SELECT\n    COUNT(*) AS total_registros,\n    ROUND(COALESCE(AVG(humor_dia)::numeric, 0), 2) AS humor_medio_7d\n  FROM base\n),\nultimo AS (\n  SELECT\n    humor_dia,\n    data_registro,\n    hora_registro,\n    detectado_em\n  FROM base\n  ORDER BY data_registro DESC,\n           COALESCE(detectado_em, data_registro::timestamp) DESC,\n           hora_registro DESC NULLS LAST\n  LIMIT 1\n)\nSELECT\n  'humor'::text AS bloco,\n  $1::uuid     AS user_id,\n  estatisticas.total_registros,\n  estatisticas.humor_medio_7d,\n  ultimo.humor_dia AS humor_atual,\n  ultimo.data_registro AS ultima_data,\n  ultimo.hora_registro AS ultima_hora\nFROM estatisticas\nLEFT JOIN ultimo ON TRUE;",
+        "query": "WITH base AS (\n  SELECT\n    uhe.humor_dia,\n    uhe.data_registro,\n    uhe.hora_registro,\n    uhe.detectado_em\n  FROM usuarios_humor_energia uhe\n  WHERE uhe.usuario_id = $1\n),\nestatisticas AS (\n  SELECT\n    COUNT(*) AS total_registros,\n    ROUND(COALESCE(AVG(humor_dia)::numeric, 0), 2) AS humor_medio_7d\n  FROM base\n),\nultimo AS (\n  SELECT\n    humor_dia,\n    data_registro,\n    hora_registro,\n    detectado_em\n  FROM base\n  ORDER BY data_registro DESC,\n           COALESCE(detectado_em, data_registro::timestamp) DESC,\n           hora_registro DESC NULLS LAST\n  LIMIT 1\n)\nSELECT\n  'humor'::text AS bloco,\n  $1::uuid     AS user_id,\n  estatisticas.total_registros,\n  estatisticas.humor_medio_7d,\n  ultimo.humor_dia AS humor_atual,\n  ultimo.data_registro AS ultima_data,\n  ultimo.hora_registro AS ultima_hora\nFROM estatisticas\nLEFT JOIN ultimo ON TRUE;",
         "options": {
           "queryReplacement": "={{ $json.user_id }}"
         }
@@ -61,7 +61,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH periodo AS (\n  SELECT\n    CURRENT_DATE - INTERVAL '7 days' AS inicio,\n    CURRENT_DATE + INTERVAL '1 day'  AS fim_exclusivo\n),\nemocao_classificada AS (\n  SELECT\n    CASE\n      WHEN LOWER(emocao_id) IN ('joy','trust','anticipation') THEN 'POSITIVA'\n      WHEN LOWER(emocao_id) IN ('sadness','fear','anger','disgust') THEN 'NEGATIVA'\n      WHEN LOWER(emocao_id) = 'surprise' THEN 'NEUTRA'\n      ELSE 'NEUTRA'\n    END AS categoria\n  FROM usuarios_emocoes ue\n  JOIN periodo p\n    ON ue.detectado_em >= p.inicio\n   AND ue.detectado_em <  p.fim_exclusivo\n  WHERE ue.usuario_id = $1\n    AND ue.intensidade >= 45\n)\nSELECT\n  'panas'::text AS bloco,\n  $1::uuid     AS user_id,\n  COUNT(*) FILTER (WHERE categoria = 'POSITIVA') AS positivas,\n  COUNT(*) FILTER (WHERE categoria = 'NEGATIVA') AS negativas,\n  COUNT(*) FILTER (WHERE categoria = 'NEUTRA')   AS neutras,\n  COUNT(*)                                       AS total,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_positivas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_negativas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEUTRA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_neutras,\n  CASE\n    WHEN COUNT(*) = 0 THEN 'NEUTRA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'POSITIVA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'NEGATIVA'\n    ELSE 'NEUTRA'\n  END AS resultado_panas\nFROM emocao_classificada;",
+        "query": "WITH emocao_classificada AS (\n  SELECT\n    CASE\n      WHEN LOWER(emocao_id) IN ('joy','trust','anticipation') THEN 'POSITIVA'\n      WHEN LOWER(emocao_id) IN ('sadness','fear','anger','disgust') THEN 'NEGATIVA'\n      WHEN LOWER(emocao_id) = 'surprise' THEN 'NEUTRA'\n      ELSE 'NEUTRA'\n    END AS categoria\n  FROM usuarios_emocoes ue\n  WHERE ue.usuario_id = $1\n    AND ue.intensidade >= 45\n)\nSELECT\n  'panas'::text AS bloco,\n  $1::uuid     AS user_id,\n  COUNT(*) FILTER (WHERE categoria = 'POSITIVA') AS positivas,\n  COUNT(*) FILTER (WHERE categoria = 'NEGATIVA') AS negativas,\n  COUNT(*) FILTER (WHERE categoria = 'NEUTRA')   AS neutras,\n  COUNT(*)                                       AS total,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_positivas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_negativas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEUTRA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_neutras,\n  CASE\n    WHEN COUNT(*) = 0 THEN 'NEUTRA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'POSITIVA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'NEGATIVA'\n    ELSE 'NEUTRA'\n  END AS resultado_panas\nFROM emocao_classificada;",
         "options": {
           "queryReplacement": "={{ $json.user_id }}"
         }
@@ -277,13 +277,15 @@
     "saveManualExecutions": true,
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "1cccd306-a780-4799-9c8c-03951ea696af",
-  "versionCounter": 2,
+  "versionId": "45abf477-1179-4375-b870-405fc3f312b9",
+  "versionCounter": 8,
   "triggerCount": 1,
   "shared": [
     {
