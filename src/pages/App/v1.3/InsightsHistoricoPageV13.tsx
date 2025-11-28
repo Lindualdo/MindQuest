@@ -82,6 +82,7 @@ const InsightsHistoricoPageV13 = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   const handleInsightClick = (insightId: string) => {

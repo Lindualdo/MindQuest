@@ -118,6 +118,7 @@ const InsightsDashboardPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   const renderInsightCard = (

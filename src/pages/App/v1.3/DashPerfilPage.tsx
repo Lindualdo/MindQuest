@@ -123,6 +123,7 @@ const DashPerfilPage: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   return (

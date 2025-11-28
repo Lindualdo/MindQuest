@@ -161,6 +161,7 @@ const QuestDetailPageV13 = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   const renderContent = () => {

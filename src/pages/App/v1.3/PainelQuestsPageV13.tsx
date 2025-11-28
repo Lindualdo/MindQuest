@@ -341,6 +341,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveNavTab('ajustes');
+    setView('evoluir');
   };
   
   const handleSelectDay = (data: Date | null) => {

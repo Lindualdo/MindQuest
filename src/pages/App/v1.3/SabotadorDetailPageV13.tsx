@@ -68,6 +68,7 @@ const SabotadorDetailPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   if (!sabotador) {

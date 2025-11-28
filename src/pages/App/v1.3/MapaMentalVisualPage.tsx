@@ -84,6 +84,7 @@ const MapaMentalVisualPage: React.FC = () => {
         break;
       case 'ajustes':
         setActiveTab('ajustes');
+        setView('evoluir');
         break;
     }
   };

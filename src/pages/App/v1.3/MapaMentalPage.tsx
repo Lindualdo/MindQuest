@@ -153,6 +153,7 @@ const MapaMentalPage: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   const handleReload = () => {

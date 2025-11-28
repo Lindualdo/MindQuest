@@ -227,6 +227,7 @@ const HumorHistoryPage: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   const handleOpenResumoConversa = (conversaId: string | number) => {

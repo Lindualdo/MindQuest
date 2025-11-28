@@ -103,6 +103,7 @@ const ConversaResumoPageV13 = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
+    setView('evoluir');
   };
 
   return (
