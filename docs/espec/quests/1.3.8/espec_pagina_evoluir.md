@@ -9,7 +9,10 @@
 
 - ✅ Cards de estatísticas (Conversas, Ações, Pontos) - implementado
 - ✅ Estrutura base com 4 seções - implementado
-- ⏳ Funcionalidades das seções - **a definir**
+- ✅ **Perfil Pessoal** - implementado
+- ⏳ Objetivos - a definir
+- ⏳ Personalizações - a definir
+- ⏳ Recursos - a definir
 
 ---
 
@@ -19,16 +22,27 @@
 **Campos:**
 - Nome preferido (já existe: `usuarios.nome_preferencia`)
 - Nome Assistente (personalizar como chamar o assistente de IA)
-- Tom de conversa: Empático (padrão) / Interativo / Educativo / Equilibrado / Direto/Firme
-- Conte mais sobre você (campo livre)
+- Tom de conversa (radio buttons com descrições):
+  - **Empático (padrão):** Respostas compassivas e acolhedoras, focadas em entender suas emoções
+  - **Interativo:** Diálogo colaborativo com perguntas que te ajudam a refletir e descobrir respostas
+  - **Educativo:** Explicações passo a passo para te ensinar técnicas e conceitos de desenvolvimento pessoal
+  - **Equilibrado:** Combina acolhimento empático com perguntas interativas para uma experiência completa
+  - **Direto/Firme:** Tom mais direto e firme, como um mentor que te desafia e não tem medo de ser direto
+- Conte mais sobre você (campo livre - texto)
 
 **Persistência:**
 - ✅ **Decisão:** Adicionar campos direto na tabela `usuarios`
-- Campos novos:
-  - `nome_assistente` (VARCHAR) - ⚠️ **Verificar se já existe**
-  - `tom_conversa` (VARCHAR ou ENUM: 'empativo', 'interativo', 'educativo', 'equilibrado', 'direto')
-  - `sobre_voce` (TEXT)
+- ✅ **Campos criados:**
+  - `nome_assistente` (VARCHAR(100)) - já existia
+  - `tom_conversa` (VARCHAR(20)) - criado com CHECK constraint
+  - `sobre_voce` (TEXT) - criado
 - Motivo: Poucos campos, consultas simples, performance melhor
+
+**Implementação:**
+- ✅ Página: `PerfilPessoalPageV13.tsx`
+- ✅ API: `api/perfil-pessoal.ts`
+- ✅ Webhook n8n: `webhook_perfil_pessoal` (ID: Xo32TaonbDju1uF9)
+- ✅ SQL: `docs/sql/add_campos_perfil_pessoal.sql`
 
 **Pendências:**
 - Como impacta geração de quests/insights? (usar `tom_conversa` e `sobre_voce` no prompt da IA)
@@ -80,12 +94,13 @@
 
 ## Decisões Necessárias
 
-1. ✅ **Perfil Pessoal - Persistência:** Adicionar campos `nome_assistente`, `tom_conversa` e `sobre_voce` na tabela `usuarios` (verificar se `nome_assistente` já existe)
-2. **APIs:** Quais webhooks criar? (perfil, objetivos, preferencias)
-3. **Priorização:** Qual seção implementar primeiro?
-4. **Temas:** Como implementar dark mode?
-5. **Conquistas:** Estrutura completa já existe ou precisa criar?
+1. ✅ **Perfil Pessoal - Persistência:** Campos criados na tabela `usuarios`
+2. ✅ **Perfil Pessoal - Implementação:** Página, API e webhook criados
+3. **APIs:** Quais webhooks criar? (objetivos, preferencias)
+4. **Priorização:** Qual seção implementar primeiro? (Objetivos, Personalizações ou Recursos)
+5. **Temas:** Como implementar dark mode?
+6. **Conquistas:** Estrutura completa já existe ou precisa criar?
 
 ---
 
-**Última atualização:** 2025-01-22 14:30
+**Última atualização:** 2025-01-22 19:45

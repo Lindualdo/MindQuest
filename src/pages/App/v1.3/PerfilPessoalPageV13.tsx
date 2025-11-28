@@ -141,8 +141,24 @@ const PerfilPessoalPageV13: React.FC = () => {
 
       const data = await response.json();
       if (data.success) {
+        // Atualizar dados do formulário com a resposta
+        if (data.perfil) {
+          setFormData({
+            nome_preferencia: data.perfil.nome_preferencia || formData.nome_preferencia,
+            nome_assistente: data.perfil.nome_assistente || null,
+            tom_conversa: data.perfil.tom_conversa || null,
+            sobre_voce: data.perfil.sobre_voce || null,
+          });
+        }
         setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        // Scroll para o topo para mostrar mensagem de sucesso
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // Voltar automaticamente após 2 segundos
+        setTimeout(() => {
+          handleBack();
+        }, 2000);
       } else {
         throw new Error(data.error || 'Erro ao salvar perfil');
       }
@@ -156,7 +172,7 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-white">
+      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
         <HeaderV1_3 nomeUsuario={nomeUsuario} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 pb-24 pt-4">
           <Loader2 size={32} className="animate-spin text-[#0EA5E9]" />
@@ -167,7 +183,7 @@ const PerfilPessoalPageV13: React.FC = () => {
   }
 
   return (
-    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-white">
+    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
@@ -208,14 +224,14 @@ const PerfilPessoalPageV13: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md"
           >
-            Perfil salvo com sucesso!
+            ✅ Perfil salvo com sucesso!
           </motion.div>
         )}
 
         {/* Formulário */}
-        <div className="space-y-4">
+        <div className="space-y-4 rounded-2xl bg-[#E8F3F5] p-6 border border-[#B6D6DF]">
           {/* Nome Preferido */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-[#1C2541]">
@@ -345,16 +361,16 @@ const PerfilPessoalPageV13: React.FC = () => {
             <label className="mb-2 block text-sm font-semibold text-[#1C2541]">
               Conte Mais Sobre Você
             </label>
+            <p className="mb-3 text-xs text-[#64748B]">
+              Compartilhe seu contexto: histórico relevante, valores, desafios atuais e situações importantes para personalizar sua experiência.
+            </p>
             <textarea
               value={formData.sobre_voce || ''}
               onChange={(e) => setFormData({ ...formData, sobre_voce: e.target.value || null })}
               rows={4}
               className="w-full rounded-xl border border-[#B6D6DF] bg-white px-4 py-3 text-sm text-[#1C2541] focus:border-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/20 resize-none"
-              placeholder="Compartilhe histórico relevante, valores, desafios atuais..."
+              placeholder="Exemplo: Tenho dois filhos, estou divorciado há dois anos, terminei um casamento de 26 anos. Mudei recentemente para Portugal..."
             />
-            <p className="mt-1 text-xs text-[#64748B]">
-              Ajude o assistente a entender melhor seu contexto
-            </p>
           </div>
 
           {/* Botão Salvar */}
