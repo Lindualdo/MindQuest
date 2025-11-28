@@ -1,6 +1,11 @@
-import { setCorsHeaders } from './utils/cors';
-
 const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/objetivos';
+
+const setCorsHeaders = (res: any) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+};
 
 const readUsuarioId = (value: any): string | null => {
   if (!value || typeof value !== 'object') {
