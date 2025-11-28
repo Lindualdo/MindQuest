@@ -1,123 +1,156 @@
-import type { APIRoute } from 'astro';
+import { setCorsHeaders } from './utils/cors';
 
-const N8N_WEBHOOK_URL = 'https://mindquest-n8n.cloudfy.live/webhook/objetivos';
+const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/objetivos';
 
-export const GET: APIRoute = async ({ url }) => {
-  const userId = url.searchParams.get('user_id');
-
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ success: false, error: 'user_id é obrigatório' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+const readUsuarioId = (value: any): string | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
   }
 
-  try {
-    const response = await fetch(`${N8N_WEBHOOK_URL}?user_id=${encodeURIComponent(userId)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  const raw = value.usuario_id ?? value.user_id ?? value.id_usuario;
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
 
-    const contentType = response.headers.get('content-type') || '';
-    const isJson = contentType.includes('application/json');
+  return null;
+};
 
-    if (!response.ok) {
-      const errorText = isJson ? await response.json() : await response.text();
-      throw new Error(`Erro ao buscar objetivos: ${response.status}`);
+export default async function handler(req: any, res: any) {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  // GET: Buscar objetivos
+  if (req.method === 'GET') {
+    const usuarioId = readUsuarioId(req.query);
+
+    if (!usuarioId) {
+      res.status(400).json({ success: false, error: 'user_id é obrigatório' });
+      return;
     }
 
-    if (!isJson) {
-      const htmlText = await response.text();
-      throw new Error('Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.');
-    }
+    const remoteEndpoint = process.env.OBJETIVOS_WEBHOOK_URL || DEFAULT_ENDPOINT;
 
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-  } catch (error) {
-    console.error('[API Objetivos] Erro no GET:', error);
-    return new Response(
-      JSON.stringify({
+    try {
+      const url = new URL(remoteEndpoint);
+      url.searchParams.set('user_id', usuarioId);
+
+      const upstreamResponse = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const contentType = upstreamResponse.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
+
+      if (!upstreamResponse.ok) {
+        res.status(upstreamResponse.status).json(
+          typeof body === 'string'
+            ? { success: false, error: body || 'Erro desconhecido' }
+            : body
+        );
+        return;
+      }
+
+      if (!isJson) {
+        res.status(500).json({
+          success: false,
+          error: 'Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.',
+        });
+        return;
+      }
+
+      res.status(200).json(body);
+    } catch (error) {
+      console.error('[objetivos] Erro ao buscar objetivos:', error);
+      res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro ao buscar objetivos',
-      }),
-      {
-        status: 500,
+      });
+    }
+    return;
+  }
+
+  // POST: Salvar objetivos
+  if (req.method === 'POST') {
+    let parsedBody: any = null;
+
+    const rawBody = req.body;
+    if (typeof rawBody === 'string') {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch {
+        parsedBody = null;
+      }
+    } else if (rawBody && typeof rawBody === 'object') {
+      parsedBody = rawBody;
+    } else if (Buffer.isBuffer(rawBody)) {
+      try {
+        parsedBody = JSON.parse(rawBody.toString('utf-8'));
+      } catch {
+        parsedBody = null;
+      }
+    }
+
+    const usuarioId = readUsuarioId(parsedBody);
+
+    if (!usuarioId) {
+      res.status(400).json({ success: false, error: 'user_id é obrigatório' });
+      return;
+    }
+
+    const remoteEndpoint = process.env.OBJETIVOS_WEBHOOK_URL || DEFAULT_ENDPOINT;
+
+    try {
+      const upstreamResponse = await fetch(remoteEndpoint, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
         },
+        body: JSON.stringify({
+          user_id: usuarioId,
+          objetivo: parsedBody?.objetivo || null,
+        }),
+      });
+
+      const contentType = upstreamResponse.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
+
+      if (!upstreamResponse.ok) {
+        res.status(upstreamResponse.status).json(
+          typeof body === 'string'
+            ? { success: false, error: body || 'Erro desconhecido' }
+            : body
+        );
+        return;
       }
-    );
-  }
-};
 
-export const POST: APIRoute = async ({ request }) => {
-  try {
-    const body = await request.json();
-    const { user_id, objetivo } = body;
+      if (!isJson) {
+        res.status(500).json({
+          success: false,
+          error: 'Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.',
+        });
+        return;
+      }
 
-    if (!user_id) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'user_id é obrigatório' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const response = await fetch(N8N_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id,
-        objetivo: objetivo || null,
-      }),
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    const isJson = contentType.includes('application/json');
-
-    if (!response.ok) {
-      const errorText = isJson ? await response.json() : await response.text();
-      throw new Error(`Erro ao salvar objetivos: ${response.status}`);
-    }
-
-    if (!isJson) {
-      const htmlText = await response.text();
-      throw new Error('Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.');
-    }
-
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-  } catch (error) {
-    console.error('[API Objetivos] Erro no POST:', error);
-    return new Response(
-      JSON.stringify({
+      res.status(200).json(body);
+    } catch (error) {
+      console.error('[objetivos] Erro ao salvar objetivos:', error);
+      res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : 'Erro ao salvar objetivos',
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      }
-    );
+      });
+    }
+    return;
   }
-};
 
+  res.status(405).json({ success: false, error: 'Método não suportado' });
+}
