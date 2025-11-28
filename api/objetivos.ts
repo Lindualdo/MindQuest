@@ -54,7 +54,7 @@ export default async function handler(req: any, res: any) {
         res.status(upstreamResponse.status).json(
           typeof body === 'string'
             ? { success: false, error: body || 'Erro desconhecido' }
-            : body
+            : { ...(typeof body === 'object' ? body : {}), success: false }
         );
         return;
       }
@@ -67,7 +67,12 @@ export default async function handler(req: any, res: any) {
         return;
       }
 
-      res.status(200).json(body);
+      // Garantir formato de resposta esperado pelo frontend
+      const responseData = typeof body === 'object' && body !== null
+        ? { ...body, success: true }
+        : { success: true, objetivo: body || null };
+      
+      res.status(200).json(responseData);
     } catch (error) {
       console.error('[objetivos] Erro ao buscar objetivos:', error);
       res.status(500).json({
@@ -80,26 +85,12 @@ export default async function handler(req: any, res: any) {
 
   // POST: Salvar objetivos
   if (req.method === 'POST') {
-    let parsedBody: any = null;
+    // Na Vercel, o body já vem parseado automaticamente
+    const body = req.body ?? {};
+    
+    console.log('[objetivos] POST recebido:', { body });
 
-    const rawBody = req.body;
-    if (typeof rawBody === 'string') {
-      try {
-        parsedBody = JSON.parse(rawBody);
-      } catch {
-        parsedBody = null;
-      }
-    } else if (rawBody && typeof rawBody === 'object') {
-      parsedBody = rawBody;
-    } else if (Buffer.isBuffer(rawBody)) {
-      try {
-        parsedBody = JSON.parse(rawBody.toString('utf-8'));
-      } catch {
-        parsedBody = null;
-      }
-    }
-
-    const usuarioId = readUsuarioId(parsedBody);
+    const usuarioId = readUsuarioId(body);
 
     if (!usuarioId) {
       res.status(400).json({ success: false, error: 'user_id é obrigatório' });
@@ -108,27 +99,35 @@ export default async function handler(req: any, res: any) {
 
     const remoteEndpoint = process.env.OBJETIVOS_WEBHOOK_URL || DEFAULT_ENDPOINT;
 
+    const payload = {
+      user_id: usuarioId,
+      objetivo: body?.objetivo || null,
+    };
+
+    console.log('[objetivos] Enviando para webhook:', { remoteEndpoint, payload });
+
     try {
       const upstreamResponse = await fetch(remoteEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user_id: usuarioId,
-          objetivo: parsedBody?.objetivo || null,
-        }),
+        body: JSON.stringify(payload),
       });
+
+      console.log('[objetivos] Webhook response status:', upstreamResponse.status);
 
       const contentType = upstreamResponse.headers.get('content-type') || '';
       const isJson = contentType.includes('application/json');
       const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
 
+      console.log('[objetivos] Webhook response body:', { isJson, body: typeof body === 'object' ? JSON.stringify(body) : body });
+
       if (!upstreamResponse.ok) {
         res.status(upstreamResponse.status).json(
           typeof body === 'string'
             ? { success: false, error: body || 'Erro desconhecido' }
-            : body
+            : { ...(typeof body === 'object' ? body : {}), success: false }
         );
         return;
       }
@@ -141,7 +140,13 @@ export default async function handler(req: any, res: any) {
         return;
       }
 
-      res.status(200).json(body);
+      // Garantir formato de resposta esperado pelo frontend
+      const responseData = typeof body === 'object' && body !== null
+        ? { ...body, success: true }
+        : { success: true };
+
+      console.log('[objetivos] Retornando resposta:', responseData);
+      res.status(200).json(responseData);
     } catch (error) {
       console.error('[objetivos] Erro ao salvar objetivos:', error);
       res.status(500).json({

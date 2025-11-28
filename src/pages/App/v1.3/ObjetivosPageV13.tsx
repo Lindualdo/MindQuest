@@ -111,7 +111,14 @@ const ObjetivosPageV13: React.FC = () => {
         }),
       });
 
+      console.log('[Objetivos] Response status:', response.status);
+      
       const data = await response.json();
+      console.log('[Objetivos] Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || `Erro HTTP ${response.status}`);
+      }
 
       if (data.success) {
         setSuccess(true);
