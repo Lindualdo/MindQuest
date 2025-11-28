@@ -1,4 +1,4 @@
-import { Home, Settings, Target, User } from 'lucide-react';
+import { Eye, Brain, Zap, Sparkles } from 'lucide-react';
 
 type TabId = 'home' | 'perfil' | 'quests' | 'ajustes';
 
@@ -34,8 +34,8 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('home') }}
         >
-          <Home size={18} />
-          <span>Home</span>
+          <Eye size={18} />
+          <span>Clareza</span>
         </button>
         <button
           type="button"
@@ -43,8 +43,8 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('perfil') }}
         >
-          <User size={18} />
-          <span>Perfil</span>
+          <Brain size={18} />
+          <span>Mente</span>
         </button>
         <button
           type="button"
@@ -52,8 +52,8 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('quests') }}
         >
-          <Target size={18} />
-          <span>Quests</span>
+          <Zap size={18} />
+          <span>Ações</span>
         </button>
         <button
           type="button"
@@ -61,8 +61,8 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('ajustes') }}
         >
-          <Settings size={18} />
-          <span>Ajustes</span>
+          <Sparkles size={18} />
+          <span>Evoluir</span>
         </button>
       </div>
     </nav>

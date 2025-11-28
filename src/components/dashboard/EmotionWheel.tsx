@@ -78,29 +78,33 @@ const EmotionWheel: React.FC = () => {
 
   return (
     <Card className="flex flex-col min-h-[360px] border border-[#B6D6DF] bg-[#E8F3F5] !shadow-md" style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}>
-      <div className="flex items-center gap-2 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Roda das emoções</h3>
-        <div className="ml-auto relative">
-          <button
-            type="button"
-            aria-label="Informações sobre a roda de emoções"
-            className="p-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
-            onClick={() => setShowInfo((prev) => !prev)}
-          >
-            <Info size={16} />
-          </button>
-          {showInfo && (
-            <div className="absolute right-0 mt-3 w-64 rounded-xl bg-white p-4 text-xs text-gray-600 shadow-xl">
-              <p><strong>Emoções:</strong> análise das conversas da semana.</p>
-              <p className="mt-1"><strong>Percentual:</strong> média de intensidade dos últimos 7 dias.</p>
-              <p className="mt-1"><strong>Base:</strong> 8 emoções fundamentais (Plutchik simplificado).</p>
-            </div>
-          )}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-bold text-[#1C2541]">Roda das Emoções</h3>
         </div>
+        <button
+          type="button"
+          onClick={() => setShowInfo(!showInfo)}
+          className="p-1.5 rounded-full bg-white/60 text-[#2F76D1] hover:bg-white transition-colors"
+        >
+          <Info size={16} />
+        </button>
       </div>
 
+      {showInfo && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-4 rounded-xl bg-white/80 p-3 text-xs text-slate-600"
+        >
+          <p className="font-semibold mb-1">O que é a Roda das Emoções?</p>
+          <p>Visualização das 8 emoções fundamentais identificadas nas conversas.É baseada na teoria de Plutchik. Ajuda a identificar padrões emocionais e compreender melhor seus sentimentos.</p>
+        </motion.div>
+      )}
+
       {/* SVG da Roda */}
-      <div ref={containerRef} className="flex flex-1 items-center justify-center pb-4 w-full">
+      <div ref={containerRef} className="flex flex-1 items-center justify-center pb-4 w-full mt-2">
         <svg
           width={wheelSize}
           height={wheelSize}

@@ -42,6 +42,7 @@ const HumorHistoryPage: React.FC = () => {
     humorHistoricoLoading,
     humorHistoricoError,
     loadHumorHistorico,
+    humorHistoricoReturnView,
     setView,
     openConversaResumo
   } = useDashboard();
@@ -196,8 +197,17 @@ const HumorHistoryPage: React.FC = () => {
   }, [humorHistorico]);
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveTab('home');
+    const returnView = humorHistoricoReturnView ?? 'dashboard';
+    if (returnView === 'dashboard') {
+      setView('dashboard');
+      setActiveTab('home');
+    } else if (returnView === 'dashEmocoes') {
+      setView('dashEmocoes');
+      setActiveTab('perfil');
+    } else {
+      setView('dashboard');
+      setActiveTab('home');
+    }
   };
 
   const handleNavHome = () => {

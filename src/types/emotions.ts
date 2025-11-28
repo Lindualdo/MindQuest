@@ -744,6 +744,8 @@ export interface StoreState {
   selectedConversationId: string | null;
   conversaResumoReturnView: ViewId | null;
   insightDetailReturnView: ViewId | null;
+  humorHistoricoReturnView: ViewId | null;
+  sabotadorDetailReturnView: ViewId | null;
   panoramaCard: PanoramaCardData | null;
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
@@ -792,6 +794,7 @@ export interface StoreState {
   refreshData: () => Promise<void>;
   setView: (view: ViewId) => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
+  openHumorHistorico: () => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
   closeInsightDetail: () => void;
   openSabotadorDetail: (sabotadorId?: string) => void;

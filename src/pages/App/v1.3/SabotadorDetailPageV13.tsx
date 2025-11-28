@@ -29,7 +29,7 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
 };
 
 const SabotadorDetailPageV13: React.FC = () => {
-  const { dashboardData, setView, selectedSabotadorId } = useDashboard();
+  const { dashboardData, setView, selectedSabotadorId, sabotadorDetailReturnView } = useDashboard();
   const [activeTab, setActiveTab] = useState<TabId>('perfil');
 
   const sabotadorId =
@@ -38,8 +38,17 @@ const SabotadorDetailPageV13: React.FC = () => {
   const overview = sabotadoresCatalogo.overview;
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveTab('home');
+    const returnView = sabotadorDetailReturnView ?? 'dashboard';
+    if (returnView === 'dashboard') {
+      setView('dashboard');
+      setActiveTab('home');
+    } else if (returnView === 'dashEmocoes') {
+      setView('dashEmocoes');
+      setActiveTab('perfil');
+    } else {
+      setView('dashboard');
+      setActiveTab('home');
+    }
   };
 
   const handleNavHome = () => {

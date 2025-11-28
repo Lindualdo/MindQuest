@@ -728,11 +728,11 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-2">
-            Minhas Missões
+          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
+            Ações
           </h1>
           <p className="text-sm text-[#64748B]">
-            Organize e acompanhe seu progresso semanal
+            Microações para evoluir
           </p>
         </div>
 

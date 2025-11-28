@@ -28,6 +28,7 @@ const HomeV1_3 = () => {
     loadWeeklyProgressCard,
     openSabotadorDetail,
     openResumoConversas,
+    openHumorHistorico,
   } = useDashboard();
 
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -96,8 +97,8 @@ const HomeV1_3 = () => {
     setView('painelQuests');
   };
 
-  const handleVerHumor = () => {
-    setView('humorHistorico');
+  const handleVerHumor = async () => {
+    await openHumorHistorico();
   };
 
   const insightCardData = insightCard ?? (!insightCardLoading ? mockInsightCard : null);
@@ -163,13 +164,19 @@ const HomeV1_3 = () => {
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        <motion.p
+        {/* Título da página */}
+        <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center text-[0.9rem] font-medium text-[#1C2541]"
+          className="mb-2 text-center"
         >
-          Descubra mais sobre você e destrave seu progresso
-        </motion.p>
+          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
+            Clareza
+          </h1>
+          <p className="text-sm text-[#64748B]">
+            Mente clara, resultados reais
+          </p>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -68,6 +68,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   selectedConversationId: null,
   conversaResumoReturnView: null,
   insightDetailReturnView: null,
+  humorHistoricoReturnView: null,
+  sabotadorDetailReturnView: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -929,9 +931,17 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         humorHistoricoError: error instanceof Error ? error.message : 'Erro ao carregar histórico'
       });
     }
-  }
+  },
 
-  ,
+  openHumorHistorico: async () => {
+    const { view } = get();
+    const originView = view === 'humorHistorico' ? get().humorHistoricoReturnView ?? 'dashboard' : view;
+    set({
+      view: 'humorHistorico',
+      humorHistoricoReturnView: originView
+    });
+    await get().loadHumorHistorico();
+  },
 
   openInsightDetail: async (insightId) => {
     const { dashboardData, view } = get();
@@ -1036,7 +1046,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   openSabotadorDetail: (sabotadorId) => {
-    const { dashboardData } = get();
+    const { dashboardData, view } = get();
     const fallbackId = dashboardData?.sabotadores?.padrao_principal?.id ?? null;
 
     if (!sabotadorId && !fallbackId) {
@@ -1045,9 +1055,11 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       return;
     }
 
+    const originView = view === 'sabotadorDetail' ? get().sabotadorDetailReturnView ?? 'dashboard' : view;
     set({
       selectedSabotadorId: sabotadorId ?? fallbackId,
-      view: 'sabotadorDetail'
+      view: 'sabotadorDetail',
+      sabotadorDetailReturnView: originView
     });
   },
 
@@ -1188,6 +1200,8 @@ export const useDashboard = () => {
     humorHistoricoLoading,
     humorHistoricoError,
     loadHumorHistorico,
+    openHumorHistorico,
+    humorHistoricoReturnView,
     openInsightDetail,
     closeInsightDetail,
     selectedInsightId,
@@ -1201,6 +1215,7 @@ export const useDashboard = () => {
     questDetailError,
     selectedSabotadorId,
     openSabotadorDetail,
+    sabotadorDetailReturnView,
     resumoConversas,
     resumoConversasLoading,
     resumoConversasError,
@@ -1273,6 +1288,8 @@ export const useDashboard = () => {
     humorHistoricoLoading,
     humorHistoricoError,
     loadHumorHistorico,
+    openHumorHistorico,
+    humorHistoricoReturnView,
     openInsightDetail,
     closeInsightDetail,
     selectedInsightId,
@@ -1286,6 +1303,7 @@ export const useDashboard = () => {
     questDetailError,
     selectedSabotadorId,
     openSabotadorDetail,
+    sabotadorDetailReturnView,
     resumoConversas,
     resumoConversasLoading,
     resumoConversasError,
