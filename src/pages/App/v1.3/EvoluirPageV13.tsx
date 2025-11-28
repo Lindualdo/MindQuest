@@ -261,6 +261,10 @@ const EvoluirPageV13: React.FC = () => {
           >
             <button
               type="button"
+              onClick={() => {
+                setView('perfilPessoal');
+                setActiveTab('ajustes');
+              }}
               className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
             >
               <div className="flex items-center gap-3">
