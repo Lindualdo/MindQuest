@@ -359,7 +359,6 @@ const PainelQuestsPageV13: React.FC = () => {
   // Renderizar quest item simplificado para "a fazer"
   const renderQuestItemSimples = (quest: QuestPersonalizadaResumo) => {
     const questId = quest.instancia_id || quest.meta_codigo;
-    const xpRecompensa = quest.xp_recompensa ?? 30;
     
     return (
       <div 
@@ -385,15 +384,9 @@ const PainelQuestsPageV13: React.FC = () => {
             </button>
           </div>
           
-          {/* XP e ações */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <Target size={14} className="text-[#0EA5E9]" />
-              <span className="text-xs font-semibold text-[#64748B]">
-                {xpRecompensa} XP
-              </span>
-            </div>
-            {questId && (
+          {/* Ações */}
+          {questId && (
+            <div className="flex items-center justify-end pt-2 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => {
@@ -407,8 +400,8 @@ const PainelQuestsPageV13: React.FC = () => {
                 Ver detalhes
                 <ArrowUpRight size={12} />
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -422,7 +415,6 @@ const PainelQuestsPageV13: React.FC = () => {
     if (!questId) {
       console.warn('[PainelQuests] Quest sem ID válido:', quest);
     }
-    const xpRecompensa = quest.xp_recompensa ?? 30;
     
     const isConversaQuest = 
       quest.catalogo_codigo === 'reflexao_diaria' ||
@@ -496,15 +488,9 @@ const PainelQuestsPageV13: React.FC = () => {
             </div>
           )}
 
-          {/* XP e ações */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <Target size={14} className="text-[#0EA5E9]" />
-              <span className="text-xs font-semibold text-[#64748B]">
-                {xpRecompensa} XP
-              </span>
-            </div>
-            {questId && (
+          {/* Ações */}
+          {questId && (
+            <div className="flex items-center justify-end pt-2 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => {
@@ -518,8 +504,8 @@ const PainelQuestsPageV13: React.FC = () => {
                 Ver detalhes
                 <ArrowUpRight size={12} />
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -792,17 +778,15 @@ const PainelQuestsPageV13: React.FC = () => {
             <>
               {questsDoDiaSelecionado.a_fazer.length > 0 ? (
                 <>
+                  <p className="text-xs text-[#94A3B8] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
+                    <span>Toque no ícone</span>
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#0EA5E9] shadow-sm">
+                      <Settings2 size={16} className="text-white" />
+                    </span>
+                    <span>para definir recorrências</span>
+                  </p>
                   <div className="space-y-3">
                     {questsDoDiaSelecionado.a_fazer.map(quest => renderQuestItemSimples(quest))}
-                  </div>
-                  <div 
-                    className="mt-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md"
-                    style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
-                  >
-                    <p className="text-sm text-[#64748B] text-center">
-                      <Settings2 size={16} className="inline mr-2 text-[#0EA5E9]" />
-                      Toque no ícone ao lado de cada quest para definir a recorrência
-                    </p>
                   </div>
                 </>
               ) : (
@@ -831,9 +815,18 @@ const PainelQuestsPageV13: React.FC = () => {
           {activeTab === 'fazendo' && (
             <>
               {questsDoDiaSelecionado.fazendo.length > 0 ? (
-                <div className="space-y-4">
-                  {questsDoDiaSelecionado.fazendo.map(quest => renderQuestItem(quest, false))}
-                </div>
+                <>
+                  <p className="text-xs text-[#94A3B8] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
+                    <span>Toque no ícone</span>
+                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-full border-2 border-[#0EA5E9] bg-white">
+                      <CheckCircle2 size={20} className="text-[#0EA5E9]" />
+                    </span>
+                    <span>para concluir uma ação</span>
+                  </p>
+                  <div className="space-y-4">
+                    {questsDoDiaSelecionado.fazendo.map(quest => renderQuestItem(quest, false))}
+                  </div>
+                </>
               ) : (
                 <div 
                   className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
