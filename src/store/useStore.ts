@@ -70,6 +70,8 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   insightDetailReturnView: null,
   humorHistoricoReturnView: null,
   sabotadorDetailReturnView: null,
+  resumoConversasReturnView: null,
+  painelQuestsReturnView: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -738,7 +740,23 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   setView: (view) => {
-    set({ view });
+    // Salvar returnView quando navegando para painelQuests
+    if (view === 'painelQuests') {
+      const { view: currentView } = get();
+      const originView = currentView === 'painelQuests' ? get().painelQuestsReturnView ?? 'dashboard' : currentView;
+      set({ 
+        view,
+        painelQuestsReturnView: originView === 'painelQuests' ? 'dashboard' : originView
+      });
+    } else {
+      // Limpar returnView quando sair do painelQuests
+      const { view: currentView } = get();
+      if (currentView === 'painelQuests') {
+        set({ view, painelQuestsReturnView: null });
+      } else {
+        set({ view });
+      }
+    }
   },
 
   /**
@@ -1105,16 +1123,22 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   openResumoConversas: async () => {
+    const { view } = get();
+    const originView = view === 'resumoConversas' ? get().resumoConversasReturnView ?? 'dashboard' : view;
     set({
       view: 'resumoConversas',
-      resumoConversasError: null
+      resumoConversasError: null,
+      resumoConversasReturnView: originView
     });
     await get().loadResumoConversas();
   },
 
   closeResumoConversas: () => {
+    const { resumoConversasReturnView } = get();
+    const returnView = resumoConversasReturnView ?? 'dashboard';
     set({
-      view: 'dashboard'
+      view: returnView,
+      resumoConversasReturnView: null
     });
   },
 
@@ -1216,12 +1240,14 @@ export const useDashboard = () => {
     selectedSabotadorId,
     openSabotadorDetail,
     sabotadorDetailReturnView,
+    painelQuestsReturnView,
     resumoConversas,
     resumoConversasLoading,
     resumoConversasError,
     openResumoConversas,
-  closeResumoConversas,
-  loadResumoConversas,
+    closeResumoConversas,
+    resumoConversasReturnView,
+    loadResumoConversas,
   conversaResumo,
   conversaResumoLoading,
   conversaResumoError,

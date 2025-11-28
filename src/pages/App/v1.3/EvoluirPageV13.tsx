@@ -1,10 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Target, Palette, BookOpen, ChevronRight, TrendingUp } from 'lucide-react';
+import { ArrowLeft, User, Target, Palette, BookOpen, ChevronRight, TrendingUp, Star } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+
+interface EvoluirStats {
+  total_conversas: number;
+  total_quests_concluidas: number;
+  xp_total: number;
+}
 
 const EvoluirPageV13: React.FC = () => {
   const {
@@ -20,13 +26,35 @@ const EvoluirPageV13: React.FC = () => {
     'Aldo';
 
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
+  const [stats, setStats] = useState<EvoluirStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
-  // Dados de progresso
-  const totalConversas = dashboardData?.gamificacao?.total_conversas ?? 0;
+  // Dados de progresso - usar stats da API se disponível, senão fallback para dados existentes
+  const totalConversas = stats?.total_conversas ?? dashboardData?.gamificacao?.total_conversas ?? 0;
   const totalQuestsConcluidas = useMemo(() => {
-    const quests = questSnapshot?.quests_personalizadas ?? [];
-    return quests.filter(q => q.status === 'concluida' || q.status === 'inativa').length;
-  }, [questSnapshot]);
+    if (stats?.total_quests_concluidas !== undefined) {
+      return stats.total_quests_concluidas;
+    }
+    
+    if (!questSnapshot) {
+      return 0;
+    }
+    
+    const quests = questSnapshot.quests_personalizadas;
+    if (!Array.isArray(quests)) {
+      return 0;
+    }
+    
+    return quests.filter(q => q && (q.status === 'concluida' || q.status === 'inativa')).length;
+  }, [stats, questSnapshot]);
+  const totalXp = useMemo(() => {
+    const xp = stats?.xp_total ?? dashboardData?.gamificacao?.xp_total ?? 0;
+    return typeof xp === 'number' ? xp : Number(xp) || 0;
+  }, [stats, dashboardData]);
+  
+  const totalXpFormatted = useMemo(() => {
+    return totalXp.toLocaleString('pt-BR');
+  }, [totalXp]);
 
 
   useEffect(() => {
@@ -34,6 +62,39 @@ const EvoluirPageV13: React.FC = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
+
+  // Carregar stats do webhook
+  useEffect(() => {
+    const loadStats = async () => {
+      const usuarioId = dashboardData?.usuario?.id;
+      if (!usuarioId) {
+        setStatsLoading(false);
+        return;
+      }
+
+      try {
+        setStatsLoading(true);
+        const url = `/api/evoluir-stats?user_id=${encodeURIComponent(usuarioId)}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Erro ao carregar stats: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.stats) {
+          setStats(data.stats);
+        }
+      } catch (error) {
+        console.error('[EvoluirPage] Erro ao carregar stats:', error);
+        // Em caso de erro, mantém os dados existentes (fallback)
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    loadStats();
+  }, [dashboardData?.usuario?.id]);
 
   const handleBack = () => {
     setView('dashboard');
@@ -97,8 +158,8 @@ const EvoluirPageV13: React.FC = () => {
           </p>
         </div>
 
-        {/* Cards de Progresso: Conversas e Ações */}
-        <div className="mb-6 grid grid-cols-2 gap-4">
+        {/* Cards de Progresso: Conversas, Ações e Pontos */}
+        <div className="mb-6 grid grid-cols-3 gap-4">
           {/* Card Conversas */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -141,6 +202,25 @@ const EvoluirPageV13: React.FC = () => {
                 <TrendingUp size={16} className="text-[#0EA5E9]" />
               </div>
             </button>
+          </motion.div>
+
+          {/* Card Pontos */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.13 }}
+          >
+            <div className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md flex flex-col items-center justify-center text-center"
+              style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+            >
+              <p className="text-sm font-semibold text-[#64748B] mb-2">Pontos</p>
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="text-4xl font-bold text-[#1C2541] leading-none">
+                  {totalXpFormatted}
+                </span>
+                <Star size={16} className="text-[#0EA5E9]" />
+              </div>
+            </div>
           </motion.div>
         </div>
 
