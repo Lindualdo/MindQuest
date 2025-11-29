@@ -29,12 +29,12 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // GET: Buscar objetivos
+  // GET: Buscar objetivos do usuário
   if (req.method === 'GET') {
     const usuarioId = readUsuarioId(req.query);
 
     if (!usuarioId) {
-      res.status(400).json({ success: false, error: 'user_id é obrigatório' });
+      res.status(400).json({ success: false, error: 'user_id obrigatório' });
       return;
     }
 
@@ -59,57 +59,53 @@ export default async function handler(req: any, res: any) {
         res.status(upstreamResponse.status).json(
           typeof body === 'string'
             ? { success: false, error: body || 'Erro desconhecido' }
-            : { ...(typeof body === 'object' ? body : {}), success: false }
+            : body
         );
         return;
       }
 
-      if (!isJson) {
-        res.status(500).json({
-          success: false,
-          error: 'Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.',
-        });
+      if (isJson) {
+        res.status(200).json(body);
         return;
       }
 
-      // Garantir formato de resposta esperado pelo frontend
-      const responseData = typeof body === 'object' && body !== null
-        ? { ...body, success: true }
-        : { success: true, objetivo: body || null };
-      
-      res.status(200).json(responseData);
+      res.status(200).send(body);
     } catch (error) {
       console.error('[objetivos] Erro ao buscar objetivos:', error);
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Erro ao buscar objetivos',
-      });
+      res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço' });
     }
     return;
   }
 
-  // POST: Salvar objetivos
+  // POST: Criar novo objetivo
   if (req.method === 'POST') {
-    // Na Vercel, o body já vem parseado automaticamente
-    const body = req.body ?? {};
-    
-    console.log('[objetivos] POST recebido:', { body });
+    let parsedBody: any = null;
 
-    const usuarioId = readUsuarioId(body);
+    const rawBody = req.body;
+    if (typeof rawBody === 'string') {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch {
+        parsedBody = null;
+      }
+    } else if (rawBody && typeof rawBody === 'object') {
+      parsedBody = rawBody;
+    } else if (Buffer.isBuffer(rawBody)) {
+      try {
+        parsedBody = JSON.parse(rawBody.toString('utf-8'));
+      } catch {
+        parsedBody = null;
+      }
+    }
+
+    const usuarioId = readUsuarioId(parsedBody);
 
     if (!usuarioId) {
-      res.status(400).json({ success: false, error: 'user_id é obrigatório' });
+      res.status(400).json({ success: false, error: 'user_id obrigatório' });
       return;
     }
 
     const remoteEndpoint = process.env.OBJETIVOS_WEBHOOK_URL || DEFAULT_ENDPOINT;
-
-    const payload = {
-      user_id: usuarioId,
-      objetivo: body?.objetivo || null,
-    };
-
-    console.log('[objetivos] Enviando para webhook:', { remoteEndpoint, payload });
 
     try {
       const upstreamResponse = await fetch(remoteEndpoint, {
@@ -117,47 +113,31 @@ export default async function handler(req: any, res: any) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(parsedBody),
       });
-
-      console.log('[objetivos] Webhook response status:', upstreamResponse.status);
 
       const contentType = upstreamResponse.headers.get('content-type') || '';
       const isJson = contentType.includes('application/json');
-      const responseBody = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
-
-      console.log('[objetivos] Webhook response body:', { isJson, responseBody: typeof responseBody === 'object' ? JSON.stringify(responseBody) : responseBody });
+      const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
 
       if (!upstreamResponse.ok) {
         res.status(upstreamResponse.status).json(
-          typeof responseBody === 'string'
-            ? { success: false, error: responseBody || 'Erro desconhecido' }
-            : { ...(typeof responseBody === 'object' ? responseBody : {}), success: false }
+          typeof body === 'string'
+            ? { success: false, error: body || 'Erro desconhecido' }
+            : body
         );
         return;
       }
 
-      if (!isJson) {
-        res.status(500).json({
-          success: false,
-          error: 'Webhook retornou HTML em vez de JSON. Verifique se o workflow está ativo.',
-        });
+      if (isJson) {
+        res.status(200).json(body);
         return;
       }
 
-      // Garantir formato de resposta esperado pelo frontend
-      const responseData = typeof responseBody === 'object' && responseBody !== null
-        ? { ...responseBody, success: true }
-        : { success: true };
-
-      console.log('[objetivos] Retornando resposta:', responseData);
-      res.status(200).json(responseData);
+      res.status(200).send(body);
     } catch (error) {
-      console.error('[objetivos] Erro ao salvar objetivos:', error);
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Erro ao salvar objetivos',
-      });
+      console.error('[objetivos] Erro ao criar objetivo:', error);
+      res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço' });
     }
     return;
   }
