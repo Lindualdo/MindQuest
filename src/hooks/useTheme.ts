@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 export type ThemeId = 'clareza' | 'natureza' | 'noturno' | 'cosmos';
 
@@ -79,27 +79,81 @@ export const TEMAS: ThemeInfo[] = [
 const STORAGE_KEY = 'mindquest-theme';
 const DEFAULT_THEME: ThemeId = 'clareza';
 
-export function useTheme() {
-  const [theme, setThemeState] = useState<ThemeId>(() => {
-    if (typeof window === 'undefined') return DEFAULT_THEME;
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && TEMAS.some(t => t.id === saved)) {
-      return saved as ThemeId;
-    }
-    return DEFAULT_THEME;
-  });
+// Store global para sincronizar tema entre componentes
+let globalTheme: ThemeId = DEFAULT_THEME;
+const listeners = new Set<() => void>();
 
-  // Aplicar tema no DOM
+// Inicializar do localStorage
+if (typeof window !== 'undefined') {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved && TEMAS.some(t => t.id === saved)) {
+    globalTheme = saved as ThemeId;
+  }
+  // Aplicar tema inicial
+  applyThemeToDOM(globalTheme);
+}
+
+function applyThemeToDOM(theme: ThemeId) {
+  if (typeof document === 'undefined') return;
+  
+  // Aplicar em TODOS os elementos .mq-app-v1_3
+  const elements = document.querySelectorAll('.mq-app-v1_3');
+  elements.forEach(el => {
+    el.setAttribute('data-theme', theme);
+  });
+  
+  // Também aplicar no body para garantir
+  document.body.setAttribute('data-mq-theme', theme);
+  
+  // Salvar no localStorage
+  localStorage.setItem(STORAGE_KEY, theme);
+}
+
+function setGlobalTheme(theme: ThemeId) {
+  globalTheme = theme;
+  applyThemeToDOM(theme);
+  listeners.forEach(listener => listener());
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+  return globalTheme;
+}
+
+function getServerSnapshot() {
+  return DEFAULT_THEME;
+}
+
+export function useTheme() {
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  // Aplicar tema sempre que o componente montar (para novas páginas)
   useEffect(() => {
-    const root = document.querySelector('.mq-app-v1_3');
-    if (root) {
-      root.setAttribute('data-theme', theme);
-    }
-    localStorage.setItem(STORAGE_KEY, theme);
+    applyThemeToDOM(theme);
   }, [theme]);
 
+  // Observer para aplicar tema em novos elementos .mq-app-v1_3
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const observer = new MutationObserver(() => {
+      applyThemeToDOM(globalTheme);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const setTheme = useCallback((newTheme: ThemeId) => {
-    setThemeState(newTheme);
+    setGlobalTheme(newTheme);
   }, []);
 
   const currentTheme = TEMAS.find(t => t.id === theme) ?? TEMAS[0];
@@ -111,6 +165,18 @@ export function useTheme() {
     temas: TEMAS,
     isDark: currentTheme.tipo === 'dark',
   };
+}
+
+// Função para inicializar tema (chamar no App.tsx)
+export function initializeTheme() {
+  if (typeof window !== 'undefined') {
+    applyThemeToDOM(globalTheme);
+  }
+}
+
+// Função para obter tema atual (sem hook)
+export function getCurrentTheme(): ThemeId {
+  return globalTheme;
 }
 
 export default useTheme;
