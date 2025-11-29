@@ -13,7 +13,6 @@ import type {
   SabotadorPadrao, 
   Insight
 } from '../types/emotions';
-import { gamificacaoLevels } from '../data/gamificacaoLevels';
 
 type ProximaJornadaBlock = {
   xp_total?: string | number | null;
@@ -1293,19 +1292,8 @@ class DataAdapter {
     const totalReflexoes = this.parseNumber(gamificacao.total_reflexoes) ?? 0;
     const totalXpHoje = this.parseNumber(gamificacao.total_xp_ganho_hoje) ?? 0;
 
-    const upcomingLevelsBase = gamificacaoLevels
-      .filter((level) => level.nivel > nivelAtual)
-      .slice(0, 3)
-      .map((level) => ({
-        nivel: level.nivel,
-        titulo: level.titulo,
-        xp_minimo: level.xp_minimo,
-        xp_maximo: level.xp_proximo_nivel,
-        xp_restante: Math.max(level.xp_minimo - xpTotal, 0),
-        descricao: level.descricao
-      }));
-
-    let proximosNiveis: Gamificacao['proximos_niveis'] = upcomingLevelsBase;
+    // Próximos níveis agora vêm da API /api/jornada-niveis quando necessário
+    const proximosNiveis: Gamificacao['proximos_niveis'] = [];
     let proximoNivel: Gamificacao['proximo_nivel'] =
       proximosNiveis.length > 0 ? { ...proximosNiveis[0] } : null;
 
