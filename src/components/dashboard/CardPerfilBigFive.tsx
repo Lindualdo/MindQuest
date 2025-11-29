@@ -107,22 +107,22 @@ const CardPerfilBigFive: React.FC = () => {
       {(perfilPrimario || perfilSecundario) && (
         <div className="mb-4 space-y-2">
           {perfilPrimario && (
-            <div className="rounded-xl bg-white/80 p-3 border-l-4 border-[#2F76D1]">
+            <div className="rounded-xl bg-[var(--mq-card)] p-3 border-l-4 border-[var(--mq-primary)]">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-slate-500">Perfil Primário</span>
+                <span className="text-xs font-semibold text-[var(--mq-text-muted)]">Perfil Primário</span>
               </div>
-              <h4 className="font-bold text-[#1C2541] text-sm">{perfilPrimario.nome_pt}</h4>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2">{perfilPrimario.resumo}</p>
+              <h4 className="font-bold text-[var(--mq-text)] text-sm">{perfilPrimario.nome_pt}</h4>
+              <p className="text-xs text-[var(--mq-text-muted)] mt-1 line-clamp-2">{perfilPrimario.resumo}</p>
             </div>
           )}
           
           {perfilSecundario && (
-            <div className="rounded-xl bg-white/60 p-3 border-l-4 border-slate-300">
+            <div className="rounded-xl bg-[var(--mq-card)]/60 p-3 border-l-4 border-[var(--mq-border)]">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-slate-500">Perfil Secundário</span>
+                <span className="text-xs font-semibold text-[var(--mq-text-muted)]">Perfil Secundário</span>
               </div>
-              <h4 className="font-bold text-[#1C2541] text-sm">{perfilSecundario.nome_pt}</h4>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2">{perfilSecundario.resumo}</p>
+              <h4 className="font-bold text-[var(--mq-text)] text-sm">{perfilSecundario.nome_pt}</h4>
+              <p className="text-xs text-[var(--mq-text-muted)] mt-1 line-clamp-2">{perfilSecundario.resumo}</p>
             </div>
           )}
         </div>
@@ -131,30 +131,31 @@ const CardPerfilBigFive: React.FC = () => {
       {/* Top 3 Traços com Scores */}
       {top3Traços.length > 0 && (
         <div className="mb-4">
-          <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Top 3 Traços</h4>
+          <h4 className="text-xs font-semibold text-[var(--mq-text-muted)] mb-2 uppercase tracking-wide">Top 3 Traços</h4>
           <div className="space-y-2">
             {top3Traços.map((traco, idx) => {
               const score = Math.round(traco.score);
               const catalogInfo = getPerfilById(traco.nome);
               
               return (
-                <div key={traco.nome} className="rounded-lg bg-white/60 p-2.5">
+                <div key={traco.nome} className="rounded-lg bg-[var(--mq-card)]/60 p-2.5">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#1C2541]">{traco.nome_pt}</span>
+                      <span className="text-xs font-bold text-[var(--mq-text)]">{traco.nome_pt}</span>
                     </div>
-                    <span className="text-xs font-bold text-[#2F76D1]">{score}/100</span>
+                    <span className="text-xs font-bold text-[var(--mq-primary)]">{score}/100</span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <div className="w-full bg-[var(--mq-bar)] rounded-full h-1.5">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${score}%` }}
                       transition={{ duration: 0.8, delay: idx * 0.1 }}
-                      className="h-1.5 rounded-full bg-gradient-to-r from-[#2F76D1] to-[#0EA5E9]"
+                      className="h-1.5 rounded-full"
+                      style={{ background: 'linear-gradient(to right, var(--mq-primary), var(--mq-success))' }}
                     />
                   </div>
                   {catalogInfo?.pontos_fortes?.[0] && (
-                    <p className="text-[10px] text-slate-500 mt-1.5 line-clamp-1">
+                    <p className="text-[10px] text-[var(--mq-text-subtle)] mt-1.5 line-clamp-1">
                       {catalogInfo.pontos_fortes[0]}
                     </p>
                   )}
@@ -167,19 +168,19 @@ const CardPerfilBigFive: React.FC = () => {
 
       {/* Resumo do Perfil */}
       {perfil.resumo_perfil && (
-        <div className="mt-4 rounded-xl bg-white/80 p-3">
+        <div className="mt-4 rounded-xl bg-[var(--mq-card)] p-3">
           <div className="flex items-start gap-2">
-            <Target size={16} className="text-[#2F76D1] mt-0.5 flex-shrink-0" />
+            <Target size={16} className="text-[var(--mq-primary)] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs font-semibold text-slate-700 mb-1">Resumo do Perfil</p>
-              <p className="text-xs text-slate-600 leading-relaxed">{perfil.resumo_perfil}</p>
+              <p className="text-xs font-semibold text-[var(--mq-text)] mb-1">Resumo do Perfil</p>
+              <p className="text-xs text-[var(--mq-text-muted)] leading-relaxed">{perfil.resumo_perfil}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Footer - Confiabilidade e Atualização */}
-      <div className="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[10px] text-slate-500">
+      <div className="mt-4 pt-3 border-t border-[var(--mq-border)] flex items-center justify-between text-[10px] text-[var(--mq-text-subtle)]">
         <div className="flex items-center gap-1">
           <Award size={12} />
           <span>Confiabilidade: {Math.round(perfil.confianca_media)}%</span>
