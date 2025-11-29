@@ -9,16 +9,46 @@
 
 MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas em ações práticas. Identifica padrões mentais que travam o progresso e oferece micro-ações personalizadas (quests) para mudança comportamental.
 
-**Fluxo Central:**
-1. Usuário conversa com assistente de reflexão (IA) pelo WhatsApp
-2. Sistema gera insights, quests, calcula pontos e atualiza análise comportamental
-3. Usuário acompanha progresso no App e gerencia quests (define recorrências e ativa quests)
-4. Assistente de quests notifica e ajuda usuário a colocar em prática
-5. Transformação acontece: usuário conquista pontos no App e progresso na vida
+**Fundamento:** Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados.
+
+### Ciclo de Transformação (4 Etapas Integradas ao Fluxo Central)
+
+**01. Transforme ruído mental em informações organizadas**
+- Usuário conversa com assistente de reflexão (IA) pelo WhatsApp (menos de 10 min/dia)
+- Assistente conduz conversa guiada, capturando humor, energia, emoções e padrões mentais
+
+**02. Entenda o que sua mente está te dizendo**
+- Sistema processa conversa e gera insights personalizados automaticamente
+- App é atualizado com informações valiosas: padrões mentais, sabotadores identificados, áreas da vida impactadas
+- Sistema gera quests (micro-ações personalizadas) baseadas em contexto da conversa
+
+**03. Encontre a energia que faltava para agir**
+- Usuário acompanha progresso no App e gerencia quests (define recorrências e ativa quests)
+- Assistente de quests notifica e ajuda usuário a colocar em prática
+- Sistema calcula pontos (XP) e atualiza análise comportamental a cada ação concluída
+
+**04. Celebre cada vitória**
+- Transformação acontece: usuário conquista pontos no App e progresso na vida
+- Sistema acompanha progresso, registra conquistas e reforça hábitos positivos
+- Evolução contínua: nível, estágio da jornada (1-4) e sequência de dias (streak) são atualizados automaticamente
+
+### Estágios da Jornada (1-4)
+
+Baseados em níveis e requisitos de progresso:
+
+- **Estágio 1** (Níveis 1-3): Explorador → Aprendiz → Observador
+  - Início da jornada, estabelecimento de hábitos, reconhecimento de padrões
+
+- **Estágio 2** (Níveis 4-6): Focado → Praticante → Consciente
+  - Consistência, transformação de insights em ações, autoconsciência
+
+- **Estágio 3** (Níveis 7-9): Iluminado → Sábio → Ascendente
+  - Rotinas consolidadas, integração emocional, consistência elevada
+
+- **Estágio 4** (Nível 10+): Mestre → Mentor
+  - Domínio da jornada, compartilhamento de aprendizados
 
 **Foco:** Desenvolvimento pessoal, mudança de padrões que travam progresso e realizações.
-
-Isso..
 
 ---
 
@@ -119,5 +149,5 @@ Isso..
 
 ---
 
-**Última atualização:** 2025-11-28
+**Última atualização:** 2025-01-22 14:30
 
