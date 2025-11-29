@@ -106,41 +106,41 @@ const InsightsHistoricoPageV13 = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541] shadow"
+            className="mq-btn-back"
           >
             <ArrowLeft size={16} />
             Voltar
           </button>
-          <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[#1C2541]">
+          <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--mq-text)]">
             Histórico de Insights
           </div>
         </div>
 
-        <Card className="!p-0 overflow-hidden" hover={false}>
-          <div className="flex items-start gap-3 border-b border-white/40 bg-white/80 p-5">
-            <div className="rounded-2xl bg-[#E0F2FE] p-3">
-              <Lightbulb className="text-[#1D4ED8]" size={18} />
+        <Card className="!p-5 mq-card" hover={false}>
+          <div className="flex items-start gap-3 mb-4">
+            <div className="rounded-2xl bg-[var(--mq-primary-light)] p-3">
+              <Lightbulb className="text-[var(--mq-primary)]" size={18} />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-[#1C2541]">Histórico de Insights</h2>
+              <h2 className="text-lg font-semibold text-[var(--mq-text)]">Histórico de Insights</h2>
             </div>
           </div>
 
-          <div className="space-y-4 p-5">
+          <div className="space-y-4">
             {loading && (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
-                <span className="ml-2 text-sm text-[#475569]">Carregando insights...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-[var(--mq-primary)]" />
+                <span className="ml-2 text-sm text-[var(--mq-text-muted)]">Carregando insights...</span>
               </div>
             )}
 
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="rounded-xl border border-[var(--mq-error)] bg-[var(--mq-error-light)] p-4 text-center">
+                <p className="text-sm text-[var(--mq-error)]">{error}</p>
                 <button
                   type="button"
                   onClick={loadInsights}
-                  className="mt-2 text-xs font-semibold text-red-700 underline"
+                  className="mt-2 text-xs font-semibold text-[var(--mq-error)] underline"
                 >
                   Tentar novamente
                 </button>
@@ -148,7 +148,7 @@ const InsightsHistoricoPageV13 = () => {
             )}
 
             {!loading && !error && insights.length === 0 && (
-              <p className="text-center text-sm text-[#475569]">Nenhum insight encontrado.</p>
+              <p className="text-center text-sm text-[var(--mq-text-muted)]">Nenhum insight encontrado.</p>
             )}
 
             {!loading && !error && insights.length > 0 && (
@@ -161,25 +161,25 @@ const InsightsHistoricoPageV13 = () => {
                       key={insight.id}
                       type="button"
                       onClick={() => handleInsightClick(insight.id)}
-                      className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 text-left shadow-md transition-all hover:bg-[#D1E7E9] hover:shadow-lg active:scale-[0.98]"
+                      className="w-full rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-left shadow-md transition-all hover:bg-[var(--mq-surface)] hover:shadow-lg active:scale-[0.98]"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-[#1C2541]">
+                          <h3 className="text-sm font-semibold text-[var(--mq-text)]">
                             {insight.titulo}
                           </h3>
                           {dataInsight && (
-                            <p className="mt-1 text-xs text-[#64748B]">
+                            <p className="mt-1 text-xs text-[var(--mq-text-muted)]">
                               {format(dataInsight, 'dd/MM/yyyy')}
                             </p>
                           )}
                           {insight.descricao && (
-                            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#475569]">
+                            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[var(--mq-text-muted)]">
                               {insight.descricao}
                             </p>
                           )}
                         </div>
-                        <ArrowUpRight className="ml-2 flex-shrink-0 text-[#2563EB]" size={16} />
+                        <ArrowUpRight className="ml-2 flex-shrink-0 text-[var(--mq-primary)]" size={16} />
                       </div>
                     </button>
                   );
