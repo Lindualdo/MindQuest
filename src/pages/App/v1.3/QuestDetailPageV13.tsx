@@ -168,9 +168,9 @@ const QuestDetailPageV13 = () => {
     if (questDetailLoading && !detail) {
       return (
         <div className="flex flex-1 items-center justify-center">
-          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow">
-            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-indigo-500" />
-            <p className="text-sm text-slate-600">Carregando detalhes da quest...</p>
+          <div className="mq-card rounded-2xl px-6 py-8 text-center">
+            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-[var(--mq-primary)]" />
+            <p className="text-sm text-[var(--mq-text-muted)]">Carregando detalhes da quest...</p>
           </div>
         </div>
       );
@@ -181,19 +181,19 @@ const QuestDetailPageV13 = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl border border-rose-100 bg-white px-5 py-6 shadow"
+          className="mq-card rounded-3xl px-5 py-6"
         >
-          <div className="mb-3 flex items-center gap-3 text-rose-600">
+          <div className="mb-3 flex items-center gap-3 text-[var(--mq-error)]">
             <AlertCircle size={22} />
             <h2 className="text-base font-semibold">Não foi possível carregar a quest</h2>
           </div>
-          <p className="text-sm text-rose-700">
+          <p className="text-sm text-[var(--mq-error)]">
             {questDetailError || 'Quest não encontrada ou indisponível no momento.'}
           </p>
           <button
             type="button"
             onClick={handleBack}
-            className="mt-4 w-full rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700"
+            className="mt-4 w-full rounded-full border border-[var(--mq-error)] px-4 py-2 text-sm font-semibold text-[var(--mq-error)]"
           >
             Voltar
           </button>
@@ -237,30 +237,30 @@ const QuestDetailPageV13 = () => {
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-5 shadow"
+        className="mq-card rounded-3xl px-4 py-5"
       >
         <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541]"
+            className="mq-btn-back text-[0.75rem] px-3 py-1"
           >
             <ArrowLeft size={16} />
             Voltar
           </button>
           {detail.area_vida && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[0.7rem] font-semibold text-blue-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mq-primary-light)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--mq-primary)]">
               {detail.area_vida.nome}
             </span>
           )}
         </div>
 
         <div className="mb-4">
-          <h2 className="text-2xl font-semibold text-[#1C2541]">
+          <h2 className="text-2xl font-semibold text-[var(--mq-text)]">
             {detail.titulo}
           </h2>
           {detail.descricao && (
-            <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--mq-text-muted)]">
               {detail.descricao}
             </p>
           )}
@@ -268,12 +268,12 @@ const QuestDetailPageV13 = () => {
 
         {/* Benefícios - Ocultar para quests custom */}
         {!isQuestCustom && baseCientifica?.objetivo && (
-          <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-emerald-900">
+          <div className="mb-4 rounded-2xl bg-[var(--mq-success-light)] px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-success)]">
               <Sparkles size={16} />
               <span>Benefícios</span>
             </div>
-            <p className="leading-relaxed text-emerald-800">
+            <p className="leading-relaxed text-[var(--mq-text)]">
               {baseCientifica.objetivo}
             </p>
           </div>
@@ -281,12 +281,12 @@ const QuestDetailPageV13 = () => {
 
         {/* Referências Científicas - Ocultar para quests custom */}
         {!isQuestCustom && baseCientifica?.fundamentos && (
-          <div className="mb-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-blue-900">
+          <div className="mb-4 rounded-2xl bg-[var(--mq-primary-light)] px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-primary)]">
               <BookOpen size={16} />
               <span>Fundamentos Científicos</span>
             </div>
-            <p className="leading-relaxed text-blue-800">
+            <p className="leading-relaxed text-[var(--mq-text)]">
               {baseCientifica.fundamentos}
             </p>
           </div>
@@ -294,12 +294,12 @@ const QuestDetailPageV13 = () => {
 
         {/* Como Aplicar - Ocultar para quests custom */}
         {!isQuestCustom && baseCientifica?.como_aplicar && (
-          <div className="mb-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-amber-900">
+          <div className="mb-4 rounded-2xl bg-[var(--mq-warning-light)] px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-warning)]">
               <Target size={16} />
               <span>Como Aplicar</span>
             </div>
-            <p className="whitespace-pre-line leading-relaxed text-amber-800">
+            <p className="whitespace-pre-line leading-relaxed text-[var(--mq-text)]">
               {baseCientifica.como_aplicar}
             </p>
           </div>
@@ -307,8 +307,8 @@ const QuestDetailPageV13 = () => {
 
         {/* Links de Referências - Ocultar para quests custom */}
         {!isQuestCustom && baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
-          <div className="mb-4 rounded-2xl bg-purple-50 px-4 py-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-purple-900">
+          <div className="mb-4 rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-sm">
+            <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-accent)]">
               <ExternalLink size={16} />
               <span>Referências</span>
             </div>
@@ -319,7 +319,7 @@ const QuestDetailPageV13 = () => {
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-purple-700 underline underline-offset-2 hover:text-purple-900"
+                    className="inline-flex items-center gap-1 text-sm text-[var(--mq-accent)] underline underline-offset-2 hover:opacity-80"
                   >
                     {link}
                     <ExternalLink size={12} />
@@ -332,18 +332,18 @@ const QuestDetailPageV13 = () => {
 
         {/* Informações Adicionais - Ocultar para quests custom */}
         {!isQuestCustom && (detail.catalogo?.tempo_estimado_min || detail.catalogo?.dificuldade) && (
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="mb-4 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
               Informações Adicionais
             </p>
             <div className="space-y-1">
               {detail.catalogo.tempo_estimado_min && (
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-[var(--mq-text-muted)]">
                   <span className="font-medium">Tempo estimado:</span> {detail.catalogo.tempo_estimado_min} minutos
                 </p>
               )}
               {detail.catalogo.dificuldade && (
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-[var(--mq-text-muted)]">
                   <span className="font-medium">Dificuldade:</span> {detail.catalogo.dificuldade === 1 ? 'Fácil' : detail.catalogo.dificuldade === 2 ? 'Média' : 'Alta'}
                 </p>
               )}
@@ -353,33 +353,33 @@ const QuestDetailPageV13 = () => {
 
         {/* Área de vida */}
         {detail.area_vida && (
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="mb-4 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
               Área de vida
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-800">{detail.area_vida.nome}</p>
+            <p className="mt-1 text-sm font-semibold text-[var(--mq-text)]">{detail.area_vida.nome}</p>
             {detail.area_vida.descricao && (
-              <p className="mt-1 text-xs text-slate-600">{detail.area_vida.descricao}</p>
+              <p className="mt-1 text-xs text-[var(--mq-text-muted)]">{detail.area_vida.descricao}</p>
             )}
           </div>
         )}
 
         {/* Sabotador */}
         {detail.sabotador && (
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="mb-4 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
               Sabotador Relacionado
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-800">{detail.sabotador.nome}</p>
+            <p className="mt-1 text-sm font-semibold text-[var(--mq-text)]">{detail.sabotador.nome}</p>
             {detail.sabotador.descricao && (
-              <p className="mt-1 text-xs text-slate-600">{detail.sabotador.descricao}</p>
+              <p className="mt-1 text-xs text-[var(--mq-text-muted)]">{detail.sabotador.descricao}</p>
             )}
             {detail.sabotador.contramedidas_sugeridas && detail.sabotador.contramedidas_sugeridas.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs font-medium text-slate-700">Contramedidas:</p>
+                <p className="text-xs font-medium text-[var(--mq-text)]">Contramedidas:</p>
                 <ul className="mt-1 space-y-1">
                   {detail.sabotador.contramedidas_sugeridas.map((contramedida, idx) => (
-                    <li key={idx} className="text-xs text-slate-600">• {contramedida}</li>
+                    <li key={idx} className="text-xs text-[var(--mq-text-muted)]">• {contramedida}</li>
                   ))}
                 </ul>
               </div>
@@ -393,7 +393,7 @@ const QuestDetailPageV13 = () => {
             type="button"
             onClick={handleConcluirQuest}
             disabled={isConcluindo}
-            className="w-full rounded-2xl bg-gradient-to-r from-[#0EA5E9] to-[#3B82F6] px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:hover:shadow-blue-500/30"
+            className="mq-btn-primary w-full rounded-2xl px-6 py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center justify-center gap-2">
               {isConcluindo ? (
