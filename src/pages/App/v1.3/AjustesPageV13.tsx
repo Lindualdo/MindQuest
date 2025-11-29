@@ -5,6 +5,7 @@ import {
   User, 
   Palette, 
   Bot, 
+  Bell,
   Shield, 
   HelpCircle,
   ChevronRight 
@@ -92,6 +93,16 @@ const AjustesPageV13: React.FC = () => {
       subtitle: 'Tom e frequência das mensagens',
       onClick: () => {
         setView('interacoesIA');
+      },
+    },
+    {
+      id: 'notificacoes',
+      icon: <Bell size={20} className="text-[var(--mq-warning)]" />,
+      title: 'Notificações e interação com IA',
+      subtitle: 'Lembretes e frequência de mensagens',
+      onClick: () => {
+        // TODO: Implementar página de notificações
+        console.log('Notificações e interação com IA');
       },
     },
     {
