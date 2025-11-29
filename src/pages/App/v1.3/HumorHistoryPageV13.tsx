@@ -256,17 +256,15 @@ const HumorHistoryPage: React.FC = () => {
           </div>
         </div>
 
-        <Card className="!p-0 overflow-hidden mq-card" hover={false}>
-          <div className="flex items-start gap-3 border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] p-5">
-            <div className="flex-1">
+        <Card className="!p-0 overflow-hidden mq-card !bg-[var(--mq-surface)]" hover={false}>
+          <div className="space-y-4 p-5">
+            {/* Título */}
+            <div>
               <h2 className="text-lg font-semibold text-[var(--mq-text)]">Histórico de Humor</h2>
               <p className="mt-1 text-sm text-[var(--mq-text-muted)]">
                 Seu humor registrado nas últimas conversas.
               </p>
             </div>
-          </div>
-
-          <div className="space-y-4 p-5">
             {(dashboardData?.mood_gauge || recentSummary.count > 0) && (
               <div className="grid grid-cols-3 gap-3 text-xs">
                 {dashboardData?.mood_gauge && humorAtualDescriptor && (
@@ -338,7 +336,7 @@ const HumorHistoryPage: React.FC = () => {
                             {chartData.map((entry) => (
                               <Cell
                                 key={entry.label}
-                                fill={selectedBar?.label === entry.label ? 'var(--mq-primary)' : 'var(--mq-primary-light)'}
+                                fill={selectedBar?.label === entry.label ? 'var(--mq-accent)' : 'var(--mq-primary)'}
                               />
                             ))}
                           </Bar>
