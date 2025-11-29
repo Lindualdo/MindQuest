@@ -180,12 +180,12 @@ const HumorHistoryPage: React.FC = () => {
     if (!active || !payload || payload.length === 0) return null;
     const data = payload[0].payload;
     return (
-      <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-xs text-[#1C2541] shadow-lg">
+      <div className="rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-3 py-2 text-xs text-[var(--mq-text)] shadow-lg">
         <p className="font-semibold">{data.label}</p>
-        <p className="mt-1 text-[0.7rem] text-[#475569]">
+        <p className="mt-1 text-[0.7rem] text-[var(--mq-text-muted)]">
           Humor:
           {' '}
-          <span className="font-semibold text-[#2563EB]">{Math.round(data.humor)}</span>
+          <span className="font-semibold text-[var(--mq-primary)]">{Math.round(data.humor)}</span>
           {data.emocao && ` • ${data.emocao}`}
         </p>
       </div>
@@ -244,23 +244,23 @@ const HumorHistoryPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleBack}
-              className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541] shadow"
+              className="mq-btn-back text-[0.75rem] px-3 py-1"
               aria-label="Voltar para o dashboard"
             >
               <ArrowLeft size={16} />
               Voltar
             </button>
-            <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[#1C2541]">
+            <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--mq-text)]">
               Histórico de humor
             </div>
           </div>
         </div>
 
-        <Card className="!p-0 overflow-hidden bg-[#E8F3F5]" hover={false}>
-          <div className="flex items-start gap-3 border-b border-white/40 bg-white/80 p-5">
+        <Card className="!p-0 overflow-hidden mq-card" hover={false}>
+          <div className="flex items-start gap-3 border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] p-5">
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-800">Histórico de Humor</h2>
-              <p className="mt-1 text-sm text-gray-600">
+              <h2 className="text-lg font-semibold text-[var(--mq-text)]">Histórico de Humor</h2>
+              <p className="mt-1 text-sm text-[var(--mq-text-muted)]">
                 Seu humor registrado nas últimas conversas.
               </p>
             </div>
@@ -270,42 +270,42 @@ const HumorHistoryPage: React.FC = () => {
             {(dashboardData?.mood_gauge || recentSummary.count > 0) && (
               <div className="grid grid-cols-3 gap-3 text-xs">
                 {dashboardData?.mood_gauge && humorAtualDescriptor && (
-                  <div className="rounded-xl border border-[#CBD5F5] bg-white px-3 py-2 text-center text-[#475467] shadow-sm">
-                    <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                  <div className="rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-3 py-2 text-center text-[var(--mq-text-muted)] shadow-sm">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
                       Humor atual
                     </p>
-                    <p className="text-sm font-semibold capitalize text-[#1F2937]">
+                    <p className="text-sm font-semibold capitalize text-[var(--mq-text)]">
                       {humorAtualDescriptor.titulo}
                     </p>
                   </div>
                 )}
-                <div className="rounded-xl border border-[#CBD5F5] bg-white px-3 py-2 text-center text-[#475467] shadow-sm">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                <div className="rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-3 py-2 text-center text-[var(--mq-text-muted)] shadow-sm">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
                     Humor médio
                   </p>
-                  <p className="text-sm font-semibold capitalize text-[#1F2937]">
+                  <p className="text-sm font-semibold capitalize text-[var(--mq-text)]">
                     {recentSummary.average !== null && humorDescriptor ? humorDescriptor.titulo : '--'}
                   </p>
                 </div>
-                <div className="rounded-xl border border-[#CBD5F5] bg-white px-3 py-2 text-center text-[#475467] shadow-sm">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[#94A3B8]">
+                <div className="rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-3 py-2 text-center text-[var(--mq-text-muted)] shadow-sm">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--mq-text-subtle)]">
                     Conversas
                   </p>
-                  <p className="text-sm font-semibold text-[#1F2937]">{recentSummary.count}</p>
+                  <p className="text-sm font-semibold text-[var(--mq-text)]">{recentSummary.count}</p>
                 </div>
               </div>
             )}
 
             {humorHistoricoLoading && (
-              <div className="text-center text-sm text-gray-500">Carregando histórico…</div>
+              <div className="text-center text-sm text-[var(--mq-text-muted)]">Carregando histórico…</div>
             )}
 
             {humorHistoricoError && (
-              <div className="text-center text-sm text-red-500">{humorHistoricoError}</div>
+              <div className="text-center text-sm text-[var(--mq-error)]">{humorHistoricoError}</div>
             )}
 
             {!humorHistoricoLoading && !humorHistoricoError && chartData.length === 0 && (
-              <div className="text-center text-sm text-gray-500">
+              <div className="text-center text-sm text-[var(--mq-text-muted)]">
                 Nenhum registro disponível para este período.
               </div>
             )}
@@ -313,21 +313,21 @@ const HumorHistoryPage: React.FC = () => {
             {!humorHistoricoLoading && !humorHistoricoError && chartData.length > 0 && (
               <div className="space-y-4">
                 {humorHistorico?.periodo && (
-                  <div className="text-xs text-[#4B5563]">
+                  <div className="text-xs text-[var(--mq-text-muted)]">
                     Período: {format(new Date(humorHistorico.periodo.inicio), 'dd/MM/yyyy')} —{' '}
                     {format(new Date(humorHistorico.periodo.fim), 'dd/MM/yyyy')}
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  <div className="rounded-2xl border border-[#E0E7FF] bg-white/70 p-4 shadow">
+                  <div className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 shadow">
                     <div className="h-56 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 8, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                          <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#475569' }} />
-                          <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: '#475569' }} />
-                          <Tooltip content={renderBarTooltip} cursor={{ fill: 'rgba(37,99,235,0.08)' }} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--mq-border)" />
+                          <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--mq-text-muted)' }} />
+                          <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: 'var(--mq-text-muted)' }} />
+                          <Tooltip content={renderBarTooltip} cursor={{ fill: 'rgba(48,131,220,0.08)' }} />
                           <Bar
                             dataKey="humor"
                             radius={[8, 8, 0, 0]}
@@ -338,7 +338,7 @@ const HumorHistoryPage: React.FC = () => {
                             {chartData.map((entry) => (
                               <Cell
                                 key={entry.label}
-                                fill={selectedBar?.label === entry.label ? '#3083DC' : '#C7E0F5'}
+                                fill={selectedBar?.label === entry.label ? 'var(--mq-primary)' : 'var(--mq-primary-light)'}
                               />
                             ))}
                           </Bar>
@@ -347,28 +347,28 @@ const HumorHistoryPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-[#E0E7FF] bg-white/70 p-4 shadow">
+                  <div className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 shadow">
                     {selectedBar ? (
-                      <div className="space-y-2 text-xs text-gray-600">
-                        <p className="text-sm font-semibold text-[#1C2541]">
+                      <div className="space-y-2 text-xs text-[var(--mq-text-muted)]">
+                        <p className="text-sm font-semibold text-[var(--mq-text)]">
                           {selectedBar.label}
                           {selectedBar.emoji && <span className="ml-2 text-lg">{selectedBar.emoji}</span>}
                         </p>
                         <p>
                           Humor:{' '}
-                          <span className="font-semibold text-[#2563EB] capitalize">
+                          <span className="font-semibold text-[var(--mq-primary)] capitalize">
                             {getHumorDescriptor(selectedBar.humor).titulo}
                           </span>
                         </p>
                         {selectedBar.justification && (
                           <p className="leading-relaxed">
-                            <span className="font-semibold text-[#1C2541]">Justificativa:</span>{' '}
+                            <span className="font-semibold text-[var(--mq-text)]">Justificativa:</span>{' '}
                             {selectedBar.justification}
                           </p>
                         )}
                         {selectedBar.conversationEmotion && (
                           <p>
-                            <span className="font-semibold text-[#1C2541]">Emoção predominante:</span>{' '}
+                            <span className="font-semibold text-[var(--mq-text)]">Emoção predominante:</span>{' '}
                             {selectedBar.conversationEmotion}
                             {selectedBar.conversationEmoji && ` ${selectedBar.conversationEmoji}`}
                           </p>
@@ -377,14 +377,14 @@ const HumorHistoryPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenResumoConversa(selectedBar.conversationId as string | number)}
-                            className="text-[0.7rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+                            className="text-[0.7rem] font-semibold text-[var(--mq-primary)] underline-offset-2 hover:underline"
                           >
                             Ver resumo da conversa
                           </button>
                         )}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--mq-text-muted)]">
                         Toque em uma barra explorar detalhes.
                       </p>
                     )}
