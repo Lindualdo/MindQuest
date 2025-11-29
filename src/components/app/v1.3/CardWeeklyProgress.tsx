@@ -142,11 +142,8 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
           <span className="text-[0.65rem] font-semibold text-[var(--mq-text-subtle)] whitespace-nowrap">{questsConcluidasSemanal}</span>
           <div className="relative h-2 flex-1 rounded-full bg-[var(--mq-bar)]">
             <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{ 
-                width: `${progressoQuests}%`,
-                background: 'linear-gradient(to right, var(--mq-success), var(--mq-primary))'
-              }}
+              className="absolute inset-y-0 left-0 rounded-full bg-[var(--mq-primary)]"
+              style={{ width: `${progressoQuests}%` }}
             />
           </div>
           <span className="text-[0.65rem] font-semibold text-[var(--mq-text-subtle)] whitespace-nowrap">{metaQuestsSemanal}</span>
@@ -194,7 +191,7 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
                 >
                   {fillHeight > 0 && (
                     <div
-                      className="absolute bottom-0 left-0 right-0 rounded-full bg-[var(--mq-success)]"
+                      className="absolute bottom-0 left-0 right-0 rounded-full bg-[var(--mq-primary)]"
                       style={{ height: `${fillHeight}px` }}
                     />
                   )}

@@ -492,7 +492,7 @@ const PainelQuestsPageV13: React.FC = () => {
               </div>
               <div className="h-2 w-full rounded-full bg-[var(--mq-bar)] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--mq-primary)] to-[var(--mq-success)] transition-all duration-500"
+                  className="h-full rounded-full bg-[var(--mq-primary)] transition-all duration-500"
                   style={{ width: `${percentual}%` }}
                 />
               </div>
