@@ -6,6 +6,7 @@ import {
   Palette, 
   Bot, 
   Bell,
+  Download,
   Shield, 
   HelpCircle,
   ChevronRight 
@@ -103,6 +104,16 @@ const AjustesPageV13: React.FC = () => {
       onClick: () => {
         // TODO: Implementar página de notificações
         console.log('Notificações e interação com IA');
+      },
+    },
+    {
+      id: 'exportar',
+      icon: <Download size={20} className="text-[var(--mq-primary)]" />,
+      title: 'Exportar dados',
+      subtitle: 'Conversas, emoções, humor, energia, sabotadores e perfil',
+      onClick: () => {
+        // TODO: Implementar página de exportação
+        console.log('Exportar dados');
       },
     },
     {
