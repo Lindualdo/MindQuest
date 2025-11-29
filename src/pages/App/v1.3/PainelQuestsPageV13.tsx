@@ -374,21 +374,21 @@ const PainelQuestsPageV13: React.FC = () => {
     return (
       <div 
         key={questId} 
-        className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md hover:shadow-lg transition-all"
+        className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-4 shadow-md hover:shadow-lg transition-all"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-[#1C2541]">{quest.titulo}</h3>
+              <h3 className="text-sm font-semibold text-[var(--mq-text)]">{quest.titulo}</h3>
               {quest.descricao && (
-                <p className="text-xs text-[#64748B] mt-1 line-clamp-1">{quest.descricao}</p>
+                <p className="text-xs text-[var(--mq-text-muted)] mt-1 line-clamp-1">{quest.descricao}</p>
               )}
             </div>
             <button
               type="button"
               onClick={() => questId && handlePlanejarQuest(questId)}
-              className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#0EA5E9] text-white shadow-sm hover:bg-[#0C8BD6] active:scale-95 transition-all"
+              className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mq-primary)] text-white shadow-sm hover:bg-[var(--mq-primary-hover)] active:scale-95 transition-all"
               aria-label="Planejar quest"
             >
               <Settings2 size={16} />
@@ -406,7 +406,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     console.error('[PainelQuests] Erro ao abrir detalhe:', error);
                   });
                 }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EA5E9] hover:text-[#0C8BD6] transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--mq-primary)] hover:text-[var(--mq-primary-hover)] transition-colors"
               >
                 Ver detalhes
                 <ArrowUpRight size={12} />
@@ -439,23 +439,23 @@ const PainelQuestsPageV13: React.FC = () => {
     return (
       <div 
         key={questId} 
-        className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all"
+        className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-5 shadow-md hover:shadow-lg transition-all"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h3 className={`text-base font-bold ${isConcluida ? 'text-gray-400 line-through' : 'text-[#1C2541]'}`}>
+              <h3 className={`text-base font-bold ${isConcluida ? 'text-gray-400 line-through' : 'text-[var(--mq-text)]'}`}>
                 {quest.titulo}
               </h3>
               {quest.descricao && (
-                <p className="text-sm text-[#64748B] mt-1.5 line-clamp-2">{quest.descricao}</p>
+                <p className="text-sm text-[var(--mq-text-muted)] mt-1.5 line-clamp-2">{quest.descricao}</p>
               )}
             </div>
             
             {isConcluida ? (
               <div className="flex-shrink-0">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-3 py-1.5 text-xs font-bold text-[#059669]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--mq-success-light)] px-3 py-1.5 text-xs font-bold text-[var(--mq-success)]">
                   <CheckCircle2 size={14} />
                   Concluída
                 </span>
@@ -469,7 +469,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all
                   ${isFutureDate 
                     ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-300' 
-                    : 'border-[#0EA5E9] bg-white text-[#0EA5E9] hover:bg-[#0EA5E9] hover:text-white hover:shadow-md active:scale-95'
+                    : 'border-[var(--mq-primary)] bg-white text-[var(--mq-primary)] hover:bg-[var(--mq-primary)] hover:text-white hover:shadow-md active:scale-95'
                   }
                 `}
                 aria-label="Concluir quest"
@@ -487,8 +487,8 @@ const PainelQuestsPageV13: React.FC = () => {
           {!isConcluida && meta > 0 && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-[#64748B]">Progresso</span>
-                <span className="font-bold text-[#0EA5E9]">{progresso}/{meta}</span>
+                <span className="font-semibold text-[var(--mq-text-muted)]">Progresso</span>
+                <span className="font-bold text-[var(--mq-primary)]">{progresso}/{meta}</span>
               </div>
               <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
                 <div
@@ -510,7 +510,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     console.error('[PainelQuests] Erro ao abrir detalhe:', error);
                   });
                 }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EA5E9] hover:text-[#0C8BD6] transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--mq-primary)] hover:text-[var(--mq-primary-hover)] transition-colors"
               >
                 Ver detalhes
                 <ArrowUpRight size={12} />
@@ -526,7 +526,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const renderWeeklyProgressBar = () => {
     return (
       <section
-        className="mb-6 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-5 shadow-md"
+        className="mb-6 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] px-5 py-5 shadow-md"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
         {/* Barras verticais dos dias (navegação principal) */}
@@ -571,7 +571,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   } : {})
                 }}
               >
-                <span className="text-[0.65rem] font-semibold text-[#94A3B8] mb-1.5 whitespace-nowrap">
+                <span className="text-[0.65rem] font-semibold text-[var(--mq-text-subtle)] mb-1.5 whitespace-nowrap">
                   {qtdPrevistas > 0 ? qtdPrevistas : (qtdConcluidas > 0 ? qtdConcluidas : 0)}
                 </span>
                 
@@ -590,11 +590,11 @@ const PainelQuestsPageV13: React.FC = () => {
                   )}
                 </div>
                 
-                <span className="text-[0.56rem] font-semibold uppercase tracking-wide text-[#1C2541]">
+                <span className="text-[0.56rem] font-semibold uppercase tracking-wide text-[var(--mq-text)]">
                   {labelDia}
                 </span>
                 
-                <span className={`text-[0.56rem] font-medium ${isHoje ? 'text-[#0EA5E9] font-semibold' : 'text-[#7E8CA0]'}`}>
+                <span className={`text-[0.56rem] font-medium ${isHoje ? 'text-[var(--mq-primary)] font-semibold' : 'text-[#7E8CA0]'}`}>
                   {dataFormatada}
                 </span>
               </button>
@@ -651,19 +651,19 @@ const PainelQuestsPageV13: React.FC = () => {
         <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl animate-slide-up">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[#1C2541]">Planejar Quest</h2>
+              <h2 className="text-xl font-bold text-[var(--mq-text)]">Planejar Quest</h2>
               <button
                 type="button"
                 onClick={handleFecharPlanejamento}
-                className="text-[#94A3B8] hover:text-[#1C2541] transition-colors"
+                className="text-[var(--mq-text-subtle)] hover:text-[var(--mq-text)] transition-colors"
               >
                 <ArrowLeft size={20} />
               </button>
             </div>
             
             <div className="mb-6">
-              <h3 className="text-base font-semibold text-[#1C2541] mb-2">{quest.titulo}</h3>
-              <p className="text-sm text-[#64748B]">Defina quantos dias você quer praticar esta quest:</p>
+              <h3 className="text-base font-semibold text-[var(--mq-text)] mb-2">{quest.titulo}</h3>
+              <p className="text-sm text-[var(--mq-text-muted)]">Defina quantos dias você quer praticar esta quest:</p>
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
@@ -675,8 +675,8 @@ const PainelQuestsPageV13: React.FC = () => {
                   className={`
                     rounded-xl border-2 p-4 text-center font-bold transition-all
                     ${recorrenciaSelecionada === dias
-                      ? 'border-[#0EA5E9] bg-[#0EA5E9] text-white shadow-lg scale-105'
-                      : 'border-gray-200 bg-white text-[#1C2541] hover:border-[#0EA5E9] hover:bg-[#E0F2FE]'
+                      ? 'border-[var(--mq-primary)] bg-[var(--mq-primary)] text-white shadow-lg scale-105'
+                      : 'border-gray-200 bg-white text-[var(--mq-text)] hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-light)]'
                     }
                   `}
                 >
@@ -693,7 +693,7 @@ const PainelQuestsPageV13: React.FC = () => {
               className={`
                 w-full rounded-xl py-4 text-center font-bold text-white transition-all
                 ${recorrenciaSelecionada && !salvando
-                  ? 'bg-[#0EA5E9] hover:bg-[#0C8BD6] shadow-lg active:scale-98'
+                  ? 'bg-[var(--mq-primary)] hover:bg-[var(--mq-primary-hover)] shadow-lg active:scale-98'
                   : 'bg-gray-300 cursor-not-allowed'
                 }
               `}
@@ -716,7 +716,7 @@ const PainelQuestsPageV13: React.FC = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#1C2541] shadow-md hover:shadow-lg transition-all active:scale-98"
+            className="mq-btn-back"
           >
             <ArrowLeft size={18} />
             Voltar
@@ -725,10 +725,10 @@ const PainelQuestsPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
+          <h1 className="mq-page-title">
             Ações
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="mq-page-subtitle">
             Microações para evoluir
           </p>
         </div>
@@ -739,7 +739,7 @@ const PainelQuestsPageV13: React.FC = () => {
         {/* Abas melhoradas */}
         <div className="mb-6">
           <div 
-            className="flex gap-2 rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-1.5 shadow-md"
+            className="flex gap-2 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-1.5 shadow-md"
             style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
           >
             {(['a_fazer', 'fazendo', 'feito'] as QuestTab[]).map((tab) => {
@@ -760,8 +760,8 @@ const PainelQuestsPageV13: React.FC = () => {
                   className={`
                     relative flex-1 rounded-xl px-4 py-3 text-center text-sm font-bold transition-all duration-200
                     ${isActive
-                      ? 'bg-[#0EA5E9] text-white shadow-md scale-105'
-                      : 'text-[#64748B] hover:text-[#1C2541] hover:bg-gray-50'
+                      ? 'bg-[var(--mq-primary)] text-white shadow-md scale-105'
+                      : 'text-[var(--mq-text-muted)] hover:text-[var(--mq-text)] hover:bg-gray-50'
                     }
                   `}
                 >
@@ -771,7 +771,7 @@ const PainelQuestsPageV13: React.FC = () => {
                       ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold
                       ${isActive
                         ? 'bg-white/20 text-white'
-                        : 'bg-gray-200 text-[#64748B]'
+                        : 'bg-gray-200 text-[var(--mq-text-muted)]'
                       }
                     `}>
                       {count}
@@ -789,9 +789,9 @@ const PainelQuestsPageV13: React.FC = () => {
             <>
               {questsDoDiaSelecionado.a_fazer.length > 0 ? (
                 <>
-                  <p className="text-xs text-[#94A3B8] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
+                  <p className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
                     <span>Toque no ícone</span>
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#0EA5E9] shadow-sm">
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--mq-primary)] shadow-sm">
                       <Settings2 size={16} className="text-white" />
                     </span>
                     <span>para definir recorrências</span>
@@ -802,15 +802,15 @@ const PainelQuestsPageV13: React.FC = () => {
                 </>
               ) : (
                 <div 
-                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-12 text-center shadow-md"
                   style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
                 >
-                  <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
-                    <div className="rounded-full bg-[#E0F2FE] p-6">
-                      <Target size={48} className="text-[#0EA5E9]" />
+                  <div className="flex flex-col items-center gap-4 text-[var(--mq-text-subtle)]">
+                    <div className="rounded-full bg-[var(--mq-primary-light)] p-6">
+                      <Target size={48} className="text-[var(--mq-primary)]" />
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-[#1C2541] mb-1">
+                      <p className="text-base font-semibold text-[var(--mq-text)] mb-1">
                         Nenhuma quest a fazer
                       </p>
                       <p className="text-sm">
@@ -827,10 +827,10 @@ const PainelQuestsPageV13: React.FC = () => {
             <>
               {questsDoDiaSelecionado.fazendo.length > 0 ? (
                 <>
-                  <p className="text-xs text-[#94A3B8] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
+                  <p className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
                     <span>Toque no ícone</span>
-                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-full border-2 border-[#0EA5E9] bg-white">
-                      <CheckCircle2 size={20} className="text-[#0EA5E9]" />
+                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-full border-2 border-[var(--mq-primary)] bg-white">
+                      <CheckCircle2 size={20} className="text-[var(--mq-primary)]" />
                     </span>
                     <span>para concluir uma ação</span>
                   </p>
@@ -840,15 +840,15 @@ const PainelQuestsPageV13: React.FC = () => {
                 </>
               ) : (
                 <div 
-                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-12 text-center shadow-md"
                   style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
                 >
-                  <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
-                    <div className="rounded-full bg-[#FEF3C7] p-6">
-                      <TrendingUp size={48} className="text-[#F59E0B]" />
+                  <div className="flex flex-col items-center gap-4 text-[var(--mq-text-subtle)]">
+                    <div className="rounded-full bg-[var(--mq-warning-light)] p-6">
+                      <TrendingUp size={48} className="text-[var(--mq-warning)]" />
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-[#1C2541] mb-1">
+                      <p className="text-base font-semibold text-[var(--mq-text)] mb-1">
                         Nenhuma quest em andamento
                       </p>
                       <p className="text-sm">
@@ -869,15 +869,15 @@ const PainelQuestsPageV13: React.FC = () => {
                 </div>
               ) : (
                 <div 
-                  className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-12 text-center shadow-md"
+                  className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] p-12 text-center shadow-md"
                   style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
                 >
-                  <div className="flex flex-col items-center gap-4 text-[#94A3B8]">
-                    <div className="rounded-full bg-[#ECFDF5] p-6">
-                      <Sparkles size={48} className="text-[#059669]" />
+                  <div className="flex flex-col items-center gap-4 text-[var(--mq-text-subtle)]">
+                    <div className="rounded-full bg-[var(--mq-success-light)] p-6">
+                      <Sparkles size={48} className="text-[var(--mq-success)]" />
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-[#1C2541] mb-1">
+                      <p className="text-base font-semibold text-[var(--mq-text)] mb-1">
                         Nenhuma conclusão ainda
                       </p>
                       <p className="text-sm">

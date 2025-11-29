@@ -47,10 +47,10 @@ const CardPerfilBigFive: React.FC = () => {
 
   if (loading) {
     return (
-      <Card className="!bg-[#E8F3F5] !border-[#B6D6DF] min-h-[360px] flex items-center justify-center">
+      <Card className="mq-card min-h-[360px] flex items-center justify-center" style={{ borderRadius: 24 }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F76D1] mx-auto mb-2"></div>
-          <p className="text-sm text-slate-600">Carregando perfil...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--mq-primary)] mx-auto mb-2"></div>
+          <p className="text-sm text-[var(--mq-text-muted)]">Carregando perfil...</p>
         </div>
       </Card>
     );
@@ -58,8 +58,8 @@ const CardPerfilBigFive: React.FC = () => {
 
   if (error || !perfil) {
     return (
-      <Card className="!bg-[#E8F3F5] !border-[#B6D6DF] min-h-[360px] flex items-center justify-center">
-        <div className="text-center text-slate-600">
+      <Card className="mq-card min-h-[360px] flex items-center justify-center" style={{ borderRadius: 24 }}>
+        <div className="text-center text-[var(--mq-text-muted)]">
           <p className="text-sm">{error || 'Perfil não disponível'}</p>
         </div>
       </Card>
@@ -73,19 +73,19 @@ const CardPerfilBigFive: React.FC = () => {
   const top3Traços = perfil.tracos_ordenados.slice(0, 3);
 
   return (
-    <Card className="!bg-[#E8F3F5] !border-[#B6D6DF] rounded-3xl" style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}>
+    <Card className="mq-card rounded-3xl" style={{ borderRadius: 24 }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <Brain size={20} className="text-[#2F76D1]" />
-            <h3 className="text-lg font-bold text-[#1C2541]">Perfil pessoal</h3>
+            <Brain size={20} className="text-[var(--mq-primary)]" />
+            <h3 className="text-lg font-bold text-[var(--mq-text)]">Perfil pessoal</h3>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 rounded-full bg-white/60 text-[#2F76D1] hover:bg-white transition-colors"
+          className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
         >
           <Info size={16} />
         </button>
@@ -96,7 +96,7 @@ const CardPerfilBigFive: React.FC = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="mb-4 rounded-xl bg-white/80 p-3 text-xs text-slate-600"
+          className="mb-4 rounded-xl bg-[var(--mq-card)] p-3 text-xs text-[var(--mq-text-muted)]"
         >
           <p className="font-semibold mb-1">O que é o Big Five?</p>
           <p>Modelo de personalidade baseado em 5 dimensões fundamentais que influenciam seu comportamento e preferências.</p>

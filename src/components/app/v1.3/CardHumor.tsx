@@ -23,18 +23,15 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
   const pointerY = 70 - 30 * Math.sin(gaugeAngle);
 
   return (
-    <section
-      className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-3 shadow-md"
-      style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
-    >
+    <section className="mq-card rounded-2xl px-4 py-3" style={{ borderRadius: 24 }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold text-[#1C2541]">Humor</h3>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Humor</h3>
         </div>
         <button
           type="button"
           onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 rounded-full bg-white/60 text-[#2F76D1] hover:bg-white transition-colors"
+          className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
         >
           <Info size={16} />
         </button>
@@ -45,7 +42,7 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="mb-4 rounded-xl bg-white/80 p-3 text-xs text-slate-600"
+          className="mb-4 rounded-xl bg-[var(--mq-card)] p-3 text-xs text-[var(--mq-text-muted)]"
         >
           <p className="font-semibold mb-1">O que é o Humor?</p>
           <p>Seu estado emocional atual detectado através das conversas. A escala vai de 1 a 10, onde valores menores indicam humor mais baixo e valores maiores indicam humor mais elevado.</p>
@@ -57,15 +54,15 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
           <svg viewBox="0 0 120 80" className="w-full">
             <defs>
               <linearGradient id="humor-gauge-perfil" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#22C55E" />
-                <stop offset="50%" stopColor="#FACC15" />
-                <stop offset="100%" stopColor="#EF4444" />
+                <stop offset="0%" stopColor="var(--mq-success)" />
+                <stop offset="50%" stopColor="var(--mq-warning)" />
+                <stop offset="100%" stopColor="var(--mq-error)" />
               </linearGradient>
             </defs>
             <path
               d="M10 70 A50 50 0 0 1 110 70"
               fill="none"
-              stroke="#E2E8F0"
+              stroke="var(--mq-bar)"
               strokeWidth={10}
               strokeLinecap="round"
             />
@@ -89,7 +86,7 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
                   y1={y1}
                   x2={x2}
                   y2={y2}
-                  stroke="#94A3B8"
+                  stroke="var(--mq-text-subtle)"
                   strokeWidth={1.5}
                 />
               );
@@ -99,17 +96,17 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
               y1={70}
               x2={pointerX}
               y2={pointerY}
-              stroke="#111827"
+              stroke="var(--mq-text)"
               strokeWidth={3}
               strokeLinecap="round"
             />
-            <circle cx={60} cy={70} r={4} fill="#111827" />
+            <circle cx={60} cy={70} r={4} fill="var(--mq-text)" />
           </svg>
         </div>
-        <p className="mt-3 text-[0.8rem] font-semibold text-[#DC2626]">
+        <p className="mt-3 text-[0.8rem] font-semibold text-[var(--mq-accent)]">
           Atual: <span className="capitalize">{humorDescriptor.titulo}</span>
         </p>
-        <p className="mt-1 text-[0.7rem] text-[#4B5563]">
+        <p className="mt-1 text-[0.7rem] text-[var(--mq-text-muted)]">
           Média histórica:
           {' '}
           <span className="font-semibold capitalize">
@@ -123,7 +120,7 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
           <button
             type="button"
             onClick={onHistorico}
-            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--mq-primary)] underline-offset-2 hover:underline"
           >
             Histórico
             <ArrowUpRight size={12} />
@@ -135,4 +132,3 @@ const CardHumor = ({ humorAtual, humorMediaSemana, onHistorico }: Props) => {
 };
 
 export default CardHumor;
-

@@ -236,7 +236,7 @@
   text-transform: uppercase;
   letter-spacing: 0.15em;
   font-weight: 600;
-  color: var(--mq-info);
+  color: var(--mq-primary);
 }
 
 /* Link inline */

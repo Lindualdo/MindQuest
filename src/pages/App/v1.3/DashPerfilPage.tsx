@@ -133,10 +133,10 @@ const DashPerfilPage: React.FC = () => {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         {/* Título da página */}
         <div className="mb-2 text-center">
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
+          <h1 className="mq-page-title">
             Mente
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="mq-page-subtitle">
             Entenda seus padrões e evolução
           </p>
         </div>
