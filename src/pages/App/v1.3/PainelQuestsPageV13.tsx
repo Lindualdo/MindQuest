@@ -490,9 +490,9 @@ const PainelQuestsPageV13: React.FC = () => {
                 <span className="font-semibold text-[var(--mq-text-muted)]">Progresso</span>
                 <span className="font-bold text-[var(--mq-primary)]">{progresso}/{meta}</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-[var(--mq-bar)] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#0EA5E9] to-[#14B8A6] transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--mq-primary)] to-[var(--mq-success)] transition-all duration-500"
                   style={{ width: `${percentual}%` }}
                 />
               </div>
@@ -501,7 +501,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
           {/* Ações */}
           {questId && (
-            <div className="flex items-center justify-end pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-end pt-2 border-t border-[var(--mq-border-subtle)]">
               <button
                 type="button"
                 onClick={() => {
