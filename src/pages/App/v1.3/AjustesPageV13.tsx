@@ -37,12 +37,20 @@ const AjustesPageV13: React.FC = () => {
     'Usuário';
 
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
+  const [showEmBreve, setShowEmBreve] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
+
+  const handleEmBreve = () => {
+    setShowEmBreve(true);
+    setTimeout(() => {
+      setShowEmBreve(false);
+    }, 3000);
+  };
 
   const handleBack = () => {
     setView('jornada');
@@ -101,40 +109,28 @@ const AjustesPageV13: React.FC = () => {
       icon: <Bell size={20} className="text-[var(--mq-warning)]" />,
       title: 'Notificações e interação com IA',
       subtitle: 'Lembretes e frequência de mensagens',
-      onClick: () => {
-        // TODO: Implementar página de notificações
-        console.log('Notificações e interação com IA');
-      },
+      onClick: handleEmBreve,
     },
     {
       id: 'exportar',
       icon: <Download size={20} className="text-[var(--mq-primary)]" />,
       title: 'Exportar dados',
       subtitle: 'Conversas, emoções, humor, energia, sabotadores e perfil',
-      onClick: () => {
-        // TODO: Implementar página de exportação
-        console.log('Exportar dados');
-      },
+      onClick: handleEmBreve,
     },
     {
       id: 'seguranca',
       icon: <Shield size={20} className="text-[var(--mq-success)]" />,
       title: 'Segurança',
       subtitle: 'Senha e privacidade',
-      onClick: () => {
-        // TODO: Implementar página de segurança
-        console.log('Segurança');
-      },
+      onClick: handleEmBreve,
     },
     {
       id: 'ajuda',
       icon: <HelpCircle size={20} className="text-[var(--mq-info)]" />,
       title: 'Ajuda e Feedback',
       subtitle: 'FAQ, suporte e sugestões',
-      onClick: () => {
-        // TODO: Implementar página de ajuda
-        console.log('Ajuda e Feedback');
-      },
+      onClick: handleEmBreve,
     },
   ];
 
@@ -160,6 +156,23 @@ const AjustesPageV13: React.FC = () => {
           <h1 className="mq-page-title">Ajustes</h1>
           <p className="mq-page-subtitle">Personalize sua experiência</p>
         </div>
+
+        {/* Mensagem "Em breve" */}
+        {showEmBreve && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-4 rounded-xl border-2 border-[var(--mq-primary)] bg-[var(--mq-primary-light)] p-4 text-center shadow-md"
+          >
+            <p className="text-sm font-semibold text-[var(--mq-primary)]">
+              🚀 Em breve
+            </p>
+            <p className="text-xs text-[var(--mq-text-muted)] mt-1">
+              Esta funcionalidade estará disponível em breve
+            </p>
+          </motion.div>
+        )}
 
         {/* Menu de opções */}
         <div className="space-y-3">
