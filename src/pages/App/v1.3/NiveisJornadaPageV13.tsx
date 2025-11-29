@@ -47,34 +47,57 @@ const NiveisJornadaPageV13: React.FC = () => {
   const { setView, dashboardData } = useDashboard();
   const [estagios, setEstagios] = useState<Estagio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nivelAtual, setNivelAtual] = useState(1);
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
     dashboardData?.usuario?.nome ??
     'Usuário';
 
-  // Nível atual do usuário (vem da tabela usuarios_conquistas via dashboard)
-  const nivelAtual = dashboardData?.gamificacao?.nivel_atual ?? 1;
+  const userId = dashboardData?.usuario?.id;
+  const xpTotal = dashboardData?.gamificacao?.xp_total ?? 0;
 
-  // Carregar dados dos níveis
+  // Carregar dados dos níveis e calcular nível do usuário
   useEffect(() => {
     const loadNiveis = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const res = await fetch('/api/jornada-niveis');
+        const res = await fetch(`/api/jornada-niveis?user_id=${userId}`);
         if (res.ok) {
           const data = await res.json();
-          if (data.success && data.estagios) {
-            setEstagios(data.estagios);
+          if (data.success) {
+            setEstagios(data.estagios || []);
+            // Usar nível calculado pela API
+            if (data.usuario?.nivel_atual) {
+              setNivelAtual(data.usuario.nivel_atual);
+            }
           }
         }
       } catch (err) {
-        console.error('[NiveisJornada] Erro:', err);
+        console.error('[NiveisJornada] Erro ao carregar API, calculando localmente:', err);
       } finally {
         setLoading(false);
       }
     };
     loadNiveis();
-  }, []);
+  }, [userId]);
+
+  // Calcular nível baseado nos pontos quando temos estágios carregados
+  useEffect(() => {
+    if (estagios.length > 0 && xpTotal > 0) {
+      const todosNiveis = estagios.flatMap(e => e.niveis);
+      const nivel = todosNiveis.find(n => 
+        xpTotal >= n.xp_minimo && (n.xp_proximo_nivel === null || xpTotal < n.xp_proximo_nivel)
+      );
+      if (nivel) {
+        setNivelAtual(nivel.nivel);
+      }
+    }
+  }, [estagios, xpTotal]);
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
@@ -109,7 +132,7 @@ const NiveisJornadaPageV13: React.FC = () => {
             <Sparkles size={32} className="text-[var(--mq-primary)]" />
           </div>
           <p className="text-sm text-[var(--mq-text-muted)] max-w-xs mx-auto">
-            Cada conversa e ação te aproximam da sua melhor versão
+            Cada conversa e ação te aproximam 
           </p>
         </motion.div>
 

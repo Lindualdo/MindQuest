@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const N8N_BASE_URL = process.env.N8N_BASE_URL || 'https://mindquest-n8n.cloudfy.live';
-// TODO: Mudar para /webhook/ após ativar na UI do n8n
-const WEBHOOK_PATH = '/webhook-test/jornada-niveis';
+const WEBHOOK_PATH = '/webhook/jornada-niveis';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS
@@ -19,7 +18,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const webhookUrl = `${N8N_BASE_URL}${WEBHOOK_PATH}`;
+    const { user_id } = req.query;
+    
+    if (!user_id || typeof user_id !== 'string') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'user_id é obrigatório' 
+      });
+    }
+
+    const webhookUrl = `${N8N_BASE_URL}${WEBHOOK_PATH}?user_id=${encodeURIComponent(user_id)}`;
     
     const response = await fetch(webhookUrl, {
       method: 'GET',
