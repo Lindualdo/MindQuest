@@ -62,6 +62,68 @@ Ao tratar de workflows n8n:
 - Seguir estritamente a seção "ATENÇÃO — Comunicação Essencial".
 - Nunca deixe valores críticos hardcoded quando existe uma fonte oficial (ex.: tabelas em banco, configs MCP); sempre buscar do catálogo e falhar se não houver dados.
 
+## Padrão de Layout e Temas (Frontend v1.3)
+
+### Estrutura de Página Padrão
+Todas as páginas devem seguir esta estrutura:
+
+```tsx
+<div className="mq-app-v1_3 flex min-h-screen flex-col">
+  <HeaderV1_3 nomeUsuario={nomeUsuario} />
+  
+  <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
+    {/* Botão voltar */}
+    <div className="mb-4">
+      <button type="button" onClick={handleBack} className="mq-btn-back">
+        <ArrowLeft size={18} />
+        Voltar
+      </button>
+    </div>
+    
+    {/* Título da página */}
+    <div className="mb-6 text-center">
+      <h1 className="mq-page-title">Título</h1>
+      <p className="mq-page-subtitle">Subtítulo</p>
+    </div>
+    
+    {/* Conteúdo */}
+  </main>
+</div>
+```
+
+### Classes CSS Padrão
+| Classe | Uso |
+|--------|-----|
+| `mq-app-v1_3` | Container raiz da página |
+| `mq-card` | Cards de conteúdo |
+| `mq-btn-back` | Botão voltar |
+| `mq-page-title` | Título principal da página |
+| `mq-page-subtitle` | Subtítulo da página |
+| `mq-eyebrow` | Label/categoria pequeno |
+
+### Variáveis CSS de Tema
+Usar **sempre** variáveis CSS para cores (suporte a temas claro/escuro):
+- `var(--mq-bg)` - fundo principal
+- `var(--mq-card)` - fundo de cards
+- `var(--mq-text)` - texto principal
+- `var(--mq-text-muted)` - texto secundário
+- `var(--mq-text-subtle)` - texto terciário
+- `var(--mq-primary)` - cor primária/destaque
+- `var(--mq-border)` - bordas
+- `var(--mq-bar)` - barras de progresso (fundo)
+
+### Imports Obrigatórios
+```tsx
+import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
+```
+
+### Regras
+- **NUNCA** usar cores hardcoded (ex: `#1a1a2e`, `bg-gray-800`)
+- **SEMPRE** usar variáveis CSS `var(--mq-*)`
+- **SEMPRE** incluir `HeaderV1_3` no topo
+- **SEMPRE** usar `max-w-md` no main para consistência mobile
+
 ## N8N / MCP
 - Priorizar ferramentas MCP do n8n (search_nodes, get_node_info, validate_workflow, etc.) antes de qualquer outra fonte.
 - Verificar propriedades de nós pelo MCP ao invés de supor APIs.
