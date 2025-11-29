@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Target, Palette, BookOpen, ChevronRight, TrendingUp, Star } from 'lucide-react';
+import { ArrowLeft, Target, ChevronRight, TrendingUp, Star } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -118,7 +118,11 @@ const EvoluirPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    setView('evoluir');
+    setView('jornada');
+  };
+
+  const handleSettings = () => {
+    setView('ajustes');
   };
 
   const handleVerHistoricoConversas = async () => {
@@ -133,7 +137,11 @@ const EvoluirPageV13: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 
+        nomeUsuario={nomeUsuario} 
+        showSettings={true}
+        onSettings={handleSettings}
+      />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
         {/* Botão voltar */}
@@ -150,8 +158,13 @@ const EvoluirPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="mq-page-title">Evoluir</h1>
-          <p className="mq-page-subtitle">Personalize sua jornada</p>
+          <h1 className="mq-page-title">Jornada</h1>
+          <p className="mq-page-subtitle">Sua evolução no MindQuest</p>
+        </div>
+
+        {/* Seção: Progresso no App */}
+        <div className="mb-4">
+          <p className="mq-eyebrow text-center mb-3">NO APP</p>
         </div>
 
         {/* Cards de Progresso: Conversas, Ações e Pontos */}
@@ -216,65 +229,13 @@ const EvoluirPageV13: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Seções do Menu */}
+        {/* Seção: Progresso na Vida */}
+        <div className="mb-4">
+          <p className="mq-eyebrow text-center mb-3">NA VIDA</p>
+        </div>
+
         <div className="space-y-3">
-          {/* Seção 1: Objetivos */}
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.09 }}
-            className="mq-card overflow-hidden"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setView('objetivos');
-                setActiveTab('ajustes');
-              }}
-              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
-                  <Target size={20} className="text-[var(--mq-primary)]" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Objetivos</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Defina e acompanhe suas metas</p>
-                </div>
-              </div>
-              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
-            </button>
-          </motion.section>
-
-          {/* Seção 2: Perfil Pessoal */}
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.13 }}
-            className="mq-card overflow-hidden"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setView('perfilPessoal');
-                setActiveTab('ajustes');
-              }}
-              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
-                  <User size={20} className="text-[var(--mq-primary)]" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Perfil Pessoal</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Personalize sua experiência</p>
-                </div>
-              </div>
-              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
-            </button>
-          </motion.section>
-
-          {/* Seção 3: Aparência */}
+          {/* Meus Objetivos */}
           <motion.section
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -284,42 +245,17 @@ const EvoluirPageV13: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setView('aparencia');
-                setActiveTab('ajustes');
+                setView('objetivos');
               }}
               className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[var(--mq-card)]">
-                  <Palette size={20} className="text-[var(--mq-accent)]" />
+                  <Target size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Aparência</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Tema e personalização visual</p>
-                </div>
-              </div>
-              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
-            </button>
-          </motion.section>
-
-          {/* Seção 4: Recursos */}
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.21 }}
-            className="mq-card overflow-hidden"
-          >
-            <button
-              type="button"
-              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
-                  <BookOpen size={20} className="text-[var(--mq-primary)]" />
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Recursos</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Conquistas, ajuda e feedback</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Meus Objetivos</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Definir e acompanhar metas</p>
                 </div>
               </div>
               <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
