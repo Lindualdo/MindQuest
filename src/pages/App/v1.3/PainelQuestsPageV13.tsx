@@ -548,7 +548,6 @@ const PainelQuestsPageV13: React.FC = () => {
               ratio = 1;
             }
             const fillHeight = ratio > 0 ? Math.max(4, ratio * trackHeight) : 0;
-            const barColor = '#22C55E';
             
             const dataFormatada = dia.dateObj 
               ? format(dia.dateObj, 'dd/MM')
@@ -576,16 +575,13 @@ const PainelQuestsPageV13: React.FC = () => {
                 </span>
                 
                 <div
-                  className="relative overflow-hidden rounded-full bg-slate-200"
+                  className="relative overflow-hidden rounded-full bg-[var(--mq-bar)]"
                   style={{ height: `${trackHeight}px`, width: '10px' }}
                 >
                   {fillHeight > 0 && (
                     <div
-                      className="absolute bottom-0 left-0 right-0 rounded-full"
-                      style={{
-                        height: `${fillHeight}px`,
-                        backgroundColor: barColor,
-                      }}
+                      className="absolute bottom-0 left-0 right-0 rounded-full bg-[var(--mq-primary)]"
+                      style={{ height: `${fillHeight}px` }}
                     />
                   )}
                 </div>
@@ -594,7 +590,7 @@ const PainelQuestsPageV13: React.FC = () => {
                   {labelDia}
                 </span>
                 
-                <span className={`text-[0.56rem] font-medium ${isHoje ? 'text-[var(--mq-primary)] font-semibold' : 'text-[#7E8CA0]'}`}>
+                <span className={`text-[0.56rem] font-medium ${isHoje ? 'text-[var(--mq-primary)] font-semibold' : 'text-[var(--mq-text-muted)]'}`}>
                   {dataFormatada}
                 </span>
               </button>
