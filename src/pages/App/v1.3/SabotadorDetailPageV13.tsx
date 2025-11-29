@@ -10,20 +10,16 @@ import { getSabotadorById, sabotadoresCatalogo } from '@/data/sabotadoresCatalog
 const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => {
   if (!items.length) return null;
   return (
-    <Card className="!p-0 overflow-hidden mq-card">
-      <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-4 py-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">{title}</h3>
-      </div>
-      <div className="p-4">
-        <ul className="space-y-2 text-sm text-[var(--mq-text)]">
-          {items.map((item) => (
-            <li key={item} className="flex items-start gap-2">
-              <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-accent-light)]" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <Card className="!p-4 mq-card">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">{title}</h3>
+      <ul className="space-y-2 text-sm text-[var(--mq-text)]">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-2">
+            <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-accent-light)]" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 };
@@ -136,11 +132,9 @@ const SabotadorDetailPageV13: React.FC = () => {
           <SectionList title="Pensamentos típicos" items={sabotador.pensamentosTipicos} />
           <SectionList title="Sentimentos comuns" items={sabotador.sentimentosComuns} />
           <SectionList title="Mentiras usadas para justificar" items={sabotador.mentirasParaJustificar} />
-          <Card className="!p-0 overflow-hidden mq-card">
-            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Impacto</h3>
-            </div>
-            <div className="flex flex-col gap-4 p-5 text-sm text-[var(--mq-text)]">
+          <Card className="!p-5 mq-card">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-4">Impacto</h3>
+            <div className="flex flex-col gap-4 text-sm text-[var(--mq-text)]">
               <div>
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--mq-accent)]">
                   <Target size={16} className="text-[var(--mq-accent)]" />
@@ -171,11 +165,9 @@ const SabotadorDetailPageV13: React.FC = () => {
               </div>
             </div>
           </Card>
-          <Card className="!p-0 overflow-hidden mq-card">
-            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Estratégias antídoto</h3>
-            </div>
-            <div className="space-y-3 p-5">
+          <Card className="!p-5 mq-card">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">Estratégias antídoto</h3>
+            <div className="space-y-3">
               {sabotador.estrategiasAntidoto.map((estrategia) => (
                 <div key={estrategia} className="flex items-start gap-2 text-sm text-[var(--mq-text)]">
                   <ShieldCheck size={16} className="mt-0.5 text-[var(--mq-success)]" />
@@ -184,11 +176,9 @@ const SabotadorDetailPageV13: React.FC = () => {
               ))}
             </div>
           </Card>
-          <Card className="!p-0 overflow-hidden mq-card">
-            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Conceito</h3>
-            </div>
-            <div className="space-y-5 p-5 text-sm leading-relaxed text-[var(--mq-text)]">
+          <Card className="!p-5 mq-card">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-4">Conceito</h3>
+            <div className="space-y-5 text-sm leading-relaxed text-[var(--mq-text)]">
               <p>{overview.descricao}</p>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-accent)]">Como esse padrão surgiu</p>
