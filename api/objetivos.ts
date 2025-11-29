@@ -1,4 +1,5 @@
 const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/objetivos';
+const DEFAULT_CATALOGO_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/objetivos-catalogo';
 
 const setCorsHeaders = (res: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,8 +30,37 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // GET: Buscar objetivos do usuário
+  // GET: Buscar objetivos do usuário OU catálogo (action=catalogo)
   if (req.method === 'GET') {
+    const action = req.query?.action;
+
+    // GET ?action=catalogo → retorna catálogo de áreas e objetivos
+    if (action === 'catalogo') {
+      const remoteEndpoint = process.env.OBJETIVOS_CATALOGO_WEBHOOK_URL || DEFAULT_CATALOGO_ENDPOINT;
+      try {
+        const upstreamResponse = await fetch(remoteEndpoint, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const contentType = upstreamResponse.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        const body = isJson ? await upstreamResponse.json() : await upstreamResponse.text();
+        if (!upstreamResponse.ok) {
+          res.status(upstreamResponse.status).json(
+            typeof body === 'string' ? { success: false, error: body || 'Erro desconhecido' } : body
+          );
+          return;
+        }
+        res.status(200).json(body);
+        return;
+      } catch (error) {
+        console.error('[objetivos] Erro ao buscar catálogo:', error);
+        res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço' });
+        return;
+      }
+    }
+
+    // GET com user_id → retorna objetivos do usuário
     const usuarioId = readUsuarioId(req.query);
 
     if (!usuarioId) {

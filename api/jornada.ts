@@ -1,8 +1,10 @@
-const DEFAULT_ENDPOINT = 'https://mindquest-n8n.cloudfy.live/webhook/evoluir-stats';
+const N8N_BASE_URL = process.env.N8N_BASE_URL || 'https://mindquest-n8n.cloudfy.live';
+const NIVEIS_WEBHOOK_PATH = '/webhook/jornada-niveis';
+const STATS_WEBHOOK_PATH = '/webhook/evoluir-stats';
 
 const setCorsHeaders = (res: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 };
@@ -11,13 +13,11 @@ const readUsuarioId = (value: any): string | null => {
   if (!value || typeof value !== 'object') {
     return null;
   }
-
   const raw = value.usuario_id ?? value.user_id ?? value.id_usuario;
   if (typeof raw === 'string') {
     const trimmed = raw.trim();
     return trimmed.length > 0 ? trimmed : null;
   }
-
   return null;
 };
 
@@ -29,31 +29,34 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (!['GET', 'POST'].includes(req.method)) {
+  if (req.method !== 'GET') {
     res.status(405).json({ success: false, error: 'Método não suportado' });
     return;
   }
 
-  const source = req.method === 'GET' ? req.query : req.body ?? {};
-  const usuarioId = readUsuarioId(source);
+  const action = req.query?.action || 'niveis';
+  const usuarioId = readUsuarioId(req.query);
 
   if (!usuarioId) {
-    res.status(400).json({ success: false, error: 'usuario_id obrigatório' });
+    res.status(400).json({ success: false, error: 'user_id obrigatório' });
     return;
   }
 
-  const remoteEndpoint = process.env.EVOLUIR_STATS_WEBHOOK_URL || DEFAULT_ENDPOINT;
-
   try {
-    // O webhook espera user_id como query param
-    const url = new URL(remoteEndpoint);
-    url.searchParams.set('user_id', usuarioId);
+    let webhookPath: string;
 
-    const upstreamResponse = await fetch(url.toString(), {
+    if (action === 'stats') {
+      webhookPath = STATS_WEBHOOK_PATH;
+    } else {
+      // default: niveis
+      webhookPath = NIVEIS_WEBHOOK_PATH;
+    }
+
+    const webhookUrl = `${N8N_BASE_URL}${webhookPath}?user_id=${encodeURIComponent(usuarioId)}`;
+
+    const upstreamResponse = await fetch(webhookUrl, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
@@ -69,15 +72,10 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    if (isJson) {
-      res.status(200).json(body);
-      return;
-    }
-
-    res.status(200).send(body);
+    res.status(200).json(body);
   } catch (error) {
-    console.error('[evoluir-stats] Erro ao conectar:', error);
-    res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço de stats' });
+    console.error(`[jornada] Erro ao buscar ${action}:`, error);
+    res.status(500).json({ success: false, error: 'Erro ao conectar ao serviço' });
   }
 }
 

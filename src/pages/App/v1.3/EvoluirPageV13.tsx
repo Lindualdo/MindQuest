@@ -56,7 +56,7 @@ const EvoluirPageV13: React.FC = () => {
       if (!userId) return;
       
       try {
-        const res = await fetch(`/api/jornada-niveis?user_id=${userId}`);
+        const res = await fetch(`/api/jornada?user_id=${userId}`);
         const data = await res.json();
         
         if (data.success && data.usuario && data.niveis) {
@@ -167,7 +167,7 @@ const EvoluirPageV13: React.FC = () => {
 
       try {
         setStatsLoading(true);
-        const url = `/api/evoluir-stats?user_id=${encodeURIComponent(usuarioId)}`;
+        const url = `/api/jornada?action=stats&user_id=${encodeURIComponent(usuarioId)}`;
         const response = await fetch(url);
         
         if (!response.ok) {

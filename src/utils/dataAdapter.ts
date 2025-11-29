@@ -1292,7 +1292,7 @@ class DataAdapter {
     const totalReflexoes = this.parseNumber(gamificacao.total_reflexoes) ?? 0;
     const totalXpHoje = this.parseNumber(gamificacao.total_xp_ganho_hoje) ?? 0;
 
-    // Próximos níveis agora vêm da API /api/jornada-niveis quando necessário
+    // Próximos níveis agora vêm da API /api/jornada quando necessário
     const proximosNiveis: Gamificacao['proximos_niveis'] = [];
     let proximoNivel: Gamificacao['proximo_nivel'] =
       proximosNiveis.length > 0 ? { ...proximosNiveis[0] } : null;

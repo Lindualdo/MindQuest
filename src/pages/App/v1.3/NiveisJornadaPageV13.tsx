@@ -90,7 +90,7 @@ const NiveisJornadaPageV13: React.FC = () => {
       }
       
       try {
-        const res = await fetch(`/api/jornada-niveis?user_id=${userId}`);
+        const res = await fetch(`/api/jornada?user_id=${userId}`);
         const data = await res.json();
         
         if (!res.ok || !data.success) {

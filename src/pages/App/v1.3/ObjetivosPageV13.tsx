@@ -162,7 +162,7 @@ const ObjetivosPageV13: React.FC = () => {
 
       // Tentar carregar catálogo (usar fallback se falhar)
       try {
-        const catalogoRes = await fetch('/api/objetivos-catalogo');
+        const catalogoRes = await fetch('/api/objetivos?action=catalogo');
         if (catalogoRes.ok) {
           const catalogoData = await catalogoRes.json();
           if (catalogoData.success) {
