@@ -92,10 +92,32 @@ const EvoluirPageV13: React.FC = () => {
     };
   }, [totalXp]);
 
-  // Dados mockados para contadores
-  const objetivosAtivos = 2; // Mock
+  // Dados para contadores
+  const [objetivosInfo, setObjetivosInfo] = useState<{ total: number; limite: number }>({ total: 0, limite: 2 });
   const checkinPendente = true; // Mock - badge [!]
   const conquistasVida = 1; // Mock
+
+  // Buscar contagem de objetivos
+  useEffect(() => {
+    const fetchObjetivos = async () => {
+      try {
+        const userId = dashboardData?.usuario?.id;
+        if (!userId) return;
+        
+        const res = await fetch(`/api/objetivos?user_id=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setObjetivosInfo({
+            total: data.total_ativos ?? 0,
+            limite: data.limite_ativos ?? 2
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao buscar objetivos:', err);
+      }
+    };
+    fetchObjetivos();
+  }, [dashboardData?.usuario?.id]);
 
 
   useEffect(() => {
@@ -324,11 +346,9 @@ const EvoluirPageV13: React.FC = () => {
                 <div className="text-left flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-bold text-[var(--mq-text)]">Meus Objetivos</h3>
-                    {objetivosAtivos > 0 && (
-                      <span className="text-xs font-semibold text-[var(--mq-primary)] bg-[var(--mq-primary-light)] px-2 py-0.5 rounded-full">
-                        ({objetivosAtivos})
-                      </span>
-                    )}
+                    <span className="text-xs font-semibold text-[var(--mq-primary)] bg-[var(--mq-primary-light)] px-2 py-0.5 rounded-full">
+                      {objetivosInfo.total}/{objetivosInfo.limite}
+                    </span>
                   </div>
                   <p className="text-xs text-[var(--mq-text-muted)]">Definir e acompanhar metas</p>
                 </div>

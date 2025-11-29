@@ -146,11 +146,16 @@ const ObjetivosPageV13: React.FC = () => {
     try {
       // Carregar objetivos do usuário
       const objetivosRes = await fetch(`/api/objetivos?user_id=${usuarioId}`);
+      let objetivosCarregados: ObjetivoUsuario[] = [];
+      let podecriarFlag = true;
+      
       if (objetivosRes.ok) {
         const data = await objetivosRes.json();
         if (data.success) {
-          setObjetivosUsuario(data.objetivos || []);
-          setPodeCriar(data.pode_criar ?? true);
+          objetivosCarregados = data.objetivos || [];
+          podecriarFlag = data.pode_criar ?? true;
+          setObjetivosUsuario(objetivosCarregados);
+          setPodeCriar(podecriarFlag);
           setTotalAtivos(data.total_ativos ?? 0);
         }
       }
@@ -167,6 +172,11 @@ const ObjetivosPageV13: React.FC = () => {
         }
       } catch {
         // Usar fallback silenciosamente
+      }
+
+      // Se não tem objetivos e pode criar, ir direto para escolha de área
+      if (objetivosCarregados.length === 0 && podecriarFlag) {
+        setPassoAtual(1);
       }
     } catch (err) {
       console.error('[Objetivos] Erro ao carregar:', err);
@@ -511,45 +521,35 @@ const ObjetivosPageV13: React.FC = () => {
 
                 <div className="space-y-2 max-h-[50vh] overflow-y-auto">
                   {objetivosDisponiveis.map((objetivo) => (
-                    <label
+                    <button
                       key={objetivo.id}
-                      className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      type="button"
+                      onClick={() => {
+                        setObjetivoSelecionado(objetivo);
+                        setObjetivoCustomizado('');
+                        setPassoAtual(3); // Avança automaticamente
+                      }}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all w-full text-left ${
                         objetivoSelecionado?.id === objetivo.id
                           ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
                           : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
                       }`}
                     >
-                      <input
-                        type="radio"
-                        name="objetivo"
-                        checked={objetivoSelecionado?.id === objetivo.id}
-                        onChange={() => {
-                          setObjetivoSelecionado(objetivo);
-                          setObjetivoCustomizado('');
-                        }}
-                        className="h-4 w-4 accent-[var(--mq-primary)]"
-                      />
                       <span className="text-sm text-[var(--mq-text)] flex-1">
                         {objetivo.titulo}
                       </span>
-                    </label>
+                      <ChevronRight size={16} className="text-[var(--mq-text-subtle)]" />
+                    </button>
                   ))}
 
                   {/* Objetivo customizado */}
-                  <label
-                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      objetivoSelecionado === null && objetivoCustomizado
+                  <div
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all ${
+                      objetivoCustomizado
                         ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
-                        : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
+                        : 'border-[var(--mq-border)] bg-[var(--mq-card)]'
                     }`}
                   >
-                    <input
-                      type="radio"
-                      name="objetivo"
-                      checked={objetivoSelecionado === null && objetivoCustomizado.length > 0}
-                      onChange={() => setObjetivoSelecionado(null)}
-                      className="h-4 w-4 accent-[var(--mq-primary)] mt-0.5"
-                    />
                     <div className="flex-1">
                       <span className="text-sm text-[var(--mq-text)]">Outro:</span>
                       <input
@@ -559,22 +559,26 @@ const ObjetivosPageV13: React.FC = () => {
                           setObjetivoCustomizado(e.target.value);
                           setObjetivoSelecionado(null);
                         }}
-                        onClick={() => setObjetivoSelecionado(null)}
-                        placeholder="Digite seu objetivo"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && objetivoCustomizado.trim()) {
+                            setPassoAtual(3);
+                          }
+                        }}
+                        placeholder="Digite seu objetivo e pressione Enter"
                         className="text-sm text-[var(--mq-text)] bg-transparent border-none outline-none w-full mt-1"
                       />
                     </div>
-                  </label>
+                    {objetivoCustomizado.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => setPassoAtual(3)}
+                        className="text-[var(--mq-primary)] hover:text-[var(--mq-primary-dark)]"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleProximoPasso}
-                  disabled={!objetivoSelecionado && !objetivoCustomizado.trim()}
-                  className="mq-btn-primary w-full mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continuar
-                </button>
               </motion.div>
             )}
 
