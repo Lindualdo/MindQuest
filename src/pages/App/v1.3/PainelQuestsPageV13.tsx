@@ -707,7 +707,7 @@ const PainelQuestsPageV13: React.FC = () => {
   };
 
   return (
-    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-gradient-to-b from-[#F5EBF3] to-[#FFFFFF]">
+    <div className="mq-app-v1_3 flex min-h-screen flex-col">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">

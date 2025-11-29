@@ -73,7 +73,7 @@ const SabotadorDetailPageV13: React.FC = () => {
 
   if (!sabotador) {
     return (
-      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+      <div className="mq-app-v1_3 flex min-h-screen flex-col">
         <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card>
@@ -102,7 +102,7 @@ const SabotadorDetailPageV13: React.FC = () => {
   }
 
   return (
-    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+    <div className="mq-app-v1_3 flex min-h-screen flex-col">
       <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">

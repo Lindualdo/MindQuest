@@ -1,21 +1,74 @@
-/* Tokens v1.3 */
+/* ========================================
+   MindQuest v1.3 - Design Tokens
+   Última atualização: 2025-11-29
+   ======================================== */
+
 .mq-app-v1_3 {
-  --mq-v1_3-bg: #F5EBF3;
-  --mq-v1_3-surface: #E8F3F5;
-  --mq-v1_3-card: #FFFFFF;
-  --mq-v1_3-border: rgba(28, 37, 65, 0.08);
-  --mq-v1_3-primary: #3083DC;
-  --mq-v1_3-accent: #D90368;
-  --mq-v1_3-text: #1C2541;
-  --mq-v1_3-muted: #E8F3F5;
-  --mq-v1_3-bar: #C5DDF2;
-  --mq-v1_3-shadow: 0px 8px 24px rgba(28, 37, 65, 0.04);
+  /* === BACKGROUND === */
+  --mq-bg: #F5EBF3;
+  --mq-surface: #E8F3F5;
+  --mq-card: #FFFFFF;
+  
+  /* === BORDAS === */
+  --mq-border: #B6D6DF;
+  --mq-border-subtle: rgba(28, 37, 65, 0.08);
+  
+  /* === TEXTOS === */
+  --mq-text: #1C2541;
+  --mq-text-secondary: #475569;
+  --mq-text-muted: #64748B;
+  --mq-text-subtle: #94A3B8;
+  
+  /* === CORES PRIMÁRIAS === */
+  --mq-primary: #0EA5E9;
+  --mq-primary-hover: #0C8BD6;
+  --mq-primary-light: #E0F2FE;
+  
+  /* === ACCENT === */
+  --mq-accent: #D90368;
+  --mq-accent-hover: #B80258;
+  
+  /* === CORES SEMÂNTICAS === */
+  --mq-success: #22C55E;
+  --mq-success-light: #ECFDF5;
+  --mq-warning: #F59E0B;
+  --mq-warning-light: #FEF3C7;
+  --mq-error: #EF4444;
+  --mq-error-light: #FEF2F2;
+  --mq-info: #2F76D1;
+  --mq-info-light: #E0F2FE;
+  
+  /* === SOMBRAS === */
+  --mq-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+  --mq-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --mq-shadow-lg: 0 16px 32px rgba(15, 23, 42, 0.12);
+  
+  /* === RAIOS === */
+  --mq-radius-sm: 12px;
+  --mq-radius-md: 16px;
+  --mq-radius-lg: 24px;
+  --mq-radius-full: 9999px;
+  
+  /* === BARRA DE PROGRESSO === */
+  --mq-bar: #C5DDF2;
+
+  /* Variáveis legadas (manter compatibilidade) */
+  --mq-v1_3-bg: var(--mq-bg);
+  --mq-v1_3-surface: var(--mq-surface);
+  --mq-v1_3-card: var(--mq-card);
+  --mq-v1_3-border: var(--mq-border-subtle);
+  --mq-v1_3-primary: var(--mq-primary);
+  --mq-v1_3-accent: var(--mq-accent);
+  --mq-v1_3-text: var(--mq-text);
+  --mq-v1_3-muted: var(--mq-surface);
+  --mq-v1_3-bar: var(--mq-bar);
+  --mq-v1_3-shadow: var(--mq-shadow-sm);
 
   font-family: 'Inter', 'SF Pro Display', 'SF Pro Text', -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
   font-size: 1rem;
   line-height: 1.35;
-  background-color: var(--mq-v1_3-bg);
-  color: var(--mq-v1_3-text);
+  background-color: var(--mq-bg);
+  color: var(--mq-text);
 }
 
 .mq-app-v1_3 .mq-card-v1_3 {
@@ -91,7 +144,7 @@
 
 .mq-app-v1_3 .mq-card-meta-v1_3 {
   font-size: 0.75rem;
-  color: #7E8CA0;
+  color: var(--mq-text-subtle);
 }
 
 .mq-app-v1_3 .mq-eyebrow-v1_3 {
@@ -99,6 +152,107 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 600;
-  color: #7E8CA0;
+  color: var(--mq-text-subtle);
+}
+
+/* ========================================
+   Classes Utilitárias Padronizadas
+   ======================================== */
+
+/* Card padrão */
+.mq-app-v1_3 .mq-card {
+  border-radius: var(--mq-radius-lg);
+  background-color: var(--mq-surface);
+  border: 1px solid var(--mq-border);
+  box-shadow: var(--mq-shadow-md);
+}
+
+/* Botão primário */
+.mq-app-v1_3 .mq-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--mq-radius-md);
+  background-color: var(--mq-primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.mq-app-v1_3 .mq-btn-primary:hover {
+  background-color: var(--mq-primary-hover);
+}
+
+.mq-app-v1_3 .mq-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.mq-app-v1_3 .mq-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botão voltar */
+.mq-app-v1_3 .mq-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--mq-radius-full);
+  background-color: var(--mq-card);
+  color: var(--mq-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--mq-shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.mq-app-v1_3 .mq-btn-back:hover {
+  box-shadow: var(--mq-shadow-md);
+}
+
+.mq-app-v1_3 .mq-btn-back:active {
+  transform: scale(0.98);
+}
+
+/* Título de página */
+.mq-app-v1_3 .mq-page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--mq-text);
+  margin-bottom: 0.25rem;
+}
+
+.mq-app-v1_3 .mq-page-subtitle {
+  font-size: 0.875rem;
+  color: var(--mq-text-muted);
+}
+
+/* Eyebrow label (acima de títulos) */
+.mq-app-v1_3 .mq-eyebrow {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  color: var(--mq-info);
+}
+
+/* Link inline */
+.mq-app-v1_3 .mq-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mq-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.mq-app-v1_3 .mq-link:hover {
+  color: var(--mq-primary-hover);
+  text-decoration: underline;
 }
 

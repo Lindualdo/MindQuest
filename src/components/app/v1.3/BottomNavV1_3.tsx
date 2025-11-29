@@ -21,11 +21,11 @@ const BottomNavV1_3 = ({
     'flex flex-col items-center gap-0.5 flex-1 text-[0.7rem] font-medium';
 
   const getColor = (tab: TabId) =>
-    active === tab ? '#D90368' : '#1C2541';
+    active === tab ? 'var(--mq-accent)' : 'var(--mq-text)';
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-[#F5EBF3]/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-[var(--mq-bg)]/95 backdrop-blur"
     >
       <div className="mx-auto flex max-w-md items-center justify-between px-6 py-2">
         <button

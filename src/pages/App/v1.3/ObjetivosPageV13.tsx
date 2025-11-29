@@ -76,7 +76,7 @@ const ObjetivosPageV13: React.FC = () => {
 
   const handleNavPerfil = () => {
     setActiveTab('perfil');
-    setView('perfil');
+    setView('dashEmocoes');
   };
 
   const handleNavQuests = () => {
@@ -84,7 +84,7 @@ const ObjetivosPageV13: React.FC = () => {
     setView('painelQuests');
   };
 
-  const handleNavAjustes = () => {
+  const handleNavConfig = () => {
     setActiveTab('ajustes');
     setView('evoluir');
   };
@@ -144,24 +144,24 @@ const ObjetivosPageV13: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+      <div className="mq-app-v1_3 flex min-h-screen flex-col">
         <HeaderV1_3 nomeUsuario={nomeUsuario} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0EA5E9]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--mq-primary)]" />
         </main>
         <BottomNavV1_3
-          activeTab={activeTab}
-          onNavHome={handleNavHome}
-          onNavPerfil={handleNavPerfil}
-          onNavQuests={handleNavQuests}
-          onNavAjustes={handleNavAjustes}
+          active={activeTab}
+          onHome={handleNavHome}
+          onPerfil={handleNavPerfil}
+          onQuests={handleNavQuests}
+          onConfig={handleNavConfig}
         />
       </div>
     );
   }
 
   return (
-    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-[#F5EBF3]">
+    <div className="mq-app-v1_3 flex min-h-screen flex-col">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
@@ -170,7 +170,7 @@ const ObjetivosPageV13: React.FC = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#1C2541] shadow-md hover:shadow-lg transition-all active:scale-98"
+            className="mq-btn-back"
           >
             <ArrowLeft size={18} />
             Voltar
@@ -179,12 +179,8 @@ const ObjetivosPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
-            Objetivos
-          </h1>
-          <p className="text-sm text-[#64748B]">
-            Defina sua meta de transformação
-          </p>
+          <h1 className="mq-page-title">Objetivos</h1>
+          <p className="mq-page-subtitle">Defina sua meta de transformação</p>
         </div>
 
         {/* Mensagens de erro/sucesso */}
@@ -192,7 +188,7 @@ const ObjetivosPageV13: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            className="mb-4 rounded-xl border border-[var(--mq-error)] bg-[var(--mq-error-light)] p-3 text-sm text-[var(--mq-error)]"
           >
             {error}
           </motion.div>
@@ -202,7 +198,7 @@ const ObjetivosPageV13: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+            className="mb-4 flex items-center gap-2 rounded-xl border border-[var(--mq-success)] bg-[var(--mq-success-light)] p-3 text-sm text-[var(--mq-success)]"
           >
             <CheckCircle2 size={18} />
             Objetivos salvos com sucesso!
@@ -210,20 +206,20 @@ const ObjetivosPageV13: React.FC = () => {
         )}
 
         {/* Formulário */}
-        <div className="space-y-4 rounded-2xl bg-[#E8F3F5] p-6 border border-[#B6D6DF]">
+        <div className="mq-card space-y-4 p-6">
           {/* Objetivos */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#1C2541]">
+            <label className="mb-2 block text-sm font-semibold text-[var(--mq-text)]">
               Meus Objetivos
             </label>
-            <p className="mb-3 text-xs text-[#64748B]">
+            <p className="mb-3 text-xs text-[var(--mq-text-muted)]">
               Liste seus principais objetivos por ordem de prioridade. O sistema usará essas informações para personalizar suas quests e ações.
             </p>
             <textarea
               value={objetivo}
               onChange={(e) => setObjetivo(e.target.value)}
               rows={6}
-              className="w-full rounded-xl border border-[#B6D6DF] bg-white px-4 py-3 text-sm text-[#1C2541] focus:border-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/20 resize-none"
+              className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20 resize-none"
               placeholder="Exemplo:&#10;1. Desenvolver mais autoconhecimento e melhorar meus relacionamentos&#10;2. Aumentar minha produtividade no trabalho&#10;3. Melhorar minha saúde emocional e bem-estar..."
             />
           </div>
@@ -235,7 +231,7 @@ const ObjetivosPageV13: React.FC = () => {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full rounded-xl bg-[#0EA5E9] px-6 py-4 text-sm font-bold text-white shadow-lg hover:bg-[#0C94D2] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="mq-btn-primary w-full py-4"
           >
             {saving ? (
               <>
@@ -253,11 +249,11 @@ const ObjetivosPageV13: React.FC = () => {
       </main>
 
       <BottomNavV1_3
-        activeTab={activeTab}
-        onNavHome={handleNavHome}
-        onNavPerfil={handleNavPerfil}
-        onNavQuests={handleNavQuests}
-        onNavAjustes={handleNavAjustes}
+        active={activeTab}
+        onHome={handleNavHome}
+        onPerfil={handleNavPerfil}
+        onQuests={handleNavQuests}
+        onConfig={handleNavConfig}
       />
     </div>
   );

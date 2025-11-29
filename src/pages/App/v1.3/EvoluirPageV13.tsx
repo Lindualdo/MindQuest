@@ -132,7 +132,7 @@ const EvoluirPageV13: React.FC = () => {
   };
 
   return (
-    <div className="mq-app-v1_3 flex min-h-screen flex-col bg-white">
+    <div className="mq-app-v1_3 flex min-h-screen flex-col">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
@@ -141,7 +141,7 @@ const EvoluirPageV13: React.FC = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#1C2541] shadow-md hover:shadow-lg transition-all active:scale-98"
+            className="mq-btn-back"
           >
             <ArrowLeft size={18} />
             Voltar
@@ -150,12 +150,8 @@ const EvoluirPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
-            Evoluir
-          </h1>
-          <p className="text-sm text-[#64748B]">
-            Personalize sua jornada
-          </p>
+          <h1 className="mq-page-title">Evoluir</h1>
+          <p className="mq-page-subtitle">Personalize sua jornada</p>
         </div>
 
         {/* Cards de Progresso: Conversas, Ações e Pontos */}
@@ -169,16 +165,14 @@ const EvoluirPageV13: React.FC = () => {
             <button
               type="button"
               onClick={handleVerHistoricoConversas}
-              className="w-full rounded-2xl border p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
-              className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
-              style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+              className="mq-card w-full p-5 hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
             >
-              <p className="text-sm font-semibold text-[#64748B] mb-2">Conversas</p>
+              <p className="text-sm font-semibold text-[var(--mq-text-muted)] mb-2">Conversas</p>
               <div className="flex items-center justify-center gap-1.5">
-                <span className="text-4xl font-bold text-[#1C2541] leading-none">
+                <span className="text-4xl font-bold text-[var(--mq-text)] leading-none">
                   {totalConversas}
                 </span>
-                <TrendingUp size={16} className="text-[#0EA5E9]" />
+                <TrendingUp size={16} className="text-[var(--mq-primary)]" />
               </div>
             </button>
           </motion.div>
@@ -192,16 +186,14 @@ const EvoluirPageV13: React.FC = () => {
             <button
               type="button"
               onClick={handleVerAcoesConcluidas}
-              className="w-full rounded-2xl border p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
-              className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
-              style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+              className="mq-card w-full p-5 hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
             >
-              <p className="text-sm font-semibold text-[#64748B] mb-2">Ações</p>
+              <p className="text-sm font-semibold text-[var(--mq-text-muted)] mb-2">Ações</p>
               <div className="flex items-center justify-center gap-1.5">
-                <span className="text-4xl font-bold text-[#1C2541] leading-none">
+                <span className="text-4xl font-bold text-[var(--mq-text)] leading-none">
                   {totalQuestsConcluidas}
                 </span>
-                <TrendingUp size={16} className="text-[#0EA5E9]" />
+                <TrendingUp size={16} className="text-[var(--mq-primary)]" />
               </div>
             </button>
           </motion.div>
@@ -212,16 +204,13 @@ const EvoluirPageV13: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
           >
-            <div className="w-full rounded-2xl border p-5 shadow-md flex flex-col items-center justify-center text-center"
-              className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
-              style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
-            >
-              <p className="text-sm font-semibold text-[#64748B] mb-2">Pontos</p>
+            <div className="mq-card w-full p-5 hover:shadow-lg transition-all flex flex-col items-center justify-center text-center">
+              <p className="text-sm font-semibold text-[var(--mq-text-muted)] mb-2">Pontos</p>
               <div className="flex items-center justify-center gap-1.5">
-                <span className="text-4xl font-bold text-[#1C2541] leading-none">
+                <span className="text-4xl font-bold text-[var(--mq-text)] leading-none">
                   {totalXpFormatted}
                 </span>
-                <Star size={16}  />
+                <Star size={16} className="text-[var(--mq-warning)]" />
               </div>
             </div>
           </motion.div>
@@ -234,8 +223,7 @@ const EvoluirPageV13: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.09 }}
-            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] overflow-hidden shadow-md"
-            style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+            className="mq-card overflow-hidden"
           >
             <button
               type="button"
@@ -247,14 +235,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <Target size={20}  />
+                  <Target size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold" >Objetivos</h3>
-                  <p className="text-xs" >Defina e acompanhe suas metas</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Objetivos</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Defina e acompanhe suas metas</p>
                 </div>
               </div>
-              <ChevronRight size={20}  />
+              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
             </button>
           </motion.section>
 
@@ -263,8 +251,7 @@ const EvoluirPageV13: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
-            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] overflow-hidden shadow-md"
-            style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+            className="mq-card overflow-hidden"
           >
             <button
               type="button"
@@ -276,14 +263,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <User size={20}  />
+                  <User size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold" >Perfil Pessoal</h3>
-                  <p className="text-xs" >Personalize sua experiência</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Perfil Pessoal</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Personalize sua experiência</p>
                 </div>
               </div>
-              <ChevronRight size={20}  />
+              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
             </button>
           </motion.section>
 
@@ -292,8 +279,7 @@ const EvoluirPageV13: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.17 }}
-            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] overflow-hidden shadow-md"
-            style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+            className="mq-card overflow-hidden"
           >
             <button
               type="button"
@@ -301,14 +287,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <Palette size={20}  />
+                  <Palette size={20} className="text-[var(--mq-accent)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold" >Aparência</h3>
-                  <p className="text-xs" >Tema e personalização visual</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Aparência</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Tema e personalização visual</p>
                 </div>
               </div>
-              <ChevronRight size={20}  />
+              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
             </button>
           </motion.section>
 
@@ -317,8 +303,7 @@ const EvoluirPageV13: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.21 }}
-            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] overflow-hidden shadow-md"
-            style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
+            className="mq-card overflow-hidden"
           >
             <button
               type="button"
@@ -326,14 +311,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <BookOpen size={20} className="text-[#0EA5E9]" />
+                  <BookOpen size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold" >Recursos</h3>
-                  <p className="text-xs" >Conquistas, ajuda e feedback</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Recursos</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Conquistas, ajuda e feedback</p>
                 </div>
               </div>
-              <ChevronRight size={20}  />
+              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
             </button>
           </motion.section>
         </div>
