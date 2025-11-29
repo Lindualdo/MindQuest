@@ -170,10 +170,10 @@ const HomeV1_3 = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-2 text-center"
         >
-          <h1 className="text-3xl font-bold text-[#1C2541] mb-1">
+          <h1 className="mq-page-title">
             Clareza
           </h1>
-          <p className="text-sm text-[#64748B]">
+          <p className="mq-page-subtitle">
             Mente clara, resultados reais
           </p>
         </motion.div>

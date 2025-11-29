@@ -29,29 +29,26 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais, onHistorico }: 
     : insight.descricao || fallbackInsight.descricao;
 
   return (
-    <section
-      className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-4 py-4 shadow-md"
-      style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
-    >
+    <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
       <div className="flex items-center justify-between">
-        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
+        <p className="mq-eyebrow">
           Insight da última conversa
         </p>
         {onHistorico && (
           <button
             type="button"
             onClick={onHistorico}
-            className="text-[0.65rem] font-medium text-[#2F76D1] hover:underline"
+            className="text-[0.65rem] font-medium text-[var(--mq-primary)] hover:underline"
           >
             Histórico &gt;
           </button>
         )}
       </div>
-      <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
-        <h3 className="text-[0.95rem] font-semibold text-[#111827]">
+      <div className="mt-3 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-4">
+        <h3 className="text-[0.95rem] font-semibold text-[var(--mq-text)]">
           {title}
         </h3>
-        <p className="mt-2 text-[0.82rem] leading-relaxed text-[#4B5563] line-clamp-2">
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-[var(--mq-text-muted)] line-clamp-2">
           {description}
         </p>
       </div>
@@ -60,7 +57,7 @@ const CardInsightUltimaConversa = ({ data, loading, onSaberMais, onHistorico }: 
           <button
             type="button"
             onClick={() => onSaberMais(insight?.insight_id ?? null)}
-            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--mq-primary)] underline-offset-2 hover:underline disabled:opacity-50"
             disabled={loading}
           >
             Saber mais
