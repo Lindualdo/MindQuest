@@ -88,7 +88,40 @@ Todas as páginas devem seguir esta estrutura:
     
     {/* Conteúdo */}
   </main>
+
+  <BottomNavV1_3
+    active={activeTab}
+    onHome={handleNavHome}
+    onPerfil={handleNavPerfil}
+    onQuests={handleNavQuests}
+    onConfig={handleNavConfig}
+  />
 </div>
+```
+
+### Handlers de Navegação do Menu (obrigatório)
+```tsx
+const [activeTab, setActiveTab] = useState<TabId>('ajustes');
+
+const handleNavHome = () => {
+  setActiveTab('home');
+  setView('dashboard');
+};
+
+const handleNavPerfil = () => {
+  setActiveTab('perfil');
+  setView('dashEmocoes');
+};
+
+const handleNavQuests = () => {
+  setActiveTab('quests');
+  setView('painelQuests');
+};
+
+const handleNavConfig = () => {
+  setActiveTab('ajustes');
+  setView('evoluir'); // ou outra view padrão
+};
 ```
 
 ### Classes CSS Padrão
@@ -115,6 +148,7 @@ Usar **sempre** variáveis CSS para cores (suporte a temas claro/escuro):
 ### Imports Obrigatórios
 ```tsx
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 ```
 
@@ -122,7 +156,9 @@ import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 - **NUNCA** usar cores hardcoded (ex: `#1a1a2e`, `bg-gray-800`)
 - **SEMPRE** usar variáveis CSS `var(--mq-*)`
 - **SEMPRE** incluir `HeaderV1_3` no topo
+- **SEMPRE** incluir `BottomNavV1_3` no rodapé (menu de navegação)
 - **SEMPRE** usar `max-w-md` no main para consistência mobile
+- **SEMPRE** usar `pb-24` no main para espaço do menu footer
 
 ## N8N / MCP
 - Priorizar ferramentas MCP do n8n (search_nodes, get_node_info, validate_workflow, etc.) antes de qualquer outra fonte.

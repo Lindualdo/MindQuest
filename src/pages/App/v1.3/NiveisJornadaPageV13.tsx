@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Star, Sparkles, Crown, Rocket, Target, Flame, Heart, Zap, Award, Sun } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import { useDashboard } from '@/store/useStore';
 
@@ -49,6 +50,7 @@ const NiveisJornadaPageV13: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nivelAtual, setNivelAtual] = useState(1);
+  const [activeTab, setActiveTab] = useState<TabId>('ajustes');
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -56,6 +58,27 @@ const NiveisJornadaPageV13: React.FC = () => {
     'Usuário';
 
   const userId = dashboardData?.usuario?.id;
+
+  // Handlers de navegação do menu
+  const handleNavHome = () => {
+    setActiveTab('home');
+    setView('dashboard');
+  };
+
+  const handleNavPerfil = () => {
+    setActiveTab('perfil');
+    setView('dashEmocoes');
+  };
+
+  const handleNavQuests = () => {
+    setActiveTab('quests');
+    setView('painelQuests');
+  };
+
+  const handleNavConfig = () => {
+    setActiveTab('ajustes');
+    setView('evoluir');
+  };
 
   // Carregar dados dos níveis da API
   useEffect(() => {
@@ -269,6 +292,14 @@ const NiveisJornadaPageV13: React.FC = () => {
           </motion.div>
         )}
       </main>
+
+      <BottomNavV1_3
+        active={activeTab}
+        onHome={handleNavHome}
+        onPerfil={handleNavPerfil}
+        onQuests={handleNavQuests}
+        onConfig={handleNavConfig}
+      />
     </div>
   );
 };
