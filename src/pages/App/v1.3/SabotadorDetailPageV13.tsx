@@ -10,15 +10,15 @@ import { getSabotadorById, sabotadoresCatalogo } from '@/data/sabotadoresCatalog
 const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => {
   if (!items.length) return null;
   return (
-    <Card className="!p-0 overflow-hidden">
-      <div className="border-b border-white/40 bg-white/70 px-4 py-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-600">{title}</h3>
+    <Card className="!p-0 overflow-hidden mq-card">
+      <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-4 py-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">{title}</h3>
       </div>
       <div className="p-4">
-        <ul className="space-y-2 text-sm text-gray-700">
+        <ul className="space-y-2 text-sm text-[var(--mq-text)]">
           {items.map((item) => (
             <li key={item} className="flex items-start gap-2">
-              <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-purple-200" />
+              <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-accent-light)]" />
               <span>{item}</span>
             </li>
           ))}
@@ -76,14 +76,14 @@ const SabotadorDetailPageV13: React.FC = () => {
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
         <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-          <Card>
-            <p className="text-sm text-[#475569]">
+          <Card className="mq-card">
+            <p className="text-sm text-[var(--mq-text-muted)]">
               Não encontramos informações adicionais sobre este sabotador. Volte ao dashboard e tente novamente.
             </p>
             <button
               type="button"
               onClick={handleBack}
-              className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--mq-primary)] underline-offset-2 hover:underline"
             >
               Voltar
               <ArrowLeft size={14} />
@@ -110,22 +110,22 @@ const SabotadorDetailPageV13: React.FC = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541] shadow"
+            className="mq-btn-back"
           >
             <ArrowLeft size={16} />
             Voltar
           </button>
         </div>
 
-        <Card className="!p-0 overflow-hidden" hover={false}>
-          <div className="flex flex-col gap-3 border-b border-white/40 bg-white/80 px-5 py-5">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#2F76D1]">
+        <Card className="!p-0 overflow-hidden mq-card" hover={false}>
+          <div className="flex flex-col gap-3 px-5 py-5">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[var(--mq-primary)]">
               Sabotador
             </p>
-            <h1 className="text-lg font-semibold text-[#1C2541]">
+            <h1 className="text-lg font-semibold text-[var(--mq-text)]">
               Meu padrão mental: {sabotador.nome}
             </h1>
-            <p className="text-sm leading-relaxed text-[#475569]">
+            <p className="text-sm leading-relaxed text-[var(--mq-text-muted)]">
               {sabotador.descricao}
             </p>
           </div>
@@ -136,34 +136,34 @@ const SabotadorDetailPageV13: React.FC = () => {
           <SectionList title="Pensamentos típicos" items={sabotador.pensamentosTipicos} />
           <SectionList title="Sentimentos comuns" items={sabotador.sentimentosComuns} />
           <SectionList title="Mentiras usadas para justificar" items={sabotador.mentirasParaJustificar} />
-          <Card className="!p-0 overflow-hidden">
-            <div className="border-b border-white/40 bg-white/70 px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Impacto</h3>
+          <Card className="!p-0 overflow-hidden mq-card">
+            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Impacto</h3>
             </div>
-            <div className="flex flex-col gap-4 p-5 text-sm text-gray-700">
+            <div className="flex flex-col gap-4 p-5 text-sm text-[var(--mq-text)]">
               <div>
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-purple-600">
-                  <Target size={16} className="text-purple-500" />
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--mq-accent)]">
+                  <Target size={16} className="text-[var(--mq-accent)]" />
                   Em você
                 </p>
                 <ul className="mt-2 space-y-2">
                   {sabotador.impacto.emSi.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-purple-300" />
+                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-accent-light)]" />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-rose-600">
-                  <HeartPulse size={16} className="text-rose-500" />
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--mq-error)]">
+                  <HeartPulse size={16} className="text-[var(--mq-error)]" />
                   Nos outros
                 </p>
                 <ul className="mt-2 space-y-2">
                   {sabotador.impacto.nosOutros.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-rose-300" />
+                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-error-light)]" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -171,46 +171,46 @@ const SabotadorDetailPageV13: React.FC = () => {
               </div>
             </div>
           </Card>
-          <Card className="!p-0 overflow-hidden">
-            <div className="border-b border-white/40 bg-white/70 px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Estratégias antídoto</h3>
+          <Card className="!p-0 overflow-hidden mq-card">
+            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Estratégias antídoto</h3>
             </div>
             <div className="space-y-3 p-5">
               {sabotador.estrategiasAntidoto.map((estrategia) => (
-                <div key={estrategia} className="flex items-start gap-2 text-sm text-gray-700">
-                  <ShieldCheck size={16} className="mt-0.5 text-emerald-500" />
+                <div key={estrategia} className="flex items-start gap-2 text-sm text-[var(--mq-text)]">
+                  <ShieldCheck size={16} className="mt-0.5 text-[var(--mq-success)]" />
                   <span>{estrategia}</span>
                 </div>
               ))}
             </div>
           </Card>
-          <Card className="!p-0 overflow-hidden">
-            <div className="border-b border-white/40 bg-white/70 px-5 py-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Conceito</h3>
+          <Card className="!p-0 overflow-hidden mq-card">
+            <div className="border-b border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-5 py-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">Conceito</h3>
             </div>
-            <div className="space-y-5 p-5 text-sm leading-relaxed text-gray-700">
+            <div className="space-y-5 p-5 text-sm leading-relaxed text-[var(--mq-text)]">
               <p>{overview.descricao}</p>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#9333EA]">Como esse padrão surgiu</p>
-                <p className="mt-2 text-[#334155]">{sabotador.funcaoOriginal}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-accent)]">Como esse padrão surgiu</p>
+                <p className="mt-2 text-[var(--mq-text)]">{sabotador.funcaoOriginal}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#0EA5E9]">Origem do conceito</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-primary)]">Origem do conceito</p>
                 <ul className="mt-2 space-y-2">
                   {overview.origem.map((texto) => (
                     <li key={texto} className="flex items-start gap-2">
-                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-sky-200" />
+                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-primary-light)]" />
                       <span>{texto}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#2563EB]">Estrutura</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-primary)]">Estrutura</p>
                 <ul className="mt-2 space-y-2">
                   {overview.estrutura.map((texto) => (
                     <li key={texto} className="flex items-start gap-2">
-                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-blue-200" />
+                      <span className="mt-1 inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--mq-primary-light)]" />
                       <span>{texto}</span>
                     </li>
                   ))}

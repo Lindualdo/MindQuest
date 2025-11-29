@@ -86,25 +86,25 @@ const ResourceCard = ({
   criandoQuest: boolean;
   disabled?: boolean;
 }) => (
-  <div className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-4 shadow-md">
+  <div className="mq-card rounded-2xl p-4">
     <div className="mb-3 flex items-start justify-between gap-2">
       <div className="flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-[#1C2541]">{resource.nome}</h4>
-          <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.65rem] font-medium text-[#64748B] capitalize">
+          <h4 className="text-sm font-semibold text-[var(--mq-text)]">{resource.nome}</h4>
+          <span className="rounded-full bg-[var(--mq-card)] px-2 py-0.5 text-[0.65rem] font-medium text-[var(--mq-text-muted)] capitalize">
             {resource.tipo}
           </span>
         </div>
-        <p className="text-sm leading-relaxed text-[#475569]">
+        <p className="text-sm leading-relaxed text-[var(--mq-text-muted)]">
           {resource.descricao}
         </p>
       </div>
     </div>
     
-    <div className="mb-3 flex items-start gap-2 rounded-xl border border-white/60 bg-white/50 p-3 text-sm text-[#1C2541]">
-      <BookOpen size={16} className="mt-0.5 flex-shrink-0 text-indigo-500" />
+    <div className="mb-3 flex items-start gap-2 rounded-xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] p-3 text-sm text-[var(--mq-text)]">
+      <BookOpen size={16} className="mt-0.5 flex-shrink-0 text-[var(--mq-primary)]" />
       <div className="flex-1">
-        <span className="font-semibold text-indigo-600">Como aplicar:</span>
+        <span className="font-semibold text-[var(--mq-primary)]">Como aplicar:</span>
         <p className="mt-1 leading-relaxed">{resource.aplicacao_pratica}</p>
       </div>
     </div>
@@ -114,7 +114,7 @@ const ResourceCard = ({
         type="button"
         onClick={onCriarQuest}
         disabled={criandoQuest}
-        className="w-full rounded-xl border border-[#B6D6DF] bg-white px-3 py-2 text-xs font-semibold text-[#1C2541] shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-3 py-2 text-xs font-semibold text-[var(--mq-text)] shadow-sm hover:bg-[var(--mq-surface)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
       >
       {criandoQuest ? (
         <>
@@ -289,9 +289,9 @@ const InsightDetailPageV13 = () => {
     if (insightDetailLoading && !detail) {
       return (
         <div className="flex flex-1 items-center justify-center">
-          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow">
-            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-indigo-500" />
-            <p className="text-sm text-slate-600">Carregando insight detalhado...</p>
+          <div className="mq-card rounded-2xl px-6 py-8 text-center">
+            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-[var(--mq-primary)]" />
+            <p className="text-sm text-[var(--mq-text-muted)]">Carregando insight detalhado...</p>
           </div>
         </div>
       );
@@ -302,19 +302,19 @@ const InsightDetailPageV13 = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl border border-rose-100 bg-white px-5 py-6 shadow"
+          className="mq-card rounded-3xl px-5 py-6"
         >
-          <div className="mb-3 flex items-center gap-3 text-rose-600">
+          <div className="mb-3 flex items-center gap-3 text-[var(--mq-error)]">
             <AlertCircle size={22} />
             <h2 className="text-base font-semibold">Não foi possível carregar o insight</h2>
           </div>
-          <p className="text-sm text-rose-700">
+          <p className="text-sm text-[var(--mq-error)]">
             {insightDetailError || 'Insight não encontrado ou indisponível no momento.'}
           </p>
           <button
             type="button"
             onClick={handleBack}
-            className="mt-4 w-full rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700"
+            className="mt-4 w-full rounded-full border border-[var(--mq-error)] px-4 py-2 text-sm font-semibold text-[var(--mq-error)]"
           >
             Voltar
           </button>
@@ -332,7 +332,7 @@ const InsightDetailPageV13 = () => {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#1C2541] shadow-sm"
+            className="mq-btn-back"
           >
             <ArrowLeft size={16} />
             Voltar
@@ -357,9 +357,9 @@ const InsightDetailPageV13 = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
+          className="mq-card rounded-2xl px-5 py-4"
         >
-          <h2 className="text-lg font-semibold text-[#1C2541]">
+          <h2 className="text-lg font-semibold text-[var(--mq-text)]">
             {detail.titulo}
           </h2>
         </motion.div>
@@ -370,9 +370,9 @@ const InsightDetailPageV13 = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] px-5 py-4 shadow-md"
+            className="mq-card rounded-2xl px-5 py-4"
           >
-            <p className="text-sm leading-relaxed text-[#475569]">
+            <p className="text-sm leading-relaxed text-[var(--mq-text-muted)]">
               {detail.descricao}
             </p>
           </motion.div>
@@ -386,7 +386,7 @@ const InsightDetailPageV13 = () => {
             transition={{ delay: 0.1 }}
             className="space-y-3"
           >
-            <h3 className="px-1 text-sm font-semibold text-[#1C2541]">
+            <h3 className="px-1 text-sm font-semibold text-[var(--mq-text)]">
               Insights
             </h3>
             {recursosSugeridos.map((resource, index) => (
@@ -414,13 +414,13 @@ const InsightDetailPageV13 = () => {
             return (
               <div
                 key={key}
-                className={`rounded-2xl border border-[#B6D6DF] px-4 py-3 text-sm shadow-md ${bg} ${text}`}
+                className={`mq-card rounded-2xl px-4 py-3 text-sm ${bg} ${text}`}
               >
                 <div className="mb-1.5 flex items-center gap-2 font-semibold">
                   {icon}
                   <span>{label}</span>
                 </div>
-                <p className="leading-relaxed text-[#1C2541]">
+                <p className="leading-relaxed text-[var(--mq-text)]">
                   {content}
                 </p>
               </div>
@@ -439,7 +439,7 @@ const InsightDetailPageV13 = () => {
             <button
               type="button"
               onClick={handleOpenConversation}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#64748B] hover:text-[#2563EB] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--mq-text-muted)] hover:text-[var(--mq-primary)] transition-colors"
             >
               Ver conversa
             </button>
