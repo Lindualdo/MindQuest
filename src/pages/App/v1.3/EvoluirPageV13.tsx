@@ -231,10 +231,10 @@ const EvoluirPageV13: React.FC = () => {
                 setView('objetivos');
                 setActiveTab('ajustes');
               }}
-              className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/60">
+                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
                   <Target size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
@@ -259,10 +259,10 @@ const EvoluirPageV13: React.FC = () => {
                 setView('perfilPessoal');
                 setActiveTab('ajustes');
               }}
-              className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/60">
+                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
                   <User size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
@@ -287,10 +287,10 @@ const EvoluirPageV13: React.FC = () => {
                 setView('aparencia');
                 setActiveTab('ajustes');
               }}
-              className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/60">
+                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
                   <Palette size={20} className="text-[var(--mq-accent)]" />
                 </div>
                 <div className="text-left">
@@ -311,10 +311,10 @@ const EvoluirPageV13: React.FC = () => {
           >
             <button
               type="button"
-              className="w-full p-4 flex items-center justify-between hover:bg-white/50 transition-colors"
+              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-white/60">
+                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
                   <BookOpen size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">

@@ -340,10 +340,10 @@ const AparenciaPageV13: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="rounded-xl border border-[var(--mq-info)]/20 bg-[var(--mq-info-light)] p-3"
+          className="rounded-xl border border-[var(--mq-primary)]/20 bg-[var(--mq-primary-light)] p-3"
         >
-          <p className="text-xs text-[var(--mq-info)]">
-            💡 <span className="font-semibold">Dica:</span> O tema escuro pode ajudar a reduzir o cansaço visual durante a noite.
+          <p className="text-xs text-[var(--mq-text)]">
+            💡 <span className="font-semibold text-[var(--mq-primary)]">Dica:</span> O tema escuro pode ajudar a reduzir o cansaço visual durante a noite.
           </p>
         </motion.div>
       </main>
