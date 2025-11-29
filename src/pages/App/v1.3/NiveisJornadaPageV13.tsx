@@ -146,7 +146,7 @@ const NiveisJornadaPageV13: React.FC = () => {
             <Sparkles size={32} className="text-[var(--mq-primary)]" />
           </div>
           <p className="text-sm text-[var(--mq-text-muted)] max-w-xs mx-auto">
-            A jornada é sua. Os níveis contam a história.
+            Conversas revelam padrões. Ações mudam tudo. Celebre cada passo...
           </p>
         </motion.div>
 
