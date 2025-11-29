@@ -28,6 +28,7 @@ import AparenciaPageV13 from './pages/App/v1.3/AparenciaPageV13';
 import CheckinSemanalPageV13 from './pages/App/v1.3/CheckinSemanalPageV13';
 import ConquistasVidaPageV13 from './pages/App/v1.3/ConquistasVidaPageV13';
 import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivosPageV13';
+import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
@@ -270,6 +271,9 @@ function App() {
         break;
       case 'conexaoAcoesObjetivos':
         page = <ConexaoAcoesObjetivosPageV13 />;
+        break;
+      case 'niveisJornada':
+        page = <NiveisJornadaPageV13 />;
         break;
       default:
         page = <HomeV1_3 />;

@@ -293,18 +293,28 @@ const EvoluirPageV13: React.FC = () => {
         >
           <div className="mq-card p-5">
             <div className="mb-3">
-              <h3 className="text-base font-bold text-[var(--mq-text)] mb-1">
-                Nível {nivelInfo.nivel} · {nivelInfo.titulo}
-              </h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-bold text-[var(--mq-text)]">
+                  Nível {nivelInfo.nivel} · {nivelInfo.titulo}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setView('niveisJornada')}
+                  className="text-xs text-[var(--mq-primary)] hover:underline flex items-center gap-1"
+                >
+                  saber mais
+                  <ChevronRight size={14} />
+                </button>
+              </div>
               <p className="text-xs text-[var(--mq-text-muted)]">
                 Estágio {nivelInfo.estagio} de 4 · {nivelInfo.estagioLabel}
               </p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-[var(--mq-text-muted)]">
-                <span>{nivelInfo.xpAtual} XP</span>
+                <span>{totalXp.toLocaleString('pt-BR')} pts</span>
                 {nivelInfo.xpProximoNivel && (
-                  <span>{nivelInfo.xpProximoNivel} XP</span>
+                  <span>{nivelInfo.xpProximoNivel.toLocaleString('pt-BR')} pts</span>
                 )}
               </div>
               <div className="w-full h-2 bg-[var(--mq-bar)] rounded-full overflow-hidden">

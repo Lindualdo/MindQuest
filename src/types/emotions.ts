@@ -722,6 +722,7 @@ export type ViewId =
   | 'evoluir'
   | 'perfilPessoal'
   | 'objetivos'
+  | 'niveisJornada'
   | 'aparencia';
 
 export interface StoreState {
