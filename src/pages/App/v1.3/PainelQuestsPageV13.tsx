@@ -648,7 +648,7 @@ const PainelQuestsPageV13: React.FC = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm">
-        <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl animate-slide-up">
+        <div className="w-full max-w-md rounded-t-3xl bg-[var(--mq-surface)] shadow-2xl animate-slide-up">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-[var(--mq-text)]">Planejar Quest</h2>
@@ -662,7 +662,7 @@ const PainelQuestsPageV13: React.FC = () => {
             </div>
             
             <div className="mb-6">
-              <h3 className="text-base font-semibold text-[var(--mq-text)] mb-2">{quest.titulo}</h3>
+              <h3 className="text-base font-semibold text-[var(--mq-text)] mb-2">Regras Automáticas de Operação</h3>
               <p className="text-sm text-[var(--mq-text-muted)]">Defina quantos dias você quer praticar esta quest:</p>
             </div>
 
@@ -676,7 +676,7 @@ const PainelQuestsPageV13: React.FC = () => {
                     rounded-xl border-2 p-4 text-center font-bold transition-all
                     ${recorrenciaSelecionada === dias
                       ? 'border-[var(--mq-primary)] bg-[var(--mq-primary)] text-white shadow-lg scale-105'
-                      : 'border-gray-200 bg-white text-[var(--mq-text)] hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-light)]'
+                      : 'border-[var(--mq-border)] bg-[var(--mq-card)] text-[var(--mq-text)] hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-light)]'
                     }
                   `}
                 >
@@ -693,8 +693,8 @@ const PainelQuestsPageV13: React.FC = () => {
               className={`
                 w-full rounded-xl py-4 text-center font-bold text-white transition-all
                 ${recorrenciaSelecionada && !salvando
-                  ? 'bg-[var(--mq-primary)] hover:bg-[var(--mq-primary-hover)] shadow-lg active:scale-98'
-                  : 'bg-gray-300 cursor-not-allowed'
+                  ? 'bg-[var(--mq-primary)] hover:opacity-90 shadow-lg active:scale-98'
+                  : 'bg-[var(--mq-text-subtle)] cursor-not-allowed'
                 }
               `}
             >
