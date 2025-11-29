@@ -21,6 +21,7 @@ import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13'
 import InsightsHistoricoPageV13 from './pages/App/v1.3/InsightsHistoricoPageV13';
 import EvoluirPageV13 from './pages/App/v1.3/EvoluirPageV13';
 import AjustesPageV13 from './pages/App/v1.3/AjustesPageV13';
+import InteracoesIAPageV13 from './pages/App/v1.3/InteracoesIAPageV13';
 import PerfilPessoalPageV13 from './pages/App/v1.3/PerfilPessoalPageV13';
 import ObjetivosPageV13 from './pages/App/v1.3/ObjetivosPageV13';
 import AparenciaPageV13 from './pages/App/v1.3/AparenciaPageV13';
@@ -245,6 +246,9 @@ function App() {
         break;
       case 'ajustes':
         page = <AjustesPageV13 />;
+        break;
+      case 'interacoesIA':
+        page = <InteracoesIAPageV13 />;
         break;
       case 'perfilPessoal':
         page = <PerfilPessoalPageV13 />;

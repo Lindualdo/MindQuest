@@ -8,8 +8,6 @@ import { useDashboard } from '@/store/useStore';
 
 interface PerfilPessoalData {
   nome_preferencia: string;
-  nome_assistente: string | null;
-  tom_conversa: 'empativo' | 'interativo' | 'educativo' | 'equilibrado' | 'direto' | null;
   sobre_voce: string | null;
 }
 
@@ -34,8 +32,6 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   const [formData, setFormData] = useState<PerfilPessoalData>({
     nome_preferencia: nomeUsuario,
-    nome_assistente: null,
-    tom_conversa: null,
     sobre_voce: null,
   });
 
@@ -65,8 +61,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         if (data.success && data.perfil) {
           setFormData({
             nome_preferencia: data.perfil.nome_preferencia || nomeUsuario,
-            nome_assistente: data.perfil.nome_assistente || null,
-            tom_conversa: data.perfil.tom_conversa || null,
             sobre_voce: data.perfil.sobre_voce || null,
           });
         }
@@ -75,8 +69,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         // Em caso de erro, usar dados do dashboard
         setFormData({
           nome_preferencia: nomeUsuario,
-          nome_assistente: null,
-          tom_conversa: null,
           sobre_voce: null,
         });
       } finally {
@@ -88,8 +80,7 @@ const PerfilPessoalPageV13: React.FC = () => {
   }, [usuarioId, nomeUsuario, dashboardData?.usuario?.cronotipo_detectado]);
 
   const handleBack = () => {
-    setView('evoluir');
-    setActiveTab('ajustes');
+    setView('ajustes');
   };
 
   const handleNavHome = () => {
@@ -109,7 +100,7 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    setView('evoluir');
+    setView('jornada');
   };
 
   const handleSave = async () => {
@@ -145,8 +136,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         if (data.perfil) {
           setFormData({
             nome_preferencia: data.perfil.nome_preferencia || formData.nome_preferencia,
-            nome_assistente: data.perfil.nome_assistente || null,
-            tom_conversa: data.perfil.tom_conversa || null,
             sobre_voce: data.perfil.sobre_voce || null,
           });
         }
@@ -244,116 +233,6 @@ const PerfilPessoalPageV13: React.FC = () => {
               className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20"
               placeholder="Como você prefere ser chamado?"
             />
-          </div>
-
-          {/* Nome Assistente */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[var(--mq-text)]">
-              Nome do Assistente
-            </label>
-            <input
-              type="text"
-              value={formData.nome_assistente || ''}
-              onChange={(e) => setFormData({ ...formData, nome_assistente: e.target.value || null })}
-              className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20"
-              placeholder="Como você quer chamar seu assistente?"
-            />
-            <p className="mt-1 text-xs text-[var(--mq-text-muted)]">
-              Personalize como o assistente de IA se apresenta para você
-            </p>
-          </div>
-
-          {/* Tom de Conversa */}
-          <div>
-            <label className="mb-3 block text-sm font-semibold text-[var(--mq-text)]">
-              Tom de Conversa
-            </label>
-            <div className="space-y-3">
-              <label className="flex items-start gap-3 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 cursor-pointer hover:border-[var(--mq-primary)] hover:bg-[var(--mq-surface)] transition-colors">
-                <input
-                  type="radio"
-                  name="tom_conversa"
-                  value="empativo"
-                  checked={formData.tom_conversa === 'empativo'}
-                  onChange={(e) => setFormData({ ...formData, tom_conversa: e.target.value as any })}
-                  className="mt-1 h-4 w-4 accent-[var(--mq-primary)]"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm text-[var(--mq-text)]">Empático (padrão)</div>
-                  <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    Respostas compassivas e acolhedoras, focadas em entender suas emoções
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 cursor-pointer hover:border-[var(--mq-primary)] hover:bg-[var(--mq-surface)] transition-colors">
-                <input
-                  type="radio"
-                  name="tom_conversa"
-                  value="interativo"
-                  checked={formData.tom_conversa === 'interativo'}
-                  onChange={(e) => setFormData({ ...formData, tom_conversa: e.target.value as any })}
-                  className="mt-1 h-4 w-4 accent-[var(--mq-primary)]"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm text-[var(--mq-text)]">Interativo</div>
-                  <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    Diálogo colaborativo com perguntas que te ajudam a refletir e descobrir respostas
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 cursor-pointer hover:border-[var(--mq-primary)] hover:bg-[var(--mq-surface)] transition-colors">
-                <input
-                  type="radio"
-                  name="tom_conversa"
-                  value="educativo"
-                  checked={formData.tom_conversa === 'educativo'}
-                  onChange={(e) => setFormData({ ...formData, tom_conversa: e.target.value as any })}
-                  className="mt-1 h-4 w-4 accent-[var(--mq-primary)]"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm text-[var(--mq-text)]">Educativo</div>
-                  <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    Explicações passo a passo para te ensinar técnicas e conceitos de desenvolvimento pessoal
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 cursor-pointer hover:border-[var(--mq-primary)] hover:bg-[var(--mq-surface)] transition-colors">
-                <input
-                  type="radio"
-                  name="tom_conversa"
-                  value="equilibrado"
-                  checked={formData.tom_conversa === 'equilibrado'}
-                  onChange={(e) => setFormData({ ...formData, tom_conversa: e.target.value as any })}
-                  className="mt-1 h-4 w-4 accent-[var(--mq-primary)]"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm text-[var(--mq-text)]">Equilibrado</div>
-                  <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    Combina acolhimento empático com perguntas interativas para uma experiência completa
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 cursor-pointer hover:border-[var(--mq-primary)] hover:bg-[var(--mq-surface)] transition-colors">
-                <input
-                  type="radio"
-                  name="tom_conversa"
-                  value="direto"
-                  checked={formData.tom_conversa === 'direto'}
-                  onChange={(e) => setFormData({ ...formData, tom_conversa: e.target.value as any })}
-                  className="mt-1 h-4 w-4 accent-[var(--mq-primary)]"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm text-[var(--mq-text)]">Direto/Firme</div>
-                  <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    Tom mais direto e firme, como um mentor que te desafia e não tem medo de ser direto
-                  </div>
-                </div>
-              </label>
-            </div>
           </div>
 
           {/* Conte mais sobre você */}

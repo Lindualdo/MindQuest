@@ -91,8 +91,7 @@ const AjustesPageV13: React.FC = () => {
       title: 'Interações com IA',
       subtitle: 'Tom e frequência das mensagens',
       onClick: () => {
-        // TODO: Implementar página de configurações de IA
-        console.log('Interações com IA');
+        setView('interacoesIA');
       },
     },
     {

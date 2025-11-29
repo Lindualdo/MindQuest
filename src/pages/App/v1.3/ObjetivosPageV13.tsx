@@ -65,8 +65,7 @@ const ObjetivosPageV13: React.FC = () => {
   }, [usuarioId]);
 
   const handleBack = () => {
-    setView('evoluir');
-    setActiveTab('ajustes');
+    setView('ajustes');
   };
 
   const handleNavHome = () => {
@@ -86,7 +85,7 @@ const ObjetivosPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    setView('evoluir');
+    setView('jornada');
   };
 
   const handleSave = async () => {
@@ -126,10 +125,10 @@ const ObjetivosPageV13: React.FC = () => {
         if (typeof window !== 'undefined') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        // Esconder mensagem de sucesso e voltar para a página Evoluir após 2 segundos
+        // Esconder mensagem de sucesso e voltar para a página Ajustes após 2 segundos
         setTimeout(() => {
           setSuccess(false);
-          setView('evoluir'); // Redireciona para a página Evoluir
+          setView('ajustes');
         }, 2000);
       } else {
         throw new Error(data.error || 'Erro ao salvar objetivos');

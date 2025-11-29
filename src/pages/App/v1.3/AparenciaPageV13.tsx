@@ -185,8 +185,7 @@ const AparenciaPageV13: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
 
   const handleBack = () => {
-    setView('evoluir');
-    setActiveTab('ajustes');
+    setView('ajustes');
   };
 
   const handleNavHome = () => {
@@ -206,7 +205,7 @@ const AparenciaPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    setView('evoluir');
+    setView('jornada');
   };
 
   const handleSelectTheme = (temaId: ThemeId) => {
