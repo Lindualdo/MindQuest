@@ -28,10 +28,7 @@ import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 import { authService } from './services/authService';
-import { initializeTheme } from './hooks/useTheme';
-
-// Inicializar tema ao carregar o app
-initializeTheme();
+import { ThemeProvider } from './components/app/v1.3/ThemeProvider';
 
 declare global {
   interface Window {
@@ -259,9 +256,11 @@ function App() {
     }
 
     return (
-      <AuthGuard>
-        {page}
-      </AuthGuard>
+      <ThemeProvider>
+        <AuthGuard>
+          {page}
+        </AuthGuard>
+      </ThemeProvider>
     );
   }
 

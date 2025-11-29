@@ -5,7 +5,8 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
-import useTheme, { type ThemeId, type ThemeInfo } from '@/hooks/useTheme';
+import { useThemeContext } from '@/components/app/v1.3/ThemeProvider';
+import type { ThemeId, ThemeInfo } from '@/hooks/useTheme';
 
 // Componente de Preview em Miniatura
 const ThemePreview: React.FC<{
@@ -174,7 +175,7 @@ const ThemePreview: React.FC<{
 
 const AparenciaPageV13: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
-  const { theme, setTheme, temas, currentTheme } = useTheme();
+  const { theme, setTheme, temas, currentTheme } = useThemeContext();
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
