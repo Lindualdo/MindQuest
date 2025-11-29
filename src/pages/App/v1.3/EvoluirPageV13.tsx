@@ -5,12 +5,21 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
-import { gamificacaoLevels } from '@/data/gamificacaoLevels';
 
 interface EvoluirStats {
   total_conversas: number;
   total_quests_concluidas: number;
   xp_total: number;
+}
+
+interface NivelInfo {
+  nivel: number;
+  titulo: string;
+  estagio: number;
+  estagioLabel: string;
+  xpAtual: number;
+  xpProximoNivel: number | null;
+  percentual: number;
 }
 
 const EvoluirPageV13: React.FC = () => {
@@ -29,8 +38,66 @@ const EvoluirPageV13: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
   const [stats, setStats] = useState<EvoluirStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [nivelInfo, setNivelInfo] = useState<NivelInfo>({
+    nivel: 1,
+    titulo: 'Despertar',
+    estagio: 1,
+    estagioLabel: 'Início da jornada',
+    xpAtual: 0,
+    xpProximoNivel: 100,
+    percentual: 0
+  });
 
-  // Dados de progresso - usar stats da API se disponível, senão fallback para dados existentes
+  const userId = dashboardData?.usuario?.id;
+
+  // Buscar dados de nível da API (jornada_niveis + usuarios_conquistas)
+  useEffect(() => {
+    const loadNivelInfo = async () => {
+      if (!userId) return;
+      
+      try {
+        const res = await fetch(`/api/jornada-niveis?user_id=${userId}`);
+        const data = await res.json();
+        
+        if (data.success && data.usuario && data.niveis) {
+          const { xp_total, nivel_atual, titulo_nivel, estagio_atual } = data.usuario;
+          
+          // Encontrar dados do nível atual
+          const nivelData = data.niveis.find((n: { nivel: number }) => n.nivel === nivel_atual);
+          const xpMinimo = nivelData?.xp_minimo ?? 0;
+          const xpProximoNivel = nivelData?.xp_proximo_nivel ?? null;
+          
+          // Calcular percentual de progresso
+          const xpNoNivel = xp_total - xpMinimo;
+          const xpNecessario = xpProximoNivel ? xpProximoNivel - xpMinimo : 0;
+          const percentual = xpProximoNivel ? Math.min(100, Math.round((xpNoNivel / xpNecessario) * 100)) : 100;
+          
+          // Label do estágio
+          const estagioLabels: Record<number, string> = {
+            1: 'Início da jornada',
+            2: 'Crescimento',
+            3: 'Consolidação',
+            4: 'Mestria'
+          };
+          
+          setNivelInfo({
+            nivel: nivel_atual,
+            titulo: titulo_nivel,
+            estagio: estagio_atual,
+            estagioLabel: estagioLabels[estagio_atual] || 'Jornada',
+            xpAtual: xp_total,
+            xpProximoNivel: xpProximoNivel,
+            percentual
+          });
+        }
+      } catch (err) {
+        console.error('[Evoluir] Erro ao carregar nível:', err);
+      }
+    };
+    loadNivelInfo();
+  }, [userId]);
+
+  // Dados de progresso - usar stats da API se disponível
   const totalConversas = stats?.total_conversas ?? dashboardData?.gamificacao?.total_conversas ?? 0;
   const totalQuestsConcluidas = useMemo(() => {
     if (stats?.total_quests_concluidas !== undefined) {
@@ -48,48 +115,11 @@ const EvoluirPageV13: React.FC = () => {
     
     return quests.filter(q => q && (q.status === 'concluida' || q.status === 'inativa')).length;
   }, [stats, questSnapshot]);
-  const totalXp = useMemo(() => {
-    const xp = stats?.xp_total ?? dashboardData?.gamificacao?.xp_total ?? 0;
-    return typeof xp === 'number' ? xp : Number(xp) || 0;
-  }, [stats, dashboardData]);
+  
+  const totalXp = nivelInfo.xpAtual;
   
   const totalXpFormatted = useMemo(() => {
     return totalXp.toLocaleString('pt-BR');
-  }, [totalXp]);
-
-  // Calcular nível e estágio (mockado por enquanto)
-  const nivelInfo = useMemo(() => {
-    const level = gamificacaoLevels.find(l => totalXp >= l.xp_minimo && (l.xp_proximo_nivel === null || totalXp < l.xp_proximo_nivel)) 
-      || gamificacaoLevels[gamificacaoLevels.length - 1];
-    
-    const xpAtual = totalXp - level.xp_minimo;
-    const xpNecessario = level.xp_proximo_nivel ? level.xp_proximo_nivel - level.xp_minimo : 0;
-    const percentual = level.xp_proximo_nivel ? Math.min(100, Math.round((xpAtual / xpNecessario) * 100)) : 100;
-    
-    // Calcular estágio: 1-3=estágio1, 4-6=estágio2, 7-9=estágio3, 10+=estágio4
-    const calcularEstagio = (nivel: number) => {
-      if (nivel <= 3) return 1;
-      if (nivel <= 6) return 2;
-      if (nivel <= 9) return 3;
-      return 4;
-    };
-    
-    const estagio = calcularEstagio(level.nivel);
-    const estagioLabel = estagio === 1 ? 'Início da jornada' : 
-                         estagio === 2 ? 'Crescimento' : 
-                         estagio === 3 ? 'Consolidação' : 
-                         'Mestria';
-    
-    return {
-      nivel: level.nivel,
-      titulo: level.titulo,
-      xpAtual,
-      xpNecessario,
-      xpProximoNivel: level.xp_proximo_nivel,
-      percentual,
-      estagio,
-      estagioLabel,
-    };
   }, [totalXp]);
 
   // Dados para contadores

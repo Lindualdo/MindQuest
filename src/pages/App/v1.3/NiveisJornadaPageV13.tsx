@@ -123,7 +123,7 @@ const NiveisJornadaPageV13: React.FC = () => {
             <Sparkles size={32} className="text-[var(--mq-primary)]" />
           </div>
           <p className="text-sm text-[var(--mq-text-muted)] max-w-xs mx-auto">
-            Cada conversa e ação te aproximam 
+            Cada conversa e ação te aproximam de sua melhor versão
           </p>
         </motion.div>
 
