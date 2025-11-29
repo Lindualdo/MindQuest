@@ -47,24 +47,14 @@ const NiveisJornadaPageV13: React.FC = () => {
   const { setView, dashboardData } = useDashboard();
   const [estagios, setEstagios] = useState<Estagio[]>([]);
   const [loading, setLoading] = useState(true);
-  const [nivelAtual, setNivelAtual] = useState(1);
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
     dashboardData?.usuario?.nome ??
     'Usuário';
 
-  // Buscar nível atual do usuário
-  useEffect(() => {
-    const xpTotal = dashboardData?.gamificacao?.xp_total ?? 0;
-    if (estagios.length > 0) {
-      const todosNiveis = estagios.flatMap(e => e.niveis);
-      const nivel = todosNiveis.find(n => 
-        xpTotal >= n.xp_minimo && (n.xp_proximo_nivel === null || xpTotal < n.xp_proximo_nivel)
-      );
-      if (nivel) setNivelAtual(nivel.nivel);
-    }
-  }, [dashboardData, estagios]);
+  // Nível atual do usuário (vem da tabela usuarios_conquistas via dashboard)
+  const nivelAtual = dashboardData?.gamificacao?.nivel_atual ?? 1;
 
   // Carregar dados dos níveis
   useEffect(() => {
