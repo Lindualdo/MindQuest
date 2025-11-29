@@ -25,6 +25,9 @@ import InteracoesIAPageV13 from './pages/App/v1.3/InteracoesIAPageV13';
 import PerfilPessoalPageV13 from './pages/App/v1.3/PerfilPessoalPageV13';
 import ObjetivosPageV13 from './pages/App/v1.3/ObjetivosPageV13';
 import AparenciaPageV13 from './pages/App/v1.3/AparenciaPageV13';
+import CheckinSemanalPageV13 from './pages/App/v1.3/CheckinSemanalPageV13';
+import ConquistasVidaPageV13 from './pages/App/v1.3/ConquistasVidaPageV13';
+import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivosPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
@@ -258,6 +261,15 @@ function App() {
         break;
       case 'aparencia':
         page = <AparenciaPageV13 />;
+        break;
+      case 'checkinSemanal':
+        page = <CheckinSemanalPageV13 />;
+        break;
+      case 'conquistasVida':
+        page = <ConquistasVidaPageV13 />;
+        break;
+      case 'conexaoAcoesObjetivos':
+        page = <ConexaoAcoesObjetivosPageV13 />;
         break;
       default:
         page = <HomeV1_3 />;
