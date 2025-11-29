@@ -1,73 +1,102 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Plus, Target, ChevronRight, Loader2, CheckCircle2, Calendar, AlertCircle } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 
-// Dados mockados - Áreas da Vida
-const areasVida = [
-  { codigo: 'carreira', nome: 'Carreira', icone: '💼' },
-  { codigo: 'relacionamentos', nome: 'Relacionamentos', icone: '💛' },
-  { codigo: 'espiritualidade', nome: 'Espiritualidade', icone: '🙏' },
-  { codigo: 'financas', nome: 'Finanças', icone: '💰' },
-  { codigo: 'saude', nome: 'Saúde', icone: '🏃' },
-  { codigo: 'evolucao', nome: 'Evolução', icone: '🧠' },
+// Tipos
+interface Area {
+  id: string;
+  codigo: string;
+  nome: string;
+  icone: string;
+  ordem: number;
+}
+
+interface ObjetivoCatalogo {
+  id: string;
+  codigo: string;
+  titulo: string;
+  ordem: number;
+}
+
+interface ObjetivoUsuario {
+  id: string;
+  area: {
+    id: string;
+    codigo: string;
+    nome: string;
+    icone: string;
+  };
+  titulo: string;
+  detalhamento: string;
+  prazo_dias: number;
+  data_inicio: string;
+  data_limite: string;
+  dias_restantes: number;
+  status: string;
+}
+
+// Fallback do catálogo (caso API não esteja disponível)
+const FALLBACK_AREAS: Area[] = [
+  { id: '22222222-2222-4222-8222-222222222222', codigo: 'trabalho', nome: 'Trabalho', icone: '💼', ordem: 1 },
+  { id: '66666666-6666-4666-8666-666666666666', codigo: 'relacionamentos', nome: 'Relacionamentos', icone: '💛', ordem: 2 },
+  { id: '44444444-4444-4444-8444-444444444444', codigo: 'espiritualidade', nome: 'Espiritualidade', icone: '🙏', ordem: 3 },
+  { id: '33333333-3333-4333-8333-333333333333', codigo: 'financas', nome: 'Finanças', icone: '💰', ordem: 4 },
+  { id: '11111111-1111-4111-8111-111111111111', codigo: 'saude', nome: 'Saúde', icone: '🏃', ordem: 5 },
+  { id: '88888888-8888-4888-8888-888888888888', codigo: 'evolucao', nome: 'Evolução', icone: '🧠', ordem: 6 },
 ];
 
-// Dados mockados - Objetivos por Área
-const objetivosCatalogo: Record<string, string[]> = {
-  carreira: [
-    'Mudar de emprego',
-    'Mudar de área de atuação',
-    'Iniciar meu próprio negócio',
-    'Conseguir uma promoção',
-    'Melhorar produtividade no trabalho',
+const FALLBACK_OBJETIVOS: Record<string, ObjetivoCatalogo[]> = {
+  '22222222-2222-4222-8222-222222222222': [
+    { id: '1', codigo: 'mudar_emprego', titulo: 'Mudar de emprego', ordem: 1 },
+    { id: '2', codigo: 'mudar_area', titulo: 'Mudar de área de atuação', ordem: 2 },
+    { id: '3', codigo: 'proprio_negocio', titulo: 'Iniciar meu próprio negócio', ordem: 3 },
+    { id: '4', codigo: 'promocao', titulo: 'Conseguir uma promoção', ordem: 4 },
+    { id: '5', codigo: 'produtividade', titulo: 'Melhorar produtividade no trabalho', ordem: 5 },
   ],
-  relacionamentos: [
-    'Encontrar alguém para a vida',
-    'Fazer novas amizades',
-    'Melhorar comunicação com parceiro(a)',
-    'Fortalecer laços familiares',
-    'Estabelecer limites saudáveis',
+  '66666666-6666-4666-8666-666666666666': [
+    { id: '6', codigo: 'encontrar_alguem', titulo: 'Encontrar alguém para a vida', ordem: 1 },
+    { id: '7', codigo: 'novas_amizades', titulo: 'Fazer novas amizades', ordem: 2 },
+    { id: '8', codigo: 'comunicacao_parceiro', titulo: 'Melhorar comunicação com parceiro(a)', ordem: 3 },
+    { id: '9', codigo: 'lacos_familiares', titulo: 'Fortalecer laços familiares', ordem: 4 },
+    { id: '10', codigo: 'limites_saudaveis', titulo: 'Estabelecer limites saudáveis', ordem: 5 },
   ],
-  espiritualidade: [
-    'Explorar uma crença ou filosofia',
-    'Desenvolver prática de meditação',
-    'Encontrar propósito e sentido',
-    'Cultivar gratidão diária',
+  '44444444-4444-4444-8444-444444444444': [
+    { id: '11', codigo: 'explorar_crenca', titulo: 'Explorar uma crença ou filosofia', ordem: 1 },
+    { id: '12', codigo: 'meditacao', titulo: 'Desenvolver prática de meditação', ordem: 2 },
+    { id: '13', codigo: 'proposito', titulo: 'Encontrar propósito e sentido', ordem: 3 },
+    { id: '14', codigo: 'gratidao', titulo: 'Cultivar gratidão diária', ordem: 4 },
   ],
-  financas: [
-    'Aumentar minha renda',
-    'Controlar gastos e contas',
-    'Começar a investir',
-    'Criar reserva de emergência',
-    'Quitar dívidas',
+  '33333333-3333-4333-8333-333333333333': [
+    { id: '15', codigo: 'aumentar_renda', titulo: 'Aumentar minha renda', ordem: 1 },
+    { id: '16', codigo: 'controlar_gastos', titulo: 'Controlar gastos e contas', ordem: 2 },
+    { id: '17', codigo: 'comecar_investir', titulo: 'Começar a investir', ordem: 3 },
+    { id: '18', codigo: 'reserva_emergencia', titulo: 'Criar reserva de emergência', ordem: 4 },
+    { id: '19', codigo: 'quitar_dividas', titulo: 'Quitar dívidas', ordem: 5 },
   ],
-  saude: [
-    'Perder peso',
-    'Ganhar massa muscular',
-    'Melhorar qualidade do sono',
-    'Reduzir ansiedade/estresse',
-    'Melhorar exames (colesterol, glicose, etc.)',
+  '11111111-1111-4111-8111-111111111111': [
+    { id: '20', codigo: 'perder_peso', titulo: 'Perder peso', ordem: 1 },
+    { id: '21', codigo: 'ganhar_massa', titulo: 'Ganhar massa muscular', ordem: 2 },
+    { id: '22', codigo: 'qualidade_sono', titulo: 'Melhorar qualidade do sono', ordem: 3 },
+    { id: '23', codigo: 'reduzir_ansiedade', titulo: 'Reduzir ansiedade/estresse', ordem: 4 },
+    { id: '24', codigo: 'melhorar_exames', titulo: 'Melhorar exames (colesterol, glicose, etc.)', ordem: 5 },
   ],
-  evolucao: [
-    'Desenvolver autoconhecimento',
-    'Aprender algo novo (idioma, habilidade)',
-    'Ler mais livros',
-    'Superar um medo ou bloqueio',
-    'Desenvolver disciplina e consistência',
+  '88888888-8888-4888-8888-888888888888': [
+    { id: '25', codigo: 'autoconhecimento', titulo: 'Desenvolver autoconhecimento', ordem: 1 },
+    { id: '26', codigo: 'aprender_novo', titulo: 'Aprender algo novo (idioma, habilidade)', ordem: 2 },
+    { id: '27', codigo: 'ler_mais', titulo: 'Ler mais livros', ordem: 3 },
+    { id: '28', codigo: 'superar_medo', titulo: 'Superar um medo ou bloqueio', ordem: 4 },
+    { id: '29', codigo: 'disciplina', titulo: 'Desenvolver disciplina e consistência', ordem: 5 },
   ],
 };
 
-type Passo = 1 | 2 | 3 | 4;
+type Passo = 0 | 1 | 2 | 3 | 4; // 0 = Lista de objetivos
 
 const ObjetivosPageV13: React.FC = () => {
-  const {
-    dashboardData,
-    setView,
-  } = useDashboard();
+  const { dashboardData, setView } = useDashboard();
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -77,26 +106,78 @@ const ObjetivosPageV13: React.FC = () => {
   const usuarioId = dashboardData?.usuario?.id;
 
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
-  const [passoAtual, setPassoAtual] = useState<Passo>(1);
+  const [passoAtual, setPassoAtual] = useState<Passo>(0);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Dados do usuário
+  const [objetivosUsuario, setObjetivosUsuario] = useState<ObjetivoUsuario[]>([]);
+  const [podeCriar, setPodeCriar] = useState(true);
+  const [totalAtivos, setTotalAtivos] = useState(0);
+
+  // Catálogo
+  const [areas, setAreas] = useState<Area[]>(FALLBACK_AREAS);
+  const [objetivosPorArea, setObjetivosPorArea] = useState<Record<string, ObjetivoCatalogo[]>>(FALLBACK_OBJETIVOS);
+
   // Estado do formulário
-  const [areaSelecionada, setAreaSelecionada] = useState<string | null>(null);
-  const [objetivoSelecionado, setObjetivoSelecionado] = useState<string | null>(null);
+  const [areaSelecionada, setAreaSelecionada] = useState<Area | null>(null);
+  const [objetivoSelecionado, setObjetivoSelecionado] = useState<ObjetivoCatalogo | null>(null);
   const [objetivoCustomizado, setObjetivoCustomizado] = useState<string>('');
   const [detalhamento, setDetalhamento] = useState<string>('');
   const [prazoDias, setPrazoDias] = useState<30 | 45 | 60 | null>(null);
 
+  // Carregar dados iniciais
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, []);
+    
+    if (usuarioId) {
+      loadData();
+    }
+  }, [usuarioId]);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Carregar objetivos do usuário
+      const objetivosRes = await fetch(`/api/objetivos?user_id=${usuarioId}`);
+      if (objetivosRes.ok) {
+        const data = await objetivosRes.json();
+        if (data.success) {
+          setObjetivosUsuario(data.objetivos || []);
+          setPodeCriar(data.pode_criar ?? true);
+          setTotalAtivos(data.total_ativos ?? 0);
+        }
+      }
+
+      // Tentar carregar catálogo (usar fallback se falhar)
+      try {
+        const catalogoRes = await fetch('/api/objetivos-catalogo');
+        if (catalogoRes.ok) {
+          const catalogoData = await catalogoRes.json();
+          if (catalogoData.success) {
+            setAreas(catalogoData.areas || FALLBACK_AREAS);
+            setObjetivosPorArea(catalogoData.objetivos_por_area || FALLBACK_OBJETIVOS);
+          }
+        }
+      } catch {
+        // Usar fallback silenciosamente
+      }
+    } catch (err) {
+      console.error('[Objetivos] Erro ao carregar:', err);
+      setError('Erro ao carregar objetivos');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
-    if (passoAtual > 1) {
+    if (passoAtual > 0) {
       setPassoAtual((prev) => (prev - 1) as Passo);
     } else {
       setView('jornada');
@@ -123,6 +204,21 @@ const ObjetivosPageV13: React.FC = () => {
     setView('jornada');
   };
 
+  const iniciarCriacao = () => {
+    if (!podeCriar) {
+      setError('Você já tem 2 objetivos ativos. Conclua ou cancele um para criar outro.');
+      return;
+    }
+    setPassoAtual(1);
+    setAreaSelecionada(null);
+    setObjetivoSelecionado(null);
+    setObjetivoCustomizado('');
+    setDetalhamento('');
+    setPrazoDias(null);
+    setError(null);
+    setSuccess(false);
+  };
+
   const handleProximoPasso = () => {
     if (passoAtual < 4) {
       setPassoAtual((prev) => (prev + 1) as Passo);
@@ -130,18 +226,12 @@ const ObjetivosPageV13: React.FC = () => {
   };
 
   const handleCriarObjetivo = async () => {
-    if (!usuarioId) {
-      setError('Usuário não identificado');
+    if (!usuarioId || !areaSelecionada) {
+      setError('Dados incompletos');
       return;
     }
 
-    if (!areaSelecionada) {
-      setError('Selecione uma área da vida');
-      setPassoAtual(1);
-      return;
-    }
-
-    const titulo = objetivoSelecionado === 'outro' ? objetivoCustomizado : objetivoSelecionado;
+    const titulo = objetivoSelecionado?.titulo || objetivoCustomizado;
     if (!titulo || titulo.trim().length < 3) {
       setError('Defina um objetivo');
       setPassoAtual(2);
@@ -156,7 +246,6 @@ const ObjetivosPageV13: React.FC = () => {
 
     if (!prazoDias) {
       setError('Selecione um prazo');
-      setPassoAtual(4);
       return;
     }
 
@@ -165,35 +254,55 @@ const ObjetivosPageV13: React.FC = () => {
       setError(null);
       setSuccess(false);
 
-      // TODO: Integrar com API real
-      // const response = await fetch('/api/objetivos', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     user_id: usuarioId,
-      //     area_vida_id: areaSelecionada,
-      //     titulo,
-      //     detalhamento,
-      //     prazo_dias: prazoDias,
-      //   }),
-      // });
+      const response = await fetch('/api/objetivos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: usuarioId,
+          area_vida_id: areaSelecionada.id,
+          objetivo_catalogo_id: objetivoSelecionado?.id || null,
+          titulo,
+          detalhamento,
+          prazo_dias: prazoDias,
+        }),
+      });
 
-      // Simular salvamento
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Erro ao criar objetivo');
+      }
 
       setSuccess(true);
+      
+      // Recarregar lista
+      await loadData();
+      
       setTimeout(() => {
-        setView('jornada');
-      }, 2000);
-    } catch (error) {
-      console.error('[Objetivos] Erro ao criar:', error);
-      setError(error instanceof Error ? error.message : 'Erro ao criar objetivo');
+        setPassoAtual(0);
+        setSuccess(false);
+      }, 1500);
+    } catch (err) {
+      console.error('[Objetivos] Erro ao criar:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao criar objetivo');
     } finally {
       setSaving(false);
     }
   };
 
-  const objetivosDisponiveis = areaSelecionada ? objetivosCatalogo[areaSelecionada] || [] : [];
+  const objetivosDisponiveis = useMemo(() => {
+    if (!areaSelecionada) return [];
+    return objetivosPorArea[areaSelecionada.id] || [];
+  }, [areaSelecionada, objetivosPorArea]);
+
+  // Filtra apenas as 6 primeiras áreas para exibição
+  const areasExibir = useMemo(() => {
+    return areas.slice(0, 6);
+  }, [areas]);
+
+  const objetivosAtivos = useMemo(() => {
+    return objetivosUsuario.filter(o => o.status === 'ativo');
+  }, [objetivosUsuario]);
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
@@ -202,11 +311,7 @@ const ObjetivosPageV13: React.FC = () => {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
         {/* Botão voltar */}
         <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
+          <button type="button" onClick={handleBack} className="mq-btn-back">
             <ArrowLeft size={18} />
             Voltar
           </button>
@@ -214,34 +319,134 @@ const ObjetivosPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="mq-page-title">Definir Objetivo</h1>
-          <p className="mq-page-subtitle">O que você quer conquistar?</p>
+          <h1 className="mq-page-title">
+            {passoAtual === 0 ? 'Meus Objetivos' : 'Definir Objetivo'}
+          </h1>
+          <p className="mq-page-subtitle">
+            {passoAtual === 0
+              ? `${totalAtivos}/2 objetivos ativos`
+              : 'O que você quer conquistar?'}
+          </p>
         </div>
 
         {/* Mensagens de erro/sucesso */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border border-[var(--mq-error)] bg-[var(--mq-error-light)] p-3 text-sm text-[var(--mq-error)]"
-          >
-            {error}
-          </motion.div>
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 rounded-xl border border-[var(--mq-error)] bg-[var(--mq-error-light)] p-3 text-sm text-[var(--mq-error)] flex items-center gap-2"
+            >
+              <AlertCircle size={16} />
+              {error}
+            </motion.div>
+          )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md flex items-center gap-2"
+            >
+              <CheckCircle2 size={20} />
+              Objetivo criado com sucesso!
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 size={32} className="animate-spin text-[var(--mq-primary)]" />
+          </div>
         )}
 
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md"
-          >
-            ✅ Objetivo criado com sucesso!
-          </motion.div>
-        )}
-
-        {/* Formulário com passos */}
-        <div className="mq-card p-6" style={{ borderRadius: 24 }}>
+        {/* Conteúdo */}
+        {!loading && (
           <AnimatePresence mode="wait">
+            {/* PASSO 0: Lista de objetivos */}
+            {passoAtual === 0 && (
+              <motion.div
+                key="lista"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                {/* Objetivos ativos */}
+                {objetivosAtivos.length > 0 && (
+                  <div className="space-y-3">
+                    {objetivosAtivos.map((obj) => (
+                      <motion.div
+                        key={obj.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mq-card p-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">{obj.area.icone}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-[var(--mq-text-muted)]">
+                                {obj.area.nome}
+                              </span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                obj.dias_restantes <= 7
+                                  ? 'bg-[var(--mq-warning-light)] text-[var(--mq-warning)]'
+                                  : 'bg-[var(--mq-primary-light)] text-[var(--mq-primary)]'
+                              }`}>
+                                {obj.dias_restantes > 0 ? `${obj.dias_restantes} dias` : 'Vence hoje!'}
+                              </span>
+                            </div>
+                            <h3 className="text-sm font-bold text-[var(--mq-text)] mb-1">
+                              {obj.titulo}
+                            </h3>
+                            <p className="text-xs text-[var(--mq-text-muted)] line-clamp-2">
+                              {obj.detalhamento}
+                            </p>
+                          </div>
+                          <ChevronRight size={18} className="text-[var(--mq-text-subtle)] mt-1" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {objetivosAtivos.length === 0 && (
+                  <div className="mq-card p-8 text-center">
+                    <Target size={48} className="mx-auto mb-4 text-[var(--mq-text-subtle)]" />
+                    <h3 className="text-base font-bold text-[var(--mq-text)] mb-2">
+                      Nenhum objetivo definido
+                    </h3>
+                    <p className="text-sm text-[var(--mq-text-muted)]">
+                      Defina até 2 objetivos para focar sua jornada de transformação.
+                    </p>
+                  </div>
+                )}
+
+                {/* Botão criar */}
+                <motion.button
+                  type="button"
+                  onClick={iniciarCriacao}
+                  disabled={!podeCriar}
+                  className={`w-full p-4 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 ${
+                    podeCriar
+                      ? 'border-[var(--mq-primary)] text-[var(--mq-primary)] hover:bg-[var(--mq-primary-light)]'
+                      : 'border-[var(--mq-border)] text-[var(--mq-text-muted)] cursor-not-allowed'
+                  }`}
+                  whileHover={podeCriar ? { scale: 1.02 } : {}}
+                  whileTap={podeCriar ? { scale: 0.98 } : {}}
+                >
+                  <Plus size={20} />
+                  <span className="font-semibold">
+                    {podeCriar ? 'Novo Objetivo' : 'Limite atingido (2/2)'}
+                  </span>
+                </motion.button>
+              </motion.div>
+            )}
+
             {/* PASSO 1: Escolha a área da vida */}
             {passoAtual === 1 && (
               <motion.div
@@ -249,24 +454,27 @@ const ObjetivosPageV13: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="mq-card p-6"
+                style={{ borderRadius: 24 }}
               >
                 <div className="mb-4">
-                  <p className="mq-eyebrow mb-2">PASSO 1</p>
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Escolha a área da vida</h3>
+                  <p className="mq-eyebrow mb-2">PASSO 1 DE 4</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">
+                    Escolha a área da vida
+                  </h3>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  {areasVida.map((area) => (
+                  {areasExibir.map((area) => (
                     <button
-                      key={area.codigo}
+                      key={area.id}
                       type="button"
                       onClick={() => {
-                        setAreaSelecionada(area.codigo);
-                        setTimeout(() => handleProximoPasso(), 300);
+                        setAreaSelecionada(area);
+                        setTimeout(() => handleProximoPasso(), 200);
                       }}
                       className={`p-4 rounded-xl border-2 transition-all ${
-                        areaSelecionada === area.codigo
+                        areaSelecionada?.id === area.id
                           ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
                           : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
                       }`}
@@ -288,19 +496,25 @@ const ObjetivosPageV13: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="mq-card p-6"
+                style={{ borderRadius: 24 }}
               >
                 <div className="mb-4">
-                  <p className="mq-eyebrow mb-2">PASSO 2</p>
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Escolha o objetivo (ou crie)</h3>
+                  <p className="mq-eyebrow mb-2">PASSO 2 DE 4</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">
+                    Escolha o objetivo
+                  </h3>
+                  <p className="text-xs text-[var(--mq-text-muted)] mt-1">
+                    {areaSelecionada?.icone} {areaSelecionada?.nome}
+                  </p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[50vh] overflow-y-auto">
                   {objetivosDisponiveis.map((objetivo) => (
                     <label
-                      key={objetivo}
+                      key={objetivo.id}
                       className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        objetivoSelecionado === objetivo
+                        objetivoSelecionado?.id === objetivo.id
                           ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
                           : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
                       }`}
@@ -308,21 +522,23 @@ const ObjetivosPageV13: React.FC = () => {
                       <input
                         type="radio"
                         name="objetivo"
-                        value={objetivo}
-                        checked={objetivoSelecionado === objetivo}
-                        onChange={(e) => {
-                          setObjetivoSelecionado(e.target.value);
+                        checked={objetivoSelecionado?.id === objetivo.id}
+                        onChange={() => {
+                          setObjetivoSelecionado(objetivo);
                           setObjetivoCustomizado('');
                         }}
                         className="h-4 w-4 accent-[var(--mq-primary)]"
                       />
-                      <span className="text-sm text-[var(--mq-text)] flex-1">{objetivo}</span>
+                      <span className="text-sm text-[var(--mq-text)] flex-1">
+                        {objetivo.titulo}
+                      </span>
                     </label>
                   ))}
 
+                  {/* Objetivo customizado */}
                   <label
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      objetivoSelecionado === 'outro'
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      objetivoSelecionado === null && objetivoCustomizado
                         ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
                         : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
                     }`}
@@ -330,26 +546,22 @@ const ObjetivosPageV13: React.FC = () => {
                     <input
                       type="radio"
                       name="objetivo"
-                      value="outro"
-                      checked={objetivoSelecionado === 'outro'}
-                      onChange={(e) => {
-                        setObjetivoSelecionado('outro');
-                        setObjetivoCustomizado('');
-                      }}
-                      className="h-4 w-4 accent-[var(--mq-primary)]"
+                      checked={objetivoSelecionado === null && objetivoCustomizado.length > 0}
+                      onChange={() => setObjetivoSelecionado(null)}
+                      className="h-4 w-4 accent-[var(--mq-primary)] mt-0.5"
                     />
                     <div className="flex-1">
-                      <span className="text-sm text-[var(--mq-text)]">Outro: </span>
+                      <span className="text-sm text-[var(--mq-text)]">Outro:</span>
                       <input
                         type="text"
                         value={objetivoCustomizado}
-                        onChange={(e) => setObjetivoCustomizado(e.target.value)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setObjetivoSelecionado('outro');
+                        onChange={(e) => {
+                          setObjetivoCustomizado(e.target.value);
+                          setObjetivoSelecionado(null);
                         }}
+                        onClick={() => setObjetivoSelecionado(null)}
                         placeholder="Digite seu objetivo"
-                        className="text-sm text-[var(--mq-text)] bg-transparent border-none outline-none flex-1 w-full"
+                        className="text-sm text-[var(--mq-text)] bg-transparent border-none outline-none w-full mt-1"
                       />
                     </div>
                   </label>
@@ -358,7 +570,7 @@ const ObjetivosPageV13: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleProximoPasso}
-                  disabled={!objetivoSelecionado || (objetivoSelecionado === 'outro' && !objetivoCustomizado.trim())}
+                  disabled={!objetivoSelecionado && !objetivoCustomizado.trim()}
                   className="mq-btn-primary w-full mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Continuar
@@ -373,11 +585,17 @@ const ObjetivosPageV13: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="mq-card p-6"
+                style={{ borderRadius: 24 }}
               >
                 <div className="mb-4">
-                  <p className="mq-eyebrow mb-2">PASSO 3</p>
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Detalhe seu objetivo</h3>
+                  <p className="mq-eyebrow mb-2">PASSO 3 DE 4</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">
+                    Detalhe seu objetivo
+                  </h3>
+                  <p className="text-xs text-[var(--mq-text-muted)] mt-1">
+                    {objetivoSelecionado?.titulo || objetivoCustomizado}
+                  </p>
                 </div>
 
                 <div>
@@ -411,11 +629,14 @@ const ObjetivosPageV13: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="mq-card p-6"
+                style={{ borderRadius: 24 }}
               >
                 <div className="mb-4">
-                  <p className="mq-eyebrow mb-2">PASSO 4</p>
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Defina o prazo</h3>
+                  <p className="mq-eyebrow mb-2">PASSO 4 DE 4</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">
+                    Defina o prazo
+                  </h3>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
@@ -433,10 +654,22 @@ const ObjetivosPageV13: React.FC = () => {
                       <div className="text-lg font-bold text-[var(--mq-text)] mb-1">{dias}</div>
                       <div className="text-xs text-[var(--mq-text-muted)]">dias</div>
                       {prazoDias === dias && (
-                        <div className="mt-2 text-[var(--mq-primary)]">✓</div>
+                        <div className="mt-2 text-[var(--mq-primary)]">
+                          <CheckCircle2 size={16} />
+                        </div>
                       )}
                     </button>
                   ))}
+                </div>
+
+                {/* Resumo */}
+                <div className="mt-6 p-4 rounded-xl bg-[var(--mq-background)] border border-[var(--mq-border)]">
+                  <h4 className="text-xs font-bold text-[var(--mq-text-muted)] mb-2">RESUMO</h4>
+                  <div className="space-y-1 text-sm">
+                    <p><span className="text-[var(--mq-text-muted)]">Área:</span> {areaSelecionada?.icone} {areaSelecionada?.nome}</p>
+                    <p><span className="text-[var(--mq-text-muted)]">Objetivo:</span> {objetivoSelecionado?.titulo || objetivoCustomizado}</p>
+                    <p><span className="text-[var(--mq-text-muted)]">Prazo:</span> {prazoDias ? `${prazoDias} dias` : '-'}</p>
+                  </div>
                 </div>
 
                 <motion.button
@@ -454,7 +687,7 @@ const ObjetivosPageV13: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Save size={18} />
+                      <Target size={18} />
                       Criar Objetivo
                     </>
                   )}
@@ -462,7 +695,7 @@ const ObjetivosPageV13: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        )}
       </main>
 
       <BottomNavV1_3
