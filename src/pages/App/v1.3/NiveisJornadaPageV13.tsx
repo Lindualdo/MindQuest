@@ -47,6 +47,7 @@ const NiveisJornadaPageV13: React.FC = () => {
   const { setView, dashboardData } = useDashboard();
   const [estagios, setEstagios] = useState<Estagio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [nivelAtual, setNivelAtual] = useState(1);
 
   const nomeUsuario =
@@ -55,49 +56,39 @@ const NiveisJornadaPageV13: React.FC = () => {
     'Usuário';
 
   const userId = dashboardData?.usuario?.id;
-  const xpTotal = dashboardData?.gamificacao?.xp_total ?? 0;
 
-  // Carregar dados dos níveis e calcular nível do usuário
+  // Carregar dados dos níveis da API
   useEffect(() => {
     const loadNiveis = async () => {
       if (!userId) {
+        setError('Usuário não identificado');
         setLoading(false);
         return;
       }
       
       try {
         const res = await fetch(`/api/jornada-niveis?user_id=${userId}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            setEstagios(data.estagios || []);
-            // Usar nível calculado pela API
-            if (data.usuario?.nivel_atual) {
-              setNivelAtual(data.usuario.nivel_atual);
-            }
-          }
+        const data = await res.json();
+        
+        if (!res.ok || !data.success) {
+          setError(data.error || 'Erro ao carregar níveis');
+          setLoading(false);
+          return;
         }
+        
+        setEstagios(data.estagios || []);
+        setNivelAtual(data.usuario?.nivel_atual ?? 1);
+        setError(null);
       } catch (err) {
-        console.error('[NiveisJornada] Erro ao carregar API, calculando localmente:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Erro ao carregar níveis';
+        setError(errorMsg);
+        console.error('[NiveisJornada] Erro:', err);
       } finally {
         setLoading(false);
       }
     };
     loadNiveis();
   }, [userId]);
-
-  // Calcular nível baseado nos pontos quando temos estágios carregados
-  useEffect(() => {
-    if (estagios.length > 0 && xpTotal > 0) {
-      const todosNiveis = estagios.flatMap(e => e.niveis);
-      const nivel = todosNiveis.find(n => 
-        xpTotal >= n.xp_minimo && (n.xp_proximo_nivel === null || xpTotal < n.xp_proximo_nivel)
-      );
-      if (nivel) {
-        setNivelAtual(nivel.nivel);
-      }
-    }
-  }, [estagios, xpTotal]);
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
@@ -140,6 +131,13 @@ const NiveisJornadaPageV13: React.FC = () => {
         {loading && (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--mq-primary)] border-t-transparent" />
+          </div>
+        )}
+
+        {/* Erro */}
+        {error && !loading && (
+          <div className="mq-card p-6 text-center border border-red-500/30 bg-red-500/10">
+            <p className="text-red-400 text-sm">{error}</p>
           </div>
         )}
 
