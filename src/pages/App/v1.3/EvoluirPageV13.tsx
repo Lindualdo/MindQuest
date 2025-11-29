@@ -302,7 +302,11 @@ const EvoluirPageV13: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
           >
-            <div className="mq-card w-full p-5 hover:shadow-lg transition-all flex flex-col items-center justify-center text-center">
+            <button
+              type="button"
+              onClick={() => setView('niveisJornada')}
+              className="mq-card w-full p-5 hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
+            >
               <p className="text-sm font-semibold text-[var(--mq-text-muted)] mb-2">Pontos</p>
               <div className="flex items-center justify-center gap-1.5">
                 <span className="text-4xl font-bold text-[var(--mq-text)] leading-none">
@@ -310,7 +314,7 @@ const EvoluirPageV13: React.FC = () => {
                 </span>
                 <Star size={16} className="text-[var(--mq-warning)]" />
               </div>
-            </div>
+            </button>
           </motion.div>
         </div>
 
