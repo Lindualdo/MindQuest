@@ -256,3 +256,111 @@
   text-decoration: underline;
 }
 
+/* ========================================
+   TEMAS - Sistema de Temas MindQuest
+   ======================================== */
+
+/* Tema 1: Clareza (Light - Padrão) */
+.mq-app-v1_3[data-theme="clareza"] {
+  --mq-bg: #F5EBF3;
+  --mq-surface: #E8F3F5;
+  --mq-card: #FFFFFF;
+  --mq-border: #B6D6DF;
+  --mq-border-subtle: rgba(28, 37, 65, 0.08);
+  --mq-text: #1C2541;
+  --mq-text-secondary: #475569;
+  --mq-text-muted: #64748B;
+  --mq-text-subtle: #94A3B8;
+  --mq-primary: #0EA5E9;
+  --mq-primary-hover: #0C8BD6;
+  --mq-primary-light: #E0F2FE;
+  --mq-accent: #D90368;
+  --mq-accent-hover: #B80258;
+  --mq-bar: #C5DDF2;
+  --mq-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+  --mq-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+  --mq-shadow-lg: 0 16px 32px rgba(15, 23, 42, 0.12);
+}
+
+/* Tema 2: Natureza (Light - Verde/Bege) */
+.mq-app-v1_3[data-theme="natureza"] {
+  --mq-bg: #F7F5F0;
+  --mq-surface: #EDF5E8;
+  --mq-card: #FDFCFA;
+  --mq-border: #C8D9B8;
+  --mq-border-subtle: rgba(60, 80, 40, 0.08);
+  --mq-text: #2D3A1F;
+  --mq-text-secondary: #4A5B3A;
+  --mq-text-muted: #6B7D5A;
+  --mq-text-subtle: #8FA07A;
+  --mq-primary: #4CAF50;
+  --mq-primary-hover: #3D8B40;
+  --mq-primary-light: #E8F5E9;
+  --mq-accent: #FF6B35;
+  --mq-accent-hover: #E55A28;
+  --mq-bar: #C8E6C9;
+  --mq-shadow-sm: 0 4px 12px rgba(45, 58, 31, 0.04);
+  --mq-shadow-md: 0 10px 24px rgba(45, 58, 31, 0.08);
+  --mq-shadow-lg: 0 16px 32px rgba(45, 58, 31, 0.12);
+}
+
+/* Tema 3: Noturno (Dark - Azul escuro) */
+.mq-app-v1_3[data-theme="noturno"] {
+  --mq-bg: #0F172A;
+  --mq-surface: #1E293B;
+  --mq-card: #334155;
+  --mq-border: #475569;
+  --mq-border-subtle: rgba(148, 163, 184, 0.12);
+  --mq-text: #F1F5F9;
+  --mq-text-secondary: #CBD5E1;
+  --mq-text-muted: #94A3B8;
+  --mq-text-subtle: #64748B;
+  --mq-primary: #38BDF8;
+  --mq-primary-hover: #7DD3FC;
+  --mq-primary-light: rgba(56, 189, 248, 0.15);
+  --mq-accent: #F472B6;
+  --mq-accent-hover: #F9A8D4;
+  --mq-bar: #475569;
+  --mq-success: #4ADE80;
+  --mq-success-light: rgba(74, 222, 128, 0.15);
+  --mq-warning: #FBBF24;
+  --mq-warning-light: rgba(251, 191, 36, 0.15);
+  --mq-error: #F87171;
+  --mq-error-light: rgba(248, 113, 113, 0.15);
+  --mq-info: #60A5FA;
+  --mq-info-light: rgba(96, 165, 250, 0.15);
+  --mq-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --mq-shadow-md: 0 10px 24px rgba(0, 0, 0, 0.4);
+  --mq-shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Tema 4: Cosmos (Dark - Roxo/Violeta) */
+.mq-app-v1_3[data-theme="cosmos"] {
+  --mq-bg: #13111C;
+  --mq-surface: #1F1B2E;
+  --mq-card: #2D2640;
+  --mq-border: #4C4270;
+  --mq-border-subtle: rgba(167, 139, 250, 0.12);
+  --mq-text: #F5F3FF;
+  --mq-text-secondary: #DDD6FE;
+  --mq-text-muted: #A78BFA;
+  --mq-text-subtle: #7C3AED;
+  --mq-primary: #A78BFA;
+  --mq-primary-hover: #C4B5FD;
+  --mq-primary-light: rgba(167, 139, 250, 0.15);
+  --mq-accent: #F472B6;
+  --mq-accent-hover: #F9A8D4;
+  --mq-bar: #4C4270;
+  --mq-success: #34D399;
+  --mq-success-light: rgba(52, 211, 153, 0.15);
+  --mq-warning: #FBBF24;
+  --mq-warning-light: rgba(251, 191, 36, 0.15);
+  --mq-error: #FB7185;
+  --mq-error-light: rgba(251, 113, 133, 0.15);
+  --mq-info: #818CF8;
+  --mq-info-light: rgba(129, 140, 248, 0.15);
+  --mq-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --mq-shadow-md: 0 10px 24px rgba(0, 0, 0, 0.5);
+  --mq-shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.6);
+}
+

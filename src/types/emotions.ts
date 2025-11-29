@@ -719,7 +719,10 @@ export type ViewId =
   | 'painelQuests'
   | 'mapaMental'
   | 'mapaMentalVisual'
-  | 'evoluir';
+  | 'evoluir'
+  | 'perfilPessoal'
+  | 'objetivos'
+  | 'aparencia';
 
 export interface StoreState {
   dashboardData: DashboardData;
