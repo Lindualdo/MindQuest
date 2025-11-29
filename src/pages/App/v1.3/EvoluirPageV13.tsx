@@ -169,6 +169,7 @@ const EvoluirPageV13: React.FC = () => {
             <button
               type="button"
               onClick={handleVerHistoricoConversas}
+              className="w-full rounded-2xl border p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
               className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
               style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
             >
@@ -191,6 +192,7 @@ const EvoluirPageV13: React.FC = () => {
             <button
               type="button"
               onClick={handleVerAcoesConcluidas}
+              className="w-full rounded-2xl border p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
               className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
               style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
             >
@@ -210,7 +212,8 @@ const EvoluirPageV13: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
           >
-            <div className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md flex flex-col items-center justify-center text-center"
+            <div className="w-full rounded-2xl border p-5 shadow-md flex flex-col items-center justify-center text-center"
+              className="w-full rounded-2xl border border-[#B6D6DF] bg-[#E8F3F5] p-5 shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center text-center"
               style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
             >
               <p className="text-sm font-semibold text-[#64748B] mb-2">Pontos</p>
@@ -218,7 +221,7 @@ const EvoluirPageV13: React.FC = () => {
                 <span className="text-4xl font-bold text-[#1C2541] leading-none">
                   {totalXpFormatted}
                 </span>
-                <Star size={16} className="text-[#0EA5E9]" />
+                <Star size={16}  />
               </div>
             </div>
           </motion.div>
@@ -244,14 +247,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <Target size={20} className="text-[#0EA5E9]" />
+                  <Target size={20}  />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[#1C2541]">Objetivos</h3>
-                  <p className="text-xs text-[#64748B]">Defina e acompanhe suas metas</p>
+                  <h3 className="text-base font-bold" >Objetivos</h3>
+                  <p className="text-xs" >Defina e acompanhe suas metas</p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#94A3B8]" />
+              <ChevronRight size={20}  />
             </button>
           </motion.section>
 
@@ -273,14 +276,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <User size={20} className="text-[#0EA5E9]" />
+                  <User size={20}  />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[#1C2541]">Perfil Pessoal</h3>
-                  <p className="text-xs text-[#64748B]">Personalize sua experiência</p>
+                  <h3 className="text-base font-bold" >Perfil Pessoal</h3>
+                  <p className="text-xs" >Personalize sua experiência</p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#94A3B8]" />
+              <ChevronRight size={20}  />
             </button>
           </motion.section>
 
@@ -298,14 +301,14 @@ const EvoluirPageV13: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/60">
-                  <Palette size={20} className="text-[#0EA5E9]" />
+                  <Palette size={20}  />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[#1C2541]">Aparência</h3>
-                  <p className="text-xs text-[#64748B]">Tema e personalização visual</p>
+                  <h3 className="text-base font-bold" >Aparência</h3>
+                  <p className="text-xs" >Tema e personalização visual</p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#94A3B8]" />
+              <ChevronRight size={20}  />
             </button>
           </motion.section>
 
@@ -326,11 +329,11 @@ const EvoluirPageV13: React.FC = () => {
                   <BookOpen size={20} className="text-[#0EA5E9]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[#1C2541]">Recursos</h3>
-                  <p className="text-xs text-[#64748B]">Conquistas, ajuda e feedback</p>
+                  <h3 className="text-base font-bold" >Recursos</h3>
+                  <p className="text-xs" >Conquistas, ajuda e feedback</p>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#94A3B8]" />
+              <ChevronRight size={20}  />
             </button>
           </motion.section>
         </div>

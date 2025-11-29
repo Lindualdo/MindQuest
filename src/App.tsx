@@ -245,6 +245,9 @@ function App() {
       case 'objetivos':
         page = <ObjetivosPageV13 />;
         break;
+      case 'aparencia':
+        page = <AparenciaPageV13 />;
+        break;
       default:
         page = <HomeV1_3 />;
         break;

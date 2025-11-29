@@ -1,0 +1,243 @@
+{
+  "createdAt": "2025-11-28T17:49:17.856Z",
+  "id": "UbfgB0wF3FatAeIU",
+  "name": "webhook_evoluir_stats",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "evoluir-stats",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook Evoluir Stats",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        304
+      ],
+      "webhookId": "7302bb77-26b1-4601-b694-eba2be6eda11"
+    },
+    {
+      "parameters": {
+        "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+      },
+      "id": "validate-node",
+      "name": "Validar Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input AS (\n  SELECT $1::uuid AS usuario_id\n),\nstats_conversas AS (\n  SELECT COUNT(*)::int AS total_conversas\n  FROM public.usr_chat uc\n  JOIN input i ON i.usuario_id = uc.usuario_id\n),\nstats_quests AS (\n  SELECT COUNT(*)::int AS total_quests_concluidas\n  FROM public.quests_recorrencias qr\n  JOIN public.usuarios_quest uq ON uq.id = qr.usuarios_quest_id\n  JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\n  JOIN input i ON i.usuario_id = uq.usuario_id\n  WHERE qr.status = 'concluida'\n    AND qc.codigo != 'reflexao_diaria'\n),\nstats_xp AS (\n  SELECT COALESCE(uc.xp_total, 0)::int AS xp_total\n  FROM public.usuarios_conquistas uc\n  JOIN input i ON i.usuario_id = uc.usuario_id\n  LIMIT 1\n)\nSELECT\n  i.usuario_id,\n  COALESCE(sc.total_conversas, 0) AS total_conversas,\n  COALESCE(sq.total_quests_concluidas, 0) AS total_quests_concluidas,\n  COALESCE(sx.xp_total, 0) AS xp_total\nFROM input i\nCROSS JOIN LATERAL (SELECT total_conversas FROM stats_conversas) sc\nCROSS JOIN LATERAL (SELECT total_quests_concluidas FROM stats_quests) sq\nCROSS JOIN LATERAL (SELECT xp_total FROM stats_xp) sx;",
+        "options": {
+          "queryReplacement": "={{ [$json.user_id] }}"
+        }
+      },
+      "id": "postgres-node",
+      "name": "Buscar Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        608,
+        304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first()?.json || {};\n\nconst response = {\n  success: true,\n  usuario_id: row.usuario_id ?? null,\n  stats: {\n    total_conversas: Number(row.total_conversas ?? 0) || 0,\n    total_quests_concluidas: Number(row.total_quests_concluidas ?? 0) || 0,\n    xp_total: Number(row.xp_total ?? 0) || 0\n  }\n};\n\nreturn [{ json: response }];"
+      },
+      "id": "format-node",
+      "name": "Formatar Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-node",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1008,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Evoluir Stats": {
+      "main": [
+        [
+          {
+            "node": "Validar Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Params": {
+      "main": [
+        [
+          {
+            "node": "Buscar Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Stats": {
+      "main": [
+        [
+          {
+            "node": "Formatar Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Response": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Webhook Evoluir Stats": [
+      {
+        "json": {
+          "headers": {
+            "host": "mindquest-n8n.cloudfy.live",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-US,en;q=0.9,pt-BR;q=0.8,pt-PT;q=0.7,pt;q=0.6,es;q=0.5",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2001:818:e374:a600:dc6b:d0d3:9a09:8003",
+            "cf-ipcountry": "PT",
+            "cf-ray": "9a5bbf080ff34842-LIS",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2FNdw5mnLVEsJlKiW9kRAAcRJw4LSce3cQ%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2B5t5eln873eA2PnUG53bQfGtZ3v%2FvrGv8%3D; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2B6QD7pPBOV4YjadQ9sD9u%2BhwY9Ftr0xwXAKy5sJCZzlw4UoLe619Kh6IcnUqGJzSWCAaQNf4z9Tw%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19UplRIp9uANFa7tpnJ7rU6%2FTpUlJiFLflV%2FwTTtfKSYcoXUEbDfnuLtuC00gSpUaV%2B297SqId4dqDUNVNgtB%2BUKVKB%2FW0FCsrfBQEaFlWdpqa2N1lwJKnl0TVjF5VoEQNUQR%2FmwEL6r3F1enh%2FW8flU9I%2BmzBijgA%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19aKh7JMwxtiU0w0jsAUBpu2tKb7Er7NJtzWiLgTZVn5NCKWadNbmeDA8LBUMgrbwMqm9HLVsJzSSWgX7cxZvCpmjmyF%2BXg%2F7Oa99nePRUv88fdI1h6PwYa8IZ8hAKPYY926eUG2ZkMd4JF3pL9wam%2F%2BMniLBx9ahM%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FLDUzIvouPfEJLOd9K0adhd%2F0Vf6EQLoyJwr2ym53q%2Fw4dOU0JCMGcxVB%2FPRzJXsCqYwqY6j9Ly3zOb82npaCzTaZ%2FUXz61OSuAlomtjfffxL8upUjwGDE3C%2BSejHw1li3i80ULms6%2FA%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%228b04959d79052d9a4fde27fe8830b1f9748281331c826275aabfed3697b200b7%23fa864d51-475e-4765-b3b4-12788525a3e6%22%2C%22%24sesid%22%3A%5B1764352627744%2C%22019acb97-9397-7bf0-97be-28f8783f087c%22%2C1764352299906%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fmindquest-n8n.cloudfy.live%2Fsignin%3Fredirect%3D%25252F%22%7D%7D",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Opera\";v=\"124\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "x-forwarded-for": "172.68.103.43",
+            "x-forwarded-host": "mindquest-n8n.cloudfy.live",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "d49265bfcab0",
+            "x-real-ip": "172.68.103.43"
+          },
+          "params": {},
+          "query": {
+            "user_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
+          },
+          "body": {},
+          "webhookUrl": "https://mindquest-n8n.cloudfy.live/webhook-test/evoluir-stats",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "97491d0a-9701-41f4-bd37-bebf012009fc",
+  "versionCounter": 15,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-28T17:49:17.856Z",
+      "role": "workflow:owner",
+      "workflowId": "UbfgB0wF3FatAeIU",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
