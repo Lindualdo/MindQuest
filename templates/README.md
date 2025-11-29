@@ -1,6 +1,63 @@
 # Templates n8n
 
+**Última atualização:** 2025-11-29 16:30
+
 Templates e exemplos para facilitar o trabalho com workflows n8n.
+
+---
+
+## 🚨 Webhooks via API/MCP - webhookId OBRIGATÓRIO
+
+Ao criar workflows com webhooks via API/MCP, **sempre incluir `webhookId`**.
+
+### Problema
+
+| Modo | Sem webhookId | Com webhookId |
+|------|---------------|---------------|
+| Teste (`/webhook-test/...`) | ✅ Funciona | ✅ Funciona |
+| Produção (`/webhook/...`) | ❌ 404 Not Found | ✅ Funciona |
+
+### Template - Criar webhook
+
+```json
+{
+  "type": "n8n-nodes-base.webhook",
+  "typeVersion": 2,
+  "id": "uuid-do-no",
+  "name": "Webhook GET",
+  "webhookId": "GERAR-UUID-UNICO",
+  "position": [250, 300],
+  "parameters": {
+    "path": "meu-endpoint",
+    "httpMethod": "GET",
+    "responseMode": "lastNode"
+  }
+}
+```
+
+### Template - Corrigir webhook existente
+
+```json
+{
+  "type": "updateNode",
+  "nodeId": "id-do-no-webhook",
+  "updates": {
+    "webhookId": "gerar-uuid-unico"
+  }
+}
+```
+
+### Gerar UUID
+
+```bash
+# macOS
+uuidgen
+
+# Node.js
+node -e "console.log(crypto.randomUUID())"
+```
+
+---
 
 ## n8n_postgres_update.json
 

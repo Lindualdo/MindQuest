@@ -145,6 +145,14 @@ Ao tratar de workflows n8n:
 - **SEMPRE** validar `operation` após update via `n8n_get_workflow`
 - Ver seção "CRÍTICO - Atualização de nodes Postgres via MCP" abaixo para checklist completo
 
+**🚨 REGRA CRÍTICA - WEBHOOKS VIA API/MCP:**
+- Ao criar workflows com webhooks via API/MCP, **SEMPRE incluir `webhookId`** no nó webhook
+- Sem `webhookId`, o webhook funciona apenas em modo teste (`/webhook-test/...`), mas **NÃO funciona em produção** (`/webhook/...`)
+- O `webhookId` deve ser um UUID único (ex: gerado com `crypto.randomUUID()`)
+- **Sintoma:** workflow ativo, mas URL de produção retorna 404
+- **Solução:** Adicionar `webhookId` ao nó webhook via `n8n_update_partial_workflow`
+- Ver seção "CRÍTICO - Webhooks criados via API/MCP" abaixo para template
+
 - Mapear nós/ID via `n8n_get_workflow` antes de editar, evitando nomes desatualizados.
 - Usar `n8n_update_partial_workflow` para mudanças cirúrgicas; evitar full update sem necessidade.
 - Após alterações, rodar `n8n_get_workflow_structure` para validar nomes, conexões e garantir consistência.
@@ -223,6 +231,57 @@ Ao tratar de workflows n8n:
     ```
   - **Documentação:** `templates/README.md` (guia de uso completo)
 
+- **🚨 CRÍTICO - Webhooks criados via API/MCP - OBRIGATÓRIO `webhookId`:**
+  
+  **Problema:** Workflows criados via API/MCP não registram URL de produção sem `webhookId`.
+  
+  **Sintomas:**
+  - ✅ Webhook funciona em modo teste: `/webhook-test/path`
+  - ❌ Webhook retorna 404 em produção: `/webhook/path`
+  - Workflow aparece como `active: true` no n8n
+  
+  **Causa:** O `webhookId` é necessário para registrar a rota de produção. Quando criado pela UI, o n8n gera automaticamente. Via API/MCP, não é gerado.
+  
+  **✅ Template correto para criar webhook via API:**
+  ```json
+  {
+    "type": "n8n-nodes-base.webhook",
+    "typeVersion": 2,
+    "id": "node-uuid",
+    "name": "Webhook GET",
+    "webhookId": "UUID-UNICO-AQUI",
+    "position": [250, 300],
+    "parameters": {
+      "path": "meu-endpoint",
+      "httpMethod": "GET",
+      "responseMode": "lastNode"
+    }
+  }
+  ```
+  
+  **✅ Para corrigir webhook existente (adicionar webhookId):**
+  ```json
+  {
+    "type": "updateNode",
+    "nodeId": "id-do-no-webhook",
+    "updates": {
+      "webhookId": "gerar-uuid-unico"
+    }
+  }
+  ```
+  
+  **🔍 Como verificar se está correto:**
+  ```javascript
+  const workflow = await n8n_get_workflow({id: "workflow-id"});
+  const webhookNode = workflow.nodes.find(n => n.type === "n8n-nodes-base.webhook");
+  if (!webhookNode.webhookId) {
+    console.error("ERRO: webhookId não definido!");
+  }
+  ```
+  
+  **📝 Gerar UUID:**
+  - Node.js: `crypto.randomUUID()`
+  - Terminal: `uuidgen` (macOS) ou `cat /proc/sys/kernel/random/uuid` (Linux)
 
 ## Debug de Execução (Padrão)
 - Quando o usuário pedir o “log/saída” de um nó do n8n, seguir estes passos com MCP:
