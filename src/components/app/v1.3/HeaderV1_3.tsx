@@ -1,48 +1,53 @@
 import { RefreshCw, Settings } from 'lucide-react';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
+import { useDashboard } from '@/store/useStore';
 
 type Props = {
   nomeUsuario: string;
   onRefresh?: () => void;
-  onSettings?: () => void;
-  showSettings?: boolean;
 };
 
-const HeaderV1_3 = ({ nomeUsuario, onRefresh, onSettings, showSettings = false }: Props) => (
-  <header
-    className="sticky top-0 z-40 border-b border-[var(--mq-border-subtle)] bg-[var(--mq-surface)]"
-  >
-    <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-2 px-4 py-2">
-      <div className="flex items-center gap-2 text-[var(--mq-text)]">
-        <img src={mindquestLogo} alt="MindQuest" className="h-10 w-auto" />
-        <p className="text-sm font-semibold tracking-tight text-[var(--mq-accent)]">MindQuest</p>
-      </div>
-      <p className="flex-1 text-center text-[0.78rem] font-semibold text-[var(--mq-text)] sm:text-sm">
-        Olá, {nomeUsuario}! <span aria-hidden="true">👋</span>
-      </p>
-      <div className="flex items-center gap-1.5">
-        {showSettings && onSettings && (
+const HeaderV1_3 = ({ nomeUsuario, onRefresh }: Props) => {
+  const { setView } = useDashboard();
+
+  const handleSettings = () => {
+    setView('ajustes');
+  };
+
+  return (
+    <header
+      className="sticky top-0 z-40 border-b border-[var(--mq-border-subtle)] bg-[var(--mq-surface)]"
+    >
+      <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-2 px-4 py-2">
+        <div className="flex items-center gap-2 text-[var(--mq-text)]">
+          <img src={mindquestLogo} alt="MindQuest" className="h-10 w-auto" />
+          <p className="text-sm font-semibold tracking-tight text-[var(--mq-accent)]">MindQuest</p>
+        </div>
+        <p className="flex-1 text-center text-[0.78rem] font-semibold text-[var(--mq-text)] sm:text-sm">
+          Olá, {nomeUsuario}! <span aria-hidden="true">👋</span>
+        </p>
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={onSettings}
+            onClick={handleSettings}
             className="inline-flex items-center justify-center rounded-full border border-[var(--mq-text)]/10 p-1.5 sm:p-2 text-[var(--mq-text)] hover:bg-[var(--mq-card)] transition-colors"
             aria-label="Ajustes"
           >
             <Settings size={16} />
           </button>
-        )}
-        <button
-          type="button"
-          onClick={onRefresh}
-          className="inline-flex items-center justify-center rounded-full border border-[var(--mq-text)]/10 p-1.5 sm:p-2 text-[var(--mq-text)] hover:bg-[var(--mq-card)] transition-colors"
-          aria-label="Atualizar"
-        >
-          <RefreshCw size={16} />
-        </button>
+          <button
+            type="button"
+            onClick={onRefresh}
+            className="inline-flex items-center justify-center rounded-full border border-[var(--mq-text)]/10 p-1.5 sm:p-2 text-[var(--mq-text)] hover:bg-[var(--mq-card)] transition-colors"
+            aria-label="Atualizar"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
 export default HeaderV1_3;
 
