@@ -16,7 +16,8 @@ interface Objetivo {
   alcancado_em: string | null;
   area_nome: string;
   area_icone: string;
-  dias_restantes: number;
+  dias_restantes: number | null;
+  is_padrao?: boolean;
 }
 
 const ConquistasVidaPageV13: React.FC = () => {
@@ -222,30 +223,40 @@ const ConquistasVidaPageV13: React.FC = () => {
                               {objetivo.detalhamento}
                             </p>
                           )}
-                          <div className="flex items-center gap-3 mt-3 text-xs text-[var(--mq-text-muted)]">
-                            <span className="flex items-center gap-1">
-                              <Calendar size={12} />
-                              Limite: {formatDate(objetivo.data_limite)}
-                            </span>
-                            <span
-                              className={`flex items-center gap-1 ${
-                                objetivo.dias_restantes <= 7
-                                  ? 'text-[var(--mq-error)]'
-                                  : objetivo.dias_restantes <= 14
-                                  ? 'text-[var(--mq-warning)]'
-                                  : ''
-                              }`}
-                            >
-                              <Clock size={12} />
-                              {objetivo.dias_restantes > 0
-                                ? `${objetivo.dias_restantes} dias`
-                                : 'Vencido'}
-                            </span>
-                          </div>
+                          {!objetivo.is_padrao && objetivo.dias_restantes !== null && (
+                            <div className="flex items-center gap-3 mt-3 text-xs text-[var(--mq-text-muted)]">
+                              <span className="flex items-center gap-1">
+                                <Calendar size={12} />
+                                Limite: {formatDate(objetivo.data_limite)}
+                              </span>
+                              <span
+                                className={`flex items-center gap-1 ${
+                                  objetivo.dias_restantes <= 7
+                                    ? 'text-[var(--mq-error)]'
+                                    : objetivo.dias_restantes <= 14
+                                    ? 'text-[var(--mq-warning)]'
+                                    : ''
+                                }`}
+                              >
+                                <Clock size={12} />
+                                {objetivo.dias_restantes > 0
+                                  ? `${objetivo.dias_restantes} dias`
+                                  : 'Vencido'}
+                              </span>
+                            </div>
+                          )}
+                          {objetivo.is_padrao && (
+                            <div className="mt-3">
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-text-subtle)] border border-[var(--mq-border)]">
+                                Objetivo Padrão (permanente)
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      {/* Ações */}
+                      {/* Ações - não mostrar para objetivo padrão */}
+                      {!objetivo.is_padrao && (
                       <AnimatePresence mode="wait">
                         {confirmando === objetivo.id ? (
                           <motion.div
@@ -316,6 +327,7 @@ const ConquistasVidaPageV13: React.FC = () => {
                           </motion.div>
                         )}
                       </AnimatePresence>
+                      )}
                     </motion.div>
                   ))}
                 </div>
