@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target, Edit3 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target, Edit3, History, Calendar } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -22,6 +22,19 @@ interface CheckinData {
   objetivo_id: string;
   pontuacao: number;
   observacoes: string;
+  semana_ano?: string; // Para edição de histórico
+}
+
+interface HistoricoCheckin {
+  id: string;
+  objetivo_id: string;
+  pontuacao: number;
+  observacoes: string;
+  data_checkin: string;
+  semana_ano: string;
+  objetivo_titulo: string;
+  area_nome: string;
+  area_icone: string;
 }
 
 const CheckinSemanalPageV13: React.FC = () => {
@@ -43,6 +56,8 @@ const CheckinSemanalPageV13: React.FC = () => {
   // Dados da API
   const [objetivos, setObjetivos] = useState<Objetivo[]>([]);
   const [semanaAtual, setSemanaAtual] = useState<string>('');
+  const [historico, setHistorico] = useState<HistoricoCheckin[]>([]);
+  const [showHistorico, setShowHistorico] = useState(false);
 
   // Estado do formulário em steps
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -74,6 +89,7 @@ const CheckinSemanalPageV13: React.FC = () => {
 
         setObjetivos(data.objetivos_ativos || []);
         setSemanaAtual(data.semana_atual || '');
+        setHistorico(data.historico_checkins || []);
         setError(null);
       } catch (err) {
         console.error('[CheckinSemanal] Erro:', err);
@@ -93,7 +109,11 @@ const CheckinSemanalPageV13: React.FC = () => {
   }, [step]);
 
   const handleBack = () => {
-    if (step > 1) {
+    if (showHistorico) {
+      setShowHistorico(false);
+      setIsEditing(false);
+      setCheckinData({ objetivo_id: '', pontuacao: 0, observacoes: '' });
+    } else if (step > 1) {
       setStep((prev) => (prev - 1) as 1 | 2 | 3);
     } else {
       setView('evoluir');
@@ -148,6 +168,18 @@ const CheckinSemanalPageV13: React.FC = () => {
     setStep(3);
   };
 
+  const handleEditFromHistorico = (checkin: HistoricoCheckin) => {
+    setCheckinData({
+      objetivo_id: checkin.objetivo_id,
+      pontuacao: checkin.pontuacao,
+      observacoes: checkin.observacoes || '',
+      semana_ano: checkin.semana_ano,
+    });
+    setIsEditing(true);
+    setShowHistorico(false);
+    setStep(2);
+  };
+
   const handleSave = async () => {
     if (!userId || !checkinData.objetivo_id || checkinData.pontuacao === 0) {
       setError('Dados incompletos');
@@ -158,15 +190,22 @@ const CheckinSemanalPageV13: React.FC = () => {
     setError(null);
 
     try {
+      const payload: Record<string, unknown> = {
+        user_id: userId,
+        objetivo_id: checkinData.objetivo_id,
+        pontuacao: checkinData.pontuacao,
+        observacoes: checkinData.observacoes,
+      };
+      
+      // Se editando do histórico, incluir a semana específica
+      if (checkinData.semana_ano) {
+        payload.semana_ano = checkinData.semana_ano;
+      }
+      
       const res = await fetch('/api/checkin-objetivo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          objetivo_id: checkinData.objetivo_id,
-          pontuacao: checkinData.pontuacao,
-          observacoes: checkinData.observacoes,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -208,7 +247,21 @@ const CheckinSemanalPageV13: React.FC = () => {
     return `${semana}/${ano}`;
   };
 
-  const selectedObjetivo = objetivos.find((o) => o.id === checkinData.objetivo_id);
+  // Busca objetivo ativo ou reconstrói do histórico (para objetivos inativos)
+  const selectedObjetivo = objetivos.find((o) => o.id === checkinData.objetivo_id) || (() => {
+    const checkinHistorico = historico.find((h) => h.objetivo_id === checkinData.objetivo_id);
+    if (checkinHistorico) {
+      return {
+        id: checkinHistorico.objetivo_id,
+        titulo: checkinHistorico.objetivo_titulo,
+        area_nome: checkinHistorico.area_nome,
+        area_icone: checkinHistorico.area_icone,
+        semana_atual: semanaAtual,
+        checkin_feito: true,
+      };
+    }
+    return undefined;
+  })();
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
@@ -284,7 +337,7 @@ const CheckinSemanalPageV13: React.FC = () => {
         {!loading && !error && objetivos.length > 0 && !success && (
           <AnimatePresence mode="wait">
             {/* Step 1: Escolher objetivo */}
-            {step === 1 && (
+            {step === 1 && !showHistorico && (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: 20 }}
@@ -332,12 +385,24 @@ const CheckinSemanalPageV13: React.FC = () => {
                       </motion.button>
                     ))}
                   </div>
+
+                  {/* Link para histórico */}
+                  {historico.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowHistorico(true)}
+                      className="w-full mt-4 py-3 text-sm text-[var(--mq-primary)] font-medium flex items-center justify-center gap-2 hover:underline"
+                    >
+                      <History size={16} />
+                      Ver histórico de check-ins
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )}
 
             {/* Step 2: Escolher pontuação */}
-            {step === 2 && selectedObjetivo && (
+            {step === 2 && selectedObjetivo && !showHistorico && (
               <motion.div
                 key="step2"
                 initial={{ opacity: 0, x: 20 }}
@@ -409,8 +474,87 @@ const CheckinSemanalPageV13: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Histórico de check-ins */}
+            {showHistorico && (
+              <motion.div
+                key="historico"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <div className="mq-card p-4">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <History size={18} className="text-[var(--mq-primary)]" />
+                    <p className="text-sm text-[var(--mq-text-muted)] text-center">
+                      Histórico de Check-ins
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {historico.map((checkin, index) => (
+                      <motion.div
+                        key={checkin.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="p-4 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-surface)]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <span className="text-xl">{checkin.area_icone}</span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-bold text-[var(--mq-text)] truncate">
+                                {checkin.objetivo_titulo}
+                              </h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Calendar size={12} className="text-[var(--mq-text-subtle)]" />
+                                <span className="text-xs text-[var(--mq-text-muted)]">
+                                  {formatSemana(checkin.semana_ano)}
+                                </span>
+                              </div>
+                              {checkin.observacoes && (
+                                <p className="text-xs text-[var(--mq-text-muted)] mt-2 line-clamp-2">
+                                  {checkin.observacoes}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-2 shrink-0">
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                              style={{ backgroundColor: getProgressColor(checkin.pontuacao) }}
+                            >
+                              {checkin.pontuacao}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleEditFromHistorico(checkin)}
+                              className="text-xs text-[var(--mq-primary)] font-medium flex items-center gap-1 hover:underline"
+                            >
+                              <Edit3 size={12} />
+                              Editar
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {historico.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-[var(--mq-text-muted)]">
+                        Nenhum check-in registrado ainda.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {/* Step 3: Observações */}
-            {step === 3 && selectedObjetivo && (
+            {step === 3 && selectedObjetivo && !showHistorico && (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, x: 20 }}
