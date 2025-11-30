@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target, Edit3 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -13,6 +13,9 @@ interface Objetivo {
   area_icone: string;
   semana_atual: string;
   checkin_feito: boolean;
+  checkin_id?: string | null;
+  checkin_pontuacao?: number | null;
+  checkin_observacoes?: string | null;
 }
 
 interface CheckinData {
@@ -43,6 +46,7 @@ const CheckinSemanalPageV13: React.FC = () => {
 
   // Estado do formulário em steps
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [isEditing, setIsEditing] = useState(false);
   const [checkinData, setCheckinData] = useState<CheckinData>({
     objetivo_id: '',
     pontuacao: 0,
@@ -117,7 +121,25 @@ const CheckinSemanalPageV13: React.FC = () => {
   };
 
   const handleSelectObjetivo = (objetivoId: string) => {
-    setCheckinData({ ...checkinData, objetivo_id: objetivoId });
+    const objetivo = objetivos.find((o) => o.id === objetivoId);
+    
+    if (objetivo?.checkin_feito && objetivo.checkin_pontuacao) {
+      // Pré-preencher dados existentes para edição
+      setCheckinData({
+        objetivo_id: objetivoId,
+        pontuacao: objetivo.checkin_pontuacao,
+        observacoes: objetivo.checkin_observacoes || '',
+      });
+      setIsEditing(true);
+    } else {
+      // Novo check-in
+      setCheckinData({
+        objetivo_id: objetivoId,
+        pontuacao: 0,
+        observacoes: '',
+      });
+      setIsEditing(false);
+    }
     setStep(2);
   };
 
@@ -181,6 +203,11 @@ const CheckinSemanalPageV13: React.FC = () => {
     return 'var(--mq-success)';
   };
 
+  const formatSemana = (semanaAtual: string) => {
+    const [ano, semana] = semanaAtual.split('-W');
+    return `${semana}/${ano}`;
+  };
+
   const selectedObjetivo = objetivos.find((o) => o.id === checkinData.objetivo_id);
 
   return (
@@ -200,7 +227,7 @@ const CheckinSemanalPageV13: React.FC = () => {
         <div className="mb-6 text-center">
           <h1 className="mq-page-title">Check-in Semanal</h1>
           <p className="mq-page-subtitle">
-            {semanaAtual ? `Semana ${semanaAtual.replace('-W', '/')}` : 'Como está seu progresso?'}
+            {semanaAtual ? `Semana ${formatSemana(semanaAtual)}` : 'Como está seu progresso?'}
           </p>
         </div>
 
@@ -249,7 +276,7 @@ const CheckinSemanalPageV13: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md"
           >
-            ✅ Check-in salvo com sucesso!
+            ✅ Check-in {isEditing ? 'atualizado' : 'salvo'} com sucesso!
           </motion.div>
         )}
 
@@ -295,7 +322,10 @@ const CheckinSemanalPageV13: React.FC = () => {
                           </p>
                         </div>
                         {objetivo.checkin_feito ? (
-                          <Check size={20} className="text-green-500 shrink-0" />
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Check size={16} className="text-green-500" />
+                            <span className="text-xs text-green-500 font-medium">Editar</span>
+                          </div>
                         ) : (
                           <ChevronRight size={20} className="text-[var(--mq-text-subtle)] shrink-0" />
                         )}
@@ -316,9 +346,15 @@ const CheckinSemanalPageV13: React.FC = () => {
                 className="space-y-4"
               >
                 <div className="mq-card p-4">
-                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-4">
+                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-2">
                     Passo 2 de 3 — Como foi seu progresso?
                   </p>
+                  
+                  {isEditing && (
+                    <p className="text-xs text-center text-amber-500 font-medium mb-4">
+                      ✏️ Editando check-in existente
+                    </p>
+                  )}
 
                   {/* Objetivo selecionado */}
                   <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-6">
@@ -383,9 +419,15 @@ const CheckinSemanalPageV13: React.FC = () => {
                 className="space-y-4"
               >
                 <div className="mq-card p-4">
-                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-4">
+                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-2">
                     Passo 3 de 3 — Conte mais sobre seu progresso
                   </p>
+                  
+                  {isEditing && (
+                    <p className="text-xs text-center text-amber-500 font-medium mb-4">
+                      ✏️ Editando check-in existente
+                    </p>
+                  )}
 
                   {/* Resumo */}
                   <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-4">
@@ -426,7 +468,7 @@ const CheckinSemanalPageV13: React.FC = () => {
                     className="w-full p-4 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-surface)] text-[var(--mq-text)] placeholder:text-[var(--mq-text-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)] resize-none"
                   />
 
-                  {/* Botão Salvar */}
+                  {/* Botão Salvar/Atualizar */}
                   <motion.button
                     type="button"
                     onClick={handleSave}
@@ -438,12 +480,12 @@ const CheckinSemanalPageV13: React.FC = () => {
                     {saving ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
-                        Salvando...
+                        {isEditing ? 'Atualizando...' : 'Salvando...'}
                       </>
                     ) : (
                       <>
-                        <Save size={18} />
-                        Salvar Check-in
+                        {isEditing ? <Edit3 size={18} /> : <Save size={18} />}
+                        {isEditing ? 'Atualizar Check-in' : 'Salvar Check-in'}
                       </>
                     )}
                   </motion.button>
