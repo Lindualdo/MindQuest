@@ -1,7 +1,8 @@
 # Análise: sw_criar_quest (versão atual)
 
 **Data:** 2025-11-30 11:30
-**Status:** Documentação para análise
+**Última atualização:** 2025-11-30 13:30
+**Status:** Alterações planejadas
 
 ---
 
@@ -187,17 +188,175 @@ A IA recebe apenas `data + resumo` das conversas. Perde:
 
 ---
 
-## Próximos Passos (Sugestões)
+## ✅ Alterações Planejadas
 
-1. **Adicionar busca de objetivos ativos** antes de montar contexto
-2. **Enriquecer consulta de sabotador** com contexto completo
-3. **Atualizar prompt da IA** para considerar objetivos
-4. **Adicionar campo `objetivo_id`** na tabela `usuarios_quest` (se ainda não existe)
-5. **Criar lógica de priorização** por prazo de objetivo
+### Decisão: IA decide qual objetivo vincular
+
+A IA receberá os objetivos do usuário e decidirá qual objetivo é mais adequado para cada quest.
+
+---
+
+### 1. Novo Node: "Buscar Objetivos Ativos"
+
+**Posição:** Após "Buscar Insights Recentes"
+
+**Query:**
+```sql
+SELECT 
+  uo.id,
+  uo.titulo,
+  uo.detalhamento,
+  uo.is_padrao,
+  av.nome AS area_vida,
+  av.codigo AS area_codigo,
+  uo.prazo_dias,
+  uo.data_limite
+FROM usuarios_objetivos uo
+JOIN areas_vida_catalogo av ON uo.area_vida_id = av.id
+WHERE uo.usuario_id = $1::uuid
+  AND uo.status = 'ativo'
+ORDER BY uo.is_padrao DESC, uo.criado_em;
+```
+
+**Saída:**
+| Campo | Descrição |
+|-------|-----------|
+| `id` | UUID do objetivo (para vincular) |
+| `titulo` | Nome do objetivo |
+| `detalhamento` | Contexto completo |
+| `is_padrao` | Se é o objetivo padrão |
+| `area_vida` | Área relacionada |
+| `prazo_dias` | Dias restantes |
+
+---
+
+### 2. Modificar: "Montar Contexto"
+
+**Adicionar ao objeto de saída:**
+```javascript
+objetivos_ativos: objetivosData.objetivos || []
+```
+
+---
+
+### 3. Modificar: "Preparar Quest do Catálogo"
+
+**Adicionar à saída para IA:**
+```javascript
+objetivos_usuario: {
+  padrao: objetivos.find(o => o.is_padrao),
+  especificos: objetivos.filter(o => !o.is_padrao)
+}
+```
+
+---
+
+### 4. Modificar: Prompt do "Agente Quests"
+
+**Adicionar ao prompt:**
+
+```
+=== Objetivos do Usuário ===
+Objetivo Padrão (sempre presente):
+{{ JSON.stringify($json.objetivos_usuario?.padrao || null) }}
+
+Objetivos Específicos (se houver):
+{{ JSON.stringify($json.objetivos_usuario?.especificos || []) }}
+
+=== REGRAS DE VINCULAÇÃO ===
+
+1. **Quest Personalizada:**
+   - DEVE estar relacionada a um objetivo específico (se houver)
+   - Se conversa menciona área de objetivo específico → vincular a esse objetivo
+   - Se não há objetivo específico ou não relaciona → vincular ao padrão
+   - Retornar `objetivo_id` do objetivo escolhido
+
+2. **Quest Sabotador:**
+   - Identificar qual objetivo o sabotador está bloqueando
+   - Se sabotador tem contexto "financeiro" e há objetivo de Finanças → vincular
+   - Se não relaciona → vincular ao objetivo padrão
+   - Retornar `objetivo_id` do objetivo escolhido
+
+3. **Quest TCC/Estoicismo:**
+   - Sempre vincular ao objetivo padrão (autoconhecimento)
+   - Retornar `objetivo_id` do objetivo padrão
+```
+
+**Adicionar ao schema de saída:**
+```json
+{
+  "objetivo_id": {"type": "string", "description": "UUID do objetivo vinculado"}
+}
+```
+
+---
+
+### 5. Modificar: Gravação (sw_xp_quest)
+
+**Incluir campo na inserção:**
+```sql
+INSERT INTO usuarios_quest (..., objetivo_id)
+VALUES (..., $objetivo_id)
+```
+
+---
+
+### Fluxo Atualizado
+
+```
+Entrada
+   │
+   ▼
+Buscar Quests Ativas
+   │
+   ▼
+Buscar Conversas
+   │
+   ▼
+Buscar Insights
+   │
+   ▼
+Buscar Objetivos Ativos  ← NOVO
+   │
+   ▼
+Buscar Sabotador
+   │
+   ▼
+Montar Contexto (com objetivos)  ← MODIFICADO
+   │
+   ▼
+Preparar para IA (com objetivos)  ← MODIFICADO
+   │
+   ▼
+Agente IA (decide objetivo)  ← MODIFICADO
+   │
+   ▼
+Gravar (com objetivo_id)  ← MODIFICADO
+```
+
+---
+
+### Regra de Vinculação (Resumo)
+
+| Tipo Quest | Objetivo Vinculado |
+|------------|-------------------|
+| Personalizada | Específico relacionado ou Padrão |
+| Sabotador | Específico bloqueado ou Padrão |
+| TCC/Estoicismo | Sempre Padrão |
+
+---
+
+### Validação Pós-Implementação
+
+- [ ] Todas as quests têm `objetivo_id` preenchido
+- [ ] Quest personalizada vincula ao objetivo correto
+- [ ] Quest sabotador considera contexto do sabotador
+- [ ] Quest TCC sempre vincula ao padrão
 
 ---
 
 ## Referências
 - Workflow ID: `LKjU8NE9aNHw7kEh`
 - Sub-workflow chamado: `sw_xp_quest` (ID: `bTeLj5qOKQo9PDMO`)
+- Campo `objetivo_id` adicionado em `usuarios_quest`: ✅
 

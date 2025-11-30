@@ -98,18 +98,30 @@ Baseados em níveis e requisitos de progresso:
    - **Com objetivos específicos:** Conversas e quests direcionadas para as metas
    - **Sem objetivos específicos:** Conversas exploratórias, quests de autoconhecimento vinculadas ao objetivo padrão
 
-### Relação Quests × Objetivos
+### Relação Quests × Objetivos (N:N)
 
-- **Quests personalizadas:** Vinculadas ao objetivo específico (se houver) ou ao padrão
-- **Quests de sabotador:** Vinculadas ao objetivo que o sabotador está bloqueando
-- **Quests TCC/Estoicismo:** Vinculadas ao objetivo padrão (desenvolvimento pessoal)
-- **Conversa/Reflexão Diária:** Sempre vinculada ao objetivo padrão
+Uma quest pode impactar múltiplos objetivos simultaneamente:
+
+| Tipo Quest | Objetivo Principal | Objetivos Secundários |
+|------------|-------------------|----------------------|
+| **Reflexão Diária** | Padrão (Evolução Pessoal) | — |
+| **TCC/Estoicismo** | Padrão (Evolução Pessoal) | — |
+| **Sabotador** | Padrão (Evolução Pessoal) | Objetivo relacionado ao contexto |
+| **Personalizada** | Objetivo mais relacionado | Outros objetivos impactados |
+
+**Tipo de Impacto:**
+- `direto` — quest foi criada especificamente para este objetivo
+- `indireto` — quest contribui para este objetivo como efeito colateral
+
+**Exemplo:** Quest "Gratidão Diária contra Sr. Inquieto"
+- Impacto direto → Evolução Pessoal (sabotador)
+- Impacto indireto → Meu Próprio Negócio (foco no app)
 
 ### Tabelas de Objetivos
 
-**`objetivos_catalogo`:** Catálogo de objetivos disponíveis por área da vida.
-
 **`usuarios_objetivos`:** Objetivos configurados pelo usuário - área, detalhamento, prazo, progresso.
+
+**`quest_objetivos`:** Relação N:N entre quests e objetivos - permite uma quest impactar múltiplos objetivos com tipo de impacto (direto/indireto).
 
 **`checkins_objetivos`:** Check-ins semanais de progresso na vida real.
 
@@ -117,7 +129,7 @@ Baseados em níveis e requisitos de progresso:
 
 ## 4. Tabelas do Sistema de Quests
 
-**`usuarios_quest`:** *(PENDENTE: adicionar campo `objetivo_id` para vincular quest ao objetivo)* Quest pai - ID, usuário, catálogo, status (disponível/ativa/inativa), contexto (área da vida, sabotador, insight). Uma quest pode ter múltiplas ocorrências.
+**`usuarios_quest`:** Quest pai - ID, usuário, catálogo, status (disponível/ativa/inativa), contexto (sabotador, insight), objetivo principal. Uma quest pode ter múltiplas ocorrências e impactar múltiplos objetivos via `quest_objetivos`.
 
 **`quests_recorrencias`:** Ocorrências planejadas e concluídas - Data, status (pendente/concluída/perdida), referência à quest pai. Uma linha por dia.
 
@@ -200,33 +212,24 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-## 9. Pendências - Ajustes para Nova Definição de Objetivos
+## 9. Pendências
 
 ### Banco de Dados
-- [ ] Adicionar campo `objetivo_id` na tabela `usuarios_quest`
-- [ ] Criar objetivo padrão "Evolução Pessoal" no catálogo
-- [ ] Trigger para criar objetivo padrão automaticamente no cadastro
-
-### Onboarding
-- [ ] Criar objetivo padrão automaticamente para novos usuários
-- [ ] Ajustar fluxo para perguntar sobre objetivos específicos (opcional)
+- [x] Campo `objetivo_id` em `usuarios_quest` (objetivo principal)
+- [x] Tabela `quest_objetivos` (relação N:N)
+- [x] Objetivo padrão "Evolução Pessoal" no catálogo
+- [x] Trigger para criar objetivo padrão no cadastro
 
 ### Workflows n8n
-- [ ] `sw_criar_quest`: Buscar objetivos ativos e vincular quests
-- [ ] `sw_criar_quest`: Se não tem objetivo específico, vincular ao padrão
-- [ ] `sw_chat_interations_v2`: Passar objetivos ativos para o agente de conversa
-- [ ] Experts: Receber contexto de objetivos para enriquecer extrações
+- [x] `sw_criar_quest`: Buscar objetivos ativos e vincular quests
+- [x] `sw_xp_quest`: Persistir `objetivo_id` e relações N:N
+- [ ] `sw_chat_interations_v2`: Passar objetivos ativos para o agente
 
 ### Frontend
-- [ ] Tela de objetivos: Mostrar objetivo padrão como fixo (não editável)
-- [ ] Quest detail: Exibir objetivo vinculado
-- [ ] Painel de quests: Filtrar por objetivo (opcional)
-
-### Regras de Negócio
-- [ ] Definir como calcular progresso do objetivo padrão
-- [ ] Definir XP específico para quests vinculadas a objetivos
+- [ ] Quest detail: Exibir objetivos vinculados
+- [ ] Painel de quests: Filtrar por objetivo
 
 ---
 
-**Última atualização:** 2025-11-30 12:45
+**Última atualização:** 2025-11-30 13:45
 
