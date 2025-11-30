@@ -1,13 +1,18 @@
 # MindQuest - Sistema de Quests v1.3.8
 
 **Data:** 2025-01-22  
-**Versão:** 1.3.8
+**Versão:** 1.3.8  
+**Última atualização:** 2025-11-30
 
 ---
 
 ## 1. Visão Geral do MindQuest
 
 MindQuest é uma plataforma de desenvolvimento pessoal que transforma conversas em ações práticas. Identifica padrões mentais que travam o progresso e oferece micro-ações personalizadas (quests) para mudança comportamental.
+
+**Posicionamento:** Autoconhecimento aplicado à ação. Não é app de produtividade, terapia ou coach. É a interseção: consciência dos padrões + filosofia prática + micro-ações + progresso visível.
+
+**Tagline:** "Mente clara, resultados reais."
 
 **Fundamento:** Pensamentos moldam sentimentos. Sentimentos impulsionam ações. Ações constroem resultados.
 
@@ -64,9 +69,55 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-## 3. Tabelas do Sistema de Quests
+## 3. Sistema de Objetivos
 
-**`usuarios_quest`:** Quest pai - ID, usuário, catálogo, status (disponível/ativa/inativa), contexto (área da vida, sabotador, insight). Uma quest pode ter múltiplas ocorrências.
+### Estrutura de Objetivos
+
+| Tipo | Qtd | Obrigatório | Descrição |
+|------|-----|-------------|-----------|
+| **Objetivo Padrão** | 1 | Sim (automático) | "Evolução Pessoal" - área Autoconhecimento |
+| **Objetivos Específicos** | 0-2 | Não | Definidos pelo usuário (Finanças, Trabalho, etc.) |
+
+**Total máximo:** 3 objetivos ativos (1 padrão + 2 específicos)
+
+### Regras de Objetivos
+
+1. **Objetivo Padrão (Evolução Pessoal):**
+   - Criado automaticamente no cadastro do usuário
+   - Não pode ser excluído ou desativado
+   - Área: Autoconhecimento / Desenvolvimento Pessoal
+   - Garante que o core do MindQuest (autoconhecimento) sempre esteja presente
+
+2. **Objetivos Específicos:**
+   - Usuário define quando quiser (não obrigatório)
+   - Máximo 2 ativos simultaneamente
+   - Prazo: 30, 45 ou 60 dias
+   - Áreas: Finanças, Trabalho, Saúde, Relacionamentos, etc.
+
+3. **Jornada Flexível:**
+   - **Com objetivos específicos:** Conversas e quests direcionadas para as metas
+   - **Sem objetivos específicos:** Conversas exploratórias, quests de autoconhecimento vinculadas ao objetivo padrão
+
+### Relação Quests × Objetivos
+
+- **Quests personalizadas:** Vinculadas ao objetivo específico (se houver) ou ao padrão
+- **Quests de sabotador:** Vinculadas ao objetivo que o sabotador está bloqueando
+- **Quests TCC/Estoicismo:** Vinculadas ao objetivo padrão (desenvolvimento pessoal)
+- **Conversa/Reflexão Diária:** Sempre vinculada ao objetivo padrão
+
+### Tabelas de Objetivos
+
+**`objetivos_catalogo`:** Catálogo de objetivos disponíveis por área da vida.
+
+**`usuarios_objetivos`:** Objetivos configurados pelo usuário - área, detalhamento, prazo, progresso.
+
+**`checkins_objetivos`:** Check-ins semanais de progresso na vida real.
+
+---
+
+## 4. Tabelas do Sistema de Quests
+
+**`usuarios_quest`:** *(PENDENTE: adicionar campo `objetivo_id` para vincular quest ao objetivo)* Quest pai - ID, usuário, catálogo, status (disponível/ativa/inativa), contexto (área da vida, sabotador, insight). Uma quest pode ter múltiplas ocorrências.
 
 **`quests_recorrencias`:** Ocorrências planejadas e concluídas - Data, status (pendente/concluída/perdida), referência à quest pai. Uma linha por dia.
 
@@ -78,7 +129,7 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-## 4. Telas do Sistema de Quests
+## 5. Telas do Sistema de Quests
 
 **PainelQuestsPageV13:** Tela principal - 3 abas (A Fazer/Fazendo/Feito). Ativa quests, visualiza progresso, acessa detalhes.
 
@@ -90,7 +141,7 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-## 5. Workflows n8n
+## 6. Workflows n8n
 
 **`sw_criar_quest`:** Criação automática - Gera 3 quests (personalizada, sabotador, TCC) baseadas em conversas/insights. Entrada: usuário_id. Saída: 3 quests com status 'disponivel'.
 
@@ -107,7 +158,7 @@ Baseados em níveis e requisitos de progresso:
 **`job_batch_xp_conversas`:** Processamento em lote - Processa as conversas e recalcula XP/jornada.
 ---
 
-## 6. Webhooks e APIs
+## 7. Webhooks e APIs
 
 **`webhook_quests`:** Listagem e snapshot - GET retorna quests do usuário (card/snapshot), POST atualiza status múltiplas quests.
 
@@ -127,7 +178,7 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-## 7. Regras de Cálculo - Conversas, Ações e Pontos (XPs)
+## 8. Regras de Cálculo - Conversas, Ações e Pontos (XPs)
 
 ### Total de Conversas
 - **Fonte:** Tabela `usr_chat`
@@ -149,5 +200,33 @@ Baseados em níveis e requisitos de progresso:
 
 ---
 
-**Última atualização:** 2025-01-22 14:30
+## 9. Pendências - Ajustes para Nova Definição de Objetivos
+
+### Banco de Dados
+- [ ] Adicionar campo `objetivo_id` na tabela `usuarios_quest`
+- [ ] Criar objetivo padrão "Evolução Pessoal" no catálogo
+- [ ] Trigger para criar objetivo padrão automaticamente no cadastro
+
+### Onboarding
+- [ ] Criar objetivo padrão automaticamente para novos usuários
+- [ ] Ajustar fluxo para perguntar sobre objetivos específicos (opcional)
+
+### Workflows n8n
+- [ ] `sw_criar_quest`: Buscar objetivos ativos e vincular quests
+- [ ] `sw_criar_quest`: Se não tem objetivo específico, vincular ao padrão
+- [ ] `sw_chat_interations_v2`: Passar objetivos ativos para o agente de conversa
+- [ ] Experts: Receber contexto de objetivos para enriquecer extrações
+
+### Frontend
+- [ ] Tela de objetivos: Mostrar objetivo padrão como fixo (não editável)
+- [ ] Quest detail: Exibir objetivo vinculado
+- [ ] Painel de quests: Filtrar por objetivo (opcional)
+
+### Regras de Negócio
+- [ ] Definir como calcular progresso do objetivo padrão
+- [ ] Definir XP específico para quests vinculadas a objetivos
+
+---
+
+**Última atualização:** 2025-11-30 12:45
 
