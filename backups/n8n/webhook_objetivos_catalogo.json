@@ -1,0 +1,215 @@
+{
+  "createdAt": "2025-11-29T16:14:11.444Z",
+  "id": "G8uozwPgQLi0LtRO",
+  "name": "webhook_objetivos_catalogo",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-get",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        300
+      ],
+      "parameters": {
+        "path": "objetivos-catalogo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "disabled": false,
+      "webhookId": "c4t4l0g0-0bj3-t1v0-4r34-v1d4c4t4l0g0"
+    },
+    {
+      "id": "buscar-areas",
+      "name": "Buscar Áreas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -100,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, codigo, nome, icone, ordem FROM areas_vida_catalogo WHERE ativo = true ORDER BY ordem",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "buscar-objetivos",
+      "name": "Buscar Objetivos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        150,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, area_vida_id, codigo, titulo, ordem FROM objetivos_catalogo WHERE ativo = true ORDER BY area_vida_id, ordem",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "montar-resposta",
+      "name": "Montar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Pegar dados dos nós anteriores\nconst areasData = $('Buscar Áreas').all();\nconst objetivosData = $('Buscar Objetivos').all();\n\n// Formatar áreas\nconst areas = areasData.map(item => ({\n  id: item.json.id,\n  codigo: item.json.codigo,\n  nome: item.json.nome,\n  icone: item.json.icone,\n  ordem: item.json.ordem\n}));\n\n// Agrupar objetivos por área\nconst objetivosPorArea = {};\nobjetivosData.forEach(item => {\n  const areaId = item.json.area_vida_id;\n  if (!objetivosPorArea[areaId]) {\n    objetivosPorArea[areaId] = [];\n  }\n  objetivosPorArea[areaId].push({\n    id: item.json.id,\n    codigo: item.json.codigo,\n    titulo: item.json.titulo,\n    ordem: item.json.ordem\n  });\n});\n\nreturn [{\n  json: {\n    success: true,\n    areas: areas,\n    objetivos_por_area: objetivosPorArea\n  }\n}];"
+      }
+    },
+    {
+      "id": "responder",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Buscar Áreas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Áreas": {
+      "main": [
+        [
+          {
+            "node": "Buscar Objetivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Objetivos": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "5e0df20f-b3f2-49f0-bc71-f4e1f67bfbe8",
+  "versionCounter": 20,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-29T16:14:11.444Z",
+      "role": "workflow:owner",
+      "workflowId": "G8uozwPgQLi0LtRO",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
