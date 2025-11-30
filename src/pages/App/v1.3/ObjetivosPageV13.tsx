@@ -35,8 +35,9 @@ interface ObjetivoUsuario {
   prazo_dias: number;
   data_inicio: string;
   data_limite: string;
-  dias_restantes: number;
+  dias_restantes: number | null;
   status: string;
+  is_padrao?: boolean;
 }
 
 // Fallback do catálogo (caso API não esteja disponível)
@@ -394,7 +395,7 @@ const ObjetivosPageV13: React.FC = () => {
                         key={obj.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mq-card p-4"
+                        className={`mq-card p-4 ${obj.is_padrao ? 'opacity-80' : 'cursor-pointer'}`}
                       >
                         <div className="flex items-start gap-3">
                           <div className="text-2xl">{obj.area.icone}</div>
@@ -403,13 +404,20 @@ const ObjetivosPageV13: React.FC = () => {
                               <span className="text-xs font-medium text-[var(--mq-text-muted)]">
                                 {obj.area.nome}
                               </span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                obj.dias_restantes <= 7
-                                  ? 'bg-[var(--mq-warning-light)] text-[var(--mq-warning)]'
-                                  : 'bg-[var(--mq-primary-light)] text-[var(--mq-primary)]'
-                              }`}>
-                                {obj.dias_restantes > 0 ? `${obj.dias_restantes} dias` : 'Vence hoje!'}
-                              </span>
+                              {!obj.is_padrao && obj.dias_restantes !== null && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                  obj.dias_restantes <= 7
+                                    ? 'bg-[var(--mq-warning-light)] text-[var(--mq-warning)]'
+                                    : 'bg-[var(--mq-primary-light)] text-[var(--mq-primary)]'
+                                }`}>
+                                  {obj.dias_restantes > 0 ? `${obj.dias_restantes} dias` : 'Vence hoje!'}
+                                </span>
+                              )}
+                              {obj.is_padrao && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-text-subtle)] border border-[var(--mq-border)]">
+                                  Padrão
+                                </span>
+                              )}
                             </div>
                             <h3 className="text-sm font-bold text-[var(--mq-text)] mb-1">
                               {obj.titulo}
@@ -418,7 +426,9 @@ const ObjetivosPageV13: React.FC = () => {
                               {obj.detalhamento}
                             </p>
                           </div>
-                          <ChevronRight size={18} className="text-[var(--mq-text-subtle)] mt-1" />
+                          {!obj.is_padrao && (
+                            <ChevronRight size={18} className="text-[var(--mq-text-subtle)] mt-1" />
+                          )}
                         </div>
                       </motion.div>
                     ))}
