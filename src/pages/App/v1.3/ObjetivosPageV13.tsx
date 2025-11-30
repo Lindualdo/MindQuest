@@ -451,7 +451,7 @@ const ObjetivosPageV13: React.FC = () => {
                 >
                   <Plus size={20} />
                   <span className="font-semibold">
-                    {podeCriar ? 'Novo Objetivo' : 'Limite atingido (2/2)'}
+                    {podeCriar ? 'Novo Objetivo' : `Limite atingido (${totalAtivos}/${limiteAtivos})`}
                   </span>
                 </motion.button>
               </motion.div>
