@@ -100,22 +100,22 @@ Baseados em níveis e requisitos de progresso:
 
 ### Relação Quests × Objetivos (N:N)
 
-Uma quest pode impactar múltiplos objetivos simultaneamente:
+| Tipo Quest | objetivo_id (principal) | objetivos_secundarios |
+|------------|------------------------|----------------------|
+| **Catálogo** (TCC, Estoicismo, Boa Prática) | Padrão | — (vazio) |
+| **Sabotador** | Padrão | Específico relacionado |
+| **Personalizada com objetivo específico** | Específico | Padrão |
+| **Personalizada sem objetivo específico** | Padrão | — (vazio) |
+| **Reflexão Diária** | Padrão | — (vazio) |
 
-| Tipo Quest | Objetivo Principal | Objetivos Secundários |
-|------------|-------------------|----------------------|
-| **Reflexão Diária** | Padrão (Evolução Pessoal) | — |
-| **TCC/Estoicismo** | Padrão (Evolução Pessoal) | — |
-| **Sabotador** | Padrão (Evolução Pessoal) | Objetivo relacionado ao contexto |
-| **Personalizada** | Objetivo mais relacionado | Outros objetivos impactados |
+**Regras fixas (forçadas no código):**
+- Catálogo sem sabotador → nunca tem objetivos secundários
+- Objetivo padrão = fallback (toda quest tem pelo menos ele)
+- Múltiplos objetivos = apenas Sabotador e Personalizada com objetivo específico
 
 **Tipo de Impacto:**
-- `direto` — quest foi criada especificamente para este objetivo
-- `indireto` — quest contribui para este objetivo como efeito colateral
-
-**Exemplo:** Quest "Gratidão Diária contra Sr. Inquieto"
-- Impacto direto → Evolução Pessoal (sabotador)
-- Impacto indireto → Meu Próprio Negócio (foco no app)
+- `direto` — objetivo principal da quest
+- `indireto` — objetivo secundário impactado
 
 ### Tabelas de Objetivos
 
@@ -231,5 +231,5 @@ Uma quest pode impactar múltiplos objetivos simultaneamente:
 
 ---
 
-**Última atualização:** 2025-11-30 13:45
+**Última atualização:** 2025-11-30 16:20
 
