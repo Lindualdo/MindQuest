@@ -1,44 +1,99 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 
-// Dados mockados
-const mockObjetivos = [
-  { id: '1', titulo: 'Melhorar comunicação no trabalho', area: 'Carreira' },
-  { id: '2', titulo: 'Reduzir ansiedade e estresse', area: 'Saúde' },
-];
+interface Objetivo {
+  id: string;
+  titulo: string;
+  area_nome: string;
+  area_icone: string;
+  semana_atual: string;
+  checkin_feito: boolean;
+}
+
+interface CheckinData {
+  objetivo_id: string;
+  pontuacao: number;
+  observacoes: string;
+}
 
 const CheckinSemanalPageV13: React.FC = () => {
-  const {
-    dashboardData,
-    setView,
-  } = useDashboard();
+  const { dashboardData, setView } = useDashboard();
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
     dashboardData?.usuario?.nome ??
     'Usuário';
 
+  const userId = dashboardData?.usuario?.id;
+
   const [activeTab, setActiveTab] = useState<TabId>('ajustes');
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [progresso, setProgresso] = useState<Record<string, number>>({
-    '1': 3,
-    '2': 4,
+  const [error, setError] = useState<string | null>(null);
+
+  // Dados da API
+  const [objetivos, setObjetivos] = useState<Objetivo[]>([]);
+  const [semanaAtual, setSemanaAtual] = useState<string>('');
+
+  // Estado do formulário em steps
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [checkinData, setCheckinData] = useState<CheckinData>({
+    objetivo_id: '',
+    pontuacao: 0,
+    observacoes: '',
   });
+
+  // Carregar objetivos ativos
+  useEffect(() => {
+    const loadData = async () => {
+      if (!userId) {
+        setError('Usuário não identificado');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/checkin-objetivo?user_id=${userId}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          setError(data.error || 'Erro ao carregar dados');
+          setLoading(false);
+          return;
+        }
+
+        setObjetivos(data.objetivos_ativos || []);
+        setSemanaAtual(data.semana_atual || '');
+        setError(null);
+      } catch (err) {
+        console.error('[CheckinSemanal] Erro:', err);
+        setError('Erro ao conectar ao serviço');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [userId]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, []);
+  }, [step]);
 
   const handleBack = () => {
-    setView('jornada');
+    if (step > 1) {
+      setStep((prev) => (prev - 1) as 1 | 2 | 3);
+    } else {
+      setView('evoluir');
+    }
   };
 
   const handleNavHome = () => {
@@ -58,19 +113,58 @@ const CheckinSemanalPageV13: React.FC = () => {
 
   const handleNavConfig = () => {
     setActiveTab('ajustes');
-    setView('jornada');
+    setView('evoluir');
+  };
+
+  const handleSelectObjetivo = (objetivoId: string) => {
+    setCheckinData({ ...checkinData, objetivo_id: objetivoId });
+    setStep(2);
+  };
+
+  const handleSelectPontuacao = (pontuacao: number) => {
+    setCheckinData({ ...checkinData, pontuacao });
+    setStep(3);
   };
 
   const handleSave = async () => {
+    if (!userId || !checkinData.objetivo_id || checkinData.pontuacao === 0) {
+      setError('Dados incompletos');
+      return;
+    }
+
     setSaving(true);
-    // Simular salvamento
-    setTimeout(() => {
-      setSaving(false);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/checkin-objetivo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          objetivo_id: checkinData.objetivo_id,
+          pontuacao: checkinData.pontuacao,
+          observacoes: checkinData.observacoes,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Erro ao salvar check-in');
+        setSaving(false);
+        return;
+      }
+
       setSuccess(true);
       setTimeout(() => {
-        handleBack();
+        setView('evoluir');
       }, 2000);
-    }, 1000);
+    } catch (err) {
+      console.error('[CheckinSemanal] Erro ao salvar:', err);
+      setError('Erro ao conectar ao serviço');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getProgressLabel = (valor: number) => {
@@ -87,6 +181,8 @@ const CheckinSemanalPageV13: React.FC = () => {
     return 'var(--mq-success)';
   };
 
+  const selectedObjetivo = objetivos.find((o) => o.id === checkinData.objetivo_id);
+
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
@@ -94,11 +190,7 @@ const CheckinSemanalPageV13: React.FC = () => {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
         {/* Botão voltar */}
         <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
+          <button type="button" onClick={handleBack} className="mq-btn-back">
             <ArrowLeft size={18} />
             Voltar
           </button>
@@ -107,8 +199,48 @@ const CheckinSemanalPageV13: React.FC = () => {
         {/* Título da página */}
         <div className="mb-6 text-center">
           <h1 className="mq-page-title">Check-in Semanal</h1>
-          <p className="mq-page-subtitle">Como está seu progresso real?</p>
+          <p className="mq-page-subtitle">
+            {semanaAtual ? `Semana ${semanaAtual.replace('-W', '/')}` : 'Como está seu progresso?'}
+          </p>
         </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--mq-primary)] border-t-transparent" />
+          </div>
+        )}
+
+        {/* Erro */}
+        {error && !loading && (
+          <div className="mq-card p-6 text-center border border-red-500/30 bg-red-500/10 mb-4">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Sem objetivos */}
+        {!loading && !error && objetivos.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mq-card p-6 text-center"
+          >
+            <Target size={48} className="mx-auto mb-4 text-[var(--mq-text-muted)]" />
+            <h3 className="text-base font-bold text-[var(--mq-text)] mb-2">
+              Nenhum objetivo ativo
+            </h3>
+            <p className="text-sm text-[var(--mq-text-muted)] mb-4">
+              Defina seus objetivos para começar a fazer check-ins semanais.
+            </p>
+            <button
+              type="button"
+              onClick={() => setView('objetivos')}
+              className="mq-btn-primary px-6 py-3 rounded-xl text-sm"
+            >
+              Definir Objetivos
+            </button>
+          </motion.div>
+        )}
 
         {/* Mensagem de sucesso */}
         {success && (
@@ -121,77 +253,205 @@ const CheckinSemanalPageV13: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Formulário */}
-        <div className="mq-card space-y-6 p-6" style={{ borderRadius: 24 }}>
-          <p className="text-sm text-[var(--mq-text-muted)] text-center">
-            Avalie seu progresso em cada objetivo nesta semana (1 = muito baixo, 5 = excelente)
-          </p>
+        {/* Steps */}
+        {!loading && !error && objetivos.length > 0 && !success && (
+          <AnimatePresence mode="wait">
+            {/* Step 1: Escolher objetivo */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <div className="mq-card p-4">
+                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-4">
+                    Passo 1 de 3 — Escolha o objetivo
+                  </p>
 
-          {mockObjetivos.map((objetivo, index) => (
-            <motion.div
-              key={objetivo.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="space-y-3"
-            >
-              <div>
-                <h3 className="text-base font-bold text-[var(--mq-text)] mb-1">
-                  {objetivo.titulo}
-                </h3>
-                <p className="text-xs text-[var(--mq-text-muted)]">{objetivo.area}</p>
-              </div>
-
-              {/* Escala 1-5 */}
-              <div className="flex items-center justify-between gap-2">
-                {[1, 2, 3, 4, 5].map((valor) => (
-                  <button
-                    key={valor}
-                    type="button"
-                    onClick={() => setProgresso({ ...progresso, [objetivo.id]: valor })}
-                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
-                      progresso[objetivo.id] === valor
-                        ? 'bg-[var(--mq-primary)] text-white shadow-md scale-105'
-                        : 'bg-[var(--mq-card)] text-[var(--mq-text-muted)] hover:bg-[var(--mq-surface)]'
-                    }`}
-                    style={{
-                      backgroundColor: progresso[objetivo.id] === valor ? getProgressColor(progresso[objetivo.id]) : undefined,
-                    }}
-                  >
-                    {valor}
-                  </button>
-                ))}
-              </div>
-
-              {/* Label do progresso */}
-              <p className="text-xs text-center font-semibold" style={{ color: getProgressColor(progresso[objetivo.id]) }}>
-                {getProgressLabel(progresso[objetivo.id])}
-              </p>
-            </motion.div>
-          ))}
-
-          {/* Botão Salvar */}
-          <motion.button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="mq-btn-primary w-full rounded-xl px-6 py-4 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            whileHover={{ scale: saving ? 1 : 1.02 }}
-            whileTap={{ scale: saving ? 1 : 0.98 }}
-          >
-            {saving ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                Salvar Check-in
-              </>
+                  <div className="space-y-3">
+                    {objetivos.map((objetivo, index) => (
+                      <motion.button
+                        key={objetivo.id}
+                        type="button"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        onClick={() => handleSelectObjetivo(objetivo.id)}
+                        className={`w-full p-4 rounded-xl border transition-all flex items-center gap-3 text-left ${
+                          objetivo.checkin_feito
+                            ? 'border-green-500/30 bg-green-500/10'
+                            : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]'
+                        }`}
+                      >
+                        <span className="text-2xl">{objetivo.area_icone}</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-[var(--mq-text)] truncate">
+                            {objetivo.titulo}
+                          </h3>
+                          <p className="text-xs text-[var(--mq-text-muted)]">
+                            {objetivo.area_nome}
+                          </p>
+                        </div>
+                        {objetivo.checkin_feito ? (
+                          <Check size={20} className="text-green-500 shrink-0" />
+                        ) : (
+                          <ChevronRight size={20} className="text-[var(--mq-text-subtle)] shrink-0" />
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             )}
-          </motion.button>
-        </div>
+
+            {/* Step 2: Escolher pontuação */}
+            {step === 2 && selectedObjetivo && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <div className="mq-card p-4">
+                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-4">
+                    Passo 2 de 3 — Como foi seu progresso?
+                  </p>
+
+                  {/* Objetivo selecionado */}
+                  <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-6">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{selectedObjetivo.area_icone}</span>
+                      <div>
+                        <h3 className="text-sm font-bold text-[var(--mq-text)]">
+                          {selectedObjetivo.titulo}
+                        </h3>
+                        <p className="text-xs text-[var(--mq-text-muted)]">
+                          {selectedObjetivo.area_nome}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Escala 1-5 */}
+                  <p className="text-xs text-center text-[var(--mq-text-muted)] mb-3">
+                    1 = Muito baixo • 5 = Excelente
+                  </p>
+
+                  <div className="flex items-center justify-between gap-2">
+                    {[1, 2, 3, 4, 5].map((valor) => (
+                      <button
+                        key={valor}
+                        type="button"
+                        onClick={() => handleSelectPontuacao(valor)}
+                        className={`flex-1 py-4 rounded-xl text-lg font-bold transition-all ${
+                          checkinData.pontuacao === valor
+                            ? 'text-white shadow-md scale-105'
+                            : 'bg-[var(--mq-surface)] text-[var(--mq-text-muted)] hover:bg-[var(--mq-card)]'
+                        }`}
+                        style={{
+                          backgroundColor:
+                            checkinData.pontuacao === valor ? getProgressColor(valor) : undefined,
+                        }}
+                      >
+                        {valor}
+                      </button>
+                    ))}
+                  </div>
+
+                  {checkinData.pontuacao > 0 && (
+                    <p
+                      className="text-sm text-center font-semibold mt-3"
+                      style={{ color: getProgressColor(checkinData.pontuacao) }}
+                    >
+                      {getProgressLabel(checkinData.pontuacao)}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Observações */}
+            {step === 3 && selectedObjetivo && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <div className="mq-card p-4">
+                  <p className="text-sm text-[var(--mq-text-muted)] text-center mb-4">
+                    Passo 3 de 3 — Conte mais sobre seu progresso
+                  </p>
+
+                  {/* Resumo */}
+                  <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{selectedObjetivo.area_icone}</span>
+                        <div>
+                          <h3 className="text-sm font-bold text-[var(--mq-text)]">
+                            {selectedObjetivo.titulo}
+                          </h3>
+                          <p className="text-xs text-[var(--mq-text-muted)]">
+                            {selectedObjetivo.area_nome}
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
+                        style={{ backgroundColor: getProgressColor(checkinData.pontuacao) }}
+                      >
+                        {checkinData.pontuacao}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Campo de observações */}
+                  <label className="block mb-2">
+                    <span className="text-sm font-semibold text-[var(--mq-text)]">
+                      Observações (opcional)
+                    </span>
+                  </label>
+                  <textarea
+                    value={checkinData.observacoes}
+                    onChange={(e) =>
+                      setCheckinData({ ...checkinData, observacoes: e.target.value })
+                    }
+                    placeholder="O que aconteceu essa semana? O que funcionou? O que pode melhorar?"
+                    rows={4}
+                    className="w-full p-4 rounded-xl border border-[var(--mq-border)] bg-[var(--mq-surface)] text-[var(--mq-text)] placeholder:text-[var(--mq-text-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)] resize-none"
+                  />
+
+                  {/* Botão Salvar */}
+                  <motion.button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="mq-btn-primary w-full rounded-xl px-6 py-4 text-sm mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    whileHover={{ scale: saving ? 1 : 1.02 }}
+                    whileTap={{ scale: saving ? 1 : 0.98 }}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Salvar Check-in
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </main>
 
       <BottomNavV1_3
@@ -206,4 +466,3 @@ const CheckinSemanalPageV13: React.FC = () => {
 };
 
 export default CheckinSemanalPageV13;
-
