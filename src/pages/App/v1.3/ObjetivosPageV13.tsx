@@ -116,6 +116,7 @@ const ObjetivosPageV13: React.FC = () => {
   const [objetivosUsuario, setObjetivosUsuario] = useState<ObjetivoUsuario[]>([]);
   const [podeCriar, setPodeCriar] = useState(true);
   const [totalAtivos, setTotalAtivos] = useState(0);
+  const [limiteAtivos, setLimiteAtivos] = useState(3);
 
   // Catálogo
   const [areas, setAreas] = useState<Area[]>(FALLBACK_AREAS);
@@ -157,6 +158,7 @@ const ObjetivosPageV13: React.FC = () => {
           setObjetivosUsuario(objetivosCarregados);
           setPodeCriar(podecriarFlag);
           setTotalAtivos(data.total_ativos ?? 0);
+          setLimiteAtivos(data.limite_ativos ?? 3);
         }
       }
 
@@ -334,7 +336,7 @@ const ObjetivosPageV13: React.FC = () => {
           </h1>
           <p className="mq-page-subtitle">
             {passoAtual === 0
-              ? `${totalAtivos}/3 objetivos ativos`
+              ? `${totalAtivos}/${limiteAtivos} objetivos ativos`
               : 'O que você quer conquistar?'}
           </p>
         </div>
