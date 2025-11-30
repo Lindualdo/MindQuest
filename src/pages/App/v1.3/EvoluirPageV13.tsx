@@ -124,10 +124,10 @@ const EvoluirPageV13: React.FC = () => {
 
   // Dados para contadores
   const [objetivosInfo, setObjetivosInfo] = useState<{ total: number; limite: number }>({ total: 0, limite: 2 });
+  const [conquistasVida, setConquistasVida] = useState(0);
   const checkinPendente = true; // Mock - badge [!]
-  const conquistasVida = 1; // Mock
 
-  // Buscar contagem de objetivos
+  // Buscar contagem de objetivos e conquistas
   useEffect(() => {
     const fetchObjetivos = async () => {
       try {
@@ -146,7 +146,24 @@ const EvoluirPageV13: React.FC = () => {
         console.error('Erro ao buscar objetivos:', err);
       }
     };
+    
+    const fetchConquistas = async () => {
+      try {
+        const userId = dashboardData?.usuario?.id;
+        if (!userId) return;
+        
+        const res = await fetch(`/api/conquista-objetivo?user_id=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setConquistasVida(data.total_alcancados ?? 0);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar conquistas:', err);
+      }
+    };
+    
     fetchObjetivos();
+    fetchConquistas();
   }, [dashboardData?.usuario?.id]);
 
 

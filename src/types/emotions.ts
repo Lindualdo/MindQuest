@@ -723,6 +723,8 @@ export type ViewId =
   | 'perfilPessoal'
   | 'objetivos'
   | 'niveisJornada'
+  | 'checkinSemanal'
+  | 'conquistasVida'
   | 'aparencia';
 
 export interface StoreState {
