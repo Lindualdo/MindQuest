@@ -474,7 +474,7 @@ const EvoluirPageV13: React.FC = () => {
             </button>
           </motion.section>
 
-          {/* Conexão Ações × Objetivos */}
+          {/* Ações por Objetivo */}
           <motion.section
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -493,8 +493,8 @@ const EvoluirPageV13: React.FC = () => {
                   <Link2 size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base font-bold text-[var(--mq-text)]">Conexão Ações × Objetivos</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Quais ações impactaram cada objetivo</p>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Ações por Objetivo</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Acompanhe o progresso de cada meta</p>
                 </div>
               </div>
               <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />

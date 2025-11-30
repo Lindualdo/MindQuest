@@ -178,8 +178,8 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="mq-page-title">Conexão Ações × Objetivos</h1>
-          <p className="mq-page-subtitle">Quais ações impactaram cada objetivo</p>
+          <h1 className="mq-page-title">Ações por Objetivo</h1>
+          <p className="mq-page-subtitle">Acompanhe o progresso de cada meta</p>
         </div>
 
         {/* Loading */}
