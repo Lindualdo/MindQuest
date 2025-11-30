@@ -125,7 +125,6 @@ const EvoluirPageV13: React.FC = () => {
   // Dados para contadores
   const [objetivosInfo, setObjetivosInfo] = useState<{ total: number; limite: number }>({ total: 0, limite: 2 });
   const [conquistasVida, setConquistasVida] = useState(0);
-  const checkinPendente = true; // Mock - badge [!]
 
   // Buscar contagem de objetivos e conquistas
   useEffect(() => {
@@ -433,14 +432,7 @@ const EvoluirPageV13: React.FC = () => {
                   <BarChart3 size={20} className="text-[var(--mq-primary)]" />
                 </div>
                 <div className="text-left flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-[var(--mq-text)]">Check-in Semanal</h3>
-                    {checkinPendente && (
-                      <span className="text-xs font-semibold text-[var(--mq-warning)] bg-[var(--mq-warning-light)] px-2 py-0.5 rounded-full">
-                        !
-                      </span>
-                    )}
-                  </div>
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Check-in Semanal</h3>
                   <p className="text-xs text-[var(--mq-text-muted)]">Como está seu progresso real?</p>
                 </div>
               </div>
