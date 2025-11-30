@@ -216,7 +216,7 @@ const ObjetivosPageV13: React.FC = () => {
 
   const iniciarCriacao = () => {
     if (!podeCriar) {
-      setError('Você já tem 2 objetivos ativos. Conclua ou cancele um para criar outro.');
+      setError('Você já tem 3 objetivos ativos. Conclua ou cancele um para criar outro.');
       return;
     }
     setPassoAtual(1);
@@ -334,7 +334,7 @@ const ObjetivosPageV13: React.FC = () => {
           </h1>
           <p className="mq-page-subtitle">
             {passoAtual === 0
-              ? `${totalAtivos}/2 objetivos ativos`
+              ? `${totalAtivos}/3 objetivos ativos`
               : 'O que você quer conquistar?'}
           </p>
         </div>

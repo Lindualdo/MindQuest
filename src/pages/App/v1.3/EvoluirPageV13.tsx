@@ -123,7 +123,7 @@ const EvoluirPageV13: React.FC = () => {
   }, [totalXp]);
 
   // Dados para contadores
-  const [objetivosInfo, setObjetivosInfo] = useState<{ total: number; limite: number }>({ total: 0, limite: 2 });
+  const [objetivosInfo, setObjetivosInfo] = useState<{ total: number; limite: number }>({ total: 0, limite: 3 });
   const [conquistasVida, setConquistasVida] = useState(0);
 
   // Buscar contagem de objetivos e conquistas
@@ -138,7 +138,7 @@ const EvoluirPageV13: React.FC = () => {
           const data = await res.json();
           setObjetivosInfo({
             total: data.total_ativos ?? 0,
-            limite: data.limite_ativos ?? 2
+            limite: data.limite_ativos ?? 3
           });
         }
       } catch (err) {
@@ -341,7 +341,7 @@ const EvoluirPageV13: React.FC = () => {
             <div className="mb-3">
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-base font-bold text-[var(--mq-text)]">
-                  Nível {nivelInfo.nivel} · {nivelInfo.titulo}
+                  Nível: {nivelInfo.titulo}
                 </h3>
                 <button
                   type="button"
@@ -353,7 +353,7 @@ const EvoluirPageV13: React.FC = () => {
                 </button>
               </div>
               <p className="text-xs text-[var(--mq-text-muted)]">
-                Estágio {nivelInfo.estagio} de 4 · {nivelInfo.estagioLabel}
+                Estágio: {nivelInfo.estagioLabel}
               </p>
             </div>
             <div className="space-y-2">
