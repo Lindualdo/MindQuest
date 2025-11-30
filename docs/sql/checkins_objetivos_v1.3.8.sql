@@ -11,7 +11,7 @@ CREATE TABLE checkins_objetivos (
   pontuacao INT NOT NULL CHECK (pontuacao BETWEEN 1 AND 5),
   observacoes TEXT,
   data_checkin DATE NOT NULL DEFAULT CURRENT_DATE,
-  semana_ano VARCHAR(7) NOT NULL, -- formato: '2025-W48'
+  semana_ano VARCHAR(10) NOT NULL, -- formato: '2025-W48'
   criado_em TIMESTAMP DEFAULT NOW(),
   
   -- Impedir duplicata: 1 check-in por objetivo por semana
