@@ -117,7 +117,7 @@ const ObjetivosPageV13: React.FC = () => {
   const [objetivosUsuario, setObjetivosUsuario] = useState<ObjetivoUsuario[]>([]);
   const [podeCriar, setPodeCriar] = useState(true);
   const [totalAtivos, setTotalAtivos] = useState(0);
-  const [limiteAtivos, setLimiteAtivos] = useState(2);
+  const [limiteAtivos, setLimiteAtivos] = useState(3);
 
   // Catálogo
   const [areas, setAreas] = useState<Area[]>(FALLBACK_AREAS);
@@ -219,7 +219,7 @@ const ObjetivosPageV13: React.FC = () => {
 
   const iniciarCriacao = () => {
     if (!podeCriar) {
-      setError('Você já tem 2 objetivos específicos ativos. Conclua ou cancele um para criar outro.');
+      setError('Você já tem 3 objetivos ativos (limite máximo). Conclua ou cancele um para criar outro.');
       return;
     }
     setPassoAtual(1);
