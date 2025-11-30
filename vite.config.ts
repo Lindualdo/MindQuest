@@ -32,8 +32,36 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => {
-            // Em dev, fazer proxy direto para o n8n (handlers do Vercel não funcionam localmente)
-            // Em produção, os handlers do Vercel interceptam antes do proxy
+            // Para /api/jornada, tratar action param
+            if (path.startsWith('/api/jornada')) {
+              const url = new URL(path, 'http://localhost');
+              const action = url.searchParams.get('action');
+              url.searchParams.delete('action');
+              const queryString = url.search;
+              
+              if (action === 'stats') {
+                const finalPath = `${basePathname}/evoluir-stats${queryString}`;
+                console.log('[Vite Proxy] Rewrite jornada (stats):', { original: path, final: finalPath });
+                return finalPath;
+              }
+              
+              // Default: jornada-niveis
+              const finalPath = `${basePathname}/jornada-niveis${queryString}`;
+              console.log('[Vite Proxy] Rewrite jornada (niveis):', { original: path, final: finalPath });
+              return finalPath;
+            }
+            
+            // Para /api/objetivos com action=catalogo, redirecionar para objetivos-catalogo
+            if (path.startsWith('/api/objetivos') && path.includes('action=catalogo')) {
+              const url = new URL(path, 'http://localhost');
+              url.searchParams.delete('action');
+              const queryString = url.search;
+              const finalPath = `${basePathname}/objetivos-catalogo${queryString}`;
+              console.log('[Vite Proxy] Rewrite objetivos-catalogo:', { original: path, final: finalPath });
+              return finalPath;
+            }
+            
+            // Para outras rotas, comportamento padrão
             const pathWithoutApi = path.replace(/^\/api/, '');
             const suffix = pathWithoutApi.startsWith('/') ? pathWithoutApi : `/${pathWithoutApi}`;
             const prefix = basePathname ? basePathname : '';
