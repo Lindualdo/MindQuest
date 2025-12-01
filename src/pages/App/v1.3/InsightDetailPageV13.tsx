@@ -109,6 +109,12 @@ const ResourceCard = ({
       </div>
     </div>
 
+    {/* 
+      BOTÃO OCULTO: Criar Quest manualmente
+      Removido em 2024-12-01 para evitar duplicação com quests automáticas do agente.
+      O sw_criar_quest já cria quests baseadas no contexto geral + insights.
+      Reativar se necessário no futuro.
+      
     {!disabled && (
       <button
         type="button"
@@ -129,6 +135,7 @@ const ResourceCard = ({
       )}
       </button>
     )}
+    */}
   </div>
 );
 
