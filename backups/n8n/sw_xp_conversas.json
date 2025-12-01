@@ -256,7 +256,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH payload AS (\n  SELECT $1::uuid AS usuario_id\n),\nverificar_quests AS (\n  SELECT COUNT(*) AS total_quests\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status IN ('disponivel', 'ativa')\n),\nbuscar_reflexao_diaria AS (\n  SELECT id\n  FROM public.quests_catalogo\n  WHERE codigo = 'reflexao_diaria'\n  LIMIT 1\n),\ncriar_quest_inicial AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    catalogo_id,\n    status,\n    ativado_em,\n    config\n  )\n  SELECT\n    gen_random_uuid(),\n    (SELECT usuario_id FROM payload),\n    brd.id,\n    'ativa',\n    NOW(),\n    jsonb_build_object(\n      'titulo', 'Reflexão Diária',\n      'descricao', 'Conversa com seu Assistente de reflexão',\n      'prioridade', 'alta',\n      'recorrencia', 'diaria',\n      'conversa', true,\n      'contexto_origem', 'sistema'\n    )\n  FROM buscar_reflexao_diaria brd\n  CROSS JOIN verificar_quests vq\n  WHERE vq.total_quests = 0\n  RETURNING id\n),\nbuscar_quest_existente AS (\n  SELECT uq.id\n  FROM public.usuarios_quest uq\n  JOIN buscar_reflexao_diaria brd ON uq.catalogo_id = brd.id\n  WHERE uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status IN ('disponivel', 'ativa')\n  LIMIT 1\n)\nSELECT\n  (SELECT usuario_id FROM payload) AS usuario_id,\n  COALESCE(\n    (SELECT id FROM buscar_quest_existente),\n    (SELECT id FROM criar_quest_inicial LIMIT 1)\n  ) AS usuarios_quest_id;",
+        "query": "WITH payload AS (\n  SELECT $1::uuid AS usuario_id\n),\nverificar_quests AS (\n  SELECT COUNT(*) AS total_quests\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status IN ('disponivel', 'ativa')\n),\nbuscar_reflexao_diaria AS (\n  SELECT id\n  FROM public.quests_catalogo\n  WHERE codigo = 'reflexao_diaria'\n  LIMIT 1\n),\nbuscar_objetivo_padrao AS (\n  SELECT id\n  FROM public.usuarios_objetivos\n  WHERE usuario_id = (SELECT usuario_id FROM payload)\n    AND is_padrao = true\n    AND status = 'ativo'\n  LIMIT 1\n),\ncriar_quest_inicial AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    catalogo_id,\n    status,\n    ativado_em,\n    objetivo_id,\n    config\n  )\n  SELECT\n    gen_random_uuid(),\n    (SELECT usuario_id FROM payload),\n    brd.id,\n    'ativa',\n    NOW(),\n    (SELECT id FROM buscar_objetivo_padrao),\n    jsonb_build_object(\n      'titulo', 'Reflexão Diária',\n      'descricao', 'Conversa com seu Assistente de reflexão',\n      'prioridade', 'alta',\n      'recorrencia', 'diaria',\n      'conversa', true,\n      'contexto_origem', 'sistema'\n    )\n  FROM buscar_reflexao_diaria brd\n  CROSS JOIN verificar_quests vq\n  WHERE vq.total_quests = 0\n  RETURNING id, objetivo_id\n),\ninserir_quest_objetivo AS (\n  INSERT INTO public.quest_objetivos (usuarios_quest_id, objetivo_id, tipo_impacto)\n  SELECT id, objetivo_id, 'direto'\n  FROM criar_quest_inicial\n  WHERE objetivo_id IS NOT NULL\n  ON CONFLICT (usuarios_quest_id, objetivo_id) DO NOTHING\n  RETURNING id\n),\nbuscar_quest_existente AS (\n  SELECT uq.id, uq.objetivo_id\n  FROM public.usuarios_quest uq\n  JOIN buscar_reflexao_diaria brd ON uq.catalogo_id = brd.id\n  WHERE uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status IN ('disponivel', 'ativa')\n  LIMIT 1\n)\nSELECT\n  (SELECT usuario_id FROM payload) AS usuario_id,\n  COALESCE(\n    (SELECT id FROM buscar_quest_existente),\n    (SELECT id FROM criar_quest_inicial LIMIT 1)\n  ) AS usuarios_quest_id,\n  COALESCE(\n    (SELECT objetivo_id FROM buscar_quest_existente),\n    (SELECT objetivo_id FROM criar_quest_inicial LIMIT 1)\n  ) AS objetivo_id;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
@@ -559,7 +559,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
@@ -573,8 +575,8 @@
       }
     ]
   },
-  "versionId": "8e686f32-cd7f-4a3e-92c8-70b50d23af15",
-  "versionCounter": 1,
+  "versionId": "c8a1be67-bfe9-43a0-8213-b9a9263f3d3a",
+  "versionCounter": 2,
   "triggerCount": 0,
   "shared": [
     {

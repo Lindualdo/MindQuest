@@ -1,0 +1,175 @@
+{
+  "createdAt": "2025-11-30T20:25:05.644Z",
+  "id": "YnhK0skLHXl1eqrf",
+  "name": "webhook_conexao_objetivos",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-get",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "c0n3x40-0bj3t1v0s-g3t",
+      "parameters": {
+        "path": "conexao-objetivos",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-dados",
+      "name": "Buscar Dados",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        450,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH quest_progress AS (\n  SELECT \n    uq.id as quest_id,\n    COUNT(*) FILTER (WHERE qr.status = 'concluida') as concluidas,\n    COUNT(*) as total\n  FROM usuarios_quest uq\n  LEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id\n  WHERE uq.usuario_id = $1\n  GROUP BY uq.id\n)\nSELECT \n  uo.id as objetivo_id,\n  uo.titulo as objetivo_titulo,\n  uo.is_padrao,\n  av.nome as area_nome,\n  av.icone as area_icone,\n  uq.id as quest_id,\n  COALESCE(uq.config->>'titulo', qc.titulo) as quest_titulo,\n  qo.tipo_impacto,\n  COALESCE(qp.concluidas, 0)::int as concluidas,\n  COALESCE(qp.total, 0)::int as total,\n  CASE WHEN COALESCE(qp.total, 0) > 0 \n    THEN ROUND((COALESCE(qp.concluidas, 0)::numeric / qp.total) * 100)\n    ELSE 0 \n  END as percentual\nFROM usuarios_objetivos uo\nJOIN areas_vida_catalogo av ON uo.area_vida_id = av.id\nLEFT JOIN quest_objetivos qo ON qo.objetivo_id = uo.id\nLEFT JOIN usuarios_quest uq ON qo.usuarios_quest_id = uq.id\nLEFT JOIN quests_catalogo qc ON uq.catalogo_id = qc.id\nLEFT JOIN quest_progress qp ON qp.quest_id = uq.id\nWHERE uo.usuario_id = $1\n  AND uo.status = 'ativo'\nORDER BY uo.is_padrao DESC, uo.titulo, quest_titulo;",
+        "options": {
+          "queryReplacement": "={{ [$json.query.user_id] }}"
+        }
+      }
+    },
+    {
+      "id": "montar-resposta",
+      "name": "Montar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(item => item.json);\n\nconst objetivosMap = new Map();\n\nfor (const row of rows) {\n  if (!row.objetivo_id) continue;\n  \n  if (!objetivosMap.has(row.objetivo_id)) {\n    objetivosMap.set(row.objetivo_id, {\n      id: row.objetivo_id,\n      titulo: row.objetivo_titulo,\n      is_padrao: row.is_padrao,\n      area: {\n        nome: row.area_nome,\n        icone: row.area_icone\n      },\n      quests: []\n    });\n  }\n  \n  if (row.quest_id) {\n    objetivosMap.get(row.objetivo_id).quests.push({\n      id: row.quest_id,\n      titulo: row.quest_titulo,\n      tipo_impacto: row.tipo_impacto,\n      concluidas: row.concluidas,\n      total: row.total,\n      percentual: row.percentual\n    });\n  }\n}\n\nconst objetivos = Array.from(objetivosMap.values());\n\nlet totalQuests = 0;\nlet totalConcluidas = 0;\nlet totalRecorrencias = 0;\n\nfor (const obj of objetivos) {\n  totalQuests += obj.quests.length;\n  for (const q of obj.quests) {\n    totalConcluidas += q.concluidas;\n    totalRecorrencias += q.total;\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    objetivos: objetivos,\n    estatisticas: {\n      total_objetivos: objetivos.length,\n      total_quests: totalQuests,\n      total_concluidas: totalConcluidas,\n      total_recorrencias: totalRecorrencias,\n      percentual_geral: totalRecorrencias > 0 \n        ? Math.round((totalConcluidas / totalRecorrencias) * 100) \n        : 0\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "responder",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "6cfd9f99-1a4f-49a0-904c-b4d67af34066",
+  "versionCounter": 6,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-11-30T20:25:05.644Z",
+      "role": "workflow:owner",
+      "workflowId": "YnhK0skLHXl1eqrf",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

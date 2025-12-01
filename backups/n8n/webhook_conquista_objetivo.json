@@ -1,0 +1,276 @@
+{
+  "createdAt": "2025-11-30T10:58:45.128Z",
+  "id": "Ld8auYElWR99amml",
+  "name": "webhook_conquista_objetivo",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-get",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "c0nqu1st4-0bj3t1v0-g3t-1d",
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "conquista-objetivo",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "webhook-post",
+      "name": "Webhook POST",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "c0nqu1st4-0bj3t1v0-p0st-1d",
+      "position": [
+        200,
+        550
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "conquista-objetivo",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "buscar-objetivos",
+      "name": "Buscar Objetivos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  uo.id,\n  uo.titulo,\n  uo.detalhamento,\n  uo.status,\n  uo.data_inicio,\n  uo.data_limite,\n  uo.alcancado_em,\n  uo.is_padrao,\n  av.nome as area_nome,\n  av.icone as area_icone,\n  CASE WHEN uo.is_padrao THEN NULL ELSE (uo.data_limite - CURRENT_DATE)::int END as dias_restantes\nFROM usuarios_objetivos uo\nJOIN areas_vida_catalogo av ON uo.area_vida_id = av.id\nWHERE uo.usuario_id = $1\nORDER BY \n  uo.is_padrao DESC,\n  CASE WHEN uo.status = 'ativo' THEN 0 ELSE 1 END,\n  uo.alcancado_em DESC NULLS LAST,\n  uo.criado_em DESC",
+        "options": {
+          "queryReplacement": "={{ [$json.query.user_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "montar-resposta-get",
+      "name": "Montar Resposta GET",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const objetivos = $input.all().map(item => item.json);\n\nconst ativos = objetivos.filter(o => o.status === 'ativo');\nconst alcancados = objetivos.filter(o => o.status === 'alcancado');\nconst outros = objetivos.filter(o => !['ativo', 'alcancado'].includes(o.status));\n\nreturn [{\n  json: {\n    success: true,\n    objetivos_ativos: ativos,\n    objetivos_alcancados: alcancados,\n    objetivos_outros: outros,\n    total_ativos: ativos.length,\n    total_alcancados: alcancados.length\n  }\n}];"
+      }
+    },
+    {
+      "id": "responder-get",
+      "name": "Responder GET",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "marcar-alcancado",
+      "name": "Marcar Alcancado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        450,
+        550
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usuarios_objetivos\nSET \n  status = 'alcancado',\n  alcancado_em = NOW(),\n  atualizado_em = NOW()\nWHERE id = $1\nAND usuario_id = $2\nAND status = 'ativo'\nRETURNING *",
+        "options": {
+          "queryReplacement": "={{ [$json.body.objetivo_id, $json.body.user_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "montar-resposta-post",
+      "name": "Montar Resposta POST",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        550
+      ],
+      "parameters": {
+        "jsCode": "const resultado = $input.first()?.json;\n\nif (!resultado || !resultado.id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Objetivo nao encontrado ou ja foi alcancado'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Parabens! Objetivo alcancado!',\n    objetivo: resultado\n  }\n}];"
+      }
+    },
+    {
+      "id": "responder-post",
+      "name": "Responder POST",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        950,
+        550
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Buscar Objetivos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Objetivos": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta GET": {
+      "main": [
+        [
+          {
+            "node": "Responder GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook POST": {
+      "main": [
+        [
+          {
+            "node": "Marcar Alcancado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Alcancado": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta POST": {
+      "main": [
+        [
+          {
+            "node": "Responder POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "abae22e5-a4be-4f70-83c1-ddb967a2ee2b",
+  "versionCounter": 7,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "createdAt": "2025-11-30T10:58:45.128Z",
+      "role": "workflow:owner",
+      "workflowId": "Ld8auYElWR99amml",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
