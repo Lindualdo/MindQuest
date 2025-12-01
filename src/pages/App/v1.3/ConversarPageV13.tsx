@@ -81,7 +81,7 @@ const ConversarPageV13 = () => {
 
   // Dados para o card de conversas da semana
   const hoje = new Date();
-  const inicioSemana = startOfWeek(hoje, { weekStartsOn: 0 });
+  const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
   const dias = weeklyData.dias ?? [];
 
   // Status config para checkboxes de conversas

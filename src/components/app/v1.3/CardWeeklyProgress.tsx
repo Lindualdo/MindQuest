@@ -11,7 +11,7 @@ type Props = {
 const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
   const dias = summary.dias ?? [];
   const hoje = new Date();
-  const inicioSemana = startOfWeek(hoje, { weekStartsOn: 0 }); // 0 = domingo
+  const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 }); // 0 = domingo
 
   // Calcular totais da semana
   const xpConversaTotal = dias.reduce((sum, dia) => sum + (dia.xpConversa ?? 0), 0);

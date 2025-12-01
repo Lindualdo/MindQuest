@@ -90,7 +90,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const weeklyData = weeklyProgressCard ?? mockWeeklyXpSummary;
   
   const diasSemana = useMemo(() => {
-    const inicioSemana = startOfWeek(hoje, { weekStartsOn: 0 });
+    const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
     
     return Array.from({ length: 7 }).map((_, i) => {
       const data = addDays(inicioSemana, i);
