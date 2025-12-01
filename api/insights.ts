@@ -2,7 +2,7 @@
  * Router consolidado para webhooks de proxy
  * Endpoints: /api/insights, /api/humor-historico, /api/resumo_conversas, /api/insights_historico
  */
-import { setCorsHeaders } from './utils/cors';
+import { setCorsHeaders } from '../src/utils/cors';
 
 const WEBHOOK_BASE_URL = 'https://mindquest-n8n.cloudfy.live/webhook';
 
