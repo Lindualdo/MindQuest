@@ -344,6 +344,11 @@ const InsightDetailPageV13 = () => {
             <ArrowLeft size={16} />
             Voltar
           </button>
+          {/* 
+            OCULTO: Badges de categoria e prioridade
+            Removido em 2024-12-01 - informação excessiva sem relevância imediata.
+            Reativar se necessário no futuro.
+
           <div className="flex items-center gap-2">
             {categoriaInfo && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] ${categoriaInfo.color}`}>
@@ -358,6 +363,7 @@ const InsightDetailPageV13 = () => {
               </span>
             )}
           </div>
+          */}
         </div>
 
         {/* Título */}
