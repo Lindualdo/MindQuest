@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target, Star } from 'lucide-react';
 import { format, startOfWeek, parseISO, isSameDay, isFuture, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
@@ -370,6 +370,7 @@ const PainelQuestsPageV13: React.FC = () => {
   // Renderizar quest item simplificado para "a fazer"
   const renderQuestItemSimples = (quest: QuestPersonalizadaResumo) => {
     const questId = quest.instancia_id || quest.meta_codigo;
+    const xpRecompensa = quest.xp_recompensa ?? 10;
     
     return (
       <div 
@@ -380,7 +381,13 @@ const PainelQuestsPageV13: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-[var(--mq-text)]">{quest.titulo}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-[var(--mq-text)]">{quest.titulo}</h3>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-[var(--mq-warning-light)] px-2 py-0.5 text-[0.65rem] font-bold text-[var(--mq-warning)]">
+                  <Star size={10} fill="currentColor" />
+                  {xpRecompensa}
+                </span>
+              </div>
               {quest.descricao && (
                 <p className="text-xs text-[var(--mq-text-muted)] mt-1 line-clamp-1">{quest.descricao}</p>
               )}
@@ -422,6 +429,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const renderQuestItem = (quest: QuestPersonalizadaResumo, isConcluida = false) => {
     // instancia_id é o ID da tabela usuarios_quest (uq.id), que é o que a API espera
     const questId = quest.instancia_id || quest.meta_codigo;
+    const xpRecompensa = quest.xp_recompensa ?? 10;
     
     if (!questId) {
       console.warn('[PainelQuests] Quest sem ID válido:', quest);
@@ -445,9 +453,19 @@ const PainelQuestsPageV13: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
-              <h3 className={`text-base font-bold ${isConcluida ? 'text-gray-400 line-through' : 'text-[var(--mq-text)]'}`}>
-                {quest.titulo}
-              </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className={`text-base font-bold ${isConcluida ? 'text-gray-400 line-through' : 'text-[var(--mq-text)]'}`}>
+                  {quest.titulo}
+                </h3>
+                <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[0.65rem] font-bold ${
+                  isConcluida 
+                    ? 'bg-[var(--mq-success-light)] text-[var(--mq-success)]' 
+                    : 'bg-[var(--mq-warning-light)] text-[var(--mq-warning)]'
+                }`}>
+                  <Star size={10} fill="currentColor" />
+                  {isConcluida ? `+${xpRecompensa}` : xpRecompensa}
+                </span>
+              </div>
               {quest.descricao && (
                 <p className="text-sm text-[var(--mq-text-muted)] mt-1.5 line-clamp-2">{quest.descricao}</p>
               )}
