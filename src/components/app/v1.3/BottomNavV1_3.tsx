@@ -18,23 +18,24 @@ const BottomNavV1_3 = ({
   onEvoluir,
 }: Props) => {
   const baseItemClasses =
-    'flex flex-col items-center gap-0.5 flex-1 text-[0.7rem] font-medium';
+    'flex flex-col items-center justify-center gap-1 flex-1 py-1 min-h-[56px] text-[0.75rem] font-semibold transition-colors';
 
   const getColor = (tab: TabId) =>
     active === tab ? 'var(--mq-accent)' : 'var(--mq-text)';
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-[var(--mq-bg)]/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--mq-border)] bg-[var(--mq-bg)]/95 backdrop-blur-md"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex max-w-md items-center justify-between px-6 py-2">
+      <div className="mx-auto flex max-w-md items-stretch justify-between px-4 py-1.5">
         <button
           type="button"
           onClick={onConversar}
           className={baseItemClasses}
           style={{ color: getColor('conversar') }}
         >
-          <MessageCircle size={18} />
+          <MessageCircle size={24} strokeWidth={active === 'conversar' ? 2.5 : 2} />
           <span>Conversar</span>
         </button>
         <button
@@ -43,7 +44,7 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('entender') }}
         >
-          <Brain size={18} />
+          <Brain size={24} strokeWidth={active === 'entender' ? 2.5 : 2} />
           <span>Entender</span>
         </button>
         <button
@@ -52,7 +53,7 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('agir') }}
         >
-          <Zap size={18} />
+          <Zap size={24} strokeWidth={active === 'agir' ? 2.5 : 2} />
           <span>Agir</span>
         </button>
         <button
@@ -61,7 +62,7 @@ const BottomNavV1_3 = ({
           className={baseItemClasses}
           style={{ color: getColor('evoluir') }}
         >
-          <TrendingUp size={18} />
+          <TrendingUp size={24} strokeWidth={active === 'evoluir' ? 2.5 : 2} />
           <span>Evoluir</span>
         </button>
       </div>
