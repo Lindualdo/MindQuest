@@ -406,7 +406,7 @@ const EvoluirPageV13: React.FC = () => {
                       {objetivosInfo.total}/{objetivosInfo.limite}
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Definir e acompanhar metas</p>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Defina seus objetivos</p>
                 </div>
               </div>
               <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
