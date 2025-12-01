@@ -20,7 +20,7 @@ const MapaMentalVisualPage: React.FC = () => {
     mapaMentalError,
     loadMapaMental,
   } = useDashboard();
-  const [activeTab, setActiveTab] = useState<TabId>('perfil');
+  const [activeTab, setActiveTab] = useState<TabId>('entender');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const nomeUsuario =
@@ -61,29 +61,29 @@ const MapaMentalVisualPage: React.FC = () => {
   const handleNav = (view: TabId | 'mapaMental' | 'mapaMentalVisual') => {
     if (view === 'mapaMental') {
       setView('mapaMental');
-      setActiveTab('perfil');
+      setActiveTab('entender');
       return;
     }
     if (view === 'mapaMentalVisual') {
       setView('mapaMentalVisual');
-      setActiveTab('perfil');
+      setActiveTab('entender');
       return;
     }
     switch (view) {
       case 'home':
-        setActiveTab('home');
-        setView('dashboard');
+        setActiveTab('conversar');
+        setView('conversar');
         break;
       case 'perfil':
-        setActiveTab('perfil');
+        setActiveTab('entender');
         setView('dashEmocoes');
         break;
       case 'quests':
-        setActiveTab('quests');
+        setActiveTab('agir');
         setView('painelQuests');
         break;
       case 'ajustes':
-        setActiveTab('ajustes');
+        setActiveTab('evoluir');
         setView('evoluir');
         break;
     }

@@ -113,7 +113,7 @@ const MapaMentalPage: React.FC = () => {
     mapaMentalError,
     loadMapaMental,
   } = useDashboard();
-  const [activeTab, setActiveTab] = useState<TabId>('perfil');
+  const [activeTab, setActiveTab] = useState<TabId>('entender');
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -133,26 +133,26 @@ const MapaMentalPage: React.FC = () => {
   }, [mapaMental, mapaMentalLoading, loadMapaMental]);
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveTab('home');
+    setView('conversar');
+    setActiveTab('conversar');
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -343,10 +343,10 @@ const MapaMentalPage: React.FC = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

@@ -52,7 +52,7 @@ const HumorHistoryPage: React.FC = () => {
     dashboardData?.usuario?.nome ??
     'Aldo';
 
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
   const [selectedBar, setSelectedBar] = useState<ChartEntry | null>(null);
 
   const userId = dashboardData?.usuario?.id;
@@ -199,34 +199,34 @@ const HumorHistoryPage: React.FC = () => {
   const handleBack = () => {
     const returnView = humorHistoricoReturnView ?? 'dashboard';
     if (returnView === 'dashboard') {
-      setView('dashboard');
-      setActiveTab('home');
+      setView('conversar');
+      setActiveTab('conversar');
     } else if (returnView === 'dashEmocoes') {
       setView('dashEmocoes');
-      setActiveTab('perfil');
+      setActiveTab('entender');
     } else {
-      setView('dashboard');
-      setActiveTab('home');
+      setView('conversar');
+      setActiveTab('conversar');
     }
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -398,10 +398,10 @@ const HumorHistoryPage: React.FC = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

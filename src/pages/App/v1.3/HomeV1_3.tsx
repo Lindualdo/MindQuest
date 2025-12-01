@@ -31,7 +31,7 @@ const HomeV1_3 = () => {
     openHumorHistorico,
   } = useDashboard();
 
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -93,7 +93,7 @@ const HomeV1_3 = () => {
 
   const handleContinue = () => {
     // Não precisa carregar aqui - o painel verifica se tem dados e carrega apenas se necessário
-    setActiveTab('quests');
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
@@ -110,23 +110,23 @@ const HomeV1_3 = () => {
     }
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -151,10 +151,10 @@ const HomeV1_3 = () => {
   const handleVerSabotador = () => {
     const id = sabotadorAtivo?.id ?? null;
     if (id) {
-      setActiveTab('perfil');
+      setActiveTab('entender');
       openSabotadorDetail(id);
     } else {
-      setActiveTab('perfil');
+      setActiveTab('entender');
       openSabotadorDetail();
     }
   };
@@ -245,10 +245,10 @@ const HomeV1_3 = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

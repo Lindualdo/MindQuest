@@ -24,7 +24,7 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   const usuarioId = dashboardData?.usuario?.id;
 
-  const [activeTab, setActiveTab] = useState<TabId>('ajustes');
+  const [activeTab, setActiveTab] = useState<TabId>('evoluir');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,23 +83,23 @@ const PerfilPessoalPageV13: React.FC = () => {
     setView('ajustes');
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('jornada');
   };
 
@@ -278,10 +278,10 @@ const PerfilPessoalPageV13: React.FC = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

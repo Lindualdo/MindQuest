@@ -24,7 +24,7 @@ const InsightsHistoricoPageV13 = () => {
   const [insights, setInsights] = useState<InsightHistoricoItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -61,27 +61,27 @@ const InsightsHistoricoPageV13 = () => {
   }, [userId]);
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveTab('home');
+    setView('conversar');
+    setActiveTab('conversar');
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -192,10 +192,10 @@ const InsightsHistoricoPageV13 = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

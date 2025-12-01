@@ -38,7 +38,7 @@ const QuestDetailPageV13 = () => {
 
   const detail = questDetail;
 
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
   const [isConcluindo, setIsConcluindo] = useState(false);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const QuestDetailPageV13 = () => {
   const handleBack = () => {
     closeQuestDetail();
     setView('painelQuests');
-    setActiveTab('quests');
+    setActiveTab('agir');
   };
 
   const handleConcluirQuest = async () => {
@@ -137,30 +137,30 @@ const QuestDetailPageV13 = () => {
       // Voltar para o painel de quests
       closeQuestDetail();
       setView('painelQuests');
-      setActiveTab('quests');
+      setActiveTab('agir');
     } catch (error) {
       console.error('[QuestDetail] Erro ao concluir quest:', error);
       setIsConcluindo(false);
     }
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -424,10 +424,10 @@ const QuestDetailPageV13 = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

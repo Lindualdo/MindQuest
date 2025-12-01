@@ -49,7 +49,7 @@ const PainelQuestsPageV13: React.FC = () => {
     'Aldo';
 
   const [activeTab, setActiveTab] = useState<QuestTab>('a_fazer');
-  const [activeNavTab, setActiveNavTab] = useState<TabId>('quests');
+  const [activeNavTab, setActiveNavTab] = useState<TabId>('agir');
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [recorrenciaSelecionada, setRecorrenciaSelecionada] = useState<number | null>(null);
   const [salvando, setSalvando] = useState(false);
@@ -304,15 +304,15 @@ const PainelQuestsPageV13: React.FC = () => {
 
   const handleBack = () => {
     // Voltar para a página que chamou (salva em painelQuestsReturnView)
-    const returnView = painelQuestsReturnView ?? 'dashboard';
+    const returnView = painelQuestsReturnView ?? 'conversar';
     setView(returnView);
     // Ajustar activeTab baseado na view de retorno
     if (returnView === 'evoluir') {
-      setActiveNavTab('ajustes');
-    } else if (returnView === 'dashboard') {
-      setActiveNavTab('home');
+      setActiveNavTab('evoluir');
+    } else if (returnView === 'conversar' || returnView === 'dashboard') {
+      setActiveNavTab('conversar');
     } else {
-      setActiveNavTab('home');
+      setActiveNavTab('conversar');
     }
   };
 
@@ -335,22 +335,22 @@ const PainelQuestsPageV13: React.FC = () => {
     }
   };
 
-  const handleNavHome = () => {
-    setActiveNavTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveNavTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveNavTab('perfil');
+  const handleNavEntender = () => {
+    setActiveNavTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveNavTab('quests');
+  const handleNavAgir = () => {
+    setActiveNavTab('agir');
   };
 
-  const handleNavConfig = () => {
-    setActiveNavTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveNavTab('evoluir');
     setView('evoluir');
   };
   
@@ -722,10 +722,10 @@ const PainelQuestsPageV13: React.FC = () => {
         {/* Título da página */}
         <div className="mb-8 text-center">
           <h1 className="mq-page-title">
-            Ações
+            Agir
           </h1>
           <p className="mq-page-subtitle">
-            Microações para evoluir
+            Micro-ações para evoluir
           </p>
         </div>
 
@@ -900,10 +900,10 @@ const PainelQuestsPageV13: React.FC = () => {
 
       <BottomNavV1_3
         active={activeNavTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

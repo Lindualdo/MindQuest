@@ -30,7 +30,7 @@ const DashPerfilPage: React.FC = () => {
 
   const userId = dashboardData?.usuario?.id;
 
-  const [activeTab, setActiveTab] = useState<TabId>('perfil');
+  const [activeTab, setActiveTab] = useState<TabId>('entender');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -106,23 +106,23 @@ const DashPerfilPage: React.FC = () => {
     }
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -134,10 +134,10 @@ const DashPerfilPage: React.FC = () => {
         {/* Título da página */}
         <div className="mb-2 text-center">
           <h1 className="mq-page-title">
-            Mente
+            Entender
           </h1>
           <p className="mq-page-subtitle">
-            Entenda seus padrões e evolução
+            Seus padrões e emoções
           </p>
         </div>
 
@@ -201,10 +201,10 @@ const DashPerfilPage: React.FC = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

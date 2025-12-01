@@ -158,7 +158,7 @@ const InsightDetailPageV13 = () => {
     [detail],
   );
 
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
   const [criandoQuest, setCriandoQuest] = useState<string | null>(null);
   
   // Recarregar questSnapshot quando o insight é aberto para atualizar botões
@@ -218,18 +218,18 @@ const InsightDetailPageV13 = () => {
     }
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
@@ -267,7 +267,7 @@ const InsightDetailPageV13 = () => {
         // Aguardar um pouco para garantir que o snapshot foi processado
         await new Promise(resolve => setTimeout(resolve, 300));
         // Navegar para o painel de quests
-        setActiveTab('quests');
+        setActiveTab('agir');
         setView('painelQuests');
       } else if (resultado.error) {
         alert(resultado.error);
@@ -280,8 +280,8 @@ const InsightDetailPageV13 = () => {
     }
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -459,10 +459,10 @@ const InsightDetailPageV13 = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

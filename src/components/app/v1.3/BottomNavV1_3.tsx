@@ -1,21 +1,21 @@
-import { Eye, Brain, Zap, Sparkles } from 'lucide-react';
+import { MessageCircle, Brain, Zap, TrendingUp } from 'lucide-react';
 
-type TabId = 'home' | 'perfil' | 'quests' | 'ajustes';
+type TabId = 'conversar' | 'entender' | 'agir' | 'evoluir';
 
 type Props = {
   active: TabId;
-  onHome: () => void;
-  onPerfil: () => void;
-  onQuests: () => void;
-  onConfig: () => void;
+  onConversar: () => void;
+  onEntender: () => void;
+  onAgir: () => void;
+  onEvoluir: () => void;
 };
 
 const BottomNavV1_3 = ({
   active,
-  onHome,
-  onPerfil,
-  onQuests,
-  onConfig,
+  onConversar,
+  onEntender,
+  onAgir,
+  onEvoluir,
 }: Props) => {
   const baseItemClasses =
     'flex flex-col items-center gap-0.5 flex-1 text-[0.7rem] font-medium';
@@ -30,38 +30,38 @@ const BottomNavV1_3 = ({
       <div className="mx-auto flex max-w-md items-center justify-between px-6 py-2">
         <button
           type="button"
-          onClick={onHome}
+          onClick={onConversar}
           className={baseItemClasses}
-          style={{ color: getColor('home') }}
+          style={{ color: getColor('conversar') }}
         >
-          <Eye size={18} />
-          <span>Clareza</span>
+          <MessageCircle size={18} />
+          <span>Conversar</span>
         </button>
         <button
           type="button"
-          onClick={onPerfil}
+          onClick={onEntender}
           className={baseItemClasses}
-          style={{ color: getColor('perfil') }}
+          style={{ color: getColor('entender') }}
         >
           <Brain size={18} />
-          <span>Mente</span>
+          <span>Entender</span>
         </button>
         <button
           type="button"
-          onClick={onQuests}
+          onClick={onAgir}
           className={baseItemClasses}
-          style={{ color: getColor('quests') }}
+          style={{ color: getColor('agir') }}
         >
           <Zap size={18} />
-          <span>Ações</span>
+          <span>Agir</span>
         </button>
         <button
           type="button"
-          onClick={onConfig}
+          onClick={onEvoluir}
           className={baseItemClasses}
-          style={{ color: getColor('ajustes') }}
+          style={{ color: getColor('evoluir') }}
         >
-          <Sparkles size={18} />
+          <TrendingUp size={18} />
           <span>Evoluir</span>
         </button>
       </div>

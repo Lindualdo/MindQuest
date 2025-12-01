@@ -35,7 +35,7 @@ const PainelQuestsPageV13: React.FC = () => {
     'Aldo';
 
   const [activeTab, setActiveTab] = useState<QuestTab>('pendentes');
-  const [activeNavTab, setActiveNavTab] = useState<TabId>('quests');
+  const [activeNavTab, setActiveNavTab] = useState<TabId>('agir');
   const hoje = useMemo(() => new Date(), []); // Fixar hoje no mount
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
   // Carregar dados apenas se não existirem no estado global (evita chamadas duplicadas)
@@ -164,7 +164,7 @@ const PainelQuestsPageV13: React.FC = () => {
   }, [questsDoDia, selectedDate]);
 
   const handleBack = () => {
-    setView('dashboard');
+    setView('conversar');
     setActiveNavTab('home');
   };
 
@@ -187,21 +187,21 @@ const PainelQuestsPageV13: React.FC = () => {
     }
   };
 
-  const handleNavHome = () => {
+  const handleNavConversar = () => {
     setActiveNavTab('home');
-    setView('dashboard');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
+  const handleNavEntender = () => {
     setActiveNavTab('perfil');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
+  const handleNavAgir = () => {
     setActiveNavTab('quests');
   };
 
-  const handleNavConfig = () => {
+  const handleNavEvoluir = () => {
     setActiveNavTab('ajustes');
   };
   
@@ -525,10 +525,10 @@ const PainelQuestsPageV13: React.FC = () => {
 
       <BottomNavV1_3
         active={activeNavTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );

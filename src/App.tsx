@@ -31,7 +31,7 @@ import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivos
 import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
-import HomeV1_3 from './pages/App/v1.3/HomeV1_3';
+import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
 import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 import { authService } from './services/authService';
 import { ThemeProvider } from './components/app/v1.3/ThemeProvider';
@@ -275,8 +275,10 @@ function App() {
       case 'niveisJornada':
         page = <NiveisJornadaPageV13 />;
         break;
+      case 'conversar':
+      case 'dashboard':
       default:
-        page = <HomeV1_3 />;
+        page = <ConversarPageV13 />;
         break;
     }
 

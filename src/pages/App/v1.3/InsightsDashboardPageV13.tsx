@@ -47,7 +47,7 @@ const InsightsDashboardPageV13: React.FC = () => {
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('conversar');
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -87,8 +87,8 @@ const InsightsDashboardPageV13: React.FC = () => {
   }, []);
 
   const handleBack = () => {
-    setView('dashboard');
-    setActiveTab('home');
+    setView('conversar');
+    setActiveTab('conversar');
   };
 
   const handlePrioridadeCycle = () => {
@@ -101,23 +101,23 @@ const InsightsDashboardPageV13: React.FC = () => {
     setSearchTerm('');
   };
 
-  const handleNavHome = () => {
-    setActiveTab('home');
-    setView('dashboard');
+  const handleNavConversar = () => {
+    setActiveTab('conversar');
+    setView('conversar');
   };
 
-  const handleNavPerfil = () => {
-    setActiveTab('perfil');
+  const handleNavEntender = () => {
+    setActiveTab('entender');
     setView('dashEmocoes');
   };
 
-  const handleNavQuests = () => {
-    setActiveTab('quests');
+  const handleNavAgir = () => {
+    setActiveTab('agir');
     setView('painelQuests');
   };
 
-  const handleNavConfig = () => {
-    setActiveTab('ajustes');
+  const handleNavEvoluir = () => {
+    setActiveTab('evoluir');
     setView('evoluir');
   };
 
@@ -231,10 +231,10 @@ const InsightsDashboardPageV13: React.FC = () => {
         </main>
         <BottomNavV1_3
           active={activeTab}
-          onHome={handleNavHome}
-          onPerfil={handleNavPerfil}
-          onQuests={handleNavQuests}
-          onConfig={handleNavConfig}
+          onConversar={handleNavConversar}
+          onEntender={handleNavEntender}
+          onAgir={handleNavAgir}
+          onEvoluir={handleNavEvoluir}
         />
       </div>
     );
@@ -264,10 +264,10 @@ const InsightsDashboardPageV13: React.FC = () => {
         </main>
         <BottomNavV1_3
           active={activeTab}
-          onHome={handleNavHome}
-          onPerfil={handleNavPerfil}
-          onQuests={handleNavQuests}
-          onConfig={handleNavConfig}
+          onConversar={handleNavConversar}
+          onEntender={handleNavEntender}
+          onAgir={handleNavAgir}
+          onEvoluir={handleNavEvoluir}
         />
       </div>
     );
@@ -489,10 +489,10 @@ const InsightsDashboardPageV13: React.FC = () => {
 
       <BottomNavV1_3
         active={activeTab}
-        onHome={handleNavHome}
-        onPerfil={handleNavPerfil}
-        onQuests={handleNavQuests}
-        onConfig={handleNavConfig}
+        onConversar={handleNavConversar}
+        onEntender={handleNavEntender}
+        onAgir={handleNavAgir}
+        onEvoluir={handleNavEvoluir}
       />
     </div>
   );
