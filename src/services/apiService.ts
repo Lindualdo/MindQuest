@@ -1079,7 +1079,8 @@ class ApiService {
   public async ativarQuest(
     usuarioId: string,
     questId: string,
-    recorrenciaDias: number
+    recorrenciaDias: number,
+    tipoRecorrencia: 'diaria' | 'semanal' = 'diaria'
   ): Promise<{
     success: boolean;
     usuario_id: string;
@@ -1100,6 +1101,7 @@ class ApiService {
     params.append('usuario_id', usuarioId);
     params.append('quest_id', questId);
     params.append('recorrencia_dias', recorrenciaDias.toString());
+    params.append('tipo_recorrencia', tipoRecorrencia);
 
     const endpoint = `/ativar-quest?${params.toString()}`;
     // Usa proxy em dev, remote em produção (mesmo padrão de concluirQuest)

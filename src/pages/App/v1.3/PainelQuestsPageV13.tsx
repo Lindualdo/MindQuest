@@ -52,6 +52,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const [activeNavTab, setActiveNavTab] = useState<TabId>('agir');
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [recorrenciaSelecionada, setRecorrenciaSelecionada] = useState<number | null>(null);
+  const [tipoRecorrencia, setTipoRecorrencia] = useState<'diaria' | 'semanal'>('diaria');
   const [salvando, setSalvando] = useState(false);
   const hoje = useMemo(() => new Date(), []);
   const [selectedDate, setSelectedDate] = useState<Date>(hoje);
@@ -363,6 +364,7 @@ const PainelQuestsPageV13: React.FC = () => {
   const handlePlanejarQuest = (questId: string) => {
     setSelectedQuestId(questId);
     setRecorrenciaSelecionada(null);
+    setTipoRecorrencia('diaria');
   };
 
   const isFutureDate = isFuture(selectedDate) && !isSameDay(selectedDate, new Date());
@@ -693,7 +695,7 @@ const PainelQuestsPageV13: React.FC = () => {
     
     setSalvando(true);
     try {
-      await apiService.ativarQuest(usuarioId, selectedQuestId, recorrenciaSelecionada);
+      await apiService.ativarQuest(usuarioId, selectedQuestId, recorrenciaSelecionada, tipoRecorrencia);
       // Recarregar dados após ativar
       if (usuarioId) {
         await Promise.all([
@@ -713,13 +715,14 @@ const PainelQuestsPageV13: React.FC = () => {
   const handleFecharPlanejamento = () => {
     setSelectedQuestId(null);
     setRecorrenciaSelecionada(null);
+    setTipoRecorrencia('diaria');
     setSalvando(false);
     if (usuarioId) {
       void loadQuestSnapshot(usuarioId);
     }
   };
 
-  // Modal de planejamento simplificado (apenas recorrência)
+  // Modal de planejamento com opções diária/semanal
   const renderPlanejamentoModal = () => {
     if (!selectedQuestId) return null;
     
@@ -728,6 +731,9 @@ const PainelQuestsPageV13: React.FC = () => {
     );
     
     if (!quest) return null;
+
+    const opcoesDiaria = [3, 5, 7, 10, 15];
+    const opcoesSemanal = [1, 2, 3, 4];
 
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm">
@@ -744,30 +750,85 @@ const PainelQuestsPageV13: React.FC = () => {
               </button>
             </div>
             
-            <div className="mb-6">
-              <h3 className="text-base font-semibold text-[var(--mq-text)] mb-2">Regras Automáticas de Operação</h3>
-              <p className="text-sm text-[var(--mq-text-muted)]">Defina quantos dias você quer praticar esta quest:</p>
+            {/* Tabs de tipo de recorrência */}
+            <div className="flex gap-2 mb-5">
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoRecorrencia('diaria');
+                  setRecorrenciaSelecionada(null);
+                }}
+                className={`
+                  flex-1 rounded-xl py-3 text-sm font-semibold transition-all
+                  ${tipoRecorrencia === 'diaria'
+                    ? 'bg-[var(--mq-primary)] text-white shadow-md'
+                    : 'bg-[var(--mq-card)] text-[var(--mq-text-muted)] hover:bg-[var(--mq-primary-light)]'
+                  }
+                `}
+              >
+                📅 Diária
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoRecorrencia('semanal');
+                  setRecorrenciaSelecionada(null);
+                }}
+                className={`
+                  flex-1 rounded-xl py-3 text-sm font-semibold transition-all
+                  ${tipoRecorrencia === 'semanal'
+                    ? 'bg-[var(--mq-primary)] text-white shadow-md'
+                    : 'bg-[var(--mq-card)] text-[var(--mq-text-muted)] hover:bg-[var(--mq-primary-light)]'
+                  }
+                `}
+              >
+                🗓️ Semanal
+              </button>
             </div>
 
+            <div className="mb-5">
+              <p className="text-sm text-[var(--mq-text-muted)]">
+                {tipoRecorrencia === 'diaria' 
+                  ? 'Defina quantos dias consecutivos você quer praticar:'
+                  : 'Defina quantas semanas você quer praticar (1x por semana):'
+                }
+              </p>
+            </div>
+
+            {/* Opções de recorrência */}
             <div className="grid grid-cols-3 gap-3 mb-6">
-              {[3, 5, 7, 10, 15].map((dias) => (
+              {(tipoRecorrencia === 'diaria' ? opcoesDiaria : opcoesSemanal).map((valor) => (
                 <button
-                  key={dias}
+                  key={valor}
                   type="button"
-                  onClick={() => setRecorrenciaSelecionada(dias)}
+                  onClick={() => setRecorrenciaSelecionada(valor)}
                   className={`
                     rounded-xl border-2 p-4 text-center font-bold transition-all
-                    ${recorrenciaSelecionada === dias
+                    ${recorrenciaSelecionada === valor
                       ? 'border-[var(--mq-primary)] bg-[var(--mq-primary)] text-white shadow-lg scale-105'
                       : 'border-[var(--mq-border)] bg-[var(--mq-card)] text-[var(--mq-text)] hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-light)]'
                     }
                   `}
                 >
-                  <div className="text-2xl mb-1">{dias}</div>
-                  <div className="text-xs">dias</div>
+                  <div className="text-2xl mb-1">{valor}</div>
+                  <div className="text-xs">
+                    {tipoRecorrencia === 'diaria' ? 'dias' : (valor === 1 ? 'semana' : 'semanas')}
+                  </div>
                 </button>
               ))}
             </div>
+
+            {/* Resumo da seleção */}
+            {recorrenciaSelecionada && (
+              <div className="mb-5 rounded-xl bg-[var(--mq-primary-light)] px-4 py-3 text-center">
+                <p className="text-sm font-medium text-[var(--mq-primary)]">
+                  {tipoRecorrencia === 'diaria'
+                    ? `${recorrenciaSelecionada} recorrências diárias`
+                    : `${recorrenciaSelecionada} recorrência${recorrenciaSelecionada > 1 ? 's' : ''} semanal (1x por semana)`
+                  }
+                </p>
+              </div>
+            )}
 
             <button
               type="button"

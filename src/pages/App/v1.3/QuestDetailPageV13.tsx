@@ -231,7 +231,14 @@ const QuestDetailPageV13 = () => {
     const podeConcluir = !isConversaQuest && 
       detail.status && 
       (detail.status !== 'concluida' || temDiaNaoConcluido);
-    const baseCientifica = detail.catalogo?.base_cientifica;
+    
+    // Priorizar base_cientifica personalizada do config (gerada pelo agente)
+    // Fallback para o catálogo se não existir
+    const baseCientificaConfig = detail.config?.base_cientifica;
+    const baseCientificaCatalogo = detail.catalogo?.base_cientifica;
+    const baseCientifica = (baseCientificaConfig && Object.keys(baseCientificaConfig).length > 0) 
+      ? baseCientificaConfig 
+      : baseCientificaCatalogo;
 
     return (
       <motion.section
@@ -266,8 +273,8 @@ const QuestDetailPageV13 = () => {
           )}
         </div>
 
-        {/* Benefícios - Ocultar para quests custom */}
-        {!isQuestCustom && baseCientifica?.objetivo && (
+        {/* Benefícios */}
+        {baseCientifica?.objetivo && (
           <div className="mb-4 rounded-2xl bg-[var(--mq-success-light)] px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-success)]">
               <Sparkles size={16} />
@@ -279,8 +286,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Referências Científicas - Ocultar para quests custom */}
-        {!isQuestCustom && baseCientifica?.fundamentos && (
+        {/* Fundamentos Científicos */}
+        {baseCientifica?.fundamentos && (
           <div className="mb-4 rounded-2xl bg-[var(--mq-primary-light)] px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-primary)]">
               <BookOpen size={16} />
@@ -292,8 +299,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Como Aplicar - Ocultar para quests custom */}
-        {!isQuestCustom && baseCientifica?.como_aplicar && (
+        {/* Como Aplicar */}
+        {baseCientifica?.como_aplicar && (
           <div className="mb-4 rounded-2xl bg-[var(--mq-warning-light)] px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-warning)]">
               <Target size={16} />
@@ -305,8 +312,8 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Links de Referências - Ocultar para quests custom */}
-        {!isQuestCustom && baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
+        {/* Links de Referências */}
+        {baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
           <div className="mb-4 rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-sm">
             <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-accent)]">
               <ExternalLink size={16} />
