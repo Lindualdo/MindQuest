@@ -385,7 +385,13 @@ const InsightDetailPageV13 = () => {
           </motion.div>
         )}
 
-        {/* Insights (Recursos) */}
+        {/* 
+          SEÇÃO OCULTA: Recursos Sugeridos (ações práticas)
+          Removido em 2024-12-01 para separar ENTENDER de AGIR.
+          Ações práticas devem ser tratadas exclusivamente por Quests (sw_criar_quest).
+          Insight deve focar apenas em reflexão e feedback.
+          Reativar se necessário no futuro.
+
         {recursosSugeridos.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -407,6 +413,7 @@ const InsightDetailPageV13 = () => {
             ))}
           </motion.div>
         )}
+        */}
 
         {/* Feedback */}
         <motion.div
