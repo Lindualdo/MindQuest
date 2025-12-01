@@ -522,13 +522,46 @@ const PainelQuestsPageV13: React.FC = () => {
     );
   };
 
-  // Navegador semanal (apenas barras verticais, sem barra horizontal)
+  // Calcular progresso semanal total
+  const metaQuestsSemanal = weeklyData.qtdQuestsPrevistasSemana ?? 7;
+  const questsConcluidasSemanal = weeklyData.qtdQuestsConcluidasSemana ?? 
+    diasSemana.reduce((sum, dia) => sum + (dia.qtdQuestsConcluidas ?? 0), 0);
+  const progressoQuestsSemanal = metaQuestsSemanal > 0 
+    ? Math.min(100, Math.round((questsConcluidasSemanal / metaQuestsSemanal) * 100))
+    : 0;
+
+  // Navegador semanal com barra de progresso
   const renderWeeklyProgressBar = () => {
     return (
       <section
         className="mb-6 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] px-5 py-5 shadow-md"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
+        {/* Barra de progresso semanal */}
+        <div className="mb-5">
+          <p className="text-[0.7rem] font-semibold text-[var(--mq-text)] mb-2">Progresso da Semana</p>
+          <div className="flex items-center gap-3">
+            <span className="text-[0.65rem] font-bold text-[var(--mq-text)] min-w-[16px]">
+              {questsConcluidasSemanal}
+            </span>
+            <div className="relative h-2.5 flex-1 rounded-full bg-[var(--mq-bar)] overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-[var(--mq-primary)] transition-all duration-500"
+                style={{ width: `${progressoQuestsSemanal}%` }}
+              />
+            </div>
+            <span className="text-[0.65rem] font-bold text-[var(--mq-text-muted)] min-w-[16px]">
+              {metaQuestsSemanal}
+            </span>
+          </div>
+          <p className="text-[0.6rem] text-[var(--mq-text-subtle)] text-center mt-1.5">
+            {progressoQuestsSemanal}% concluído
+          </p>
+        </div>
+
+        {/* Divisor */}
+        <div className="h-px bg-[var(--mq-border)] mb-4" />
+
         {/* Barras verticais dos dias (navegação principal) */}
         <div className="flex h-20 items-end justify-between gap-1.5">
           {diasSemana.map((dia, index) => {
