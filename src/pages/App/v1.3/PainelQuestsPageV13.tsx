@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target, Star } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target, Star, Trophy } from 'lucide-react';
 import { format, startOfWeek, parseISO, isSameDay, isFuture, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
@@ -547,6 +547,10 @@ const PainelQuestsPageV13: React.FC = () => {
   const progressoQuestsSemanal = metaQuestsSemanal > 0 
     ? Math.min(100, Math.round((questsConcluidasSemanal / metaQuestsSemanal) * 100))
     : 0;
+  
+  // Pontos ganhos na semana
+  const pontosGanhosSemana = weeklyData.xpSemanaTotal ?? 
+    diasSemana.reduce((sum, dia) => sum + ((dia as any).xpQuests ?? 0), 0);
 
   // Navegador semanal com barra de progresso
   const renderWeeklyProgressBar = () => {
@@ -555,6 +559,38 @@ const PainelQuestsPageV13: React.FC = () => {
         className="mb-6 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-surface)] px-5 py-5 shadow-md"
         style={{ borderRadius: 24, boxShadow: '0 10px 24px rgba(15,23,42,0.08)' }}
       >
+        {/* Banner de conquistas da semana */}
+        <div className={`mb-4 flex items-center justify-center gap-4 rounded-xl px-4 py-3 ${
+          questsConcluidasSemanal > 0 
+            ? 'bg-gradient-to-r from-[var(--mq-success-light)] to-[var(--mq-primary-light)]' 
+            : 'bg-[var(--mq-card)] border border-dashed border-[var(--mq-border)]'
+        }`}>
+          {questsConcluidasSemanal > 0 ? (
+            <>
+              <div className="flex items-center gap-1.5">
+                <Trophy size={16} className="text-[var(--mq-success)]" />
+                <span className="text-sm font-bold text-[var(--mq-success)]">
+                  {questsConcluidasSemanal} {questsConcluidasSemanal === 1 ? 'ação' : 'ações'}
+                </span>
+              </div>
+              <span className="text-[var(--mq-text-subtle)]">·</span>
+              <div className="flex items-center gap-1.5">
+                <Star size={14} fill="var(--mq-warning)" className="text-[var(--mq-warning)]" />
+                <span className="text-sm font-bold text-[var(--mq-warning)]">
+                  +{pontosGanhosSemana} Pontos
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Target size={16} className="text-[var(--mq-text-muted)]" />
+              <span className="text-sm font-medium text-[var(--mq-text-muted)]">
+                Comece sua primeira ação da semana!
+              </span>
+            </div>
+          )}
+        </div>
+
         {/* Barra de progresso semanal */}
         <div className="mb-5">
           <p className="text-[0.7rem] font-semibold text-[var(--mq-text)] mb-2">Progresso da Semana</p>
