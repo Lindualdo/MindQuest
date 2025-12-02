@@ -16,7 +16,7 @@ const logFilePath = path.resolve('backups/n8n-backup.log.jsonl');
 const pageLimit = Number(process.env.N8N_PAGE_LIMIT ?? '100');
 const folderPageLimit = Number(process.env.N8N_FOLDER_PAGE_LIMIT ?? '100');
 const PROJECT_ROOT_ID = '0';
-const fieldsToRemove = new Set(['updatedAt', 'lastActiveAt']);
+const fieldsToRemove = new Set(['updatedAt', 'lastActiveAt', 'versionCounter', 'versionId', 'triggerCount']);
 
 async function fileExists(targetPath) {
   try {

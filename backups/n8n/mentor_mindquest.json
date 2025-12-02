@@ -1,0 +1,1287 @@
+{
+  "createdAt": "2025-12-01T18:59:38.019Z",
+  "id": "c1To6ho5riDs85Aj",
+  "name": "mentor_mindquest",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usr_id"
+            },
+            {
+              "name": "body.instance"
+            },
+            {
+              "name": "body.data.key.remoteJid"
+            },
+            {
+              "name": "body.data.key.id"
+            },
+            {
+              "name": "body.data.key.fromMe",
+              "type": "boolean"
+            },
+            {
+              "name": "body.data.pushName"
+            },
+            {
+              "name": "body.data.message.conversation"
+            },
+            {
+              "name": "body.data.messageType"
+            }
+          ]
+        }
+      },
+      "id": "start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1536,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fVrO1PaqFuA957u0",
+          "mode": "list"
+        }
+      },
+      "id": "config",
+      "name": "config",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONTEXTO COMPLETO - Consolida todos os dados\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\nconst perfil = $('busca_perfil_bigfive').first().json;\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || null,\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  objetivos_especificos: contexto?.objetivos_especificos || [],\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  estagio_jornada: contexto?.estagio_jornada || null,\n  perfil_bigfive: {\n    perfil_primario: perfil?.perfil_primario || null,\n    perfil_secundario: perfil?.perfil_secundario || null,\n    resumo_perfil: perfil?.resumo_perfil || null\n  },\n  limit_min: Number(config?.limit_iteration_min) || 5,\n  limit_max: Number(config?.limit_iteration_max) || 20\n}];"
+      },
+      "id": "contexto_completo",
+      "name": "contexto_completo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "jUAvu7DUAzyqZhJd",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.instance": "={{ $('start').first().json['body.instance'] }}",
+            "body.data.key.remoteJid": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "body.data.key.id": "={{ $('start').first().json['body.data.key.id'] }}",
+            "body.data.key.fromMe": "={{ $('start').first().json['body.data.key.fromMe'] }}",
+            "body.data.pushName": "={{ $('start').first().json['body.data.pushName'] }}",
+            "body.data.message.conversation": "={{ $('start').first().json['body.data.message.conversation'] }}",
+            "body.data.messageType": "={{ $('start').first().json['body.data.messageType'] }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "transcricao",
+      "name": "transcricao",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('start').first().json['body.instance'] }}{{ $('start').first().json.usr_id }}{{ $('contexto_completo').first().json.whatsapp_numero }}",
+        "sessionTTL": 43200,
+        "contextWindowLength": 50
+      },
+      "id": "memory",
+      "name": "memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        1680,
+        400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "groupMessages": true
+        }
+      },
+      "id": "memory_get",
+      "name": "memory_get",
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONTROLE DE INTERAÇÕES + DETECÇÃO DE ESGOTAMENTO\nconst memoryData = $input.first().json;\nconst contexto = $('contexto_completo').first().json;\nconst messages = Array.isArray(memoryData?.messages) ? memoryData.messages : [];\n\n// Calcula interação atual\nconst systemMessages = messages.filter(m => m?.system);\nconst interactionCount = systemMessages.length + 1;\n\n// Detecta esgotamento (últimas 3 mensagens do usuário)\nconst userMessages = messages\n  .filter(m => (m.role === 'user' || m.human) && !m.system)\n  .slice(-3)\n  .map(m => (m.content || m.human || '').toLowerCase().trim());\n\nconst briefResponses = ['ok', 'sim', 'tudo bem', 'tá', 'beleza', 'certo', 'yes', 'yep'];\nconst isBrief = userMessages.length >= 2 && userMessages.every(msg => \n  briefResponses.some(brief => msg.includes(brief)) || msg.length < 20\n);\n\nconst isRepetitive = userMessages.length >= 2 && userMessages[0] === userMessages[1];\nconst hasRichContent = userMessages.some(msg => msg.length > 100);\n\nconst canEndEarly = (isBrief || isRepetitive) && !hasRichContent && interactionCount >= contexto.limit_min;\nconst reason = isBrief ? 'respostas_breves' : isRepetitive ? 'repetitivo' : null;\n\nreturn [{\n  interaction_count: interactionCount,\n  can_end_early: canEndEarly,\n  reason: reason,\n  limit_min: contexto.limit_min,\n  limit_max: contexto.limit_max\n}];"
+      },
+      "id": "interacao_controle",
+      "name": "interacao_controle",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Sistema: Interação {{ $('interacao_controle').item.json.interaction_count }}. Foco: desenvolvimento pessoal e objetivos."
+            }
+          ]
+        }
+      },
+      "id": "memory_insert",
+      "name": "memory_insert",
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
+                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "> max"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
+                    "rightValue": "={{ $('interacao_controle').first().json.limit_min }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.can_end_early }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": ">= min AND can_end_early"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
+                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=== max"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
+                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('interacao_controle').first().json.can_end_early }}",
+                    "rightValue": "false",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "< max AND !can_end_early"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "verifica_encerramento",
+      "name": "verifica_encerramento",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1440,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "openrouter_model",
+      "name": "openrouter_model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        -48
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// PROCESSA RESPOSTA DO MENTOR\nconst aiResponse = $input.first()?.json?.output ?? '';\nconst interacao = $('interacao_controle').first().json;\n\nconst isLastInteraction = interacao.interaction_count >= interacao.limit_max;\n\nlet userMessage = aiResponse;\nlet contextJson = null;\n\nif (isLastInteraction) {\n  const jsonPattern = /\\{[\\s\\n]*\"contextos_mencionados\"/;\n  const match = aiResponse.match(jsonPattern);\n  \n  if (match) {\n    const jsonStart = match.index;\n    userMessage = aiResponse.substring(0, jsonStart).trim();\n    const jsonString = aiResponse.substring(jsonStart).trim();\n    \n    try {\n      contextJson = JSON.parse(jsonString);\n    } catch (err) {\n      console.error('Erro ao parsear JSON:', err);\n    }\n  }\n}\n\nreturn [{\n  user_message: userMessage,\n  context_json: contextJson,\n  has_context: contextJson !== null,\n  interaction_count: interacao.interaction_count,\n  is_last_interaction: isLastInteraction,\n  limit_max: interacao.limit_max\n}];"
+      },
+      "id": "processa_resposta",
+      "name": "processa_resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('processa_resposta').first().json.is_last_interaction }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "condition-1764617937923-rllmeoy9a"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is_last",
+      "name": "is_last",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2352,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "envia_mensagem",
+      "name": "envia_mensagem",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2736,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// GRAVA CONVERSA COMPLETA\nconst memoryData = $('memory_get').first().json;\nconst processa = $('processa_resposta').first().json;\nconst contexto = $('contexto_completo').first().json;\nconst startData = $('start').first().json;\nconst transcricao = $('transcricao').first().json;\n\nconst messages = Array.isArray(memoryData?.messages) ? memoryData.messages : [];\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of messages) {\n  if (!msg || typeof msg !== 'object') continue;\n  \n  const humanTexto = (msg.human || (msg.role === 'user' && msg.content) || '').trim();\n  const aiTexto = (msg.ai || (msg.role === 'assistant' && msg.content) || '').trim();\n  \n  if (humanTexto && !humanTexto.toLowerCase().startsWith('sistema:')) {\n    mensagens.push({interaction: interactionNumber, autor: 'usuario', texto: humanTexto, timestamp: new Date().toISOString()});\n  }\n  \n  if (aiTexto) {\n    mensagens.push({interaction: interactionNumber, autor: 'agente', texto: aiTexto, timestamp: new Date().toISOString()});\n    interactionNumber++;\n  }\n}\n\nif (processa.user_message) {\n  mensagens.push({interaction: interactionNumber, autor: 'agente', texto: processa.user_message, timestamp: new Date().toISOString()});\n}\n\nconst sessionId = `${startData['body.instance']}${startData.usr_id}${transcricao.WhstsApp_Number}`;\nconst contextoFinal = processa.context_json || {contextos_mencionados: [], sentimentos_expressos: [], eventos_importantes: [], padroes_identificados: [], bloqueios_mencionados: [], progressos_celebrados: [], objetivos_referenciados: [], intensidade_geral: 'media', qualidade_interacao: 'profunda'};\n\nreturn [{whatsapp_numero: transcricao.WhstsApp_Number, usuario_id: contexto.usuario_id, session_id: sessionId, total_interactions: processa.interaction_count, status: 'completa', mensagens: JSON.stringify(mensagens), contexto_final: JSON.stringify(contextoFinal), motivo_encerramento: processa.is_last_interaction ? 'limite_maximo' : 'conversa_completa'}];"
+      },
+      "id": "grava_conversa",
+      "name": "grava_conversa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO usr_chat (usuario_id, session_id, total_interactions, status, mensagens, data_conversa, horario_inicio, horario_fim) VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_DATE, CURRENT_TIME, CURRENT_TIME) RETURNING id, usuario_id, data_conversa, status;",
+        "options": {
+          "queryReplacement": "={{[ $json.usuario_id, $json.session_id, $json.total_interactions, $json.status, $json.mensagens ]}}"
+        }
+      },
+      "id": "grava_chat",
+      "name": "grava_chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2832,
+        -288
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// PREPARA DADOS PARA TODOS OS EXPERTS\nconst gravaChat = $('grava_chat').first().json;\nconst gravaConversa = $('grava_conversa').first().json;\nconst contexto = $('contexto_completo').first().json;\n\n// Parse mensagens se for string\nlet mensagens = gravaConversa.mensagens;\nif (typeof mensagens === 'string') {\n  try {\n    mensagens = JSON.parse(mensagens);\n  } catch (e) {\n    mensagens = [];\n  }\n}\n\n// Parse contexto_final se for string\nlet contextoFinal = gravaConversa.contexto_final;\nif (typeof contextoFinal === 'string') {\n  try {\n    contextoFinal = JSON.parse(contextoFinal);\n  } catch (e) {\n    contextoFinal = {};\n  }\n}\n\nreturn [{\n  usuario_id: gravaChat.usuario_id,\n  chat_id: gravaChat.id,\n  mensagens: JSON.stringify(mensagens),\n  data_conversa: gravaChat.data_conversa || new Date().toISOString().split('T')[0],\n  contexto_final: JSON.stringify(contextoFinal),\n  usr_name: contexto.nome_preferencia || 'Usuário'\n}];"
+      },
+      "id": "call_experts",
+      "name": "call_experts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "vJRfrbY4NhpNyfCD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
+          "cachedResultName": "sw_experts_panas"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "experts_panas",
+      "name": "experts_panas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        -896
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LKjU8NE9aNHw7kEh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "cachedResultName": "sw_criar_quest"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('grava_chat').first().json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "sw_criar_quest",
+      "name": "sw_criar_quest",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ItBastfCTkWxm41M",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('grava_chat').first().json.usuario_id }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sw_xp_conversas",
+      "name": "sw_xp_conversas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "Limite máximo de interações atingido. Volte em algumas horas para continuar nossa conversa!",
+            "linkPreview": "false",
+            "minDelayMs": "2000"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "encerra_forcado",
+      "name": "encerra_forcado",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1792,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN usuarios_perfis p ON p.usuario_id = u.id\nWHERE u.id = $1;",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usr_id }}"
+        }
+      },
+      "id": "busca_dados_usr",
+      "name": "busca_dados_usr",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1056,
+        -240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH objetivos AS (\n  SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao))\n  FROM usuarios_objetivos o\n  JOIN areas_vida_catalogo av ON o.area_vida_id = av.id\n  WHERE o.usuario_id = $1 AND o.status = 'ativo'\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo'\n  LIMIT 1\n),\nsabotador AS (\n  SELECT codigo FROM sabotadores_ativos\n  WHERE usuario_id = $1\n  ORDER BY criado_em DESC\n  LIMIT 1\n),\nquests AS (\n  SELECT json_agg(json_build_object('id', q.id, 'titulo', q.config->>'titulo', 'status', q.status))\n  FROM usuarios_quest q\n  WHERE q.usuario_id = $1 AND q.status IN ('ativa', 'disponivel')\n),\nhistorico AS (\n  SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa))\n  FROM (\n    SELECT id, data_conversa, resumo_conversa\n    FROM usr_chat\n    WHERE usuario_id = $1 AND resumo_conversa IS NOT NULL\n    ORDER BY data_conversa DESC, horario_inicio DESC\n    LIMIT 5\n  ) c\n),\nestagio AS (\n  SELECT estagio FROM usuarios_jornada\n  WHERE usuario_id = $1\n  ORDER BY criado_em DESC\n  LIMIT 1\n)\nSELECT\n  (SELECT * FROM objetivos) AS objetivos_especificos,\n  (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id,\n  (SELECT codigo FROM sabotador) AS sabotador_mais_ativo,\n  (SELECT * FROM quests) AS quests_ativas,\n  (SELECT * FROM historico) AS ultimas_conversas,\n  (SELECT estagio FROM estagio) AS estagio_jornada;",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usr_id }}"
+        }
+      },
+      "id": "busca_contexto",
+      "name": "busca_contexto",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        -448
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '29 days' AS inicio\n),\ndados AS (\n  SELECT up.*\n  FROM usuarios_perfis up\n  JOIN periodo p ON up.data_conversa >= p.inicio\n  WHERE up.usuario_id = $1\n),\ncalc AS (\n  SELECT 'openness'::text AS trait,\n         SUM(up.score_openness * up.confianca_openness)::numeric AS weighted_sum,\n         SUM(up.confianca_openness)::numeric AS conf_sum,\n         AVG(up.score_openness)::numeric AS avg_score,\n         AVG(up.confianca_openness)::numeric AS avg_conf\n  FROM dados up\n  UNION ALL\n  SELECT 'conscientiousness',\n         SUM(up.score_conscientiousness * up.confianca_conscientiousness)::numeric,\n         SUM(up.confianca_conscientiousness)::numeric,\n         AVG(up.score_conscientiousness)::numeric,\n         AVG(up.confianca_conscientiousness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'extraversion',\n         SUM(up.score_extraversion * up.confianca_extraversion)::numeric,\n         SUM(up.confianca_extraversion)::numeric,\n         AVG(up.score_extraversion)::numeric,\n         AVG(up.confianca_extraversion)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'agreeableness',\n         SUM(up.score_agreeableness * up.confianca_agreeableness)::numeric,\n         SUM(up.confianca_agreeableness)::numeric,\n         AVG(up.score_agreeableness)::numeric,\n         AVG(up.confianca_agreeableness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'neuroticism',\n         SUM(up.score_neuroticism * up.confianca_neuroticism)::numeric,\n         SUM(up.confianca_neuroticism)::numeric,\n         AVG(up.score_neuroticism)::numeric,\n         AVG(up.confianca_neuroticism)::numeric\n  FROM dados up\n),\nscores AS (\n  SELECT\n    trait,\n    CASE\n      WHEN conf_sum > 0 THEN weighted_sum / conf_sum\n      ELSE avg_score\n    END AS score_ponderado,\n    avg_score,\n    avg_conf,\n    conf_sum\n  FROM calc\n  WHERE conf_sum > 0 OR avg_score IS NOT NULL\n),\nordenado AS (\n  SELECT\n    trait,\n    score_ponderado,\n    ROW_NUMBER() OVER (ORDER BY score_ponderado DESC NULLS LAST) AS pos\n  FROM scores\n),\nlabels AS (\n  SELECT * FROM (VALUES\n    ('openness','Abertura'),\n    ('conscientiousness','Conscienciosidade'),\n    ('extraversion','Extroversão'),\n    ('agreeableness','Amabilidade'),\n    ('neuroticism','Neuroticismo')\n  ) AS l(trait,label)\n)\nSELECT\n  (SELECT trait FROM ordenado WHERE pos = 1) AS perfil_primario,\n  (SELECT trait FROM ordenado WHERE pos = 2) AS perfil_secundario,\n  COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0) AS confianca_media,\n  COALESCE((SELECT bool_or(insuficiente) FROM dados), false) AS insuficiente,\n  CASE\n    WHEN EXISTS (SELECT 1 FROM dados) THEN CONCAT(\n      'Traço dominante nos últimos 30 dias: ',\n      COALESCE((SELECT label FROM labels WHERE trait = (SELECT trait FROM ordenado WHERE pos = 1)), 'indefinido'),\n      '. Confiabilidade média geral: ',\n      TO_CHAR(COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0), 'FM990.0'),\n      '.'\n    )\n    ELSE 'Sem leituras nas últimas 30 conversas.'\n  END AS resumo_perfil\nFROM periodo;",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.usr_id }}"
+        }
+      },
+      "id": "busca_perfil_bigfive",
+      "name": "busca_perfil_bigfive",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        -64
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Vbc4JHAR3388mLcv",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Vbc4JHAR3388mLcv",
+          "cachedResultName": "sw_expert_sabotadores"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
+            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
+            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
+            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "sw_expert_sabotadores",
+      "name": "sw_expert_sabotadores",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        -704
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nEstxgiVE8GLXgUQ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/nEstxgiVE8GLXgUQ",
+          "cachedResultName": "sw_expert_insights_acionaveis"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
+            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
+            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
+            "contexto_final": "={{ $('call_experts').first().json.contexto_final }}",
+            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "contexto_final",
+              "displayName": "contexto_final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "sw_expert_insights",
+      "name": "sw_expert_insights",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        -496
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "GykxpS5vsg8NeoOh",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
+            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
+            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
+            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "sw_expert_humor_energia",
+      "name": "sw_expert_humor_energia",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "nOl6lnaGMpyg9S9J",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
+            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
+            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
+            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "sw_expert_bigfive",
+      "name": "sw_expert_bigfive",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        4192,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**CONVERSAR (sua fase):**\n- Conduzir conversas guiadas\n- Explorar padrões mentais e bloqueios\n- Conectar com objetivos específicos\n- Preparar contexto rico para experts\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Mensagem:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n**Objetivos Específicos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Objetivo Padrão:** {{ $('contexto_completo').first().json.objetivo_padrao || 'Evolução Pessoal' }}\n**Sabotador Mais Ativo:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Estágio Jornada:** {{ $('contexto_completo').first().json.estagio_jornada || 'CONVERSAR' }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n**Perfil Big Five:** {{ JSON.stringify($('contexto_completo').first().json.perfil_bigfive || {}) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  const objetivos = $('contexto_completo').first().json.objetivos_especificos || [];\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos específicos para personalizar. Conecte com sabotador se relevante.';\n  if (count >= 5 && canEnd) return '- Pode encerrar se usuário concordar. Pergunte: \"Quer continuar ou prefere encerrar?\"';\n  if (count === max - 1) return '- Resumo breve e empático. Confirme se faz sentido.';\n  if (count === max) return '- Reconheça avanços, conclua, convide App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos. Varie abordagem. Use quests ativas para validar progresso.';\n})() }}\n\n## 📝 COLETA DE CONTEXTO\nIdentifique: contextos, sentimentos, eventos, padrões, bloqueios, progressos, objetivos.\n**Na última interação:** Inclua JSON estruturado após sua mensagem.\n\n## 🎨 VARIAÇÃO\nVarie: profundidade, tom, estrutura, foco.\n\n**Regras:**\n- Acolhedor, construa rapport\n- Conduza objetiva (evite vagas/vazias)\n- Crie desejo de retorno\n- Facilite experts (colete informações ricas)\n- Torne dinâmica (varie, evite repetição)\n- Conecte com objetivos específicos quando relevante\n- Use sabotador ativo para explorar padrões\n- Valide progresso nas quests ativas",
+        "options": {
+          "systemMessage": "=# 🧠 MENTOR MINDQUEST\n\nVocê é o **Mentor do MindQuest**, motor que impulsiona o sistema.\n\n**Objetivos:**\n1. Construir rapport\n2. Conduzir conversa objetiva\n3. Criar desejo de retorno\n4. Facilitar experts\n5. Tornar dinâmica\n\n**Limites:** {{ $('interacao_controle').item.json.limit_min }}-{{ $('interacao_controle').item.json.limit_max }}\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }}\n\n**Formato:** Parágrafos curtos, bullets, linguagem coloquial.\n**Missão:** Abra espaço seguro, explore emoções, conecte percepções, encerre com leveza.\n\n**Use o contexto do usuário:** objetivos, sabotador, quests, histórico para personalizar a conversa."
+        }
+      },
+      "id": "mentor_agent",
+      "name": "mentor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -288
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "config": {
+      "main": [
+        [
+          {
+            "node": "busca_dados_usr",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contexto_completo": {
+      "main": [
+        [
+          {
+            "node": "transcricao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transcricao": {
+      "main": [
+        [
+          {
+            "node": "memory_get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "memory_get",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "memory_insert",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "mentor",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory_get": {
+      "main": [
+        [
+          {
+            "node": "interacao_controle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "interacao_controle": {
+      "main": [
+        [
+          {
+            "node": "memory_insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory_insert": {
+      "main": [
+        [
+          {
+            "node": "verifica_encerramento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "openrouter_model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica_encerramento": {
+      "main": [
+        [
+          {
+            "node": "encerra_forcado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mentor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processa_resposta": {
+      "main": [
+        [
+          {
+            "node": "is_last",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is_last": {
+      "main": [
+        [
+          {
+            "node": "grava_conversa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "envia_mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "envia_mensagem": {
+      "main": [
+        [
+          {
+            "node": "memory_get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "grava_conversa": {
+      "main": [
+        [
+          {
+            "node": "grava_chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "grava_chat": {
+      "main": [
+        [
+          {
+            "node": "call_experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "call_experts": {
+      "main": [
+        [
+          {
+            "node": "experts_panas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_criar_quest",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_xp_conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_expert_sabotadores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_expert_insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_expert_humor_energia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sw_expert_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_dados_usr": {
+      "main": [
+        [
+          {
+            "node": "busca_contexto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "busca_perfil_bigfive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_contexto": {
+      "main": [
+        [
+          {
+            "node": "contexto_completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_perfil_bigfive": {
+      "main": [
+        [
+          {
+            "node": "contexto_completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mentor": {
+      "main": [
+        [
+          {
+            "node": "processa_resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "shared": [
+    {
+      "createdAt": "2025-12-01T18:59:38.019Z",
+      "role": "workflow:owner",
+      "workflowId": "c1To6ho5riDs85Aj",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
