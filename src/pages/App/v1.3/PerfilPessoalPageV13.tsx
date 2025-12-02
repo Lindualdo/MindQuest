@@ -8,7 +8,6 @@ import { useDashboard } from '@/store/useStore';
 
 interface PerfilPessoalData {
   nome_preferencia: string;
-  sobre_voce: string | null;
 }
 
 const PerfilPessoalPageV13: React.FC = () => {
@@ -32,7 +31,6 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   const [formData, setFormData] = useState<PerfilPessoalData>({
     nome_preferencia: nomeUsuario,
-    sobre_voce: null,
   });
 
   useEffect(() => {
@@ -61,7 +59,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         if (data.success && data.perfil) {
           setFormData({
             nome_preferencia: data.perfil.nome_preferencia || nomeUsuario,
-            sobre_voce: data.perfil.sobre_voce || null,
           });
         }
       } catch (error) {
@@ -69,7 +66,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         // Em caso de erro, usar dados do dashboard
         setFormData({
           nome_preferencia: nomeUsuario,
-          sobre_voce: null,
         });
       } finally {
         setLoading(false);
@@ -136,7 +132,6 @@ const PerfilPessoalPageV13: React.FC = () => {
         if (data.perfil) {
           setFormData({
             nome_preferencia: data.perfil.nome_preferencia || formData.nome_preferencia,
-            sobre_voce: data.perfil.sobre_voce || null,
           });
         }
         setSuccess(true);
@@ -232,23 +227,6 @@ const PerfilPessoalPageV13: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, nome_preferencia: e.target.value })}
               className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20"
               placeholder="Como você prefere ser chamado?"
-            />
-          </div>
-
-          {/* Conte mais sobre você */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[var(--mq-text)]">
-              Conte Mais Sobre Você
-            </label>
-            <p className="mb-3 text-xs text-[var(--mq-text-muted)]">
-              Compartilhe seu contexto: histórico relevante, valores, desafios atuais e situações importantes para personalizar sua experiência.
-            </p>
-            <textarea
-              value={formData.sobre_voce || ''}
-              onChange={(e) => setFormData({ ...formData, sobre_voce: e.target.value || null })}
-              rows={4}
-              className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20 resize-none"
-              placeholder="Exemplo: Tenho dois filhos, estou divorciado há dois anos, terminei um casamento de 26 anos. Mudei recentemente para Portugal..."
             />
           </div>
 

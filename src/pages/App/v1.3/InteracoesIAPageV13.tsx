@@ -8,6 +8,7 @@ import { useDashboard } from '@/store/useStore';
 
 interface InteracoesIAData {
   nome_assistente: string | null;
+  sobre_voce: string | null;
   tom_conversa: 'empativo' | 'interativo' | 'educativo' | 'equilibrado' | 'direto' | null;
 }
 
@@ -32,6 +33,7 @@ const InteracoesIAPageV13: React.FC = () => {
 
   const [formData, setFormData] = useState<InteracoesIAData>({
     nome_assistente: null,
+    sobre_voce: null,
     tom_conversa: null,
   });
 
@@ -61,6 +63,7 @@ const InteracoesIAPageV13: React.FC = () => {
         if (data.success && data.perfil) {
           setFormData({
             nome_assistente: data.perfil.nome_assistente || null,
+            sobre_voce: data.perfil.sobre_voce || null,
             tom_conversa: data.perfil.tom_conversa || null,
           });
         }
@@ -68,6 +71,7 @@ const InteracoesIAPageV13: React.FC = () => {
         console.error('[InteracoesIA] Erro ao carregar:', error);
         setFormData({
           nome_assistente: null,
+          sobre_voce: null,
           tom_conversa: null,
         });
       } finally {
@@ -134,6 +138,7 @@ const InteracoesIAPageV13: React.FC = () => {
         if (data.perfil) {
           setFormData({
             nome_assistente: data.perfil.nome_assistente || null,
+            sobre_voce: data.perfil.sobre_voce || null,
             tom_conversa: data.perfil.tom_conversa || null,
           });
         }
@@ -232,6 +237,23 @@ const InteracoesIAPageV13: React.FC = () => {
             <p className="mt-1 text-xs text-[var(--mq-text-muted)]">
               Personalize como o assistente de IA se apresenta para você
             </p>
+          </div>
+
+          {/* Conte mais sobre você */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-[var(--mq-text)]">
+              Conte Mais Sobre Você
+            </label>
+            <p className="mb-3 text-xs text-[var(--mq-text-muted)]">
+              Compartilhe seu contexto: histórico relevante, valores, desafios atuais e situações importantes para personalizar sua experiência.
+            </p>
+            <textarea
+              value={formData.sobre_voce || ''}
+              onChange={(e) => setFormData({ ...formData, sobre_voce: e.target.value || null })}
+              rows={4}
+              className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20 resize-none"
+              placeholder="Exemplo: Tenho dois filhos, estou divorciado há dois anos, terminei um casamento de 26 anos. Mudei recentemente para Portugal..."
+            />
           </div>
 
           {/* Tom de Conversa */}
