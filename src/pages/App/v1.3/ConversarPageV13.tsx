@@ -307,7 +307,7 @@ const ConversarPageV13 = () => {
           className="mb-2 text-center"
         >
           <h1 className="mq-page-title">Conversar</h1>
-          <p className="mq-page-subtitle">Conversas com seu mentor</p>
+          <p className="mq-page-subtitle">Conversas revelam padrões. Ações mudam tudo.</p>
         </motion.div>
 
         {/* Card de Progresso: Seu progresso no MindQuest */}
