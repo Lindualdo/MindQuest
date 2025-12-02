@@ -45,7 +45,7 @@ const estagioColors: Record<number, { bg: string; border: string; text: string; 
 };
 
 const NiveisJornadaPageV13: React.FC = () => {
-  const { setView, dashboardData } = useDashboard();
+  const { setView, dashboardData, niveisJornadaReturnView } = useDashboard();
   const [estagios, setEstagios] = useState<Estagio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +122,10 @@ const NiveisJornadaPageV13: React.FC = () => {
         <div className="mb-4">
           <button
             type="button"
-            onClick={() => setView('evoluir')}
+            onClick={() => {
+              const returnView = niveisJornadaReturnView ?? 'evoluir';
+              setView(returnView);
+            }}
             className="mq-btn-back"
           >
             <ArrowLeft size={18} />

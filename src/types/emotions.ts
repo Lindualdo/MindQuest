@@ -702,6 +702,7 @@ export interface DashboardData {
 // Store state interface
 export type ViewId =
   | 'dashboard'
+  | 'conversar'
   | 'humorHistorico'
   | 'insightDetail'
   | 'questDetail'
@@ -799,7 +800,7 @@ export interface StoreState {
   updateDashboardData: (data: Partial<DashboardData>) => void;
   setLoading: (loading: boolean) => void;
   refreshData: () => Promise<void>;
-  setView: (view: ViewId) => void;
+  setView: (view: ViewId, forceReturnView?: ViewId) => void;
   loadHumorHistorico: (options?: { inicio?: string; fim?: string }) => Promise<void>;
   openHumorHistorico: () => Promise<void>;
   openInsightDetail: (insightId: string) => Promise<void>;
