@@ -374,7 +374,9 @@
         "workflowId": {
           "__rl": true,
           "value": "DJB5qWudX1Hqap1O",
-          "mode": "list"
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -384,7 +386,57 @@
             "messageText": "={{ $('processa_resposta').first().json.user_message }}",
             "linkPreview": "false",
             "minDelayMs": "3000"
-          }
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
         },
         "options": {
           "waitForSubWorkflow": true

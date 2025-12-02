@@ -72,9 +72,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1\nORDER BY criado_em DESC\nLIMIT 10;",
+        "query": "SELECT DISTINCT ON (DATE(c.criado_em))\n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.usuario_id = $1\n  AND qc.id IS NOT NULL\nORDER BY DATE(c.criado_em) DESC, c.criado_em DESC\nLIMIT 10;",
         "options": {
-          "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}"
+          "queryReplacement": "={{ $json.query.user_id }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
@@ -95,7 +95,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  id,\n  criado_em AS data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE id= '{{ $json.query.conversa_id }}'",
+        "query": "SELECT \n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.id = '{{ $json.query.conversa_id }}'\n  AND qc.id IS NOT NULL",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -218,9 +218,6 @@
       }
     ]
   },
-  "versionId": "ea73012a-5d0b-470b-a280-1e8bd82dc3f1",
-  "versionCounter": 4,
-  "triggerCount": 1,
   "shared": [
     {
       "createdAt": "2025-10-12T07:55:47.675Z",
