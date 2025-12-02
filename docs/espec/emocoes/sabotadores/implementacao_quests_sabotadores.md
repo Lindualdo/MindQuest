@@ -1,7 +1,7 @@
 # Implementação: Quests de Sabotadores
 
 **Data:** 2025-12-02  
-**Status:** Pronto para implementação  
+**Status:** Implementado  
 **Versão:** 1.0
 
 ---
@@ -181,10 +181,10 @@ return [{
 
 ## Checklist de Implementação
 
-- [ ] Modificar query "Buscar Sabotadores Ativo" para retornar top 3 + atual
-- [ ] Adicionar lógica de decisão (atual no top 3?)
-- [ ] Atualizar prompt do agente para usar insight/contramedida
-- [ ] Ajustar validação em "Aplicar Limites & Dedupe"
+- [x] Modificar query "Buscar Sabotadores Ativo" para retornar top 3 + atual
+- [x] Adicionar lógica de decisão (atual no top 3?)
+- [x] Atualizar prompt do agente para usar insight/contramedida
+- [x] Ajustar validação em "Aplicar Limites & Dedupe"
 - [ ] Testar com usuário que tem sabotador atual ≠ top 3
 - [ ] Testar com usuário que tem sabotador atual = top 3
 - [ ] Validar que quest usa insight contextualizado (não catálogo genérico)
