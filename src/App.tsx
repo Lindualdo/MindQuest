@@ -23,6 +23,7 @@ import EvoluirPageV13 from './pages/App/v1.3/EvoluirPageV13';
 import AjustesPageV13 from './pages/App/v1.3/AjustesPageV13';
 import InteracoesIAPageV13 from './pages/App/v1.3/InteracoesIAPageV13';
 import PerfilPessoalPageV13 from './pages/App/v1.3/PerfilPessoalPageV13';
+import NotificacoesPageV13 from './pages/App/v1.3/NotificacoesPageV13';
 import ObjetivosPageV13 from './pages/App/v1.3/ObjetivosPageV13';
 import AparenciaPageV13 from './pages/App/v1.3/AparenciaPageV13';
 import CheckinSemanalPageV13 from './pages/App/v1.3/CheckinSemanalPageV13';
@@ -262,6 +263,9 @@ function App() {
         break;
       case 'aparencia':
         page = <AparenciaPageV13 />;
+        break;
+      case 'notificacoes':
+        page = <NotificacoesPageV13 />;
         break;
       case 'checkinSemanal':
         page = <CheckinSemanalPageV13 />;

@@ -107,9 +107,11 @@ const AjustesPageV13: React.FC = () => {
     {
       id: 'notificacoes',
       icon: <Bell size={20} className="text-[var(--mq-warning)]" />,
-      title: 'Notificações e interação com IA',
+      title: 'Notificações',
       subtitle: 'Lembretes e frequência de mensagens',
-      onClick: handleEmBreve,
+      onClick: () => {
+        setView('notificacoes');
+      },
     },
     {
       id: 'exportar',
