@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, MessageSquare, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ArrowUpRight, Star } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -67,6 +67,9 @@ const ConversaResumoPageV13 = () => {
       'conversa_id',
       'id',
       'chat_id',
+      'xp_conversa',
+      'xp',
+      'pontos',
     ]);
     return Object.entries(conversaResumo)
       .filter(([key, value]) => !ignorar.has(key) && value !== undefined && value !== null)
@@ -162,14 +165,26 @@ const ConversaResumoPageV13 = () => {
 
               {conversaResumo && (
                 <div className="space-y-4">
-                  {conversaResumo.data_conversa && (
-                    <div className="flex items-center justify-between rounded-2xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-3 py-2 text-xs font-semibold text-[var(--mq-text-muted)]">
+                  {/* Data e XP da conversa */}
+                  <div className="flex items-center justify-between rounded-2xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-3 py-2 text-xs font-semibold text-[var(--mq-text-muted)]">
+                    <div className="flex items-center gap-2">
                       <span>Conversa</span>
-                      <span className="rounded-full bg-[var(--mq-primary-light)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--mq-primary)]">
-                        {format(new Date(conversaResumo.data_conversa), 'dd/MM/yyyy')}
-                      </span>
+                      {conversaResumo.data_conversa && (
+                        <span className="rounded-full bg-[var(--mq-primary-light)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--mq-primary)]">
+                          {format(new Date(conversaResumo.data_conversa), 'dd/MM/yyyy')}
+                        </span>
+                      )}
                     </div>
-                  )}
+                    {/* Pontos da conversa */}
+                    {((conversaResumo as any).pontos || (conversaResumo as any).xp_conversa || (conversaResumo as any).xp) && (
+                      <div className="flex items-center gap-1 rounded-full bg-[var(--mq-warning-light)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--mq-warning)]">
+                        <Star size={10} />
+                        <span>
+                          {(conversaResumo as any).pontos ?? (conversaResumo as any).xp_conversa ?? (conversaResumo as any).xp} pts
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   {paragraphs.length > 0 && (
                     <div className="space-y-3 rounded-2xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-4 py-3 text-sm leading-relaxed text-[var(--mq-text)]">
@@ -229,6 +244,7 @@ const ConversaResumoPageV13 = () => {
                     const conversaId = conversa.conversa_id ?? conversa.id ?? conversa.chat_id;
                     const dataConversa = conversa.data_conversa ? new Date(conversa.data_conversa) : null;
                     const titulo = (conversa as any).titulo || (dataConversa ? `Conversa de ${format(dataConversa, 'dd/MM/yyyy')}` : `Conversa ${index + 1}`);
+                    const xpConversa = (conversa as any).pontos ?? (conversa as any).xp_conversa ?? (conversa as any).xp;
                     
                     return (
                       <button
@@ -239,9 +255,18 @@ const ConversaResumoPageV13 = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h3 className="text-sm font-semibold text-[var(--mq-text)]">
-                              {titulo}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-semibold text-[var(--mq-text)]">
+                                {titulo}
+                              </h3>
+                              {/* Pontos da conversa */}
+                              {xpConversa && (
+                                <div className="flex items-center gap-1 rounded-full bg-[var(--mq-warning-light)] px-2 py-0.5 text-[0.6rem] font-semibold text-[var(--mq-warning)]">
+                                  <Star size={10} />
+                                  <span>{xpConversa} pts</span>
+                                </div>
+                              )}
+                            </div>
                             {dataConversa && (
                               <p className="mt-1 text-xs text-[var(--mq-text-muted)]">
                                 {format(dataConversa, 'dd/MM/yyyy')}
