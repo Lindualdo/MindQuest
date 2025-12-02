@@ -10,8 +10,6 @@ import type {
   StoreState,
   DashboardData,
   ResumoConversasPayload,
-  QuestSnapshot,
-  MapaMentalData,
   QuestStatus,
 } from '../types/emotions';
 
@@ -134,7 +132,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   loadQuestSnapshot: async (usuarioIdParam) => {
-    const { dashboardData: stateDashboard, questSnapshot, questLoading } = get();
+    const { dashboardData: stateDashboard, questLoading } = get();
     const usuarioId = usuarioIdParam ?? stateDashboard?.usuario?.id;
 
     if (!usuarioId) {
@@ -412,7 +410,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
           const meta = quest.progresso_meta ?? 1;
           return {
             ...quest,
-            status: 'concluida',
+            status: 'concluida' as QuestStatus,
             progresso_atual: meta,
             concluido_em: nowIso,
           };
@@ -828,8 +826,9 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
               nome: userData.user.nome,
               nome_preferencia: userData.user.nome_preferencia,
               cronotipo_detectado: userData.user.cronotipo_detectado || null,
+              perfil_detectado: userData.user.perfil_detectado || null,
             },
-          },
+          } as DashboardData,
         });
         
         // Carregar cards necessários para o dashboard
@@ -1360,6 +1359,7 @@ export const useDashboard = () => {
     openResumoConversas,
     closeResumoConversas,
     loadResumoConversas,
+    resumoConversasReturnView,
     conversaResumo,
     conversaResumoLoading,
     conversaResumoError,

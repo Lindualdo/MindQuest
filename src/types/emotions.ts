@@ -726,7 +726,12 @@ export type ViewId =
   | 'niveisJornada'
   | 'checkinSemanal'
   | 'conquistasVida'
-  | 'aparencia';
+  | 'aparencia'
+  | 'jornada'
+  | 'ajustes'
+  | 'interacoesIA'
+  | 'notificacoes'
+  | 'conexaoAcoesObjetivos';
 
 export interface StoreState {
   dashboardData: DashboardData;
@@ -754,6 +759,9 @@ export interface StoreState {
   insightDetailReturnView: ViewId | null;
   humorHistoricoReturnView: ViewId | null;
   sabotadorDetailReturnView: ViewId | null;
+  resumoConversasReturnView: ViewId | null;
+  painelQuestsReturnView: ViewId | null;
+  niveisJornadaReturnView: ViewId | null;
   panoramaCard: PanoramaCardData | null;
   panoramaCardUserId: string | null;
   panoramaCardLoading: boolean;
@@ -823,6 +831,9 @@ export interface StoreState {
   loadConversasCard: (usuarioId?: string) => Promise<void>;
   loadWeeklyProgressCard: (usuarioId?: string) => Promise<void>;
   loadMapaMental: (usuarioId?: string) => Promise<void>;
+  loadRodaEmocoes: (usuarioId?: string) => Promise<void>;
+  openQuestDetail: (questId: string, dataSelecionada?: string) => Promise<void>;
+  closeQuestDetail: () => void;
 }
 
 // Configurações personalizadas por perfil

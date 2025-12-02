@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, AlertCircle, BookOpen } from 'lucide-react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 import AuthGuard from './components/auth/AuthGuard';
 import InsightDetailPageV13 from './pages/App/v1.3/InsightDetailPageV13';
 import QuestDetailPageV13 from './pages/App/v1.3/QuestDetailPageV13';
@@ -33,7 +33,6 @@ import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
-import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
 import { authService } from './services/authService';
 import { ThemeProvider } from './components/app/v1.3/ThemeProvider';
 
@@ -84,7 +83,6 @@ function App() {
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
   const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
   const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
-  const isAppPreviewV13 = resolvedPath === '/app/1.3';
   const isRootPath = resolvedPath === '/';
   const redirectHandledRef = useRef(false);
 
@@ -110,11 +108,9 @@ function App() {
   }
 
   const { 
-    dashboardData, 
     refreshData, 
     isLoading, 
     error,
-    ultimaAtualizacao,
     view
   } = useDashboard();
 
@@ -205,7 +201,7 @@ function App() {
 
   // Rotas v1.3 - todas as rotas de app agora usam v1.3
   if (isAppRoute) {
-    let page: JSX.Element;
+    let page: React.ReactElement;
 
     switch (view) {
       case 'insightDetail':
