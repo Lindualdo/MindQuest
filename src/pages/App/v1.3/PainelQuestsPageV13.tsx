@@ -550,9 +550,10 @@ const PainelQuestsPageV13: React.FC = () => {
     ? Math.min(100, Math.round((questsConcluidasSemanal / metaQuestsSemanal) * 100))
     : 0;
   
-  // Pontos ganhos na semana
-  const pontosGanhosSemana = weeklyData.xpSemanaTotal ?? 
-    diasSemana.reduce((sum, dia) => sum + ((dia as any).xpQuests ?? 0), 0);
+  // Pontos ganhos na semana (apenas quests, excluindo conversas)
+  const pontosGanhosSemana = weeklyData.dias?.reduce(
+    (sum, dia) => sum + ((dia as any).xpQuests ?? 0), 0
+  ) ?? 0;
 
   // Navegador semanal com barra de progresso
   const renderWeeklyProgressBar = () => {
