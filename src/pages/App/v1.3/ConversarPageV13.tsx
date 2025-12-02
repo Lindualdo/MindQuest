@@ -308,6 +308,15 @@ const ConversarPageV13 = () => {
         >
           <h1 className="mq-page-title">Conversar</h1>
           <p className="mq-page-subtitle">Conversas revelam padrões. Ações mudam tudo.</p>
+          <a
+            href={WHATSAPP_URL_HOME}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[var(--mq-primary)] hover:underline"
+          >
+            Fale com seu mentor
+            <ExternalLink size={14} />
+          </a>
         </motion.div>
 
         {/* Card de Progresso: Seu progresso no MindQuest */}
