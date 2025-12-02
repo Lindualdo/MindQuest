@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../store/useStore';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -46,26 +47,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Loading inicial
   if (isLoading || !authChecked) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="mq-app-v1_3 min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mq-bg)' }}>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="p-6 bg-white rounded-2xl shadow-xl border border-white/20 mb-6">
+          <div className="mq-card p-6 mb-6" style={{ borderRadius: 'var(--mq-radius-lg)' }}>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+              <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--mq-primary)' }}>
                 <Brain className="text-white" size={32} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--mq-primary)' }}>
                   MindQuest
                 </h1>
-                <p className="text-sm text-gray-500">Carregando sua experiência...</p>
+                <p className="text-sm" style={{ color: 'var(--mq-text-muted)' }}>Carregando sua experiência...</p>
               </div>
             </div>
             
-            <div className="flex items-center justify-center gap-2 text-gray-600">
+            <div className="flex items-center justify-center gap-2" style={{ color: 'var(--mq-text-muted)' }}>
               <RefreshCw className="animate-spin" size={20} />
               <span>Validando acesso...</span>
             </div>
@@ -75,7 +76,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                className="w-2 h-2 bg-blue-600 rounded-full"
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: 'var(--mq-primary)' }}
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.7, 1, 0.7],
@@ -103,33 +105,33 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       'Não foi possível validar seu token de acesso. Solicite um novo link ou tente novamente em instantes.';
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 flex items-center justify-center">
+      <div className="mq-app-v1_3 min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--mq-bg)' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-md mx-4"
         >
-          <div className="p-8 bg-white rounded-2xl shadow-xl border border-red-100">
+          <div className="mq-card p-8" style={{ borderRadius: 'var(--mq-radius-lg)' }}>
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 bg-red-100 rounded-xl">
-                <AlertTriangle className="text-red-600" size={32} />
+              <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--mq-error-light)' }}>
+                <AlertTriangle size={32} style={{ color: 'var(--mq-error)' }} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-red-800">
+                <h1 className="text-xl font-bold" style={{ color: 'var(--mq-error)' }}>
                   Acesso Negado
                 </h1>
-                <p className="text-sm text-red-600">Problema de autenticação</p>
+                <p className="text-sm" style={{ color: 'var(--mq-error)' }}>Problema de autenticação</p>
               </div>
             </div>
             
             <div className="space-y-4">
-              <p className="text-gray-700">{friendlyMessage}</p>
+              <p style={{ color: 'var(--mq-text)' }}>{friendlyMessage}</p>
               
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <p className="text-sm text-red-700">
-                  <strong>Possíveis causas:</strong>
+              <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--mq-error-light)', border: '1px solid var(--mq-error)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--mq-error)' }}>
+                  Possíveis causas:
                 </p>
-                <ul className="text-sm text-red-600 mt-2 space-y-1">
+                <ul className="text-sm mt-2 space-y-1" style={{ color: 'var(--mq-error)' }}>
                   <li>• Token expirado (válido por 7 dias)</li>
                   <li>• Link de acesso inválido</li>
                   <li>• Problemas de conexão</li>
@@ -139,13 +141,23 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
               <div className="space-y-3">
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold"
+                  style={{ 
+                    backgroundColor: 'var(--mq-error)', 
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.9';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
                 >
                   <RefreshCw size={16} />
                   Tentar Novamente
                 </button>
                 
-                <p className="text-xs text-gray-500">
+                <p className="text-xs" style={{ color: 'var(--mq-text-muted)' }}>
                   Se o problema persistir, solicite um novo link de acesso via WhatsApp
                 </p>
               </div>
