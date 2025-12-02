@@ -140,27 +140,50 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
     }));
   };
 
-  // Ordenar quests: completas primeiro, depois por percentual decrescente
-  const ordenarQuests = (quests: Quest[]): Quest[] => {
-    return [...quests].sort((a, b) => {
+  // Filtrar e ordenar quests: excluir Reflexão Diária, ordenar por percentual decrescente
+  const filtrarEOrdenarQuests = (quests: Quest[]): Quest[] => {
+    // Filtrar quests que não são Reflexão Diária
+    const questsAcoes = quests.filter(q => 
+      !q.titulo.toLowerCase().includes('reflexão diária') && 
+      !q.titulo.toLowerCase().includes('reflexao diaria')
+    );
+    
+    return [...questsAcoes].sort((a, b) => {
       // Completas (100%) primeiro
-      if (a.percentual === 100 && b.percentual !== 100) return -1;
-      if (b.percentual === 100 && a.percentual !== 100) return 1;
+      const percA = Number(a.percentual) || 0;
+      const percB = Number(b.percentual) || 0;
+      if (percA === 100 && percB !== 100) return -1;
+      if (percB === 100 && percA !== 100) return 1;
       // Depois por percentual decrescente
-      return b.percentual - a.percentual;
+      return percB - percA;
     });
   };
 
   // Calcular resumo do objetivo
+  // Excluir Reflexão Diária do total de ações (ela é tratada separadamente)
   const calcularResumo = (quests: Quest[]) => {
-    if (quests.length === 0) return { total: 0, concluidas: 0, mediaProgresso: 0 };
-    
-    const concluidas = quests.filter(q => q.percentual === 100).length;
-    const mediaProgresso = Math.round(
-      quests.reduce((sum, q) => sum + q.percentual, 0) / quests.length
+    // Filtrar quests que não são Reflexão Diária
+    const questsAcoes = quests.filter(q => 
+      !q.titulo.toLowerCase().includes('reflexão diária') && 
+      !q.titulo.toLowerCase().includes('reflexao diaria')
     );
     
-    return { total: quests.length, concluidas, mediaProgresso };
+    if (questsAcoes.length === 0) return { total: 0, concluidas: 0, mediaProgresso: 0, reflexaoDiaria: quests.find(q => q.titulo.toLowerCase().includes('reflexão diária') || q.titulo.toLowerCase().includes('reflexao diaria')) };
+    
+    // Converter percentual para número (pode vir como string da API)
+    const concluidas = questsAcoes.reduce((sum, q) => sum + Number(q.concluidas || 0), 0);
+    const totalRecorrencias = questsAcoes.reduce((sum, q) => sum + Number(q.total || 0), 0);
+    const mediaProgresso = totalRecorrencias > 0 
+      ? Math.round((concluidas / totalRecorrencias) * 100)
+      : 0;
+    
+    return { 
+      total: questsAcoes.length, 
+      concluidas, 
+      totalRecorrencias,
+      mediaProgresso,
+      reflexaoDiaria: quests.find(q => q.titulo.toLowerCase().includes('reflexão diária') || q.titulo.toLowerCase().includes('reflexao diaria'))
+    };
   };
 
   return (
@@ -212,7 +235,7 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
             ) : (
               objetivos.map((objetivo, index) => {
                 const isExpanded = expandedObjetivos.has(objetivo.id);
-                const questsOrdenadas = ordenarQuests(objetivo.quests);
+                const questsOrdenadas = filtrarEOrdenarQuests(objetivo.quests);
                 const resumo = calcularResumo(objetivo.quests);
                 const questsAMostrar = questsOrdenadas.slice(0, questsVisiveis[objetivo.id] || QUESTS_POR_PAGINA);
                 const temMaisQuests = questsOrdenadas.length > (questsVisiveis[objetivo.id] || QUESTS_POR_PAGINA);
@@ -244,7 +267,7 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
                         </p>
                         
                         {/* Resumo */}
-                        <div className="flex items-center gap-3 text-xs">
+                        <div className="flex items-center gap-3 text-xs flex-wrap">
                           <span className="text-[var(--mq-text-muted)]">
                             {resumo.total} {resumo.total === 1 ? 'ação' : 'ações'}
                           </span>
@@ -252,7 +275,7 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
                             <>
                               <span className="text-[var(--mq-text-subtle)]">•</span>
                               <span className="text-[var(--mq-success)]">
-                                {resumo.concluidas} {resumo.concluidas === 1 ? 'concluída' : 'concluídas'}
+                                {resumo.concluidas}/{resumo.totalRecorrencias} concluídas
                               </span>
                               <span className="text-[var(--mq-text-subtle)]">•</span>
                               <span className="text-[var(--mq-primary)] font-medium">
@@ -290,7 +313,8 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
                             
                             <div className="space-y-4">
                               {questsAMostrar.map((quest) => {
-                                const isConcluida = quest.percentual === 100;
+                                const percentual = Number(quest.percentual) || 0;
+                                const isConcluida = percentual === 100;
                                 
                                 return (
                                   <div key={quest.id} className="space-y-2">
@@ -313,14 +337,14 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
                                     <div className="w-full h-1.5 bg-[var(--mq-bar)] rounded-full overflow-hidden">
                                       <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${quest.percentual}%` }}
+                                        animate={{ width: `${percentual}%` }}
                                         transition={{ duration: 0.5, delay: 0.1 }}
                                         className={`h-full rounded-full ${isConcluida ? 'bg-[var(--mq-success)]' : 'bg-[var(--mq-primary)]'}`}
                                       />
                                     </div>
                                     
                                     <p className={`text-xs text-right ${isConcluida ? 'text-[var(--mq-success)]' : 'text-[var(--mq-text-muted)]'}`}>
-                                      {quest.percentual}% {isConcluida ? '✓' : 'concluído'}
+                                      {percentual}% {isConcluida ? '✓' : 'concluído'}
                                     </p>
                                   </div>
                                 );
