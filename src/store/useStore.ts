@@ -1338,7 +1338,10 @@ export const useDashboard = () => {
     jornadaCardError,
     loadJornadaCard,
     markQuestAsCompletedLocal,
-    isAuthenticated
+    isAuthenticated,
+    selectedPerfilBigFiveId,
+    openPerfilBigFiveDetail,
+    perfilBigFiveDetailReturnView
   } = useStore();
   
   return {
@@ -1429,7 +1432,10 @@ export const useDashboard = () => {
     jornadaCardError,
     loadJornadaCard,
     markQuestAsCompletedLocal,
-    isAuthenticated
+    isAuthenticated,
+    selectedPerfilBigFiveId,
+    openPerfilBigFiveDetail,
+    perfilBigFiveDetailReturnView
   };
 };
 
