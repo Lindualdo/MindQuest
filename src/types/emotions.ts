@@ -397,6 +397,49 @@ export interface ResumoConversasPayload {
   extras?: Record<string, unknown>;
 }
 
+// Ações do sabotador (quests relacionadas)
+export interface AcaoSabotador {
+  id: string;
+  status: string;
+  titulo: string;
+  descricao: string | null;
+  tipo: string | null;
+  catalogo_id: string | null;
+  catalogo_codigo: string | null;
+  xp_recompensa: number | null;
+  ativado_em: string | null;
+  atualizado_em: string | null;
+}
+
+export interface AcoesSabotadorResponse {
+  success: boolean;
+  usuario_id: string | null;
+  sabotador_id: string | null;
+  acoes: AcaoSabotador[];
+  total: number;
+}
+
+// Ocorrências do sabotador
+export interface OcorrenciaSabotador {
+  id: string;
+  chat_id: string | null;
+  insight_atual: string | null;
+  contramedida_ativa: string | null;
+  intensidade_media: number | null;
+  contexto_principal: string | null;
+  data_ocorrencia: string | null;
+  data_conversa: string | null;
+  resumo_conversa: string | null;
+}
+
+export interface OcorrenciasSabotadorResponse {
+  success: boolean;
+  usuario_id: string | null;
+  sabotador_id: string | null;
+  ocorrencias: OcorrenciaSabotador[];
+  total: number;
+}
+
 // Alertas preventivos (background system)
 export interface AlertaPreventivo {
   id: string;
@@ -722,6 +765,8 @@ export type ViewId =
   | 'conquistas'
   | 'proximosNiveis'
   | 'sabotadorDetail'
+  | 'sabotadorAcoes'
+  | 'sabotadorOcorrencias'
   | 'resumoConversas'
   | 'conversaResumo'
   | 'panasDetail'
@@ -744,7 +789,8 @@ export type ViewId =
   | 'ajustes'
   | 'interacoesIA'
   | 'notificacoes'
-  | 'conexaoAcoesObjetivos';
+  | 'conexaoAcoesObjetivos'
+  | 'conexaoAcoesSabotadores';
 
 export interface StoreState {
   dashboardData: DashboardData;

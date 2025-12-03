@@ -25,6 +25,8 @@ import type {
   MapaMentalData,
   BigFivePerfilResponse,
   RodaEmocoesResponse,
+  AcoesSabotadorResponse,
+  OcorrenciasSabotadorResponse,
 } from '../types/emotions';
 
 interface ApiResponse {
@@ -1649,6 +1651,70 @@ class ApiService {
     }
 
     return payload as RodaEmocoesResponse;
+  }
+
+  public async getAcoesSabotador(
+    userId: string,
+    sabotadorId: string
+  ): Promise<AcoesSabotadorResponse> {
+    if (!userId || !sabotadorId) {
+      throw new Error('user_id e sabotador_id são obrigatórios');
+    }
+
+    const params = new URLSearchParams({
+      user_id: userId,
+      sabotador_id: sabotadorId,
+    });
+    const endpoint = `/acoes/sabotador?${params.toString()}`;
+    console.info('[API] requisitando ações do sabotador:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar ações do sabotador');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    }
+
+    if (!payload || typeof payload !== 'object' || !('success' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado na resposta de ações do sabotador');
+    }
+
+    return payload as AcoesSabotadorResponse;
+  }
+
+  public async getOcorrenciasSabotador(
+    userId: string,
+    sabotadorId: string
+  ): Promise<OcorrenciasSabotadorResponse> {
+    if (!userId || !sabotadorId) {
+      throw new Error('user_id e sabotador_id são obrigatórios');
+    }
+
+    const params = new URLSearchParams({
+      user_id: userId,
+      sabotador_id: sabotadorId,
+    });
+    const endpoint = `/ocorrencias/sabotador?${params.toString()}`;
+    console.info('[API] requisitando ocorrências do sabotador:', `${this.remoteBaseUrl}${endpoint}`);
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao carregar ocorrências do sabotador');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    }
+
+    if (!payload || typeof payload !== 'object' || !('success' in (payload as Record<string, unknown>))) {
+      throw new Error('Formato inesperado na resposta de ocorrências do sabotador');
+    }
+
+    return payload as OcorrenciasSabotadorResponse;
   }
 }
 

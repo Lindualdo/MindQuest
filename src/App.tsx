@@ -16,6 +16,8 @@ import MapaMentalPage from './pages/App/v1.3/MapaMentalPage';
 import MapaMentalVisualPage from './pages/App/v1.3/MapaMentalVisualPage';
 import { useDashboard } from './store/useStore';
 import SabotadorDetailPageV13 from './pages/App/v1.3/SabotadorDetailPageV13';
+import SabotadorAcoesPage from './pages/App/v1.3/SabotadorAcoesPage';
+import SabotadorOcorrenciasPage from './pages/App/v1.3/SabotadorOcorrenciasPage';
 import PainelQuestsPageV13 from './pages/App/v1.3/PainelQuestsPageV13';
 import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13';
 import InsightsHistoricoPageV13 from './pages/App/v1.3/InsightsHistoricoPageV13';
@@ -29,6 +31,7 @@ import AparenciaPageV13 from './pages/App/v1.3/AparenciaPageV13';
 import CheckinSemanalPageV13 from './pages/App/v1.3/CheckinSemanalPageV13';
 import ConquistasVidaPageV13 from './pages/App/v1.3/ConquistasVidaPageV13';
 import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivosPageV13';
+import ConexaoAcoesSabotadoresPageV13 from './pages/App/v1.3/ConexaoAcoesSabotadoresPageV13';
 import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
@@ -232,6 +235,12 @@ function App() {
       case 'sabotadorDetail':
         page = <SabotadorDetailPageV13 />;
         break;
+      case 'sabotadorAcoes':
+        page = <SabotadorAcoesPage />;
+        break;
+      case 'sabotadorOcorrencias':
+        page = <SabotadorOcorrenciasPage />;
+        break;
       case 'mapaMental':
         page = <MapaMentalPage />;
         break;
@@ -271,6 +280,9 @@ function App() {
         break;
       case 'conexaoAcoesObjetivos':
         page = <ConexaoAcoesObjetivosPageV13 />;
+        break;
+      case 'conexaoAcoesSabotadores':
+        page = <ConexaoAcoesSabotadoresPageV13 />;
         break;
       case 'niveisJornada':
         page = <NiveisJornadaPageV13 />;
