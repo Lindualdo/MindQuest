@@ -159,7 +159,9 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
                   const isMaisAtivo = sabotador.sabotador_id === maisAtivoId;
                   const isAtual = sabotador.sabotador_id === sabotadorAtualId;
                   const barHeight = Math.max(4, (sabotador.total_deteccoes / maxDeteccoes) * 100);
-                  const scoreImpacto = sabotador.score ?? (sabotador.total_deteccoes * sabotador.intensidade_media);
+                  // Garantir que intensidade_media seja número
+                  const intensidadeMedia = Number(sabotador.intensidade_media) || 0;
+                  const scoreImpacto = sabotador.score ?? (sabotador.total_deteccoes * intensidadeMedia);
 
                   return (
                     <motion.button
@@ -180,9 +182,9 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
                             <div className="font-semibold mb-1">{sabotador.nome}</div>
                             <div className="space-y-0.5">
                               <div>Detecções: <strong>{sabotador.total_deteccoes}</strong></div>
-                              <div>Intensidade: <strong>{sabotador.intensidade_media.toFixed(1)}%</strong></div>
+                              <div>Intensidade: <strong>{intensidadeMedia.toFixed(1)}%</strong></div>
                               <div className="border-t border-[var(--mq-bg)] border-opacity-20 pt-0.5 mt-0.5">
-                                Score: <strong>{scoreImpacto.toFixed(0)}</strong>
+                                Score: <strong>{Number(scoreImpacto).toFixed(0)}</strong>
                               </div>
                             </div>
                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[var(--mq-text)]" />
