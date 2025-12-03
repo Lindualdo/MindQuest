@@ -21,36 +21,35 @@ type Props = {
 };
 
 // Mock com sabotadores para visualização (exported)
-// Nota: hipervigilante removido quando hiper_realizador está presente
 const mockSabotadoresRanking: SabotadorRankingItem[] = [
   { sabotador_id: 'hiper_realizador', total_deteccoes: 16, intensidade_media: 70 },
   { sabotador_id: 'inquieto', total_deteccoes: 25, intensidade_media: 65 },
+  { sabotador_id: 'hipervigilante', total_deteccoes: 10, intensidade_media: 62 },
   { sabotador_id: 'critico', total_deteccoes: 8, intensidade_media: 55 },
   { sabotador_id: 'controlador', total_deteccoes: 5, intensidade_media: 50 },
-  { sabotador_id: 'insistente', total_deteccoes: 4, intensidade_media: 45 },
 ];
 
 const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loading }: Props) => {
   const [showInfo, setShowInfo] = useState(false);
 
+  // Função para remover prefixo "hiper-" do nome
+  const formatarNome = (nome: string): string => {
+    return nome.replace(/^hiper[-_]?/i, '');
+  };
+
   // Calcular score e ordenar do maior para menor
   const sabotadoresRankeados = useMemo(() => {
     const dados = sabotadores.length > 0 ? sabotadores : mockSabotadoresRanking;
 
-    // Filtrar: se hiper_realizador existe, remover hipervigilante
-    const temHiperRealizador = dados.some(s => s.sabotador_id === 'hiper_realizador');
-    const dadosFiltrados = temHiperRealizador
-      ? dados.filter(s => s.sabotador_id !== 'hipervigilante')
-      : dados;
-
-    return dadosFiltrados
+    return dados
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
+        const nomeOriginal = catalogEntry?.nome || s.sabotador_id;
         const score = s.total_deteccoes * s.intensidade_media;
         return {
           ...s,
           score,
-          nome: catalogEntry?.nome || s.sabotador_id,
+          nome: formatarNome(nomeOriginal),
           emoji: catalogEntry?.emoji || '🎭',
           resumo: catalogEntry?.resumo || '',
         };
