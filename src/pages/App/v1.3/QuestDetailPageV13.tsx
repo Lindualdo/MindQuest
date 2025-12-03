@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 import { format } from 'date-fns';
+import type { QuestDetailCatalogoBaseCientifica } from '@/types/emotions';
 
 const QuestDetailPageV13 = () => {
   const {
@@ -24,8 +25,6 @@ const QuestDetailPageV13 = () => {
     closeQuestDetail,
     setView,
     concluirQuest,
-    openQuestDetail,
-    questSnapshot,
     questDetailSelectedDate,
     loadQuestSnapshot,
   } = useDashboard();
@@ -213,10 +212,20 @@ const QuestDetailPageV13 = () => {
     // Para quests recorrentes, verificar se há algum dia não concluído
     // Isso permite concluir quests de datas passadas mesmo que o status geral seja 'concluida'
     let temDiaNaoConcluido = false;
+    let recorrenciaSelecionadaConcluida = false;
+    
     if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
       const dias = (detail.recorrencias as any).dias;
       if (Array.isArray(dias)) {
         temDiaNaoConcluido = dias.some((dia: any) => dia.status !== 'concluida');
+        
+        // Se há data selecionada, verificar se essa recorrência específica já está concluída
+        if (questDetailSelectedDate) {
+          const recorrenciaSelecionada = dias.find((dia: any) => dia.data === questDetailSelectedDate);
+          if (recorrenciaSelecionada) {
+            recorrenciaSelecionadaConcluida = recorrenciaSelecionada.status === 'concluida';
+          }
+        }
       }
     }
 
@@ -227,13 +236,16 @@ const QuestDetailPageV13 = () => {
     // - Para quests recorrentes, também permitir se houver algum dia não concluído
     // - Permite concluir quests de datas passadas que o usuário esqueceu de marcar
     // - Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
+    // - NÃO mostrar botão se a recorrência selecionada já está concluída
     const podeConcluir = !isConversaQuest && 
       detail.status && 
-      (detail.status !== 'concluida' || temDiaNaoConcluido);
+      (detail.status !== 'concluida' || temDiaNaoConcluido) &&
+      !recorrenciaSelecionadaConcluida;
     
     // Priorizar base_cientifica personalizada do config (gerada pelo agente)
     // Fallback para o catálogo se não existir
-    const baseCientificaConfig = detail.config?.base_cientifica;
+    const detailWithConfig = detail as typeof detail & { config?: { base_cientifica?: QuestDetailCatalogoBaseCientifica } | null };
+    const baseCientificaConfig = detailWithConfig.config?.base_cientifica;
     const baseCientificaCatalogo = detail.catalogo?.base_cientifica;
     const baseCientifica = (baseCientificaConfig && Object.keys(baseCientificaConfig).length > 0) 
       ? baseCientificaConfig 
