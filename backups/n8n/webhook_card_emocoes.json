@@ -20,7 +20,8 @@
         -224,
         368
       ],
-      "webhookId": "33423fbf-31d8-49c6-ad83-9da047c61601"
+      "webhookId": "33423fbf-31d8-49c6-ad83-9da047c61601",
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -129,7 +130,7 @@
     },
     {
       "parameters": {
-        "numberInputs": 4
+        "numberInputs": 5
       },
       "id": "812549e0-68ec-4b62-a586-4d4309407d35",
       "name": "Merge Dados",
@@ -142,7 +143,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const rows = $input.all().map(item => item.json || {});\n\nfunction findRow(bloco) {\n  return rows.find((row) => row.bloco === bloco) || null;\n}\n\nconst humorRow = findRow('humor');\nconst panasRow = findRow('panas');\nconst sabotadorRow = findRow('sabotador');\nconst emocaoRows = rows.filter((row) => row.bloco === 'emocoes');\n\nconst humorMedia = humorRow?.humor_medio_7d ?? null;\nconst humorAtual = humorRow?.humor_atual ?? humorMedia;\n\nconst response = {\n  success: true,\n  usuario_id: humorRow?.user_id || panasRow?.user_id || sabotadorRow?.user_id || emocaoRows[0]?.user_id || null,\n  card_panorama_emocional: {\n    humor: {\n      media_7d: humorMedia,\n      atual: humorAtual,\n      amostras: humorRow?.total_registros ?? 0,\n      ultima_data: humorRow?.ultima_data ?? null,\n      ultima_hora: humorRow?.ultima_hora ?? null,\n    },\n    energia: {\n      percentual_positiva: panasRow?.percentual_positivas ?? 0,\n      percentual_negativa: panasRow?.percentual_negativas ?? 0,\n      percentual_neutra: panasRow?.percentual_neutras ?? 0,\n      categoria: panasRow?.resultado_panas ?? 'NEUTRA',\n    },\n    emocoes_dominantes: emocaoRows.map((row) => ({\n      nome: row.emocao_nome ?? 'Emoção',\n      emoji: row.emoji ?? '❤️',\n      percentual: row.percentual ?? 0,\n    })),\n    sabotador: sabotadorRow\n      ? {\n          id: sabotadorRow.sabotador_id,\n          nome: sabotadorRow.nome,\n          emoji: sabotadorRow.emoji,\n          apelido: sabotadorRow.apelido_personalizado,\n          contexto: sabotadorRow.contexto_principal,\n          insight: sabotadorRow.insight_atual,\n          contramedida: sabotadorRow.contramedida_ativa,\n          intensidade_media: sabotadorRow.intensidade_media,\n          total_deteccoes: sabotadorRow.total_deteccoes,\n          conversas_afetadas: sabotadorRow.conversas_afetadas,\n        }\n      : null,\n  },\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+        "jsCode": "const rows = $input.all().map(item => item.json || {});\n\nfunction findRow(bloco) {\n  return rows.find((row) => row.bloco === bloco) || null;\n}\n\nconst humorRow = findRow('humor');\nconst panasRow = findRow('panas');\nconst sabotadorRow = findRow('sabotador');\nconst emocaoRows = rows.filter((row) => row.bloco === 'emocoes');\nconst sabotadoresListaRows = rows.filter((row) => row.bloco === 'sabotadores_lista');\n\nconst humorMedia = humorRow?.humor_medio_7d ?? null;\nconst humorAtual = humorRow?.humor_atual ?? humorMedia;\n\nconst response = {\n  success: true,\n  usuario_id: humorRow?.user_id || panasRow?.user_id || sabotadorRow?.user_id || emocaoRows[0]?.user_id || null,\n  card_panorama_emocional: {\n    humor: {\n      media_7d: humorMedia,\n      atual: humorAtual,\n      amostras: humorRow?.total_registros ?? 0,\n      ultima_data: humorRow?.ultima_data ?? null,\n      ultima_hora: humorRow?.ultima_hora ?? null,\n    },\n    energia: {\n      percentual_positiva: panasRow?.percentual_positivas ?? 0,\n      percentual_negativa: panasRow?.percentual_negativas ?? 0,\n      percentual_neutra: panasRow?.percentual_neutras ?? 0,\n      categoria: panasRow?.resultado_panas ?? 'NEUTRA',\n    },\n    emocoes_dominantes: emocaoRows.map((row) => ({\n      nome: row.emocao_nome ?? 'Emoção',\n      emoji: row.emoji ?? '❤️',\n      percentual: row.percentual ?? 0,\n    })),\n    sabotador: sabotadorRow\n      ? {\n          id: sabotadorRow.sabotador_id,\n          nome: sabotadorRow.nome,\n          emoji: sabotadorRow.emoji,\n          apelido: sabotadorRow.apelido_personalizado,\n          contexto: sabotadorRow.contexto_principal,\n          insight: sabotadorRow.insight_atual,\n          contramedida: sabotadorRow.contramedida_ativa,\n          intensidade_media: sabotadorRow.intensidade_media,\n          total_deteccoes: sabotadorRow.total_deteccoes,\n          conversas_afetadas: sabotadorRow.conversas_afetadas,\n        }\n      : null,\n    sabotadores_todos: sabotadoresListaRows.map((row) => ({\n      sabotador_id: row.sabotador_id,\n      nome: row.nome,\n      emoji: row.emoji,\n      total_deteccoes: row.total_deteccoes,\n      intensidade_media: row.intensidade_media,\n      score_impacto: row.score_impacto ?? (row.total_deteccoes * row.intensidade_media),\n      insight_atual: row.insight_atual,\n      contramedida_ativa: row.contramedida_ativa,\n      contexto_principal: row.contexto_principal,\n    })),\n  },\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
       },
       "id": "d8c757c0-1598-4008-95ae-ad789de9fac9",
       "name": "Montar Response",
@@ -165,6 +166,29 @@
         976,
         448
       ]
+    },
+    {
+      "id": "todos-sabotadores-node",
+      "name": "Sabotadores_Todos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        256,
+        848
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH sabotadores_agregados AS (\n  SELECT\n    us.sabotador_id,\n    COUNT(*) AS total_deteccoes,\n    COUNT(DISTINCT us.chat_id) AS conversas_afetadas,\n    AVG(us.intensidade_media) AS intensidade_media,\n    MAX(us.insight_atual) AS insight_atual,\n    MAX(us.contramedida_ativa) AS contramedida_ativa,\n    MAX(us.contexto_principal) AS contexto_principal,\n    MAX(COALESCE(us.data_ultima_atividade, us.atualizado_em)) AS ultima_atualizacao\n  FROM usuarios_sabotadores us\n  WHERE us.usuario_id = $1\n  GROUP BY us.sabotador_id\n),\nsabotadores_com_metrica AS (\n  SELECT\n    sa.*,\n    (sa.total_deteccoes * sa.intensidade_media)::numeric AS score_impacto\n  FROM sabotadores_agregados sa\n)\nSELECT\n  'sabotadores_lista'::text AS bloco,\n  $1::uuid AS user_id,\n  scm.sabotador_id,\n  sc.nome,\n  sc.emoji,\n  scm.total_deteccoes,\n  ROUND(scm.intensidade_media::numeric, 2) AS intensidade_media,\n  ROUND(scm.score_impacto::numeric, 2) AS score_impacto,\n  scm.insight_atual,\n  scm.contramedida_ativa,\n  scm.contexto_principal\nFROM sabotadores_com_metrica scm\nJOIN sabotadores_catalogo sc ON sc.id = scm.sabotador_id\nORDER BY scm.score_impacto DESC;",
+        "options": {
+          "queryReplacement": "={{ $json.user_id }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -199,6 +223,11 @@
           },
           {
             "node": "Sabotador_Ativo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sabotadores_Todos",
             "type": "main",
             "index": 0
           }
@@ -267,6 +296,17 @@
             "node": "Responder Webhook",
             "type": "main",
             "index": 0
+          }
+        ]
+      ]
+    },
+    "Sabotadores_Todos": {
+      "main": [
+        [
+          {
+            "node": "Merge Dados",
+            "type": "main",
+            "index": 4
           }
         ]
       ]
