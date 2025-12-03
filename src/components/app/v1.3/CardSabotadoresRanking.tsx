@@ -20,17 +20,14 @@ type Props = {
   loading?: boolean;
 };
 
-// Mock com todos os 9 sabotadores para visualização (exported)
+// Mock com sabotadores para visualização (exported)
+// Nota: hipervigilante removido quando hiper_realizador está presente
 const mockSabotadoresRanking: SabotadorRankingItem[] = [
   { sabotador_id: 'hiper_realizador', total_deteccoes: 16, intensidade_media: 70 },
   { sabotador_id: 'inquieto', total_deteccoes: 25, intensidade_media: 65 },
-  { sabotador_id: 'hipervigilante', total_deteccoes: 10, intensidade_media: 62 },
   { sabotador_id: 'critico', total_deteccoes: 8, intensidade_media: 55 },
   { sabotador_id: 'controlador', total_deteccoes: 5, intensidade_media: 50 },
   { sabotador_id: 'insistente', total_deteccoes: 4, intensidade_media: 45 },
-  { sabotador_id: 'prestativo', total_deteccoes: 3, intensidade_media: 40 },
-  { sabotador_id: 'vitima', total_deteccoes: 2, intensidade_media: 35 },
-  { sabotador_id: 'esquivo', total_deteccoes: 1, intensidade_media: 30 },
 ];
 
 const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loading }: Props) => {
@@ -40,7 +37,13 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
   const sabotadoresRankeados = useMemo(() => {
     const dados = sabotadores.length > 0 ? sabotadores : mockSabotadoresRanking;
 
-    return dados
+    // Filtrar: se hiper_realizador existe, remover hipervigilante
+    const temHiperRealizador = dados.some(s => s.sabotador_id === 'hiper_realizador');
+    const dadosFiltrados = temHiperRealizador
+      ? dados.filter(s => s.sabotador_id !== 'hipervigilante')
+      : dados;
+
+    return dadosFiltrados
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
         const score = s.total_deteccoes * s.intensidade_media;
@@ -52,7 +55,8 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
           resumo: catalogEntry?.resumo || '',
         };
       })
-      .sort((a, b) => b.total_deteccoes - a.total_deteccoes);
+      .sort((a, b) => b.total_deteccoes - a.total_deteccoes)
+      .slice(0, 5); // Top 5 apenas
   }, [sabotadores]);
 
   // Calcular valor máximo para escala do eixo Y
@@ -77,7 +81,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-col">
-          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrão mental</h3>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
           <p className="mq-eyebrow mt-0.5">Sabotadores</p>
         </div>
         <button
@@ -108,7 +112,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {/* Loading state */}
       {loading && (
         <div className="mt-3 flex items-end justify-between gap-2 h-44">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex-1 animate-pulse">
               <div 
                 className="bg-[var(--mq-border)] rounded-t-md" 
