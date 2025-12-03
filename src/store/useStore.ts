@@ -24,12 +24,14 @@ interface ExtendedStoreState extends StoreState {
   isAuthenticated: boolean;
   lastUpdated: string;
   selectedSabotadorId: string | null;
+  selectedPerfilBigFiveId: string | null;
   
   // Actions adicionais
   setError: (error: string | null) => void;
   setAuthenticated: (auth: boolean) => void;
   initializeAuth: () => Promise<boolean>;
   openSabotadorDetail: (sabotadorId?: string) => void;
+  openPerfilBigFiveDetail: (tracoId?: string) => void;
   // Full chat detail
   openFullChat: (chatId: string) => Promise<void>;
   closeFullChat: () => void;
@@ -57,6 +59,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   insightDetailLoading: false,
   insightDetailError: null,
   selectedSabotadorId: null,
+  selectedPerfilBigFiveId: null,
   resumoConversas: null,
   resumoConversasLoading: false,
   resumoConversasError: null,
@@ -68,6 +71,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   insightDetailReturnView: null,
   humorHistoricoReturnView: null,
   sabotadorDetailReturnView: null,
+  perfilBigFiveDetailReturnView: null,
   resumoConversasReturnView: null,
   painelQuestsReturnView: null,
   niveisJornadaReturnView: null,
@@ -1098,6 +1102,21 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
       selectedSabotadorId: sabotadorId ?? fallbackId,
       view: 'sabotadorDetail',
       sabotadorDetailReturnView: originView
+    });
+  },
+
+  openPerfilBigFiveDetail: (tracoId) => {
+    if (!tracoId) {
+      console.warn('[openPerfilBigFiveDetail] tracoId não informado');
+      return;
+    }
+
+    const { view } = get();
+    const originView = view === 'perfilBigFiveDetail' ? get().perfilBigFiveDetailReturnView ?? 'dashEmocoes' : view;
+    set({
+      selectedPerfilBigFiveId: tracoId,
+      view: 'perfilBigFiveDetail',
+      perfilBigFiveDetailReturnView: originView
     });
   },
 

@@ -18,6 +18,7 @@ import { useDashboard } from './store/useStore';
 import SabotadorDetailPageV13 from './pages/App/v1.3/SabotadorDetailPageV13';
 import SabotadorAcoesPage from './pages/App/v1.3/SabotadorAcoesPage';
 import SabotadorOcorrenciasPage from './pages/App/v1.3/SabotadorOcorrenciasPage';
+import PerfilBigFiveDetailPageV13 from './pages/App/v1.3/PerfilBigFiveDetailPageV13';
 import PainelQuestsPageV13 from './pages/App/v1.3/PainelQuestsPageV13';
 import InsightsDashboardPageV13 from './pages/App/v1.3/InsightsDashboardPageV13';
 import InsightsHistoricoPageV13 from './pages/App/v1.3/InsightsHistoricoPageV13';
@@ -237,6 +238,9 @@ function App() {
         break;
       case 'sabotadorAcoes':
         page = <SabotadorAcoesPage />;
+        break;
+      case 'perfilBigFiveDetail':
+        page = <PerfilBigFiveDetailPageV13 />;
         break;
       case 'sabotadorOcorrencias':
         page = <SabotadorOcorrenciasPage />;

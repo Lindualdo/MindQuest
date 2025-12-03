@@ -4,12 +4,15 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import EmotionWheel from '@/components/dashboard/EmotionWheel';
-import CardPerfilBigFive from '@/components/dashboard/CardPerfilBigFive';
+import CardPerfilBigFiveRanking from '@/components/app/v1.3/CardPerfilBigFiveRanking';
 import CardHumor from '@/components/app/v1.3/CardHumor';
 import CardEnergia from '@/components/app/v1.3/CardEnergia';
 import CardSabotadoresRanking, { type SabotadorRankingItem, mockSabotadoresRanking } from '@/components/app/v1.3/CardSabotadoresRanking';
 import { useDashboard } from '@/store/useStore';
 import { mockMoodEnergySummary } from '@/data/mockHomeV1_3';
+import { apiService } from '@/services/apiService';
+import { useState, useEffect } from 'react';
+import type { BigFivePerfilData } from '@/types/emotions';
 
 const DashPerfilPage: React.FC = () => {
   const {
@@ -20,6 +23,7 @@ const DashPerfilPage: React.FC = () => {
     loadPanoramaCard,
     openSabotadorDetail,
     openHumorHistorico,
+    openPerfilBigFiveDetail,
   } = useDashboard();
 
   const nomeUsuario =
@@ -30,6 +34,8 @@ const DashPerfilPage: React.FC = () => {
   const userId = dashboardData?.usuario?.id;
 
   const [activeTab, setActiveTab] = useState<TabId>('entender');
+  const [perfilBigFive, setPerfilBigFive] = useState<BigFivePerfilData | null>(null);
+  const [perfilBigFiveLoading, setPerfilBigFiveLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -41,6 +47,26 @@ const DashPerfilPage: React.FC = () => {
     if (!userId || panoramaCard || panoramaCardLoading) return;
     loadPanoramaCard(userId);
   }, [userId, panoramaCard, panoramaCardLoading, loadPanoramaCard]);
+
+  useEffect(() => {
+    if (!userId || perfilBigFive || perfilBigFiveLoading) return;
+    
+    const loadPerfil = async () => {
+      try {
+        setPerfilBigFiveLoading(true);
+        const response = await apiService.getPerfilBigFive(userId);
+        if (response.success && response.perfil) {
+          setPerfilBigFive(response.perfil);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar perfil Big Five:', err);
+      } finally {
+        setPerfilBigFiveLoading(false);
+      }
+    };
+
+    void loadPerfil();
+  }, [userId, perfilBigFive, perfilBigFiveLoading]);
 
   const moodSummary = useMemo(() => {
     if (!panoramaCard) {
@@ -103,6 +129,10 @@ const DashPerfilPage: React.FC = () => {
 
   const handleSabotadorClick = (sabotadorId: string) => {
     openSabotadorDetail(sabotadorId);
+  };
+
+  const handlePerfilBigFiveClick = (tracoId: string) => {
+    openPerfilBigFiveDetail(tracoId);
   };
 
   const handleNavConversar = () => {
@@ -187,13 +217,18 @@ const DashPerfilPage: React.FC = () => {
           <EmotionWheel />
         </motion.div>
 
-        {/* Card Perfil Big Five */}
+        {/* Card Perfil Big Five Ranking */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.21 }}
         >
-          <CardPerfilBigFive />
+          <CardPerfilBigFiveRanking
+            tracos={perfilBigFive?.tracos_ordenados || []}
+            tracoAtualId={null}
+            onBarClick={handlePerfilBigFiveClick}
+            loading={perfilBigFiveLoading}
+          />
         </motion.div>
       </main>
 
