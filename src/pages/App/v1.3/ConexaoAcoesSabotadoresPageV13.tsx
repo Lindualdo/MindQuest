@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Brain, Zap, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Brain, Zap, CheckCircle2, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -24,7 +24,7 @@ interface Sabotador {
 const QUESTS_POR_PAGINA = 3;
 
 const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
-  const { dashboardData, setView } = useDashboard();
+  const { dashboardData, setView, openSabotadorDetail } = useDashboard();
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
@@ -321,9 +321,24 @@ const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
                                       />
                                     </div>
                                     
-                                    <p className={`text-xs text-right ${isConcluida ? 'text-[var(--mq-success)]' : 'text-[var(--mq-text-muted)]'}`}>
-                                      {percentual}% {isConcluida ? '✓' : 'concluído'}
-                                    </p>
+                                    <div className={`flex items-center ${quest === questsAMostrar[questsAMostrar.length - 1] ? 'justify-between' : 'justify-end'}`}>
+                                      <p className={`text-xs ${isConcluida ? 'text-[var(--mq-success)]' : 'text-[var(--mq-text-muted)]'}`}>
+                                        {percentual}% {isConcluida ? '✓' : 'concluído'}
+                                      </p>
+                                      {quest === questsAMostrar[questsAMostrar.length - 1] && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            openSabotadorDetail(sabotador.id);
+                                          }}
+                                          className="ml-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--mq-primary)] hover:underline"
+                                        >
+                                          Saber mais
+                                          <ExternalLink size={12} />
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 );
                               })}

@@ -72,6 +72,9 @@ const SabotadorDetailPageV13: React.FC = () => {
     } else if (returnView === 'dashEmocoes') {
       setView('dashEmocoes');
       setActiveTab('entender');
+    } else if (returnView === 'conexaoAcoesSabotadores') {
+      setView('conexaoAcoesSabotadores');
+      setActiveTab('evoluir');
     } else {
       setView('conversar');
       setActiveTab('conversar');
