@@ -199,10 +199,10 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
                     key={sabotador.sabotador_id} 
                     className="flex-1 flex flex-col items-center"
                   >
-                    <span className={`text-[0.5rem] text-center leading-tight truncate w-full ${
+                    <span className={`text-xs text-center leading-tight break-words w-full px-0.5 ${
                       isMaisAtivo ? 'text-[var(--mq-primary)] font-semibold' : 'text-[var(--mq-text-subtle)]'
                     }`}>
-                      {sabotador.nome.split(' ')[0].substring(0, 8)}
+                      {sabotador.nome}
                     </span>
                   </div>
                 );
