@@ -209,44 +209,76 @@ const QuestDetailPageV13 = () => {
     // Verificar se é quest custom (criada manualmente pelo usuário)
     const isQuestCustom = detail.catalogo?.codigo === 'quest_custom';
 
-    // Para quests recorrentes, verificar se há algum dia não concluído
-    // Isso permite concluir quests de datas passadas mesmo que o status geral seja 'concluida'
-    let temDiaNaoConcluido = false;
+    // REGRA DEFINITIVA: Ocultar botão se a recorrência do dia selecionado já está concluída
     let recorrenciaSelecionadaConcluida = false;
     
     // Data de referência: usar a data selecionada ou a data atual
     const dataReferencia = questDetailSelectedDate || format(new Date(), 'yyyy-MM-dd');
     
+    // Verificar recorrências
     if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
       const dias = (detail.recorrencias as any).dias;
-      if (Array.isArray(dias)) {
-        temDiaNaoConcluido = dias.some((dia: any) => dia.status !== 'concluida' && dia.status !== 'perdida');
-        
-        // Verificar se a recorrência da data de referência já está concluída
+      if (Array.isArray(dias) && dias.length > 0) {
+        // Buscar recorrência da data de referência
         const recorrenciaSelecionada = dias.find((dia: any) => {
-          const dataDia = dia.data ? format(new Date(dia.data), 'yyyy-MM-dd') : null;
-          return dataDia === dataReferencia;
+          if (!dia.data) return false;
+          // Normalizar data: pode vir como string ISO ou Date
+          let dataDia: string;
+          try {
+            if (typeof dia.data === 'string') {
+              // Se já é string no formato yyyy-MM-dd, usar direto
+              if (/^\d{4}-\d{2}-\d{2}$/.test(dia.data)) {
+                dataDia = dia.data;
+              } else {
+                // Tentar parsear como ISO
+                dataDia = format(new Date(dia.data), 'yyyy-MM-dd');
+              }
+            } else {
+              dataDia = format(new Date(dia.data), 'yyyy-MM-dd');
+            }
+            return dataDia === dataReferencia;
+          } catch {
+            return false;
+          }
         });
         
         if (recorrenciaSelecionada) {
-          // Se a recorrência está concluída ou perdida, não deve mostrar o botão
+          // Se a recorrência está concluída ou perdida, NÃO mostrar botão
           recorrenciaSelecionadaConcluida = recorrenciaSelecionada.status === 'concluida' || recorrenciaSelecionada.status === 'perdida';
+          
+          console.log('[QuestDetail] ✅ Recorrência encontrada:', {
+            dataReferencia,
+            recorrenciaData: recorrenciaSelecionada.data,
+            recorrenciaStatus: recorrenciaSelecionada.status,
+            recorrenciaSelecionadaConcluida,
+            deveOcultarBotao: recorrenciaSelecionadaConcluida
+          });
+        } else {
+          console.warn('[QuestDetail] ⚠️ Recorrência NÃO encontrada para data:', {
+            dataReferencia,
+            diasDisponiveis: dias.map((d: any) => ({ data: d.data, status: d.status }))
+          });
         }
       }
     }
 
-    // Permitir concluir quests que não estejam já concluídas e não sejam de conversa
-    // - Quests em status "disponivel" (a fazer) podem ser concluídas diretamente sem planejamento prévio
-    // - O sistema cria automaticamente o registro em quests_recorrencias quando a quest é concluída
-    // - Isso é especialmente útil para quests de execução única (sem recorrência)
-    // - Para quests recorrentes, também permitir se houver algum dia não concluído
-    // - Permite concluir quests de datas passadas que o usuário esqueceu de marcar
-    // - Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
-    // - NÃO mostrar botão se a recorrência da data de referência já está concluída/perdida
+    // REGRA SIMPLIFICADA: Mostrar botão APENAS se:
+    // 1. Não é quest de conversa
+    // 2. Tem status válido
+    // 3. A recorrência do dia selecionado NÃO está concluída/perdida
     const podeConcluir = !isConversaQuest && 
       detail.status && 
-      (detail.status !== 'concluida' || temDiaNaoConcluido) &&
       !recorrenciaSelecionadaConcluida;
+    
+    console.log('[QuestDetail] 🔍 Decisão final botão:', {
+      isConversaQuest,
+      status: detail.status,
+      recorrenciaSelecionadaConcluida,
+      temRecorrencias: !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias),
+      dataReferencia,
+      podeConcluir,
+      resultado: podeConcluir ? '✅ MOSTRAR BOTÃO' : '❌ OCULTAR BOTÃO'
+    });
     
     // Priorizar base_cientifica personalizada do config (gerada pelo agente)
     // Fallback para o catálogo se não existir
