@@ -767,6 +767,7 @@ export type ViewId =
   | 'sabotadorDetail'
   | 'sabotadorAcoes'
   | 'sabotadorOcorrencias'
+  | 'perfilBigFiveDetail'
   | 'resumoConversas'
   | 'conversaResumo'
   | 'panasDetail'
@@ -818,6 +819,7 @@ export interface StoreState {
   insightDetailReturnView: ViewId | null;
   humorHistoricoReturnView: ViewId | null;
   sabotadorDetailReturnView: ViewId | null;
+  perfilBigFiveDetailReturnView: ViewId | null;
   resumoConversasReturnView: ViewId | null;
   painelQuestsReturnView: ViewId | null;
   niveisJornadaReturnView: ViewId | null;
