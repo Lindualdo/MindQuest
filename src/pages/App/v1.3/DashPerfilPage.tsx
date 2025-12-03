@@ -7,14 +7,13 @@ import EmotionWheel from '@/components/dashboard/EmotionWheel';
 import CardPerfilBigFive from '@/components/dashboard/CardPerfilBigFive';
 import CardHumor from '@/components/app/v1.3/CardHumor';
 import CardEnergia from '@/components/app/v1.3/CardEnergia';
-import CardSabotadorMente from '@/components/app/v1.3/CardSabotadorMente';
+import CardSabotadoresRanking, { type SabotadorRankingItem } from '@/components/app/v1.3/CardSabotadoresRanking';
 import { useDashboard } from '@/store/useStore';
 import { mockMoodEnergySummary } from '@/data/mockHomeV1_3';
 
 const DashPerfilPage: React.FC = () => {
   const {
     dashboardData,
-    view,
     setView,
     panoramaCard,
     panoramaCardLoading,
@@ -79,31 +78,76 @@ const DashPerfilPage: React.FC = () => {
     };
   }, [panoramaCard]);
 
-  const sabotadorAtivo = panoramaCard?.sabotador ?? dashboardData?.sabotadores?.padrao_principal ?? null;
-  const sabotadorNome =
-    sabotadorAtivo?.nome ??
-    (sabotadorAtivo && 'apelido' in sabotadorAtivo ? sabotadorAtivo.apelido : null) ??
-    dashboardData?.sabotadores?.padrao_principal?.apelido ??
-    dashboardData?.sabotadores?.padrao_principal?.nome ??
-    null;
-  const sabotadorEmoji =
-    sabotadorAtivo?.emoji ?? dashboardData?.sabotadores?.padrao_principal?.emoji ?? null;
-  const sabotadorDescricao =
-    (sabotadorAtivo && 'contexto' in sabotadorAtivo ? sabotadorAtivo.contexto : null) ??
-    (sabotadorAtivo && 'insight' in sabotadorAtivo ? sabotadorAtivo.insight : null) ??
-    (sabotadorAtivo && 'contexto_principal' in sabotadorAtivo ? sabotadorAtivo.contexto_principal : null) ??
-    (sabotadorAtivo && 'insight_contexto' in sabotadorAtivo ? sabotadorAtivo.insight_contexto : null) ??
-    dashboardData?.sabotadores?.padrao_principal?.contexto_principal ??
-    dashboardData?.sabotadores?.padrao_principal?.insight_contexto ??
-    null;
-
-  const handleVerSabotador = () => {
-    const id = sabotadorAtivo?.id ?? null;
-    if (id) {
-      openSabotadorDetail(id);
-    } else {
-      openSabotadorDetail();
+  // Dados de sabotadores para o ranking
+  // TODO: Integrar com API real quando disponível
+  const sabotadoresRanking = useMemo((): SabotadorRankingItem[] => {
+    const sabotadorPanorama = panoramaCard?.sabotador;
+    const sabotadorDash = dashboardData?.sabotadores?.padrao_principal;
+    
+    const sabotadorId = sabotadorPanorama?.id ?? sabotadorDash?.id ?? null;
+    if (!sabotadorId) {
+      return [];
     }
+
+    // Extrair valores com verificação de tipo
+    const totalDeteccoes = 
+      (sabotadorPanorama && 'total_deteccoes' in sabotadorPanorama ? Number(sabotadorPanorama.total_deteccoes) : null) ??
+      (sabotadorDash && 'total_deteccoes' in sabotadorDash ? Number(sabotadorDash.total_deteccoes) : null) ??
+      15;
+    
+    const intensidadeMedia = 
+      (sabotadorPanorama && 'intensidade_media' in sabotadorPanorama ? Number(sabotadorPanorama.intensidade_media) : null) ??
+      (sabotadorDash && 'intensidade_media' in sabotadorDash ? Number(sabotadorDash.intensidade_media) : null) ??
+      68;
+
+    const insightAtual = 
+      (sabotadorPanorama && 'insight' in sabotadorPanorama ? String(sabotadorPanorama.insight ?? '') : null) ??
+      (sabotadorDash && 'insight_atual' in sabotadorDash ? String(sabotadorDash.insight_atual ?? '') : null) ??
+      null;
+
+    const contramedida = 
+      (sabotadorPanorama && 'contramedida' in sabotadorPanorama ? String(sabotadorPanorama.contramedida ?? '') : null) ??
+      (sabotadorDash && 'contramedida_ativa' in sabotadorDash ? String(sabotadorDash.contramedida_ativa ?? '') : null) ??
+      null;
+
+    const contexto = 
+      (sabotadorPanorama && 'contexto' in sabotadorPanorama ? String(sabotadorPanorama.contexto ?? '') : null) ??
+      (sabotadorDash && 'contexto_principal' in sabotadorDash ? String(sabotadorDash.contexto_principal ?? '') : null) ??
+      null;
+
+    // Construir lista com sabotador principal + mock de outros detectados
+    // Quando a API estiver disponível, substituir por dados reais
+    const principal: SabotadorRankingItem = {
+      sabotador_id: sabotadorId,
+      total_deteccoes: totalDeteccoes || 15,
+      intensidade_media: intensidadeMedia || 68,
+      insight_atual: insightAtual || null,
+      contramedida_ativa: contramedida || null,
+      contexto_principal: contexto || null,
+    };
+
+    // Mock de sabotadores secundários para visualização
+    // Remover quando integrar com API real
+    const mockSecundarios: SabotadorRankingItem[] = [
+      {
+        sabotador_id: 'inquieto',
+        total_deteccoes: 12,
+        intensidade_media: 55,
+      },
+      {
+        sabotador_id: 'hipervigilante',
+        total_deteccoes: 8,
+        intensidade_media: 62,
+      },
+    ].filter(s => s.sabotador_id !== sabotadorId);
+
+    return [principal, ...mockSecundarios];
+  }, [panoramaCard, dashboardData]);
+
+  const sabotadorAtualId = panoramaCard?.sabotador?.id ?? dashboardData?.sabotadores?.padrao_principal?.id ?? null;
+
+  const handleSabotadorClick = (sabotadorId: string) => {
+    openSabotadorDetail(sabotadorId);
   };
 
   const handleNavConversar = () => {
@@ -174,18 +218,17 @@ const DashPerfilPage: React.FC = () => {
           <EmotionWheel />
         </motion.div>
 
-        {/* Card Sabotador */}
+        {/* Card Ranking de Sabotadores */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.17 }}
         >
-          <CardSabotadorMente
-            sabotadorId={sabotadorAtivo?.id ?? null}
-            nome={sabotadorNome}
-            emoji={sabotadorEmoji}
-            descricao={sabotadorDescricao}
-            onSaberMais={sabotadorNome ? handleVerSabotador : undefined}
+          <CardSabotadoresRanking
+            sabotadores={sabotadoresRanking}
+            sabotadorAtualId={sabotadorAtualId}
+            onBarClick={handleSabotadorClick}
+            loading={panoramaCardLoading}
           />
         </motion.div>
 
