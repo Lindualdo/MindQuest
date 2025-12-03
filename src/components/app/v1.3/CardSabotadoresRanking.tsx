@@ -20,14 +20,27 @@ type Props = {
   loading?: boolean;
 };
 
+// Mock com todos os 9 sabotadores para visualização (exported)
+const mockSabotadoresRanking: SabotadorRankingItem[] = [
+  { sabotador_id: 'hiper_realizador', total_deteccoes: 16, intensidade_media: 70 },
+  { sabotador_id: 'inquieto', total_deteccoes: 25, intensidade_media: 65 },
+  { sabotador_id: 'hipervigilante', total_deteccoes: 10, intensidade_media: 62 },
+  { sabotador_id: 'critico', total_deteccoes: 8, intensidade_media: 55 },
+  { sabotador_id: 'controlador', total_deteccoes: 5, intensidade_media: 50 },
+  { sabotador_id: 'insistente', total_deteccoes: 4, intensidade_media: 45 },
+  { sabotador_id: 'prestativo', total_deteccoes: 3, intensidade_media: 40 },
+  { sabotador_id: 'vitima', total_deteccoes: 2, intensidade_media: 35 },
+  { sabotador_id: 'esquivo', total_deteccoes: 1, intensidade_media: 30 },
+];
+
 const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loading }: Props) => {
   const [showInfo, setShowInfo] = useState(false);
 
   // Calcular score e ordenar do maior para menor
   const sabotadoresRankeados = useMemo(() => {
-    if (!sabotadores || sabotadores.length === 0) return [];
+    const dados = sabotadores.length > 0 ? sabotadores : mockSabotadoresRanking;
 
-    return sabotadores
+    return dados
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
         const score = s.total_deteccoes * s.intensidade_media;
@@ -50,28 +63,6 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
 
   // Determinar qual é o mais ativo (primeiro da lista ordenada)
   const maisAtivoId = sabotadoresRankeados[0]?.sabotador_id || null;
-
-  // Mensagem quando não há dados
-  if (!loading && sabotadoresRankeados.length === 0) {
-    return (
-      <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex flex-col">
-            <h3 className="text-lg font-bold text-[var(--mq-text)]">Sabotadores detectados</h3>
-            <p className="mq-eyebrow mt-0.5">Padrões mentais identificados</p>
-          </div>
-        </div>
-        <div className="mt-3 rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-6 text-center">
-          <p className="text-sm text-[var(--mq-text-muted)]">
-            Nenhum sabotador detectado ainda.
-          </p>
-          <p className="mt-2 text-xs text-[var(--mq-text-subtle)]">
-            Continue conversando para identificar seus padrões mentais.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
@@ -108,103 +99,115 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
 
       {/* Loading state */}
       {loading && (
-        <div className="mt-3 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-4 bg-[var(--mq-border)] rounded w-24 mb-2" />
-              <div className="h-8 bg-[var(--mq-border)] rounded" />
+        <div className="mt-3 flex items-end justify-between gap-2 h-40">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+            <div key={i} className="flex-1 animate-pulse">
+              <div 
+                className="bg-[var(--mq-border)] rounded-t-md" 
+                style={{ height: `${20 + Math.random() * 80}%` }}
+              />
             </div>
           ))}
         </div>
       )}
 
-      {/* Gráfico de barras */}
+      {/* Gráfico de Barras Vertical */}
       {!loading && (
-        <div className="mt-3 space-y-3">
-          {sabotadoresRankeados.map((sabotador, index) => {
-            const isMaisAtivo = sabotador.sabotador_id === maisAtivoId;
-            const isAtual = sabotador.sabotador_id === sabotadorAtualId;
-            const barWidth = Math.max(10, (sabotador.score / maxScore) * 100);
+        <div className="mt-4">
+          {/* Barras */}
+          <div className="flex items-end justify-between gap-1.5 h-36 px-1">
+            {sabotadoresRankeados.map((sabotador, index) => {
+              const isMaisAtivo = sabotador.sabotador_id === maisAtivoId;
+              const isAtual = sabotador.sabotador_id === sabotadorAtualId;
+              const barHeight = Math.max(8, (sabotador.score / maxScore) * 100);
 
-            return (
-              <motion.div
-                key={sabotador.sabotador_id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="group"
-              >
-                {/* Label com emoji e nome */}
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{sabotador.emoji}</span>
-                    <span 
-                      className={`text-xs font-medium ${
-                        isMaisAtivo 
-                          ? 'text-[var(--mq-primary)] font-semibold' 
-                          : 'text-[var(--mq-text)]'
-                      }`}
-                    >
-                      {sabotador.nome}
-                    </span>
-                    {isMaisAtivo && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[var(--mq-primary)] text-white text-[0.6rem] font-bold uppercase">
-                        <TrendingUp size={10} />
-                        Mais ativo
-                      </span>
-                    )}
-                    {isAtual && !isMaisAtivo && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[var(--mq-accent)] text-white text-[0.6rem] font-bold uppercase">
-                        Atual
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[0.65rem] text-[var(--mq-text-muted)]">
-                    {sabotador.total_deteccoes}x · {Math.round(sabotador.intensidade_media)}%
-                  </span>
-                </div>
-
-                {/* Barra clicável */}
-                <button
+              return (
+                <motion.button
+                  key={sabotador.sabotador_id}
                   type="button"
                   onClick={() => onBarClick?.(sabotador.sabotador_id)}
-                  className="w-full h-9 rounded-xl bg-[var(--mq-bar)] overflow-hidden relative cursor-pointer group-hover:ring-2 group-hover:ring-[var(--mq-primary)] group-hover:ring-opacity-30 transition-all"
-                  aria-label={`Ver detalhes de ${sabotador.nome}`}
+                  className={`flex-1 flex flex-col items-center justify-end cursor-pointer group relative ${
+                    isMaisAtivo ? 'z-10' : ''
+                  }`}
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ delay: index * 0.05, duration: 0.4, ease: 'easeOut' }}
+                  style={{ transformOrigin: 'bottom' }}
+                  aria-label={`${sabotador.nome}: ${Math.round(sabotador.score)} pontos`}
                 >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${barWidth}%` }}
-                    transition={{ duration: 0.6, delay: index * 0.08, ease: 'easeOut' }}
-                    className={`absolute inset-y-0 left-0 rounded-xl ${
-                      isMaisAtivo
-                        ? 'bg-gradient-to-r from-[var(--mq-primary)] to-[var(--mq-accent)]'
-                        : 'bg-[var(--mq-primary)]'
-                    } ${isMaisAtivo ? 'opacity-100' : 'opacity-70'}`}
-                  />
-                  {/* Score dentro da barra */}
-                  <span 
-                    className={`absolute inset-y-0 left-3 flex items-center text-xs font-bold ${
-                      barWidth > 25 ? 'text-white' : 'text-[var(--mq-text)]'
-                    }`}
-                  >
+                  {/* Indicador mais ativo */}
+                  {isMaisAtivo && (
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                      <TrendingUp size={14} className="text-[var(--mq-primary)]" />
+                    </div>
+                  )}
+                  
+                  {/* Score no topo */}
+                  <span className={`text-[0.6rem] font-semibold mb-1 ${
+                    isMaisAtivo ? 'text-[var(--mq-primary)]' : 'text-[var(--mq-text-muted)]'
+                  }`}>
                     {Math.round(sabotador.score)}
                   </span>
-                </button>
-              </motion.div>
-            );
-          })}
+                  
+                  {/* Barra */}
+                  <div
+                    className={`w-full rounded-t-md transition-all duration-200 ${
+                      isMaisAtivo 
+                        ? 'bg-[var(--mq-primary)] group-hover:bg-[var(--mq-accent)]' 
+                        : isAtual
+                          ? 'bg-[var(--mq-accent)] group-hover:bg-[var(--mq-primary)]'
+                          : 'bg-[var(--mq-bar)] group-hover:bg-[var(--mq-primary)] group-hover:opacity-80'
+                    }`}
+                    style={{ height: `${barHeight}%`, minHeight: 8 }}
+                  />
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Labels com emoji abaixo das barras */}
+          <div className="flex justify-between gap-1.5 mt-2 px-1">
+            {sabotadoresRankeados.map((sabotador) => {
+              const isMaisAtivo = sabotador.sabotador_id === maisAtivoId;
+              return (
+                <div 
+                  key={sabotador.sabotador_id} 
+                  className="flex-1 flex flex-col items-center"
+                >
+                  <span className="text-sm">{sabotador.emoji}</span>
+                  <span className={`text-[0.5rem] text-center leading-tight mt-0.5 ${
+                    isMaisAtivo ? 'text-[var(--mq-primary)] font-semibold' : 'text-[var(--mq-text-subtle)]'
+                  }`}>
+                    {sabotador.nome.split(' ')[0]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legenda */}
+          <div className="flex items-center justify-center gap-4 mt-4 text-[0.65rem] text-[var(--mq-text-muted)]">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm bg-[var(--mq-primary)]" />
+              <span>Mais ativo</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm bg-[var(--mq-bar)]" />
+              <span>Detectado</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Instrução para clicar */}
-      {!loading && sabotadoresRankeados.length > 0 && onBarClick && (
+      {!loading && onBarClick && (
         <p className="mt-4 text-center text-[0.7rem] text-[var(--mq-text-subtle)] italic">
-          Clique na barra para saber mais sobre cada sabotador...
+          Clique na barra para saber mais...
         </p>
       )}
     </section>
   );
 };
 
+export { mockSabotadoresRanking };
 export default CardSabotadoresRanking;
-

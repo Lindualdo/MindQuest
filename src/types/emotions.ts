@@ -428,6 +428,17 @@ export interface PanoramaCardSabotador {
   conversas_afetadas?: number | string | null;
 }
 
+export interface PanoramaSabotadorRanking {
+  sabotador_id: string;
+  nome: string;
+  emoji: string;
+  total_deteccoes: number;
+  intensidade_media: number;
+  insight_atual: string | null;
+  contramedida_ativa: string | null;
+  contexto_principal: string | null;
+}
+
 export interface PanoramaCardData {
   humor: {
     media_7d: number | null;
@@ -447,6 +458,7 @@ export interface PanoramaCardData {
   };
   emocoes_dominantes: PanoramaCardEmotion[];
   sabotador: PanoramaCardSabotador | null;
+  sabotadores_todos?: PanoramaSabotadorRanking[];
 }
 
 export interface PanoramaCardResponse {
