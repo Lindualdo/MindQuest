@@ -79,38 +79,18 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
   return (
     <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
       {/* Header */}
-      <div className="mb-4">
-        <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between mb-6">
+        <div>
           <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
-          <button
-            type="button"
-            onClick={() => setShowInfo(!showInfo)}
-            className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
-          >
-            <Info size={16} />
-          </button>
+          <p className="mq-eyebrow mt-1">Entenda como te sabotam</p>
         </div>
-        
-        {/* Fluxo visual: Pensamentos → Emoções → Ações */}
-        <div className="flex items-center gap-2 mt-2 text-sm">
-          <span className="flex items-center gap-1">
-            <span>🧠</span>
-            <span className="text-[var(--mq-text-muted)]">Pensamentos</span>
-          </span>
-          <span className="text-[var(--mq-text-subtle)]">→</span>
-          <span className="flex items-center gap-1">
-            <span>💭</span>
-            <span className="text-[var(--mq-text-muted)]">Emoções</span>
-          </span>
-          <span className="text-[var(--mq-text-subtle)]">→</span>
-          <span className="flex items-center gap-1">
-            <span>⚡</span>
-            <span className="text-[var(--mq-text-muted)]">Ações</span>
-          </span>
-        </div>
-
-        {/* CTA */}
-        <p className="mq-eyebrow mt-3">Entenda como seus pensamentos te sabotam</p>
+        <button
+          type="button"
+          onClick={() => setShowInfo(!showInfo)}
+          className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
+        >
+          <Info size={16} />
+        </button>
       </div>
 
       {/* Info expandível */}
@@ -252,11 +232,18 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
         </div>
       )}
 
-      {/* Instrução para clicar */}
-      {!loading && onBarClick && (
-        <p className="mt-4 text-center text-sm font-semibold text-[var(--mq-primary)]">
-          Toque na barra para saber mais...
-        </p>
+      {/* Frase conceitual e instrução */}
+      {!loading && (
+        <div className="mt-6 text-center">
+          <p className="text-xs text-[var(--mq-text-muted)] mb-2">
+            Pensamentos geram emoções que movem as ações
+          </p>
+          {onBarClick && (
+            <p className="text-sm font-semibold text-[var(--mq-primary)]">
+              Toque na barra para saber mais...
+            </p>
+          )}
+        </div>
       )}
     </section>
   );
