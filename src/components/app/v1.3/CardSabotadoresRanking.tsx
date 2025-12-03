@@ -106,6 +106,11 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
             O gráfico mostra quantas vezes cada sabotador foi detectado nas suas conversas. 
             Quanto maior a barra, mais frequente é esse padrão de pensamento.
           </p>
+          <p className="mt-2">
+            O ranking considera tanto a <strong>frequência</strong> (quantas vezes foi detectado) 
+            quanto a <strong>intensidade média</strong> de cada sabotador. 
+            Quanto maior a combinação dessas duas métricas, maior o impacto no seu bem-estar.
+          </p>
         </motion.div>
       )}
 
@@ -154,22 +159,38 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
                   const isMaisAtivo = sabotador.sabotador_id === maisAtivoId;
                   const isAtual = sabotador.sabotador_id === sabotadorAtualId;
                   const barHeight = Math.max(4, (sabotador.total_deteccoes / maxDeteccoes) * 100);
+                  const scoreImpacto = sabotador.score ?? (sabotador.total_deteccoes * sabotador.intensidade_media);
 
                   return (
                     <motion.button
                       key={sabotador.sabotador_id}
                       type="button"
                       onClick={() => onBarClick?.(sabotador.sabotador_id)}
-                      className={`flex-1 cursor-pointer group`}
+                      className={`flex-1 cursor-pointer group relative`}
                       initial={{ scaleY: 0 }}
                       animate={{ scaleY: 1 }}
                       transition={{ delay: index * 0.05, duration: 0.4, ease: 'easeOut' }}
                       style={{ transformOrigin: 'bottom', height: '100%' }}
                       aria-label={`${sabotador.nome}: ${sabotador.total_deteccoes} detecções`}
                     >
-                      <div className="h-full flex items-end justify-center">
+                      <div className="h-full flex items-end justify-center relative">
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-20">
+                          <div className="bg-[var(--mq-text)] text-[var(--mq-bg)] rounded-lg px-3 py-2 text-xs shadow-lg whitespace-nowrap">
+                            <div className="font-semibold mb-1">{sabotador.nome}</div>
+                            <div className="space-y-0.5">
+                              <div>Detecções: <strong>{sabotador.total_deteccoes}</strong></div>
+                              <div>Intensidade: <strong>{sabotador.intensidade_media.toFixed(1)}%</strong></div>
+                              <div className="border-t border-[var(--mq-bg)] border-opacity-20 pt-0.5 mt-0.5">
+                                Score: <strong>{scoreImpacto.toFixed(0)}</strong>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[var(--mq-text)]" />
+                          </div>
+                        </div>
+
                         <div
-                          className={`w-full max-w-[28px] rounded-t-md transition-all duration-200 ${
+                          className={`w-full max-w-[28px] rounded-t-md transition-all duration-200 relative ${
                             isMaisAtivo 
                               ? 'bg-[var(--mq-primary)] group-hover:brightness-110' 
                               : isAtual
