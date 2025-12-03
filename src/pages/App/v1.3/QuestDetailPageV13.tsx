@@ -290,32 +290,25 @@ const QuestDetailPageV13 = () => {
       console.log('[QuestDetail] ℹ️ Quest sem recorrências ou estrutura inválida');
     }
 
-    // REGRA DEFINITIVA SIMPLIFICADA:
-    // Ocultar botão se:
-    // 1. É quest de conversa OU
-    // 2. Recorrência do dia selecionado está concluída/perdida OU
-    // 3. Quest está finalizada (concluida/inativa) e não tem recorrências ativas
+    // REGRA: Ocultar botão se:
+    // 1. É quest de conversa (concluída automaticamente)
+    // 2. Recorrência do dia selecionado já está concluída/perdida
+    // 3. Quest não-recorrente finalizada
     
     const questFinalizada = detail.status === 'concluida' || detail.status === 'inativa';
     const temRecorrencias = !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias);
     
-    // Se encontrou recorrência e está concluída → ocultar
-    // Se quest está finalizada e não tem recorrências → ocultar
-    // Se quest está finalizada, tem recorrências mas não encontrou a específica → ocultar (por segurança, quest já finalizada)
-    const deveOcultar = recorrenciaSelecionadaConcluida || 
-                       (questFinalizada && !temRecorrencias) ||
-                       (questFinalizada && temRecorrencias && !recorrenciaSelecionadaConcluida);
+    const deveOcultar = recorrenciaSelecionadaConcluida || (questFinalizada && !temRecorrencias);
     
     const podeConcluir = !isConversaQuest && detail.status && !deveOcultar;
     
-    console.log('[QuestDetail] 🔍 Decisão final botão:', {
-      isConversaQuest,
-      status: detail.status,
-      recorrenciaSelecionadaConcluida,
-      temRecorrencias: !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias),
+    console.log('[QuestDetail] 🔍 Decisão botão:', {
       dataReferencia,
+      recorrenciaSelecionadaConcluida,
+      questFinalizada,
+      temRecorrencias,
+      deveOcultar,
       podeConcluir,
-      resultado: podeConcluir ? '✅ MOSTRAR BOTÃO' : '❌ OCULTAR BOTÃO'
     });
     
     // Priorizar base_cientifica personalizada do config (gerada pelo agente)
