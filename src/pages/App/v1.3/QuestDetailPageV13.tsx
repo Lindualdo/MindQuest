@@ -263,12 +263,14 @@ const QuestDetailPageV13 = () => {
         
         if (recorrenciaSelecionada) {
           // Se a recorrência está concluída ou perdida, NÃO mostrar botão
-          recorrenciaSelecionadaConcluida = recorrenciaSelecionada.status === 'concluida' || recorrenciaSelecionada.status === 'perdida';
+          const statusNormalizado = String(recorrenciaSelecionada.status || '').toLowerCase().trim();
+          recorrenciaSelecionadaConcluida = statusNormalizado === 'concluida' || statusNormalizado === 'perdida';
           
           console.log('[QuestDetail] ✅ Recorrência encontrada:', {
             dataReferencia,
             recorrenciaData: recorrenciaSelecionada.data,
             recorrenciaStatus: recorrenciaSelecionada.status,
+            statusNormalizado,
             recorrenciaSelecionadaConcluida,
             deveOcultarBotao: recorrenciaSelecionadaConcluida
           });
@@ -293,18 +295,14 @@ const QuestDetailPageV13 = () => {
     // REGRA: Ocultar botão se:
     // 1. É quest de conversa (concluída automaticamente)
     // 2. Recorrência do dia selecionado já está concluída/perdida
-    // 3. Quest está finalizada (status global)
     
-    const questFinalizada = detail.status === 'concluida' || detail.status === 'inativa';
-    
-    const deveOcultar = recorrenciaSelecionadaConcluida || questFinalizada;
+    const deveOcultar = recorrenciaSelecionadaConcluida;
     
     const podeConcluir = !isConversaQuest && detail.status && !deveOcultar;
     
     console.log('[QuestDetail] 🔍 Decisão botão:', {
-      status: detail.status,
+      dataReferencia,
       recorrenciaSelecionadaConcluida,
-      questFinalizada,
       deveOcultar,
       podeConcluir,
     });
