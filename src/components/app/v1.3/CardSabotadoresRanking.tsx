@@ -45,7 +45,8 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
         const nomeOriginal = catalogEntry?.nome || s.sabotador_id;
-        const score = s.total_deteccoes * s.intensidade_media;
+        // Usar score_impacto da API se disponível, senão calcular localmente
+        const score = (s as any).score_impacto ?? (s.total_deteccoes * s.intensidade_media);
         return {
           ...s,
           score,
@@ -54,7 +55,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
           resumo: catalogEntry?.resumo || '',
         };
       })
-      .sort((a, b) => b.total_deteccoes - a.total_deteccoes)
+      .sort((a, b) => b.score - a.score) // Ordenar por score (frequência × intensidade)
       .slice(0, 5); // Top 5 apenas
   }, [sabotadores]);
 

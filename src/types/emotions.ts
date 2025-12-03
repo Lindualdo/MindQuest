@@ -434,6 +434,7 @@ export interface PanoramaSabotadorRanking {
   emoji: string;
   total_deteccoes: number;
   intensidade_media: number;
+  score_impacto?: number; // Métrica combinada: frequência × intensidade
   insight_atual: string | null;
   contramedida_ativa: string | null;
   contexto_principal: string | null;
