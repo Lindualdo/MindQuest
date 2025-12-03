@@ -39,6 +39,7 @@ import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
 import { authService } from './services/authService';
 import { ThemeProvider } from './components/app/v1.3/ThemeProvider';
+import { registerPushToken } from './utils/pushNotifications';
 
 declare global {
   interface Window {
@@ -115,7 +116,9 @@ function App() {
     refreshData, 
     isLoading, 
     error,
-    view
+    view,
+    dashboardData,
+    isAuthenticated
   } = useDashboard();
 
   const handleRefresh = async () => {
@@ -148,6 +151,26 @@ function App() {
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [view]);
+
+  // Registrar push notifications quando usuário estiver autenticado
+  useEffect(() => {
+    if (!isAppRoute) return;
+    if (!isAuthenticated) return;
+    if (!dashboardData?.usuario?.id) return;
+    if (typeof window === 'undefined') return;
+    if (!('serviceWorker' in navigator)) return;
+
+    const userId = dashboardData.usuario.id;
+    
+    // Aguardar um pouco para garantir que o app está carregado
+    const timer = setTimeout(() => {
+      registerPushToken(userId).catch((error) => {
+        console.error('[App] Erro ao registrar push token:', error);
+      });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [isAppRoute, isAuthenticated, dashboardData?.usuario?.id]);
 
   if (isLandingRoute) {
     return <ComecarAgoraLandingPage />;
