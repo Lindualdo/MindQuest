@@ -9,7 +9,7 @@
 
 ## Atualização (2025-12-03)
 
-### O que mudou
+### Priorização de sabotador e informações para criação de quests
 
 1. **Priorização do Sabotador Atual:**
    - Se o sabotador atual está no top 3 → usa informações do **atual** (não do top 1 histórico)
@@ -22,21 +22,11 @@
    - **SEMPRE** usar insight/contramedida da conversa mais recente (não dados agregados)
    - Query: `DISTINCT ON (sabotador_id) ORDER BY criado_em DESC`
 
-4. **Validação de catalogo_id:**
-   - Pré-selecionar `catalogo_id` válido do `quests_catalogo` antes de enviar ao Agente
+4. **sabotador_id:**
+   - Sabotador id é um campo do tipo text minusculo
+   - já eviar ao agente de quest o `sabotador_id` correto, o mesmo usado para agrupar e encontrar os top 3
    - Forçar uso do ID pré-selecionado no nó "Aplicar Limites & Dedupe"
-   - Registrar `sabotador_id` em `usuarios_quest`
-
-### Decisões Técnicas
-
-- **Agente:** O agente de quests adapta quests do catálogo, enriquecendo com contexto
-- **Fonte de Insight:** `usuarios_sabotadores` (contexto da conversa mais recente)
-- **catalogo_id:** Pré-selecionar e forçar uso no "Aplicar Limites & Dedupe"
-
-### Pendências
-
-1. Corrigir validação de `catalogo_id` para garantir uso do ID pré-selecionado
-2. Analisar erro de FK na execução 143034
+   - Garantir que o workflows xp_quests grave o `sabotador_id`correto em `usuarios_quest`
 
 ---
 
