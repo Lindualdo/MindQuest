@@ -236,7 +236,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {!loading && (
         <div className="mt-6 text-center">
           <p className="text-xs text-[var(--mq-text-muted)] mb-2">
-            Pensamentos geram emoções que movem as ações
+            Pensamentos geram emoções que movem suas ações
           </p>
           {onBarClick && (
             <p className="text-sm font-semibold text-[var(--mq-primary)]">
