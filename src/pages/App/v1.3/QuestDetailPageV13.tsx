@@ -214,17 +214,23 @@ const QuestDetailPageV13 = () => {
     let temDiaNaoConcluido = false;
     let recorrenciaSelecionadaConcluida = false;
     
+    // Data de referência: usar a data selecionada ou a data atual
+    const dataReferencia = questDetailSelectedDate || format(new Date(), 'yyyy-MM-dd');
+    
     if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
       const dias = (detail.recorrencias as any).dias;
       if (Array.isArray(dias)) {
-        temDiaNaoConcluido = dias.some((dia: any) => dia.status !== 'concluida');
+        temDiaNaoConcluido = dias.some((dia: any) => dia.status !== 'concluida' && dia.status !== 'perdida');
         
-        // Se há data selecionada, verificar se essa recorrência específica já está concluída
-        if (questDetailSelectedDate) {
-          const recorrenciaSelecionada = dias.find((dia: any) => dia.data === questDetailSelectedDate);
-          if (recorrenciaSelecionada) {
-            recorrenciaSelecionadaConcluida = recorrenciaSelecionada.status === 'concluida';
-          }
+        // Verificar se a recorrência da data de referência já está concluída
+        const recorrenciaSelecionada = dias.find((dia: any) => {
+          const dataDia = dia.data ? format(new Date(dia.data), 'yyyy-MM-dd') : null;
+          return dataDia === dataReferencia;
+        });
+        
+        if (recorrenciaSelecionada) {
+          // Se a recorrência está concluída ou perdida, não deve mostrar o botão
+          recorrenciaSelecionadaConcluida = recorrenciaSelecionada.status === 'concluida' || recorrenciaSelecionada.status === 'perdida';
         }
       }
     }
@@ -236,7 +242,7 @@ const QuestDetailPageV13 = () => {
     // - Para quests recorrentes, também permitir se houver algum dia não concluído
     // - Permite concluir quests de datas passadas que o usuário esqueceu de marcar
     // - Inclui quests vencidas ou canceladas (usuário pode marcar como concluída retroativamente)
-    // - NÃO mostrar botão se a recorrência selecionada já está concluída
+    // - NÃO mostrar botão se a recorrência da data de referência já está concluída/perdida
     const podeConcluir = !isConversaQuest && 
       detail.status && 
       (detail.status !== 'concluida' || temDiaNaoConcluido) &&
