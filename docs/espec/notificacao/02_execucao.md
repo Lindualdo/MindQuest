@@ -1,7 +1,7 @@
 # Notificações - Fase 2: Execução
 
 **Data:** 2025-12-03
-**Última atualização:** 2025-12-03
+**Última atualização:** 2025-12-03 18:00
 
 ## Objetivo
 
@@ -76,6 +76,20 @@ Executar rotinas agendadas para enviar notificações aos usuários conforme sua
 - ⏳ Sistema de logs de notificações enviadas
 - ⏳ Tratamento de erros e retry
 - ⏳ Rate limiting para APIs externas
+
+## Testes Pendentes
+
+- [ ] Teste de workflow agendado (execução manual)
+- [ ] Teste de busca de usuários com notificações ativas
+- [ ] Teste de verificação de período do dia
+- [ ] Teste de filtro por período (manhã/tarde/noite)
+- [ ] Teste de busca de tokens de dispositivos
+- [ ] Teste de preparação de notificações
+- [ ] Teste de envio real de push (quando implementado)
+- [ ] Teste de logs de notificações enviadas
+- [ ] Teste de verificação de conversas pendentes
+- [ ] Teste de verificação de quests pendentes
+- [ ] Teste de verificação de conquistas
 
 ## Fluxo de Execução
 

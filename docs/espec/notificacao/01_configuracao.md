@@ -1,7 +1,7 @@
 # Notificações - Fase 1: Configuração
 
 **Data:** 2025-12-03
-**Última atualização:** 2025-12-03
+**Última atualização:** 2025-12-03 18:00
 
 ## Objetivo
 
@@ -79,4 +79,16 @@ Usuário pode selecionar múltiplos canais.
 - ✅ Configuração de VAPID keys para Web Push
 - ⏳ Testes de registro de tokens
 - ⏳ Validação de permissões do usuário
+
+## Testes Pendentes
+
+- [ ] Teste de geração de chaves VAPID (`scripts/generate-vapid-keys.js`)
+- [ ] Teste de carregamento de `VITE_VAPID_PUBLIC_KEY` no frontend
+- [ ] Teste de solicitação de permissão de notificações
+- [ ] Teste de criação de subscription com chave pública
+- [ ] Teste de registro de token via API (`/api/push-token`)
+- [ ] Teste de workflow n8n `webhook_push_token` (salvar token)
+- [ ] Teste de persistência de token no banco (`dispositivos_push`)
+- [ ] Teste de atualização de token existente (mesmo usuário/dispositivo)
+- [ ] Teste end-to-end: configuração → registro → validação
 
