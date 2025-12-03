@@ -290,24 +290,23 @@ const QuestDetailPageV13 = () => {
       console.log('[QuestDetail] ℹ️ Quest sem recorrências ou estrutura inválida');
     }
 
-    // REGRA DEFINITIVA: Mostrar botão APENAS se:
-    // 1. Não é quest de conversa
-    // 2. Tem status válido
-    // 3. A recorrência do dia selecionado NÃO está concluída/perdida
-    // 4. Se quest está concluída/inativa E não encontrou recorrência específica, ocultar (por segurança)
+    // REGRA DEFINITIVA SIMPLIFICADA:
+    // Ocultar botão se:
+    // 1. É quest de conversa OU
+    // 2. Recorrência do dia selecionado está concluída/perdida OU
+    // 3. Quest está finalizada (concluida/inativa) e não tem recorrências ativas
+    
     const questFinalizada = detail.status === 'concluida' || detail.status === 'inativa';
     const temRecorrencias = !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias);
     
-    // Se tem recorrências mas não encontrou a específica E quest está finalizada → ocultar (por segurança)
-    // Se não tem recorrências E quest está finalizada → ocultar
-    const naoEncontrouRecorrencia = temRecorrencias && !recorrenciaSelecionadaConcluida && questFinalizada;
-    const questFinalizadaSemRecorrencias = questFinalizada && !temRecorrencias;
+    // Se encontrou recorrência e está concluída → ocultar
+    // Se quest está finalizada e não tem recorrências → ocultar
+    // Se quest está finalizada, tem recorrências mas não encontrou a específica → ocultar (por segurança, quest já finalizada)
+    const deveOcultar = recorrenciaSelecionadaConcluida || 
+                       (questFinalizada && !temRecorrencias) ||
+                       (questFinalizada && temRecorrencias && !recorrenciaSelecionadaConcluida);
     
-    const podeConcluir = !isConversaQuest && 
-      detail.status && 
-      !recorrenciaSelecionadaConcluida &&
-      !naoEncontrouRecorrencia &&
-      !questFinalizadaSemRecorrencias;
+    const podeConcluir = !isConversaQuest && detail.status && !deveOcultar;
     
     console.log('[QuestDetail] 🔍 Decisão final botão:', {
       isConversaQuest,
