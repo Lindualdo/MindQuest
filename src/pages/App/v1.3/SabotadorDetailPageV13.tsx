@@ -1,11 +1,15 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Target, HeartPulse, ShieldCheck } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Target, HeartPulse, ShieldCheck, MessageSquare, ExternalLink } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { getSabotadorById, sabotadoresCatalogo } from '@/data/sabotadoresCatalogo';
+import { apiService } from '@/services/apiService';
+import type { OcorrenciaSabotador } from '@/types/emotions';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => {
   if (!items.length) return null;
@@ -27,11 +31,38 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
 const SabotadorDetailPageV13: React.FC = () => {
   const { dashboardData, setView, selectedSabotadorId, sabotadorDetailReturnView } = useDashboard();
   const [activeTab, setActiveTab] = useState<TabId>('entender');
+  const [ultimaOcorrencia, setUltimaOcorrencia] = useState<OcorrenciaSabotador | null>(null);
+  const [ocorrenciaLoading, setOcorrenciaLoading] = useState(false);
+  const [ocorrenciaError, setOcorrenciaError] = useState<string | null>(null);
 
   const sabotadorId =
     selectedSabotadorId ?? dashboardData?.sabotadores?.padrao_principal?.id ?? '';
   const sabotador = useMemo(() => getSabotadorById(sabotadorId), [sabotadorId]);
   const overview = sabotadoresCatalogo.overview;
+  const userId = dashboardData?.usuario?.id;
+
+  useEffect(() => {
+    if (!userId || !sabotadorId) {
+      return;
+    }
+
+    const loadUltimaOcorrencia = async () => {
+      try {
+        setOcorrenciaLoading(true);
+        setOcorrenciaError(null);
+        const response = await apiService.getOcorrenciasSabotador(userId, sabotadorId);
+        // A primeira ocorrência é a mais recente (já vem ordenada DESC)
+        setUltimaOcorrencia(response.ocorrencias?.[0] || null);
+      } catch (err) {
+        console.error('Erro ao carregar última ocorrência:', err);
+        setOcorrenciaError(err instanceof Error ? err.message : 'Erro ao carregar ocorrência');
+      } finally {
+        setOcorrenciaLoading(false);
+      }
+    };
+
+    void loadUltimaOcorrencia();
+  }, [userId, sabotadorId]);
 
   const handleBack = () => {
     const returnView = sabotadorDetailReturnView ?? 'dashboard';
@@ -113,6 +144,7 @@ const SabotadorDetailPageV13: React.FC = () => {
           </button>
         </div>
 
+        {/* Card 1: Informações do Sabotador */}
         <Card className="!p-0 overflow-hidden mq-card" hover={false}>
           <div className="flex flex-col gap-3 px-5 py-5">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[var(--mq-primary)]">
@@ -126,6 +158,62 @@ const SabotadorDetailPageV13: React.FC = () => {
             </p>
           </div>
         </Card>
+
+        {/* Card 2: Última Ocorrência */}
+        {ocorrenciaLoading && (
+          <Card className="mq-card">
+            <p className="text-sm text-[var(--mq-text-muted)]">Carregando ocorrência...</p>
+          </Card>
+        )}
+
+        {ocorrenciaError && (
+          <Card className="mq-card">
+            <p className="text-sm text-[var(--mq-error)]">{ocorrenciaError}</p>
+          </Card>
+        )}
+
+        {!ocorrenciaLoading && !ocorrenciaError && ultimaOcorrencia && (
+          <Card className="mq-card">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
+                  Última ocorrência
+                </p>
+                {ultimaOcorrencia.data_ocorrencia && (
+                  <span className="text-xs text-[var(--mq-text-muted)]">
+                    {format(new Date(ultimaOcorrencia.data_ocorrencia), "dd 'de' MMMM 'de' yyyy", {
+                      locale: ptBR,
+                    })}
+                  </span>
+                )}
+              </div>
+              
+              {ultimaOcorrencia.resumo_conversa && (
+                <p className="text-sm text-[var(--mq-text)] leading-relaxed line-clamp-3">
+                  {ultimaOcorrencia.resumo_conversa}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setView('sabotadorOcorrencias')}
+                className="flex items-center gap-2 text-sm font-semibold text-[var(--mq-primary)] hover:underline mt-2"
+              >
+                <MessageSquare size={16} />
+                Ver histórico de ocorrências
+                <ExternalLink size={14} />
+              </button>
+            </div>
+          </Card>
+        )}
+
+        {!ocorrenciaLoading && !ocorrenciaError && !ultimaOcorrencia && (
+          <Card className="mq-card">
+            <p className="text-sm text-[var(--mq-text-muted)]">
+              Nenhuma ocorrência registrada para este sabotador.
+            </p>
+          </Card>
+        )}
 
         <div className="space-y-4">
           <SectionList title="Características marcantes" items={sabotador.caracteristicas} />
