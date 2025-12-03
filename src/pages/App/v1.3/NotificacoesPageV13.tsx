@@ -7,18 +7,19 @@ import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 
 type CanalNotificacao = 'whatsapp' | 'email' | 'push' | 'sms';
+type PeriodoDia = 'manha' | 'tarde' | 'noite';
 
 interface NotificacoesData {
   // Conversas Direcionadas da IA (WhatsApp)
   conversas_ia_ativo: boolean;
-  conversas_ia_horario: string; // HH:mm
+  conversas_ia_periodo: PeriodoDia;
   conversas_ia_motivacionais: boolean;
   conversas_ia_sabotadores: boolean;
   conversas_ia_resumo_semanal: boolean;
   
   // Lembretes/Alertas
   lembretes_ativo: boolean;
-  lembretes_horario: string; // HH:mm
+  lembretes_periodo: PeriodoDia;
   lembretes_conversas_diarias: boolean;
   lembretes_quests: boolean;
   lembretes_conquistas: boolean;
@@ -47,14 +48,14 @@ const NotificacoesPageV13: React.FC = () => {
   const [formData, setFormData] = useState<NotificacoesData>({
     // Conversas Direcionadas da IA
     conversas_ia_ativo: true,
-    conversas_ia_horario: '09:00',
+    conversas_ia_periodo: 'manha',
     conversas_ia_motivacionais: true,
     conversas_ia_sabotadores: true,
     conversas_ia_resumo_semanal: true,
     
     // Lembretes/Alertas
     lembretes_ativo: true,
-    lembretes_horario: '08:00',
+    lembretes_periodo: 'manha',
     lembretes_conversas_diarias: true,
     lembretes_quests: true,
     lembretes_conquistas: true,
@@ -87,12 +88,12 @@ const NotificacoesPageV13: React.FC = () => {
         if (data.success && data.notificacoes) {
           setFormData({
             conversas_ia_ativo: data.notificacoes.conversas_ia_ativo ?? true,
-            conversas_ia_horario: data.notificacoes.conversas_ia_horario || '09:00',
+            conversas_ia_periodo: data.notificacoes.conversas_ia_periodo || 'manha',
             conversas_ia_motivacionais: data.notificacoes.conversas_ia_motivacionais ?? true,
             conversas_ia_sabotadores: data.notificacoes.conversas_ia_sabotadores ?? true,
             conversas_ia_resumo_semanal: data.notificacoes.conversas_ia_resumo_semanal ?? true,
             lembretes_ativo: data.notificacoes.lembretes_ativo ?? true,
-            lembretes_horario: data.notificacoes.lembretes_horario || '08:00',
+            lembretes_periodo: data.notificacoes.lembretes_periodo || 'manha',
             lembretes_conversas_diarias: data.notificacoes.lembretes_conversas_diarias ?? true,
             lembretes_quests: data.notificacoes.lembretes_quests ?? true,
             lembretes_conquistas: data.notificacoes.lembretes_conquistas ?? true,
@@ -323,18 +324,21 @@ const NotificacoesPageV13: React.FC = () => {
 
             {formData.conversas_ia_ativo && (
               <div className="space-y-4">
-                {/* Horário */}
+                {/* Período */}
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--mq-text)]">
                     <Clock size={16} />
-                    Horário preferido
+                    Período preferido
                   </label>
-                  <input
-                    type="time"
-                    value={formData.conversas_ia_horario}
-                    onChange={(e) => setFormData({ ...formData, conversas_ia_horario: e.target.value })}
+                  <select
+                    value={formData.conversas_ia_periodo}
+                    onChange={(e) => setFormData({ ...formData, conversas_ia_periodo: e.target.value as PeriodoDia })}
                     className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20"
-                  />
+                  >
+                    <option value="manha">Manhã</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="noite">Noite</option>
+                  </select>
                 </div>
 
                 {/* Tipos de conversas */}
@@ -431,18 +435,21 @@ const NotificacoesPageV13: React.FC = () => {
 
             {formData.lembretes_ativo && (
               <div className="space-y-4">
-                {/* Horário */}
+                {/* Período */}
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--mq-text)]">
                     <Clock size={16} />
-                    Horário preferido
+                    Período preferido
                   </label>
-                  <input
-                    type="time"
-                    value={formData.lembretes_horario}
-                    onChange={(e) => setFormData({ ...formData, lembretes_horario: e.target.value })}
+                  <select
+                    value={formData.lembretes_periodo}
+                    onChange={(e) => setFormData({ ...formData, lembretes_periodo: e.target.value as PeriodoDia })}
                     className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20"
-                  />
+                  >
+                    <option value="manha">Manhã</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="noite">Noite</option>
+                  </select>
                 </div>
 
                 {/* Tipos de lembretes */}
