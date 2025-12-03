@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Target, ChevronRight, TrendingUp, Star, BarChart3, Trophy, Link2 } from 'lucide-react';
+import { ArrowLeft, Target, ChevronRight, TrendingUp, Star, BarChart3, Trophy, Link2, Brain } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -499,6 +499,33 @@ const EvoluirPageV13: React.FC = () => {
                 <div className="text-left">
                   <h3 className="text-base font-bold text-[var(--mq-text)]">Ações por Objetivo</h3>
                   <p className="text-xs text-[var(--mq-text-muted)]">Acompanhe o progresso de cada meta</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
+            </button>
+          </motion.section>
+
+          {/* Ações por Sabotadores */}
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.37 }}
+            className="mq-card overflow-hidden"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setView('conexaoAcoesSabotadores');
+              }}
+              className="w-full p-4 flex items-center justify-between hover:bg-[var(--mq-card)]/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-[var(--mq-card)]">
+                  <Brain size={20} className="text-[var(--mq-primary)]" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-base font-bold text-[var(--mq-text)]">Ações por Sabotadores</h3>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Acompanhe o progresso de cada padrão mental</p>
                 </div>
               </div>
               <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
