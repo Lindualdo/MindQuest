@@ -1,9 +1,9 @@
 # Quests de Sabotadores - Regras de Criação
 
 **Data:** 2025-12-02  
-**Última atualização:** 2025-12-03  
+**Última atualização:** 2025-12-03 15:30  
 **Status:** Definição executiva  
-**Versão:** 1.1
+**Versão:** 1.2
 
 ---
 
@@ -11,18 +11,22 @@
 
 ### Priorização de sabotador e informações para criação de quests
 
-1. **Priorização do Sabotador Atual:**
+1. **Definição de Sabotador Atual:**
+   - Sabotador com a **data mais recente** (truncar para `DATE`, ignorar horas)
+   - Se múltiplos sabotadores no mesmo dia → desempate por **`intensidade_media` maior**
+
+2. **Priorização do Sabotador Atual:**
    - Se o sabotador atual está no top 3 → usa informações do **atual** (não do top 1 histórico)
 
-2. **Condição para Quest Adicional:**
-   - Quest adicional **somente** se sabotador atual **NÃO** está no top 3 **E** intensidade **>= 65**
+3. **Condição para Quest Adicional:**
+   - Quest adicional **somente** se sabotador atual **NÃO** está no top 3 **E** intensidade **>= 60**
    - Nesse caso: 1 quest para o atual + 1 quest para o top 1 histórico
 
-3. **Contexto do Sabotador:**
+4. **Contexto do Sabotador:**
    - **SEMPRE** usar insight/contramedida da conversa mais recente (não dados agregados)
    - Query: `DISTINCT ON (sabotador_id) ORDER BY criado_em DESC`
 
-4. **sabotador_id:**
+5. **sabotador_id:**
    - Sabotador id é um campo do tipo text minusculo
    - já eviar ao agente de quest o `sabotador_id` correto, o mesmo usado para agrupar e encontrar os top 3
    - Forçar uso do ID pré-selecionado no nó "Aplicar Limites & Dedupe"
