@@ -982,7 +982,7 @@
         }
       },
       "id": "mentor_agent",
-      "name": "mentor",
+      "name": "mentor - Mind",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
@@ -1050,7 +1050,7 @@
             "index": 0
           },
           {
-            "node": "mentor",
+            "node": "mentor - Mind",
             "type": "ai_memory",
             "index": 0
           }
@@ -1094,7 +1094,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "mentor",
+            "node": "mentor - Mind",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -1112,7 +1112,7 @@
         ],
         [
           {
-            "node": "mentor",
+            "node": "mentor - Mind",
             "type": "main",
             "index": 0
           }
@@ -1260,7 +1260,7 @@
         ]
       ]
     },
-    "mentor": {
+    "mentor - Mind": {
       "main": [
         [
           {
