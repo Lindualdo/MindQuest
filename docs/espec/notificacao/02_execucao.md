@@ -71,7 +71,7 @@ Executar rotinas agendadas para enviar notificações aos usuários conforme sua
 - ⏳ Implementar verificação de conversas pendentes
 - ⏳ Implementar verificação de quests pendentes
 - ⏳ Implementar verificação de conquistas
-- ⏳ Configurar VAPID keys
+- ✅ Configurar VAPID keys
 - ⏳ Implementar envio real de push notifications
 - ⏳ Sistema de logs de notificações enviadas
 - ⏳ Tratamento de erros e retry

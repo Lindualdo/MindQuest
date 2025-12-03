@@ -76,7 +76,7 @@ Usuário pode selecionar múltiplos canais.
 
 ## Pendências
 
-- ⏳ Configuração de VAPID keys para Web Push
+- ✅ Configuração de VAPID keys para Web Push
 - ⏳ Testes de registro de tokens
 - ⏳ Validação de permissões do usuário
 

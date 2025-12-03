@@ -31,7 +31,7 @@
 
 ### ⏳ Pendente
 
-- [ ] Configuração de VAPID keys
+- [x] Configuração de VAPID keys
 - [ ] Testes de registro de tokens
 - [ ] Validação de permissões do usuário
 
@@ -68,7 +68,7 @@
 
 ## Próximos Passos
 
-1. **Configurar VAPID keys** para Web Push API
+1. ✅ **Configurar VAPID keys** para Web Push API
 2. **Implementar verificação de pendências** (conversas/quests/conquistas)
 3. **Implementar envio real de push** (HTTP Request ou Code node com web-push)
 4. **Sistema de logs** para rastrear notificações enviadas
