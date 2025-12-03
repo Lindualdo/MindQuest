@@ -77,8 +77,8 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-col">
-          <h3 className="text-lg font-bold text-[var(--mq-text)]">Sabotadores detectados</h3>
-          <p className="mq-eyebrow mt-0.5">Frequência de detecção</p>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrão mental</h3>
+          <p className="mq-eyebrow mt-0.5">Sabotadores</p>
         </div>
         <button
           type="button"
@@ -182,7 +182,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
             </div>
           </div>
 
-          {/* Eixo X - Labels com emoji */}
+          {/* Eixo X - Labels dos sabotadores */}
           <div className="flex mt-2">
             {/* Espaço para alinhamento com eixo Y */}
             <div className="pr-2" style={{ width: 24 }} />
@@ -196,27 +196,14 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
                     key={sabotador.sabotador_id} 
                     className="flex-1 flex flex-col items-center"
                   >
-                    <span className="text-sm">{sabotador.emoji}</span>
-                    <span className={`text-[0.45rem] text-center leading-tight mt-0.5 truncate w-full ${
+                    <span className={`text-[0.5rem] text-center leading-tight truncate w-full ${
                       isMaisAtivo ? 'text-[var(--mq-primary)] font-semibold' : 'text-[var(--mq-text-subtle)]'
                     }`}>
-                      {sabotador.nome.split(' ')[0].substring(0, 6)}
+                      {sabotador.nome.split(' ')[0].substring(0, 8)}
                     </span>
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Legenda */}
-          <div className="flex items-center justify-center gap-4 mt-4 text-[0.65rem] text-[var(--mq-text-muted)]">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-[var(--mq-primary)]" />
-              <span>Mais ativo</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-[#7dd3fc]" />
-              <span>Detectado</span>
             </div>
           </div>
         </div>
@@ -224,8 +211,8 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
 
       {/* Instrução para clicar */}
       {!loading && onBarClick && (
-        <p className="mt-4 text-center text-[0.7rem] text-[var(--mq-text-subtle)] italic">
-          Clique na barra para saber mais...
+        <p className="mt-4 text-center text-sm font-semibold text-[var(--mq-primary)]">
+          Toque na barra para saber mais...
         </p>
       )}
     </section>
