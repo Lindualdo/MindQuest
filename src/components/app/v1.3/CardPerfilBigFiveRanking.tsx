@@ -17,13 +17,24 @@ type Props = {
   loading?: boolean;
 };
 
+// Mapeamento de nomes antigos para novos
+const mapearNomeTraco = (nomeOriginal: string): string => {
+  const mapeamento: Record<string, string> = {
+    'Conscienciosidade': 'Disciplina',
+    'Abertura à Experiência': 'Curiosidade',
+    'Abertura': 'Curiosidade',
+    'Neuroticismo': 'Instabilidade',
+    'Amabilidade': 'Gentileza',
+    'Extroversão': 'Sociabilidade',
+  };
+  return mapeamento[nomeOriginal] || nomeOriginal;
+};
+
 // Mock com traços para visualização
 const mockTracosRanking: PerfilBigFiveRankingItem[] = [
-  { traco_id: 'conscientiousness', nome_pt: 'Conscienciosidade', score: 84 },
-  { traco_id: 'openness', nome_pt: 'Abertura', score: 69 },
-  { traco_id: 'neuroticism', nome_pt: 'Neuroticismo', score: 66 },
-  { traco_id: 'extraversion', nome_pt: 'Extroversão', score: 55 },
-  { traco_id: 'agreeableness', nome_pt: 'Amabilidade', score: 48 },
+  { traco_id: 'conscientiousness', nome_pt: 'Disciplina', score: 84 },
+  { traco_id: 'openness', nome_pt: 'Curiosidade', score: 69 },
+  { traco_id: 'neuroticism', nome_pt: 'Instabilidade', score: 66 },
 ];
 
 const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }: Props) => {
@@ -34,14 +45,14 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
     const dados = tracos.length > 0 
       ? tracos.map(t => ({
           traco_id: t.nome,
-          nome_pt: t.nome_pt,
+          nome_pt: mapearNomeTraco(t.nome_pt),
           score: Math.round(t.score),
         }))
       : mockTracosRanking;
 
     return dados
       .sort((a, b) => b.score - a.score) // Ordenar por score (maior para menor)
-      .slice(0, 5); // Top 5 apenas
+      .slice(0, 3); // Top 3 apenas
   }, [tracos]);
 
   // Calcular valor máximo para escala do eixo Y (sempre 100 para percentual)
@@ -62,7 +73,7 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
         <div className="flex items-center gap-2">
           <Brain size={20} className="text-[var(--mq-primary)]" />
           <div>
-            <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrão comportamental</h3>
+            <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de comportamento</h3>
             <p className="mq-eyebrow mt-1">Seus traços de personalidade</p>
           </div>
         </div>
@@ -94,7 +105,7 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
       {/* Loading state */}
       {loading && (
         <div className="mt-3 flex items-end justify-between gap-2 h-44">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div key={i} className="flex-1 animate-pulse">
               <div 
                 className="bg-[var(--mq-border)] rounded-t-md" 
