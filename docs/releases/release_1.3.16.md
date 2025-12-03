@@ -1,7 +1,7 @@
 # Release 1.3.16
 
-**Data:** 2025-01-22 15:30
-**Última atualização:** 2025-01-22 15:30
+**Data:** 2025-12-03 16:05
+**Última atualização:** 2025-12-03 16:05
 
 ## Resumo
 
@@ -105,5 +105,5 @@ Foco em **padronização do card de perfil Big Five** com gráfico de colunas, *
 
 ---
 
-**Última atualização:** 2025-01-22 15:30
+**Última atualização:** 2025-12-03 16:05
 
