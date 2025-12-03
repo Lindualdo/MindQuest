@@ -11,7 +11,6 @@ import CardSabotadoresRanking, { type SabotadorRankingItem, mockSabotadoresRanki
 import { useDashboard } from '@/store/useStore';
 import { mockMoodEnergySummary } from '@/data/mockHomeV1_3';
 import { apiService } from '@/services/apiService';
-import { useState, useEffect } from 'react';
 import type { BigFivePerfilData } from '@/types/emotions';
 
 const DashPerfilPage: React.FC = () => {
