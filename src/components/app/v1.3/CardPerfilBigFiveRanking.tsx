@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Info, Brain } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { getPerfilById } from '@/data/bigFiveCatalogo';
 import type { TracoOrdenado } from '@/types/emotions';
 
