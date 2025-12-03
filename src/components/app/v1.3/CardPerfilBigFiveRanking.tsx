@@ -70,12 +70,9 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
     <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Brain size={20} className="text-[var(--mq-primary)]" />
-          <div>
-            <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de comportamento</h3>
-            <p className="mq-eyebrow mt-1">Seus traços de personalidade</p>
-          </div>
+        <div>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de comportamento</h3>
+          <p className="mq-eyebrow mt-1">Seus traços de personalidade</p>
         </div>
         <button
           type="button"

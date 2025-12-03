@@ -7,6 +7,19 @@ import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { getPerfilById, bigFiveCatalogo } from '@/data/bigFiveCatalogo';
 
+// Mapeamento de nomes antigos para novos (igual ao card)
+const mapearNomeTraco = (nomeOriginal: string): string => {
+  const mapeamento: Record<string, string> = {
+    'Conscienciosidade': 'Disciplina',
+    'Abertura à Experiência': 'Curiosidade',
+    'Abertura': 'Curiosidade',
+    'Neuroticismo': 'Instabilidade',
+    'Amabilidade': 'Gentileza',
+    'Extroversão': 'Sociabilidade',
+  };
+  return mapeamento[nomeOriginal] || nomeOriginal;
+};
+
 const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => {
   if (!items.length) return null;
   return (
@@ -110,9 +123,8 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="mq-page-title flex items-center justify-center gap-2">
-            <span>{traco.emoji}</span>
-            <span>{traco.nome_pt}</span>
+          <h1 className="mq-page-title">
+            {mapearNomeTraco(traco.nome_pt)}
           </h1>
           <p className="mq-page-subtitle">{traco.resumo}</p>
         </div>
