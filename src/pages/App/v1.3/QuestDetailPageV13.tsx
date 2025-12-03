@@ -293,20 +293,18 @@ const QuestDetailPageV13 = () => {
     // REGRA: Ocultar botão se:
     // 1. É quest de conversa (concluída automaticamente)
     // 2. Recorrência do dia selecionado já está concluída/perdida
-    // 3. Quest não-recorrente finalizada
+    // 3. Quest está finalizada (status global)
     
     const questFinalizada = detail.status === 'concluida' || detail.status === 'inativa';
-    const temRecorrencias = !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias);
     
-    const deveOcultar = recorrenciaSelecionadaConcluida || (questFinalizada && !temRecorrencias);
+    const deveOcultar = recorrenciaSelecionadaConcluida || questFinalizada;
     
     const podeConcluir = !isConversaQuest && detail.status && !deveOcultar;
     
     console.log('[QuestDetail] 🔍 Decisão botão:', {
-      dataReferencia,
+      status: detail.status,
       recorrenciaSelecionadaConcluida,
       questFinalizada,
-      temRecorrencias,
       deveOcultar,
       podeConcluir,
     });
