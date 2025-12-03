@@ -294,18 +294,20 @@ const QuestDetailPageV13 = () => {
     // 1. Não é quest de conversa
     // 2. Tem status válido
     // 3. A recorrência do dia selecionado NÃO está concluída/perdida
-    // 4. Se quest está concluída/inativa E não tem recorrências, ocultar botão (quest já finalizada)
+    // 4. Se quest está concluída/inativa E não encontrou recorrência específica, ocultar (por segurança)
     const questFinalizada = detail.status === 'concluida' || detail.status === 'inativa';
     const temRecorrencias = !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias);
     
-    // Se quest está finalizada e não tem recorrências, ocultar botão
-    // Se tem recorrências mas não encontrou a específica e quest está finalizada, também ocultar
-    const deveOcultarPorStatus = questFinalizada && (!temRecorrencias || !recorrenciaSelecionadaConcluida);
+    // Se tem recorrências mas não encontrou a específica E quest está finalizada → ocultar (por segurança)
+    // Se não tem recorrências E quest está finalizada → ocultar
+    const naoEncontrouRecorrencia = temRecorrencias && !recorrenciaSelecionadaConcluida && questFinalizada;
+    const questFinalizadaSemRecorrencias = questFinalizada && !temRecorrencias;
     
     const podeConcluir = !isConversaQuest && 
       detail.status && 
       !recorrenciaSelecionadaConcluida &&
-      !deveOcultarPorStatus;
+      !naoEncontrouRecorrencia &&
+      !questFinalizadaSemRecorrencias;
     
     console.log('[QuestDetail] 🔍 Decisão final botão:', {
       isConversaQuest,
