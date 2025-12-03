@@ -183,11 +183,25 @@ const DashPerfilPage: React.FC = () => {
           />
         </motion.div>
 
-        {/* Card Humor */}
+        {/* Card Perfil Big Five Ranking */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.09 }}
+        >
+          <CardPerfilBigFiveRanking
+            tracos={perfilBigFive?.tracos_ordenados || []}
+            tracoAtualId={null}
+            onBarClick={handlePerfilBigFiveClick}
+            loading={perfilBigFiveLoading}
+          />
+        </motion.div>
+
+        {/* Card Humor */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13 }}
         >
           <CardHumor
             humorAtual={moodSummary.humorHoje}
@@ -202,7 +216,7 @@ const DashPerfilPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.13 }}
+          transition={{ delay: 0.17 }}
         >
           <CardEnergia energiaAtual={moodSummary.energiaHoje} />
         </motion.div>
@@ -211,23 +225,9 @@ const DashPerfilPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.17 }}
-        >
-          <EmotionWheel />
-        </motion.div>
-
-        {/* Card Perfil Big Five Ranking */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.21 }}
         >
-          <CardPerfilBigFiveRanking
-            tracos={perfilBigFive?.tracos_ordenados || []}
-            tracoAtualId={null}
-            onBarClick={handlePerfilBigFiveClick}
-            loading={perfilBigFiveLoading}
-          />
+          <EmotionWheel />
         </motion.div>
       </main>
 

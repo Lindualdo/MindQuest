@@ -62,7 +62,7 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
         <div className="flex items-center gap-2">
           <Brain size={20} className="text-[var(--mq-primary)]" />
           <div>
-            <h3 className="text-lg font-bold text-[var(--mq-text)]">Perfil pessoal</h3>
+            <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrão comportamental</h3>
             <p className="mq-eyebrow mt-1">Seus traços de personalidade</p>
           </div>
         </div>
