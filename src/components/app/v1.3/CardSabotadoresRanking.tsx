@@ -79,19 +79,38 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
   return (
     <section className="mq-card rounded-2xl px-4 py-4" style={{ borderRadius: 24 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex flex-col">
+      <div className="mb-4">
+        <div className="flex items-start justify-between">
           <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
-          <p className="text-sm text-[var(--mq-text-muted)] mt-1">Pensamentos geram emoções que definem suas ações</p>
-          <p className="mq-eyebrow mt-1.5">Entenda seus sabotadores</p>
+          <button
+            type="button"
+            onClick={() => setShowInfo(!showInfo)}
+            className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
+          >
+            <Info size={16} />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 rounded-full bg-[var(--mq-card)] text-[var(--mq-primary)] hover:bg-[var(--mq-card)] transition-colors"
-        >
-          <Info size={16} />
-        </button>
+        
+        {/* Fluxo visual: Pensamentos → Emoções → Ações */}
+        <div className="flex items-center gap-2 mt-2 text-sm">
+          <span className="flex items-center gap-1">
+            <span>🧠</span>
+            <span className="text-[var(--mq-text-muted)]">Pensamentos</span>
+          </span>
+          <span className="text-[var(--mq-text-subtle)]">→</span>
+          <span className="flex items-center gap-1">
+            <span>💭</span>
+            <span className="text-[var(--mq-text-muted)]">Emoções</span>
+          </span>
+          <span className="text-[var(--mq-text-subtle)]">→</span>
+          <span className="flex items-center gap-1">
+            <span>⚡</span>
+            <span className="text-[var(--mq-text-muted)]">Ações</span>
+          </span>
+        </div>
+
+        {/* CTA */}
+        <p className="mq-eyebrow mt-3">Entenda como seus pensamentos te sabotam</p>
       </div>
 
       {/* Info expandível */}
