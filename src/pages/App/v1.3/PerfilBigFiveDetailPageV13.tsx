@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Target, BookOpen, Lightbulb, Users, Briefcase } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -142,12 +142,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
         {/* Pontos Fortes */}
         {traco.pontos_fortes && traco.pontos_fortes.length > 0 && (
           <Card className="!p-4 mq-card">
-            <div className="flex items-center gap-2 mb-3">
-              <Target size={16} className="text-[var(--mq-success)]" />
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
-                Pontos Fortes
-              </h3>
-            </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">
+              Pontos Fortes
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--mq-text)]">
               {traco.pontos_fortes.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -162,12 +159,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
         {/* Áreas de Melhoria */}
         {traco.areas_melhoria && traco.areas_melhoria.length > 0 && (
           <Card className="!p-4 mq-card">
-            <div className="flex items-center gap-2 mb-3">
-              <Lightbulb size={16} className="text-[var(--mq-warning)]" />
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
-                Áreas de Melhoria
-              </h3>
-            </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">
+              Áreas de Melhoria
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--mq-text)]">
               {traco.areas_melhoria.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -182,12 +176,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
         {/* Preferências de Trabalho */}
         {traco.preferencias_trabalho && traco.preferencias_trabalho.length > 0 && (
           <Card className="!p-4 mq-card">
-            <div className="flex items-center gap-2 mb-3">
-              <Briefcase size={16} className="text-[var(--mq-primary)]" />
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
-                Preferências de Trabalho
-              </h3>
-            </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">
+              Preferências de Trabalho
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--mq-text)]">
               {traco.preferencias_trabalho.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -202,12 +193,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
         {/* Relacionamentos */}
         {traco.relacionamentos && traco.relacionamentos.length > 0 && (
           <Card className="!p-4 mq-card">
-            <div className="flex items-center gap-2 mb-3">
-              <Users size={16} className="text-[var(--mq-accent)]" />
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
-                Relacionamentos
-              </h3>
-            </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">
+              Relacionamentos
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--mq-text)]">
               {traco.relacionamentos.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
@@ -222,12 +210,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
         {/* Estratégias de Desenvolvimento */}
         {traco.estrategias_desenvolvimento && traco.estrategias_desenvolvimento.length > 0 && (
           <Card className="!p-4 mq-card">
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen size={16} className="text-[var(--mq-primary)]" />
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)]">
-                Estratégias de Desenvolvimento
-              </h3>
-            </div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-text-muted)] mb-3">
+              Estratégias de Desenvolvimento
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--mq-text)]">
               {traco.estrategias_desenvolvimento.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
