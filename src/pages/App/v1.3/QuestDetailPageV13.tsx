@@ -8,7 +8,6 @@ import {
   BookOpen,
   Loader2,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -312,30 +311,6 @@ const QuestDetailPageV13 = () => {
           </div>
         )}
 
-        {/* Links de Referências */}
-        {baseCientifica?.links_referencias && baseCientifica.links_referencias.length > 0 && (
-          <div className="mb-4 rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-semibold text-[var(--mq-accent)]">
-              <ExternalLink size={16} />
-              <span>Referências</span>
-            </div>
-            <ul className="space-y-2">
-              {baseCientifica.links_referencias.map((link, idx) => (
-                <li key={idx}>
-                  <a
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-[var(--mq-accent)] underline underline-offset-2 hover:opacity-80"
-                  >
-                    {link}
-                    <ExternalLink size={12} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {/* Informações Adicionais - Ocultar para quests custom */}
         {!isQuestCustom && (detail.catalogo?.tempo_estimado_min || detail.catalogo?.dificuldade) && (

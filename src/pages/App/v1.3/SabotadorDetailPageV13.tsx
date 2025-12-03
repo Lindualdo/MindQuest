@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Target, HeartPulse, ShieldCheck, MessageSquare, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Target, HeartPulse, ShieldCheck } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -196,16 +196,6 @@ const SabotadorDetailPageV13: React.FC = () => {
                   {ultimaOcorrencia.resumo_conversa}
                 </p>
               )}
-
-              <button
-                type="button"
-                onClick={() => setView('sabotadorOcorrencias')}
-                className="flex items-center gap-2 text-sm font-semibold text-[var(--mq-primary)] hover:underline mt-2"
-              >
-                <MessageSquare size={16} />
-                Ver histórico de ocorrências
-                <ExternalLink size={14} />
-              </button>
             </div>
           </Card>
         )}
