@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowLeft, Target, BookOpen, Lightbulb, Users, Briefcase } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -26,7 +26,7 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
 
 const PerfilBigFiveDetailPageV13: React.FC = () => {
   const { dashboardData, setView, selectedPerfilBigFiveId, perfilBigFiveDetailReturnView } = useDashboard();
-  const [activeTab, setActiveTab] = React.useState<TabId>('entender');
+  const [activeTab, setActiveTab] = useState<TabId>('entender');
 
   const tracoId = selectedPerfilBigFiveId ?? '';
   const traco = useMemo(() => getPerfilById(tracoId), [tracoId]);
