@@ -224,72 +224,86 @@ const QuestDetailPageV13 = () => {
     });
     
     // Verificar recorrências
-    if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
-      const dias = (detail.recorrencias as any).dias;
-      if (Array.isArray(dias) && dias.length > 0) {
-        console.log('[QuestDetail] 📅 Dias disponíveis:', dias.map((d: any) => ({ 
-          data: d.data, 
-          status: d.status,
-          dataTipo: typeof d.data 
-        })));
+    // Estrutura pode ser: { dias: [...] } ou array direto
+    let dias: any[] = [];
+    if (detail.recorrencias) {
+      if (Array.isArray(detail.recorrencias)) {
+        // Array direto do webhook
+        dias = detail.recorrencias;
+      } else if (typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
+        // Estrutura com propriedade dias
+        dias = (detail.recorrencias as any).dias || [];
+      }
+    }
+    
+    if (dias.length > 0) {
+      console.log('[QuestDetail] 📅 Dias disponíveis:', dias.map((d: any) => ({ 
+        data: d.data || d.data_planejada, 
+        data_planejada: d.data_planejada,
+        status: d.status,
+        dataTipo: typeof (d.data || d.data_planejada)
+      })));
+      
+      // Buscar recorrência da data de referência
+      const recorrenciaSelecionada = dias.find((dia: any) => {
+        // Aceitar tanto 'data' quanto 'data_planejada'
+        const dataCampo = dia.data || dia.data_planejada;
+        if (!dataCampo) return false;
         
-        // Buscar recorrência da data de referência
-        const recorrenciaSelecionada = dias.find((dia: any) => {
-          if (!dia.data) return false;
-          // Normalizar data: pode vir como string ISO ou Date
-          let dataDia: string;
-          try {
-            if (typeof dia.data === 'string') {
-              // Se já é string no formato yyyy-MM-dd, usar direto
-              if (/^\d{4}-\d{2}-\d{2}$/.test(dia.data)) {
-                dataDia = dia.data;
-              } else {
-                // Tentar parsear como ISO
-                dataDia = format(new Date(dia.data), 'yyyy-MM-dd');
-              }
+        // Normalizar data: pode vir como string ISO ou Date
+        let dataDia: string;
+        try {
+          if (typeof dataCampo === 'string') {
+            // Se já é string no formato yyyy-MM-dd, usar direto
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dataCampo)) {
+              dataDia = dataCampo;
             } else {
-              dataDia = format(new Date(dia.data), 'yyyy-MM-dd');
+              // Tentar parsear como ISO
+              dataDia = format(new Date(dataCampo), 'yyyy-MM-dd');
             }
-            const match = dataDia === dataReferencia;
-            if (match) {
-              console.log('[QuestDetail] ✅ Match encontrado:', { dataDia, dataReferencia, status: dia.status });
-            }
-            return match;
-          } catch (err) {
-            console.error('[QuestDetail] ❌ Erro ao processar data:', err, dia.data);
-            return false;
+          } else {
+            dataDia = format(new Date(dataCampo), 'yyyy-MM-dd');
           }
-        });
-        
-        if (recorrenciaSelecionada) {
-          // Se a recorrência está concluída ou perdida, NÃO mostrar botão
-          const statusNormalizado = String(recorrenciaSelecionada.status || '').toLowerCase().trim();
-          recorrenciaSelecionadaConcluida = statusNormalizado === 'concluida' || statusNormalizado === 'perdida';
-          
-          console.log('[QuestDetail] ✅ Recorrência encontrada:', {
-            dataReferencia,
-            recorrenciaData: recorrenciaSelecionada.data,
-            recorrenciaStatus: recorrenciaSelecionada.status,
-            statusNormalizado,
-            recorrenciaSelecionadaConcluida,
-            deveOcultarBotao: recorrenciaSelecionadaConcluida
-          });
-        } else {
-          console.warn('[QuestDetail] ⚠️ Recorrência NÃO encontrada para data:', {
-            dataReferencia,
-            totalDias: dias.length,
-            diasDisponiveis: dias.map((d: any) => ({ 
-              data: d.data, 
-              status: d.status,
-              dataFormatada: d.data ? (typeof d.data === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.data) ? d.data : format(new Date(d.data), 'yyyy-MM-dd')) : null
-            }))
-          });
+          const match = dataDia === dataReferencia;
+          if (match) {
+            console.log('[QuestDetail] ✅ Match encontrado:', { dataDia, dataReferencia, status: dia.status });
+          }
+          return match;
+        } catch (err) {
+          console.error('[QuestDetail] ❌ Erro ao processar data:', err, dataCampo);
+          return false;
         }
+      });
+      
+      if (recorrenciaSelecionada) {
+        // Se a recorrência está concluída ou perdida, NÃO mostrar botão
+        const statusNormalizado = String(recorrenciaSelecionada.status || '').toLowerCase().trim();
+        recorrenciaSelecionadaConcluida = statusNormalizado === 'concluida' || statusNormalizado === 'perdida';
+        
+        console.log('[QuestDetail] ✅ Recorrência encontrada:', {
+          dataReferencia,
+          recorrenciaData: recorrenciaSelecionada.data || recorrenciaSelecionada.data_planejada,
+          recorrenciaStatus: recorrenciaSelecionada.status,
+          statusNormalizado,
+          recorrenciaSelecionadaConcluida,
+          deveOcultarBotao: recorrenciaSelecionadaConcluida
+        });
       } else {
-        console.warn('[QuestDetail] ⚠️ Array de dias vazio ou inválido');
+        console.warn('[QuestDetail] ⚠️ Recorrência NÃO encontrada para data:', {
+          dataReferencia,
+          totalDias: dias.length,
+          diasDisponiveis: dias.map((d: any) => {
+            const dataCampo = d.data || d.data_planejada;
+            return {
+              data: dataCampo,
+              status: d.status,
+              dataFormatada: dataCampo ? (typeof dataCampo === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dataCampo) ? dataCampo : format(new Date(dataCampo), 'yyyy-MM-dd')) : null
+            };
+          })
+        });
       }
     } else {
-      console.log('[QuestDetail] ℹ️ Quest sem recorrências ou estrutura inválida');
+      console.log('[QuestDetail] ℹ️ Quest sem recorrências ou array vazio');
     }
 
     // REGRA: Ocultar botão se:
