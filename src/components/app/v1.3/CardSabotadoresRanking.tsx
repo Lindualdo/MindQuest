@@ -82,7 +82,8 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       <div className="flex items-center justify-between mb-3">
         <div className="flex flex-col">
           <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
-          <p className="mq-eyebrow mt-0.5">Sabotadores</p>
+          <p className="text-sm text-[var(--mq-text-muted)] mt-1">Pensamentos geram emoções que definem suas ações</p>
+          <p className="mq-eyebrow mt-1.5">Entenda seus sabotadores</p>
         </div>
         <button
           type="button"
