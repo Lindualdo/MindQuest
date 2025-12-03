@@ -2,23 +2,29 @@ import webpush from 'web-push';
 import fs from 'fs';
 import path from 'path';
 
-// Carregar VAPID keys
-let VAPID_PUBLIC_KEY = '';
-let VAPID_PRIVATE_KEY = '';
+// Carregar VAPID keys (prioridade: variáveis de ambiente > arquivo local)
+let VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+let VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
 
-try {
-  const vapidKeysPath = path.join(process.cwd(), 'config', 'vapid-keys.json');
-  const vapidKeys = JSON.parse(fs.readFileSync(vapidKeysPath, 'utf-8'));
-  VAPID_PUBLIC_KEY = vapidKeys.publicKey;
-  VAPID_PRIVATE_KEY = vapidKeys.privateKey;
-  
+// Se não estiver em variáveis de ambiente, tentar arquivo local (dev)
+if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+  try {
+    const vapidKeysPath = path.join(process.cwd(), 'config', 'vapid-keys.json');
+    const vapidKeys = JSON.parse(fs.readFileSync(vapidKeysPath, 'utf-8'));
+    VAPID_PUBLIC_KEY = vapidKeys.publicKey;
+    VAPID_PRIVATE_KEY = vapidKeys.privateKey;
+  } catch (error) {
+    console.error('[Send Push] Erro ao carregar VAPID keys do arquivo:', error);
+  }
+}
+
+// Configurar web-push se as keys estiverem disponíveis
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
     'mailto:mindquest@example.com',
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
-} catch (error) {
-  console.error('[Send Push] Erro ao carregar VAPID keys:', error);
 }
 
 export default async function handler(req: any, res: any) {
