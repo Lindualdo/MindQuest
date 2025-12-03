@@ -103,10 +103,6 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
         >
           <p className="font-semibold mb-1">Como funciona o ranking?</p>
           <p>
-            O gráfico mostra quantas vezes cada sabotador foi detectado nas suas conversas. 
-            Quanto maior a barra, mais frequente é esse padrão de pensamento.
-          </p>
-          <p className="mt-2">
             O ranking considera tanto a <strong>frequência</strong> (quantas vezes foi detectado) 
             quanto a <strong>intensidade média</strong> de cada sabotador. 
             Quanto maior a combinação dessas duas métricas, maior o impacto no seu bem-estar.
