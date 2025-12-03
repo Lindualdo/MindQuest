@@ -215,10 +215,24 @@ const QuestDetailPageV13 = () => {
     // Data de referência: usar a data selecionada ou a data atual
     const dataReferencia = questDetailSelectedDate || format(new Date(), 'yyyy-MM-dd');
     
+    console.log('[QuestDetail] 🔍 Iniciando verificação:', {
+      questId: detail.id,
+      status: detail.status,
+      dataReferencia,
+      questDetailSelectedDate,
+      temRecorrencias: !!(detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias)
+    });
+    
     // Verificar recorrências
     if (detail.recorrencias && typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
       const dias = (detail.recorrencias as any).dias;
       if (Array.isArray(dias) && dias.length > 0) {
+        console.log('[QuestDetail] 📅 Dias disponíveis:', dias.map((d: any) => ({ 
+          data: d.data, 
+          status: d.status,
+          dataTipo: typeof d.data 
+        })));
+        
         // Buscar recorrência da data de referência
         const recorrenciaSelecionada = dias.find((dia: any) => {
           if (!dia.data) return false;
@@ -236,8 +250,13 @@ const QuestDetailPageV13 = () => {
             } else {
               dataDia = format(new Date(dia.data), 'yyyy-MM-dd');
             }
-            return dataDia === dataReferencia;
-          } catch {
+            const match = dataDia === dataReferencia;
+            if (match) {
+              console.log('[QuestDetail] ✅ Match encontrado:', { dataDia, dataReferencia, status: dia.status });
+            }
+            return match;
+          } catch (err) {
+            console.error('[QuestDetail] ❌ Erro ao processar data:', err, dia.data);
             return false;
           }
         });
@@ -256,10 +275,19 @@ const QuestDetailPageV13 = () => {
         } else {
           console.warn('[QuestDetail] ⚠️ Recorrência NÃO encontrada para data:', {
             dataReferencia,
-            diasDisponiveis: dias.map((d: any) => ({ data: d.data, status: d.status }))
+            totalDias: dias.length,
+            diasDisponiveis: dias.map((d: any) => ({ 
+              data: d.data, 
+              status: d.status,
+              dataFormatada: d.data ? (typeof d.data === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.data) ? d.data : format(new Date(d.data), 'yyyy-MM-dd')) : null
+            }))
           });
         }
+      } else {
+        console.warn('[QuestDetail] ⚠️ Array de dias vazio ou inválido');
       }
+    } else {
+      console.log('[QuestDetail] ℹ️ Quest sem recorrências ou estrutura inválida');
     }
 
     // REGRA SIMPLIFICADA: Mostrar botão APENAS se:
