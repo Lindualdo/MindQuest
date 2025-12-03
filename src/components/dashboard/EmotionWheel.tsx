@@ -206,8 +206,18 @@ const EmotionWheel: React.FC = () => {
                   y={percentY}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="font-semibold fill-gray-700 pointer-events-none"
-                  style={{ fontSize: `${percentFontSize}px` }}
+                  className="font-semibold pointer-events-none"
+                  filter="url(#textShadow)"
+                  style={{
+                    fontSize: `${percentFontSize}px`,
+                    fill: '#FFFFFF',
+                    stroke: '#000000',
+                    strokeWidth: '1px',
+                    strokeLinejoin: 'round',
+                    strokeLinecap: 'round',
+                    paintOrder: 'stroke fill',
+                    fontWeight: '700',
+                  }}
                 >
                   {emocao.intensidade}%
                 </text>
@@ -232,6 +242,18 @@ const EmotionWheel: React.FC = () => {
               <stop offset="0%" stopColor="#8B5CF6" />
               <stop offset="100%" stopColor="#3B82F6" />
             </radialGradient>
+            {/* Filtro de sombra para melhorar contraste dos números */}
+            <filter id="textShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+              <feOffset dx="0" dy="1" result="offsetblur" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.8" />
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
         </svg>
       </div>
