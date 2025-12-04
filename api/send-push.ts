@@ -2,29 +2,26 @@ import webpush from 'web-push';
 import fs from 'fs';
 import path from 'path';
 
-// Carregar VAPID keys (prioridade: variáveis de ambiente > arquivo local)
-let VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
-let VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+// Função para carregar VAPID keys (lazy loading no handler)
+function getVapidKeys() {
+  // Prioridade 1: Variáveis de ambiente (produção Vercel)
+  let publicKey = process.env.VAPID_PUBLIC_KEY || '';
+  let privateKey = process.env.VAPID_PRIVATE_KEY || '';
 
-// Se não estiver em variáveis de ambiente, tentar arquivo local (dev)
-if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-  try {
-    const vapidKeysPath = path.join(process.cwd(), 'config', 'vapid-keys.json');
-    const vapidKeys = JSON.parse(fs.readFileSync(vapidKeysPath, 'utf-8'));
-    VAPID_PUBLIC_KEY = vapidKeys.publicKey;
-    VAPID_PRIVATE_KEY = vapidKeys.privateKey;
-  } catch (error) {
-    console.error('[Send Push] Erro ao carregar VAPID keys do arquivo:', error);
+  // Prioridade 2: Arquivo local (desenvolvimento)
+  if (!publicKey || !privateKey) {
+    try {
+      const vapidKeysPath = path.join(process.cwd(), 'config', 'vapid-keys.json');
+      const vapidKeys = JSON.parse(fs.readFileSync(vapidKeysPath, 'utf-8'));
+      publicKey = vapidKeys.publicKey || publicKey;
+      privateKey = vapidKeys.privateKey || privateKey;
+    } catch (error) {
+      // Arquivo não existe (normal em produção)
+      console.error('[Send Push] Arquivo vapid-keys.json não encontrado:', error);
+    }
   }
-}
 
-// Configurar web-push se as keys estiverem disponíveis
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    'mailto:suporte@mindquest.pt',
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY
-  );
+  return { publicKey, privateKey };
 }
 
 export default async function handler(req: any, res: any) {
@@ -42,9 +39,12 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Debug: verificar carregamento das variáveis (remover após validação)
+  // Carregar VAPID keys (lazy loading)
+  const { publicKey: VAPID_PUBLIC_KEY, privateKey: VAPID_PRIVATE_KEY } = getVapidKeys();
+
+  // Debug: verificar carregamento das variáveis
   const hasEnvVars = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
-  const hasFileKeys = !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
+  const hasKeys = !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
 
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     res.status(500).json({ 
@@ -52,13 +52,24 @@ export default async function handler(req: any, res: any) {
       error: 'VAPID keys não configuradas',
       debug: {
         hasEnvVars,
-        hasFileKeys,
+        hasKeys,
         publicKeyLength: VAPID_PUBLIC_KEY?.length || 0,
-        privateKeyLength: VAPID_PRIVATE_KEY?.length || 0
+        privateKeyLength: VAPID_PRIVATE_KEY?.length || 0,
+        envVars: {
+          publicPresent: !!process.env.VAPID_PUBLIC_KEY,
+          privatePresent: !!process.env.VAPID_PRIVATE_KEY
+        }
       }
     });
     return;
   }
+
+  // Configurar web-push (sempre no handler para garantir)
+  webpush.setVapidDetails(
+    'mailto:suporte@mindquest.pt',
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
 
   try {
     const { token, titulo, corpo, usuario_id, tipo } = req.body;
