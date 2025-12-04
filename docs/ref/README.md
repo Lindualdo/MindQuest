@@ -8,10 +8,11 @@ Esta pasta contém documentação **compacta e essencial**.
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| `n8n.md` | Manual técnico n8n/MCP |
+| `produto.md` | Framework MindQuest (visão geral) |
+| `quests.md` | Core: Conversas, Quests, Objetivos |
 | `frontend.md` | Template React v1.3 + CSS |
+| `n8n.md` | Manual técnico n8n/MCP |
 | `postgres.md` | Conexão e queries |
-| `produto.md` | Visão do produto MindQuest |
 | `api.md` | Endpoints API (router consolidado) |
 
 ## Uso
