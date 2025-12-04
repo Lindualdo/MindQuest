@@ -33,6 +33,8 @@ interface UsageEvent {
 interface ModelStats {
   model: string;
   totalTokens: number;
+  includedTokens: number; // Tokens usados dentro do limite
+  onDemandTokens: number; // Tokens excedentes (cobrados)
   totalCost: number;
   requests: number;
   includedRequests: number;
@@ -42,14 +44,16 @@ interface ModelStats {
 }
 
 // ====== LIMITES DO CURSOR - PLANO ULTRA ======
-// Plano Ultra: ~20x mais requests que o Pro
+// Plano Ultra: Limite por TOKENS (não por requisições)
+// Baseado na página de Billing: ~3.4M tokens incluídos no período
+// Distribuição aproximada por modelo (ajustar conforme uso real)
 const CURSOR_LIMITS = {
-  'claude-4.5-opus-high-thinking': { name: 'Claude Opus 4.5', monthlyIncluded: 5000, priority: 1 },
-  'claude-4.5-sonnet-thinking': { name: 'Claude Sonnet 4.5', monthlyIncluded: 10000, priority: 2 },
-  'gpt-5.1': { name: 'GPT-5.1', monthlyIncluded: 10000, priority: 3 },
-  'auto': { name: 'Auto (Sonnet)', monthlyIncluded: 10000, priority: 4 },
-  'grok-code-fast-1': { name: 'Grok Code', monthlyIncluded: 10000, priority: 5 },
-  'gemini-3-pro-preview': { name: 'Gemini 3 Pro', monthlyIncluded: 10000, priority: 6 },
+  'claude-4.5-opus-high-thinking': { name: 'Claude Opus 4.5', monthlyIncluded: 1_100_000, priority: 1 }, // ~1.1M tokens
+  'claude-4.5-sonnet-thinking': { name: 'Claude Sonnet 4.5', monthlyIncluded: 2_000_000, priority: 2 },
+  'gpt-5.1': { name: 'GPT-5.1', monthlyIncluded: 2_000_000, priority: 3 },
+  'auto': { name: 'Auto (Sonnet)', monthlyIncluded: 2_400_000, priority: 4 }, // ~2.4M tokens (maior uso)
+  'grok-code-fast-1': { name: 'Grok Code', monthlyIncluded: 2_000_000, priority: 5 },
+  'gemini-3-pro-preview': { name: 'Gemini 3 Pro', monthlyIncluded: 2_000_000, priority: 6 },
 };
 
 // ====== PARSER CSV ======
@@ -133,6 +137,8 @@ const CursorUsageDash: React.FC = () => {
         byModel[model] = {
           model,
           totalTokens: 0,
+          includedTokens: 0,
+          onDemandTokens: 0,
           totalCost: 0,
           requests: 0,
           includedRequests: 0,
@@ -150,10 +156,12 @@ const CursorUsageDash: React.FC = () => {
 
       if (ev.kind === 'On-Demand') {
         byModel[model].onDemandRequests += 1;
+        byModel[model].onDemandTokens += ev.totalTokens;
         byModel[model].onDemandCost += ev.cost;
         onDemandCost += ev.cost;
       } else {
         byModel[model].includedRequests += 1;
+        byModel[model].includedTokens += ev.totalTokens;
         byModel[model].includedCost += ev.cost;
         includedCost += ev.cost;
       }
@@ -289,20 +297,62 @@ const CursorUsageDash: React.FC = () => {
                 <div className="text-2xl font-bold text-[var(--mq-text)]">{stats.totalRequests}</div>
               </div>
               <div className="mq-card p-4 text-center">
-                <div className="text-xs text-[var(--mq-text-muted)] mb-1">Custo Total</div>
-                <div className="text-2xl font-bold text-[var(--mq-primary)]">${stats.totalCost.toFixed(2)}</div>
+                <div className="text-xs text-[var(--mq-text-muted)] mb-1">Total Tokens</div>
+                <div className="text-lg font-bold text-[var(--mq-text)]">
+                  {formatTokens(stats.modelList.reduce((sum, m) => sum + m.totalTokens, 0))}
+                </div>
               </div>
               <div className="mq-card p-4 text-center bg-green-500/10">
                 <div className="flex items-center justify-center gap-1 text-xs text-green-500 mb-1">
-                  <CheckCircle size={12} /> Incluso
+                  <CheckCircle size={12} /> Incluso (Plano)
                 </div>
                 <div className="text-xl font-bold text-green-500">${stats.includedCost.toFixed(2)}</div>
+                <div className="text-xs text-green-500/70 mt-1">
+                  {stats.modelList.reduce((sum, m) => sum + m.includedRequests, 0)} requests
+                </div>
               </div>
               <div className="mq-card p-4 text-center bg-amber-500/10">
                 <div className="flex items-center justify-center gap-1 text-xs text-amber-500 mb-1">
-                  <AlertTriangle size={12} /> Cobrado Extra
+                  <AlertTriangle size={12} /> On-Demand (Extra)
                 </div>
                 <div className="text-xl font-bold text-amber-500">${stats.onDemandCost.toFixed(2)}</div>
+                <div className="text-xs text-amber-500/70 mt-1">
+                  {stats.modelList.reduce((sum, m) => sum + m.onDemandRequests, 0)} requests
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Explicação do Modelo de Cobrança */}
+            <motion.div 
+              className="mq-card mb-6 p-4 bg-blue-500/10 border-blue-500/30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h3 className="font-medium text-blue-500 flex items-center gap-2 mb-2">
+                <DollarSign size={16} /> Como Funciona a Cobrança
+              </h3>
+              <div className="text-sm text-[var(--mq-text-muted)] space-y-2">
+                <div>
+                  <strong className="text-[var(--mq-text)]">1. Limite do Plano Ultra (Included):</strong>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    <li>• Limite mensal = <strong>por TOKENS</strong> (não por requisições)</li>
+                    <li>• Exemplo: ~3.4M tokens incluídos no período (Auto: 2.4M, Opus: 1.1M)</li>
+                    <li>• Dentro do limite: <span className="text-green-500">já pago na assinatura</span></li>
+                    <li>• O custo mostrado é referência do valor consumido do plano</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-[var(--mq-text)]">2. Excesso (On-Demand):</strong>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    <li>• Quando excede o limite de <strong>TOKENS</strong>: <span className="text-amber-500">cobrado extra</span></li>
+                    <li>• Cobrança = <strong>por TOKENS</strong> (input + output tokens)</li>
+                    <li>• Preço varia por modelo (Opus é mais caro que Sonnet)</li>
+                  </ul>
+                </div>
+                <div className="pt-2 border-t border-blue-500/20">
+                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o uso de <strong>tokens</strong>, não apenas requisições. On-Demand é cobrado por tokens excedentes!
+                </div>
               </div>
             </motion.div>
 
@@ -320,8 +370,9 @@ const CursorUsageDash: React.FC = () => {
               {stats.modelList.map((m, i) => {
                 const info = getModelInfo(m.model);
                 const isOnDemandHeavy = m.onDemandRequests > 0;
+                // Limite é por TOKENS - usar apenas tokens Included para calcular %
                 const usagePercent = info.monthlyIncluded > 0 
-                  ? Math.min(100, (m.includedRequests / info.monthlyIncluded) * 100)
+                  ? Math.min(100, (m.includedTokens / info.monthlyIncluded) * 100)
                   : 0;
 
                 return (
@@ -351,14 +402,19 @@ const CursorUsageDash: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Barra de uso */}
+                    {/* Barra de uso - por TOKENS */}
                     {info.monthlyIncluded > 0 && (
                       <div className="mt-3">
                         <div className="flex justify-between text-xs mb-1">
                           <span className="text-[var(--mq-text-muted)]">
-                            {m.includedRequests}/{info.monthlyIncluded} inclusos
+                            {formatTokens(m.includedTokens)}/{formatTokens(info.monthlyIncluded)} tokens (Included)
+                            {m.onDemandTokens > 0 && (
+                              <span className="text-amber-500 ml-1">
+                                +{formatTokens(m.onDemandTokens)} extra
+                              </span>
+                            )}
                           </span>
-                          <span className={usagePercent >= 80 ? 'text-amber-500' : 'text-green-500'}>
+                          <span className={usagePercent >= 100 ? 'text-red-500' : usagePercent >= 80 ? 'text-amber-500' : 'text-green-500'}>
                             {usagePercent.toFixed(0)}%
                           </span>
                         </div>
@@ -410,11 +466,11 @@ const CursorUsageDash: React.FC = () => {
                   <Zap size={16} /> Dicas de Otimização
                 </h3>
                 <ul className="text-sm text-[var(--mq-text-muted)] space-y-1">
-                  <li>• <strong>Claude Opus 4.5</strong>: Use para tarefas complexas. Limite Ultra: ~5.000 req/mês.</li>
-                  <li>• <strong>GPT-5.1</strong>: Bom custo-benefício para código. Limite Ultra: ~10.000 req/mês.</li>
-                  <li>• <strong>Claude Sonnet 4.5</strong>: Equilíbrio entre qualidade e velocidade. Limite Ultra: ~10.000 req/mês.</li>
-                  <li>• <strong>Auto</strong>: Evite - escolhe modelos aleatoriamente.</li>
-                  <li>• Selecione modelo manualmente para controle e otimização.</li>
+                  <li>• <strong>Claude Opus 4.5</strong>: Use para tarefas complexas. Limite Ultra: ~1.1M tokens/mês.</li>
+                  <li>• <strong>Auto</strong>: Maior uso (~2.4M tokens). Evite - escolhe modelos aleatoriamente.</li>
+                  <li>• <strong>GPT-5.1</strong>: Bom custo-benefício para código. Limite Ultra: ~2M tokens/mês.</li>
+                  <li>• <strong>Claude Sonnet 4.5</strong>: Equilíbrio qualidade/velocidade. Limite Ultra: ~2M tokens/mês.</li>
+                  <li>• Selecione modelo manualmente para controle e otimização de tokens.</li>
                 </ul>
               </motion.div>
             )}
