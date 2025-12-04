@@ -20,70 +20,63 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   console.log('[SW] Push recebido:', event);
   
-  let notificationData = {
-    title: NOTIFICATION_TITLE,
-    body: 'Você tem uma nova notificação',
-    icon: '/mindquest_logo_vazado.png',
-    badge: '/mindquest_logo_vazado_small.png',
-    tag: 'mindquest-notification',
-    requireInteraction: false,
-    data: {}
-  };
+  let title = NOTIFICATION_TITLE;
+  let body = 'Você tem uma nova notificação';
+  let icon = '/mindquest_logo_vazado.png';
+  let badge = '/mindquest_logo_vazado_small.png';
+  let tag = 'mindquest-notification';
+  let data = {};
 
-  const showNotificationPromise = event.data
-    ? event.data.text().then((textPayload) => {
-        if (textPayload) {
-          try {
-            const parsed = JSON.parse(textPayload);
-            return {
-              title: parsed.title || notificationData.title,
-              body: parsed.body || notificationData.body,
-              icon: parsed.icon || notificationData.icon,
-              badge: parsed.badge || notificationData.badge,
-              tag: parsed.tag || notificationData.tag,
-              requireInteraction:
-                typeof parsed.requireInteraction === 'boolean'
-                  ? parsed.requireInteraction
-                  : notificationData.requireInteraction,
-              data: parsed.data || notificationData.data
-            };
-          } catch (jsonError) {
-            console.log('[SW] Payload não é JSON, usando texto puro');
-            return {
-              ...notificationData,
-              body: textPayload
-            };
-          }
+  if (event.data) {
+    try {
+      // text() é SÍNCRONO em PushMessageData
+      const textPayload = event.data.text();
+      console.log('[SW] Payload recebido:', textPayload);
+      
+      if (textPayload) {
+        try {
+          const parsed = JSON.parse(textPayload);
+          title = parsed.title || title;
+          body = parsed.body || body;
+          icon = parsed.icon || icon;
+          badge = parsed.badge || badge;
+          tag = parsed.tag || tag;
+          data = parsed.data || data;
+          console.log('[SW] Payload parseado com sucesso:', parsed);
+        } catch (jsonError) {
+          console.log('[SW] Payload não é JSON, usando texto puro');
+          body = textPayload;
         }
-        return notificationData;
-      }).catch((error) => {
-        console.error('[SW] Erro ao ler payload do push:', error);
-        return notificationData;
-      })
-    : Promise.resolve(notificationData);
+      }
+    } catch (error) {
+      console.error('[SW] Erro ao ler payload:', error);
+    }
+  }
+
+  console.log('[SW] Exibindo notificação:', { title, body });
 
   event.waitUntil(
-    showNotificationPromise.then((finalData) => {
-      return self.registration.showNotification(finalData.title, {
-        body: finalData.body,
-        icon: finalData.icon,
-        badge: finalData.badge,
-        tag: finalData.tag,
-        requireInteraction: finalData.requireInteraction,
-        data: finalData.data,
+    self.registration.showNotification(title, {
+      body: body,
+      icon: icon,
+      badge: badge,
+      tag: tag,
+      data: data,
       vibrate: [200, 100, 200],
       actions: [
         {
           action: 'open',
-          title: 'Abrir',
-          icon: '/mindquest_logo_vazado_small.png'
+          title: 'Abrir'
         },
         {
           action: 'close',
           title: 'Fechar'
         }
       ]
-      });
+    }).then(() => {
+      console.log('[SW] Notificação exibida com sucesso');
+    }).catch((err) => {
+      console.error('[SW] Erro ao exibir notificação:', err);
     })
   );
 });
@@ -98,16 +91,13 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  // Abrir/focar a aplicação
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Se já existe uma janela aberta, focar nela
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           return client.focus();
         }
       }
-      // Caso contrário, abrir nova janela
       if (clients.openWindow) {
         const url = event.notification.data?.url || '/app/1.3';
         return clients.openWindow(url);
@@ -120,4 +110,3 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('error', (event) => {
   console.error('[SW] Erro no Service Worker:', event);
 });
-
