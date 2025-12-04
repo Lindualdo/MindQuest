@@ -34,6 +34,7 @@ import ConquistasVidaPageV13 from './pages/App/v1.3/ConquistasVidaPageV13';
 import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivosPageV13';
 import ConexaoAcoesSabotadoresPageV13 from './pages/App/v1.3/ConexaoAcoesSabotadoresPageV13';
 import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
+import CursorUsageDash from './pages/App/v1.3/CursorUsageDash';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
@@ -313,6 +314,9 @@ function App() {
         break;
       case 'niveisJornada':
         page = <NiveisJornadaPageV13 />;
+        break;
+      case 'cursorUsage':
+        page = <CursorUsageDash />;
         break;
       case 'conversar':
       case 'dashboard':

@@ -9,7 +9,8 @@ import {
   Download,
   Shield, 
   HelpCircle,
-  ChevronRight 
+  ChevronRight,
+  Cpu
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -119,6 +120,15 @@ const AjustesPageV13: React.FC = () => {
       title: 'Exportar dados',
       subtitle: 'Conversas, emoções, humor, energia, sabotadores e perfil',
       onClick: handleEmBreve,
+    },
+    {
+      id: 'cursorUsage',
+      icon: <Cpu size={20} className="text-[var(--mq-accent)]" />,
+      title: 'Cursor Usage',
+      subtitle: 'Monitor de tokens e custos do Cursor IDE',
+      onClick: () => {
+        setView('cursorUsage');
+      },
     },
     {
       id: 'seguranca',
