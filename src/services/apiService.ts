@@ -1601,6 +1601,96 @@ class ApiService {
     return this.remoteBaseUrl;
   }
 
+  /**
+   * Salvar anotação de conversa ou quest
+   */
+  public async salvarAnotacao(
+    tipo: 'conversa' | 'quest',
+    id: string,
+    anotacao: string | null,
+    usuarioId: string
+  ): Promise<{ success: boolean; tipo: string; id: string; anotacao: string | null; atualizado_em: string }> {
+    if (!tipo || !['conversa', 'quest'].includes(tipo)) {
+      throw new Error('tipo deve ser "conversa" ou "quest"');
+    }
+    if (!id) {
+      throw new Error('id é obrigatório');
+    }
+    if (!usuarioId) {
+      throw new Error('usuario_id é obrigatório');
+    }
+
+    const endpoint = '/anotacoes';
+    const body = {
+      tipo,
+      id,
+      anotacao: anotacao !== null && anotacao !== undefined ? String(anotacao) : null,
+      usuario_id: usuarioId,
+    };
+
+    const result = await this.makeRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }, false);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Falha ao salvar anotação');
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      throw new Error('Formato inesperado na resposta de anotação');
+    }
+
+    return payload as { success: boolean; tipo: string; id: string; anotacao: string | null; atualizado_em: string };
+  }
+
+  /**
+   * Buscar anotação de conversa ou quest
+   */
+  public async buscarAnotacao(
+    tipo: 'conversa' | 'quest',
+    id: string,
+    usuarioId: string
+  ): Promise<{ success: boolean; tipo: string; id: string; anotacao: string | null; atualizado_em: string | null }> {
+    if (!tipo || !['conversa', 'quest'].includes(tipo)) {
+      throw new Error('tipo deve ser "conversa" ou "quest"');
+    }
+    if (!id) {
+      throw new Error('id é obrigatório');
+    }
+    if (!usuarioId) {
+      throw new Error('usuario_id é obrigatório');
+    }
+
+    const endpoint = `/anotacoes?tipo=${encodeURIComponent(tipo)}&id=${encodeURIComponent(id)}&user_id=${encodeURIComponent(usuarioId)}`;
+    const result = await this.makeRequest(endpoint, undefined, true);
+
+    if (!result.success) {
+      // Se não encontrou, retornar objeto vazio com anotacao null
+      return { success: true, tipo, id, anotacao: null, atualizado_em: null };
+    }
+
+    let payload: unknown = result.response;
+    if (Array.isArray(payload)) {
+      payload = payload[0];
+    } else if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+      payload = (payload as Record<string, unknown>).data;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return { success: true, tipo, id, anotacao: null, atualizado_em: null };
+    }
+
+    return payload as { success: boolean; tipo: string; id: string; anotacao: string | null; atualizado_em: string | null };
+  }
+
   public async getPerfilBigFive(userId: string): Promise<BigFivePerfilResponse> {
     if (!userId) {
       throw new Error('Usuário inválido');

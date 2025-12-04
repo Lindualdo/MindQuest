@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -8,6 +8,7 @@ import {
   BookOpen,
   Loader2,
   CheckCircle2,
+  StickyNote,
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -15,6 +16,7 @@ import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
 import { format } from 'date-fns';
 import type { QuestDetailCatalogoBaseCientifica } from '@/types/emotions';
+import { apiService } from '@/services/apiService';
 
 const QuestDetailPageV13 = () => {
   const {
@@ -38,11 +40,91 @@ const QuestDetailPageV13 = () => {
 
   const [activeTab, setActiveTab] = useState<TabId>('conversar');
   const [isConcluindo, setIsConcluindo] = useState(false);
+  const [anotacaoLocal, setAnotacaoLocal] = useState<string>('');
+  const [salvandoAnotacao, setSalvandoAnotacao] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }, []);
+
+  // Obter recorrência selecionada e seu ID para anotações
+  const { recorrenciaId, anotacaoAtual } = useMemo(() => {
+    if (!detail.recorrencias) return { recorrenciaId: null, anotacaoAtual: null };
+    let dias: any[] = [];
+    if (Array.isArray(detail.recorrencias)) {
+      dias = detail.recorrencias;
+    } else if (typeof detail.recorrencias === 'object' && 'dias' in detail.recorrencias) {
+      dias = (detail.recorrencias as any).dias || [];
+    }
+    
+    const dataReferencia = questDetailSelectedDate || format(new Date(), 'yyyy-MM-dd');
+    const recorrencia = dias.find((dia: any) => {
+      const dataCampo = dia.data || dia.data_planejada;
+      if (!dataCampo) return false;
+      try {
+        const dataDia = typeof dataCampo === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dataCampo)
+          ? dataCampo
+          : format(new Date(dataCampo), 'yyyy-MM-dd');
+        return dataDia === dataReferencia;
+      } catch {
+        return false;
+      }
+    });
+    
+    return {
+      recorrenciaId: recorrencia?.id || null,
+      anotacaoAtual: recorrencia?.anotacoes_quest || null
+    };
+  }, [detail.recorrencias, questDetailSelectedDate]);
+
+  // Sincronizar anotação local com a recorrência quando mudar
+  useEffect(() => {
+    setAnotacaoLocal(anotacaoAtual || '');
+  }, [anotacaoAtual]);
+
+  // Auto-save com debounce
+  const salvarAnotacao = useCallback(async (texto: string) => {
+    if (!recorrenciaId || !dashboardData?.usuario?.id) return;
+
+    setSalvandoAnotacao(true);
+    try {
+      const anotacaoFinal = texto.trim().length > 0 ? texto.trim() : null;
+      await apiService.salvarAnotacao('quest', recorrenciaId, anotacaoFinal, dashboardData.usuario.id);
+      
+      // Recarregar snapshot para sincronizar
+      await loadQuestSnapshot();
+    } catch (error) {
+      console.error('[QuestDetail] Erro ao salvar anotação:', error);
+    } finally {
+      setSalvandoAnotacao(false);
+    }
+  }, [recorrenciaId, dashboardData?.usuario?.id, loadQuestSnapshot]);
+
+  const handleAnotacaoChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const novoTexto = e.target.value;
+    setAnotacaoLocal(novoTexto);
+
+    // Limpar timer anterior
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Salvar após 1.5 segundos sem digitar
+    debounceTimerRef.current = setTimeout(() => {
+      void salvarAnotacao(novoTexto);
+    }, 1500);
+  }, [salvarAnotacao]);
+
+  // Limpar timer ao desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   const handleBack = () => {
@@ -314,6 +396,7 @@ const QuestDetailPageV13 = () => {
     
     const podeConcluir = !isConversaQuest && detail.status && !deveOcultar;
     
+    
     console.log('[QuestDetail] 🔍 Decisão botão:', {
       dataReferencia,
       recorrenciaSelecionadaConcluida,
@@ -362,6 +445,26 @@ const QuestDetailPageV13 = () => {
             </p>
           )}
         </div>
+
+        {/* Anotação do usuário (sempre visível, inline editável - no início) */}
+        {recorrenciaId && dashboardData?.usuario?.id && (
+          <div className="mb-4 rounded-2xl border-2 border-[var(--mq-primary)] bg-[var(--mq-primary-light)] px-4 py-3">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-[var(--mq-primary)]">
+              <StickyNote size={14} />
+              <span>Sua Anotação</span>
+              {salvandoAnotacao && (
+                <span className="ml-auto text-[0.65rem] opacity-70">Salvando...</span>
+              )}
+            </div>
+            <textarea
+              value={anotacaoLocal}
+              onChange={handleAnotacaoChange}
+              placeholder="Digite sua anotação aqui..."
+              className="w-full min-h-[60px] resize-none rounded-xl border-0 bg-transparent px-0 py-1 text-sm leading-relaxed text-[var(--mq-text)] placeholder:text-[var(--mq-text-subtle)] focus:outline-none focus:ring-0"
+              rows={3}
+            />
+          </div>
+        )}
 
         {/* Benefícios */}
         {baseCientifica?.objetivo && (
@@ -483,6 +586,7 @@ const QuestDetailPageV13 = () => {
             </div>
           </button>
         )}
+        
       </motion.section>
     );
   };

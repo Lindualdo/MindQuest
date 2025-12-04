@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, MessageSquare, ArrowUpRight, Star } from 'lucide-react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { ArrowLeft, MessageSquare, ArrowUpRight, Star, StickyNote } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { format } from 'date-fns';
+import { apiService } from '@/services/apiService';
 
 const ConversaResumoPageV13 = () => {
   const {
@@ -31,6 +32,9 @@ const ConversaResumoPageV13 = () => {
     'Aldo';
 
   const [activeTab, setActiveTab] = useState<TabId>('conversar');
+  const [anotacaoLocal, setAnotacaoLocal] = useState<string>('');
+  const [salvandoAnotacao, setSalvandoAnotacao] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const conversaIdAtual = useMemo(() => {
     if (!conversaResumo) return null;
@@ -53,6 +57,58 @@ const ConversaResumoPageV13 = () => {
     }
   }, [selectedConversationId, conversaResumo, conversaIdAtual, loadConversaResumo]);
 
+  // Sincronizar anotação local com o resumo quando carregar
+  useEffect(() => {
+    if (conversaResumo) {
+      const anotacaoAtual = (conversaResumo as any)?.anotacoes_usr || '';
+      setAnotacaoLocal(anotacaoAtual);
+    }
+  }, [conversaResumo]);
+
+  // Auto-save com debounce
+  const salvarAnotacao = useCallback(async (texto: string) => {
+    if (!conversaIdAtual || !dashboardData?.usuario?.id) return;
+
+    setSalvandoAnotacao(true);
+    try {
+      const anotacaoFinal = texto.trim().length > 0 ? texto.trim() : null;
+      await apiService.salvarAnotacao('conversa', conversaIdAtual, anotacaoFinal, dashboardData.usuario.id);
+      
+      // Recarregar resumo para sincronizar
+      if (selectedConversationId) {
+        await loadConversaResumo(selectedConversationId);
+      }
+    } catch (error) {
+      console.error('[ConversaResumo] Erro ao salvar anotação:', error);
+    } finally {
+      setSalvandoAnotacao(false);
+    }
+  }, [conversaIdAtual, dashboardData?.usuario?.id, selectedConversationId, loadConversaResumo]);
+
+  const handleAnotacaoChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const novoTexto = e.target.value;
+    setAnotacaoLocal(novoTexto);
+
+    // Limpar timer anterior
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Salvar após 1.5 segundos sem digitar
+    debounceTimerRef.current = setTimeout(() => {
+      void salvarAnotacao(novoTexto);
+    }, 1500);
+  }, [salvarAnotacao]);
+
+  // Limpar timer ao desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   const paragraphs = useMemo(() => {
     const texto = conversaResumo?.resumo_conversa?.trim();
     if (!texto) return [];
@@ -70,6 +126,7 @@ const ConversaResumoPageV13 = () => {
       'xp_conversa',
       'xp',
       'pontos',
+      'anotacoes_usr', // Removido dos detalhes extras - já exibido no campo inline
     ]);
     return Object.entries(conversaResumo)
       .filter(([key, value]) => !ignorar.has(key) && value !== undefined && value !== null)
@@ -186,6 +243,26 @@ const ConversaResumoPageV13 = () => {
                     )}
                   </div>
 
+                  {/* Anotação do usuário (sempre visível, inline editável - abaixo de data e pontos) */}
+                  {conversaIdAtual && dashboardData?.usuario?.id && (
+                    <div className="rounded-2xl border-2 border-[var(--mq-primary)] bg-[var(--mq-primary-light)] px-4 py-3">
+                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-[var(--mq-primary)]">
+                        <StickyNote size={14} />
+                        <span>Sua Anotação</span>
+                        {salvandoAnotacao && (
+                          <span className="ml-auto text-[0.65rem] opacity-70">Salvando...</span>
+                        )}
+                      </div>
+                      <textarea
+                        value={anotacaoLocal}
+                        onChange={handleAnotacaoChange}
+                        placeholder="Digite sua anotação aqui..."
+                        className="w-full min-h-[60px] resize-none rounded-xl border-0 bg-transparent px-0 py-1 text-sm leading-relaxed text-[var(--mq-text)] placeholder:text-[var(--mq-text-subtle)] focus:outline-none focus:ring-0"
+                        rows={3}
+                      />
+                    </div>
+                  )}
+
                   {paragraphs.length > 0 && (
                     <div className="space-y-3 rounded-2xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-4 py-3 text-sm leading-relaxed text-[var(--mq-text)]">
                       {paragraphs.map((paragraph, index) => (
@@ -288,6 +365,7 @@ const ConversaResumoPageV13 = () => {
             </div>
           </Card>
         )}
+
       </main>
 
       <BottomNavV1_3

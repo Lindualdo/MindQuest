@@ -154,6 +154,8 @@ const ENDPOINT_MAP: Record<string, string> = {
   // Sabotadores
   'acoes/sabotador': '/acoes/sabotador',
   'ocorrencias/sabotador': '/ocorrencias/sabotador',
+  // Anotações
+  'anotacoes': '/anotacoes',
 };
 
 // Endpoints que aceitam passagem direta de query params
@@ -163,7 +165,7 @@ const SIMPLE_GET_ENDPOINTS = [
   'acoes/sabotador', 'ocorrencias/sabotador', 'full_chat',
   'objetivos', 'perfil-pessoal', 'notificacoes', 
   'conexao-objetivos', 'conexao-sabotadores', 'conquista-objetivo',
-  'checkin-objetivo',
+  'checkin-objetivo', 'anotacoes',
 ];
 
 export default async function handler(req: any, res: any) {
@@ -527,6 +529,46 @@ export default async function handler(req: any, res: any) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id, objetivo_id }),
+        });
+        await handleResponse(upstreamResponse, res);
+        return;
+      }
+
+      if (endpoint === 'anotacoes') {
+        const usuarioId = readUsuarioId(parsedBody);
+        const tipo = parsedBody?.tipo;
+        const id = parsedBody?.id;
+        const anotacao = parsedBody?.anotacao;
+        
+        if (!usuarioId) {
+          res.status(400).json({ success: false, error: 'usuario_id obrigatório' });
+          return;
+        }
+        
+        if (!tipo || !['conversa', 'quest'].includes(tipo)) {
+          res.status(400).json({ success: false, error: 'tipo deve ser "conversa" ou "quest"' });
+          return;
+        }
+        
+        if (!id) {
+          res.status(400).json({ success: false, error: 'id é obrigatório' });
+          return;
+        }
+        
+        // Garantir que anotacao seja string ou null (não undefined)
+        const anotacaoFinal = anotacao !== undefined && anotacao !== null ? String(anotacao) : null;
+        
+        const payload = {
+          tipo: String(tipo),
+          id: String(id),
+          anotacao: anotacaoFinal,
+          usuario_id: String(usuarioId),
+        };
+        
+        const upstreamResponse = await fetch(remoteEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
         await handleResponse(upstreamResponse, res);
         return;
