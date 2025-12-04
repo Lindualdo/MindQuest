@@ -4,36 +4,38 @@
 
 ## Visão Geral
 
-Sistema gamificado de **monitoramento emocional** baseado na **Roda de Emoções de Plutchik**.
+Plataforma de desenvolvimento pessoal que transforma **conversas em ações práticas**. Identifica padrões mentais que travam o progresso e oferece micro-ações personalizadas (quests) para mudança comportamental.
 
-## Versão Atual
+## Framework MindQuest
 
-**v1.3** - Mobile-first, design moderno
+**CONVERSAR → ENTENDER → AGIR → EVOLUIR**
 
-## Funcionalidades Core
+### 1. CONVERSAR (Motor do Sistema)
+- Mentor IA conduz conversas guiadas via WhatsApp/Web
+- Foco em desenvolvimento pessoal, padrões mentais e objetivos
+- Impulsiona todo o restante do sistema
+- Prepara contexto rico para análise automatizada
 
-### 1. Conversar (Mentor IA)
-- Conversas guiadas via WhatsApp/Web
-- Mentor inteligente que entende contexto
-- Análise emocional em tempo real
-
-### 2. Entender (Dashboard Emocional)
+### 2. ENTENDER (Análise Automatizada)
+- Experts detectam: emoções, humor, energia, sabotadores
 - Roda de emoções (Plutchik)
-- Análise de humor e energia
-- Insights personalizados
-- Sabotadores detectados
-- Perfil de personalidade
+- Gera quests e insights personalizados
+- Dashboard emocional em tempo real
+- Perfil de personalidade (Big Five)
 
-### 3. Agir (Quests)
-- Sistema gamificado de ações
+### 3. AGIR (Execução)
+- Sistema gamificado de quests
 - XP e níveis
-- Quests baseadas em objetivos
-- Conquistas e progresso
+- Mentor valida progresso e detecta bloqueios
+- Ajuda a destravar dificuldades nas ações
 
-### 4. Evoluir (Jornada)
-- Progresso na jornada
-- Níveis e evolução
-- Histórico de conquistas
+### 4. EVOLUIR (Visão Macro)
+- Medir se ações levam ao objetivo final
+- Progresso semanal e histórico de conquistas
+- Mentor celebra conquistas e motiva usuário
+- Evolução pessoal mensurável
+
+**Papel do Mentor:** Motor que impulsiona todo o sistema através de conversas guiadas, atuando principalmente em CONVERSAR, mas também apoiando em AGIR e EVOLUIR.
 
 ## Conceitos Principais
 
