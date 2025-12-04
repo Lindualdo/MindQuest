@@ -26,7 +26,7 @@ BDFvqrQTPxtRfsh79LQ5DsVsDUtAOOulOwRE1BKMkPklnYQjqbbftZjFemkyJDxf5r8krPpGJL1TNBMT
 ### 2. VAPID_PRIVATE_KEY
 
 ```
-a3SPu6YIaQzf2fVHfvU-QYCNZn0e0nBqMcQejHFH7WU
+a3SPu6YIaQzf2fVHfvU-CFyxiBxX_RsDQ9uSt4eE6QE
 ```
 
 **Configurar em:**

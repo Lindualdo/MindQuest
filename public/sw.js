@@ -30,45 +30,63 @@ self.addEventListener('push', (event) => {
     data: {}
   };
 
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      notificationData = {
-        ...notificationData,
-        title: data.title || NOTIFICATION_TITLE,
-        body: data.body || notificationData.body,
-        icon: data.icon || notificationData.icon,
-        badge: data.badge || notificationData.badge,
-        tag: data.tag || notificationData.tag,
-        requireInteraction: data.requireInteraction || false,
-        data: data.data || {}
-      };
-    } catch (e) {
-      console.error('[SW] Erro ao parsear dados do push:', e);
-      notificationData.body = event.data.text() || notificationData.body;
-    }
-  }
+  const showNotificationPromise = event.data
+    ? event.data.text().then((text) => {
+        if (text) {
+          try {
+            const data = JSON.parse(text);
+            return {
+              title: data.title || NOTIFICATION_TITLE,
+              body: data.body || notificationData.body,
+              icon: data.icon || notificationData.icon,
+              badge: data.badge || notificationData.badge,
+              tag: data.tag || notificationData.tag,
+              requireInteraction: data.requireInteraction || false,
+              data: data.data || {}
+            };
+          } catch (jsonError) {
+            // Se não for JSON, usar como texto simples
+            console.log('[SW] Dados não são JSON, usando como texto:', text);
+            return {
+              title: NOTIFICATION_TITLE,
+              body: text || notificationData.body,
+              icon: notificationData.icon,
+              badge: notificationData.badge,
+              tag: notificationData.tag,
+              requireInteraction: false,
+              data: {}
+            };
+          }
+        }
+        return notificationData;
+      }).catch((e) => {
+        console.error('[SW] Erro ao processar dados do push:', e);
+        return notificationData;
+      })
+    : Promise.resolve(notificationData);
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      tag: notificationData.tag,
-      requireInteraction: notificationData.requireInteraction,
-      data: notificationData.data,
+    showNotificationPromise.then((finalData) => {
+      return self.registration.showNotification(finalData.title, {
+        body: finalData.body,
+        icon: finalData.icon,
+        badge: finalData.badge,
+        tag: finalData.tag,
+        requireInteraction: finalData.requireInteraction,
+        data: finalData.data,
       vibrate: [200, 100, 200],
-      actions: [
-        {
-          action: 'open',
-          title: 'Abrir',
-          icon: '/mindquest_logo_vazado_small.png'
-        },
-        {
-          action: 'close',
-          title: 'Fechar'
-        }
-      ]
+        actions: [
+          {
+            action: 'open',
+            title: 'Abrir',
+            icon: '/mindquest_logo_vazado_small.png'
+          },
+          {
+            action: 'close',
+            title: 'Fechar'
+          }
+        ]
+      });
     })
   );
 });
