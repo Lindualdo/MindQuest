@@ -132,10 +132,15 @@ const CursorUsageDash: React.FC = () => {
     if (!events.length) return null;
 
     // Filtrar apenas eventos do ciclo atual (após data de corte)
+    // Data de corte: 04/12/2025 às 09:00 UTC
     const cycleStart = CYCLE_START_DATE;
+    const cycleStartTime = cycleStart.getTime();
+    
     const cycleEvents = events.filter(ev => {
       const eventDate = new Date(ev.date);
-      return eventDate >= cycleStart;
+      const eventTime = eventDate.getTime();
+      // Apenas eventos a partir de 09:00 UTC do dia 04/12/2025
+      return eventTime >= cycleStartTime;
     });
 
     if (!cycleEvents.length) {
