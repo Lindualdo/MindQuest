@@ -4,7 +4,7 @@
 
 Esta pasta contém documentação **compacta e essencial**.
 
-## Documentos
+## Documentos de Referência
 
 | Arquivo | Conteúdo |
 |---------|----------|
@@ -14,6 +14,13 @@ Esta pasta contém documentação **compacta e essencial**.
 | `n8n.md` | Manual técnico n8n/MCP |
 | `postgres.md` | Conexão e queries |
 | `api.md` | Endpoints API (router consolidado) |
+
+## Prompts Especializados
+
+| Prompt | Uso |
+|--------|-----|
+| `prompt_workflows.md` | Especialista em workflows n8n |
+| `prompt_frontend.md` | Especialista em frontend React |
 
 ## Uso
 
