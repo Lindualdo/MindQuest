@@ -50,16 +50,18 @@ interface ModelStats {
 const CYCLE_START_DATE = new Date('2025-12-04T09:00:00.000Z'); // 04/12/2025 às 09:00 UTC
 
 // ====== LIMITES DO CURSOR - PLANO ULTRA ======
-// Plano Ultra: Limite por TOKENS (não por requisições)
-// Baseado na página de Billing: ~3.4M tokens incluídos no período
-// Distribuição aproximada por modelo (ajustar conforme uso real)
-const CURSOR_LIMITS = {
-  'claude-4.5-opus-high-thinking': { name: 'Claude Opus 4.5', monthlyIncluded: 1_100_000, priority: 1 }, // ~1.1M tokens
-  'claude-4.5-sonnet-thinking': { name: 'Claude Sonnet 4.5', monthlyIncluded: 2_000_000, priority: 2 },
-  'gpt-5.1': { name: 'GPT-5.1', monthlyIncluded: 2_000_000, priority: 3 },
-  'auto': { name: 'Auto (Sonnet)', monthlyIncluded: 2_400_000, priority: 4 }, // ~2.4M tokens (maior uso)
-  'grok-code-fast-1': { name: 'Grok Code', monthlyIncluded: 2_000_000, priority: 5 },
-  'gemini-3-pro-preview': { name: 'Gemini 3 Pro', monthlyIncluded: 2_000_000, priority: 6 },
+// Plano Ultra: Limite por VALOR (US$ 400 incluídos por mês)
+// Baseado na documentação oficial: US$ 400 em créditos mensais para inferência
+const ULTRA_PLAN_LIMIT = 400.0; // US$ 400 incluídos no plano
+
+// Nomes dos modelos para exibição
+const MODEL_NAMES: Record<string, string> = {
+  'claude-4.5-opus-high-thinking': 'Claude Opus 4.5',
+  'claude-4.5-sonnet-thinking': 'Claude Sonnet 4.5',
+  'gpt-5.1': 'GPT-5.1',
+  'auto': 'Auto (Sonnet)',
+  'grok-code-fast-1': 'Grok Code',
+  'gemini-3-pro-preview': 'Gemini 3 Pro',
 };
 
 // ====== PARSER CSV ======
@@ -205,36 +207,37 @@ const CursorUsageDash: React.FC = () => {
       }
     });
 
-    // Recalcular Included vs On-Demand baseado nos limites do plano
-    // Se o uso exceder o limite, apenas o limite é "Included", o restante é "On-Demand"
-    Object.keys(byModel).forEach(modelKey => {
-      const modelData = byModel[modelKey];
-      const modelInfo = CURSOR_LIMITS[modelKey as keyof typeof CURSOR_LIMITS];
+    // Recalcular Included vs On-Demand baseado no limite de VALOR do plano
+    // Limite: US$ 400 incluídos por mês
+    // Se o custo Included exceder o limite, apenas o limite é "Included", o restante é "On-Demand"
+    
+    if (includedCost > ULTRA_PLAN_LIMIT) {
+      // Excedeu o limite de valor incluído
+      const excessValue = includedCost - ULTRA_PLAN_LIMIT;
       
-      if (modelInfo && modelInfo.monthlyIncluded > 0) {
-        // Se o uso Included exceder o limite, redistribuir apenas os tokens
-        if (modelData.includedTokens > modelInfo.monthlyIncluded) {
-          const excessTokens = modelData.includedTokens - modelInfo.monthlyIncluded;
-          // Mover excedente para On-Demand (apenas tokens, requests permanecem como Included)
+      // Redistribuir o excedente proporcionalmente entre os modelos
+      Object.keys(byModel).forEach(modelKey => {
+        const modelData = byModel[modelKey];
+        if (modelData.includedCost > 0) {
+          const modelRatio = modelData.includedCost / includedCost;
+          const modelExcess = excessValue * modelRatio;
+          
+          // Mover excedente para On-Demand
+          modelData.onDemandCost += modelExcess;
+          modelData.includedCost -= modelExcess;
+          
+          // Redistribuir tokens proporcionalmente
+          const costRatio = modelData.includedCost / (modelData.includedCost + modelExcess || 1);
+          const excessTokens = Math.round(modelData.includedTokens * (1 - costRatio));
           modelData.onDemandTokens += excessTokens;
-          modelData.includedTokens = modelInfo.monthlyIncluded;
-          // Requests permanecem como Included (não redistribuímos requests)
+          modelData.includedTokens -= excessTokens;
         }
-      }
-    });
-
-    // Recalcular totais após redistribuição
-    includedCost = 0;
-    onDemandCost = 0;
-    Object.values(byModel).forEach(modelData => {
-      // Recalcular custos proporcionalmente
-      const includedRatio = modelData.includedTokens / (modelData.totalTokens || 1);
-      const onDemandRatio = modelData.onDemandTokens / (modelData.totalTokens || 1);
-      modelData.includedCost = modelData.totalCost * includedRatio;
-      modelData.onDemandCost = modelData.totalCost * onDemandRatio;
-      includedCost += modelData.includedCost;
-      onDemandCost += modelData.onDemandCost;
-    });
+      });
+      
+      // Atualizar totais
+      includedCost = ULTRA_PLAN_LIMIT;
+      onDemandCost = totalCost - ULTRA_PLAN_LIMIT;
+    }
 
     // Ordenar por custo total
     const modelList = Object.values(byModel).sort((a, b) => b.totalCost - a.totalCost);
@@ -272,6 +275,9 @@ const CursorUsageDash: React.FC = () => {
         daysRemaining,
         daysInMonth,
       },
+      planLimit: ULTRA_PLAN_LIMIT,
+      planLimitUsed: includedCost,
+      planLimitPercent: (includedCost / ULTRA_PLAN_LIMIT) * 100,
     };
   }, [events]);
 
@@ -315,8 +321,8 @@ const CursorUsageDash: React.FC = () => {
     return n.toString();
   };
 
-  const getModelInfo = (model: string) => {
-    return CURSOR_LIMITS[model as keyof typeof CURSOR_LIMITS] || { name: model, monthlyIncluded: 0, priority: 99 };
+  const getModelName = (model: string) => {
+    return MODEL_NAMES[model] || model;
   };
 
   return (
@@ -450,7 +456,7 @@ const CursorUsageDash: React.FC = () => {
                 </div>
                 <div className="text-xl font-bold text-green-500">${stats.includedCost.toFixed(2)}</div>
                 <div className="text-xs text-green-500/70 mt-1">
-                  {stats.modelList.reduce((sum, m) => sum + m.includedRequests, 0)} requests
+                  ${stats.planLimit?.toFixed(0) ?? '400'} incluídos • {stats.planLimitPercent?.toFixed(1) ?? '0'}% usado
                 </div>
               </div>
               <div className="mq-card p-4 text-center bg-amber-500/10">
@@ -463,6 +469,42 @@ const CursorUsageDash: React.FC = () => {
                 </div>
               </div>
             </motion.div>
+
+            {/* Indicador de Limite do Plano */}
+            {stats.planLimit !== undefined && stats.planLimitPercent !== undefined && (
+              <motion.div 
+                className="mq-card mb-6 p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-[var(--mq-text)]">
+                    Limite do Plano Ultra (Included)
+                  </span>
+                  <span className={`text-sm font-bold ${
+                    stats.planLimitPercent >= 100 ? 'text-red-500' :
+                    stats.planLimitPercent >= 80 ? 'text-amber-500' : 'text-green-500'
+                  }`}>
+                    ${stats.includedCost.toFixed(2)} / ${stats.planLimit.toFixed(0)} ({stats.planLimitPercent.toFixed(1)}%)
+                  </span>
+                </div>
+                <div className="h-3 bg-[var(--mq-bar)] rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${
+                      stats.planLimitPercent >= 100 ? 'bg-red-500' :
+                      stats.planLimitPercent >= 80 ? 'bg-amber-500' : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min(100, stats.planLimitPercent)}%` }}
+                  />
+                </div>
+                {stats.planLimitPercent >= 100 && (
+                  <div className="mt-2 text-xs text-red-500 font-medium">
+                    ⚠️ Limite de ${stats.planLimit.toFixed(0)} incluídos excedido! Uso adicional será cobrado como On-Demand.
+                  </div>
+                )}
+              </motion.div>
+            )}
 
             {/* Explicação do Modelo de Cobrança */}
             <motion.div 
@@ -478,22 +520,22 @@ const CursorUsageDash: React.FC = () => {
                 <div>
                   <strong className="text-[var(--mq-text)]">1. Limite do Plano Ultra (Included):</strong>
                   <ul className="ml-4 mt-1 space-y-1">
-                    <li>• Limite mensal = <strong>por TOKENS</strong> (não por requisições)</li>
-                    <li>• Exemplo: ~3.4M tokens incluídos no período (Auto: 2.4M, Opus: 1.1M)</li>
+                    <li>• Limite mensal = <strong>US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos</strong> (por valor, não por tokens)</li>
                     <li>• Dentro do limite: <span className="text-green-500">já pago na assinatura</span></li>
-                    <li>• O custo mostrado é referência do valor consumido do plano</li>
+                    <li>• O custo mostrado é o valor real consumido do plano</li>
+                    <li>• Tokens variam por modelo (Opus é mais caro por token que Sonnet)</li>
                   </ul>
                 </div>
                 <div>
                   <strong className="text-[var(--mq-text)]">2. Excesso (On-Demand):</strong>
                   <ul className="ml-4 mt-1 space-y-1">
-                    <li>• Quando excede o limite de <strong>TOKENS</strong>: <span className="text-amber-500">cobrado extra</span></li>
-                    <li>• Cobrança = <strong>por TOKENS</strong> (input + output tokens)</li>
+                    <li>• Quando excede US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos: <span className="text-amber-500">cobrado extra</span></li>
+                    <li>• Cobrança = <strong>por valor</strong> (custo real do modelo usado)</li>
                     <li>• Preço varia por modelo (Opus é mais caro que Sonnet)</li>
                   </ul>
                 </div>
                 <div className="pt-2 border-t border-blue-500/20">
-                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o uso de <strong>tokens</strong>, não apenas requisições. On-Demand é cobrado por tokens excedentes!
+                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o <strong>valor usado</strong> (${stats.planLimitUsed?.toFixed(2) ?? stats.includedCost.toFixed(2)} / ${stats.planLimit?.toFixed(0) ?? '400'}). Quando exceder ${stats.planLimit?.toFixed(0) ?? '400'}, uso adicional será cobrado como On-Demand!
                 </div>
               </div>
             </motion.div>
@@ -518,12 +560,9 @@ const CursorUsageDash: React.FC = () => {
 
             <div className="space-y-3">
               {stats.modelList.map((m, i) => {
-                const info = getModelInfo(m.model);
-                const isOnDemandHeavy = m.onDemandRequests > 0;
-                // Limite é por TOKENS - calcular % real (pode exceder 100% se ultrapassar limite)
-                const usagePercent = info.monthlyIncluded > 0 
-                  ? (m.includedTokens / info.monthlyIncluded) * 100
-                  : 0;
+                const modelName = getModelName(m.model);
+                const isOnDemandHeavy = m.onDemandCost > 0;
+                const totalModelValue = m.includedCost + m.onDemandCost;
 
                 return (
                   <motion.div 
@@ -536,7 +575,7 @@ const CursorUsageDash: React.FC = () => {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <div className="font-medium text-[var(--mq-text)] flex items-center gap-2">
-                          {info.name}
+                          {modelName}
                           {isOnDemandHeavy && (
                             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500">
                               On-Demand
@@ -552,42 +591,36 @@ const CursorUsageDash: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Barra de uso - por TOKENS */}
-                    {info.monthlyIncluded > 0 && (
-                      <div className="mt-3">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-[var(--mq-text-muted)]">
-                            {formatTokens(m.includedTokens)}/{formatTokens(info.monthlyIncluded)} tokens (Included)
-                            {m.onDemandTokens > 0 && (
-                              <span className="text-amber-500 ml-1">
-                                +{formatTokens(m.onDemandTokens)} extra
+                    {/* Informações de valor */}
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs mb-2">
+                        <div className="space-y-1">
+                          <div className="text-[var(--mq-text-muted)]">
+                            <span className="text-green-500">Included: ${m.includedCost.toFixed(2)}</span>
+                            {m.onDemandCost > 0 && (
+                              <span className="text-amber-500 ml-2">
+                                • On-Demand: ${m.onDemandCost.toFixed(2)}
                               </span>
                             )}
-                          </span>
-                          <span className={usagePercent >= 100 ? 'text-red-500' : usagePercent >= 80 ? 'text-amber-500' : 'text-green-500'}>
-                            {usagePercent.toFixed(0)}%
-                          </span>
-                        </div>
-                        {/* Projeção mensal */}
-                        {stats.cycleInfo && stats.cycleInfo.daysElapsed > 0 && usagePercent > 0 && (
-                          <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                            Projeção: ~{formatTokens(Math.round((m.includedTokens / stats.cycleInfo.daysElapsed) * stats.cycleInfo.daysInMonth))} tokens/mês
-                            {usagePercent > 100 && (
-                              <span className="text-red-500 ml-1 font-semibold">⚠️ Limite excedido! ({usagePercent.toFixed(0)}%)</span>
+                          </div>
+                          <div className="text-[var(--mq-text-muted)]">
+                            Tokens: {formatTokens(m.includedTokens)} (Included)
+                            {m.onDemandTokens > 0 && (
+                              <span className="text-amber-500 ml-1">
+                                + {formatTokens(m.onDemandTokens)} (On-Demand)
+                              </span>
                             )}
                           </div>
-                        )}
-                        <div className="h-2 bg-[var(--mq-bar)] rounded-full overflow-hidden relative">
-                          <div 
-                            className={`h-full rounded-full transition-all ${
-                              usagePercent >= 100 ? 'bg-red-500' :
-                              usagePercent >= 80 ? 'bg-amber-500' : 'bg-green-500'
-                            }`}
-                            style={{ width: `${Math.min(100, usagePercent)}%` }}
-                          />
                         </div>
                       </div>
-                    )}
+                      
+                      {/* Projeção mensal baseada em valor */}
+                      {stats.cycleInfo && stats.cycleInfo.daysElapsed > 0 && totalModelValue > 0 && (
+                        <div className="text-xs text-[var(--mq-text-muted)] mt-2 pt-2 border-t border-[var(--mq-border)]">
+                          Projeção mensal: ~${((totalModelValue / stats.cycleInfo.daysElapsed) * stats.cycleInfo.daysInMonth).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Detalhes Included vs On-Demand */}
                     {(m.includedRequests > 0 || m.onDemandRequests > 0) && (
