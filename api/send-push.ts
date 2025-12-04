@@ -117,17 +117,50 @@ export default async function handler(req: any, res: any) {
     });
 
     // Enviar notificação
-    await webpush.sendNotification(subscription, payload);
-
-    res.status(200).json({
-      success: true,
-      usuario_id: usuario_id || null,
-      enviado_em: new Date().toISOString(),
-      titulo,
-      corpo
-    });
+    try {
+      await webpush.sendNotification(subscription, payload);
+      
+      res.status(200).json({
+        success: true,
+        usuario_id: usuario_id || null,
+        enviado_em: new Date().toISOString(),
+        titulo,
+        corpo,
+        message: 'Notificação enviada com sucesso para o serviço de push'
+      });
+    } catch (pushError: any) {
+      // Erros específicos do web-push (FCM/GCM)
+      console.error('[Send Push] Erro do web-push:', pushError);
+      
+      // Status codes comuns:
+      // 410 - Subscription expirada/inválida
+      // 404 - Endpoint não encontrado
+      // 429 - Rate limit
+      // 400 - Payload muito grande ou formato inválido
+      
+      const statusCode = pushError.statusCode || pushError.code;
+      let errorMessage = pushError.message || 'Erro ao enviar notificação';
+      
+      if (statusCode === 410) {
+        errorMessage = 'Subscription expirada. O usuário precisa criar uma nova subscription.';
+      } else if (statusCode === 404) {
+        errorMessage = 'Endpoint não encontrado. Token pode estar inválido.';
+      } else if (statusCode === 429) {
+        errorMessage = 'Rate limit excedido. Aguarde antes de enviar novamente.';
+      } else if (statusCode === 413 || errorMessage.includes('payload')) {
+        errorMessage = 'Payload muito grande. Reduza o tamanho da mensagem.';
+      }
+      
+      res.status(statusCode && statusCode < 500 ? statusCode : 500).json({
+        success: false,
+        error: errorMessage,
+        statusCode: statusCode || null,
+        details: pushError.body ? `Body: ${JSON.stringify(pushError.body)}` : undefined
+      });
+      return;
+    }
   } catch (error: any) {
-    console.error('[Send Push] Erro ao enviar notificação:', error);
+    console.error('[Send Push] Erro geral:', error);
     
     res.status(500).json({
       success: false,
