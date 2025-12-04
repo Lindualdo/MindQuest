@@ -38,6 +38,21 @@ a3SPu6YIaQzf2fVHfvU-CFyxiBxX_RsDQ9uSt4eE6QE
 
 ---
 
+### 3. VITE_VAPID_PUBLIC_KEY (Frontend Vite)
+
+```
+BDFvqrQTPxtRfsh79LQ5DsVsDUtAOOulOwRE1BKMkPklnYQjqbbftZjFemkyJDxf5r8krPpGJL1TNBMTe9i7wiE
+```
+
+**Configurar em:**
+- ✅ Production
+- ✅ Preview
+- ✅ Development
+
+> Usada pelo bundle do Vite (`import.meta.env.VITE_VAPID_PUBLIC_KEY`). Sem ela o frontend mostra o alerta “VAPID_PUBLIC_KEY não configurada”.
+
+---
+
 ## Passo a Passo na Vercel
 
 1. Acesse: https://vercel.com/dashboard
@@ -47,10 +62,10 @@ a3SPu6YIaQzf2fVHfvU-CFyxiBxX_RsDQ9uSt4eE6QE
 5. Configure cada variável:
    - **Key:** `VAPID_PUBLIC_KEY`
    - **Value:** `BDFvqrQTPxtRfsh79LQ5DsVsDUtAOOulOwRE1BKMkPklnYQjqbbftZjFemkyJDxf5r8krPpGJL1TNBMTe9i7wiE`
-   - **Environments:** Marque Production, Preview e Development
-   - Clique em **Save**
+   - **Environments:** Production, Preview, Development
 6. Repita para `VAPID_PRIVATE_KEY`
-7. **Após configurar:** Faça um redeploy ou push novo commit
+7. Adicione também `VITE_VAPID_PUBLIC_KEY` (mesmo valor da pública) — esta entra no bundle Vite.
+8. **Após configurar:** Faça um redeploy ou push novo commit
 
 ---
 
