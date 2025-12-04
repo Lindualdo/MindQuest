@@ -2,25 +2,22 @@
 
 **Data:** 2025-01-22 15:30
 
-Esta pasta contém documentação **compacta e essencial** para otimizar o uso de tokens.
+Esta pasta contém documentação **compacta e essencial**.
 
 ## Documentos
 
-| Arquivo | Conteúdo | Tokens |
-|---------|----------|--------|
-| `n8n.md` | Manual técnico n8n/MCP | ~1.100 |
-| `frontend.md` | Template React v1.3 + CSS | ~300 |
-| `postgres.md` | Conexão e queries | ~200 |
-| `produto.md` | Visão do produto MindQuest | ~400 |
-
-**Total:** ~2.000 tokens (vs ~15.000 tokens da documentação completa)
+| Arquivo | Conteúdo |
+|---------|----------|
+| `n8n.md` | Manual técnico n8n/MCP |
+| `frontend.md` | Template React v1.3 + CSS |
+| `postgres.md` | Conexão e queries |
+| `produto.md` | Visão do produto MindQuest |
 
 ## Uso
 
-### Para IA (Cursor/Claude)
+### Para IA
 - Use estes documentos como referência rápida
-- Consulte documentação completa em `docs/espec/` apenas quando necessário
-- Economia de 85% de tokens em consultas comuns
+- Consulte documentação completa em `docs/espec/` quando necessário
 
 ### Para Desenvolvedores
 - Quick reference para padrões do projeto

@@ -121,7 +121,3 @@ const handleNavEvoluir = () => {
 4. **SEMPRE** usar `pb-24` no main (espaço para menu)
 5. **SEMPRE** usar variáveis CSS para cores
 
----
-
-**Economia de tokens:** Este documento tem ~300 tokens vs ~2.000 tokens da documentação completa.
-

@@ -63,7 +63,3 @@ Recomendações geradas pela IA baseadas em análise de dados
 
 Ver `docs/espec/produto/definicao_produto.md` para detalhes completos.
 
----
-
-**Economia de tokens:** Este documento tem ~400 tokens vs ~5.000 tokens da documentação completa.
-

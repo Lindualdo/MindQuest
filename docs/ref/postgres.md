@@ -49,7 +49,3 @@ PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATA
 3. **SEMPRE** validar acesso antes de queries
 4. Citar apenas `config/postgres.env` ao referenciar credenciais
 
----
-
-**Economia de tokens:** Este documento tem ~200 tokens vs ~800 tokens da documentação completa.
-

@@ -112,7 +112,4 @@ validate_workflow(workflow)   # Validar antes de aplicar
 3. **Ajustar expressões** → `$items`, `$node` ao renomear
 4. **Confirmar tipo via MCP** → `get_node_info` antes de supor
 5. **Code nodes** → `n8n-nodes-base.code` (nunca `function`)
-
----
-
-**Economia de tokens:** Use `mode="structure"` ao ler workflows (80% menos tokens que `mode="full"`).
+6. **Ler workflows** → usar `mode="structure"` para visão geral
