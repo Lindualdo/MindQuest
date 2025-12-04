@@ -71,11 +71,70 @@ npm run dev  # Vite proxy ativo em /api/*
 
 Frontend usa `/api/meu-endpoint` → proxy redireciona para n8n webhook.
 
+## Observações Importantes
+
+### Extração de Endpoint na Vercel
+
+O router usa **fallback múltiplo** para extrair o endpoint:
+
+1. **Primeiro**: Tenta `req.query.slug` (padrão Vercel para catch-all routes)
+2. **Fallback**: Extrai de `req.url` via parsing se slug não disponível
+3. **Último recurso**: Regex simples `/api/([^?]+)`
+
+**Por quê?** Na Vercel, com query params (`/api/jornada?user_id=...`), o `req.query.slug` pode não estar disponível. O fallback garante funcionamento em produção.
+
+### Verificações no vercel.json
+
+**NÃO adicione** rewrites genéricos que interceptem rotas API:
+```json
+// ❌ EVITAR - interfere no catch-all route
+{
+  "source": "/api/(.*)",
+  "destination": "/api/$1"
+}
+```
+
+**Use apenas** rewrites específicos quando necessário:
+```json
+// ✅ OK - rewrite específico
+{
+  "source": "/api/humor-historico",
+  "destination": "/api/insights"
+}
+```
+
+### Debugging
+
+O router loga automaticamente:
+```typescript
+console.log(`[Router] ${req.method} /api/${endpoint}`, { 
+  query: req.query, 
+  url: req.url,
+  slug: req.query.slug 
+});
+```
+
+**Se endpoint retornar 404:**
+1. Verificar logs da Vercel para ver o que foi extraído
+2. Confirmar que endpoint está no `ENDPOINT_MAP`
+3. Verificar se não há rewrite conflitante no `vercel.json`
+
+### Diferenças Local vs Produção
+
+| Ambiente | Comportamento |
+|----------|---------------|
+| **Local (dev)** | Vite proxy redireciona `/api/*` direto para n8n (não passa pelo router) |
+| **Produção (Vercel)** | Router consolidado processa todas as rotas `/api/*` |
+
+**Teste sempre em produção** após mudanças, mesmo que funcione localmente.
+
 ## Checklist
 
 - [ ] Endpoint registrado no `ENDPOINT_MAP`
 - [ ] Handler GET ou POST implementado
 - [ ] Validação de parâmetros obrigatórios
 - [ ] Testado localmente via `npm run dev`
+- [ ] Verificado que não há rewrites conflitantes no `vercel.json`
 - [ ] Deploy Vercel validado
+- [ ] Logs da Vercel verificados para confirmar extração correta do endpoint
 
