@@ -203,9 +203,6 @@ const CursorUsageDash: React.FC = () => {
 
     // Período do ciclo atual
     const cycleDates = cycleEvents.map(e => new Date(e.date));
-    const minDate = cycleDates.length > 0 
-      ? new Date(Math.min(...cycleDates.map(d => d.getTime())))
-      : cycleStart;
     const maxDate = cycleDates.length > 0
       ? new Date(Math.max(...cycleDates.map(d => d.getTime())))
       : new Date();
@@ -408,15 +405,17 @@ const CursorUsageDash: React.FC = () => {
             </motion.div>
 
             {/* Período do Ciclo */}
-            <div className="mq-card mb-4 p-3 text-center">
-              <div className="text-xs text-[var(--mq-text-muted)] mb-1">Ciclo Atual</div>
-              <div className="text-sm font-semibold text-[var(--mq-text)]">
-                {stats.period.start} → {stats.cycleInfo.nextCycle.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+            {stats.cycleInfo && stats.cycleInfo.nextCycle && (
+              <div className="mq-card mb-4 p-3 text-center">
+                <div className="text-xs text-[var(--mq-text-muted)] mb-1">Ciclo Atual</div>
+                <div className="text-sm font-semibold text-[var(--mq-text)]">
+                  {stats.period.start} → {stats.cycleInfo.nextCycle.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </div>
+                <div className="text-xs text-[var(--mq-text-muted)] mt-1">
+                  {stats.cycleInfo.daysElapsed} dias decorridos • {stats.cycleInfo.daysRemaining} dias restantes
+                </div>
               </div>
-              <div className="text-xs text-[var(--mq-text-muted)] mt-1">
-                {stats.cycleInfo.daysElapsed} dias decorridos • {stats.cycleInfo.daysRemaining} dias restantes
-              </div>
-            </div>
+            )}
 
             {/* Por Modelo */}
             <h2 className="text-lg font-semibold text-[var(--mq-text)] mb-3 flex items-center gap-2">
@@ -476,7 +475,7 @@ const CursorUsageDash: React.FC = () => {
                           </span>
                         </div>
                         {/* Projeção mensal */}
-                        {stats.cycleInfo.daysElapsed > 0 && usagePercent > 0 && (
+                        {stats.cycleInfo && stats.cycleInfo.daysElapsed > 0 && usagePercent > 0 && (
                           <div className="text-xs text-[var(--mq-text-muted)] mt-1">
                             Projeção: ~{formatTokens(Math.round((m.includedTokens / stats.cycleInfo.daysElapsed) * stats.cycleInfo.daysInMonth))} tokens/mês
                             {usagePercent >= 100 && (
@@ -532,11 +531,11 @@ const CursorUsageDash: React.FC = () => {
                   <Zap size={16} /> Dicas de Otimização
                 </h3>
                 <ul className="text-sm text-[var(--mq-text-muted)] space-y-1">
-                  <li>• <strong>Claude Opus 4.5</strong>: Use para tarefas complexas. Limite Ultra: ~1.1M tokens/mês.</li>
-                  <li>• <strong>Auto</strong>: Maior uso (~2.4M tokens). Evite - escolhe modelos aleatoriamente.</li>
-                  <li>• <strong>GPT-5.1</strong>: Bom custo-benefício para código. Limite Ultra: ~2M tokens/mês.</li>
-                  <li>• <strong>Claude Sonnet 4.5</strong>: Equilíbrio qualidade/velocidade. Limite Ultra: ~2M tokens/mês.</li>
-                  <li>• Selecione modelo manualmente para controle e otimização de tokens.</li>
+                  <li>• <strong>Claude Sonnet 4.5</strong>: ⭐ Melhor custo-benefício. Use para 70% das tarefas (React/TS/n8n).</li>
+                  <li>• <strong>GPT-5.1</strong>: Rápido e barato. Use para completions simples e edições pontuais.</li>
+                  <li>• <strong>Claude Opus 4.5</strong>: ⚠️ Use apenas para tarefas complexas (10-15% do uso). Muito caro!</li>
+                  <li>• <strong>Auto</strong>: ❌ Evite - desperdiça tokens escolhendo modelos aleatoriamente.</li>
+                  <li>• <strong>Estratégia:</strong> Sonnet padrão → GPT-5.1 rápido → Opus apenas se necessário.</li>
                 </ul>
               </motion.div>
             )}

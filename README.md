@@ -2,7 +2,7 @@
 
 Sistema gamificado de monitoramento emocional baseado na Roda de Emoções de Plutchik.
 
-**Versão:** 1.3.2
+**Versão:** 1.3.19
 
 ---
 
@@ -142,4 +142,4 @@ src/
 
 ---
 
-**MindQuest v1.3.2** — Mente clara, resultados reais 🌟
+**MindQuest v1.3.19** — Mente clara, resultados reais 🌟
