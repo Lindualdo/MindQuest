@@ -489,9 +489,9 @@ const CursorUsageDash: React.FC = () => {
               {stats.modelList.map((m, i) => {
                 const info = getModelInfo(m.model);
                 const isOnDemandHeavy = m.onDemandRequests > 0;
-                // Limite é por TOKENS - usar apenas tokens Included para calcular %
+                // Limite é por TOKENS - calcular % real (pode exceder 100% se ultrapassar limite)
                 const usagePercent = info.monthlyIncluded > 0 
-                  ? Math.min(100, (m.includedTokens / info.monthlyIncluded) * 100)
+                  ? (m.includedTokens / info.monthlyIncluded) * 100
                   : 0;
 
                 return (
@@ -541,12 +541,12 @@ const CursorUsageDash: React.FC = () => {
                         {stats.cycleInfo && stats.cycleInfo.daysElapsed > 0 && usagePercent > 0 && (
                           <div className="text-xs text-[var(--mq-text-muted)] mt-1">
                             Projeção: ~{formatTokens(Math.round((m.includedTokens / stats.cycleInfo.daysElapsed) * stats.cycleInfo.daysInMonth))} tokens/mês
-                            {usagePercent >= 100 && (
-                              <span className="text-red-500 ml-1">⚠️ Limite excedido!</span>
+                            {usagePercent > 100 && (
+                              <span className="text-red-500 ml-1 font-semibold">⚠️ Limite excedido! ({usagePercent.toFixed(0)}%)</span>
                             )}
                           </div>
                         )}
-                        <div className="h-2 bg-[var(--mq-bar)] rounded-full overflow-hidden">
+                        <div className="h-2 bg-[var(--mq-bar)] rounded-full overflow-hidden relative">
                           <div 
                             className={`h-full rounded-full transition-all ${
                               usagePercent >= 100 ? 'bg-red-500' :
