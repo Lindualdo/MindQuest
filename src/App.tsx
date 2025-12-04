@@ -35,6 +35,9 @@ import ConexaoAcoesObjetivosPageV13 from './pages/App/v1.3/ConexaoAcoesObjetivos
 import ConexaoAcoesSabotadoresPageV13 from './pages/App/v1.3/ConexaoAcoesSabotadoresPageV13';
 import NiveisJornadaPageV13 from './pages/App/v1.3/NiveisJornadaPageV13';
 import CursorUsageDash from './pages/App/v1.3/CursorUsageDash';
+import CursorCobrancaPage from './pages/App/v1.3/CursorCobrancaPage';
+import CursorModelosPage from './pages/App/v1.3/CursorModelosPage';
+import CursorContextoPage from './pages/App/v1.3/CursorContextoPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
@@ -113,7 +116,7 @@ function App() {
     return <ConversationGuidePage />;
   }
 
-  // Rota pública: Cursor Usage Dashboard
+  // Rotas públicas: Cursor Usage Dashboard e Guias
   const isCursorUsageRoute = 
     resolvedPath === '/app/cursor-usage' || 
     resolvedPath === '/cursor-usage' ||
@@ -122,10 +125,52 @@ function App() {
      (window.location.pathname.toLowerCase().includes('cursor-usage') || 
       window.location.search.includes('view=cursorUsage')));
   
+  const isCursorCobrancaRoute = 
+    resolvedPath === '/app/cursor-cobranca' || 
+    resolvedPath === '/cursor-cobranca' ||
+    (isAppRoute && typeof window !== 'undefined' && 
+     window.location.pathname.toLowerCase().includes('cursor-cobranca'));
+  
+  const isCursorModelosRoute = 
+    resolvedPath === '/app/cursor-modelos' || 
+    resolvedPath === '/cursor-modelos' ||
+    (isAppRoute && typeof window !== 'undefined' && 
+     window.location.pathname.toLowerCase().includes('cursor-modelos'));
+  
+  const isCursorContextoRoute = 
+    resolvedPath === '/app/cursor-contexto' || 
+    resolvedPath === '/cursor-contexto' ||
+    (isAppRoute && typeof window !== 'undefined' && 
+     window.location.pathname.toLowerCase().includes('cursor-contexto'));
+  
   if (isCursorUsageRoute) {
     return (
       <ThemeProvider>
         <CursorUsageDash />
+      </ThemeProvider>
+    );
+  }
+  
+  if (isCursorCobrancaRoute) {
+    return (
+      <ThemeProvider>
+        <CursorCobrancaPage />
+      </ThemeProvider>
+    );
+  }
+  
+  if (isCursorModelosRoute) {
+    return (
+      <ThemeProvider>
+        <CursorModelosPage />
+      </ThemeProvider>
+    );
+  }
+  
+  if (isCursorContextoRoute) {
+    return (
+      <ThemeProvider>
+        <CursorContextoPage />
       </ThemeProvider>
     );
   }

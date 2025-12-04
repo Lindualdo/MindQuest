@@ -8,7 +8,9 @@ import {
   AlertTriangle,
   CheckCircle,
   TrendingUp,
-  Zap
+  Zap,
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -328,6 +330,62 @@ const CursorUsageDash: React.FC = () => {
               className="hidden"
             />
           </label>
+        </motion.div>
+
+        {/* Links para Guias */}
+        <motion.div 
+          className="grid grid-cols-1 gap-3 mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.05 }}
+        >
+          <a 
+            href="/app/cursor-cobranca"
+            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <DollarSign size={20} className="text-[var(--mq-primary)]" />
+                <div>
+                  <div className="font-medium text-[var(--mq-text)]">Como Funciona a Cobrança</div>
+                  <div className="text-xs text-[var(--mq-text-muted)]">Limite por tokens, Included vs On-Demand</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+            </div>
+          </a>
+
+          <a 
+            href="/app/cursor-modelos"
+            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Cpu size={20} className="text-[var(--mq-primary)]" />
+                <div>
+                  <div className="font-medium text-[var(--mq-text)]">Qual Modelo Usar</div>
+                  <div className="text-xs text-[var(--mq-text-muted)]">Melhor uso dos tokens - React/TS + n8n</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+            </div>
+          </a>
+
+          <a 
+            href="/app/cursor-contexto"
+            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText size={20} className="text-[var(--mq-primary)]" />
+                <div>
+                  <div className="font-medium text-[var(--mq-text)]">Contexto Eficiente</div>
+                  <div className="text-xs text-[var(--mq-text-muted)]">Sem desperdício de tokens</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+            </div>
+          </a>
         </motion.div>
 
         {/* Dashboard */}
