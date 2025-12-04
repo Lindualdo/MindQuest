@@ -30,40 +30,47 @@ self.addEventListener('push', (event) => {
     data: {}
   };
 
-  if (event.data) {
-    try {
-      const textPayload = event.data.text();
-      if (textPayload) {
-        try {
-          const parsed = JSON.parse(textPayload);
-          notificationData.title = parsed.title || notificationData.title;
-          notificationData.body = parsed.body || notificationData.body;
-          notificationData.icon = parsed.icon || notificationData.icon;
-          notificationData.badge = parsed.badge || notificationData.badge;
-          notificationData.tag = parsed.tag || notificationData.tag;
-          notificationData.requireInteraction =
-            typeof parsed.requireInteraction === 'boolean'
-              ? parsed.requireInteraction
-              : notificationData.requireInteraction;
-          notificationData.data = parsed.data || notificationData.data;
-        } catch (jsonError) {
-          console.log('[SW] Payload não é JSON, usando texto puro');
-          notificationData.body = textPayload;
+  const showNotificationPromise = event.data
+    ? event.data.text().then((textPayload) => {
+        if (textPayload) {
+          try {
+            const parsed = JSON.parse(textPayload);
+            return {
+              title: parsed.title || notificationData.title,
+              body: parsed.body || notificationData.body,
+              icon: parsed.icon || notificationData.icon,
+              badge: parsed.badge || notificationData.badge,
+              tag: parsed.tag || notificationData.tag,
+              requireInteraction:
+                typeof parsed.requireInteraction === 'boolean'
+                  ? parsed.requireInteraction
+                  : notificationData.requireInteraction,
+              data: parsed.data || notificationData.data
+            };
+          } catch (jsonError) {
+            console.log('[SW] Payload não é JSON, usando texto puro');
+            return {
+              ...notificationData,
+              body: textPayload
+            };
+          }
         }
-      }
-    } catch (error) {
-      console.error('[SW] Erro ao ler payload do push:', error);
-    }
-  }
+        return notificationData;
+      }).catch((error) => {
+        console.error('[SW] Erro ao ler payload do push:', error);
+        return notificationData;
+      })
+    : Promise.resolve(notificationData);
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      tag: notificationData.tag,
-      requireInteraction: notificationData.requireInteraction,
-      data: notificationData.data,
+    showNotificationPromise.then((finalData) => {
+      return self.registration.showNotification(finalData.title, {
+        body: finalData.body,
+        icon: finalData.icon,
+        badge: finalData.badge,
+        tag: finalData.tag,
+        requireInteraction: finalData.requireInteraction,
+        data: finalData.data,
       vibrate: [200, 100, 200],
       actions: [
         {
@@ -76,6 +83,7 @@ self.addEventListener('push', (event) => {
           title: 'Fechar'
         }
       ]
+      });
     })
   );
 });
