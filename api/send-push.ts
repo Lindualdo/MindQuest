@@ -21,7 +21,7 @@ if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
 // Configurar web-push se as keys estiverem disponíveis
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
-    'mailto:mindquest@example.com',
+    'mailto:suporte@mindquest.pt',
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
@@ -42,10 +42,20 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  // Debug: verificar carregamento das variáveis (remover após validação)
+  const hasEnvVars = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+  const hasFileKeys = !!(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
+
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     res.status(500).json({ 
       success: false, 
-      error: 'VAPID keys não configuradas' 
+      error: 'VAPID keys não configuradas',
+      debug: {
+        hasEnvVars,
+        hasFileKeys,
+        publicKeyLength: VAPID_PUBLIC_KEY?.length || 0,
+        privateKeyLength: VAPID_PRIVATE_KEY?.length || 0
+      }
     });
     return;
   }
@@ -85,12 +95,13 @@ export default async function handler(req: any, res: any) {
     const payload = JSON.stringify({
       title: titulo,
       body: corpo,
-      icon: '/icon-192x192.png',
-      badge: '/badge-72x72.png',
+      icon: '/mindquest_logo.png',
+      badge: '/mindquest_logo.png',
       data: {
         usuario_id: usuario_id || null,
         tipo: tipo || 'lembrete',
-        url: '/app'
+        url: '/app',
+        timestamp: new Date().getTime()
       }
     });
 
