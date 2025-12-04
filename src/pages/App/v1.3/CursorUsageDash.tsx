@@ -41,14 +41,15 @@ interface ModelStats {
   onDemandCost: number;
 }
 
-// ====== LIMITES DO CURSOR (referência) ======
+// ====== LIMITES DO CURSOR - PLANO ULTRA ======
+// Plano Ultra: ~20x mais requests que o Pro
 const CURSOR_LIMITS = {
-  'claude-4.5-opus-high-thinking': { name: 'Claude Opus 4.5', monthlyIncluded: 250, priority: 1 },
-  'claude-4.5-sonnet-thinking': { name: 'Claude Sonnet 4.5', monthlyIncluded: 500, priority: 2 },
-  'gpt-5.1': { name: 'GPT-5.1', monthlyIncluded: 500, priority: 3 },
-  'auto': { name: 'Auto (Sonnet)', monthlyIncluded: 500, priority: 4 },
-  'grok-code-fast-1': { name: 'Grok Code', monthlyIncluded: 500, priority: 5 },
-  'gemini-3-pro-preview': { name: 'Gemini 3 Pro', monthlyIncluded: 500, priority: 6 },
+  'claude-4.5-opus-high-thinking': { name: 'Claude Opus 4.5', monthlyIncluded: 5000, priority: 1 },
+  'claude-4.5-sonnet-thinking': { name: 'Claude Sonnet 4.5', monthlyIncluded: 10000, priority: 2 },
+  'gpt-5.1': { name: 'GPT-5.1', monthlyIncluded: 10000, priority: 3 },
+  'auto': { name: 'Auto (Sonnet)', monthlyIncluded: 10000, priority: 4 },
+  'grok-code-fast-1': { name: 'Grok Code', monthlyIncluded: 10000, priority: 5 },
+  'gemini-3-pro-preview': { name: 'Gemini 3 Pro', monthlyIncluded: 10000, priority: 6 },
 };
 
 // ====== PARSER CSV ======
@@ -244,6 +245,10 @@ const CursorUsageDash: React.FC = () => {
             Cursor Usage Monitor
           </h1>
           <p className="mq-page-subtitle">Monitore seu consumo de tokens</p>
+          <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30">
+            <span className="text-xs font-semibold text-purple-500">Plano Ultra</span>
+            <span className="text-xs text-[var(--mq-text-muted)]">• Limites aumentados</span>
+          </div>
         </div>
 
         {/* Upload CSV */}
@@ -405,10 +410,11 @@ const CursorUsageDash: React.FC = () => {
                   <Zap size={16} /> Dicas de Otimização
                 </h3>
                 <ul className="text-sm text-[var(--mq-text-muted)] space-y-1">
-                  <li>• <strong>Claude Opus 4.5</strong>: Use para tarefas complexas. Limite incluso ~250 req/mês.</li>
-                  <li>• <strong>GPT-5.1</strong>: Bom custo-benefício para código.</li>
+                  <li>• <strong>Claude Opus 4.5</strong>: Use para tarefas complexas. Limite Ultra: ~5.000 req/mês.</li>
+                  <li>• <strong>GPT-5.1</strong>: Bom custo-benefício para código. Limite Ultra: ~10.000 req/mês.</li>
+                  <li>• <strong>Claude Sonnet 4.5</strong>: Equilíbrio entre qualidade e velocidade. Limite Ultra: ~10.000 req/mês.</li>
                   <li>• <strong>Auto</strong>: Evite - escolhe modelos aleatoriamente.</li>
-                  <li>• Selecione modelo manualmente para controle.</li>
+                  <li>• Selecione modelo manualmente para controle e otimização.</li>
                 </ul>
               </motion.div>
             )}
