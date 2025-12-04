@@ -1,0 +1,205 @@
+---
+alwaysApply: false
+---
+## Estrutura do Projeto
+
+```
+src/
+├── pages/App/v1.3/          # Páginas principais
+├── components/app/v1.3/     # Componentes v1.3
+├── store/                   # Estado global (Zustand)
+api/
+└── [...slug].ts             # Router consolidado (evita limite Vercel)
+config/
+└── postgres.env             # Credenciais DB (NUNCA no código)
+ref/
+└── *.md                     # Documentação de referência
+```
+
+---
+
+## Regras de Nomenclatura
+
+- **Components:** PascalCase + sufixo versão (`HeaderV1_3.tsx`)
+- **Funções:** camelCase (`handleNavConversar`)
+- **Constantes:** UPPER_SNAKE_CASE (`ENDPOINT_MAP`)
+- **CSS Classes:** kebab-case com prefixo (`mq-card`, `mq-btn-back`)
+
+---
+
+## Padrões Frontend (v1.3)
+
+### Template Obrigatório de Página
+```tsx
+import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
+import BottomNavV1_3 from '@/components/app/v1.3/BottomNavV1_3';
+import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
+
+// Structure:
+<div className="mq-app-v1_3">
+  <HeaderV1_3 />
+  <main className="mx-auto w-full max-w-md flex-1 px-4 pb-24 pt-4">
+    {/* Content */}
+  </main>
+  <BottomNavV1_3 />
+</div>
+```
+
+### Regras CSS
+- **SEMPRE** usar variáveis CSS: `var(--mq-bg)`, `var(--mq-text)`, etc
+- **NUNCA** cores hardcoded (`#1a1a2e`, `bg-gray-800`)
+- **Classes disponíveis:** `mq-card`, `mq-btn-back`, `mq-page-title`, `mq-page-subtitle`
+
+---
+
+## Padrões API
+
+### Adicionar Novo Endpoint
+
+**1. Registrar no ENDPOINT_MAP** (`api/[...slug].ts` ~linha 105)
+```typescript
+const ENDPOINT_MAP = {
+  'meu-endpoint': '/meu-endpoint',
+};
+```
+
+**2. GET simples** → adicionar em `SIMPLE_GET_ENDPOINTS` (~linha 145)
+
+**3. Lógica customizada** → implementar handler no bloco GET/POST
+
+### Utilitários
+- `readUsuarioId(req.query)` → extrair user_id
+- `parseBody(req.body)` → parsing seguro
+- `handleResponse(upstream, res)` → proxy response
+
+---
+
+## Workflows n8n - REGRAS CRÍTICAS
+
+### ❌ NUNCA ALTERAR
+- Workflows `sw_*` (ex: `sw_xp_quest`, `sw_criar_quest`) → exclusivos do agente IA
+- Sub-workflows devem ter `active=false`
+
+### ✅ USAR PARA INTERFACE
+- Workflows `webhook_*` (ex: `webhook_concluir_quest`)
+
+### Edição de Workflows (via MCP)
+```bash
+# 1. Mapear estrutura
+n8n_get_workflow(id, mode="structure")
+
+# 2. Editar (SEMPRE partial update)
+n8n_update_partial_workflow()
+
+# 3. Validar
+n8n_get_workflow(id, mode="structure")
+```
+
+### Postgres Nodes - Template Obrigatório
+**SEMPRE incluir os 3 campos juntos:**
+```json
+{
+  "parameters": {
+    "operation": "executeQuery",
+    "query": "SELECT * FROM table WHERE id = $1",
+    "options": {"queryReplacement": "={{ [$json.id] }}"}
+  }
+}
+```
+
+### Webhooks - Regra Crítica
+**SEMPRE incluir `webhookId`** (senão 404 em produção):
+```json
+{
+  "webhookId": "UUID-UNICO",
+  "parameters": {
+    "path": "endpoint",
+    "httpMethod": "GET"
+  }
+}
+```
+
+---
+
+## Conceitos do Produto
+
+### Framework MindQuest
+**CONVERSAR → ENTENDER → AGIR → EVOLUIR**
+
+### Tipos de Quest
+- **Personalizada:** IA contextual (conversas)
+- **Sabotador:** Superar padrões limitantes
+- **TCC/Estoicismo:** Técnicas comportamentais
+- **Reflexão Diária:** Permanente (conversa)
+
+### Status de Quest
+- **Disponível:** Aguardando ativação
+- **Ativa:** Com recorrências planejadas
+- **Inativa:** Concluída/vencida (pode reativar)
+
+### XP e Níveis
+- **Conversas:** XP calculado pelo mentor
+- **Quests:** 10 XP por quest concluída
+- **Níveis:** 1-10+ (4 estágios)
+
+---
+
+## Segurança e Validação
+
+### PostgreSQL
+- **NUNCA** colocar credenciais no código
+- **SEMPRE** usar `config/postgres.env`
+- **SEMPRE** validar `user_id` em endpoints
+
+### Validação de Parâmetros
+```typescript
+const usuarioId = readUsuarioId(req.query);
+if (!usuarioId) {
+  res.status(400).json({ error: 'user_id obrigatório' });
+  return;
+}
+```
+
+---
+
+## Debug e Troubleshooting
+
+### API (Vercel)
+- Logs automáticos: `[Router] ${method} /api/${endpoint}`
+- 404? → Verificar `ENDPOINT_MAP` + rewrites no `vercel.json`
+
+### n8n Workflows
+```bash
+# Ver última execução
+n8n_list_executions(workflowId)
+
+# Detalhar saída
+n8n_get_execution(id, mode="summary")
+```
+
+---
+
+## Restrições
+
+### vercel.json
+- **EVITAR** rewrites genéricos `/api/(.*)`
+- **USAR** rewrites específicos quando necessário
+
+### n8n
+- **NUNCA** usar `n8n_update_workflow` (full update)
+- **SEMPRE** usar `n8n_update_partial_workflow`
+
+### Frontend
+- Máximo `max-w-md` (mobile-first)
+- Sempre `pb-24` no main (espaço para menu)
+
+---
+
+## Documentação Completa
+
+Para detalhes, consultar:
+- `ref/` → Referência rápida
+- `docs/espec/` → Especificações completas
+- `docs/n8n/` → Workflows detalhados
+
+---
