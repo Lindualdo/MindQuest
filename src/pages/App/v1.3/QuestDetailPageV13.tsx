@@ -52,7 +52,7 @@ const QuestDetailPageV13 = () => {
 
   // Obter recorrência selecionada e seu ID para anotações
   const { recorrenciaId, anotacaoAtual } = useMemo(() => {
-    if (!detail.recorrencias) return { recorrenciaId: null, anotacaoAtual: null };
+    if (!detail || !detail.recorrencias) return { recorrenciaId: null, anotacaoAtual: null };
     let dias: any[] = [];
     if (Array.isArray(detail.recorrencias)) {
       dias = detail.recorrencias;
@@ -78,7 +78,7 @@ const QuestDetailPageV13 = () => {
       recorrenciaId: recorrencia?.id || null,
       anotacaoAtual: recorrencia?.anotacoes_quest || null
     };
-  }, [detail.recorrencias, questDetailSelectedDate]);
+  }, [detail, questDetailSelectedDate]);
 
   // Sincronizar anotação local com a recorrência quando mudar
   useEffect(() => {
