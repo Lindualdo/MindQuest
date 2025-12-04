@@ -43,6 +43,10 @@ interface ModelStats {
   onDemandCost: number;
 }
 
+// ====== CONFIGURAÇÃO DO CICLO ======
+// Data de corte do ciclo mensal (início da assinatura Ultra)
+const CYCLE_START_DATE = new Date('2025-12-04T09:00:00.000Z'); // 04/12/2025 às 09:00 UTC
+
 // ====== LIMITES DO CURSOR - PLANO ULTRA ======
 // Plano Ultra: Limite por TOKENS (não por requisições)
 // Baseado na página de Billing: ~3.4M tokens incluídos no período
@@ -125,13 +129,40 @@ const CursorUsageDash: React.FC = () => {
   const stats = useMemo(() => {
     if (!events.length) return null;
 
+    // Filtrar apenas eventos do ciclo atual (após data de corte)
+    const cycleStart = CYCLE_START_DATE;
+    const cycleEvents = events.filter(ev => {
+      const eventDate = new Date(ev.date);
+      return eventDate >= cycleStart;
+    });
+
+    if (!cycleEvents.length) {
+      return {
+        byModel: {},
+        modelList: [],
+        totalCost: 0,
+        includedCost: 0,
+        onDemandCost: 0,
+        totalRequests: 0,
+        period: {
+          start: cycleStart.toLocaleDateString('pt-BR'),
+          end: new Date().toLocaleDateString('pt-BR'),
+        },
+        cycleInfo: {
+          start: cycleStart,
+          daysElapsed: Math.floor((Date.now() - cycleStart.getTime()) / (1000 * 60 * 60 * 24)),
+          daysInMonth: 30, // Aproximação
+        },
+      };
+    }
+
     const byModel: Record<string, ModelStats> = {};
     let totalCost = 0;
     let includedCost = 0;
     let onDemandCost = 0;
     let totalRequests = 0;
 
-    events.forEach(ev => {
+    cycleEvents.forEach(ev => {
       const model = ev.model;
       if (!byModel[model]) {
         byModel[model] = {
@@ -170,10 +201,23 @@ const CursorUsageDash: React.FC = () => {
     // Ordenar por custo total
     const modelList = Object.values(byModel).sort((a, b) => b.totalCost - a.totalCost);
 
-    // Período
-    const dates = events.map(e => new Date(e.date));
-    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+    // Período do ciclo atual
+    const cycleDates = cycleEvents.map(e => new Date(e.date));
+    const minDate = cycleDates.length > 0 
+      ? new Date(Math.min(...cycleDates.map(d => d.getTime())))
+      : cycleStart;
+    const maxDate = cycleDates.length > 0
+      ? new Date(Math.max(...cycleDates.map(d => d.getTime())))
+      : new Date();
+
+    // Calcular próximo ciclo
+    const nextCycleStart = new Date(cycleStart);
+    nextCycleStart.setMonth(nextCycleStart.getMonth() + 1);
+
+    // Dias decorridos desde o início do ciclo
+    const daysElapsed = Math.max(1, Math.floor((Date.now() - cycleStart.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysInMonth = 30; // Aproximação padrão
+    const daysRemaining = Math.max(0, daysInMonth - daysElapsed);
 
     return {
       byModel,
@@ -183,8 +227,15 @@ const CursorUsageDash: React.FC = () => {
       onDemandCost,
       totalRequests,
       period: {
-        start: minDate.toLocaleDateString('pt-BR'),
-        end: maxDate.toLocaleDateString('pt-BR'),
+        start: cycleStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        end: maxDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      },
+      cycleInfo: {
+        start: cycleStart,
+        nextCycle: nextCycleStart,
+        daysElapsed,
+        daysRemaining,
+        daysInMonth,
       },
     };
   }, [events]);
@@ -356,9 +407,15 @@ const CursorUsageDash: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Período */}
-            <div className="text-center text-xs text-[var(--mq-text-muted)] mb-4">
-              Período: {stats.period.start} → {stats.period.end}
+            {/* Período do Ciclo */}
+            <div className="mq-card mb-4 p-3 text-center">
+              <div className="text-xs text-[var(--mq-text-muted)] mb-1">Ciclo Atual</div>
+              <div className="text-sm font-semibold text-[var(--mq-text)]">
+                {stats.period.start} → {stats.cycleInfo.nextCycle.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
+              <div className="text-xs text-[var(--mq-text-muted)] mt-1">
+                {stats.cycleInfo.daysElapsed} dias decorridos • {stats.cycleInfo.daysRemaining} dias restantes
+              </div>
             </div>
 
             {/* Por Modelo */}
@@ -418,6 +475,15 @@ const CursorUsageDash: React.FC = () => {
                             {usagePercent.toFixed(0)}%
                           </span>
                         </div>
+                        {/* Projeção mensal */}
+                        {stats.cycleInfo.daysElapsed > 0 && usagePercent > 0 && (
+                          <div className="text-xs text-[var(--mq-text-muted)] mt-1">
+                            Projeção: ~{formatTokens(Math.round((m.includedTokens / stats.cycleInfo.daysElapsed) * stats.cycleInfo.daysInMonth))} tokens/mês
+                            {usagePercent >= 100 && (
+                              <span className="text-red-500 ml-1">⚠️ Limite excedido!</span>
+                            )}
+                          </div>
+                        )}
                         <div className="h-2 bg-[var(--mq-bar)] rounded-full overflow-hidden">
                           <div 
                             className={`h-full rounded-full transition-all ${
