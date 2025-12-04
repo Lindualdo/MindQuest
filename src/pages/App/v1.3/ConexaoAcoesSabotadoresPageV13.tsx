@@ -183,7 +183,7 @@ const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
         {/* Título da página */}
         <div className="mb-6 text-center">
           <h1 className="mq-page-title">Ações por Sabotadores</h1>
-          <p className="mq-page-subtitle">Acompanhe o progresso de cada padrão mental</p>
+          <p className="mq-page-subtitle">Acompanhe as ações realizadas para cada sabotador</p>
         </div>
 
         {/* Loading */}

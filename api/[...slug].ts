@@ -127,6 +127,7 @@ const ENDPOINT_MAP: Record<string, string> = {
   'objetivos-catalogo': '/objetivos-catalogo',
   'conexao-objetivos': '/conexao-objetivos',
   'conquista-objetivo': '/conquista-objetivo',
+  'checkin-objetivo': '/checkin-objetivo',
   // Jornada
   'jornada-niveis': '/jornada-niveis',
   'evoluir-stats': '/evoluir-stats',
@@ -162,6 +163,7 @@ const SIMPLE_GET_ENDPOINTS = [
   'acoes/sabotador', 'ocorrencias/sabotador', 'full_chat',
   'objetivos', 'perfil-pessoal', 'notificacoes', 
   'conexao-objetivos', 'conexao-sabotadores', 'conquista-objetivo',
+  'checkin-objetivo',
 ];
 
 export default async function handler(req: any, res: any) {
@@ -530,8 +532,8 @@ export default async function handler(req: any, res: any) {
         return;
       }
 
-      // Endpoints POST simples (objetivos, perfil-pessoal, notificacoes)
-      if (['objetivos', 'perfil-pessoal', 'notificacoes'].includes(endpoint)) {
+      // Endpoints POST simples (objetivos, perfil-pessoal, notificacoes, checkin-objetivo)
+      if (['objetivos', 'perfil-pessoal', 'notificacoes', 'checkin-objetivo'].includes(endpoint)) {
         const usuarioId = readUsuarioId(parsedBody);
         if (!usuarioId) {
           res.status(400).json({ success: false, error: 'user_id obrigatório' });

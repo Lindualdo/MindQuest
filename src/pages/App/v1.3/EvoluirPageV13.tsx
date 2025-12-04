@@ -525,7 +525,7 @@ const EvoluirPageV13: React.FC = () => {
                 </div>
                 <div className="text-left">
                   <h3 className="text-base font-bold text-[var(--mq-text)]">Ações por Sabotadores</h3>
-                  <p className="text-xs text-[var(--mq-text-muted)]">Acompanhe o progresso de cada padrão mental</p>
+                  <p className="text-xs text-[var(--mq-text-muted)]">Acompanhe as ações realizadas para cada sabotador</p>
                 </div>
               </div>
               <ChevronRight size={20} className="text-[var(--mq-text-subtle)]" />
