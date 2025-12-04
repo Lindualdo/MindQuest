@@ -12,6 +12,7 @@ Esta pasta contém documentação **compacta e essencial**.
 | `frontend.md` | Template React v1.3 + CSS |
 | `postgres.md` | Conexão e queries |
 | `produto.md` | Visão do produto MindQuest |
+| `api.md` | Endpoints API (router consolidado) |
 
 ## Uso
 
