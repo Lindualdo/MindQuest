@@ -173,10 +173,56 @@ export default async function handler(req: any, res: any) {
   }
 
   // Extrair o endpoint do path - suporta subpaths como card/jornada
-  const slug = req.query.slug as string[] | string;
-  const endpoint = Array.isArray(slug) ? slug.join('/') : slug || '';
+  // Na Vercel, o slug pode vir de req.query.slug ou precisar ser extraído de req.url
+  let endpoint = '';
+  
+  // Tentar primeiro do query param (padrão Vercel)
+  const slug = req.query.slug as string[] | string | undefined;
+  if (slug) {
+    endpoint = Array.isArray(slug) ? slug.join('/') : slug;
+  }
+  
+  // Fallback: extrair de req.url se slug não estiver disponível
+  if (!endpoint && req.url) {
+    try {
+      const url = new URL(req.url, 'http://localhost');
+      const pathParts = url.pathname.split('/').filter(Boolean);
+      // Remover 'api' do início se presente
+      const apiIndex = pathParts.indexOf('api');
+      if (apiIndex >= 0 && pathParts.length > apiIndex + 1) {
+        endpoint = pathParts.slice(apiIndex + 1).join('/');
+      } else if (pathParts.length > 0) {
+        endpoint = pathParts.join('/');
+      }
+    } catch (e) {
+      // Se falhar ao parsear URL, tentar extração simples
+      const match = req.url.match(/\/api\/([^?]+)/);
+      if (match && match[1]) {
+        endpoint = match[1];
+      }
+    }
+  }
 
-  console.log(`[Router] ${req.method} /api/${endpoint}`, { query: req.query });
+  console.log(`[Router] ${req.method} /api/${endpoint}`, { 
+    query: req.query, 
+    url: req.url,
+    slug: req.query.slug 
+  });
+
+  // Validar se endpoint foi extraído
+  if (!endpoint) {
+    console.error('[Router] Endpoint não encontrado', { 
+      url: req.url, 
+      query: req.query,
+      headers: req.headers 
+    });
+    res.status(404).json({ 
+      success: false, 
+      error: 'Endpoint não encontrado',
+      debug: { url: req.url, query: req.query }
+    });
+    return;
+  }
 
   // Roteamento especial para jornada (com action)
   if (endpoint === 'jornada') {
