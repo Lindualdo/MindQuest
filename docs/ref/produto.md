@@ -22,6 +22,7 @@ Sistema gamificado de **monitoramento emocional** baseado na **Roda de Emoções
 - Análise de humor e energia
 - Insights personalizados
 - Sabotadores detectados
+- Perfil de personalidade
 
 ### 3. Agir (Quests)
 - Sistema gamificado de ações
@@ -30,17 +31,17 @@ Sistema gamificado de **monitoramento emocional** baseado na **Roda de Emoções
 - Conquistas e progresso
 
 ### 4. Evoluir (Jornada)
-- Progresso semanal
+- Progresso na jornada
 - Níveis e evolução
 - Histórico de conquistas
 
 ## Conceitos Principais
 
 ### Humor
-Calculado por média ponderada de emoções (últimos 7 dias)
+Calculado por média ponderada de emoções
 
 ### Energia
-Baseada em sabotadores ativos + check-ins
+Baseada no calculo de PANAS
 
 ### Sabotadores
 Padrões mentais que bloqueiam progresso (ex: Procrastinador, Perfeccionista)
@@ -56,10 +57,10 @@ Recomendações geradas pela IA baseadas em análise de dados
 1. **Workflows `sw_*`** → Exclusivos do agente IA (NUNCA alterar)
 2. **Workflows `webhook_*`** → Para interface/APIs
 3. **XP de conversas** → Calculado automaticamente pelo mentor
-4. **XP de quests** → 100 XP por quest concluída
+4. **XP de quests** → 10 XP por quest concluída
 5. **Níveis** → Sistema de progressão baseado em XP total
 
 ## Documentação Completa
 
-Ver `docs/espec/produto/definicao_produto.md` para detalhes completos.
+Ver `docs/espec/produto/` para detalhes completos.
 
