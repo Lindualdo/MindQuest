@@ -55,29 +55,67 @@ self.addEventListener('push', (event) => {
 
   console.log('[SW] Exibindo notificação:', { title, body });
 
+  // Primeiro tentar com actions
+  const notificationOptionsWithActions = {
+    body: body,
+    icon: icon,
+    badge: badge,
+    tag: tag,
+    data: data,
+    vibrate: [200, 100, 200],
+    requireInteraction: false,
+    silent: false,
+    actions: [
+      {
+        action: 'open',
+        title: 'Abrir'
+      },
+      {
+        action: 'close',
+        title: 'Fechar'
+      }
+    ]
+  };
+
+  // Opções simplificadas sem actions (fallback)
+  const notificationOptionsSimple = {
+    body: body,
+    icon: icon,
+    badge: badge,
+    tag: tag,
+    data: data,
+    vibrate: [200, 100, 200],
+    requireInteraction: false,
+    silent: false
+  };
+
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: icon,
-      badge: badge,
-      tag: tag,
-      data: data,
-      vibrate: [200, 100, 200],
-      actions: [
-        {
-          action: 'open',
-          title: 'Abrir'
-        },
-        {
-          action: 'close',
-          title: 'Fechar'
-        }
-      ]
-    }).then(() => {
-      console.log('[SW] Notificação exibida com sucesso');
-    }).catch((err) => {
-      console.error('[SW] Erro ao exibir notificação:', err);
-    })
+    self.registration.showNotification(title, notificationOptionsWithActions)
+      .then(() => {
+        console.log('[SW] Notificação exibida com sucesso (com actions)');
+      })
+      .catch((err) => {
+        console.warn('[SW] Erro ao exibir notificação com actions:', err);
+        console.log('[SW] Tentando exibir notificação sem actions...');
+        // Tentar novamente sem actions
+        return self.registration.showNotification(title, notificationOptionsSimple)
+          .then(() => {
+            console.log('[SW] Notificação exibida com sucesso (sem actions)');
+          })
+          .catch((err2) => {
+            console.error('[SW] Erro ao exibir notificação (tentativa sem actions):', err2);
+            // Última tentativa: apenas título e corpo
+            return self.registration.showNotification(title, {
+              body: body,
+              icon: icon,
+              data: data
+            }).then(() => {
+              console.log('[SW] Notificação exibida com sucesso (mínima)');
+            }).catch((err3) => {
+              console.error('[SW] Falha total ao exibir notificação:', err3);
+            });
+          });
+      })
   );
 });
 
