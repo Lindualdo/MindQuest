@@ -14,6 +14,18 @@ interface PushSubscriptionData {
 }
 
 /**
+ * Converte ArrayBuffer para base64 de forma segura
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
  * Converte subscription para formato de token (base64)
  */
 function subscriptionToToken(subscription: PushSubscription): string {
@@ -24,9 +36,9 @@ function subscriptionToToken(subscription: PushSubscription): string {
     throw new Error('Subscription keys não disponíveis');
   }
 
-  // Converter ArrayBuffer para base64
-  const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(key)));
-  const authBase64 = btoa(String.fromCharCode(...new Uint8Array(auth)));
+  // Converter ArrayBuffer para base64 de forma segura
+  const keyBase64 = arrayBufferToBase64(key);
+  const authBase64 = arrayBufferToBase64(auth);
   
   return `${subscription.endpoint}::${keyBase64}::${authBase64}`;
 }
