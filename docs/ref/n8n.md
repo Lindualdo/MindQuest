@@ -1,6 +1,6 @@
 # n8n - Manual Técnico Essencial
 
-**Data:** 2025-01-22 15:00
+**Data:** 2025-12-04
 
 ## Workflow MindQuest - Regras Críticas
 

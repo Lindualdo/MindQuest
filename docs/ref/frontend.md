@@ -1,6 +1,6 @@
 # Frontend - Referência Rápida
 
-**Data:** 2025-01-22 15:30
+**Data:** 2025-12-04
 
 ## Stack
 

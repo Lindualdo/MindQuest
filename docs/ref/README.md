@@ -1,6 +1,6 @@
 # Documentação de Referência Rápida
 
-**Data:** 2025-01-22 15:30
+**Data:** 2025-12-04
 
 Esta pasta contém documentação **compacta e essencial**.
 
@@ -39,5 +39,5 @@ Estes documentos devem ser atualizados quando:
 2. Novos padrões críticos forem estabelecidos
 3. Regras de negócio essenciais mudarem
 
-**Última revisão:** 2025-01-22 15:30
+**Última revisão:** 2025-12-04
 
