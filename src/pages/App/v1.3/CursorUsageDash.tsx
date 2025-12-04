@@ -14,6 +14,7 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+import { useAuth } from '@/store/useStore';
 
 // ====== TIPOS ======
 interface UsageEvent {
@@ -89,7 +90,12 @@ function parseCSV(text: string): UsageEvent[] {
 // ====== COMPONENTE PRINCIPAL ======
 const CursorUsageDash: React.FC = () => {
   const { dashboardData, setView } = useDashboard();
-  const nomeUsuario = dashboardData?.usuario?.nome_preferencia ?? dashboardData?.usuario?.nome ?? 'Usuário';
+  const { isAuthenticated } = useAuth();
+  
+  // Se autenticado, usa nome do usuário; senão, usa "Visitante"
+  const nomeUsuario = isAuthenticated 
+    ? (dashboardData?.usuario?.nome_preferencia ?? dashboardData?.usuario?.nome ?? 'Usuário')
+    : 'Visitante';
 
   const [activeTab, setActiveTab] = useState<TabId>('evoluir');
   const [events, setEvents] = useState<UsageEvent[]>([]);
@@ -175,11 +181,37 @@ const CursorUsageDash: React.FC = () => {
   }, [events]);
 
   // ====== NAVEGAÇÃO ======
-  const handleBack = () => setView('ajustes');
-  const handleNavConversar = () => { setActiveTab('conversar'); setView('conversar'); };
-  const handleNavEntender = () => { setActiveTab('entender'); setView('dashEmocoes'); };
-  const handleNavAgir = () => { setActiveTab('agir'); setView('painelQuests'); };
-  const handleNavEvoluir = () => { setActiveTab('evoluir'); setView('jornada'); };
+  const handleBack = () => {
+    if (isAuthenticated) {
+      setView('ajustes');
+    } else {
+      window.location.href = '/';
+    }
+  };
+  const handleNavConversar = () => { 
+    if (isAuthenticated) {
+      setActiveTab('conversar'); 
+      setView('conversar'); 
+    }
+  };
+  const handleNavEntender = () => { 
+    if (isAuthenticated) {
+      setActiveTab('entender'); 
+      setView('dashEmocoes'); 
+    }
+  };
+  const handleNavAgir = () => { 
+    if (isAuthenticated) {
+      setActiveTab('agir'); 
+      setView('painelQuests'); 
+    }
+  };
+  const handleNavEvoluir = () => { 
+    if (isAuthenticated) {
+      setActiveTab('evoluir'); 
+      setView('jornada'); 
+    }
+  };
 
   // ====== HELPERS DE FORMATAÇÃO ======
   const formatTokens = (n: number) => {
@@ -393,13 +425,15 @@ const CursorUsageDash: React.FC = () => {
         )}
       </main>
 
-      <BottomNavV1_3
-        active={activeTab}
-        onConversar={handleNavConversar}
-        onEntender={handleNavEntender}
-        onAgir={handleNavAgir}
-        onEvoluir={handleNavEvoluir}
-      />
+      {isAuthenticated && (
+        <BottomNavV1_3
+          active={activeTab}
+          onConversar={handleNavConversar}
+          onEntender={handleNavEntender}
+          onAgir={handleNavAgir}
+          onEvoluir={handleNavEvoluir}
+        />
+      )}
     </div>
   );
 };

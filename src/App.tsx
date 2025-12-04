@@ -113,6 +113,23 @@ function App() {
     return <ConversationGuidePage />;
   }
 
+  // Rota pública: Cursor Usage Dashboard
+  const isCursorUsageRoute = 
+    resolvedPath === '/app/cursor-usage' || 
+    resolvedPath === '/cursor-usage' ||
+    resolvedPath === '/app/1.3/cursor-usage' ||
+    (isAppRoute && typeof window !== 'undefined' && 
+     (window.location.pathname.toLowerCase().includes('cursor-usage') || 
+      window.location.search.includes('view=cursorUsage')));
+  
+  if (isCursorUsageRoute) {
+    return (
+      <ThemeProvider>
+        <CursorUsageDash />
+      </ThemeProvider>
+    );
+  }
+
   const { 
     refreshData, 
     isLoading, 
@@ -314,9 +331,6 @@ function App() {
         break;
       case 'niveisJornada':
         page = <NiveisJornadaPageV13 />;
-        break;
-      case 'cursorUsage':
-        page = <CursorUsageDash />;
         break;
       case 'conversar':
       case 'dashboard':
