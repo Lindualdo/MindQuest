@@ -30,63 +30,52 @@ self.addEventListener('push', (event) => {
     data: {}
   };
 
-  const showNotificationPromise = event.data
-    ? event.data.text().then((text) => {
-        if (text) {
-          try {
-            const data = JSON.parse(text);
-            return {
-              title: data.title || NOTIFICATION_TITLE,
-              body: data.body || notificationData.body,
-              icon: data.icon || notificationData.icon,
-              badge: data.badge || notificationData.badge,
-              tag: data.tag || notificationData.tag,
-              requireInteraction: data.requireInteraction || false,
-              data: data.data || {}
-            };
-          } catch (jsonError) {
-            // Se não for JSON, usar como texto simples
-            console.log('[SW] Dados não são JSON, usando como texto:', text);
-            return {
-              title: NOTIFICATION_TITLE,
-              body: text || notificationData.body,
-              icon: notificationData.icon,
-              badge: notificationData.badge,
-              tag: notificationData.tag,
-              requireInteraction: false,
-              data: {}
-            };
-          }
+  if (event.data) {
+    try {
+      const textPayload = event.data.text();
+      if (textPayload) {
+        try {
+          const parsed = JSON.parse(textPayload);
+          notificationData.title = parsed.title || notificationData.title;
+          notificationData.body = parsed.body || notificationData.body;
+          notificationData.icon = parsed.icon || notificationData.icon;
+          notificationData.badge = parsed.badge || notificationData.badge;
+          notificationData.tag = parsed.tag || notificationData.tag;
+          notificationData.requireInteraction =
+            typeof parsed.requireInteraction === 'boolean'
+              ? parsed.requireInteraction
+              : notificationData.requireInteraction;
+          notificationData.data = parsed.data || notificationData.data;
+        } catch (jsonError) {
+          console.log('[SW] Payload não é JSON, usando texto puro');
+          notificationData.body = textPayload;
         }
-        return notificationData;
-      }).catch((e) => {
-        console.error('[SW] Erro ao processar dados do push:', e);
-        return notificationData;
-      })
-    : Promise.resolve(notificationData);
+      }
+    } catch (error) {
+      console.error('[SW] Erro ao ler payload do push:', error);
+    }
+  }
 
   event.waitUntil(
-    showNotificationPromise.then((finalData) => {
-      return self.registration.showNotification(finalData.title, {
-        body: finalData.body,
-        icon: finalData.icon,
-        badge: finalData.badge,
-        tag: finalData.tag,
-        requireInteraction: finalData.requireInteraction,
-        data: finalData.data,
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      tag: notificationData.tag,
+      requireInteraction: notificationData.requireInteraction,
+      data: notificationData.data,
       vibrate: [200, 100, 200],
-        actions: [
-          {
-            action: 'open',
-            title: 'Abrir',
-            icon: '/mindquest_logo_vazado_small.png'
-          },
-          {
-            action: 'close',
-            title: 'Fechar'
-          }
-        ]
-      });
+      actions: [
+        {
+          action: 'open',
+          title: 'Abrir',
+          icon: '/mindquest_logo_vazado_small.png'
+        },
+        {
+          action: 'close',
+          title: 'Fechar'
+        }
+      ]
     })
   );
 });
