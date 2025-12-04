@@ -234,11 +234,6 @@ const EvoluirPageV13: React.FC = () => {
     await openResumoConversas();
   };
 
-  const handleVerAcoesConcluidas = () => {
-    setView('painelQuests');
-    setActiveTab('agir');
-    // TODO: Implementar filtro para mostrar apenas concluídas
-  };
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">

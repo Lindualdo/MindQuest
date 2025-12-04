@@ -24,7 +24,7 @@ interface Sabotador {
 const QUESTS_POR_PAGINA = 3;
 
 const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
-  const { dashboardData, setView, openSabotadorDetail } = useDashboard();
+  const { dashboardData, setView } = useDashboard();
 
   const nomeUsuario =
     dashboardData?.usuario?.nome_preferencia ??
