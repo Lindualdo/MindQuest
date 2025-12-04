@@ -6,6 +6,7 @@
  * - /api/quests
  * - /api/quest-detail
  * - /api/criar-quest
+ * - /api/criar-quest-manual
  * - /api/concluir-quest
  * - /api/ativar-quest
  * - /api/objetivos
@@ -20,6 +21,16 @@
  * - /api/conexao-sabotadores
  * - /api/notificacoes
  * - /api/push-token
+ * - /api/card/emocoes
+ * - /api/card/insight
+ * - /api/card/conversas
+ * - /api/card/jornada
+ * - /api/progresso-semanal
+ * - /api/perfil-big-five
+ * - /api/roda/emocoes
+ * - /api/acoes/sabotador
+ * - /api/ocorrencias/sabotador
+ * - /api/full_chat
  */
 
 const N8N_BASE_URL = process.env.N8N_BASE_URL || 'https://mindquest-n8n.cloudfy.live';
@@ -104,26 +115,54 @@ const handleResponse = async (response: Response, res: any) => {
 
 // Mapeamento de endpoints para webhooks
 const ENDPOINT_MAP: Record<string, string> = {
+  // Quests
   'quests': '/quests',
   'quest-detail': '/quest-detail',
   'criar-quest': '/criar-quest',
+  'criar-quest-manual': '/criar-quest-manual',
   'concluir-quest': '/concluir-quest',
   'ativar-quest': '/ativar-quest',
+  // Objetivos
   'objetivos': '/objetivos',
   'objetivos-catalogo': '/objetivos-catalogo',
   'conexao-objetivos': '/conexao-objetivos',
   'conquista-objetivo': '/conquista-objetivo',
+  // Jornada
   'jornada-niveis': '/jornada-niveis',
   'evoluir-stats': '/evoluir-stats',
+  'progresso-semanal': '/progresso-semanal',
+  // Cards
+  'card/emocoes': '/card/emocoes',
+  'card/insight': '/card/insight',
+  'card/conversas': '/card/conversas',
+  'card/jornada': '/card/jornada',
+  // Insights
   'insights': '/insights',
   'humor-historico': '/humor-historico',
   'resumo_conversas': '/resumo_conversas',
   'insights_historico': '/insights_historico',
+  'full_chat': '/full_chat',
+  // Perfil e outros
   'perfil-pessoal': '/perfil-pessoal',
   'conexao-sabotadores': '/conexao-sabotadores',
   'notificacoes': '/notificacoes',
   'push-token': '/push-token',
+  // Big Five e Emoções
+  'perfil-big-five': '/perfil-big-five',
+  'roda/emocoes': '/roda/emocoes',
+  // Sabotadores
+  'acoes/sabotador': '/acoes/sabotador',
+  'ocorrencias/sabotador': '/ocorrencias/sabotador',
 };
+
+// Endpoints que aceitam passagem direta de query params
+const SIMPLE_GET_ENDPOINTS = [
+  'card/emocoes', 'card/insight', 'card/conversas', 'card/jornada',
+  'progresso-semanal', 'perfil-big-five', 'roda/emocoes',
+  'acoes/sabotador', 'ocorrencias/sabotador', 'full_chat',
+  'objetivos', 'perfil-pessoal', 'notificacoes', 
+  'conexao-objetivos', 'conexao-sabotadores', 'conquista-objetivo',
+];
 
 export default async function handler(req: any, res: any) {
   setCorsHeaders(res);
@@ -133,11 +172,13 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Extrair o endpoint do path
+  // Extrair o endpoint do path - suporta subpaths como card/jornada
   const slug = req.query.slug as string[] | string;
-  const endpoint = Array.isArray(slug) ? slug[0] : slug || '';
+  const endpoint = Array.isArray(slug) ? slug.join('/') : slug || '';
 
-  // Roteamento especial para jornada
+  console.log(`[Router] ${req.method} /api/${endpoint}`, { query: req.query });
+
+  // Roteamento especial para jornada (com action)
   if (endpoint === 'jornada') {
     const action = req.query?.action || 'niveis';
     const usuarioId = readUsuarioId(req.query);
@@ -165,7 +206,7 @@ export default async function handler(req: any, res: any) {
 
   // Roteamento especial para objetivos com action=catalogo
   if (endpoint === 'objetivos' && req.method === 'GET' && req.query?.action === 'catalogo') {
-    const remoteEndpoint = process.env.OBJETIVOS_CATALOGO_WEBHOOK_URL || `${WEBHOOK_BASE_URL}/objetivos-catalogo`;
+    const remoteEndpoint = `${WEBHOOK_BASE_URL}/objetivos-catalogo`;
     try {
       const upstreamResponse = await fetch(remoteEndpoint, {
         method: 'GET',
@@ -180,7 +221,7 @@ export default async function handler(req: any, res: any) {
   }
 
   // Roteamento especial para insights (suporta múltiplos endpoints)
-  if (endpoint === 'insights' || endpoint === 'humor-historico' || endpoint === 'resumo_conversas' || endpoint === 'insights_historico') {
+  if (['insights', 'humor-historico', 'resumo_conversas', 'insights_historico'].includes(endpoint)) {
     const endpointPath = ENDPOINT_MAP[endpoint] || ENDPOINT_MAP['insights'];
     const remoteEndpoint = `${WEBHOOK_BASE_URL}${endpointPath}`;
 
@@ -190,7 +231,7 @@ export default async function handler(req: any, res: any) {
 
       if (source && typeof source === 'object') {
         Object.entries(source as Record<string, unknown>).forEach(([key, rawValue]) => {
-          if (rawValue === undefined || rawValue === null) return;
+          if (rawValue === undefined || rawValue === null || key === 'slug') return;
           const values = Array.isArray(rawValue) 
             ? rawValue
                 .map(v => typeof v === 'string' ? v : JSON.stringify(v))
@@ -222,12 +263,30 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const remoteEndpoint = process.env[`${endpoint.toUpperCase().replace(/-/g, '_')}_WEBHOOK_URL`] || `${WEBHOOK_BASE_URL}${webhookPath}`;
+  const remoteEndpoint = `${WEBHOOK_BASE_URL}${webhookPath}`;
 
   // Handlers específicos por endpoint
   try {
     // GET handlers
     if (req.method === 'GET') {
+      // Endpoints GET simples - passam query params direto
+      if (SIMPLE_GET_ENDPOINTS.includes(endpoint)) {
+        const url = new URL(remoteEndpoint);
+        // Passar todos os query params exceto slug
+        Object.entries(req.query as Record<string, unknown>).forEach(([key, value]) => {
+          if (key !== 'slug' && value !== undefined && value !== null) {
+            url.searchParams.set(key, String(value));
+          }
+        });
+        
+        const upstreamResponse = await fetch(url.toString(), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        await handleResponse(upstreamResponse, res);
+        return;
+      }
+
       if (endpoint === 'quests') {
         const usuarioId = readUsuarioId(req.query);
         if (!usuarioId) {
@@ -302,25 +361,11 @@ export default async function handler(req: any, res: any) {
           quest_id: questId,
           recorrencia_dias: recorrenciaDias.toString(),
         });
+        if (req.query.tipo_recorrencia) {
+          queryParams.set('tipo_recorrencia', String(req.query.tipo_recorrencia));
+        }
         const webhookUrl = `${remoteEndpoint}?${queryParams.toString()}`;
         const upstreamResponse = await fetch(webhookUrl, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        await handleResponse(upstreamResponse, res);
-        return;
-      }
-
-      // Endpoints GET simples (objetivos, perfil-pessoal, notificacoes, conexao-*)
-      if (['objetivos', 'perfil-pessoal', 'notificacoes', 'conexao-objetivos', 'conexao-sabotadores', 'conquista-objetivo'].includes(endpoint)) {
-        const usuarioId = readUsuarioId(req.query);
-        if (!usuarioId) {
-          res.status(400).json({ success: false, error: 'user_id obrigatório' });
-          return;
-        }
-        const url = new URL(remoteEndpoint);
-        url.searchParams.set('user_id', usuarioId);
-        const upstreamResponse = await fetch(url.toString(), {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -382,6 +427,22 @@ export default async function handler(req: any, res: any) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
+        });
+        await handleResponse(upstreamResponse, res);
+        return;
+      }
+
+      // criar-quest-manual - passa body direto
+      if (endpoint === 'criar-quest-manual') {
+        const usuarioId = readUsuarioId(parsedBody);
+        if (!usuarioId) {
+          res.status(400).json({ success: false, error: 'usuario_id obrigatório' });
+          return;
+        }
+        const upstreamResponse = await fetch(remoteEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedBody),
         });
         await handleResponse(upstreamResponse, res);
         return;
@@ -449,4 +510,3 @@ export default async function handler(req: any, res: any) {
     });
   }
 }
-
