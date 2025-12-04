@@ -205,6 +205,37 @@ const CursorUsageDash: React.FC = () => {
       }
     });
 
+    // Recalcular Included vs On-Demand baseado nos limites do plano
+    // Se o uso exceder o limite, apenas o limite é "Included", o restante é "On-Demand"
+    Object.keys(byModel).forEach(modelKey => {
+      const modelData = byModel[modelKey];
+      const modelInfo = CURSOR_LIMITS[modelKey as keyof typeof CURSOR_LIMITS];
+      
+      if (modelInfo && modelInfo.monthlyIncluded > 0) {
+        // Se o uso Included exceder o limite, redistribuir apenas os tokens
+        if (modelData.includedTokens > modelInfo.monthlyIncluded) {
+          const excessTokens = modelData.includedTokens - modelInfo.monthlyIncluded;
+          // Mover excedente para On-Demand (apenas tokens, requests permanecem como Included)
+          modelData.onDemandTokens += excessTokens;
+          modelData.includedTokens = modelInfo.monthlyIncluded;
+          // Requests permanecem como Included (não redistribuímos requests)
+        }
+      }
+    });
+
+    // Recalcular totais após redistribuição
+    includedCost = 0;
+    onDemandCost = 0;
+    Object.values(byModel).forEach(modelData => {
+      // Recalcular custos proporcionalmente
+      const includedRatio = modelData.includedTokens / (modelData.totalTokens || 1);
+      const onDemandRatio = modelData.onDemandTokens / (modelData.totalTokens || 1);
+      modelData.includedCost = modelData.totalCost * includedRatio;
+      modelData.onDemandCost = modelData.totalCost * onDemandRatio;
+      includedCost += modelData.includedCost;
+      onDemandCost += modelData.onDemandCost;
+    });
+
     // Ordenar por custo total
     const modelList = Object.values(byModel).sort((a, b) => b.totalCost - a.totalCost);
 
