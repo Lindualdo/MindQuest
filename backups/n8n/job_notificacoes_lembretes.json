@@ -1,0 +1,407 @@
+{
+  "createdAt": "2025-12-03T16:50:49.703Z",
+  "id": "VHN99nCeauiBMoMD",
+  "name": "job_notificacoes_lembretes",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "buscar-usuarios",
+      "name": "Buscar Usuários com Notificações",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        96
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT n.usuario_id, n.lembretes_ativo, n.lembretes_periodo, n.lembretes_conversas_diarias, n.lembretes_quests, n.lembretes_conquistas, n.lembretes_canais\nFROM notificacoes n\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_canais && ARRAY['push']::text[]\n  AND EXISTS (\n    SELECT 1 FROM dispositivos_push dp\n    WHERE dp.usuario_id = n.usuario_id\n  );",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "verificar-periodo",
+      "name": "Verificar Período",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        96
+      ],
+      "parameters": {
+        "jsCode": "// Verificar se estamos no período correto\nconst horaAtual = new Date().getHours();\nlet periodoAtual = 'manha';\n\nif (horaAtual >= 6 && horaAtual < 12) {\n  periodoAtual = 'manha';\n} else if (horaAtual >= 12 && horaAtual < 18) {\n  periodoAtual = 'tarde';\n} else if (horaAtual >= 18 || horaAtual < 6) {\n  periodoAtual = 'noite';\n}\n\n// Filtrar apenas usuários com período correspondente\nconst items = $input.all();\nconst filtered = items.filter(item => {\n  const periodoUsuario = item.json.lembretes_periodo || 'manha';\n  return periodoUsuario === periodoAtual;\n});\n\nreturn filtered.map(item => ({\n  json: {\n    ...item.json,\n    periodo_atual: periodoAtual\n  }\n}));"
+      }
+    },
+    {
+      "id": "buscar-tokens",
+      "name": "Buscar Tokens",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        160,
+        96
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  dp.usuario_id, \n  dp.token,\n  n.lembretes_conversas_diarias,\n  n.lembretes_quests,\n  n.lembretes_conquistas\nFROM dispositivos_push dp\nINNER JOIN notificacoes n ON n.usuario_id = dp.usuario_id\nWHERE dp.usuario_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "verificar-conversas",
+      "name": "Verificar Conversas Pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        528,
+        256
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Verificar conversas pendentes\n-- 1. Meta diária: verificar se teve conversa hoje\n-- 2. Conversas não terminadas: verificar status 'incompleta' na tabela usr_chat\nWITH hoje AS (\n  SELECT CURRENT_DATE AS data_hoje\n),\nconversas_hoje AS (\n  SELECT \n    u.id AS usuario_id,\n    COUNT(DISTINCT uc.id) AS total_conversas_hoje\n  FROM usuarios u\n  CROSS JOIN hoje\n  LEFT JOIN usr_chat uc ON uc.usuario_id = u.id \n    AND DATE(uc.criado_em) = hoje.data_hoje\n  WHERE u.id = $1::uuid\n  GROUP BY u.id\n),\nconversas_incompletas AS (\n  SELECT \n    uc.usuario_id,\n    COUNT(*) AS total_incompletas\n  FROM usr_chat uc\n  WHERE uc.usuario_id = $1::uuid\n    AND uc.status = 'incompleta'\n    AND uc.data_conversa = CURRENT_DATE\n  GROUP BY uc.usuario_id\n),\nconversas_pendentes AS (\n  SELECT \n    u.id AS usuario_id,\n    CASE \n      WHEN ch.total_conversas_hoje = 0 OR ch.total_conversas_hoje IS NULL THEN true\n      ELSE false\n    END AS sem_conversa_hoje,\n    CASE\n      WHEN ci.total_incompletas > 0 THEN true\n      ELSE false\n    END AS tem_conversa_incompleta\n  FROM usuarios u\n  LEFT JOIN conversas_hoje ch ON ch.usuario_id = u.id\n  LEFT JOIN conversas_incompletas ci ON ci.usuario_id = u.id\n  WHERE u.id = $1::uuid\n)\nSELECT \n  cp.usuario_id,\n  cp.sem_conversa_hoje,\n  cp.tem_conversa_incompleta,\n  CASE\n    WHEN cp.sem_conversa_hoje THEN 'sem_conversa_hoje'\n    WHEN cp.tem_conversa_incompleta THEN 'conversa_pendente'\n    ELSE NULL\n  END AS tipo_pendencia\nFROM conversas_pendentes cp\nWHERE cp.sem_conversa_hoje = true OR cp.tem_conversa_incompleta = true;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "verificar-quests",
+      "name": "Verificar Quests Pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        528,
+        480
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Verificar quests recorrentes de hoje não concluídas\nSELECT \n  qr.usuarios_quest_id,\n  uq.usuario_id,\n  qr.data_planejada,\n  qr.status,\n  COALESCE(uq.config->>'titulo', 'Quest') AS quest_titulo\nFROM quests_recorrencias qr\nINNER JOIN usuarios_quest uq ON uq.id = qr.usuarios_quest_id\nWHERE uq.usuario_id = $1::uuid\n  AND qr.data_planejada = CURRENT_DATE\n  AND qr.status = 'pendente'\nORDER BY qr.data_planejada;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "merge-dados",
+      "name": "Merge Dados",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        912,
+        112
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 3
+      }
+    },
+    {
+      "id": "preparar-notificacoes",
+      "name": "Preparar Notificações",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        128
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Preparar notificações baseadas nas pendências encontradas\n// Este nó recebe dados de múltiplas fontes via Merge (append mode)\n// Todos os dados chegam juntos em uma única execução\n\nconst items = $input.all();\nconst notificacoes = [];\n\n// Agrupar por usuario_id\nconst porUsuario = {};\n\nfor (const item of items) {\n  const usuarioId = item.json.usuario_id;\n  if (!usuarioId) continue;\n  \n  if (!porUsuario[usuarioId]) {\n    porUsuario[usuarioId] = {\n      usuario_id: usuarioId,\n      token: null,\n      lembretes_conversas_diarias: false,\n      lembretes_quests: false,\n      conversas: { sem_conversa_hoje: false, conversa_pendente: false },\n      quests: []\n    };\n  }\n  \n  // Token e configurações (vem de Buscar Tokens)\n  if (item.json.token) {\n    porUsuario[usuarioId].token = item.json.token;\n  }\n  if (item.json.lembretes_conversas_diarias !== undefined) {\n    porUsuario[usuarioId].lembretes_conversas_diarias = item.json.lembretes_conversas_diarias;\n  }\n  if (item.json.lembretes_quests !== undefined) {\n    porUsuario[usuarioId].lembretes_quests = item.json.lembretes_quests;\n  }\n  \n  // Conversas pendentes (vem de Verificar Conversas Pendentes)\n  if (item.json.tipo_pendencia === 'sem_conversa_hoje') {\n    porUsuario[usuarioId].conversas.sem_conversa_hoje = true;\n  } else if (item.json.tipo_pendencia === 'conversa_pendente') {\n    porUsuario[usuarioId].conversas.conversa_pendente = true;\n  }\n  \n  // Quests pendentes (vem de Verificar Quests Pendentes)\n  if (item.json.quest_titulo) {\n    const questJaExiste = porUsuario[usuarioId].quests.some(\n      q => q.titulo === item.json.quest_titulo\n    );\n    if (!questJaExiste) {\n      porUsuario[usuarioId].quests.push({\n        titulo: item.json.quest_titulo,\n        data_planejada: item.json.data_planejada\n      });\n    }\n  }\n}\n\n// Criar notificações apenas para usuários com pendências\nfor (const usuarioId in porUsuario) {\n  const dados = porUsuario[usuarioId];\n  \n  // Só processar se tiver token (dados de configuração chegaram)\n  if (!dados.token) continue;\n  \n  const mensagens = [];\n  \n  // Conversas (só se habilitado)\n  if (dados.lembretes_conversas_diarias) {\n    if (dados.conversas.sem_conversa_hoje) {\n      mensagens.push('Você ainda não fez sua conversa diária hoje');\n    }\n    if (dados.conversas.conversa_pendente) {\n      mensagens.push('Você tem uma conversa não terminada');\n    }\n  }\n  \n  // Quests (só se habilitado)\n  if (dados.lembretes_quests && dados.quests.length > 0) {\n    mensagens.push(`Você tem ${dados.quests.length} quest${dados.quests.length > 1 ? 's' : ''} pendente${dados.quests.length > 1 ? 's' : ''} hoje`);\n  }\n  \n  // Só criar notificação se houver pendências\n  if (mensagens.length > 0) {\n    notificacoes.push({\n      json: {\n        usuario_id: dados.usuario_id,\n        token: dados.token,\n        titulo: 'MindQuest - Lembretes',\n        corpo: mensagens.join('. ') + '.',\n        tipo: 'lembrete',\n        conversas_pendentes: dados.conversas.sem_conversa_hoje || dados.conversas.conversa_pendente,\n        quests_pendentes: dados.quests.length > 0\n      }\n    });\n  }\n}\n\nreturn notificacoes;"
+      }
+    },
+    {
+      "id": "enviar-push",
+      "name": "Enviar Push Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1312,
+        128
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://mind-quest-orcin.vercel.app/api/send-push",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $json.token }}"
+            },
+            {
+              "name": "titulo",
+              "value": "={{ $json.titulo }}"
+            },
+            {
+              "name": "corpo",
+              "value": "={{ $json.corpo }}"
+            },
+            {
+              "name": "usuario_id",
+              "value": "={{ $json.usuario_id }}"
+            },
+            {
+              "name": "tipo",
+              "value": "={{ $json.tipo || \"lembrete\" }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "processar-resposta",
+      "name": "Processar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        128
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Processar resposta da API e formatar resultado\n// Preservar usuario_id do item anterior (vem de Preparar Notificações)\nconst items = $input.all();\nconst resultados = [];\n\nfor (const item of items) {\n  const response = item.json;\n  // usuario_id vem do pairedItem (item anterior)\n  const usuarioId = item.pairedItem?.item?.json?.usuario_id || response.usuario_id;\n  \n  if (response.success) {\n    resultados.push({\n      json: {\n        usuario_id: usuarioId,\n        sucesso: true,\n        enviado_em: response.enviado_em || new Date().toISOString(),\n        titulo: response.titulo,\n        corpo: response.corpo\n      },\n      pairedItem: item.pairedItem\n    });\n  } else {\n    resultados.push({\n      json: {\n        usuario_id: usuarioId,\n        sucesso: false,\n        erro: response.error || 'Erro desconhecido'\n      },\n      pairedItem: item.pairedItem\n    });\n  }\n}\n\nreturn resultados;"
+      }
+    },
+    {
+      "id": "log-resultado",
+      "name": "Log Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        128
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst sucessos = items.filter(i => i.json.sucesso === true).length;\nconst falhas = items.filter(i => i.json.sucesso === false).length;\n\nreturn [{\n  json: {\n    total: items.length,\n    sucessos,\n    falhas,\n    timestamp: new Date().toISOString(),\n    status: sucessos > 0 ? 'enviado' : 'erro'\n  }\n}];"
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger (Teste)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        96
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Buscar Usuários com Notificações": {
+      "main": [
+        [
+          {
+            "node": "Verificar Período",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Período": {
+      "main": [
+        [
+          {
+            "node": "Buscar Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Tokens": {
+      "main": [
+        [
+          {
+            "node": "Verificar Conversas Pendentes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Quests Pendentes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Conversas Pendentes": {
+      "main": [
+        [
+          {
+            "node": "Merge Dados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Verificar Quests Pendentes": {
+      "main": [
+        [
+          {
+            "node": "Merge Dados",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Dados": {
+      "main": [
+        [
+          {
+            "node": "Preparar Notificações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Notificações": {
+      "main": [
+        [
+          {
+            "node": "Enviar Push Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Push Notification": {
+      "main": [
+        [
+          {
+            "node": "Processar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Log Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger (Teste)": {
+      "main": [
+        [
+          {
+            "node": "Buscar Usuários com Notificações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "shared": [
+    {
+      "createdAt": "2025-12-03T16:50:49.703Z",
+      "role": "workflow:owner",
+      "workflowId": "VHN99nCeauiBMoMD",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
