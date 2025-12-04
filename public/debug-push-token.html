@@ -204,22 +204,54 @@
         
         if (!subscription) {
           log('Criando nova subscription...', 'warning');
-          subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-          });
-          log('Nova subscription criada ✓', 'success');
+          log(`VAPID Key (início): ${VAPID_PUBLIC_KEY.substring(0, 30)}...`, 'info');
+          
+          try {
+            const vapidKeyArray = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+            log(`VAPID Key convertida (tamanho: ${vapidKeyArray.length} bytes)`, 'info');
+            
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: vapidKeyArray
+            });
+            
+            if (!subscription) {
+              log('❌ Subscription retornou null/undefined', 'error');
+              return;
+            }
+            
+            log('Nova subscription criada ✓', 'success');
+            log(`Endpoint: ${subscription.endpoint.substring(0, 50)}...`, 'info');
+          } catch (subscribeError) {
+            log(`❌ Erro ao criar subscription: ${subscribeError.message}`, 'error');
+            log(`Tipo do erro: ${subscribeError.name}`, 'error');
+            log(`Stack: ${subscribeError.stack || 'N/A'}`, 'error');
+            console.error('Erro completo:', subscribeError);
+            return;
+          }
         } else {
           log('Subscription existente encontrada ✓', 'success');
         }
 
+        // Verificar se subscription existe
+        if (!subscription) {
+          log('❌ Subscription não foi criada/encontrada', 'error');
+          return;
+        }
+
         // Extrair token
+        log('Extraindo dados da subscription...', 'info');
         const endpoint = subscription.endpoint;
         const p256dhKey = subscription.getKey('p256dh');
         const authKey = subscription.getKey('auth');
 
+        log(`Endpoint: ${endpoint ? endpoint.substring(0, 50) + '...' : 'NÃO ENCONTRADO'}`, 'info');
+        log(`p256dh key: ${p256dhKey ? 'OK (' + p256dhKey.byteLength + ' bytes)' : 'NÃO ENCONTRADA'}`, 'info');
+        log(`auth key: ${authKey ? 'OK (' + authKey.byteLength + ' bytes)' : 'NÃO ENCONTRADA'}`, 'info');
+
         if (!p256dhKey || !authKey) {
-          log('Chaves não disponíveis na subscription', 'error');
+          log('❌ Chaves não disponíveis na subscription', 'error');
+          log('Verifique se o Service Worker está ativo e funcional', 'error');
           return;
         }
 
