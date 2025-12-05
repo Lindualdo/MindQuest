@@ -1,6 +1,6 @@
 {
-  "createdAt": "2025-12-03T16:50:49.703Z",
-  "id": "VHN99nCeauiBMoMD",
+  "createdAt": "2025-12-05T12:29:42.901Z",
+  "id": "uhyvgbzJl1r1LXoV",
   "name": "job_notificacoes_lembretes",
   "description": null,
   "active": false,
@@ -12,13 +12,13 @@
         "query": "SELECT DISTINCT \n  n.usuario_id, \n  n.lembretes_ativo, \n  n.lembretes_periodo, \n  n.lembretes_conversas_diarias, \n  n.lembretes_quests, \n  n.lembretes_conquistas, \n  n.lembretes_canais\nFROM notificacoes n\nWHERE n.lembretes_ativo = true\n  AND (\n    (n.lembretes_canais && ARRAY['push']::text[] \n     AND EXISTS (SELECT 1 FROM dispositivos_push dp WHERE dp.usuario_id = n.usuario_id))\n    OR\n    (n.lembretes_canais && ARRAY['whatsapp']::text[] \n     AND EXISTS (SELECT 1 FROM usuarios u WHERE u.id = n.usuario_id AND u.whatsapp_numero IS NOT NULL))\n  );",
         "options": {}
       },
-      "id": "buscar-usuarios",
+      "id": "9142d139-7e85-491b-bd09-7711f77ce526",
       "name": "Buscar Usuários com Notificações",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -288,
-        96
+        224,
+        0
       ],
       "credentials": {
         "postgres": {
@@ -31,13 +31,13 @@
       "parameters": {
         "jsCode": "// Verificar se estamos no período correto\nconst horaAtual = new Date().getHours();\nlet periodoAtual = 'manha';\n\nif (horaAtual >= 6 && horaAtual < 12) {\n  periodoAtual = 'manha';\n} else if (horaAtual >= 12 && horaAtual < 18) {\n  periodoAtual = 'tarde';\n} else if (horaAtual >= 18 || horaAtual < 6) {\n  periodoAtual = 'noite';\n}\n\n// Filtrar apenas usuários com período correspondente\nconst items = $input.all();\nconst filtered = items.filter(item => {\n  const periodoUsuario = item.json.lembretes_periodo || 'manha';\n  return periodoUsuario === periodoAtual;\n});\n\nreturn filtered.map(item => ({\n  json: {\n    ...item.json,\n    periodo_atual: periodoAtual\n  }\n}));"
       },
-      "id": "verificar-periodo",
+      "id": "621fd071-96ec-469e-abef-b18461e87060",
       "name": "Verificar Período",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -64,
-        96
+        448,
+        0
       ]
     },
     {
@@ -48,13 +48,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "buscar-tokens",
+      "id": "ea758e50-3990-43da-9bdc-91c997876e99",
       "name": "Buscar Tokens Push",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        -32
+        672,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -71,13 +71,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "buscar-whatsapp",
+      "id": "8b71c45f-5188-4db1-ba0a-0af4cf6e61b8",
       "name": "Buscar WhatsApp",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        160,
-        128
+        672,
+        96
       ],
       "credentials": {
         "postgres": {
@@ -94,13 +94,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "verificar-conversas",
+      "id": "4d995b89-a500-4b23-ae93-d15f61e26513",
       "name": "Verificar Conversas Pendentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        528,
-        256
+        1104,
+        -224
       ],
       "credentials": {
         "postgres": {
@@ -117,13 +117,13 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "verificar-quests",
+      "id": "9352290a-4cab-409a-a487-e8960b1ac237",
       "name": "Verificar Quests Pendentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        528,
-        480
+        1056,
+        304
       ],
       "credentials": {
         "postgres": {
@@ -136,26 +136,26 @@
       "parameters": {
         "numberInputs": 4
       },
-      "id": "merge-dados",
+      "id": "571de18b-a453-4a95-acbe-f235ba99e9b1",
       "name": "Merge Dados",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        912,
-        112
+        1424,
+        16
       ]
     },
     {
       "parameters": {
         "jsCode": "// Preparar notificações baseadas nas pendências encontradas\n// Suporte a múltiplos canais: push e whatsapp\n\nconst items = $input.all();\nconst notificacoes = [];\n\n// Agrupar por usuario_id\nconst porUsuario = {};\n\nfor (const item of items) {\n  const usuarioId = item.json.usuario_id;\n  if (!usuarioId) continue;\n  \n  if (!porUsuario[usuarioId]) {\n    porUsuario[usuarioId] = {\n      usuario_id: usuarioId,\n      tokens: [],\n      whatsapp_numero: null,\n      lembretes_canais: [],\n      lembretes_conversas_diarias: false,\n      lembretes_quests: false,\n      conversas: { sem_conversa_hoje: false, conversa_pendente: false },\n      quests: []\n    };\n  }\n  \n  // Token push\n  if (item.json.token) {\n    if (!porUsuario[usuarioId].tokens.includes(item.json.token)) {\n      porUsuario[usuarioId].tokens.push(item.json.token);\n    }\n  }\n  \n  // WhatsApp\n  if (item.json.whatsapp_numero) {\n    porUsuario[usuarioId].whatsapp_numero = item.json.whatsapp_numero;\n  }\n  \n  // Canais\n  if (item.json.lembretes_canais) {\n    porUsuario[usuarioId].lembretes_canais = item.json.lembretes_canais;\n  }\n  \n  // Configurações\n  if (item.json.lembretes_conversas_diarias !== undefined) {\n    porUsuario[usuarioId].lembretes_conversas_diarias = item.json.lembretes_conversas_diarias;\n  }\n  if (item.json.lembretes_quests !== undefined) {\n    porUsuario[usuarioId].lembretes_quests = item.json.lembretes_quests;\n  }\n  \n  // Conversas pendentes\n  if (item.json.tipo_pendencia === 'sem_conversa_hoje') {\n    porUsuario[usuarioId].conversas.sem_conversa_hoje = true;\n  } else if (item.json.tipo_pendencia === 'conversa_pendente') {\n    porUsuario[usuarioId].conversas.conversa_pendente = true;\n  }\n  \n  // Quests pendentes\n  if (item.json.quest_titulo) {\n    const questJaExiste = porUsuario[usuarioId].quests.some(\n      q => q.titulo === item.json.quest_titulo\n    );\n    if (!questJaExiste) {\n      porUsuario[usuarioId].quests.push({\n        titulo: item.json.quest_titulo,\n        data_planejada: item.json.data_planejada\n      });\n    }\n  }\n}\n\n// Criar notificações por canal\nfor (const usuarioId in porUsuario) {\n  const dados = porUsuario[usuarioId];\n  const mensagens = [];\n  \n  // Conversas (só se habilitado)\n  if (dados.lembretes_conversas_diarias) {\n    if (dados.conversas.sem_conversa_hoje) {\n      mensagens.push('Você ainda não fez sua conversa diária hoje');\n    }\n    if (dados.conversas.conversa_pendente) {\n      mensagens.push('Você tem uma conversa não terminada');\n    }\n  }\n  \n  // Quests (só se habilitado)\n  if (dados.lembretes_quests && dados.quests.length > 0) {\n    mensagens.push(`Você tem ${dados.quests.length} quest${dados.quests.length > 1 ? 's' : ''} pendente${dados.quests.length > 1 ? 's' : ''} hoje`);\n  }\n  \n  // Só criar notificação se houver pendências\n  if (mensagens.length > 0) {\n    const titulo = 'MindQuest - Lembretes';\n    const corpo = mensagens.join('. ') + '.';\n    \n    // Push: uma notificação por dispositivo\n    if (dados.lembretes_canais.includes('push') && dados.tokens.length > 0) {\n      for (const token of dados.tokens) {\n        notificacoes.push({\n          json: {\n            usuario_id: dados.usuario_id,\n            canal: 'push',\n            token: token,\n            titulo: titulo,\n            corpo: corpo,\n            tipo: 'lembrete'\n          }\n        });\n      }\n    }\n    \n    // WhatsApp: uma notificação por usuário\n    if (dados.lembretes_canais.includes('whatsapp') && dados.whatsapp_numero) {\n      notificacoes.push({\n        json: {\n          usuario_id: dados.usuario_id,\n          canal: 'whatsapp',\n          whatsapp_numero: dados.whatsapp_numero,\n          titulo: titulo,\n          corpo: corpo,\n          tipo: 'lembrete'\n        }\n      });\n    }\n  }\n}\n\nreturn notificacoes;"
       },
-      "id": "preparar-notificacoes",
+      "id": "825bd538-1f23-43ac-81fe-8f21499d01c8",
       "name": "Preparar Notificações",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        128
+        1648,
+        48
       ]
     },
     {
@@ -180,8 +180,7 @@
                   }
                 ],
                 "combinator": "and"
-              },
-              "renameOutput": false
+              }
             },
             {
               "conditions": {
@@ -201,20 +200,19 @@
                   }
                 ],
                 "combinator": "and"
-              },
-              "renameOutput": false
+              }
             }
           ]
         },
         "options": {}
       },
-      "id": "switch-canal",
+      "id": "82eb12c3-1540-43c1-b628-13258ee71089",
       "name": "Switch Canal",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1344,
-        128
+        1856,
+        32
       ]
     },
     {
@@ -248,80 +246,140 @@
         },
         "options": {}
       },
-      "id": "enviar-push",
+      "id": "daa9b662-cda8-427f-861c-33fc09174491",
       "name": "Enviar Push",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1568,
-        32
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": "={{ \"DJB5qWudX1Hqap1O\" }}",
-        "options": {
-          "inputData": "={{ { \"instance\": \"MindQuest\", \"numero\": $json.whatsapp_numero, \"mensagem\": $json.corpo } }}"
-        }
-      },
-      "id": "enviar-whatsapp",
-      "name": "Enviar WhatsApp",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
-      "position": [
-        1568,
-        224
-      ]
-    },
-    {
-      "parameters": {
-        "numberInputs": 2
-      },
-      "id": "merge-resultados",
-      "name": "Merge Resultados",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        1792,
-        128
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Processar respostas de ambos os canais\nconst items = $input.all();\nconst resultados = [];\n\nfor (const item of items) {\n  const response = item.json;\n  const usuarioId = item.pairedItem?.item?.json?.usuario_id || response.usuario_id;\n  const canal = item.pairedItem?.item?.json?.canal || 'desconhecido';\n  \n  // Push notification\n  if (response.success !== undefined) {\n    resultados.push({\n      json: {\n        usuario_id: usuarioId,\n        canal: canal,\n        sucesso: response.success,\n        enviado_em: response.enviado_em || new Date().toISOString(),\n        erro: response.error || null\n      },\n      pairedItem: item.pairedItem\n    });\n  }\n  // WhatsApp (sw_evolution_send_message_v2)\n  else if (response.status !== undefined) {\n    resultados.push({\n      json: {\n        usuario_id: usuarioId,\n        canal: canal,\n        sucesso: response.status === 'success',\n        enviado_em: new Date().toISOString(),\n        erro: response.error || null\n      },\n      pairedItem: item.pairedItem\n    });\n  }\n  // Resposta genérica\n  else {\n    resultados.push({\n      json: {\n        usuario_id: usuarioId,\n        canal: canal,\n        sucesso: true,\n        enviado_em: new Date().toISOString()\n      },\n      pairedItem: item.pairedItem\n    });\n  }\n}\n\nreturn resultados;"
-      },
-      "id": "processar-resposta",
-      "name": "Processar Respostas",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2016,
-        128
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\nconst sucessos = items.filter(i => i.json.sucesso === true).length;\nconst falhas = items.filter(i => i.json.sucesso === false).length;\n\n// Contar por canal\nconst porCanal = {};\nfor (const item of items) {\n  const canal = item.json.canal || 'desconhecido';\n  if (!porCanal[canal]) {\n    porCanal[canal] = { total: 0, sucessos: 0, falhas: 0 };\n  }\n  porCanal[canal].total++;\n  if (item.json.sucesso) {\n    porCanal[canal].sucessos++;\n  } else {\n    porCanal[canal].falhas++;\n  }\n}\n\nreturn [{\n  json: {\n    total: items.length,\n    sucessos,\n    falhas,\n    por_canal: porCanal,\n    timestamp: new Date().toISOString(),\n    status: sucessos > 0 ? 'enviado' : 'erro'\n  }\n}];"
-      },
-      "id": "log-resultado",
-      "name": "Log Resultado",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2240,
-        128
+        2320,
+        -48
       ]
     },
     {
       "parameters": {},
-      "id": "manual-trigger",
+      "id": "7e7ef766-e6aa-4a03-9fb5-ec45a1b9be2b",
       "name": "Manual Trigger (Teste)",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -512,
-        96
+        0,
+        0
       ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fVrO1PaqFuA957u0",
+          "mode": "list",
+          "cachedResultName": "MindQuest",
+          "cachedResultUrl": "/projects/u1M57XAwIiLpPwjp/datatables/fVrO1PaqFuA957u0"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        288
+      ],
+      "id": "557aba1b-fa11-4e9c-9293-67ced04349a7",
+      "name": "config"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $json.Instancia_evolution }}",
+            "remoteJidOrNumber": "={{ $('Switch Canal').item.json.whatsapp_numero }}",
+            "messageText": "={{ $('Switch Canal').item.json.corpo }}",
+            "minDelayMs": "2000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2400,
+        288
+      ],
+      "id": "3dd18550-4d60-4c82-b691-40337b8cad5a",
+      "name": "Call 'sw_evolution_send_message_v2'"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        96
+      ],
+      "id": "1e5c4cb2-f4ec-439d-b92e-ba6562429999",
+      "name": "end"
     }
   ],
   "connections": {
@@ -439,7 +497,7 @@
         ],
         [
           {
-            "node": "Enviar WhatsApp",
+            "node": "config",
             "type": "main",
             "index": 0
           }
@@ -450,40 +508,7 @@
       "main": [
         [
           {
-            "node": "Merge Resultados",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Enviar WhatsApp": {
-      "main": [
-        [
-          {
-            "node": "Merge Resultados",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Merge Resultados": {
-      "main": [
-        [
-          {
-            "node": "Processar Respostas",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Processar Respostas": {
-      "main": [
-        [
-          {
-            "node": "Log Resultado",
+            "node": "end",
             "type": "main",
             "index": 0
           }
@@ -500,25 +525,41 @@
           }
         ]
       ]
+    },
+    "config": {
+      "main": [
+        [
+          {
+            "node": "Call 'sw_evolution_send_message_v2'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'sw_evolution_send_message_v2'": {
+      "main": [
+        [
+          {
+            "node": "end",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true,
-    "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": null,
   "pinData": {},
   "shared": [
     {
-      "createdAt": "2025-12-03T16:50:49.703Z",
+      "createdAt": "2025-12-05T12:29:42.901Z",
       "role": "workflow:owner",
-      "workflowId": "VHN99nCeauiBMoMD",
+      "workflowId": "uhyvgbzJl1r1LXoV",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",

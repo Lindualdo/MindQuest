@@ -3,7 +3,7 @@
   "id": "YlZ5iI1QJuW9mxqu",
   "name": "webhook_mapa_mental",
   "description": null,
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {
