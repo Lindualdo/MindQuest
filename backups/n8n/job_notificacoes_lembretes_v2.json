@@ -1,0 +1,610 @@
+{
+  "createdAt": "2025-12-05T14:22:05.076Z",
+  "id": "i5VG5rHZ39ytueyu",
+  "name": "job_notificacoes_lembretes_v2",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,13,19 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -80
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        16,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH usuario_config AS (\n  SELECT \n    n.usuario_id,\n    n.lembretes_periodo,\n    n.lembretes_conversas_diarias,\n    n.lembretes_quests,\n    n.lembretes_canais,\n    u.whatsapp_numero,\n    ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens\n  FROM notificacoes n\n  JOIN usuarios u ON u.id = n.usuario_id\n  LEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\n  WHERE n.lembretes_ativo = true\n  GROUP BY n.usuario_id, n.lembretes_periodo, n.lembretes_conversas_diarias, \n           n.lembretes_quests, n.lembretes_canais, u.whatsapp_numero\n),\nconversas_hoje AS (\n  SELECT usuario_id, COUNT(*) > 0 AS teve_conversa\n  FROM usr_chat \n  WHERE DATE(criado_em) = CURRENT_DATE\n  GROUP BY usuario_id\n),\nquests_pendentes AS (\n  SELECT \n    uq.usuario_id,\n    COUNT(*) AS total_quests,\n    ARRAY_AGG(COALESCE(uq.config->>'titulo', 'Quest')) AS titulos_quests\n  FROM quests_recorrencias qr\n  JOIN usuarios_quest uq ON uq.id = qr.usuarios_quest_id\n  WHERE qr.data_planejada = CURRENT_DATE AND qr.status = 'pendente'\n  GROUP BY uq.usuario_id\n),\nja_notificado AS (\n  SELECT usuario_id, tipo\n  FROM notificacoes_log\n  WHERE DATE(criado_em) = CURRENT_DATE\n    AND tipo IN ('lembrete_conversa', 'lembrete_quest')\n)\nSELECT \n  uc.usuario_id,\n  uc.lembretes_periodo,\n  uc.lembretes_conversas_diarias,\n  uc.lembretes_quests,\n  uc.lembretes_canais,\n  uc.whatsapp_numero,\n  uc.push_tokens,\n  COALESCE(ch.teve_conversa, false) AS teve_conversa_hoje,\n  COALESCE(qp.total_quests, 0) AS quests_pendentes,\n  qp.titulos_quests,\n  EXISTS(SELECT 1 FROM ja_notificado jn WHERE jn.usuario_id = uc.usuario_id AND jn.tipo = 'lembrete_conversa') AS ja_notificou_conversa,\n  EXISTS(SELECT 1 FROM ja_notificado jn WHERE jn.usuario_id = uc.usuario_id AND jn.tipo = 'lembrete_quest') AS ja_notificou_quest\nFROM usuario_config uc\nLEFT JOIN conversas_hoje ch ON ch.usuario_id = uc.usuario_id\nLEFT JOIN quests_pendentes qp ON qp.usuario_id = uc.usuario_id;",
+        "options": {}
+      },
+      "id": "query",
+      "name": "Query Consolidada",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        112
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Determinar período atual\nconst horaAtual = new Date().getHours();\nlet periodoAtual = 'noite';\nif (horaAtual >= 6 && horaAtual < 12) periodoAtual = 'manha';\nelse if (horaAtual >= 12 && horaAtual < 18) periodoAtual = 'tarde';\n\nconst notificacoes = [];\n\nfor (const item of $input.all()) {\n  const u = item.json;\n  \n  // Filtrar por período configurado\n  if (u.lembretes_periodo !== periodoAtual) continue;\n  \n  const mensagens = [];\n  const tipos = [];\n  \n  // Verificar conversa pendente\n  if (u.lembretes_conversas_diarias && !u.teve_conversa_hoje && !u.ja_notificou_conversa) {\n    mensagens.push('Você ainda não fez sua conversa diária hoje');\n    tipos.push('lembrete_conversa');\n  }\n  \n  // Verificar quests pendentes\n  if (u.lembretes_quests && u.quests_pendentes > 0 && !u.ja_notificou_quest) {\n    const qtd = u.quests_pendentes;\n    mensagens.push(`Você tem ${qtd} quest${qtd > 1 ? 's' : ''} pendente${qtd > 1 ? 's' : ''}`);\n    tipos.push('lembrete_quest');\n  }\n  \n  // Só continuar se houver pendências\n  if (mensagens.length === 0) continue;\n  \n  const corpo = mensagens.join('. ') + '.';\n  const titulo = 'MindQuest - Lembretes';\n  \n  // Gerar notificação para cada canal habilitado\n  for (const canal of u.lembretes_canais || []) {\n    if (canal === 'push' && u.push_tokens?.length > 0) {\n      for (const token of u.push_tokens) {\n        notificacoes.push({\n          usuario_id: u.usuario_id,\n          canal: 'push',\n          token,\n          titulo,\n          corpo,\n          tipos\n        });\n      }\n    } else if (canal === 'whatsapp' && u.whatsapp_numero) {\n      notificacoes.push({\n        usuario_id: u.usuario_id,\n        canal: 'whatsapp',\n        whatsapp_numero: u.whatsapp_numero,\n        titulo,\n        corpo,\n        tipos\n      });\n    } else if (canal === 'sms') {\n      notificacoes.push({\n        usuario_id: u.usuario_id,\n        canal: 'sms',\n        titulo,\n        corpo,\n        tipos,\n        _todo: true\n      });\n    } else if (canal === 'email') {\n      notificacoes.push({\n        usuario_id: u.usuario_id,\n        canal: 'email',\n        titulo,\n        corpo,\n        tipos,\n        _todo: true\n      });\n    }\n  }\n}\n\nreturn notificacoes.map(n => ({ json: n }));"
+      },
+      "id": "filtrar",
+      "name": "Filtrar e Preparar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "push",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "whatsapp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "sms",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch",
+      "name": "Switch Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://mindquest.pt/api/send-push",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $json.token }}"
+            },
+            {
+              "name": "titulo",
+              "value": "={{ $json.titulo }}"
+            },
+            {
+              "name": "corpo",
+              "value": "={{ $json.corpo }}"
+            },
+            {
+              "name": "usuario_id",
+              "value": "={{ $json.usuario_id }}"
+            },
+            {
+              "name": "tipo",
+              "value": "lembrete"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "push",
+      "name": "Enviar Push",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        -96
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, mensagem, status)\nSELECT $1::uuid, 'push', t.tipo, $2, 'enviado'\nFROM unnest($3::text[]) AS t(tipo)\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'push'\n    AND nl.tipo = t.tipo\n    AND DATE(nl.criado_em) = CURRENT_DATE\n)",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.tipos] }}"
+        }
+      },
+      "id": "log_push",
+      "name": "Log Push",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1200,
+        -96
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fVrO1PaqFuA957u0",
+          "mode": "list",
+          "cachedResultName": "MindQuest"
+        }
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        960,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $json.Instancia_evolution }}",
+            "remoteJidOrNumber": "={{ $('Switch Canal').item.json.whatsapp_numero }}",
+            "messageText": "={{ $('Switch Canal').item.json.corpo }}",
+            "minDelayMs": "2000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "whatsapp",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        112
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, mensagem, status)\nSELECT $1::uuid, 'whatsapp', t.tipo, $2, 'enviado'\nFROM unnest($3::text[]) AS t(tipo)\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'whatsapp'\n    AND nl.tipo = t.tipo\n    AND DATE(nl.criado_em) = CURRENT_DATE\n)",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.tipos] }}"
+        }
+      },
+      "id": "log_whatsapp",
+      "name": "Log WhatsApp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1440,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "sms_todo",
+      "name": "SMS (TODO)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        304
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "email_todo",
+      "name": "Email (TODO)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        512
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "end",
+      "name": "End",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        192
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Query Consolidada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Consolidada": {
+      "main": [
+        [
+          {
+            "node": "Filtrar e Preparar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar e Preparar": {
+      "main": [
+        [
+          {
+            "node": "Switch Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Canal": {
+      "main": [
+        [
+          {
+            "node": "Enviar Push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SMS (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Push": {
+      "main": [
+        [
+          {
+            "node": "Log Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Push": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Log WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS (TODO)": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email (TODO)": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "shared": [
+    {
+      "createdAt": "2025-12-05T14:22:05.076Z",
+      "role": "workflow:owner",
+      "workflowId": "i5VG5rHZ39ytueyu",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

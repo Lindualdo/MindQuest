@@ -1,0 +1,29 @@
+vamos criar as rotinas de envio de notificações:
+
+para as notificações temos duas categorias: lembretes e interações
+analise o workflow: notificacoes_lembretes em backup/n8n
+
+vamos usar as regras deste workflow e reconstruir uma versão mais simplificada - do zero
+o usuario pode escolher os canais para receber as notificações
+
+push, sms, whats e email
+- use o que já está feito do envio via push  (funcionando)
+- use o que já está feito do envio por whatsapp (funcionando)
+- deixe os demais canais estruturados para fazer depois
+- precisamos gravar o log do que já foi enviado, para não reenviar
+
+Use as melhores praticas do N8N descritas na referencia e também melhores praticas de desenvolvimento
+atenção ao usar os subworkflows `sw_evolution_send_message_v2`para manter as mesmas configurações
+
+Analise também o log da ultima execução do workflow job_notificacoes_lembretes no n8n para entender a saida de cada node e as configurações 
+
+Referencias e contexto:
+
+n8n:@docs/ref/n8n.md 
+postgree:@docs/ref/postgres.md 
+
+1 - faça uma analise completa do workflow atual
+2 - faça um plano de melhoria 
+- uma versão gerencial / executiva bem objetiva 30 linhas
+- uma versão tecnica com todos os detalhes necessários para implementenação
+3 - após aprovação implementar
