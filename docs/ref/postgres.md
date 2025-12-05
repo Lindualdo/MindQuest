@@ -37,10 +37,14 @@ PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATA
 ## Tabelas Principais
 
 - `usuarios` - Dados dos usuários
-- `conversas` - Conversas com o mentor
-- `quests` - Quests (ativas/concluídas)
+- `usr_chat` - Conversas com o mentor
+- `usuarios_quests` - Quests (ativas/concluídas)
+- `quests_recorrencias` - recorrencias de cada quests
+- `usuarios_conquistas` - pontos consolidados de XPs
 - `insights` - Insights gerados
 - `sabotadores` - Sabotadores detectados
+- `notificacoes` - Configuração das notificações
+- `notificacoes_log` - Log de notificações enviadas (controle reenvio)
 
 ## Regras
 
