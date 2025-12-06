@@ -1,6 +1,7 @@
 #Front
 - card conversa da home: dar mais destaque a frase "toque no dia para..."
 - pagina do menu entender: a pagina não fica fixa no mobile. você consegue arrasta-la como se tivesse mais coisa pra ver. deixar igual padrão das demais paginas dos menus
+- quando o card tiver detalhe, sempre mostrar a pag. de detalhes ao clicar no card
 
 #Back
 - Melhorar agente mentor
