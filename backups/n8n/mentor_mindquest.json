@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-06T18:50:45.607Z",
+  "updatedAt": "2025-12-06T19:29:54.425Z",
   "createdAt": "2025-12-01T18:59:38.019Z",
   "id": "c1To6ho5riDs85Aj",
   "name": "mentor_mindquest",
@@ -44,8 +44,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1536,
-        -240
+        -464,
+        -288
       ]
     },
     {
@@ -62,20 +62,20 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -1312,
-        -240
+        -304,
+        -288
       ]
     },
     {
       "parameters": {
-        "jsCode": "// CONTEXTO COMPLETO - Consolida todos os dados\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || null,\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  objetivos_especificos: contexto?.objetivos_especificos || [],\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || null,\n  titulo_nivel: contexto?.titulo_nivel || null,\n  limit_min: Number(config?.limit_iteration_min) || 5,\n  limit_max: Number(config?.limit_iteration_max) || 20\n}];"
+        "jsCode": "// CONTEXTO COMPLETO - Consolida todos os dados\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || null,\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  sobre_voce: dadosUsr?.sobre_voce || null,\n  tom_conversa: dadosUsr?.tom_conversa || null,\n  objetivos_especificos: contexto?.objetivos_especificos || [],\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || null,\n  titulo_nivel: contexto?.titulo_nivel || null,\n  limit_min: Number(config?.limit_iteration_min) || 5,\n  limit_max: Number(config?.limit_iteration_max) || 20\n}];"
       },
       "id": "contexto_completo",
       "name": "contexto_completo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -160,
+        272,
         -288
       ]
     },
@@ -105,7 +105,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        96,
+        464,
         -288
       ]
     },
@@ -142,7 +142,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        464,
+        640,
         -288
       ]
     },
@@ -155,7 +155,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
+        944,
         -288
       ]
     },
@@ -589,7 +589,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria\nFROM usuarios u\nWHERE u.id = $1;",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  u.sobre_voce,\n  u.tom_conversa\nFROM usuarios u\nWHERE u.id = $1;",
         "options": {
           "queryReplacement": "={{ $('start').first().json.usr_id }}"
         }
@@ -599,8 +599,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1056,
-        -240
+        -128,
+        -288
       ],
       "credentials": {
         "postgres": {
@@ -622,8 +622,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
-        -448
+        64,
+        -288
       ],
       "credentials": {
         "postgres": {
@@ -631,30 +631,6 @@
           "name": "Postgres account"
         }
       }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH periodo AS (\n  SELECT CURRENT_DATE - INTERVAL '29 days' AS inicio\n),\ndados AS (\n  SELECT up.*\n  FROM usuarios_perfis up\n  JOIN periodo p ON up.data_conversa >= p.inicio\n  WHERE up.usuario_id = $1\n),\ncalc AS (\n  SELECT 'openness'::text AS trait,\n         SUM(up.score_openness * up.confianca_openness)::numeric AS weighted_sum,\n         SUM(up.confianca_openness)::numeric AS conf_sum,\n         AVG(up.score_openness)::numeric AS avg_score,\n         AVG(up.confianca_openness)::numeric AS avg_conf\n  FROM dados up\n  UNION ALL\n  SELECT 'conscientiousness',\n         SUM(up.score_conscientiousness * up.confianca_conscientiousness)::numeric,\n         SUM(up.confianca_conscientiousness)::numeric,\n         AVG(up.score_conscientiousness)::numeric,\n         AVG(up.confianca_conscientiousness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'extraversion',\n         SUM(up.score_extraversion * up.confianca_extraversion)::numeric,\n         SUM(up.confianca_extraversion)::numeric,\n         AVG(up.score_extraversion)::numeric,\n         AVG(up.confianca_extraversion)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'agreeableness',\n         SUM(up.score_agreeableness * up.confianca_agreeableness)::numeric,\n         SUM(up.confianca_agreeableness)::numeric,\n         AVG(up.score_agreeableness)::numeric,\n         AVG(up.confianca_agreeableness)::numeric\n  FROM dados up\n  UNION ALL\n  SELECT 'neuroticism',\n         SUM(up.score_neuroticism * up.confianca_neuroticism)::numeric,\n         SUM(up.confianca_neuroticism)::numeric,\n         AVG(up.score_neuroticism)::numeric,\n         AVG(up.confianca_neuroticism)::numeric\n  FROM dados up\n),\nscores AS (\n  SELECT\n    trait,\n    CASE\n      WHEN conf_sum > 0 THEN weighted_sum / conf_sum\n      ELSE avg_score\n    END AS score_ponderado,\n    avg_score,\n    avg_conf,\n    conf_sum\n  FROM calc\n  WHERE conf_sum > 0 OR avg_score IS NOT NULL\n),\nordenado AS (\n  SELECT\n    trait,\n    score_ponderado,\n    ROW_NUMBER() OVER (ORDER BY score_ponderado DESC NULLS LAST) AS pos\n  FROM scores\n),\nlabels AS (\n  SELECT * FROM (VALUES\n    ('openness','Abertura'),\n    ('conscientiousness','Conscienciosidade'),\n    ('extraversion','Extroversão'),\n    ('agreeableness','Amabilidade'),\n    ('neuroticism','Neuroticismo')\n  ) AS l(trait,label)\n)\nSELECT\n  (SELECT trait FROM ordenado WHERE pos = 1) AS perfil_primario,\n  (SELECT trait FROM ordenado WHERE pos = 2) AS perfil_secundario,\n  COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0) AS confianca_media,\n  COALESCE((SELECT bool_or(insuficiente) FROM dados), false) AS insuficiente,\n  CASE\n    WHEN EXISTS (SELECT 1 FROM dados) THEN CONCAT(\n      'Traço dominante nos últimos 30 dias: ',\n      COALESCE((SELECT label FROM labels WHERE trait = (SELECT trait FROM ordenado WHERE pos = 1)), 'indefinido'),\n      '. Confiabilidade média geral: ',\n      TO_CHAR(COALESCE((SELECT ROUND(AVG(avg_conf), 1) FROM scores WHERE avg_conf IS NOT NULL), 0), 'FM990.0'),\n      '.'\n    )\n    ELSE 'Sem leituras nas últimas 30 conversas.'\n  END AS resumo_perfil\nFROM periodo;",
-        "options": {
-          "queryReplacement": "={{ $('start').first().json.usr_id }}"
-        }
-      },
-      "id": "busca_perfil_bigfive",
-      "name": "busca_perfil_bigfive",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -656,
-        -64
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
     },
     {
       "parameters": {
@@ -893,7 +869,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**CONVERSAR (sua fase):**\n- Conduzir conversas guiadas\n- Explorar padrões mentais e bloqueios\n- Conectar com objetivos específicos\n- Preparar contexto rico para experts\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Mensagem:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n**Objetivos Específicos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Objetivo Padrão:** {{ $('contexto_completo').first().json.objetivo_padrao || 'Evolução Pessoal' }}\n**Sabotador Mais Ativo:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Estágio Jornada:** {{ $('contexto_completo').first().json.estagio_jornada || 'CONVERSAR' }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n**Perfil Big Five:** {{ JSON.stringify($('contexto_completo').first().json.perfil_bigfive || {}) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  const objetivos = $('contexto_completo').first().json.objetivos_especificos || [];\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos específicos para personalizar. Conecte com sabotador se relevante.';\n  if (count >= 5 && canEnd) return '- Pode encerrar se usuário concordar. Pergunte: \"Quer continuar ou prefere encerrar?\"';\n  if (count === max - 1) return '- Resumo breve e empático. Confirme se faz sentido.';\n  if (count === max) return '- Reconheça avanços, conclua, convide App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos. Varie abordagem. Use quests ativas para validar progresso.';\n})() }}\n\n## 📝 COLETA DE CONTEXTO\nIdentifique: contextos, sentimentos, eventos, padrões, bloqueios, progressos, objetivos.\n**Na última interação:** Inclua JSON estruturado após sua mensagem.\n\n## 🎨 VARIAÇÃO\nVarie: profundidade, tom, estrutura, foco.\n\n**Regras:**\n- Acolhedor, construa rapport\n- Conduza objetiva (evite vagas/vazias)\n- Crie desejo de retorno\n- Facilite experts (colete informações ricas)\n- Torne dinâmica (varie, evite repetição)\n- Conecte com objetivos específicos quando relevante\n- Use sabotador ativo para explorar padrões\n- Valide progresso nas quests ativas",
+        "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**CONVERSAR (sua fase):**\n- Conduzir conversas guiadas\n- Explorar padrões mentais e bloqueios\n- Conectar com objetivos específicos\n- Preparar contexto rico para experts\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Mensagem do usuário:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n{{ $('contexto_completo').first().json.sobre_voce ? '**Sobre o usuário:** ' + $('contexto_completo').first().json.sobre_voce : '' }}\n{{ $('contexto_completo').first().json.tom_conversa ? '**Tom preferido:** ' + $('contexto_completo').first().json.tom_conversa : '' }}\n**Objetivos Específicos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Objetivo Padrão:** {{ $('contexto_completo').first().json.objetivo_padrao || 'Evolução Pessoal' }}\n**Sabotador Mais Ativo:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Estágio Jornada:** {{ $('contexto_completo').first().json.estagio_jornada || 'CONVERSAR' }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n**Perfil Big Five:** {{ JSON.stringify($('contexto_completo').first().json.perfil_bigfive || {}) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos específicos para personalizar. Conecte com sabotador se relevante.';\n  if (count >= 5 && canEnd) return '- Pode encerrar se usuário concordar. Pergunte: \"Quer continuar ou prefere encerrar?\"';\n  if (count === max - 1) return '- Resumo breve e empático. Confirme se faz sentido.';\n  if (count === max) return '- Reconheça avanços, conclua, convide App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos. Varie abordagem. Use quests ativas para validar progresso.';\n})() }}\n\n## 📝 SAÍDA\n- Responda APENAS com sua mensagem ao usuário\n- NÃO inclua JSON, código ou dados técnicos na resposta\n- Seja natural, acolhedor e objetivo\n\n## 🎨 VARIAÇÃO\nVarie: profundidade, tom, estrutura, foco.\n\n**Regras:**\n- Acolhedor, construa rapport\n- Conduza objetiva (evite vagas/vazias)\n- Crie desejo de retorno\n- Facilite experts (colete informações ricas)\n- Torne dinâmica (varie, evite repetição)\n- Conecte com objetivos específicos quando relevante\n- Use sabotador ativo para explorar padrões\n- Valide progresso nas quests ativas\n- Se houver tom_conversa definido, ADOTE esse tom",
         "options": {
           "systemMessage": "=# 🧠 MENTOR MINDQUEST\n\nVocê é o **Mentor do MindQuest**, motor que impulsiona o sistema.\n\n**Objetivos:**\n1. Construir rapport\n2. Conduzir conversa objetiva\n3. Criar desejo de retorno\n4. Facilitar experts\n5. Tornar dinâmica\n\n**Limites:** {{ $('interacao_controle').item.json.limit_min }}-{{ $('interacao_controle').item.json.limit_max }}\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }}\n\n**Formato:** Parágrafos curtos, bullets, linguagem coloquial.\n**Missão:** Abra espaço seguro, explore emoções, conecte percepções, encerre com leveza.\n\n**Use o contexto do usuário:** objetivos, sabotador, quests, histórico para personalizar a conversa."
         }
@@ -1135,27 +1111,11 @@
             "node": "busca_contexto",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "busca_perfil_bigfive",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
     },
     "busca_contexto": {
-      "main": [
-        [
-          {
-            "node": "contexto_completo",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "busca_perfil_bigfive": {
       "main": [
         [
           {
@@ -1205,7 +1165,7 @@
       }
     ]
   },
-  "versionId": "c5519ef9-fd6d-49cb-b00c-8fbb90599c79",
-  "versionCounter": 43,
+  "versionId": "4c7100eb-9e64-4deb-ac81-b0b3af0ede86",
+  "versionCounter": 45,
   "triggerCount": 0
 }
