@@ -1,4 +1,5 @@
 {
+  "updatedAt": "2025-12-06T18:28:07.933Z",
   "createdAt": "2025-12-01T18:59:38.019Z",
   "id": "c1To6ho5riDs85Aj",
   "name": "mentor_mindquest",
@@ -180,7 +181,34 @@
     },
     {
       "parameters": {
-        "looseTypeValidation": true
+        "rules": {
+          "values": [
+            {
+              "outputKey": "encerra",
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "loose"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('interacao_controle').item.json.interaction_count }}",
+                    "rightValue": "={{ $('interacao_controle').item.json.limit_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "id": "verifica_encerramento",
       "name": "verifica_encerramento",
@@ -1173,13 +1201,18 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "versionId": "303e0ebd-dec3-473c-9245-db0c89058091",
+  "versionCounter": 41,
+  "triggerCount": 0,
   "shared": [
     {
+      "updatedAt": "2025-12-01T18:59:38.019Z",
       "createdAt": "2025-12-01T18:59:38.019Z",
       "role": "workflow:owner",
       "workflowId": "c1To6ho5riDs85Aj",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
+        "updatedAt": "2025-09-25T16:38:18.729Z",
         "createdAt": "2025-09-16T16:13:20.606Z",
         "id": "u1M57XAwIiLpPwjp",
         "name": "Aldo Santos <lindualdo@hotmail.com>",
@@ -1188,10 +1221,12 @@
         "description": null,
         "projectRelations": [
           {
+            "updatedAt": "2025-09-16T16:13:20.606Z",
             "createdAt": "2025-09-16T16:13:20.606Z",
             "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
             "projectId": "u1M57XAwIiLpPwjp",
             "user": {
+              "updatedAt": "2025-12-06T06:32:37.051Z",
               "createdAt": "2025-09-16T16:13:20.056Z",
               "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
               "email": "lindualdo@hotmail.com",
@@ -1217,6 +1252,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
+              "lastActiveAt": "2025-12-06",
               "isPending": false
             }
           }
