@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-06T20:58:23.376Z",
+  "updatedAt": "2025-12-06T21:46:13.718Z",
   "createdAt": "2025-12-01T18:59:38.019Z",
   "id": "c1To6ho5riDs85Aj",
   "name": "mentor_mindquest",
@@ -227,8 +227,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1664,
-        -48
+        1600,
+        48
       ],
       "credentials": {
         "openRouterApi": {
@@ -239,7 +239,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// PROCESSA SAÍDA DO PARSER\nconst output = $input.first()?.json?.output ?? {};\nconst interacao = $('interacao_controle').first().json;\n\nconst isLastInteraction = interacao.interaction_count >= interacao.limit_max;\nconst conversaConcluida = output.conversa_concluida === true;\n\nreturn [{\n  user_message: output.mensagem_usuario || '',\n  interaction_count: interacao.interaction_count,\n  is_last_interaction: isLastInteraction,\n  conversa_concluida: conversaConcluida,\n  should_finalize: isLastInteraction || conversaConcluida,\n  limit_max: interacao.limit_max\n}];"
+        "jsCode": "// PROCESSA SAÍDA DO PARSER\nconst output = $input.first()?.json?.output ?? {};\nconst interacao = $('interacao_controle').first().json;\n\nconst isLastInteraction = interacao.interaction_count >= interacao.limit_max;\nconst conversaConcluida = output.conversa_concluida === true;\nconst shouldFinalize = isLastInteraction || conversaConcluida;\n\nreturn [{\n  user_message: output.mensagem_usuario || '',\n  interaction_count: interacao.interaction_count,\n  is_last_interaction: isLastInteraction,\n  conversa_concluida: conversaConcluida,\n  should_finalize: shouldFinalize,\n  limit_max: interacao.limit_max,\n  resumo_conversa: shouldFinalize ? (output.resumo_conversa || null) : null,\n  tem_reflexao: shouldFinalize ? (output.tem_reflexao || false) : null\n}];"
       },
       "id": "processa_resposta",
       "name": "processa_resposta",
@@ -368,7 +368,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// GRAVA CONVERSA COMPLETA\nconst memoryData = $('memory_get').first().json;\nconst processa = $('processa_resposta').first().json;\nconst contexto = $('contexto_completo').first().json;\nconst startData = $('start').first().json;\nconst transcricao = $('transcricao').first().json;\n\nconst messages = Array.isArray(memoryData?.messages) ? memoryData.messages : [];\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of messages) {\n  if (!msg || typeof msg !== 'object') continue;\n  \n  const humanTexto = (msg.human || (msg.role === 'user' && msg.content) || '').trim();\n  const aiTexto = (msg.ai || (msg.role === 'assistant' && msg.content) || '').trim();\n  \n  if (humanTexto && !humanTexto.toLowerCase().startsWith('sistema:')) {\n    mensagens.push({interaction: interactionNumber, autor: 'usuario', texto: humanTexto, timestamp: new Date().toISOString()});\n  }\n  \n  if (aiTexto) {\n    mensagens.push({interaction: interactionNumber, autor: 'agente', texto: aiTexto, timestamp: new Date().toISOString()});\n    interactionNumber++;\n  }\n}\n\nif (processa.user_message) {\n  mensagens.push({interaction: interactionNumber, autor: 'agente', texto: processa.user_message, timestamp: new Date().toISOString()});\n}\n\nconst sessionId = `${startData['body.instance']}${startData.usr_id}${transcricao.WhstsApp_Number}`;\nconst contextoFinal = processa.context_json || {contextos_mencionados: [], sentimentos_expressos: [], eventos_importantes: [], padroes_identificados: [], bloqueios_mencionados: [], progressos_celebrados: [], objetivos_referenciados: [], intensidade_geral: 'media', qualidade_interacao: 'profunda'};\n\nreturn [{whatsapp_numero: transcricao.WhstsApp_Number, usuario_id: contexto.usuario_id, session_id: sessionId, total_interactions: processa.interaction_count, status: 'completa', mensagens: JSON.stringify(mensagens), contexto_final: JSON.stringify(contextoFinal), motivo_encerramento: processa.is_last_interaction ? 'limite_maximo' : 'conversa_completa'}];"
+        "jsCode": "// GRAVA CONVERSA COMPLETA\nconst memoryData = $('memory_get').first().json;\nconst processa = $('processa_resposta').first().json;\nconst contexto = $('contexto_completo').first().json;\nconst startData = $('start').first().json;\nconst transcricao = $('transcricao').first().json;\n\nconst messages = Array.isArray(memoryData?.messages) ? memoryData.messages : [];\nconst mensagens = [];\nlet interactionNumber = 1;\n\nfor (const msg of messages) {\n  if (!msg || typeof msg !== 'object') continue;\n  \n  const humanTexto = (msg.human || (msg.role === 'user' && msg.content) || '').trim();\n  const aiTexto = (msg.ai || (msg.role === 'assistant' && msg.content) || '').trim();\n  \n  if (humanTexto && !humanTexto.toLowerCase().startsWith('sistema:')) {\n    mensagens.push({interaction: interactionNumber, autor: 'usuario', texto: humanTexto, timestamp: new Date().toISOString()});\n  }\n  \n  if (aiTexto) {\n    mensagens.push({interaction: interactionNumber, autor: 'agente', texto: aiTexto, timestamp: new Date().toISOString()});\n    interactionNumber++;\n  }\n}\n\nif (processa.user_message) {\n  mensagens.push({interaction: interactionNumber, autor: 'agente', texto: processa.user_message, timestamp: new Date().toISOString()});\n}\n\nconst sessionId = `${startData['body.instance']}${startData.usr_id}${transcricao.WhstsApp_Number}`;\n\nreturn [{\n  whatsapp_numero: transcricao.WhstsApp_Number,\n  usuario_id: contexto.usuario_id,\n  session_id: sessionId,\n  total_interactions: processa.interaction_count,\n  status: 'completa',\n  mensagens: JSON.stringify(mensagens),\n  resumo_conversa: processa.resumo_conversa || null,\n  tem_reflexao: processa.tem_reflexao || false,\n  motivo_encerramento: processa.is_last_interaction ? 'limite_maximo' : 'conversa_completa'\n}];"
       },
       "id": "grava_conversa",
       "name": "grava_conversa",
@@ -382,9 +382,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usr_chat (usuario_id, session_id, total_interactions, status, mensagens, data_conversa, horario_inicio, horario_fim) VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_DATE, CURRENT_TIME, CURRENT_TIME) RETURNING id, usuario_id, data_conversa, status;",
+        "query": "INSERT INTO usr_chat (usuario_id, session_id, total_interactions, status, mensagens, resumo_conversa, tem_reflexao, data_conversa, horario_inicio, horario_fim) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, CURRENT_DATE, CURRENT_TIME, CURRENT_TIME) RETURNING id, usuario_id, data_conversa, status;",
         "options": {
-          "queryReplacement": "={{[ $json.usuario_id, $json.session_id, $json.total_interactions, $json.status, $json.mensagens ]}}"
+          "queryReplacement": "={{[ $json.usuario_id, $json.session_id, $json.total_interactions, $json.status, $json.mensagens, $json.resumo_conversa, $json.tem_reflexao ]}}"
         }
       },
       "id": "grava_chat",
@@ -869,11 +869,11 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Esgotamento detectado:** {{ $('interacao_controle').item.json.can_end_early ? 'SIM' : 'NÃO' }}\n**Mensagem do usuário:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n{{ $('contexto_completo').first().json.sobre_voce ? '**Sobre:** ' + $('contexto_completo').first().json.sobre_voce : '' }}\n{{ $('contexto_completo').first().json.tom_conversa ? '**Tom:** ' + $('contexto_completo').first().json.tom_conversa : '' }}\n**Objetivos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Sabotador:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos para personalizar.';\n  if (canEnd) return '- ESGOTAMENTO: Pergunte gentilmente se quer encerrar.';\n  if (count === max - 1) return '- Penúltima interação. Resumo breve.';\n  if (count === max) return '- ÚLTIMA interação. Conclua e convide ao App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos.';\n})() }}\n\n## 📝 FORMATO DE SAÍDA (OBRIGATÓRIO)\n\nSempre retorne um JSON com exatamente dois campos:\n\n1. **mensagem_usuario**: Sua resposta ao usuário (texto limpo, sem JSON)\n2. **conversa_concluida**: \n   - `true` se você está se despedindo/encerrando\n   - `false` se a conversa continua\n\n**Quando encerrar (conversa_concluida: true):**\n- Usuário pediu para encerrar\n- Usuário concordou em encerrar\n- Conversa chegou ao fim natural\n- Atingiu limite máximo\n\n**EXEMPLO:**\n```json\n{\n  \"mensagem_usuario\": \"Que bom falar com você! Como está se sentindo hoje?\",\n  \"conversa_concluida\": false\n}\n```",
+        "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Esgotamento detectado:** {{ $('interacao_controle').item.json.can_end_early ? 'SIM' : 'NÃO' }}\n**Mensagem do usuário:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n{{ $('contexto_completo').first().json.sobre_voce ? '**Sobre:** ' + $('contexto_completo').first().json.sobre_voce : '' }}\n{{ $('contexto_completo').first().json.tom_conversa ? '**Tom:** ' + $('contexto_completo').first().json.tom_conversa : '' }}\n**Objetivos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Sabotador:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos para personalizar.';\n  if (canEnd) return '- ESGOTAMENTO: Pergunte gentilmente se quer encerrar.';\n  if (count === max - 1) return '- Penúltima interação. Resumo breve.';\n  if (count === max) return '- ÚLTIMA interação. Conclua e convide ao App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos.';\n})() }}\n\n## 📝 FORMATO DE SAÍDA (OBRIGATÓRIO)\n\nSempre retorne JSON com:\n\n1. **mensagem_usuario**: Sua resposta ao usuário (texto limpo)\n2. **conversa_concluida**: `true` se despedindo, `false` se continua\n3. **resumo_conversa**: APENAS quando conversa_concluida=true\n4. **tem_reflexao**: APENAS quando conversa_concluida=true\n\n**REGRAS DO RESUMO (quando conversa_concluida=true):**\n- Máximo 300 palavras, 3ª pessoa, use o nome do usuário\n- PRESERVE: situação emocional, eventos importantes, sentimentos expressos\n- PRESERVE: contextos relevantes, insights, decisões, planos\n- PRESERVE: padrões comportamentais, gatilhos, progress\n- REMOVA: perguntas do agente, validações, repetições, saudações\n- tem_reflexao=true se: análise profunda, conexões emoções-eventos, autoconhecimento\n\n**EXEMPLO DURANTE CONVERSA:**\n```json\n{\"mensagem_usuario\": \"Como você está hoje?\", \"conversa_concluida\": false, \"resumo_conversa\": null, \"tem_reflexao\": null}\n```\n\n**EXEMPLO AO ENCERRAR:**\n```json\n{\"mensagem_usuario\": \"Foi ótimo conversar! Até logo.\", \"conversa_concluida\": true, \"resumo_conversa\": \"Aldo relatou progresso significativo no app, expressando confiança e motivação. Mencionou estratégias de foco e micro-tarefas...\", \"tem_reflexao\": true}\n```",
+        "hasOutputParser": true,
         "options": {
-          "systemMessage": "=# 🧠 MENTOR MINDQUEST\n\nVocê é o **Mentor do MindQuest**, motor que impulsiona o sistema.\n\n**Objetivos:**\n1. Construir rapport\n2. Conduzir conversa objetiva\n3. Criar desejo de retorno\n4. Facilitar experts\n5. Tornar dinâmica\n\n**Limites:** {{ $('interacao_controle').item.json.limit_min }}-{{ $('interacao_controle').item.json.limit_max }}\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }}\n\n**Formato:** Parágrafos curtos, bullets, linguagem coloquial.\n**Missão:** Abra espaço seguro, explore emoções, conecte percepções, encerre com leveza.\n\n**Use o contexto do usuário:** objetivos, sabotador, quests, histórico para personalizar a conversa."
-        },
-        "hasOutputParser": true
+          "systemMessage": "=# 🧠 MENTOR MINDQUEST\n\nVocê é o **Mentor do MindQuest**, motor que impulsiona o sistema.\n\n**Objetivos:**\n1. Construir rapport profundo\n2. Conduzir conversa objetiva e rica em contexto\n3. Criar desejo de retorno\n4. Coletar informações relevantes para os experts\n5. Tornar dinâmica e personalizada\n\n**Limites:** {{ $('interacao_controle').item.json.limit_min }}-{{ $('interacao_controle').item.json.limit_max }}\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }}\n\n**PRESERVAÇÃO DE CONTEXTO:**\n- Explore emoções em profundidade\n- Conecte eventos com sentimentos\n- Identifique padrões comportamentais\n- Capture gatilhos e progress\n- Relacione com objetivos e sabotadores do usuário\n\n**Formato:** Parágrafos curtos, bullets, linguagem coloquial.\n**Missão:** Abra espaço seguro, explore emoções, conecte percepções, encerre com leveza.\n\n**Use o contexto do usuário:** objetivos, sabotador, quests, histórico para personalizar."
+        }
       },
       "id": "mentor_agent",
       "name": "mentor - Mind",
@@ -915,18 +915,18 @@
       ]
     },
     {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"mensagem_usuario\": \"Olá! Como posso te ajudar hoje?\",\n  \"conversa_concluida\": false,\n  \"resumo_conversa\": null,\n  \"tem_reflexao\": null\n}",
+        "autoFix": true
+      },
       "id": "parser_mentor",
       "name": "Parser Mentor",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1872,
-        80
-      ],
-      "parameters": {
-        "jsonSchemaExample": "{\n  \"mensagem_usuario\": \"Olá! Como posso te ajudar hoje?\",\n  \"conversa_concluida\": false\n}",
-        "autoFix": true
-      }
+        1936,
+        0
+      ]
     }
   ],
   "connections": {
@@ -1033,6 +1033,11 @@
         [
           {
             "node": "mentor - Mind",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Mentor",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -1223,24 +1228,16 @@
           "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
-          "body.data.key.id": "2A691B808C59A00DF3CE",
+          "body.data.key.id": "3B4E34D7EAB5E6D087AE",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
-          "body.data.message.conversation": "Olá",
+          "body.data.message.conversation": "anote como quest esses passos e pode encerrar por hoje",
           "body.data.messageType": "conversation"
-        }
-      }
-    ],
-    "transcricao": [
-      {
-        "json": {
-          "message": "Olá",
-          "WhstsApp_Number": "351932786582"
         }
       }
     ]
   },
-  "versionId": "d1c9b52d-0b45-4f43-bcf5-790d4d1f9839",
-  "versionCounter": 52,
+  "versionId": "33c0fabc-505c-44c6-934e-d9ecd18c8b68",
+  "versionCounter": 54,
   "triggerCount": 0
 }
