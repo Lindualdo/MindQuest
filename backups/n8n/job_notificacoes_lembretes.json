@@ -3,7 +3,7 @@
   "id": "i5VG5rHZ39ytueyu",
   "name": "job_notificacoes_lembretes",
   "description": null,
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -12,7 +12,7 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 7,8,10,11,13,14,16,17,19,21 * * *"
+              "expression": "=0 7,8,10,11,13,14,16,17,19,21 * * *"
             }
           ]
         }
@@ -24,8 +24,7 @@
       "position": [
         -160,
         -80
-      ],
-      "disabled": true
+      ]
     },
     {
       "parameters": {
@@ -545,7 +544,13 @@
   "connections": {
     "Schedule Trigger": {
       "main": [
-        []
+        [
+          {
+            "node": "Query Contexto Completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Query Contexto Completo": {
@@ -794,7 +799,11 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {
     "When clicking ‘Execute workflow’": [
