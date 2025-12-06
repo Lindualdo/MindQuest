@@ -14,16 +14,6 @@ source config/postgres.env
 PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -c 'SELECT 1'
 ```
 
-## Variáveis
-
-```bash
-PGHOST="host"
-PGPORT="5432"
-PGUSER="usuario"
-PGPASSWORD="senha"
-PGDATABASE="mindquest"
-```
-
 ## Query Rápida
 
 ```bash
@@ -38,11 +28,12 @@ PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATA
 
 - `usuarios` - Dados dos usuários
 - `usr_chat` - Conversas com o mentor
-- `usuarios_quests` - Quests (ativas/concluídas)
+- `usuarios_quest` - Quests (ativas/concluídas)
 - `quests_recorrencias` - recorrencias de cada quests
 - `usuarios_conquistas` - pontos consolidados de XPs
+- `usuarios_objetivos` - Objetivos (um padrão e 2 configurados)
 - `insights` - Insights gerados
-- `sabotadores` - Sabotadores detectados
+- `usuarios_sabotadores` - Sabotadores detectados
 - `notificacoes` - Configuração das notificações
 - `notificacoes_log` - Log de notificações enviadas (controle reenvio)
 

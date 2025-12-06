@@ -10,10 +10,11 @@ Micro-ações personalizadas geradas automaticamente a partir de conversas, insi
 
 | Tipo | Descrição |
 |------|-----------|
+| **Reflexão Diária** | Quest permanente (conversas com mentor) |
 | **Personalizada** | IA contextual (baseada em conversas) |
 | **Sabotador** | Superar padrões limitantes |
 | **TCC/Estoicismo** | Técnicas comportamentais |
-| **Reflexão Diária** | Quest permanente (conversa) |
+
 
 ## Status
 
