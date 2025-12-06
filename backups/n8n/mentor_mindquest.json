@@ -67,7 +67,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// CONTEXTO COMPLETO - Consolida todos os dados\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\nconst perfil = $('busca_perfil_bigfive').first().json;\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || null,\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  objetivos_especificos: contexto?.objetivos_especificos || [],\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  estagio_jornada: contexto?.estagio_jornada || null,\n  perfil_bigfive: {\n    perfil_primario: perfil?.perfil_primario || null,\n    perfil_secundario: perfil?.perfil_secundario || null,\n    resumo_perfil: perfil?.resumo_perfil || null\n  },\n  limit_min: Number(config?.limit_iteration_min) || 5,\n  limit_max: Number(config?.limit_iteration_max) || 20\n}];"
+        "jsCode": "// CONTEXTO COMPLETO - Consolida todos os dados\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || null,\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  objetivos_especificos: contexto?.objetivos_especificos || [],\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || null,\n  titulo_nivel: contexto?.titulo_nivel || null,\n  limit_min: Number(config?.limit_iteration_min) || 5,\n  limit_max: Number(config?.limit_iteration_max) || 20\n}];"
       },
       "id": "contexto_completo",
       "name": "contexto_completo",
@@ -180,119 +180,7 @@
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
-                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
-                    "operator": {
-                      "type": "number",
-                      "operation": "gt"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "> max"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
-                    "rightValue": "={{ $('interacao_controle').first().json.limit_min }}",
-                    "operator": {
-                      "type": "number",
-                      "operation": "gte"
-                    }
-                  },
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.can_end_early }}",
-                    "rightValue": "true",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": ">= min AND can_end_early"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
-                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
-                    "operator": {
-                      "type": "number",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "=== max"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.interaction_count }}",
-                    "rightValue": "={{ $('interacao_controle').first().json.limit_max }}",
-                    "operator": {
-                      "type": "number",
-                      "operation": "lt"
-                    }
-                  },
-                  {
-                    "leftValue": "={{ $('interacao_controle').first().json.can_end_early }}",
-                    "rightValue": "false",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "< max AND !can_end_early"
-            }
-          ]
-        },
-        "options": {}
+        "looseTypeValidation": true
       },
       "id": "verifica_encerramento",
       "name": "verifica_encerramento",
@@ -674,7 +562,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria,\n  COALESCE(p.perfil_primario, 'neutro') perfil_primario\nFROM usuarios u\nLEFT JOIN usuarios_perfis p ON p.usuario_id = u.id\nWHERE u.id = $1;",
+        "query": "SELECT\n  u.nome,\n  u.id,\n  u.nome_preferencia,\n  u.nome_assistente,\n  u.token_acesso,\n  u.cronotipo_detectado,\n  u.whatsapp_numero,\n  u.faixa_etaria\nFROM usuarios u\nWHERE u.id = $1;",
         "options": {
           "queryReplacement": "={{ $('start').first().json.usr_id }}"
         }
@@ -697,7 +585,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH objetivos AS (\n  SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao))\n  FROM usuarios_objetivos o\n  JOIN areas_vida_catalogo av ON o.area_vida_id = av.id\n  WHERE o.usuario_id = $1 AND o.status = 'ativo'\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo'\n  LIMIT 1\n),\nsabotador AS (\n  SELECT codigo FROM sabotadores_ativos\n  WHERE usuario_id = $1\n  ORDER BY criado_em DESC\n  LIMIT 1\n),\nquests AS (\n  SELECT json_agg(json_build_object('id', q.id, 'titulo', q.config->>'titulo', 'status', q.status))\n  FROM usuarios_quest q\n  WHERE q.usuario_id = $1 AND q.status IN ('ativa', 'disponivel')\n),\nhistorico AS (\n  SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa))\n  FROM (\n    SELECT id, data_conversa, resumo_conversa\n    FROM usr_chat\n    WHERE usuario_id = $1 AND resumo_conversa IS NOT NULL\n    ORDER BY data_conversa DESC, horario_inicio DESC\n    LIMIT 5\n  ) c\n),\nestagio AS (\n  SELECT estagio FROM usuarios_jornada\n  WHERE usuario_id = $1\n  ORDER BY criado_em DESC\n  LIMIT 1\n)\nSELECT\n  (SELECT * FROM objetivos) AS objetivos_especificos,\n  (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id,\n  (SELECT codigo FROM sabotador) AS sabotador_mais_ativo,\n  (SELECT * FROM quests) AS quests_ativas,\n  (SELECT * FROM historico) AS ultimas_conversas,\n  (SELECT estagio FROM estagio) AS estagio_jornada;",
+        "query": "WITH objetivos AS (\n  SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao))\n  FROM usuarios_objetivos o\n  JOIN areas_vida_catalogo av ON o.area_vida_id = av.id\n  WHERE o.usuario_id = $1 AND o.status = 'ativo'\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo'\n  LIMIT 1\n),\nsabotador AS (\n  SELECT sabotador_id, COUNT(*) AS total_deteccoes\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1\n  GROUP BY sabotador_id\n  ORDER BY COUNT(*) DESC\n  LIMIT 1\n),\nperfil_bigfive AS (\n  SELECT perfil_primario, COUNT(*) AS total_deteccoes, ROUND(AVG(confianca_media)::numeric, 2) AS confianca_media\n  FROM usuarios_perfis\n  WHERE usuario_id = $1\n  GROUP BY perfil_primario\n  ORDER BY COUNT(*) DESC, AVG(confianca_media) DESC\n  LIMIT 1\n),\nquests AS (\n  SELECT json_agg(json_build_object('id', q.id, 'titulo', q.config->>'titulo', 'status', q.status))\n  FROM usuarios_quest q\n  WHERE q.usuario_id = $1 AND q.status IN ('ativa', 'disponivel')\n),\nhistorico AS (\n  SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa))\n  FROM (\n    SELECT id, data_conversa, resumo_conversa\n    FROM usr_chat\n    WHERE usuario_id = $1 AND resumo_conversa IS NOT NULL\n    ORDER BY data_conversa DESC, horario_inicio DESC\n    LIMIT 5\n  ) c\n),\nnivel AS (\n  SELECT nivel_atual, titulo_nivel FROM usuarios_conquistas\n  WHERE usuario_id = $1\n  LIMIT 1\n)\nSELECT\n  (SELECT * FROM objetivos) AS objetivos_especificos,\n  (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id,\n  (SELECT sabotador_id FROM sabotador) AS sabotador_mais_ativo,\n  (SELECT perfil_primario FROM perfil_bigfive) AS perfil_bigfive_primario,\n  (SELECT * FROM quests) AS quests_ativas,\n  (SELECT * FROM historico) AS ultimas_conversas,\n  (SELECT nivel_atual FROM nivel) AS nivel_atual,\n  (SELECT titulo_nivel FROM nivel) AS titulo_nivel;",
         "options": {
           "queryReplacement": "={{ $('start').first().json.usr_id }}"
         }
@@ -738,7 +626,8 @@
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {

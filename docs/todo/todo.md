@@ -10,7 +10,7 @@
 - exportação - relatorio semanal
 - enviar relatorio semanal
 - tratamento de interações do mentor (conversa, lembretes, demais..)
-
+- Mentor: sabotador mais ativo, o ultimo ou os 3 mais ativos
 
 #Infra
 - Apagar aquivos obsoletos
