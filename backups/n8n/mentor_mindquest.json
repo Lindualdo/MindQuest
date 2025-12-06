@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-06T20:34:29.503Z",
+  "updatedAt": "2025-12-06T20:42:35.626Z",
   "createdAt": "2025-12-01T18:59:38.019Z",
   "id": "c1To6ho5riDs85Aj",
   "name": "mentor_mindquest",
@@ -882,6 +882,36 @@
         1760,
         -288
       ]
+    },
+    {
+      "id": "envia_final",
+      "name": "envia_final",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2560,
+        -272
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
     }
   ],
   "connections": {
@@ -1027,7 +1057,7 @@
       "main": [
         [
           {
-            "node": "grava_conversa",
+            "node": "envia_final",
             "type": "main",
             "index": 0
           }
@@ -1136,6 +1166,17 @@
           }
         ]
       ]
+    },
+    "envia_final": {
+      "main": [
+        [
+          {
+            "node": "grava_conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1173,7 +1214,7 @@
       }
     ]
   },
-  "versionId": "88248fa4-d79f-4a92-ba24-e8d762ffb9bc",
-  "versionCounter": 49,
+  "versionId": "c75d2219-73ff-4c9b-8bb3-0b13c2e6cc36",
+  "versionCounter": 50,
   "triggerCount": 0
 }
