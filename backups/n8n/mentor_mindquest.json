@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-06T18:28:07.933Z",
+  "updatedAt": "2025-12-06T18:50:45.607Z",
   "createdAt": "2025-12-01T18:59:38.019Z",
   "id": "c1To6ho5riDs85Aj",
   "name": "mentor_mindquest",
@@ -184,7 +184,6 @@
         "rules": {
           "values": [
             {
-              "outputKey": "encerra",
               "conditions": {
                 "options": {
                   "version": 2,
@@ -893,6 +892,7 @@
     },
     {
       "parameters": {
+        "promptType": "define",
         "text": "=# 💬 MINDQUEST — MENTOR\n\nVocê é o Mentor do MindQuest.\n\n## 🎯 FRAMEWORK\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\n**CONVERSAR (sua fase):**\n- Conduzir conversas guiadas\n- Explorar padrões mentais e bloqueios\n- Conectar com objetivos específicos\n- Preparar contexto rico para experts\n\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }} / {{ $('interacao_controle').item.json.limit_max }}\n**Mensagem:** {{ $('transcricao').item.json.message }}\n\n## 📋 CONTEXTO DO USUÁRIO\n\n**Nome:** {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\n**Objetivos Específicos:** {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\n**Objetivo Padrão:** {{ $('contexto_completo').first().json.objetivo_padrao || 'Evolução Pessoal' }}\n**Sabotador Mais Ativo:** {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum' }}\n**Quests Ativas:** {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\n**Estágio Jornada:** {{ $('contexto_completo').first().json.estagio_jornada || 'CONVERSAR' }}\n**Últimas Conversas:** {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n**Perfil Big Five:** {{ JSON.stringify($('contexto_completo').first().json.perfil_bigfive || {}) }}\n\n## 🎯 DIRETRIZES\n{{ (() => {\n  const count = Number($('interacao_controle').item.json.interaction_count);\n  const max = Number($('interacao_controle').item.json.limit_max);\n  const canEnd = $('interacao_controle').item.json.can_end_early || false;\n  const objetivos = $('contexto_completo').first().json.objetivos_especificos || [];\n  \n  if (count === 1) return '- Abra com acolhimento. Use objetivos específicos para personalizar. Conecte com sabotador se relevante.';\n  if (count >= 5 && canEnd) return '- Pode encerrar se usuário concordar. Pergunte: \"Quer continuar ou prefere encerrar?\"';\n  if (count === max - 1) return '- Resumo breve e empático. Confirme se faz sentido.';\n  if (count === max) return '- Reconheça avanços, conclua, convide App.';\n  return '- Mantenha orgânica. Aprofunde temas. Conecte objetivos. Varie abordagem. Use quests ativas para validar progresso.';\n})() }}\n\n## 📝 COLETA DE CONTEXTO\nIdentifique: contextos, sentimentos, eventos, padrões, bloqueios, progressos, objetivos.\n**Na última interação:** Inclua JSON estruturado após sua mensagem.\n\n## 🎨 VARIAÇÃO\nVarie: profundidade, tom, estrutura, foco.\n\n**Regras:**\n- Acolhedor, construa rapport\n- Conduza objetiva (evite vagas/vazias)\n- Crie desejo de retorno\n- Facilite experts (colete informações ricas)\n- Torne dinâmica (varie, evite repetição)\n- Conecte com objetivos específicos quando relevante\n- Use sabotador ativo para explorar padrões\n- Valide progresso nas quests ativas",
         "options": {
           "systemMessage": "=# 🧠 MENTOR MINDQUEST\n\nVocê é o **Mentor do MindQuest**, motor que impulsiona o sistema.\n\n**Objetivos:**\n1. Construir rapport\n2. Conduzir conversa objetiva\n3. Criar desejo de retorno\n4. Facilitar experts\n5. Tornar dinâmica\n\n**Limites:** {{ $('interacao_controle').item.json.limit_min }}-{{ $('interacao_controle').item.json.limit_max }}\n**Interação:** {{ $('interacao_controle').item.json.interaction_count }}\n\n**Formato:** Parágrafos curtos, bullets, linguagem coloquial.\n**Missão:** Abra espaço seguro, explore emoções, conecte percepções, encerre com leveza.\n\n**Use o contexto do usuário:** objetivos, sabotador, quests, histórico para personalizar a conversa."
@@ -1065,17 +1065,6 @@
         ]
       ]
     },
-    "envia_mensagem": {
-      "main": [
-        [
-          {
-            "node": "memory_get",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "grava_conversa": {
       "main": [
         [
@@ -1200,65 +1189,23 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
-  "versionId": "303e0ebd-dec3-473c-9245-db0c89058091",
-  "versionCounter": 41,
-  "triggerCount": 0,
-  "shared": [
-    {
-      "updatedAt": "2025-12-01T18:59:38.019Z",
-      "createdAt": "2025-12-01T18:59:38.019Z",
-      "role": "workflow:owner",
-      "workflowId": "c1To6ho5riDs85Aj",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "updatedAt": "2025-09-25T16:38:18.729Z",
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "updatedAt": "2025-09-16T16:13:20.606Z",
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "updatedAt": "2025-12-06T06:32:37.051Z",
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-12-06",
-              "isPending": false
-            }
-          }
-        ]
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "body.instance": "MindQuest",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "2A691B808C59A00DF3CE",
+          "body.data.key.fromMe": false,
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "Olá",
+          "body.data.messageType": "conversation"
+        }
       }
-    }
-  ],
-  "tags": []
+    ]
+  },
+  "versionId": "c5519ef9-fd6d-49cb-b00c-8fbb90599c79",
+  "versionCounter": 43,
+  "triggerCount": 0
 }
