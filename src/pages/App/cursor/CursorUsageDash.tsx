@@ -374,63 +374,7 @@ const CursorUsageDash: React.FC = () => {
           </label>
         </motion.div>
 
-        {/* Links para Guias */}
-        <motion.div 
-          className="grid grid-cols-1 gap-3 mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.05 }}
-        >
-          <a 
-            href="/app/cursor-cobranca"
-            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <DollarSign size={20} className="text-[var(--mq-primary)]" />
-                <div>
-                  <div className="font-medium text-[var(--mq-text)]">Como Funciona a Cobrança</div>
-                  <div className="text-xs text-[var(--mq-text-muted)]">Limite por tokens, Included vs On-Demand</div>
-                </div>
-              </div>
-              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
-            </div>
-          </a>
-
-          <a 
-            href="/app/cursor-modelos"
-            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Cpu size={20} className="text-[var(--mq-primary)]" />
-                <div>
-                  <div className="font-medium text-[var(--mq-text)]">Qual Modelo Usar</div>
-                  <div className="text-xs text-[var(--mq-text-muted)]">Melhor uso dos tokens - React/TS + n8n</div>
-                </div>
-              </div>
-              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
-            </div>
-          </a>
-
-          <a 
-            href="/app/cursor-contexto"
-            className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText size={20} className="text-[var(--mq-primary)]" />
-                <div>
-                  <div className="font-medium text-[var(--mq-text)]">Contexto Eficiente</div>
-                  <div className="text-xs text-[var(--mq-text-muted)]">Sem desperdício de tokens</div>
-                </div>
-              </div>
-              <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
-            </div>
-          </a>
-        </motion.div>
-
-        {/* Dashboard */}
+        {/* Dashboard - Stats primeiro */}
         {stats && (
           <>
             {/* Resumo Geral */}
@@ -438,7 +382,7 @@ const CursorUsageDash: React.FC = () => {
               className="grid grid-cols-2 gap-3 mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.05 }}
             >
               <div className="mq-card p-4 text-center">
                 <div className="text-xs text-[var(--mq-text-muted)] mb-1">Total Requests</div>
@@ -476,7 +420,7 @@ const CursorUsageDash: React.FC = () => {
                 className="mq-card mb-6 p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.15 }}
+                transition={{ delay: 0.1 }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-[var(--mq-text)]">
@@ -505,40 +449,6 @@ const CursorUsageDash: React.FC = () => {
                 )}
               </motion.div>
             )}
-
-            {/* Explicação do Modelo de Cobrança */}
-            <motion.div 
-              className="mq-card mb-6 p-4 bg-blue-500/10 border-blue-500/30"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h3 className="font-medium text-blue-500 flex items-center gap-2 mb-2">
-                <DollarSign size={16} /> Como Funciona a Cobrança
-              </h3>
-              <div className="text-sm text-[var(--mq-text-muted)] space-y-2">
-                <div>
-                  <strong className="text-[var(--mq-text)]">1. Limite do Plano Ultra (Included):</strong>
-                  <ul className="ml-4 mt-1 space-y-1">
-                    <li>• Limite mensal = <strong>US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos</strong> (por valor, não por tokens)</li>
-                    <li>• Dentro do limite: <span className="text-green-500">já pago na assinatura</span></li>
-                    <li>• O custo mostrado é o valor real consumido do plano</li>
-                    <li>• Tokens variam por modelo (Opus é mais caro por token que Sonnet)</li>
-                  </ul>
-                </div>
-                <div>
-                  <strong className="text-[var(--mq-text)]">2. Excesso (On-Demand):</strong>
-                  <ul className="ml-4 mt-1 space-y-1">
-                    <li>• Quando excede US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos: <span className="text-amber-500">cobrado extra</span></li>
-                    <li>• Cobrança = <strong>por valor</strong> (custo real do modelo usado)</li>
-                    <li>• Preço varia por modelo (Opus é mais caro que Sonnet)</li>
-                  </ul>
-                </div>
-                <div className="pt-2 border-t border-blue-500/20">
-                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o <strong>valor usado</strong> (${stats.planLimitUsed?.toFixed(2) ?? stats.includedCost.toFixed(2)} / ${stats.planLimit?.toFixed(0) ?? '400'}). Quando exceder ${stats.planLimit?.toFixed(0) ?? '400'}, uso adicional será cobrado como On-Demand!
-                </div>
-              </div>
-            </motion.div>
 
             {/* Período do Ciclo */}
             {stats.cycleInfo && stats.cycleInfo.nextCycle && (
@@ -666,6 +576,96 @@ const CursorUsageDash: React.FC = () => {
                 </ul>
               </motion.div>
             )}
+
+            {/* Explicação do Modelo de Cobrança - no final */}
+            <motion.div 
+              className="mq-card mt-6 p-4 bg-blue-500/10 border-blue-500/30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.55 }}
+            >
+              <h3 className="font-medium text-blue-500 flex items-center gap-2 mb-2">
+                <DollarSign size={16} /> Como Funciona a Cobrança
+              </h3>
+              <div className="text-sm text-[var(--mq-text-muted)] space-y-2">
+                <div>
+                  <strong className="text-[var(--mq-text)]">1. Limite do Plano Ultra (Included):</strong>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    <li>• Limite mensal = <strong>US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos</strong> (por valor, não por tokens)</li>
+                    <li>• Dentro do limite: <span className="text-green-500">já pago na assinatura</span></li>
+                    <li>• O custo mostrado é o valor real consumido do plano</li>
+                    <li>• Tokens variam por modelo (Opus é mais caro por token que Sonnet)</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-[var(--mq-text)]">2. Excesso (On-Demand):</strong>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    <li>• Quando excede US$ {ULTRA_PLAN_LIMIT.toFixed(0)} incluídos: <span className="text-amber-500">cobrado extra</span></li>
+                    <li>• Cobrança = <strong>por valor</strong> (custo real do modelo usado)</li>
+                    <li>• Preço varia por modelo (Opus é mais caro que Sonnet)</li>
+                  </ul>
+                </div>
+                <div className="pt-2 border-t border-blue-500/20">
+                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o <strong>valor usado</strong> (${stats.planLimitUsed?.toFixed(2) ?? stats.includedCost.toFixed(2)} / ${stats.planLimit?.toFixed(0) ?? '400'}). Quando exceder ${stats.planLimit?.toFixed(0) ?? '400'}, uso adicional será cobrado como On-Demand!
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Links para Guias - no final */}
+            <motion.div 
+              className="grid grid-cols-1 gap-3 mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              <a 
+                href="/app/cursor-cobranca"
+                className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <DollarSign size={20} className="text-[var(--mq-primary)]" />
+                    <div>
+                      <div className="font-medium text-[var(--mq-text)]">Como Funciona a Cobrança</div>
+                      <div className="text-xs text-[var(--mq-text-muted)]">Limite por tokens, Included vs On-Demand</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+                </div>
+              </a>
+
+              <a 
+                href="/app/cursor-modelos"
+                className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Cpu size={20} className="text-[var(--mq-primary)]" />
+                    <div>
+                      <div className="font-medium text-[var(--mq-text)]">Qual Modelo Usar</div>
+                      <div className="text-xs text-[var(--mq-text-muted)]">Melhor uso dos tokens - React/TS + n8n</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+                </div>
+              </a>
+
+              <a 
+                href="/app/cursor-contexto"
+                className="mq-card p-4 hover:bg-[var(--mq-primary)]/5 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText size={20} className="text-[var(--mq-primary)]" />
+                    <div>
+                      <div className="font-medium text-[var(--mq-text)]">Contexto Eficiente</div>
+                      <div className="text-xs text-[var(--mq-text-muted)]">Sem desperdício de tokens</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-[var(--mq-text-muted)]" />
+                </div>
+              </a>
+            </motion.div>
           </>
         )}
 
