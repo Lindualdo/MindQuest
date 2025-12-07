@@ -1,5 +1,4 @@
 {
-  "updatedAt": "2025-12-06T21:31:54.787Z",
   "createdAt": "2025-10-03T14:54:43.940Z",
   "id": "Vbc4JHAR3388mLcv",
   "name": "sw_expert_sabotadores",
@@ -11,37 +10,32 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id" },
-            { "name": "mensagens" },
-            { "name": "data_conversa" },
-            { "name": "chat_id" },
-            { "name": "usr_name" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "mensagens"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "usr_name"
+            }
           ]
         }
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [160, 80],
+      "position": [
+        160,
+        80
+      ],
       "id": "ab9114d5-694e-4e63-8257-b8f4744fbb3f",
       "name": "start"
-    },
-    {
-      "id": "busca_catalogo",
-      "name": "busca_catalogo",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [280, 80],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT id, nome, descricao FROM sabotadores_catalogo ORDER BY nome;",
-        "options": {}
-      },
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -55,18 +49,24 @@
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
-      "position": [520, 80],
+      "position": [
+        520,
+        80
+      ],
       "id": "5078885e-3d2c-41ce-9f1e-f66da411a6b5",
       "name": "Analisador Sabotadores"
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"sabotadores_detectados\": [\n    {\n      \"sabotador_id\": \"critico\",\n      \"nome_pt\": \"Crítico\",\n      \"intensidade\": 75,\n      \"contexto\": \"relacionamentos\",\n      \"frases_gatilho\": [\n        \"me senti desprezado\",\n        \"ela não gostava mais de mim\",\n        \"não encontrei alguém que vale a pena\"\n      ],\n      \"insights\": \"Autocrítica intensa sobre valor pessoal e capacidade de ser amado.\",\n      \"confiabilidade\": 90,\n      \"apelido\": \"Sr. Exigente\",\n      \"contramedida\": \"Praticar autocompaixão: falar consigo como falaria com um amigo querido por 3 minutos\"\n    }\n  ]\n}",
+        "jsonSchemaExample": "{\n  \"sabotadores_detectados\": [\n    {\n      \"sabotador_id\": \"critico\",\n      \"nome_pt\": \"Crítico\",\n      \"intensidade\": 75,\n      \"contexto\": \"relacionamentos\",\n      \"frases_gatilho\": [\n        \"me senti desprezado\",\n        \"ela não gostava mais de mim\",\n        \"não encontrei alguém que vale a pena\"\n      ],\n      \"insights\": \"Autocrítica intensa sobre valor pessoal e capacidade de ser amado. Padrão recorrente de dúvida sobre próprio valor em relacionamentos.\",\n      \"confiabilidade\": 90,\n      \"apelido\": \"Sr. Exigente\",\n      \"contramedida\": \"Praticar autocompaixão: falar consigo como falaria com um amigo querido por 3 minutos\"\n    }\n  ]\n}",
         "autoFix": true
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [632, 304],
+      "position": [
+        632,
+        304
+      ],
       "id": "a66b52c1-d5af-4f1c-8902-227ba7f4307a",
       "name": "Parser JSON Sabotadores"
     },
@@ -79,7 +79,10 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [488, 432],
+      "position": [
+        488,
+        432
+      ],
       "id": "d3455d77-915f-4b1c-b568-a1cc9e1d3fc7",
       "name": "OpenRouter Claude",
       "credentials": {
@@ -99,9 +102,33 @@
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [840, 80],
+      "position": [
+        840,
+        80
+      ],
       "id": "70e4bcd8-4fd5-4a16-9f73-d29644d9b656",
       "name": "Gravar Sabotadores",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "busca_catalogo",
+      "name": "busca_catalogo",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        280,
+        80
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, nome, descricao FROM sabotadores_catalogo ORDER BY nome;",
+        "options": {}
+      },
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -111,26 +138,139 @@
     }
   ],
   "connections": {
-    "start": {
-      "main": [[{ "node": "busca_catalogo", "type": "main", "index": 0 }]]
-    },
-    "busca_catalogo": {
-      "main": [[{ "node": "Analisador Sabotadores", "type": "main", "index": 0 }]]
-    },
     "Analisador Sabotadores": {
-      "main": [[{ "node": "Gravar Sabotadores", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Gravar Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser JSON Sabotadores": {
-      "ai_outputParser": [[{ "node": "Analisador Sabotadores", "type": "ai_outputParser", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analisador Sabotadores",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "OpenRouter Claude": {
       "ai_languageModel": [
         [
-          { "node": "Analisador Sabotadores", "type": "ai_languageModel", "index": 0 },
-          { "node": "Parser JSON Sabotadores", "type": "ai_languageModel", "index": 0 }
+          {
+            "node": "Analisador Sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser JSON Sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "busca_catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_catalogo": {
+      "main": [
+        [
+          {
+            "node": "Analisador Sabotadores",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "usr_name": "Aldo",
+          "mensagens": "[{\"interaction\":1,\"autor\":\"usuario\",\"texto\":\"Hoje eu acordei tranquilo, bastante reflexivo sobre a minha vida no modo mais global, não só sobre o momento que eu estou agora. Tem acontecido muitas coisas que são recorrentes na minha vida. A primeira delas é na questão financeira. eu tenho uma tendência muito grande a buscar investimentos de alto risco como criptomoedas ações e quase sempre eu assumo muito risco já perdi dinheiro várias vezes e isso voltou a acontecer agora novamente e esse fator sempre impacta muito na minha vida de modo geral um dos motivos disso que a minha vida sempre foi muito focada em conseguir liberdade financeira para ter mais seguran n depender das pessoas porque eu nunca tive muitas amizades nem de família, nem de amigos, com quem eu pudesse contar. Então eu me agarrava nisso como uma esperança de ter a garantia de um futuro mais tranquilo, onde eu dependesse menos das pessoas e dependesse mais de mim, tivesse mais no controle da minha situação, tivesse segurança. então por conta disso acabo assumindo o risco para tentar chegar mais rápido nesse objetivo e quanto mais eu me esforço para chegar lá, mais distante eu acabo ficando sempre tive grandes resultados trabalhando para os outros, empresas sempre cresci na carreira mas um sonho de muito tempo de ter meu negócio próprio nunca consegui colocar em prática nunca consegui ganhar dinheiro trabalhando por conta própria e muito menos também nos meus investimentos não consigo crescer meu patrimônio\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":1,\"autor\":\"agente\",\"texto\":\"Aldo, percebo que esse ciclo financeiro que você vive tem um peso muito grande para você, principalmente porque ele está ligado ao seu desejo profundo de segurança e autonomia. Essa busca intensa por liberdade financeira, mesmo com os riscos repetidos, revela o quanto é importante para você se sentir no controle da sua vida. Como você tem lidado emocionalmente com essas oscilações e perdas que acontecem nesse caminho?\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":2,\"autor\":\"usuario\",\"texto\":\"Esse ano eu vim aqui para Portugal com um valor bastante expressivo, que seria suficiente para eu ter uma tranquilidade bastante interessante. E eu perdi neste ano aproximadamente 60% do patrimônio, não mais, bem mais que isso, mais de 60, 70% do patrimônio que eu trouxe. e ontem eu tive uma perda, ontem não, na sexta-feira eu tive uma perda de aproximadamente uns 30 mil dólares é muita coisa e eu estou numa situação onde eu consigo manter um certo equilíbrio emocional, eu não sei o quanto isso é bom ou o quanto isso é ruim se eu estou anestesiado, paralisado ou se eu aprendi a lidar com isso e estou olhando de forma mais tranquila racionalizando e tentando achar uma saída para evitar isso e para recuperar o dinheiro que eu perdi.\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":2,\"autor\":\"agente\",\"texto\":\"Aldo, essa perda significativa do patrimônio certamente é um golpe duro, mesmo que você consiga manter um certo equilíbrio emocional diante disso. É compreensível que fique uma dúvida sobre se esse distanciamento emocional é uma proteção ou algo que pode estar bloqueando sua reação. De que forma essa situação tem impactado suas decisões e seu planejamento para o futuro próximo?\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":3,\"autor\":\"usuario\",\"texto\":\"Eu ainda estou nessa fase de reavaliar isso, porque eu tenho duas opções nesse momento. Ou eu continuo me arriscando, tomando mais risco para tentar recuperar mais rápido o dinheiro perdido. ou eu saio desse ciclo, tomo ações mais protetivas e me arrisco menos, mas também dificulta mais a recuperação do patrimônio que eu já perdi. Então, nesse momento, eu estou realmente em dúvida nesses dois caminhos a seguir. O terceiro ponto é que, quanto mais risco eu assumo, mais tempo eu tenho que me dedicar para acompanhar, para controlar. E, por consequência, acaba tomando muito meu tempo de dedicar em outras áreas da minha vida. Por exemplo, eu mudei para cá esse ano, para Portugal. Terminei um relacionamento recente e eu estou aqui já quase há um ano. não tive tempo de dedicar nem em lazer, nem em relacionamento e nem nas outras áreas da minha vida e nem também em colocar um negócio próprio que também é um desejo meu.\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":3,\"autor\":\"agente\",\"texto\":\"Aldo, entendo que essa dúvida entre arriscar mais para tentar recuperar rápido ou adotar uma postura mais protetiva traz um conflito importante, especialmente quando o tempo investido nesse controle acaba tirando espaço de outras áreas da sua vida que também são valiosas para você. Essa situação parece exigir um equilíbrio delicado entre seus desejos financeiros e o cuidado consigo mesmo. Que estratégias ou recursos você considera ter à disposição para ajudar a lidar com essa dualidade no momento?\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":4,\"autor\":\"usuario\",\"texto\":\"o recurso que eu tenho é a minha experiência na área. Eu já trabalho no mercado de risco há bastante tempo. E eu já ganhei dinheiro bastante também no mercado. Outra questão é que o mercado está num daqueles momentos de sobrevenda, onde os ativos estão muito baratos e as oportunidades são grandes. Então, o recurso que eu tenho é esse, é usar a minha experiência e a estratégia é buscar o meio termo entre se expor demais ao risco ou ser conservador demais eu posso me alavancar, por exemplo mas deixando um espaço saudável de risco para não ter liquidação e nem voltar a perder e infelizmente agora não tem outro jeito tem que dedicar mais tempo para acompanhar de perto e recuperar o máximo que eu posso até o final desse ano.\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":4,\"autor\":\"agente\",\"texto\":\"Aldo, pelo que você compartilhou, vejo que está enfrentando um cenário complexo e desafiador, mas que tem clara consciência dos seus recursos e estratégias disponíveis. Você trouxe um valor significativo para Portugal, sofreu perdas pesadas no patrimônio, e agora está num ponto de fazer escolhas importantes entre seguir arriscando para recuperar rápido ou adotar uma postura mais protetiva. Além disso, sabe que essa recuperação vai exigir dedicação e tempo, o que afeta outras áreas da sua vida que são importantes para você. Como pontos principais, destacaria:\\n\\n1. O desejo de liberdade financeira que envolve segurança e autonomia para você.\\n2. O impacto emocional e financeiro das perdas recentes, inclusive uma perda expressiva muito recente.\\n3. A dificuldade de equilibrar o tempo e energia entre o monitoramento dos investimentos e outros aspectos da vida pessoal.\\n4. A incerteza entre continuar no alto risco ou buscar uma postura mais conservadora para recuperação.\\n5. A experiência no mercado financeiro e a estratégia que busca o meio termo para controlar riscos saudáveis.\\n6. O momento atual de dedicação intensa para tentar recuperar até o final do ano.\\n\\nConsegui entender bem sua situação?\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":5,\"autor\":\"usuario\",\"texto\":\"sim exatamente isso\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"},{\"interaction\":5,\"autor\":\"agente\",\"texto\":\"Fico feliz que o resumo tenha correspondido ao que você sente, Aldo. É evidente que você tem uma visão clara do seu cenário e está consciente dos desafios e recursos disponíveis, o que é fundamental para seguir em frente com mais segurança. Nossa conversa de hoje está finalizada, te espero amanhã para saber as novidades.\\n\\n{\\n  \\\"interaction_completa\\\": true,\\n  \\\"total_interactions\\\": 5,\\n  \\\"status\\\": \\\"completa\\\",\\n  \\\"contexto_final\\\": {\\n    \\\"situacao_emocional\\\": \\\"equilíbrio emocional apesar da ansiedade e incertezas devido às perdas financeiras\\\",\\n    \\\"contextos_mencionados\\\": [\\\"finanças pessoais e investimentos\\\", \\\"mudança para Portugal\\\", \\\"desejo de autonomia e segurança financeira\\\"],\\n    \\\"sentimentos_expressos\\\": [\\\"ansiedade\\\", \\\"esperança\\\", \\\"dúvida\\\"],\\n    \\\"eventos_importantes\\\": [\\\"perda significativa de patrimônio\\\", \\\"mudança internacional\\\", \\\"fim de relacionamento recente\\\"],\\n    \\\"intensidade_geral\\\": \\\"média\\\",\\n    \\\"validado_pelo_usuario\\\": true,\\n    \\\"observacoes_agente\\\": \\\"perfil de tomada de risco com experiência financeira; busca constante pelo equilíbrio entre risco e proteção; impacto emocional significativo nas outras áreas da vida\\\"\\n  },\\n  \\\"emocoes_detectadas\\\": {\\n    \\\"emocao_primaria\\\": \\\"anticipation\\\",\\n    \\\"intensidade_emocao\\\": 7,\\n    \\\"energia_detectada\\\": 6,\\n    \\\"humor_autoavaliado\\\": 7\\n  },\\n  \\\"qualidade_interacao\\\": 8,\\n  \\\"emoji_dia\\\": \\\"😊\\\",\\n  \\\"pronta_para_especialista\\\": true\\n}\",\"timestamp\":\"2025-10-12T09:02:07.141Z\"}]",
+          "data_conversa": "Sun Oct 12 2025 00:00:00 GMT+0000 (Coordinated Universal Time)",
+          "chat_id": "7f5e0eba-1f33-44dd-a01a-eb0e343c0292"
+        }
+      }
+    ]
+  },
+  "shared": [
+    {
+      "createdAt": "2025-10-03T14:54:43.940Z",
+      "role": "workflow:owner",
+      "workflowId": "Vbc4JHAR3388mLcv",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
 }
