@@ -3,7 +3,7 @@
  * AÇÃO: App limpo - apenas v1.3, marketing e suporte
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import AuthGuard from './components/auth/AuthGuard';
@@ -41,7 +41,6 @@ import CursorContextoPage from './pages/App/cursor/CursorContextoPage';
 import ConversationGuidePage from './pages/Suport/ConversationGuidePage';
 import ComecarAgoraLandingPage from './pages/Marketing/ComecarAgoraLandingPage';
 import ConversarPageV13 from './pages/App/v1.3/ConversarPageV13';
-import { authService } from './services/authService';
 import { ThemeProvider } from './components/app/v1.3/ThemeProvider';
 import { registerPushToken } from './utils/pushNotifications';
 
@@ -92,8 +91,6 @@ function App() {
   const isSupportConversationGuide = resolvedPath === '/suporte/conversation-guide';
   const isLandingRoute = resolvedPath === '/' || resolvedPath === '/comecar-agora';
   const isAppRoute = resolvedPath === '/app' || resolvedPath.startsWith('/app/');
-  const isRootPath = resolvedPath === '/';
-  const redirectHandledRef = useRef(false);
 
   if (typeof window !== 'undefined') {
     window.__MINDQUEST_ROUTING__ = {
@@ -187,26 +184,6 @@ function App() {
   const handleRefresh = async () => {
     await refreshData();
   };
-
-  useEffect(() => {
-    if (!isRootPath || redirectHandledRef.current) {
-      return;
-    }
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const search = window.location.search;
-    const hasTokenInQuery = /([?&])token=/i.test(search);
-    const hasStoredToken = authService.hasTokenAvailable();
-
-    if (hasTokenInQuery || hasStoredToken) {
-      redirectHandledRef.current = true;
-      const target = hasTokenInQuery ? `/app/1.3${search}` : '/app/1.3';
-      window.location.replace(target);
-    }
-  }, [isRootPath]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
