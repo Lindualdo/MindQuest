@@ -1,0 +1,246 @@
+{
+  "name": "job_execute_experts",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "mensagens": "={{ $('Preparar Dados Expert').first().json.mensagens }}",
+            "data_conversa": "={{ $('Preparar Dados Expert').first().json.data_conversa }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "usuario_id", "displayName": "usuario_id", "type": "string" },
+            { "id": "mensagens", "displayName": "mensagens", "type": "string" },
+            { "id": "data_conversa", "displayName": "data_conversa", "type": "string" },
+            { "id": "chat_id", "displayName": "chat_id", "type": "string" }
+          ]
+        }
+      },
+      "id": "7abfde7f-2eef-4710-84e1-cc5b4f05eb9a",
+      "name": "experts_panas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, -64]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}"
+          }
+        }
+      },
+      "id": "8cd07aef-7acd-44a8-bbec-b4d612a0830d",
+      "name": "sw_criar_quest",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 960]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}"
+          }
+        }
+      },
+      "id": "75f6c7ee-8936-4c96-b0b7-2011444fb161",
+      "name": "sw_xp_conversas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 1184]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}",
+            "mensagens": "={{ $('Preparar Dados Expert').first().json.mensagens }}",
+            "data_conversa": "={{ $('Preparar Dados Expert').first().json.data_conversa }}",
+            "usr_name": "={{ $('Preparar Dados Expert').first().json.usr_name }}"
+          }
+        }
+      },
+      "id": "bcfdf633-9ee9-4f2d-b202-b680e2ad69ea",
+      "name": "sw_expert_sabotadores",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 128]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}",
+            "mensagens": "={{ $('Preparar Dados Expert').first().json.mensagens }}",
+            "contexto_final": "={{ $('Preparar Dados Expert').first().json.contexto_final }}",
+            "data_conversa": "={{ $('Preparar Dados Expert').first().json.data_conversa }}",
+            "usr_name": "={{ $('Preparar Dados Expert').first().json.usr_name }}"
+          }
+        }
+      },
+      "id": "cd745628-0630-4d1b-918c-2caab5c94eb7",
+      "name": "sw_expert_insights",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 336]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}",
+            "mensagens": "={{ $('Preparar Dados Expert').first().json.mensagens }}",
+            "data_conversa": "={{ $('Preparar Dados Expert').first().json.data_conversa }}",
+            "usr_name": "={{ $('Preparar Dados Expert').first().json.usr_name }}"
+          }
+        }
+      },
+      "id": "51b3d43f-c975-4ef1-b5ef-7046d9c155fa",
+      "name": "sw_expert_humor_energia",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 544]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Preparar Dados Expert').first().json.usuario_id }}",
+            "chat_id": "={{ $('Preparar Dados Expert').first().json.chat_id }}",
+            "mensagens": "={{ $('Preparar Dados Expert').first().json.mensagens }}",
+            "data_conversa": "={{ $('Preparar Dados Expert').first().json.data_conversa }}",
+            "usr_name": "={{ $('Preparar Dados Expert').first().json.usr_name }}"
+          }
+        }
+      },
+      "id": "7b6e962b-e9ad-4659-9c55-16b6e3b11995",
+      "name": "sw_expert_bigfive",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [160, 752]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours" }]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1200, 528],
+      "id": "0176e0f0-3af5-4c14-820c-d82883bdd67e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "id": "query-pendentes",
+      "name": "Buscar Conversas Pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-960, 528],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT c.id as chat_id, c.usuario_id, c.data_conversa,\n       c.mensagens, c.contexto_final,\n       COALESCE(u.nome_preferencia, u.nome, 'Usuário') as usr_name\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.mensagens IS NOT NULL\n  AND NOT EXISTS (\n    SELECT 1 FROM log_experts_conversas l \n    WHERE l.chat_id = c.id AND l.expert_name = 'panas'\n  )\nORDER BY c.data_conversa DESC\nLIMIT 50;",
+        "options": {}
+      }
+    },
+    {
+      "id": "check-results",
+      "name": "Tem Conversas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-720, 528],
+      "parameters": {
+        "conditions": {
+          "options": { "version": 2 },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "exists" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop-conversas",
+      "name": "Loop Conversas",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-480, 528],
+      "parameters": {
+        "batchSize": 1,
+        "options": { "reset": false }
+      }
+    },
+    {
+      "id": "prepara-dados",
+      "name": "Preparar Dados Expert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 528],
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nlet mensagens = item.mensagens;\nif (typeof mensagens === 'string') {\n  try { mensagens = JSON.parse(mensagens); } catch (e) { mensagens = []; }\n}\n\nlet contextoFinal = item.contexto_final;\nif (typeof contextoFinal === 'string') {\n  try { contextoFinal = JSON.parse(contextoFinal); } catch (e) { contextoFinal = {}; }\n}\n\nreturn [{\n  chat_id: item.chat_id,\n  usuario_id: item.usuario_id,\n  mensagens: JSON.stringify(mensagens),\n  data_conversa: item.data_conversa || new Date().toISOString().split('T')[0],\n  contexto_final: JSON.stringify(contextoFinal),\n  usr_name: item.usr_name || 'Usuário'\n}];"
+      }
+    },
+    {
+      "id": "registra-log",
+      "name": "Registrar Log Experts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [480, 528],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO log_experts_conversas (chat_id, expert_name, success)\nVALUES \n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'panas', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'sabotadores', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'insights', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'humor_energia', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'bigfive', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'criar_quest', true),\n  ({{ $('Preparar Dados Expert').first().json.chat_id }}, 'xp_conversas', true)\nON CONFLICT (chat_id, expert_name) DO NOTHING;",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Buscar Conversas Pendentes", "type": "main", "index": 0 }]]
+    },
+    "Buscar Conversas Pendentes": {
+      "main": [[{ "node": "Tem Conversas?", "type": "main", "index": 0 }]]
+    },
+    "Tem Conversas?": {
+      "main": [[{ "node": "Loop Conversas", "type": "main", "index": 0 }]]
+    },
+    "Loop Conversas": {
+      "main": [[], [{ "node": "Preparar Dados Expert", "type": "main", "index": 0 }]]
+    },
+    "Preparar Dados Expert": {
+      "main": [[
+        { "node": "experts_panas", "type": "main", "index": 0 },
+        { "node": "sw_expert_sabotadores", "type": "main", "index": 0 },
+        { "node": "sw_expert_insights", "type": "main", "index": 0 },
+        { "node": "sw_expert_humor_energia", "type": "main", "index": 0 },
+        { "node": "sw_expert_bigfive", "type": "main", "index": 0 },
+        { "node": "sw_criar_quest", "type": "main", "index": 0 },
+        { "node": "sw_xp_conversas", "type": "main", "index": 0 },
+        { "node": "Registrar Log Experts", "type": "main", "index": 0 }
+      ]]
+    },
+    "Registrar Log Experts": {
+      "main": [[{ "node": "Loop Conversas", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
