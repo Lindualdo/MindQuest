@@ -107,6 +107,25 @@ Criada (disponível) → Ativa (recorrências) → Concluída → Inativa
 4. **Reflexão Diária** → Sempre ativa, nunca expira
 5. **Objetivo Padrão** → Não pode ser excluído
 
+---
+
+## ⚠️ Regra Crítica: `sw_xp_conversas`
+
+**Condição para inserir conversa em `quests_recorrencias`:**
+
+```
+usr_chat.data_conversa > usuarios_conquistas.ultima_conversa_em
+```
+
+| Se | Resultado |
+|----|-----------|
+| `data_conversa` > `ultima_conversa_em` | ✅ Insere recorrência |
+| `data_conversa` <= `ultima_conversa_em` | ❌ Ignora |
+
+**Atenção:** Workflow NÃO consulta `quests_recorrencias`. Usa apenas `ultima_conversa_em` como marcador.
+
+> **TODO:** Melhorar consistência - workflow deveria verificar `quests_recorrencias` diretamente para evitar estados inconsistentes quando dados são excluídos manualmente.
+
 ## Documentação Completa
 
 Ver `docs/espec/quests/` para detalhes completos.
