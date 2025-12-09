@@ -8,7 +8,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "// PREPARA DADOS PARA TODOS OS EXPERTS\nconst gravaChat = $('grava_chat').first().json;\nconst gravaConversa = $('grava_conversa').first().json;\nconst contexto = $('contexto_completo').first().json;\n\n// Parse mensagens se for string\nlet mensagens = gravaConversa.mensagens;\nif (typeof mensagens === 'string') {\n  try {\n    mensagens = JSON.parse(mensagens);\n  } catch (e) {\n    mensagens = [];\n  }\n}\n\n// Parse contexto_final se for string\nlet contextoFinal = gravaConversa.contexto_final;\nif (typeof contextoFinal === 'string') {\n  try {\n    contextoFinal = JSON.parse(contextoFinal);\n  } catch (e) {\n    contextoFinal = {};\n  }\n}\n\nreturn [{\n  usuario_id: gravaChat.usuario_id,\n  chat_id: gravaChat.id,\n  mensagens: JSON.stringify(mensagens),\n  data_conversa: gravaChat.data_conversa || new Date().toISOString().split('T')[0],\n  contexto_final: JSON.stringify(contextoFinal),\n  usr_name: contexto.nome_preferencia || 'Usuário'\n}];"
+        "jsCode": "// PREPARA DADOS PARA OS EXPERTS (batch noturno)\nconst chatPendente = $input.first().json;\n\n// Parse mensagens se for objeto ou string\nlet mensagens = chatPendente.mensagens;\nif (typeof mensagens === 'string') {\n  try {\n    mensagens = JSON.parse(mensagens);\n  } catch (e) {\n    mensagens = [];\n  }\n}\n\n// Formata mensagens como texto\nconst mensagensTexto = Array.isArray(mensagens) \n  ? mensagens.map(m => `${m.autor}: ${m.texto}`).join('\\n')\n  : '';\n\nreturn [{\n  usuario_id: chatPendente.usuario_id,\n  chat_id: chatPendente.id,\n  data_conversa: chatPendente.data_conversa,\n  mensagens: JSON.stringify(mensagens),\n  mensagens_texto: mensagensTexto,\n  total_interacoes: Array.isArray(mensagens) ? mensagens.filter(m => m.autor === 'usuario').length : 0,\n  usr_name: chatPendente.usr_name || '',\n  contexto_final: chatPendente.contexto_final || ''\n}];"
       },
       "id": "16db4927-a89c-4ee4-af98-afe5642c1d9d",
       "name": "call_experts",
@@ -23,73 +23,6 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "vJRfrbY4NhpNyfCD",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
-          "cachedResultName": "sw_experts_panas"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "mensagens",
-              "displayName": "mensagens",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "data_conversa",
-              "displayName": "data_conversa",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": false
-        }
-      },
-      "id": "7abfde7f-2eef-4710-84e1-cc5b4f05eb9a",
-      "name": "experts_panas",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        320,
-        -64
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
           "value": "LKjU8NE9aNHw7kEh",
           "mode": "list",
           "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
@@ -98,7 +31,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('grava_chat').first().json.usuario_id }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -132,8 +65,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        960
+        608,
+        128
       ]
     },
     {
@@ -141,13 +74,39 @@
         "workflowId": {
           "__rl": true,
           "value": "ItBastfCTkWxm41M",
-          "mode": "list"
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ItBastfCTkWxm41M",
+          "cachedResultName": "sw_xp_conversas"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('grava_chat').first().json.usuario_id }}"
-          }
+            "usuario_id": "={{ $input.first().json.usuario_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "calcular_apenas_novos",
+              "displayName": "calcular_apenas_novos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
         },
         "options": {}
       },
@@ -157,7 +116,7 @@
       "typeVersion": 1.3,
       "position": [
         320,
-        1184
+        976
       ]
     },
     {
@@ -172,10 +131,10 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
-            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}",
+            "data_conversa": "={{ $input.first().json.data_conversa }}",
             "usr_name": "={{ $('call_experts').first().json.usr_name }}"
           },
           "matchingColumns": [],
@@ -254,11 +213,11 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}",
             "contexto_final": "={{ $('call_experts').first().json.contexto_final }}",
-            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "data_conversa": "={{ $input.first().json.data_conversa }}",
             "usr_name": "={{ $('call_experts').first().json.usr_name }}"
           },
           "matchingColumns": [],
@@ -339,17 +298,69 @@
         "workflowId": {
           "__rl": true,
           "value": "GykxpS5vsg8NeoOh",
-          "mode": "list"
+          "mode": "list",
+          "cachedResultUrl": "/workflow/GykxpS5vsg8NeoOh",
+          "cachedResultName": "sw_expert_humor_energia"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
-            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}",
+            "data_conversa": "={{ $input.first().json.data_conversa }}",
             "usr_name": "={{ $('call_experts').first().json.usr_name }}"
-          }
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
         },
         "options": {
           "waitForSubWorkflow": false
@@ -369,17 +380,69 @@
         "workflowId": {
           "__rl": true,
           "value": "nOl6lnaGMpyg9S9J",
-          "mode": "list"
+          "mode": "list",
+          "cachedResultUrl": "/workflow/nOl6lnaGMpyg9S9J",
+          "cachedResultName": "sw_expert_bigfive_ocean"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens }}",
-            "data_conversa": "={{ $('call_experts').first().json.data_conversa }}",
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}",
+            "data_conversa": "={{ $input.first().json.data_conversa }}",
             "usr_name": "={{ $('call_experts').first().json.usr_name }}"
-          }
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_name",
+              "displayName": "usr_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
         },
         "options": {
           "waitForSubWorkflow": false
@@ -395,34 +458,359 @@
       ]
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -2048,
-        448
-      ],
-      "id": "a6e17d11-4727-427e-b7f9-da5d16e73bf1",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
       "parameters": {
         "operation": "executeQuery",
-        "query": "select id, usuario_id, data_conversa, status from chat_usr\nwhere usuarios_id = $1",
+        "query": "SELECT c.id, c.usuario_id, c.data_conversa, c.status, c.mensagens,\n       u.usr_name, u.contexto_final\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.data_conversa = CURRENT_DATE\n  AND (c.processada_em IS NULL OR c.processada_em < c.atualizado_em)\n  AND c.mensagens IS NOT NULL\n  AND jsonb_array_length(c.mensagens) > 0\nORDER BY c.data_conversa DESC;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1232,
+        -1360,
         528
       ],
       "id": "b49fa207-f754-4f8c-a9fa-9e1238273810",
-      "name": "Execute a SQL query",
+      "name": "busca_pendentes",
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        272,
+        1408
+      ],
+      "id": "32010570-be39-4f60-8fe9-e020cb4160b4",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa completa abaixo entre o usuário e o agente.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $input.first().json.mensagens }}\n```\n\nSUA TAREFA:\n1. GERAR RESUMO CONCISO\n2. ANALISAR REFLEXÃO DO USUÁRIO\n3. CONTAR PALAVRAS DO USUÁRIO\n\nRETORNE APENAS ESTE JSON:\n{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": boolean,\n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": number,\n  \"confianca_analise\": number\n}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas.\n\nSeu trabalho é:\n1. Analisar a conversa completa entre usuário e agente (5 interações)\n2. Gerar um resumo conciso mantendo APENAS o essencial\n3. Identificar se o usuário fez reflexões profundas\n4. Contar palavras totais do usuário\n5. Preservar contexto emocional e insights importantes\n\nREGRAS CRÍTICAS:\n- Remova redundâncias e repetições\n- Mantenha apenas informações únicas e relevantes\n- Preserve sentimentos, eventos e contextos mencionados\n- Seja objetivo e direto\n- Máximo de 300 palavras no resumo\n- Retorne APENAS JSON estruturado\n\nVocê está ajudando a construir o perfil psicológico do usuário ao longo do tempo, então cada palavra conta."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        1200
+      ],
+      "id": "6a0c685b-c25a-4483-bcb6-5e342964638e",
+      "name": "Resumo das conversas"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": true, \n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": 204,  \n  \"confianca_analise\": 95 \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        1408
+      ],
+      "id": "38cb79d1-3d37-4529-94ff-588775cad1f8",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "usr_chat",
+          "mode": "list",
+          "cachedResultName": "usr_chat"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('call_experts').first().json.chat_id }}",
+            "total_palavras_usuario": "={{ $json.output.total_palavras_usuario }}",
+            "resumo_conversa": "={{ $json.output.resumo_conversa }}",
+            "tem_reflexao": "={{ $json.output.tem_reflexao }}",
+            "processada_em": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "horario_inicio",
+              "displayName": "horario_inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "time",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "horario_fim",
+              "displayName": "horario_fim",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "time",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "total_interactions",
+              "displayName": "total_interactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "processada_em",
+              "displayName": "processada_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "resumo_conversa",
+              "displayName": "resumo_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tem_reflexao",
+              "displayName": "tem_reflexao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_palavras_usuario",
+              "displayName": "total_palavras_usuario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        1200
+      ],
+      "id": "51d87e68-5afc-460b-a2af-6bf40bf1a934",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "vJRfrbY4NhpNyfCD",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
+          "cachedResultName": "sw_experts_panas"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "ea3276e0-abf2-4210-9829-6011abe567ad",
+      "name": "expert_panas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        -80
+      ]
+    },
+    {
+      "id": "schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1584,
+        528
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 23 * * *"
+            }
+          ]
         }
       }
     }
@@ -431,16 +819,6 @@
     "call_experts": {
       "main": [
         [
-          {
-            "node": "experts_panas",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sw_criar_quest",
-            "type": "main",
-            "index": 0
-          },
           {
             "node": "sw_xp_conversas",
             "type": "main",
@@ -465,13 +843,84 @@
             "node": "sw_expert_bigfive",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Resumo das conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "expert_panas",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "Execute a SQL query": {
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Resumo das conversas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumo das conversas": {
       "main": [
-        []
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Resumo das conversas",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sw_expert_sabotadores": {
+      "main": [
+        [
+          {
+            "node": "sw_criar_quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "busca_pendentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_pendentes": {
+      "main": [
+        [
+          {
+            "node": "call_experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },

@@ -44,13 +44,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH quests AS (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.catalogo_id,\n    COALESCE(uq.config->>'contexto_origem', '') AS contexto_origem,\n    COALESCE(uq.config->>'titulo', '') AS titulo,\n    uq.ativado_em,\n    uq.config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('disponivel', 'ativa')\n)\nSELECT json_build_object(\n  'quests_ativas',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', quests.id,\n      'status', quests.status,\n      'catalogo_id', quests.catalogo_id,\n      'contexto_origem', quests.contexto_origem,\n      'titulo', quests.titulo,\n      'criado_em', quests.ativado_em,\n      'config', quests.config\n    )\n    ORDER BY quests.ativado_em DESC\n  ), '[]'::json)\n) AS contexto\nFROM quests;",
+        "query": "-- Verifica limite + busca quests ativas\nWITH chat_status AS (\n  SELECT CASE WHEN processada_em IS NOT NULL THEN TRUE ELSE FALSE END AS ja_processado\n  FROM usr_chat WHERE id = $2::uuid\n),\nquests_count AS (\n  SELECT COUNT(*) AS total_quests FROM usuarios_quest\n  WHERE usuario_id = $1::uuid AND status IN ('ativa', 'disponivel')\n),\nverificacao AS (\n  SELECT \n    COALESCE((SELECT ja_processado FROM chat_status), FALSE) AS chat_ja_processado,\n    COALESCE((SELECT total_quests FROM quests_count), 0) AS total_quests_ativas,\n    CASE \n      WHEN COALESCE((SELECT ja_processado FROM chat_status), FALSE) = TRUE THEN 'chat_processado'\n      WHEN COALESCE((SELECT total_quests FROM quests_count), 0) >= 15 THEN 'limite_atingido'\n      ELSE 'pode_processar'\n    END AS status_processamento\n),\nquests AS (\n  SELECT uq.id, uq.status, uq.catalogo_id,\n    COALESCE(uq.config->>'contexto_origem', '') AS contexto_origem,\n    COALESCE(uq.config->>'titulo', '') AS titulo,\n    uq.ativado_em, uq.config\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid AND uq.status IN ('disponivel', 'ativa')\n)\nSELECT \n  (SELECT status_processamento FROM verificacao) AS status_processamento,\n  (SELECT chat_ja_processado FROM verificacao) AS chat_ja_processado,\n  (SELECT total_quests_ativas FROM verificacao) AS total_quests_ativas,\n  json_build_object('quests_ativas', COALESCE((SELECT json_agg(json_build_object(\n    'id', quests.id, 'status', quests.status, 'catalogo_id', quests.catalogo_id,\n    'contexto_origem', quests.contexto_origem, 'titulo', quests.titulo,\n    'criado_em', quests.ativado_em, 'config', quests.config\n  ) ORDER BY quests.ativado_em DESC) FROM quests), '[]'::json)) AS contexto;",
         "options": {
-          "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
+          "queryReplacement": "={{ [$('Normalizar Entrada').item.json.usuario_id, $('Normalizar Entrada').item.json.chat_id] }}"
         }
       },
       "id": "7f1aa97f-b1ce-4817-a06f-7a188b7b1d1b",
-      "name": "Buscar Quests Ativas",
+      "name": "Buscar Quests e Verificar Limite",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
@@ -361,10 +361,10 @@
     },
     {
       "parameters": {
-        "jsCode": "\nreturn [{\n  json: {\n    usuario_id: $('start').first().json.usuario_id,\n    quests_registradas: 0\n  }\n}];"
+        "jsCode": "// Saída quando não pode processar\nconst verificacao = $('Buscar Quests e Verificar Limite').first().json;\nconst entrada = $('Normalizar Entrada').first().json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: 0,\n    motivo: verificacao.status_processamento || 'sem_conversa',\n    total_quests_ativas: verificacao.total_quests_ativas || 0,\n    chat_ja_processado: verificacao.chat_ja_processado || false\n  }\n}];"
       },
       "id": "cea696ab-a45d-4369-b61d-e1ce3e495912",
-      "name": "Montar Saída1",
+      "name": "Saida Bloqueado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -383,7 +383,16 @@
           },
           "conditions": [
             {
-              "id": "864d9ebe-fb91-4498-91fd-bb5855f5c087",
+              "id": "proc1",
+              "leftValue": "={{ $('Buscar Quests e Verificar Limite').first().json.status_processamento }}",
+              "rightValue": "pode_processar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "conv1",
               "leftValue": "={{ $json.conversas.conversas_recentes[0].chat_id }}",
               "rightValue": "",
               "operator": {
@@ -403,7 +412,7 @@
         -272
       ],
       "id": "3cf8b129-dcc4-494e-9989-1e8af2fda22c",
-      "name": "tem conversa"
+      "name": "Pode Processar?"
     },
     {
       "parameters": {
@@ -446,14 +455,14 @@
       "main": [
         [
           {
-            "node": "Buscar Quests Ativas",
+            "node": "Buscar Quests e Verificar Limite",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar Quests Ativas": {
+    "Buscar Quests e Verificar Limite": {
       "main": [
         [
           {
@@ -468,7 +477,7 @@
       "main": [
         [
           {
-            "node": "tem conversa",
+            "node": "Pode Processar?",
             "type": "main",
             "index": 0
           }
@@ -612,7 +621,7 @@
         ]
       ]
     },
-    "tem conversa": {
+    "Pode Processar?": {
       "main": [
         [
           {
@@ -623,7 +632,7 @@
         ],
         [
           {
-            "node": "Montar Saída1",
+            "node": "Saida Bloqueado",
             "type": "main",
             "index": 0
           }

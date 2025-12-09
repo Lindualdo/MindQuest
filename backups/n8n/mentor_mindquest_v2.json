@@ -43,8 +43,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -288,
-        -288
+        -768,
+        -304
       ]
     },
     {
@@ -61,8 +61,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -112,
-        -288
+        -592,
+        -304
       ]
     },
     {
@@ -78,8 +78,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        64,
-        -288
+        -416,
+        -304
       ],
       "credentials": {
         "postgres": {
@@ -91,7 +91,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH objetivos AS (\n  SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao))\n  FROM usuarios_objetivos o\n  JOIN areas_vida_catalogo av ON o.area_vida_id = av.id\n  WHERE o.usuario_id = $1 AND o.status = 'ativo'\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo'\n  LIMIT 1\n),\nsabotador AS (\n  SELECT sabotador_id, COUNT(*) AS total_deteccoes\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1\n  GROUP BY sabotador_id\n  ORDER BY COUNT(*) DESC\n  LIMIT 1\n),\nperfil_bigfive AS (\n  SELECT perfil_primario, COUNT(*) AS total_deteccoes, ROUND(AVG(confianca_media)::numeric, 2) AS confianca_media\n  FROM usuarios_perfis\n  WHERE usuario_id = $1\n  GROUP BY perfil_primario\n  ORDER BY COUNT(*) DESC, AVG(confianca_media) DESC\n  LIMIT 1\n),\nquests AS (\n  SELECT json_agg(json_build_object('id', q.id, 'titulo', q.config->>'titulo', 'status', q.status))\n  FROM usuarios_quest q\n  WHERE q.usuario_id = $1 AND q.status IN ('ativa', 'disponivel')\n),\nhistorico AS (\n  SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa))\n  FROM (\n    SELECT id, data_conversa, resumo_conversa\n    FROM usr_chat\n    WHERE usuario_id = $1 AND resumo_conversa IS NOT NULL\n    ORDER BY data_conversa DESC, horario_inicio DESC\n    LIMIT 5\n  ) c\n),\nnivel AS (\n  SELECT nivel_atual, titulo_nivel FROM usuarios_conquistas\n  WHERE usuario_id = $1\n  LIMIT 1\n),\nsessao_hoje AS (\n  SELECT id, data_conversa, status, mensagens\n  FROM usr_chat\n  WHERE usuario_id = $1 AND data_conversa = CURRENT_DATE\n  ORDER BY horario_inicio DESC\n  LIMIT 1\n),\ntotal_conversas AS (\n  SELECT COUNT(*) as total FROM usr_chat WHERE usuario_id = $1\n)\nSELECT\n  (SELECT * FROM objetivos) AS objetivos_especificos,\n  (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id,\n  (SELECT sabotador_id FROM sabotador) AS sabotador_mais_ativo,\n  (SELECT perfil_primario FROM perfil_bigfive) AS perfil_bigfive_primario,\n  (SELECT * FROM quests) AS quests_ativas,\n  (SELECT * FROM historico) AS ultimas_conversas,\n  (SELECT nivel_atual FROM nivel) AS nivel_atual,\n  (SELECT titulo_nivel FROM nivel) AS titulo_nivel,\n  (SELECT id FROM sessao_hoje) AS sessao_hoje_id,\n  (SELECT status FROM sessao_hoje) AS sessao_hoje_status,\n  (SELECT mensagens FROM sessao_hoje) AS sessao_hoje_mensagens,\n  (SELECT total FROM total_conversas) AS total_conversas;",
+        "query": "WITH objetivos AS (\n  SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao))\n  FROM usuarios_objetivos o\n  JOIN areas_vida_catalogo av ON o.area_vida_id = av.id\n  WHERE o.usuario_id = $1 AND o.status = 'ativo'\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo'\n  LIMIT 1\n),\nsabotador AS (\n  SELECT sabotador_id, COUNT(*) AS total_deteccoes\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1\n  GROUP BY sabotador_id\n  ORDER BY COUNT(*) DESC\n  LIMIT 1\n),\nperfil_bigfive AS (\n  SELECT perfil_primario, COUNT(*) AS total_deteccoes, ROUND(AVG(confianca_media)::numeric, 2) AS confianca_media\n  FROM usuarios_perfis\n  WHERE usuario_id = $1\n  GROUP BY perfil_primario\n  ORDER BY COUNT(*) DESC, AVG(confianca_media) DESC\n  LIMIT 1\n),\nquests_count AS (\n  SELECT \n    COUNT(*) FILTER (WHERE status = 'ativa') AS total_ativas,\n    COUNT(*) FILTER (WHERE status = 'disponivel') AS total_disponiveis\n  FROM usuarios_quest\n  WHERE usuario_id = $1 AND status IN ('ativa', 'disponivel')\n),\nhistorico AS (\n  SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa))\n  FROM (\n    SELECT id, data_conversa, resumo_conversa\n    FROM usr_chat\n    WHERE usuario_id = $1 \n      AND resumo_conversa IS NOT NULL\n      AND data_conversa < CURRENT_DATE\n    ORDER BY data_conversa DESC, horario_inicio DESC\n    LIMIT 5\n  ) c\n),\nnivel AS (\n  SELECT nivel_atual, titulo_nivel FROM usuarios_conquistas\n  WHERE usuario_id = $1\n  LIMIT 1\n),\nsessao_hoje AS (\n  SELECT id, data_conversa, status, mensagens\n  FROM usr_chat\n  WHERE usuario_id = $1 AND data_conversa = CURRENT_DATE\n  ORDER BY horario_inicio DESC\n  LIMIT 1\n),\ntotal_conversas AS (\n  SELECT COUNT(*) as total FROM usr_chat WHERE usuario_id = $1\n)\nSELECT\n  (SELECT * FROM objetivos) AS objetivos_especificos,\n  (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id,\n  (SELECT sabotador_id FROM sabotador) AS sabotador_mais_ativo,\n  (SELECT perfil_primario FROM perfil_bigfive) AS perfil_bigfive_primario,\n  (SELECT total_ativas FROM quests_count) AS quests_ativas_total,\n  (SELECT total_disponiveis FROM quests_count) AS quests_disponiveis_total,\n  (SELECT * FROM historico) AS ultimas_conversas,\n  (SELECT nivel_atual FROM nivel) AS nivel_atual,\n  (SELECT titulo_nivel FROM nivel) AS titulo_nivel,\n  (SELECT id FROM sessao_hoje) AS sessao_hoje_id,\n  (SELECT status FROM sessao_hoje) AS sessao_hoje_status,\n  (SELECT mensagens FROM sessao_hoje) AS sessao_hoje_mensagens,\n  (SELECT total FROM total_conversas) AS total_conversas;",
         "options": {
           "queryReplacement": "={{ $('start').first().json.usr_id }}"
         }
@@ -101,8 +101,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        256,
-        -288
+        0,
+        -304
       ],
       "credentials": {
         "postgres": {
@@ -113,15 +113,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// CONTEXTO COMPLETO v2 - Consolida dados + sessão do dia\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\n// Verifica se é primeira conversa\nconst totalConversas = Number(contexto?.total_conversas || 0);\nconst isPrimeiraConversa = totalConversas === 0;\n\n// Verifica se usuário tem objetivos\nconst objetivos = contexto?.objetivos_especificos || [];\nconst temObjetivos = Array.isArray(objetivos) && objetivos.length > 0;\n\n// Sessão do dia (se existir, continua; senão, é nova)\nconst sessaoHojeId = contexto?.sessao_hoje_id || null;\nconst sessaoHojeMensagens = contexto?.sessao_hoje_mensagens || [];\nconst isNovaSessao = !sessaoHojeId;\n\n// Conta interações da sessão atual\nconst mensagensArray = Array.isArray(sessaoHojeMensagens) ? sessaoHojeMensagens : [];\nconst interacaoAtual = mensagensArray.filter(m => m?.autor === 'usuario').length + 1;\n\n// Tom de conversa (default: empatico)\nconst tomConversa = dadosUsr?.tom_conversa || 'empatico';\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || 'Mind',\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  sobre_voce: dadosUsr?.sobre_voce || null,\n  tom_conversa: tomConversa,\n  objetivos_especificos: objetivos,\n  tem_objetivos: temObjetivos,\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  quests_ativas: contexto?.quests_ativas || [],\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || 1,\n  titulo_nivel: contexto?.titulo_nivel || 'Explorador',\n  total_conversas: totalConversas,\n  is_primeira_conversa: isPrimeiraConversa,\n  sessao_hoje_id: sessaoHojeId,\n  sessao_hoje_mensagens: sessaoHojeMensagens,\n  is_nova_sessao: isNovaSessao,\n  interacao_atual: interacaoAtual\n}];"
+        "jsCode": "// CONTEXTO COMPLETO v5 - Quests simplificado (apenas totais)\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\n// Notificação recente (se houver)\nconst notifResult = $('busca_notificacao').first()?.json;\nconst temNotificacao = notifResult && notifResult.id;\nconst notificacaoRecente = temNotificacao ? {\n  id: notifResult.id,\n  tipo: notifResult.tipo,\n  titulo: notifResult.titulo || '',\n  mensagem: notifResult.mensagem || '',\n  contexto_mentor: notifResult.contexto_mentor || '',\n  quests_mencionadas: notifResult.quests_mencionadas || [],\n  referencia_id: notifResult.referencia_id,\n  criado_em: notifResult.criado_em\n} : null;\n\n// Verifica se é primeira conversa\nconst totalConversas = Number(contexto?.total_conversas || 0);\nconst isPrimeiraConversa = totalConversas === 0;\n\n// Verifica se usuário tem objetivos\nconst objetivos = contexto?.objetivos_especificos || [];\nconst temObjetivos = Array.isArray(objetivos) && objetivos.length > 0;\n\n// Quests - apenas totais (detalhes via tool)\nconst questsAtivasTotal = Number(contexto?.quests_ativas_total || 0);\nconst questsDisponiveisTotal = Number(contexto?.quests_disponiveis_total || 0);\nconst temQuests = questsAtivasTotal > 0 || questsDisponiveisTotal > 0;\n\n// Sessão do dia (se existir, continua; senão, é nova)\nconst sessaoHojeId = contexto?.sessao_hoje_id || null;\nconst sessaoHojeMensagens = contexto?.sessao_hoje_mensagens || [];\nconst isNovaSessao = !sessaoHojeId;\n\n// Conta interações da sessão atual\nconst mensagensArray = Array.isArray(sessaoHojeMensagens) ? sessaoHojeMensagens : [];\nconst interacaoAtual = mensagensArray.filter(m => m?.autor === 'usuario').length + 1;\n\n// Tom de conversa (default: empatico)\nconst tomConversa = dadosUsr?.tom_conversa || 'empatico';\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || 'Mind',\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  sobre_voce: dadosUsr?.sobre_voce || null,\n  tom_conversa: tomConversa,\n  objetivos_especificos: objetivos,\n  tem_objetivos: temObjetivos,\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  // Quests - apenas indicadores\n  tem_quests: temQuests,\n  quests_ativas_total: questsAtivasTotal,\n  quests_disponiveis_total: questsDisponiveisTotal,\n  // Histórico\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || 1,\n  titulo_nivel: contexto?.titulo_nivel || 'Explorador',\n  total_conversas: totalConversas,\n  is_primeira_conversa: isPrimeiraConversa,\n  sessao_hoje_id: sessaoHojeId,\n  sessao_hoje_mensagens: sessaoHojeMensagens,\n  is_nova_sessao: isNovaSessao,\n  interacao_atual: interacaoAtual,\n  // Notificação\n  tem_notificacao_recente: temNotificacao,\n  notificacao_recente: notificacaoRecente\n}];"
       },
       "id": "contexto_completo",
       "name": "contexto_completo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        464,
-        -288
+        208,
+        -304
       ]
     },
     {
@@ -150,14 +150,14 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        656,
-        -288
+        400,
+        -304
       ]
     },
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('start').first().json['body.instance'] }}{{ $('start').first().json.usr_id }}{{ $('contexto_completo').first().json.whatsapp_numero }}",
+        "sessionKey": "={{ $('start').first().json['body.instance'] }}{{ $('start').first().json.usr_id }}{{ $('busca_dados_usr').item.json.whatsapp_numero }}",
         "sessionTTL": 43200,
         "contextWindowLength": 50
       },
@@ -166,8 +166,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        912,
-        -32
+        640,
+        128
       ],
       "credentials": {
         "redis": {
@@ -186,8 +186,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        736,
-        240
+        416,
+        304
       ],
       "credentials": {
         "openRouterApi": {
@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"mensagem_usuario\": \"Oi! Como você está hoje?\",\n  \"checkpoint_encerramento\": false,\n  \"tema_atual_fechado\": false,\n  \"objetivo_sugerido\": null\n}",
+        "jsonSchemaExample": "{\n  \"mensagem_usuario\": \"Oi! Como você está hoje?\",\n  \"tema_atual\": {\n    \"titulo\": \"Rotina de férias\",\n    \"resumo\": [\"Definiu rotina 5h-22h\", \"Preocupação com sono\"],\n    \"decisoes\": [\"Academia às 5h\"]\n  },\n  \"checkpoint_encerramento\": false,\n  \"tema_atual_fechado\": false,\n  \"objetivo_sugerido\": null\n}",
         "autoFix": true
       },
       "id": "parser_mentor",
@@ -206,21 +206,21 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1136,
-        144
+        1008,
+        224
       ]
     },
     {
       "parameters": {
-        "jsCode": "// PROCESSA RESPOSTA DO MENTOR v2\nconst output = $input.first()?.json?.output ?? {};\nconst contexto = $('contexto_completo').first().json;\nconst transcricao = $('transcricao').first().json;\n\n// Flags do mentor\nconst checkpointEncerramento = output.checkpoint_encerramento === true;\nconst temaFechado = output.tema_atual_fechado === true;\nconst objetivoSugerido = output.objetivo_sugerido || null;\n\n// Prepara mensagens para gravar (incremental)\nconst mensagemUsuario = {\n  interaction: contexto.interacao_atual,\n  autor: 'usuario',\n  texto: transcricao.message || '',\n  timestamp: new Date().toISOString()\n};\n\nconst mensagemMentor = {\n  interaction: contexto.interacao_atual,\n  autor: 'agente',\n  texto: output.mensagem_usuario || '',\n  timestamp: new Date().toISOString()\n};\n\n// Mensagens existentes + novas\nconst mensagensExistentes = Array.isArray(contexto.sessao_hoje_mensagens) \n  ? contexto.sessao_hoje_mensagens \n  : [];\nconst mensagensAtualizadas = [...mensagensExistentes, mensagemUsuario, mensagemMentor];\n\nreturn [{\n  user_message: output.mensagem_usuario || '',\n  checkpoint_encerramento: checkpointEncerramento,\n  tema_fechado: temaFechado,\n  objetivo_sugerido: objetivoSugerido,\n  interacao_atual: contexto.interacao_atual,\n  sessao_id: contexto.sessao_hoje_id,\n  is_nova_sessao: contexto.is_nova_sessao,\n  mensagens_atualizadas: JSON.stringify(mensagensAtualizadas),\n  total_interacoes: mensagensAtualizadas.filter(m => m.autor === 'usuario').length\n}];"
+        "jsCode": "// PROCESSA RESPOSTA DO MENTOR v6 - trigger unificado\nconst output = $input.first()?.json?.output ?? {};\nconst contexto = $('contexto_completo').first().json;\nconst transcricao = $('transcricao').first().json;\nconst config = $('config').first().json;\n\n// Flags do mentor\nconst checkpointEncerramento = output.checkpoint_encerramento === true;\nconst temaFechado = output.tema_atual_fechado === true;\nconst objetivoSugerido = output.objetivo_sugerido || null;\n\n// Tema atual\nconst temaAtual = output.tema_atual || { titulo: '', resumo: [], decisoes: [] };\n\n// Trigger UNIFICADO: qualquer um dos 3 cenários chama experts\nconst limitInteracoes = config.limit_iteration || 7;\nconst atingiuLimite = contexto.interacao_atual >= limitInteracoes;\nconst triggerExperts = temaFechado || atingiuLimite || checkpointEncerramento;\n\n// Prepara mensagens para gravar (incremental)\nconst mensagemUsuario = {\n  interaction: contexto.interacao_atual,\n  autor: 'usuario',\n  texto: transcricao.message || '',\n  timestamp: new Date().toISOString()\n};\n\nconst mensagemMentor = {\n  interaction: contexto.interacao_atual,\n  autor: 'agente',\n  texto: output.mensagem_usuario || '',\n  timestamp: new Date().toISOString(),\n  tema: temaAtual.titulo || null\n};\n\n// Mensagens existentes + novas\nconst mensagensExistentes = Array.isArray(contexto.sessao_hoje_mensagens) \n  ? contexto.sessao_hoje_mensagens \n  : [];\nconst mensagensAtualizadas = [...mensagensExistentes, mensagemUsuario, mensagemMentor];\n\nreturn [{\n  user_message: output.mensagem_usuario || '',\n  checkpoint_encerramento: checkpointEncerramento,\n  tema_fechado: temaFechado,\n  tema_atual: temaAtual,\n  trigger_experts: triggerExperts,\n  objetivo_sugerido: objetivoSugerido,\n  interacao_atual: contexto.interacao_atual,\n  sessao_id: contexto.sessao_hoje_id,\n  is_nova_sessao: contexto.is_nova_sessao,\n  mensagens_atualizadas: JSON.stringify(mensagensAtualizadas),\n  total_interacoes: mensagensAtualizadas.filter(m => m.autor === 'usuario').length\n}];"
       },
       "id": "processa_resposta",
       "name": "processa_resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        -288
+        944,
+        -304
       ]
     },
     {
@@ -236,8 +236,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1408,
-        -288
+        1136,
+        -304
       ],
       "credentials": {
         "postgres": {
@@ -272,8 +272,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1600,
-        -288
+        1984,
+        -64
       ]
     },
     {
@@ -285,13 +285,13 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
+                  "typeValidation": "strict"
                 },
+                "combinator": "and",
                 "conditions": [
                   {
-                    "id": "enc1",
-                    "leftValue": "={{ $('processa_resposta').first().json.checkpoint_encerramento }}",
+                    "id": "exp1",
+                    "leftValue": "={{ $('processa_resposta').first().json.trigger_experts }}",
                     "rightValue": "true",
                     "operator": {
                       "type": "boolean",
@@ -299,24 +299,22 @@
                       "singleValue": true
                     }
                   }
-                ],
-                "combinator": "and"
+                ]
               },
               "renameOutput": true,
-              "outputKey": "encerrar"
+              "outputKey": "trigger_experts"
             }
           ]
         },
-        "options": {
-          "fallbackOutput": "extra"
-        }
+        "fallbackOutput": "extra",
+        "options": {}
       },
       "id": "verifica_encerramento",
       "name": "verifica_encerramento",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1808,
+        1648,
         -288
       ]
     },
@@ -333,8 +331,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2000,
-        -480
+        2224,
+        -464
       ],
       "credentials": {
         "postgres": {
@@ -345,15 +343,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// PREPARA DADOS PARA OS EXPERTS\nconst contexto = $('contexto_completo').first().json;\nconst sessaoFinalizada = $input.first().json;\nconst processa = $('processa_resposta').first().json;\n\n// Mensagens da sessão\nconst mensagens = sessaoFinalizada.mensagens || [];\nconst mensagensTexto = mensagens\n  .map(m => `${m.autor}: ${m.texto}`)\n  .join('\\n');\n\n// Objetivo sugerido pelo mentor (se houver)\nconst objetivoSugerido = processa.objetivo_sugerido || null;\n\nreturn [{\n  usuario_id: contexto.usuario_id,\n  chat_id: sessaoFinalizada.id,\n  data_conversa: sessaoFinalizada.data_conversa,\n  mensagens_json: JSON.stringify(mensagens),\n  mensagens_texto: mensagensTexto,\n  total_interacoes: mensagens.filter(m => m.autor === 'usuario').length,\n  objetivo_sugerido: objetivoSugerido,\n  tem_objetivo_sugerido: objetivoSugerido !== null\n}];"
+        "jsCode": "// PREPARA DADOS PARA OS EXPERTS (compatível com ambos os caminhos)\nconst contexto = $('contexto_completo').first().json;\nconst processa = $('processa_resposta').first().json;\nconst inputData = $input.first().json;\n\n// Mensagens: tenta do input (finaliza_sessao) ou do processa_resposta\nconst mensagens = inputData.mensagens || JSON.parse(processa.mensagens_atualizadas || '[]');\nconst mensagensTexto = mensagens.map(m => `${m.autor}: ${m.texto}`).join('\\n');\n\n// Objetivo sugerido pelo mentor (se houver)\nconst objetivoSugerido = processa.objetivo_sugerido || null;\n\nreturn [{\n  usuario_id: contexto.usuario_id,\n  chat_id: inputData.id || processa.sessao_id,\n  data_conversa: inputData.data_conversa || new Date().toISOString().split('T')[0],\n  mensagens_json: JSON.stringify(mensagens),\n  mensagens_texto: mensagensTexto,\n  total_interacoes: mensagens.filter(m => m.autor === 'usuario').length,\n  objetivo_sugerido: objetivoSugerido,\n  tem_objetivo_sugerido: objetivoSugerido !== null\n}];"
       },
       "id": "call_experts",
       "name": "call_experts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2208,
-        -480
+        2480,
+        -272
       ]
     },
     {
@@ -368,9 +366,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens_texto }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -424,7 +422,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         -896
       ]
     },
@@ -438,9 +436,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens_texto }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
           }
         },
         "options": {
@@ -452,7 +450,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         -704
       ]
     },
@@ -466,9 +464,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens_texto }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
           }
         },
         "options": {
@@ -480,7 +478,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         -512
       ]
     },
@@ -494,9 +492,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens_texto }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
           }
         },
         "options": {
@@ -508,7 +506,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         -320
       ]
     },
@@ -522,9 +520,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}",
-            "mensagens": "={{ $('call_experts').first().json.mensagens_texto }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}",
+            "mensagens": "={{ $input.first().json.mensagens_texto }}"
           }
         },
         "options": {
@@ -536,7 +534,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         -128
       ]
     },
@@ -552,7 +550,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -588,7 +586,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2512,
+        2800,
         64
       ]
     },
@@ -602,8 +600,8 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('call_experts').first().json.usuario_id }}",
-            "chat_id": "={{ $('call_experts').first().json.chat_id }}"
+            "usuario_id": "={{ $input.first().json.usuario_id }}",
+            "chat_id": "={{ $input.first().json.chat_id }}"
           }
         },
         "options": {
@@ -615,7 +613,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2800,
+        3088,
         -704
       ]
     },
@@ -631,7 +629,7 @@
           "conditions": [
             {
               "id": "obj1",
-              "leftValue": "={{ $('call_experts').first().json.tem_objetivo_sugerido }}",
+              "leftValue": "={{ $input.first().json.tem_objetivo_sugerido }}",
               "rightValue": "true",
               "operator": {
                 "type": "boolean",
@@ -649,7 +647,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2512,
+        2800,
         304
       ]
     },
@@ -658,7 +656,7 @@
         "operation": "executeQuery",
         "query": "-- Grava objetivo sugerido pelo mentor\nINSERT INTO usuarios_objetivos (usuario_id, titulo, area_vida_id, descricao, is_padrao, status)\nSELECT \n  $1,\n  $2,\n  av.id,\n  $4,\n  FALSE,\n  'ativo'\nFROM areas_vida_catalogo av\nWHERE av.nome ILIKE '%' || $3 || '%'\nLIMIT 1\nRETURNING id, titulo, area_vida_id;",
         "options": {
-          "queryReplacement": "={{ [ $('call_experts').first().json.usuario_id, $('call_experts').first().json.objetivo_sugerido?.titulo || 'Objetivo', $('call_experts').first().json.objetivo_sugerido?.area_vida || 'Desenvolvimento Pessoal', $('call_experts').first().json.objetivo_sugerido?.detalhamento || '' ] }}"
+          "queryReplacement": "={{ [ $input.first().json.usuario_id, $input.first().json.objetivo_sugerido?.titulo || 'Objetivo', $input.first().json.objetivo_sugerido?.area_vida || 'Desenvolvimento Pessoal', $input.first().json.objetivo_sugerido?.detalhamento || '' ] }}"
         }
       },
       "id": "grava_objetivo",
@@ -666,7 +664,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2800,
+        3088,
         288
       ],
       "credentials": {
@@ -678,11 +676,8 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=<mensagem_usuario>\n{{ $('transcricao').item.json.message }}\n</mensagem_usuario>\n\n<contexto_sessao>\nInteração: {{ $('contexto_completo').first().json.interacao_atual }}\nNova sessão hoje: {{ $('contexto_completo').first().json.is_nova_sessao ? 'SIM' : 'NÃO' }}\nPrimeira conversa no MindQuest: {{ $('contexto_completo').first().json.is_primeira_conversa ? 'SIM' : 'NÃO' }}\n</contexto_sessao>\n\n<contexto_usuario>\nNome: {{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}\nTom preferido: {{ $('contexto_completo').first().json.tom_conversa || 'empatico' }}\n{{ $('contexto_completo').first().json.sobre_voce ? 'Sobre: ' + $('contexto_completo').first().json.sobre_voce : '' }}\nTem objetivos definidos: {{ $('contexto_completo').first().json.tem_objetivos ? 'SIM' : 'NÃO' }}\nObjetivos: {{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}\nPadrão de pensamento ativo: {{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum identificado' }}\nPerfil comportamental: {{ $('contexto_completo').first().json.perfil_bigfive_primario || 'não identificado' }}\nQuests ativas: {{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}\nNível: {{ $('contexto_completo').first().json.nivel_atual }} - {{ $('contexto_completo').first().json.titulo_nivel }}\nÚltimas conversas: {{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}\n</contexto_usuario>\n\n<diretrizes>\n{{ (() => {\n  const ctx = $('contexto_completo').first().json;\n  const diretrizes = [];\n  \n  // Prioridade 1: Objetivos\n  if (!ctx.tem_objetivos) {\n    diretrizes.push('PRIORIDADE: Usuário não tem objetivos definidos. Conduza a conversa para descobrir o que ele quer tirar do papel. Pergunte sobre projetos, metas ou mudanças que ele deseja fazer.');\n  }\n  \n  // Nova sessão: abertura contextual\n  if (ctx.is_nova_sessao && ctx.interacao_atual === 1) {\n    if (ctx.is_primeira_conversa) {\n      diretrizes.push('Primeira conversa: Acolha, apresente-se brevemente como mentor do MindQuest, e foque em conhecer o usuário.');\n    } else {\n      diretrizes.push('Abertura contextual: Escolha o que for mais relevante - quest pendente, última conversa, ou simplesmente perguntar como ele está.');\n    }\n  }\n  \n  // Quests\n  const quests = ctx.quests_ativas || [];\n  if (quests.length > 0) {\n    diretrizes.push('Quests ativas: Pergunte sobre progresso quando fizer sentido. Motive nas concluídas, ajude a destravar nas paradas.');\n  }\n  \n  return diretrizes.join('\\n');\n})() }}\n</diretrizes>",
-        "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>\nVocê é o Mentor do MindQuest, o motor que impulsiona todo o sistema de desenvolvimento pessoal.\n</role>\n\n<framework>\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\nSeu papel está em CONVERSAR: coletar informações ricas que alimentam os experts (ENTENDER), geram quests (AGIR) e impulsionam a evolução do usuário (EVOLUIR).\n</framework>\n\n<objetivo_mindquest>\nAjudar pessoas a tirarem objetivos e projetos do papel. O problema não é falta de plano - é padrão de pensamento que trava.\n</objetivo_mindquest>\n\n<tom_conversa>\nAdapte seu tom conforme preferência do usuário:\n- empatico: Respostas compassivas e acolhedoras, focadas em entender emoções\n- interativo: Diálogo colaborativo com perguntas que ajudam a refletir\n- educativo: Explicações passo a passo sobre técnicas e conceitos\n- equilibrado: Combina acolhimento empático com perguntas interativas\n- direto: Tom mais firme, como um mentor que desafia e não tem medo de ser direto\n</tom_conversa>\n\n<regras_conversa>\n1. GESTÃO ATIVA: Você direciona a conversa com leveza. Evite múltiplos temas simultâneos.\n2. FECHAMENTO POR TEMA: Quando concluir um assunto, pergunte: \"Sobre [tema], tem mais algo? Ou quer partir para outro assunto?\"\n3. CHECKPOINT: Detecte pontos naturais de encerramento (reflexão, insight, sinais de despedida). Pergunte se quer encerrar.\n4. OBJETIVOS: Se usuário não tem objetivos, priorize ajudá-lo a definir. MindQuest só funciona se soubermos o que ele quer alcançar.\n5. QUESTS: Reconheça evolução nas concluídas, pergunte das abertas se faz sentido.\n6. PADRÕES: Use \"padrão de pensamento\" em vez de \"sabotador\". Termos curtos: Inquieto, Realizador, Vigilante, Vítima, Racional.\n7. PERFIL: Use termos simples para BigFive: Disciplina, Curiosidade, Instabilidade, etc.\n</regras_conversa>\n\n<formato_resposta>\nParágrafos curtos ou bullets. Linguagem coloquial. Uma pergunta por vez.\n</formato_resposta>\n\n<saida_json>\nRetorne SEMPRE um JSON válido com:\n- mensagem_usuario: sua resposta ao usuário\n- checkpoint_encerramento: true se detectou ponto natural de encerramento e vai perguntar se quer encerrar\n- tema_atual_fechado: true se fechou um tema e vai perguntar se quer mudar de assunto\n- objetivo_sugerido: objeto com {area_vida, titulo, detalhamento} SE usuário definiu objetivo na conversa, senão null\n</saida_json>"
+          "systemMessage": "=<system>\n\n<identity>\n<role>Mentor do MindQuest</role>\n<purpose>Guia de desenvolvimento pessoal que transforma conversas em ações práticas</purpose>\n</identity>\n\n<framework>\nCONVERSAR (você) → ENTENDER (experts) → AGIR (quests) → EVOLUIR (progresso)\n\nSeu papel: CONVERSAR para coletar informações ricas que alimentam todo o sistema.\n</framework>\n\n<mission>\nAjudar pessoas a tirarem do papel o que já sabem que precisam fazer.\nO problema não é falta de plano, é padrão mental que trava a ação.\n</mission>\n\n<!-- ============================================ -->\n<!-- USO DE TOOLS -->\n<!-- ============================================ -->\n\n<tools_usage>\n\n<principle name=\"quando_usar_tools\">\nVocê tem acesso a ferramentas (tools) para buscar informações detalhadas.\nUSE TOOLS quando precisar de dados específicos que NÃO estão no contexto.\n\nREGRA DE OURO: Primeiro verifique se a informação já está no contexto.\nSó chame a tool se realmente precisar de mais detalhes.\n</principle>\n\n<tool name=\"quest_tool\">\nPROPÓSITO: Buscar detalhes das quests do usuário\n\nQUANDO USAR:\n- Usuário pergunta sobre suas quests\n- Usuário quer saber o que tem pra fazer\n- Você precisa mencionar uma quest específica pelo nome\n- Usuário quer marcar quest como feita\n- Conversa é sobre progresso/ações\n\nQUANDO NÃO USAR:\n- Conversa casual sem menção a quests/ações\n- Já sabe que usuário não tem quests (total_ativas = 0)\n- Apenas para verificar se existem quests (use o indicador do contexto)\n\nRETORNO: Resumo com totais + lista de quests a fazer, fazendo e feitas hoje\n</tool>\n\n<principle name=\"eficiencia\">\n- NÃO chame tools desnecessariamente (gasta tempo e recursos)\n- USE o contexto fornecido sempre que possível\n- CHAME tools apenas quando precisar de DETALHES não disponíveis\n</principle>\n\n</tools_usage>\n\n<!-- ============================================ -->\n<!-- DIRETRIZES DE CONVERSA -->\n<!-- ============================================ -->\n\n<conversation_guidelines>\n\n<principle name=\"gestao_ativa\">\n- Conduza a conversa com clareza\n- Um tema de cada vez\n- Acompanhe o tema atual e seus pontos principais\n</principle>\n\n<principle name=\"fechamento_tema\">\nANTES de fechar qualquer tema:\n\n1. Apresente MICRO RESUMO (2-4 bullets):\n   \"Deixa eu recapitular o que conversamos:\n   • [ponto principal 1]\n   • [ponto principal 2]\n   • [decisão/insight se houver]\"\n\n2. Valide EXPLICITAMENTE:\n   \"Quer explorar mais esse assunto ou seguimos para outro tema?\"\n\n3. AGUARDE confirmação do usuário antes de marcar tema_atual_fechado = true\n\nIMPORTANTE:\n- Tema fechado ≠ Conversa encerrada\n- Só marque checkpoint_encerramento se usuário der sinal de despedida\n</principle>\n\n<principle name=\"checkpoints\">\nDetecte pontos naturais de encerramento de SESSÃO:\n- Sinais de despedida (\"tenho que ir\", \"por hoje tá bom\", \"obrigado\")\n- Usuário confirma que não quer mais conversar\n\nQuando detectar: \"Por hoje é isso? Ou tem mais algo?\"\n</principle>\n\n<principle name=\"prioridades_contextuais\">\nPRIORIDADE MÁXIMA se usuário NÃO tem objetivos:\n- Descobrir o que ele quer alcançar\n- Perguntar sobre projetos, metas, mudanças desejadas\n- Objetivo claro = sistema funciona\n\nSe PRIMEIRAS CONVERSAS - 10 primeiras:\n- Acolha brevemente\n- Foque em conhecer o usuário\n\nSe NOVA SESSÃO (mas não primeira conversa):\n- Escolha o mais relevante: quest pendente, última conversa, ou \"como está?\"\n- Se tem quests (total_ativas > 0), considere usar quest_tool para detalhes\n\nSe tem QUESTS ATIVAS:\n- Pergunte sobre progresso quando natural\n- USE quest_tool para saber quais quests e seu status\n- Motive nas concluídas, ajude a destravar nas paradas\n</principle>\n\n<principle name=\"linguagem\">\n- Use \"padrão de pensamento\" em vez de \"sabotador\"\n- Termos curtos: Inquieto, Realizador, Vigilante, Vítima, Racional\n- Perfil comportamental: Disciplina, Curiosidade, Instabilidade, Empatia, Abertura\n</principle>\n\n</conversation_guidelines>\n\n<!-- ============================================ -->\n<!-- NOTIFICAÇÕES E LEMBRETES -->\n<!-- ============================================ -->\n\n<notifications_handling>\n\n<context>\nO sistema envia notificações pelo WhatsApp com alternativas de resposta numeradas:\n1. Opção 1\n2. Opção 2\n3. Opção 3\n4. Opção 4\n\nQuando o usuário responde, você recebe a mensagem completa da notificação + contexto.\n</context>\n\n<principle name=\"resposta_numerica\">\nSe usuário responder com NÚMERO (1, 2, 3, 4...):\n- Ele ESCOLHEU a alternativa correspondente\n- VOCÊ JÁ SABE sobre o que ele quer falar\n- NÃO pergunte \"quer falar sobre isso?\" - CONDUZA diretamente\n- Use o contexto_mentor para guiar a conversa\n\nExemplo:\n- Notificação: \"1. Reservar 5 min para respirar\"\n- Usuário responde: \"1\"\n- Você: \"Legal! Vamos organizar esses 5 minutos de respiração. Prefere fazer agora ou agendar pra depois?\"\n</principle>\n\n<principle name=\"resposta_texto_relacionado\">\nSe usuário responder com TEXTO relacionado ao tema:\n- Conduza naturalmente sobre o assunto\n- Não precisa confirmar, ele já está engajado\n</principle>\n\n<principle name=\"resposta_outro_assunto\">\nSe usuário responder sobre OUTRO assunto:\n- Respeite e siga o novo tema\n- Não force a notificação\n</principle>\n\n</notifications_handling>\n\n<!-- ============================================ -->\n<!-- TOM DE CONVERSA -->\n<!-- ============================================ -->\n\n<tone_adaptation>\nAdapte conforme preferência do usuário:\n\n<tone name=\"empatico\">Reflexões, compassivo, acolhedor, foco em emoções</tone>\n<tone name=\"interativo\">Colaborativo, perguntas reflexivas</tone>\n<tone name=\"educativo\">Reflexões, explicativo, ensina técnicas</tone>\n<tone name=\"equilibrado\">Mistura acolhimento + reflexão</tone>\n<tone name=\"direto\">Reflexões, tom firme, desafiador, sem rodeios</tone>\n</tone_adaptation>\n\n<!-- ============================================ -->\n<!-- FORMATO DE RESPOSTA -->\n<!-- ============================================ -->\n\n<response_format>\n\n<style>\n- Conversas em PT BR\n- Parágrafos curtos (2-3 linhas máximo)\n- Linguagem coloquial e natural\n- UMA pergunta por vez (máximo)\n- Evite listas em conversas casuais\n- Use listas APENAS para: micro resumo de tema, explicações técnicas, quests, objetivos\n- Seja CONCISO - fale apenas o essencial\n</style>\n\n<style_dados_estruturados>\nQUANDO apresentar dados (quests, resumos, técnicas, estatísticas):\n\nFormato padrão:\n📊 **[Título do bloco]**\n• Item 1\n• Item 2\n• Item 3\n\nExemplo quests:\n---\n📋 **Fazendo (12)**\n• Reflexão Diária\n• Foco nas Micro Tarefas\n• Conexão Social\n\n✅ **Concluídas hoje (4)**\n• Atividade Física\n• Alimentação Consciente\n\n📝 **A Fazer (22)**\n• Gratidão Específica\n• Limpeza e Organização\n---\n\nRegras:\n- Use separadores (---) para delimitar blocos de dados\n- Use emojis para categorias (📋 📝 ✅ 🎯 💡 ⚡)\n- Negrito em títulos de seção\n- Bullets (•) para itens\n- Mostre contagem entre parênteses\n- Máximo 3-4 itens por categoria (+ \"e mais X\" se houver)\n</style_dados_estruturados>\n\n<output_structure>\nRetorne SEMPRE este JSON exato (sem texto adicional):\n\n{\n  \"mensagem_usuario\": \"string - sua resposta ao usuário\",\n  \"tema_atual\": {\n    \"titulo\": \"string - nome curto do tema sendo discutido\",\n    \"resumo\": [\"ponto 1\", \"ponto 2\"],\n    \"decisoes\": [\"decisão 1\"] ou []\n  },\n  \"checkpoint_encerramento\": boolean,\n  \"tema_atual_fechado\": boolean,\n  \"objetivo_sugerido\": { \"area_vida\": \"string\", \"titulo\": \"string\", \"detalhamento\": \"string\" } | null\n}\n\nREGRAS DOS CAMPOS:\n- tema_atual: SEMPRE preencha com o tema da conversa atual\n- tema_atual.resumo: pontos principais discutidos (atualizar a cada interação)\n- tema_atual.decisoes: decisões/insights importantes do usuário\n- checkpoint_encerramento: SOMENTE true se usuário sinalizou despedida explícita\n- tema_atual_fechado: true SOMENTE após micro resumo + confirmação do usuário\n\nCRÍTICO: Retorne APENAS o JSON, sem preamble, sem explicações, sem markdown.\n</output_structure>\n\n</response_format>\n\n<!-- ============================================ -->\n<!-- REGRAS CRÍTICAS -->\n<!-- ============================================ -->\n\n<critical_rules>\n1. NUNCA use listas em conversas casuais (use para dados estruturados)\n2. NUNCA seja verbose, resista a isso\n3. SEMPRE retorne apenas JSON no output (sem texto extra)\n4. SEMPRE uma pergunta por vez no máximo\n5. SEMPRE mantenha tom natural e coloquial\n6. NUNCA mencione \"sistema\", \"experts\", \"análise\" ao usuário\n7. NUNCA feche tema sem apresentar micro resumo e validar com usuário\n8. LIDERE a conversa - ajude o usuário a não dispersar\n9. Se usuário responder com NÚMERO, conduza diretamente (não pergunte \"quer falar sobre...?\")\n10. USE quest_tool apenas quando precisar de DETALHES de quests\n11. SEMPRE use formatação estruturada (emojis, bullets, separadores) ao apresentar quests, resumos ou técnicas\n</critical_rules>\n\n</system>"
         }
       },
       "id": "mentor_agent",
@@ -690,8 +685,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        880,
-        -288
+        624,
+        -304
       ]
     },
     {
@@ -701,7 +696,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        2464,
+        2752,
         720
       ],
       "id": "c909e359-2a1d-4a2f-9d54-159f72abc2c9",
@@ -725,7 +720,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2496,
+        2784,
         512
       ],
       "id": "70e48f10-616f-47c5-a048-61e42ef42a93",
@@ -738,7 +733,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2656,
+        2944,
         720
       ],
       "id": "8430e601-7cd7-491c-b5de-bb94dd83b95c",
@@ -925,7 +920,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2816,
+        3104,
         512
       ],
       "id": "d9ec36df-24e8-4bd4-b251-b988dbcc153a",
@@ -936,6 +931,175 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }} - Seus dados foram atualizados acesse o App MindQuest: https://mindquest.pt/app/auth?token={{ $('busca_dados_usr').item.json.token_acesso }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "69729790-3af6-40f7-bbfe-cba249bff773",
+      "name": "envia_mensagem_encerrar",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1984,
+        -464
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, tipo, titulo, mensagem, contexto_mentor, quests_mencionadas, referencia_id, criado_em\nFROM notificacoes_log\nWHERE usuario_id = $1\n  AND canal = 'whatsapp'\n  AND (respondida IS NULL OR respondida = FALSE)\nORDER BY criado_em DESC\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
+        }
+      },
+      "id": "busca_notificacao",
+      "name": "busca_notificacao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -208,
+        -304
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE notificacoes_log\nSET respondida = TRUE, respondida_em = NOW()\nWHERE id = $1::uuid\n  AND $1 IS NOT NULL;",
+        "options": {
+          "queryReplacement": "={{ [$('contexto_completo').first().json.notificacao_recente ? $('contexto_completo').first().json.notificacao_recente.id : null] }}"
+        }
+      },
+      "id": "marca_notificacao",
+      "name": "marca_notificacao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1328,
+        -304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool for quest information.",
+        "operation": "executeQuery",
+        "query": "\nWITH quests_usuario AS (\n  SELECT \n    uq.id,\n    uq.status,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    uq.ativado_em\n  FROM usuarios_quest uq\n  WHERE uq.usuario_id = $1\n),\nrecorrencias_hoje AS (\n  SELECT \n    uq.id AS quest_id,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    qr.data_concluida,\n    qr.xp_base + qr.xp_bonus AS xp_ganho\n  FROM quests_recorrencias qr\n  JOIN usuarios_quest uq ON qr.usuarios_quest_id = uq.id\n  WHERE uq.usuario_id = $1\n    AND qr.status = 'concluida'\n    AND qr.data_concluida = CURRENT_DATE\n)\nSELECT json_build_object(\n  'resumo', json_build_object(\n    'total_a_fazer', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'disponivel'),\n    'total_fazendo', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'ativa'),\n    'total_feitas_hoje', (SELECT COUNT(*) FROM recorrencias_hoje)\n  ),\n  'quests_a_fazer', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'disponivel'\n  ), '[]'::json),\n  'quests_fazendo', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'ativa'\n  ), '[]'::json),\n  'quests_feitas_hoje', COALESCE((\n    SELECT json_agg(json_build_object('quest_id', quest_id, 'titulo', titulo, 'xp_ganho', xp_ganho))\n    FROM recorrencias_hoje\n  ), '[]'::json)\n) AS resultado;",
+        "options": {
+          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        784,
+        0
+      ],
+      "id": "df5561c0-331f-4f10-893f-2d0c19c5e747",
+      "name": "quets_tool",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        -64
+      ],
+      "id": "ea7cf850-2e53-4c58-a90e-fef5be0cffc0",
+      "name": "Chat Memory Manager",
+      "disabled": true
     }
   ],
   "connections": {
@@ -955,17 +1119,6 @@
         [
           {
             "node": "busca_dados_usr",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "busca_dados_usr": {
-      "main": [
-        [
-          {
-            "node": "busca_contexto",
             "type": "main",
             "index": 0
           }
@@ -1006,9 +1159,6 @@
       ]
     },
     "openrouter_model": {
-      "main": [
-        []
-      ],
       "ai_languageModel": [
         [
           {
@@ -1025,9 +1175,6 @@
       ]
     },
     "parser_mentor": {
-      "main": [
-        []
-      ],
       "ai_outputParser": [
         [
           {
@@ -1039,13 +1186,15 @@
       ]
     },
     "memory": {
-      "main": [
-        []
-      ],
       "ai_memory": [
         [
           {
             "node": "mentor",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
             "type": "ai_memory",
             "index": 0
           }
@@ -1063,33 +1212,30 @@
         ]
       ]
     },
-    "grava_mensagem": {
+    "verifica_encerramento": {
       "main": [
+        [
+          {
+            "node": "envia_mensagem_encerrar",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "envia_mensagem",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "envia_mensagem": {
-      "main": [
-        [
+          },
           {
-            "node": "verifica_encerramento",
+            "node": "call_experts",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "verifica_encerramento": {
-      "main": [
+        ],
         [
           {
-            "node": "finaliza_sessao",
+            "node": "envia_mensagem",
             "type": "main",
             "index": 0
           }
@@ -1218,6 +1364,77 @@
           }
         ]
       ]
+    },
+    "envia_mensagem_encerrar": {
+      "main": [
+        [
+          {
+            "node": "finaliza_sessao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_dados_usr": {
+      "main": [
+        [
+          {
+            "node": "busca_notificacao",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_notificacao": {
+      "main": [
+        [
+          {
+            "node": "busca_contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "grava_mensagem": {
+      "main": [
+        [
+          {
+            "node": "marca_notificacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marca_notificacao": {
+      "main": [
+        [
+          {
+            "node": "verifica_encerramento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quets_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1231,18 +1448,21 @@
     "executionTimeout": 120
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {
     "start": [
       {
         "json": {
-          "usr_id": "f6d4c6b0-5496-4035-b670-d8009df6c413",
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.remoteJid": "5512992060001@s.whatsapp.net",
-          "body.data.key.id": "3FED0E602117D5B181BE",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "3B8430064F4F35BD7122",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Enzo Xavier",
-          "body.data.messageType": "documentMessage"
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "1",
+          "body.data.messageType": "conversation"
         }
       }
     ]
