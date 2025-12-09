@@ -74,3 +74,21 @@ Pessoas que:
 | Jornada para quem não tem clareza? | Pendente |
 | Limite de 2 objetivos é adequado? | Validar |
 
+
+## diferenciais
+aqui está o que priorizar para diferenciais do MindQuest vs chats genéricos de IA:
+
+*Prioridades Chave:*
+•⁠  ⁠Framework estruturado CONVERSAR → ENTENDER → AGIR → EVOLUIR como fluxo obrigatório e guiado.
+•⁠  ⁠Mentor com gestão ativa da conversa (direciona temas, evita dispersão, fecha por tema).
+•⁠  ⁠Experts automáticos para análise profunda (emocoes, sabotadores, quests personalizadas).
+•⁠  ⁠Quests micro-ação com acompanhamento (ativação, progresso, validação pelo mentor).
+•⁠  ⁠Métricas de evolução macro (progresso em objetivos, padrões mentais evoluídos).
+
+*Implementações Específicas:*
+•⁠  ⁠Checkpoints naturais de encerramento e mudança de tema.
+•⁠  ⁠Integração de padrões mentais (Inquieto, Hiper_Realizador) com quests desafiadoras.
+•⁠  ⁠Suporte contínuo em AGIR e EVOLUIR, não só respostas pontuais.
+•⁠  ⁠Personalização baseada em histórico completo do usuário.
+
+Isso cria um sistema fechado de evolução, não conversa solta. Foco nisso para lançamento.

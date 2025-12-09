@@ -390,11 +390,12 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        464,
-        -1616
+        864,
+        -1792
       ],
       "id": "295e6531-a2d9-4e5f-be9f-b5a81293be8c",
-      "name": "chat_interations"
+      "name": "chat_interations",
+      "disabled": true
     },
     {
       "parameters": {
@@ -503,11 +504,12 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        96,
-        -1792
+        464,
+        -1968
       ],
       "id": "eb39cd0a-29c6-4199-9131-6430d54f0331",
-      "name": "Aldo"
+      "name": "Aldo",
+      "disabled": true
     },
     {
       "parameters": {
@@ -613,11 +615,122 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        480,
-        -1888
+        864,
+        -2064
       ],
       "id": "80c92cda-dc10-4263-a96c-55401d621c55",
-      "name": "chat_interations1"
+      "name": "Mentor v1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "zpNw60BXhEJCYTYH",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/zpNw60BXhEJCYTYH",
+          "cachedResultName": "mentor_mindquest_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.data.key.fromMe": "={{ $('start').first().json.body.data.key.fromMe }}",
+            "usr_id": "={{ $('usr_validate').first().json.id }}",
+            "body.instance": "={{ $('start').first().json.body.instance }}",
+            "body.data.key.remoteJid": "={{ $('start').first().json.body.data.key.remoteJid }}",
+            "body.data.key.id": "={{ $('start').first().json.body.data.key.id }}",
+            "body.data.pushName": "={{ $('start').first().json.body.data.pushName }}",
+            "body.data.messageType": "={{ $('start').first().json.body.data.messageType }}",
+            "body.data.message.conversation": "={{ $('start').first().json.body.data.message.conversation }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usr_id",
+              "displayName": "usr_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.instance",
+              "displayName": "body.instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.remoteJid",
+              "displayName": "body.data.key.remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.id",
+              "displayName": "body.data.key.id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.key.fromMe",
+              "displayName": "body.data.key.fromMe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean"
+            },
+            {
+              "id": "body.data.pushName",
+              "displayName": "body.data.pushName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.message.conversation",
+              "displayName": "body.data.message.conversation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "body.data.messageType",
+              "displayName": "body.data.messageType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        -1776
+      ],
+      "id": "9a6e2716-4a09-47d8-94f8-2572ea01d013",
+      "name": "Mentor v2"
     }
   ],
   "connections": {
@@ -654,7 +767,7 @@
       "main": [
         [
           {
-            "node": "Aldo",
+            "node": "Mentor v2",
             "type": "main",
             "index": 0
           }
@@ -699,20 +812,8 @@
     },
     "Aldo": {
       "main": [
-        [
-          {
-            "node": "chat_interations1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "chat_interations",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [],
+        []
       ]
     }
   },
