@@ -1,6 +1,6 @@
 # n8n - Manual Técnico Essencial
 
-**Data:** 2025-12-04
+**Data:** 2025-12-09
 
 ## Workflow MindQuest - Regras Críticas
 
@@ -11,6 +11,33 @@
 ### Sub-workflows (sw_*)
 - NUNCA ativar → rodam na transação do pai via `executeWorkflow`
 - `active=false` é correto
+
+## AI Agent Tools
+
+### Postgres Tool (consultas sob demanda)
+O AI Agent pode ter **tools conectadas** para buscar dados quando necessário.
+
+**Exemplo:** `quest_tool` no mentor
+- Busca detalhes de quests apenas quando o agente precisar
+- Economiza tokens no prompt (não envia lista completa toda interação)
+- Prompt contém apenas indicadores (`tem_quests`, `total_ativas`)
+
+**Configuração:**
+1. Criar node Postgres Tool via interface n8n
+2. Conectar ao AI Agent (porta `ai_tool`)
+3. Query com parâmetro `$fromAI('campo')` para receber input do agente
+
+**System Prompt - Instruir uso:**
+```xml
+<tool name="quest_tool">
+QUANDO USAR:
+- Usuário pergunta sobre quests
+- Precisa mencionar quest pelo nome
+QUANDO NÃO USAR:
+- Conversa casual
+- Já sabe que não tem quests (total = 0)
+</tool>
+```
 
 ## Edição de Workflows - Fluxo Essencial
 
