@@ -80,3 +80,7 @@
   return diretrizes.join('\n');
 })() }}
 </diretrizes>
+
+<output_format>
+Retorne APENAS este JSON, sem texto adicional, seguindo rigorosamente as intruções do system: {"mensagem_usuario":"sua resposta","tema_atual":{"titulo":"tema","resumo":["ponto 1","ponto 2"],"decisoes":[]},"checkpoint_encerramento":false,"tema_atual_fechado":false,"objetivo_sugerido":null}
+</output_format>
