@@ -43,7 +43,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -768,
+        -544,
         -304
       ]
     },
@@ -61,7 +61,7 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -592,
+        -368,
         -304
       ]
     },
@@ -78,7 +78,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -416,
+        -192,
         -304
       ],
       "credentials": {
@@ -101,7 +101,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        0,
+        224,
         -304
       ],
       "credentials": {
@@ -120,7 +120,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        208,
+        432,
         -304
       ]
     },
@@ -150,7 +150,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        400,
+        624,
         -304
       ]
     },
@@ -166,7 +166,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        640,
+        864,
         128
       ],
       "credentials": {
@@ -186,7 +186,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        416,
+        640,
         304
       ],
       "credentials": {
@@ -206,8 +206,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1008,
-        224
+        1520,
+        240
       ]
     },
     {
@@ -219,7 +219,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
+        1168,
         -304
       ]
     },
@@ -236,7 +236,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1136,
+        1360,
         -304
       ],
       "credentials": {
@@ -272,75 +272,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1984,
+        2064,
         -128
-      ]
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "exp1",
-                    "leftValue": "={{ $('processa_resposta').first().json.trigger_experts }}",
-                    "rightValue": "true",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "chamar_experts"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "12510685-dd79-4699-b0f7-ab2484c3f37f",
-                    "leftValue": "={{ $('processa_resposta').first().json.trigger_experts }}",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "false",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "apenas_msg"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "verifica_encerramento",
-      "name": "verifica_encerramento",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [
-        1568,
-        -304
       ]
     },
     {
@@ -356,7 +289,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2224,
+        2272,
         -464
       ],
       "credentials": {
@@ -705,7 +638,7 @@
         "text": "=<user_input>\n\n<message>\n{{ $('transcricao').item.json.message }}\n</message>\n\n<session_context>\n<interaction_number>{{ $('contexto_completo').first().json.interacao_atual }}</interaction_number>\n<is_new_session>{{ $('contexto_completo').first().json.is_nova_sessao ? 'SIM' : 'NÃO' }}</is_new_session>\n<is_first_ever>{{ $('contexto_completo').first().json.is_primeira_conversa ? 'SIM' : 'NÃO' }}</is_first_ever>\n</session_context>\n</user_input>\n\n\n<!-- ============================================ -->\n<!-- NOTIFICAÇÃO PENDENTE (se houver) -->\n<!-- ============================================ -->\n\n{{ $('contexto_completo').first().json.tem_notificacao_recente ? `\n<notification_context>\n<has_pending_notification>SIM</has_pending_notification>\n<notification_type>${$('contexto_completo').first().json.notificacao_recente.tipo || ''}</notification_type>\n<notification_title>${$('contexto_completo').first().json.notificacao_recente.titulo || ''}</notification_title>\n<notification_message>\n${$('contexto_completo').first().json.notificacao_recente.mensagem || ''}\n</notification_message>\n<mentor_context>${$('contexto_completo').first().json.notificacao_recente.contexto_mentor || ''}</mentor_context>\n\n<instruction>\nANALISE A MENSAGEM DO USUÁRIO:\n\n1. Se for um NÚMERO (1, 2, 3, 4...):\n   - O usuário está respondendo à alternativa correspondente na notificação\n   - Use o contexto_mentor para conduzir a conversa sobre esse tema\n   - NÃO pergunte \"sobre o que quer falar\", você já sabe!\n\n2. Se for TEXTO relacionado ao tema:\n   - O usuário está respondendo sobre a notificação\n   - Conduza a conversa naturalmente\n\n3. Se for TEXTO não relacionado:\n   - O usuário quer falar de outro assunto\n   - Siga o novo tema, não force a notificação\n</instruction>\n</notification_context>\n` : '' }}\n\n<!-- ============================================ -->\n<!-- CONTEXTO DO USUÁRIO -->\n<!-- ============================================ -->\n\n<user_context>\n<profile>\n<name>{{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}</name>\n<preferred_tone>{{ $('contexto_completo').first().json.tom_conversa || 'empatico' }}</preferred_tone>\n<about>{{ $('contexto_completo').first().json.sobre_voce ? 'Sobre: ' + $('contexto_completo').first().json.sobre_voce : '' }}</about>\n</profile>\n\n<goals>\n<has_defined_goals>{{ $('contexto_completo').first().json.tem_objetivos ? 'SIM' : 'NÃO' }}</has_defined_goals>\n<active_goals>{{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}</active_goals>\n</goals>\n\n<mental_profile>\n<active_pattern>{{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum identificado' }}</active_pattern>\n<behavioral_profile>{{ $('contexto_completo').first().json.perfil_bigfive_primario || 'não identificado' }}</behavioral_profile>\n</mental_profile>\n\n<quests>\n<has_quests>{{ $('contexto_completo').first().json.tem_quests ? 'SIM' : 'NÃO' }}</has_quests>\n<total_ativas>{{ $('contexto_completo').first().json.quests_ativas_total || 0 }}</total_ativas>\n<total_a_planejar>{{ $('contexto_completo').first().json.quests_disponiveis_total || 0 }}</total_a_planejar>\n<note>Use quest_tool para detalhes das quests quando necessário</note>\n</quests>\n\n<progress>\n<level>{{ $('contexto_completo').first().json.nivel_atual }}</level>\n<title>{{ $('contexto_completo').first().json.titulo_nivel }}</title>\n</progress>\n\n<conversation_history>{{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}</conversation_history>\n</user_context>\n\n\n<!-- ============================================ -->\n<!-- DIRETRIZES PRIORITÁRIAS -->\n<!-- ============================================ -->\n\n<diretrizes>\n{{ (() => {\n  const ctx = $('contexto_completo').first().json;\n  const diretrizes = [];\n  \n  // Prioridade 1: Objetivos\n  if (!ctx.tem_objetivos) {\n    diretrizes.push('PRIORIDADE: Usuário não tem objetivos definidos. Conduza a conversa para descobrir o que ele quer tirar do papel.');\n  }\n  \n  // Nova sessão: abertura contextual (só se NÃO tiver notificação)\n  if (ctx.is_nova_sessao && ctx.interacao_atual === 1 && !ctx.tem_notificacao_recente) {\n    if (ctx.is_primeira_conversa) {\n      diretrizes.push('Primeira conversa: Acolha, apresente-se brevemente como mentor do MindQuest, e foque em conhecer o usuário.');\n    } else {\n      diretrizes.push('Abertura contextual: Escolha o que for mais relevante - quest pendente, última conversa, ou simplesmente perguntar como ele está.');\n    }\n  }\n  \n  return diretrizes.join('\\n');\n})() }}\n</diretrizes>\n\n<output_format>\nRetorne APENAS este JSON, sem texto adicional, seguindo rigorosamente as intruções do system: {\"mensagem_usuario\":\"sua resposta\",\"tema_atual\":{\"titulo\":\"tema\",\"resumo\":[\"ponto 1\",\"ponto 2\"],\"decisoes\":[]},\"checkpoint_encerramento\":false,\"tema_atual_fechado\":false,\"objetivo_sugerido\":null}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<system>\n\n<identity>\n<role>Mentor do MindQuest</role>\n<purpose>Guia de desenvolvimento pessoal que transforma conversas em ações práticas</purpose>\n</identity>\n\n<framework>\nCONVERSAR (você) → ENTENDER (experts) → AGIR (quests) → EVOLUIR (progresso)\n\nSeu papel: CONVERSAR para coletar informações ricas que alimentam todo o sistema.\n</framework>\n\n<mission>\nAjudar pessoas a tirarem do papel o que já sabem que precisam fazer.\nO problema não é falta de plano, é padrão mental que trava a ação.\n</mission>\n\n<!-- ============================================ -->\n<!-- USO DE TOOLS -->\n<!-- ============================================ -->\n\n<tools_usage>\n\n<principle name=\"quando_usar_tools\">\nVocê tem acesso a ferramentas (tools) para buscar informações detalhadas.\nUSE TOOLS quando precisar de dados específicos que NÃO estão no contexto.\n\nREGRA DE OURO: Primeiro verifique se a informação já está no contexto.\nSó chame a tool se realmente precisar de mais detalhes.\n</principle>\n\n<tool name=\"quest_tool\">\nPROPÓSITO: Buscar detalhes das quests do usuário\n\nQUANDO USAR:\n- Usuário pergunta sobre suas quests\n- Usuário quer saber o que tem pra fazer\n- Você precisa mencionar uma quest específica pelo nome\n- Usuário quer marcar quest como feita\n- Conversa é sobre progresso/ações\n\nQUANDO NÃO USAR:\n- Conversa casual sem menção a quests/ações\n- Já sabe que usuário não tem quests (total_ativas = 0)\n- Apenas para verificar se existem quests (use o indicador do contexto)\n\nRETORNO: Resumo com totais + lista de quests a fazer, fazendo e feitas hoje\n</tool>\n\n<principle name=\"eficiencia\">\n- NÃO chame tools desnecessariamente (gasta tempo e recursos)\n- USE o contexto fornecido sempre que possível\n- CHAME tools apenas quando precisar de DETALHES não disponíveis\n</principle>\n\n</tools_usage>\n\n<!-- ============================================ -->\n<!-- DIRETRIZES DE CONVERSA -->\n<!-- ============================================ -->\n\n<conversation_guidelines>\n\n<principle name=\"gestao_ativa\">\n- Conduza a conversa com clareza\n- Um tema de cada vez\n- Acompanhe o tema atual e seus pontos principais\n</principle>\n\n<principle name=\"fechamento_tema\">\nREGRA CRÍTICA: tema_atual_fechado = true SOMENTE após confirmação EXPLÍCITA do usuário.\n\nPROCESSO OBRIGATÓRIO:\n1. Apresente o conteúdo solicitado (quests, resumo, etc)\n2. Pergunte: \"Quer explorar mais ou seguimos para outro tema?\"\n3. AGUARDE resposta do usuário\n4. SOMENTE SE usuário confirmar fechamento → tema_atual_fechado = true\n\nPROIBIDO:\n- NUNCA marque tema_atual_fechado = true na mesma interação que apresenta dados\n- NUNCA feche tema sem pergunta explícita ao usuário\n- Apresentar quests/resumo NÃO É fechamento de tema\n\nEXEMPLOS:\n- Usuário pede panorama de quests → apresenta → tema_atual_fechado = FALSE\n- Usuário confirma \"pode fechar\" → tema_atual_fechado = TRUE\n</principle>\n\n<principle name=\"checkpoints\">\n`checkpoint_encerramento` = true SOMENTE quando:\n- Usuário CONFIRMA encerramento (\"ok, por hoje é isso\", \"pode finalizar\")\n- Despedida explícita (\"tchau\", \"até mais\", \"tenho que ir\")\n\nNÃO marque checkpoint quando:\n- Usuário pede resumo (pode querer continuar)\n- Você faz resumo espontâneo\n- Tema fechado mas usuário não confirmou que vai parar\n\nAo DETECTAR possível encerramento → PERGUNTE primeiro, não marque.\n</principle>\n\n<principle name=\"prioridades_contextuais\">\nPRIORIDADE MÁXIMA se usuário NÃO tem objetivos:\n- Descobrir o que ele quer alcançar\n- Perguntar sobre projetos, metas, mudanças desejadas\n- Objetivo claro = sistema funciona\n\nSe PRIMEIRAS CONVERSAS - 10 primeiras:\n- Acolha brevemente\n- Foque em conhecer o usuário\n\nSe NOVA SESSÃO (mas não primeira conversa):\n- Escolha o mais relevante: quest pendente, última conversa, ou \"como está?\"\n- Se tem quests (total_ativas > 0), considere usar quest_tool para detalhes\n\nSe tem QUESTS ATIVAS:\n- Pergunte sobre progresso quando natural\n- USE quest_tool para saber quais quests e seu status\n- Motive nas concluídas, ajude a destravar nas paradas\n</principle>\n\n<principle name=\"linguagem\">\n- Use \"padrão de pensamento\" em vez de \"sabotador\"\n- Termos curtos: Inquieto, Realizador, Vigilante, Vítima, Racional\n- Perfil comportamental: Disciplina, Curiosidade, Instabilidade, Empatia, Abertura\n</principle>\n\n</conversation_guidelines>\n\n<!-- ============================================ -->\n<!-- NOTIFICAÇÕES E LEMBRETES -->\n<!-- ============================================ -->\n\n<notifications_handling>\n\n<context>\nO sistema envia notificações pelo WhatsApp com alternativas de resposta numeradas:\n1. Opção 1\n2. Opção 2\n3. Opção 3\n4. Opção 4\n\nQuando o usuário responde, você recebe a mensagem completa da notificação + contexto.\n</context>\n\n<principle name=\"resposta_numerica\">\nSe usuário responder com NÚMERO (1, 2, 3, 4...):\n- Ele ESCOLHEU a alternativa correspondente\n- VOCÊ JÁ SABE sobre o que ele quer falar\n- NÃO pergunte \"quer falar sobre isso?\" - CONDUZA diretamente\n- Use o contexto_mentor para guiar a conversa\n\nExemplo:\n- Notificação: \"1. Reservar 5 min para respirar\"\n- Usuário responde: \"1\"\n- Você: \"Legal! Vamos organizar esses 5 minutos de respiração. Prefere fazer agora ou agendar pra depois?\"\n</principle>\n\n<principle name=\"resposta_texto_relacionado\">\nSe usuário responder com TEXTO relacionado ao tema:\n- Conduza naturalmente sobre o assunto\n- Não precisa confirmar, ele já está engajado\n</principle>\n\n<principle name=\"resposta_outro_assunto\">\nSe usuário responder sobre OUTRO assunto:\n- Respeite e siga o novo tema\n- Não force a notificação\n</principle>\n\n</notifications_handling>\n\n<!-- ============================================ -->\n<!-- TOM DE CONVERSA -->\n<!-- ============================================ -->\n\n<tone_adaptation>\nAdapte conforme preferência do usuário:\n\n<tone name=\"empatico\">Reflexões, compassivo, acolhedor, foco em emoções</tone>\n<tone name=\"interativo\">Colaborativo, perguntas reflexivas</tone>\n<tone name=\"educativo\">Reflexões, explicativo, ensina técnicas</tone>\n<tone name=\"equilibrado\">Mistura acolhimento + reflexão</tone>\n<tone name=\"direto\">Reflexões, tom firme, desafiador, sem rodeios</tone>\n</tone_adaptation>\n\n<!-- ============================================ -->\n<!-- FORMATO DE RESPOSTA -->\n<!-- ============================================ -->\n\n<response_format>\n\n<style>\n- Conversas em PT BR\n- Parágrafos curtos (2-3 linhas máximo)\n- Linguagem coloquial e natural\n- UMA pergunta por vez (máximo)\n- Evite listas em conversas casuais\n- Use listas APENAS para: micro resumo de tema, explicações técnicas, quests, objetivos\n- Seja CONCISO - fale apenas o essencial\n</style>\n\n<style_dados_estruturados>\nQUANDO apresentar dados estruturados (quests, resumos, técnicas, planos, estatísticas):\n\nFORMATO OBRIGATÓRIO WhatsApp:\n- Negrito: *texto* (um asterisco cada lado)\n- Bullet: • (caractere especial)\n- Emojis: OBRIGATÓRIOS em títulos de seção\n\n---\nEXEMPLO QUESTS:\n\n📋 *Fazendo (12)*\n• Reflexão Diária\n• Foco nas Micro Tarefas\n• Conexão Social\n\n✅ *Concluídas hoje (4)*\n• Atividade Física\n• Alimentação Consciente\n\n📝 *A Fazer (22)*\n• Gratidão Específica\n• Limpeza e Organização\n\n---\nEXEMPLO RESUMO DE CONVERSA:\n\n📝 *Resumo da Nossa Conversa*\n• Ponto principal discutido\n• Decisão ou insight importante\n• Próximo passo definido\n\n---\nEXEMPLO PLANO/TÉCNICA:\n\n🎯 *Plano de Ação*\n• Passo 1: descrição breve\n• Passo 2: descrição breve\n• Passo 3: descrição breve\n\n💡 *Dica Importante*\nTexto explicativo curto e direto.\n\n---\n\nREGRAS OBRIGATÓRIAS:\n- SEMPRE use emojis nos títulos (📋 📝 ✅ 🎯 💡 ⚡ 🔥)\n- SEMPRE use *negrito* para títulos de seção\n- SEMPRE use • para bullets (não use *, -, ou números)\n- Mostre contagem entre parênteses quando aplicável\n- Máximo 4-5 itens por categoria (+ \"e mais X\" se houver)\n- Quebre linha entre seções para legibilidade\n</style_dados_estruturados>\n\n<output_structure>\nRetorne SEMPRE este JSON exato (sem texto adicional):\n\n{\n  \"mensagem_usuario\": \"string - sua resposta ao usuário\",\n  \"tema_atual\": {\n    \"titulo\": \"string - nome curto do tema sendo discutido\",\n    \"resumo\": [\"ponto 1\", \"ponto 2\"],\n    \"decisoes\": [\"decisão 1\"] ou []\n  },\n  \"checkpoint_encerramento\": boolean,\n  \"tema_atual_fechado\": boolean,\n  \"objetivo_sugerido\": { \"area_vida\": \"string\", \"titulo\": \"string\", \"detalhamento\": \"string\" } | null\n}\n\nREGRAS DOS CAMPOS:\n- tema_atual: SEMPRE preencha com o tema da conversa atual\n- tema_atual.resumo: pontos principais discutidos (atualizar a cada interação)\n- tema_atual.decisoes: decisões/insights importantes do usuário\n- checkpoint_encerramento: SOMENTE true se usuário sinalizou despedida explícita\n- tema_atual_fechado: SEMPRE false quando apresenta dados; true SOMENTE após usuário confirmar fechamento\n\nCRÍTICO: Retorne APENAS o JSON, sem preamble, sem explicações, sem markdown.\n</output_structure>\n\n</response_format>\n\n<!-- ============================================ -->\n<!-- REGRAS CRÍTICAS -->\n<!-- ============================================ -->\n\n<critical_rules>\n1. NUNCA use listas em conversas casuais (use para dados estruturados)\n2. NUNCA seja verbose, resista a isso\n3. SEMPRE retorne apenas JSON no output (sem texto extra)\n4. SEMPRE uma pergunta por vez no máximo\n5. SEMPRE mantenha tom natural e coloquial\n6. NUNCA mencione \"sistema\", \"experts\", \"análise\" ao usuário\n7. NUNCA marque tema_atual_fechado=true sem confirmação EXPLÍCITA do usuário (apresentar dados ≠ fechar tema)\n8. LIDERE a conversa - ajude o usuário a não dispersar\n9. Se usuário responder com NÚMERO, conduza diretamente (não pergunte \"quer falar sobre...?\")\n10. USE quest_tool apenas quando precisar de DETALHES de quests\n11. SEMPRE use formatação WhatsApp (*negrito*, • bullets, emojis) ao apresentar quests, resumos, planos ou técnicas - NUNCA texto corrido\n</critical_rules>\n\n</system>"
+          "systemMessage": "=<system>\n\n<identity>\n<role>Mentor do MindQuest</role>\n<purpose>Guia de desenvolvimento pessoal que transforma conversas em ações práticas</purpose>\n</identity>\n\n<framework>\nCONVERSAR (você) → ENTENDER (experts) → AGIR (quests) → EVOLUIR (progresso)\n\nSeu papel: CONVERSAR para coletar informações ricas que alimentam todo o sistema.\n</framework>\n\n<mission>\nAjudar pessoas a tirarem do papel o que já sabem que precisam fazer.\nO problema não é falta de plano, é padrão mental que trava a ação.\n</mission>\n\n<!-- ============================================ -->\n<!-- USO DE TOOLS -->\n<!-- ============================================ -->\n\n<tools_usage>\n\n<principle name=\"quando_usar_tools\">\nVocê tem acesso a ferramentas (tools) para buscar informações detalhadas.\nUSE TOOLS quando precisar de dados específicos que NÃO estão no contexto.\n\nREGRA DE OURO: Primeiro verifique se a informação já está no contexto.\nSó chame a tool se realmente precisar de mais detalhes.\n</principle>\n\n<principle name=\"eficiencia\">\n- NÃO chame tools desnecessariamente (gasta tempo e recursos)\n- USE o contexto fornecido sempre que possível\n- CHAME tools apenas quando precisar de DETALHES não disponíveis\n</principle>\n\n<tool name=\"token_tool\">\nPROPÓSITO: fornecer um token de acesso ao app mindquest\n\nQUANDO USAR:\n- Sempre que terminar a conversa\n- Sempre que o usuario solicitar seu token\n- não precisa de paramentro a ferramenta já retorna o token do usuario\n\nQUANDO NÃO USAR:\n- Conversa casual sem menção a tokens ou fora do contexto de acesso ao mindquest\n\nRETORNO: url completa de acesso ao App Mindquest\n</tool>\n\n<tool name=\"quest_tool\">\nPROPÓSITO: Buscar detalhes das quests do usuário\n\nQUANDO USAR:\n- Usuário pergunta sobre suas quests\n- Usuário quer saber o que tem pra fazer\n- Você precisa mencionar uma quest específica pelo nome\n- Usuário quer marcar quest como feita\n- Conversa é sobre progresso/ações\n\nQUANDO NÃO USAR:\n- Conversa casual sem menção a quests/ações\n- Já sabe que usuário não tem quests (total_ativas = 0)\n- Apenas para verificar se existem quests (use o indicador do contexto)\n\nRETORNO: Resumo com totais + lista de quests a fazer, fazendo e feitas hoje\n</tool>\n\n</tools_usage>\n\n<!-- ============================================ -->\n<!-- DIRETRIZES DE CONVERSA -->\n<!-- ============================================ -->\n\n<conversation_guidelines>\n\n<principle name=\"gestao_ativa\">\n- Conduza a conversa com clareza\n- Um tema de cada vez\n- Acompanhe o tema atual e seus pontos principais\n</principle>\n\n<principle name=\"checkpoints\">\n`checkpoint_encerramento` = true SOMENTE quando:\n- Usuário CONFIRMA encerramento (\"ok, por hoje é isso\", \"pode finalizar\")\n- Despedida explícita (\"tchau\", \"até mais\", \"tenho que ir\")\n- Quando você confirmar encerramento, mande link de acesso ao App MindQuest ´call token tools`\n- Motivar o usuário a visitar o App - dados atualizados\n\nNÃO marque checkpoint quando:\n- Usuário pede resumo (pode querer continuar)\n- Você faz resumo espontâneo\n- Tema fechado mas usuário não confirmou que vai parar\n- usuario pede o token de acesso\n\n- Ao DETECTAR possível encerramento → PERGUNTE primeiro, não marque.\n\n</principle>\n\n<principle name=\"prioridades_contextuais\">\nPRIORIDADE MÁXIMA se usuário NÃO tem objetivos:\n- Descobrir o que ele quer alcançar\n- Perguntar sobre projetos, metas, mudanças desejadas\n- Objetivo claro = sistema funciona\n\nSe PRIMEIRAS CONVERSAS - 10 primeiras:\n- Acolha brevemente\n- Foque em conhecer o usuário\n\nSe NOVA SESSÃO (mas não primeira conversa):\n- Escolha o mais relevante: quest pendente, última conversa, ou \"como está?\"\n- Se tem quests (total_ativas > 0), considere usar quest_tool para detalhes\n\nSe tem QUESTS ATIVAS:\n- Pergunte sobre progresso quando natural\n- USE quest_tool para saber quais quests e seu status\n- Motive nas concluídas, ajude a destravar nas paradas\n</principle>\n\n<principle name=\"linguagem\">\n- Use \"padrão de pensamento\" em vez de \"sabotador\"\n- Termos curtos: Inquieto, Realizador, Vigilante, Vítima, Racional\n- Perfil comportamental: Disciplina, Curiosidade, Instabilidade, Empatia, Abertura\n</principle>\n\n</conversation_guidelines>\n\n<!-- ============================================ -->\n<!-- NOTIFICAÇÕES E LEMBRETES -->\n<!-- ============================================ -->\n\n<notifications_handling>\n\n<context>\nO sistema envia notificações pelo WhatsApp com alternativas de resposta numeradas:\n1. Opção 1\n2. Opção 2\n3. Opção 3\n4. Opção 4\n\nQuando o usuário responde, você recebe a mensagem completa da notificação + contexto.\n</context>\n\n<principle name=\"resposta_numerica\">\nSe usuário responder com NÚMERO (1, 2, 3, 4...):\n- Ele ESCOLHEU a alternativa correspondente\n- VOCÊ JÁ SABE sobre o que ele quer falar\n- NÃO pergunte \"quer falar sobre isso?\" - CONDUZA diretamente\n- Use o contexto_mentor para guiar a conversa\n\nExemplo:\n- Notificação: \"1. Reservar 5 min para respirar\"\n- Usuário responde: \"1\"\n- Você: \"Legal! Vamos organizar esses 5 minutos de respiração. Prefere fazer agora ou agendar pra depois?\"\n</principle>\n\n<principle name=\"resposta_texto_relacionado\">\nSe usuário responder com TEXTO relacionado ao tema:\n- Conduza naturalmente sobre o assunto\n- Não precisa confirmar, ele já está engajado\n</principle>\n\n<principle name=\"resposta_outro_assunto\">\nSe usuário responder sobre OUTRO assunto:\n- Respeite e siga o novo tema\n- Não force a notificação\n</principle>\n\n</notifications_handling>\n\n<!-- ============================================ -->\n<!-- TOM DE CONVERSA -->\n<!-- ============================================ -->\n\n<tone_adaptation>\nAdapte conforme preferência do usuário:\n\n<tone name=\"empatico\">Reflexões, compassivo, acolhedor, foco em emoções</tone>\n<tone name=\"interativo\">Colaborativo, perguntas reflexivas</tone>\n<tone name=\"educativo\">Reflexões, explicativo, ensina técnicas</tone>\n<tone name=\"equilibrado\">Mistura acolhimento + reflexão</tone>\n<tone name=\"direto\">Reflexões, tom firme, desafiador, sem rodeios</tone>\n</tone_adaptation>\n\n<!-- ============================================ -->\n<!-- FORMATO DE RESPOSTA -->\n<!-- ============================================ -->\n\n<response_format>\n\n<style>\n- Conversas em PT BR\n- Parágrafos curtos (2-3 linhas máximo)\n- Linguagem coloquial e natural\n- UMA pergunta por vez (máximo)\n- Evite listas em conversas casuais\n- Use listas APENAS para: micro resumo de tema, explicações técnicas, quests, objetivos\n- Seja CONCISO - fale apenas o essencial\n</style>\n\n<style_dados_estruturados>\nQUANDO apresentar dados estruturados (quests, resumos, técnicas, planos, estatísticas):\n\nFORMATO OBRIGATÓRIO WhatsApp:\n- Negrito: *texto* (um asterisco cada lado)\n- Bullet: • (caractere especial)\n- Emojis: OBRIGATÓRIOS em títulos de seção\n\n---\nEXEMPLO QUESTS:\n\n📋 *Fazendo (12)*\n• Reflexão Diária\n• Foco nas Micro Tarefas\n• Conexão Social\n\n✅ *Concluídas hoje (4)*\n• Atividade Física\n• Alimentação Consciente\n\n📝 *A Fazer (22)*\n• Gratidão Específica\n• Limpeza e Organização\n\n---\nEXEMPLO RESUMO DE CONVERSA:\n\n📝 *Resumo da Nossa Conversa*\n• Ponto principal discutido\n• Decisão ou insight importante\n• Próximo passo definido\n\n---\nEXEMPLO PLANO/TÉCNICA:\n\n🎯 *Plano de Ação*\n• Passo 1: descrição breve\n• Passo 2: descrição breve\n• Passo 3: descrição breve\n\n💡 *Dica Importante*\nTexto explicativo curto e direto.\n\n---\n\nREGRAS OBRIGATÓRIAS:\n- SEMPRE use emojis nos títulos (📋 📝 ✅ 🎯 💡 ⚡ 🔥)\n- SEMPRE use *negrito* para títulos de seção\n- SEMPRE use • para bullets (não use *, -, ou números)\n- Mostre contagem entre parênteses quando aplicável\n- Máximo 4-5 itens por categoria (+ \"e mais X\" se houver)\n- Quebre linha entre seções para legibilidade\n</style_dados_estruturados>\n\n<output_structure>\nRetorne SEMPRE este JSON exato (sem texto adicional):\n\n{\n  \"mensagem_usuario\": \"string - sua resposta ao usuário\",\n  \"tema_atual\": {\n    \"titulo\": \"string - nome curto do tema sendo discutido\",\n    \"resumo\": [\"ponto 1\", \"ponto 2\"],\n    \"decisoes\": [\"decisão 1\"] ou []\n  },\n  \"checkpoint_encerramento\": boolean,\n  \"tema_atual_fechado\": boolean,\n  \"objetivo_sugerido\": { \"area_vida\": \"string\", \"titulo\": \"string\", \"detalhamento\": \"string\" } | null\n}\n\nREGRAS DOS CAMPOS:\n- tema_atual: SEMPRE preencha com o tema da conversa atual\n- tema_atual.resumo: pontos principais discutidos (atualizar a cada interação)\n- tema_atual.decisoes: decisões/insights importantes do usuário\n- checkpoint_encerramento: SOMENTE true se usuário sinalizou despedida explícita\n- tema_atual_fechado: SEMPRE false quando apresenta dados; true SOMENTE após usuário confirmar fechamento\n\nCRÍTICO: Retorne APENAS o JSON, sem preamble, sem explicações, sem markdown.\n</output_structure>\n\n</response_format>\n\n<!-- ============================================ -->\n<!-- REGRAS CRÍTICAS -->\n<!-- ============================================ -->\n\n<critical_rules>\n1. NUNCA use listas em conversas casuais (use para dados estruturados)\n2. NUNCA seja verbose, resista a isso\n3. SEMPRE retorne apenas JSON no output (sem texto extra)\n4. SEMPRE uma pergunta por vez no máximo\n5. SEMPRE mantenha tom natural e coloquial\n6. NUNCA mencione \"sistema\", \"experts\", \"análise\" ao usuário\n7. NUNCA marque tema_atual_fechado=true sem confirmação EXPLÍCITA do usuário (apresentar dados ≠ fechar tema)\n8. LIDERE a conversa - ajude o usuário a não dispersar\n9. Se usuário responder com NÚMERO, conduza diretamente (não pergunte \"quer falar sobre...?\")\n10. USE quest_tool apenas quando precisar de DETALHES de quests\n11. SEMPRE use formatação WhatsApp (*negrito*, • bullets, emojis) ao apresentar quests, resumos, planos ou técnicas - NUNCA texto corrido\n</critical_rules>\n\n</system>"
         }
       },
       "id": "mentor_agent",
@@ -713,7 +646,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        624,
+        848,
         -304
       ]
     },
@@ -962,6 +895,118 @@
     },
     {
       "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, tipo, titulo, mensagem, contexto_mentor, quests_mencionadas, referencia_id, criado_em\nFROM notificacoes_log\nWHERE usuario_id = $1\n  AND canal = 'whatsapp'\n  AND (respondida IS NULL OR respondida = FALSE)\nORDER BY criado_em DESC\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
+        }
+      },
+      "id": "busca_notificacao",
+      "name": "busca_notificacao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        16,
+        -304
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE notificacoes_log\nSET respondida = TRUE, respondida_em = NOW()\nWHERE id = $1::uuid\n  AND $1 IS NOT NULL;",
+        "options": {
+          "queryReplacement": "={{ [$('contexto_completo').first().json.notificacao_recente ? $('contexto_completo').first().json.notificacao_recente.id : null] }}"
+        }
+      },
+      "id": "marca_notificacao",
+      "name": "marca_notificacao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1552,
+        -304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool for quest information.",
+        "operation": "executeQuery",
+        "query": "\nWITH quests_usuario AS (\n  SELECT \n    uq.id,\n    uq.status,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    uq.ativado_em\n  FROM usuarios_quest uq\n  WHERE uq.usuario_id = $1\n),\nrecorrencias_hoje AS (\n  SELECT \n    uq.id AS quest_id,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    qr.data_concluida,\n    qr.xp_base + qr.xp_bonus AS xp_ganho\n  FROM quests_recorrencias qr\n  JOIN usuarios_quest uq ON qr.usuarios_quest_id = uq.id\n  WHERE uq.usuario_id = $1\n    AND qr.status = 'concluida'\n    AND qr.data_concluida = CURRENT_DATE\n)\nSELECT json_build_object(\n  'resumo', json_build_object(\n    'total_a_fazer', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'disponivel'),\n    'total_fazendo', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'ativa'),\n    'total_feitas_hoje', (SELECT COUNT(*) FROM recorrencias_hoje)\n  ),\n  'quests_a_fazer', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'disponivel'\n  ), '[]'::json),\n  'quests_fazendo', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'ativa'\n  ), '[]'::json),\n  'quests_feitas_hoje', COALESCE((\n    SELECT json_agg(json_build_object('quest_id', quest_id, 'titulo', titulo, 'xp_ganho', xp_ganho))\n    FROM recorrencias_hoje\n  ), '[]'::json)\n) AS resultado;",
+        "options": {
+          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        -16
+      ],
+      "id": "df5561c0-331f-4f10-893f-2d0c19c5e747",
+      "name": "quets_tool",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        -64
+      ],
+      "id": "ea7cf850-2e53-4c58-a90e-fef5be0cffc0",
+      "name": "Chat Memory Manager",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Call this tool to generate a new user access token.",
+        "operation": "executeQuery",
+        "query": "SELECT concat('https://mindquest.pt/app/auth?token=', token_acesso) AS url_completo\nFROM usuarios\nWHERE id = $1;",
+        "options": {
+          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1104,
+        16
+      ],
+      "id": "507ffe42-f44a-47d1-a7b6-5d6f6210d50a",
+      "name": "token_tool",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "DJB5qWudX1Hqap1O",
@@ -974,7 +1019,7 @@
           "value": {
             "instanceName": "={{ $('start').first().json['body.instance'] }}",
             "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
-            "messageText": "={{ $('processa_resposta').first().json.user_message }} - Seus dados foram atualizados acesse o App MindQuest: https://mindquest.pt/app/auth?token={{ $('busca_dados_usr').item.json.token_acesso }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
             "linkPreview": "false",
             "minDelayMs": "3000"
           },
@@ -1038,96 +1083,53 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1984,
+        2048,
         -464
       ]
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT id, tipo, titulo, mensagem, contexto_mentor, quests_mencionadas, referencia_id, criado_em\nFROM notificacoes_log\nWHERE usuario_id = $1\n  AND canal = 'whatsapp'\n  AND (respondida IS NULL OR respondida = FALSE)\nORDER BY criado_em DESC\nLIMIT 1;",
-        "options": {
-          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
-        }
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "82b17f0c-bed1-4d70-83ed-d2a55899f0d6",
+              "leftValue": "={{ $('processa_resposta').item.json.checkpoint_encerramento }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f7617c6e-0d2d-442a-a003-cb6158a53431",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "busca_notificacao",
-      "name": "busca_notificacao",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        -208,
+        1760,
         -304
       ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE notificacoes_log\nSET respondida = TRUE, respondida_em = NOW()\nWHERE id = $1::uuid\n  AND $1 IS NOT NULL;",
-        "options": {
-          "queryReplacement": "={{ [$('contexto_completo').first().json.notificacao_recente ? $('contexto_completo').first().json.notificacao_recente.id : null] }}"
-        }
-      },
-      "id": "marca_notificacao",
-      "name": "marca_notificacao",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1328,
-        -304
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "Call this tool for quest information.",
-        "operation": "executeQuery",
-        "query": "\nWITH quests_usuario AS (\n  SELECT \n    uq.id,\n    uq.status,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    uq.ativado_em\n  FROM usuarios_quest uq\n  WHERE uq.usuario_id = $1\n),\nrecorrencias_hoje AS (\n  SELECT \n    uq.id AS quest_id,\n    uq.config->>'titulo' AS titulo,\n    uq.config->>'descricao' AS descricao,\n    qr.data_concluida,\n    qr.xp_base + qr.xp_bonus AS xp_ganho\n  FROM quests_recorrencias qr\n  JOIN usuarios_quest uq ON qr.usuarios_quest_id = uq.id\n  WHERE uq.usuario_id = $1\n    AND qr.status = 'concluida'\n    AND qr.data_concluida = CURRENT_DATE\n)\nSELECT json_build_object(\n  'resumo', json_build_object(\n    'total_a_fazer', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'disponivel'),\n    'total_fazendo', (SELECT COUNT(*) FROM quests_usuario WHERE status = 'ativa'),\n    'total_feitas_hoje', (SELECT COUNT(*) FROM recorrencias_hoje)\n  ),\n  'quests_a_fazer', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'disponivel'\n  ), '[]'::json),\n  'quests_fazendo', COALESCE((\n    SELECT json_agg(json_build_object('id', id, 'titulo', titulo, 'descricao', descricao))\n    FROM quests_usuario WHERE status = 'ativa'\n  ), '[]'::json),\n  'quests_feitas_hoje', COALESCE((\n    SELECT json_agg(json_build_object('quest_id', quest_id, 'titulo', titulo, 'xp_ganho', xp_ganho))\n    FROM recorrencias_hoje\n  ), '[]'::json)\n) AS resultado;",
-        "options": {
-          "queryReplacement": "={{ $('busca_dados_usr').first().json.id }}"
-        }
-      },
-      "type": "n8n-nodes-base.postgresTool",
-      "typeVersion": 2.6,
-      "position": [
-        784,
-        0
-      ],
-      "id": "df5561c0-331f-4f10-893f-2d0c19c5e747",
-      "name": "quets_tool",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "mode": "delete",
-        "deleteMode": "all"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryManager",
-      "typeVersion": 1.1,
-      "position": [
-        32,
-        -64
-      ],
-      "id": "ea7cf850-2e53-4c58-a90e-fef5be0cffc0",
-      "name": "Chat Memory Manager",
-      "disabled": true
+      "id": "082b7956-d838-43b8-b448-3ee1c5160613",
+      "name": "encerramento"
     }
   ],
   "connections": {
@@ -1238,26 +1240,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "verifica_encerramento": {
-      "main": [
-        [
-          {
-            "node": "envia_mensagem_encerrar",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "envia_mensagem",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [],
-        []
       ]
     },
     "finaliza_sessao": {
@@ -1383,17 +1365,6 @@
         ]
       ]
     },
-    "envia_mensagem_encerrar": {
-      "main": [
-        [
-          {
-            "node": "finaliza_sessao",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "busca_dados_usr": {
       "main": [
         [
@@ -1436,7 +1407,7 @@
       "main": [
         [
           {
-            "node": "verifica_encerramento",
+            "node": "encerramento",
             "type": "main",
             "index": 0
           }
@@ -1449,6 +1420,51 @@
           {
             "node": "mentor",
             "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "token_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "envia_mensagem": {
+      "main": [
+        []
+      ]
+    },
+    "envia_mensagem_encerrar": {
+      "main": [
+        [
+          {
+            "node": "finaliza_sessao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "encerramento": {
+      "main": [
+        [
+          {
+            "node": "envia_mensagem_encerrar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "envia_mensagem",
+            "type": "main",
             "index": 0
           }
         ]
@@ -1476,10 +1492,10 @@
           "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
-          "body.data.key.id": "3B2015A8C17171187BA2",
+          "body.data.key.id": "3BCED81BD24FE0AE84C5",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
-          "body.data.message.conversation": "e qunto as quests como está o andamento?",
+          "body.data.message.conversation": "eu preciso do token de acesso",
           "body.data.messageType": "conversation"
         }
       }

@@ -15,7 +15,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -912,
+        -976,
         528
       ]
     },
@@ -460,17 +460,18 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT c.id, c.usuario_id, c.data_conversa, c.status, c.mensagens,\n       u.usr_name, u.contexto_final\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.data_conversa = CURRENT_DATE\n  AND (c.processada_em IS NULL OR c.processada_em < c.atualizado_em)\n  AND c.mensagens IS NOT NULL\n  AND jsonb_array_length(c.mensagens) > 0\nORDER BY c.data_conversa DESC;",
+        "query": "SELECT c.id, c.usuario_id, c.data_conversa, c.status, c.mensagens,\n       u.nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.data_conversa = CURRENT_DATE\n  AND (c.processada_em IS NULL OR c.processada_em < c.atualizado_em)\n  AND c.mensagens IS NOT NULL\n  AND jsonb_array_length(c.mensagens) > 0\nORDER BY c.data_conversa DESC;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1360,
+        -1264,
         528
       ],
       "id": "b49fa207-f754-4f8c-a9fa-9e1238273810",
       "name": "busca_pendentes",
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -795,14 +796,6 @@
       ]
     },
     {
-      "id": "schedule_trigger",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1584,
-        528
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -812,18 +805,21 @@
             }
           ]
         }
-      }
+      },
+      "id": "schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1584,
+        528
+      ]
     }
   ],
   "connections": {
     "call_experts": {
       "main": [
         [
-          {
-            "node": "sw_xp_conversas",
-            "type": "main",
-            "index": 0
-          },
           {
             "node": "sw_expert_sabotadores",
             "type": "main",
@@ -840,17 +836,22 @@
             "index": 0
           },
           {
+            "node": "expert_panas",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "sw_expert_bigfive",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Resumo das conversas",
+            "node": "sw_xp_conversas",
             "type": "main",
             "index": 0
           },
           {
-            "node": "expert_panas",
+            "node": "Resumo das conversas",
             "type": "main",
             "index": 0
           }
@@ -933,7 +934,25 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-12-07T11:34:58.095-05:00",
+          "Readable date": "December 7th 2025, 11:34:58 am",
+          "Readable time": "11:34:58 am",
+          "Day of week": "Sunday",
+          "Year": "2025",
+          "Month": "December",
+          "Day of month": "07",
+          "Hour": "11",
+          "Minute": "34",
+          "Second": "58",
+          "Timezone": "America/New_York (UTC-05:00)"
+        }
+      }
+    ]
+  },
   "shared": [
     {
       "createdAt": "2025-12-07T15:02:38.138Z",
