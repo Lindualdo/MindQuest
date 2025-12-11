@@ -437,6 +437,21 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## Regras de Negócio: Conversas → Quests\n\n### Quantidade de Quests por Conversa\n- **1 conversa (usr_chat) = 3 ou 4 quests**\n\n**Padrão (3 quests):**\n1. Quest personalizada (baseada na conversa)\n2. Quest de sabotador (baseada no sabotador principal)\n3. Quest TCC / outras (do catálogo)\n\n**Exceção (4 quests):**\n- Quando o sabotador atual **não está no top 3 históricos**\n- **E** a intensidade ≥ 60  \n→ Adiciona 1 quest extra de sabotador (secundário)\n\n---\n\n### Regras de Processamento\n- Cada conversa é processada **apenas 1 vez**\n- Verificar campo `processada_em` no `usr_chat`:\n  - Se **já processado** → não cria quests\n  - Se **não processado** → cria 3 ou 4 quests e marca como processado\n\n---\n\n### Limite de Quests Ativas\n- Limite máximo: **15 quests ativas**\n- Se o usuário já tem **≥ 15 quests**, nenhuma quest nova é criada\n",
+        "height": 480,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2688,
+        -784
+      ],
+      "id": "ada5978e-9074-40f7-b9ee-489cca650c5d",
+      "name": "Sticky Note"
     }
   ],
   "connections": {
@@ -662,7 +677,8 @@
     "start": [
       {
         "json": {
-          "usuario_id": "0847d8a7-4fba-45f2-9470-a7eeacaa4bd4"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "fae2c26e-ec33-4bb5-979d-1af6f2bd2068"
         }
       }
     ]

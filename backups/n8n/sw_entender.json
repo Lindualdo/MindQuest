@@ -1,141 +1,26 @@
 {
-  "createdAt": "2025-12-07T15:02:38.138Z",
-  "id": "6Mb1qRAaheSQ9L0y",
-  "name": "job_execute_experts",
+  "createdAt": "2025-12-11T10:28:22.897Z",
+  "id": "M6wDT4LzEiYcAo5Y",
+  "name": "sw_entender",
   "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "jsCode": "// PREPARA DADOS PARA OS EXPERTS (batch noturno)\nconst chatPendente = $input.first().json;\n\n// Parse mensagens se for objeto ou string\nlet mensagens = chatPendente.mensagens;\nif (typeof mensagens === 'string') {\n  try {\n    mensagens = JSON.parse(mensagens);\n  } catch (e) {\n    mensagens = [];\n  }\n}\n\n// Formata mensagens como texto\nconst mensagensTexto = Array.isArray(mensagens) \n  ? mensagens.map(m => `${m.autor}: ${m.texto}`).join('\\n')\n  : '';\n\nreturn [{\n  usuario_id: chatPendente.usuario_id,\n  chat_id: chatPendente.id,\n  data_conversa: chatPendente.data_conversa,\n  mensagens: JSON.stringify(mensagens),\n  mensagens_texto: mensagensTexto,\n  total_interacoes: Array.isArray(mensagens) ? mensagens.filter(m => m.autor === 'usuario').length : 0,\n  usr_name: chatPendente.usr_name || '',\n  contexto_final: chatPendente.contexto_final || ''\n}];"
-      },
-      "id": "16db4927-a89c-4ee4-af98-afe5642c1d9d",
-      "name": "call_experts",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -976,
-        528
-      ]
-    },
-    {
-      "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "LKjU8NE9aNHw7kEh",
+          "value": "vJRfrbY4NhpNyfCD",
           "mode": "list",
-          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
-          "cachedResultName": "sw_criar_quest"
+          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
+          "cachedResultName": "sw_experts_panas"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "id": "8cd07aef-7acd-44a8-bbec-b4d612a0830d",
-      "name": "sw_criar_quest",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        608,
-        128
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "ItBastfCTkWxm41M",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/ItBastfCTkWxm41M",
-          "cachedResultName": "sw_xp_conversas"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "calcular_apenas_novos",
-              "displayName": "calcular_apenas_novos",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "boolean",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "id": "75f6c7ee-8936-4c96-b0b7-2011444fb161",
-      "name": "sw_xp_conversas",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        320,
-        976
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "Vbc4JHAR3388mLcv",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/Vbc4JHAR3388mLcv",
-          "cachedResultName": "sw_expert_sabotadores"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}",
-            "chat_id": "={{ $input.first().json.chat_id }}",
-            "mensagens": "={{ $input.first().json.mensagens_texto }}",
-            "data_conversa": "={{ $input.first().json.data_conversa }}",
-            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "mensagens": "={{ $json.mensagens }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -164,7 +49,80 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
               "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "5de1bb75-be29-4eff-acd4-3f5a38e75439",
+      "name": "expert_panas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Vbc4JHAR3388mLcv",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Vbc4JHAR3388mLcv",
+          "cachedResultName": "sw_expert_sabotadores"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "mensagens": "={{ $json.mensagens }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
             },
             {
               "id": "chat_id",
@@ -182,7 +140,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -192,13 +151,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "bcfdf633-9ee9-4f2d-b202-b680e2ad69ea",
-      "name": "sw_expert_sabotadores",
+      "id": "ca9da84b-86bc-4cb3-86dd-778deb09a48a",
+      "name": "expert_sabotadores",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        128
+        0,
+        192
       ]
     },
     {
@@ -213,12 +172,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}",
-            "chat_id": "={{ $input.first().json.chat_id }}",
-            "mensagens": "={{ $input.first().json.mensagens_texto }}",
-            "contexto_final": "={{ $('call_experts').first().json.contexto_final }}",
-            "data_conversa": "={{ $input.first().json.data_conversa }}",
-            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "mensagens": "={{ $json.mensagens }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -247,7 +203,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             },
             {
               "id": "data_conversa",
@@ -256,7 +213,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             },
             {
               "id": "chat_id",
@@ -274,7 +232,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -284,13 +243,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "cd745628-0630-4d1b-918c-2caab5c94eb7",
-      "name": "sw_expert_insights",
+      "id": "2f35148a-2ea4-4959-b84a-2c223554d2b3",
+      "name": "expert_insights",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        336
+        0,
+        384
       ]
     },
     {
@@ -298,81 +257,27 @@
         "workflowId": {
           "__rl": true,
           "value": "GykxpS5vsg8NeoOh",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/GykxpS5vsg8NeoOh",
-          "cachedResultName": "sw_expert_humor_energia"
+          "mode": "list"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}",
-            "chat_id": "={{ $input.first().json.chat_id }}",
-            "mensagens": "={{ $input.first().json.mensagens_texto }}",
-            "data_conversa": "={{ $input.first().json.data_conversa }}",
-            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "mensagens",
-              "displayName": "mensagens",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "data_conversa",
-              "displayName": "data_conversa",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "usr_name",
-              "displayName": "usr_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "mensagens": "={{ $json.mensagens }}"
+          }
         },
         "options": {
           "waitForSubWorkflow": false
         }
       },
-      "id": "51b3d43f-c975-4ef1-b5ef-7046d9c155fa",
-      "name": "sw_expert_humor_energia",
+      "id": "33e6172c-817f-4037-aa9b-f24479422993",
+      "name": "expert_humor_energia",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        544
+        0,
+        576
       ]
     },
     {
@@ -387,11 +292,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}",
-            "chat_id": "={{ $input.first().json.chat_id }}",
-            "mensagens": "={{ $input.first().json.mensagens_texto }}",
-            "data_conversa": "={{ $input.first().json.data_conversa }}",
-            "usr_name": "={{ $('call_experts').first().json.usr_name }}"
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "mensagens": "={{ $json.mensagens }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -420,7 +323,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             },
             {
               "id": "chat_id",
@@ -438,7 +342,8 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -448,36 +353,14 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "7b6e962b-e9ad-4659-9c55-16b6e3b11995",
-      "name": "sw_expert_bigfive",
+      "id": "1921f843-f452-4415-8e70-614073d1e221",
+      "name": "expert_bigfive",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        752
+        0,
+        768
       ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT c.id, c.usuario_id, c.data_conversa, c.status, c.mensagens,\n       u.nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.data_conversa = CURRENT_DATE\n  AND (c.processada_em IS NULL OR c.processada_em < c.atualizado_em)\n  AND c.mensagens IS NOT NULL\n  AND jsonb_array_length(c.mensagens) > 0\nORDER BY c.data_conversa DESC;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -1264,
-        528
-      ],
-      "id": "b49fa207-f754-4f8c-a9fa-9e1238273810",
-      "name": "busca_pendentes",
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -486,10 +369,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        272,
-        1408
+        -48,
+        1200
       ],
-      "id": "32010570-be39-4f60-8fe9-e020cb4160b4",
+      "id": "9a95bf3f-d77a-47df-b09d-275fd256ee23",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -501,19 +384,19 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Analise a conversa completa abaixo entre o usuário e o agente.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $input.first().json.mensagens }}\n```\n\nSUA TAREFA:\n1. GERAR RESUMO CONCISO\n2. ANALISAR REFLEXÃO DO USUÁRIO\n3. CONTAR PALAVRAS DO USUÁRIO\n\nRETORNE APENAS ESTE JSON:\n{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": boolean,\n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": number,\n  \"confianca_analise\": number\n}",
+        "text": "=Analise a conversa completa abaixo entre o usuário e o agente.\n\nNome do usuário: {{ $('start').item.json.usr_nome_preferencia }}\n\n**CONVERSA COMPLETA:**\n```\n{{ $('start').item.json.mensagens }}\n```\n\nSUA TAREFA:\n1. GERAR RESUMO CONCISO\nCrie um resumo mantendo APENAS:\n- Situação emocional do dia (estado atual)\n- Eventos importantes mencionados\n- Sentimentos expressos (não repita, liste únicos)\n- Contextos relevantes (trabalho, família, relacionamentos, etc)\n- Insights ou reflexões importantes\n- Decisões ou planos mencionados\n- agrupe por temas\n\nRemova:\n- Perguntas do agente (mantenha só respostas do usuário)\n- Validações e confirmações\n- Repetições de informações\n- Saudações e despedidas\n\n2. ANALISAR REFLEXÃO DO USUÁRIO\nTEM REFLEXÃO = true se:\n- Usuário analisou sentimentos com profundidade\n- Fez conexões entre eventos e emoções\n- Demonstrou autoconhecimento\n\nTEM REFLEXÃO = false se:\n- Apenas relatou fatos superficialmente\n- Respostas curtas sem elaboração\n\n3. CONTAR PALAVRAS DO USUÁRIO\nConte APENAS palavras das falas do usuário (autor: \"usuario\").\n\nRETORNE APENAS ESTE JSON:\n{\n  \"resumo_conversa\": \"string\",\n  \"tem_reflexao\": true,\n  \"justificativa_reflexao\": \"string\",\n  \"total_palavras_usuario\": 204,\n  \"confianca_analise\": 95\n}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas.\n\nSeu trabalho é:\n1. Analisar a conversa completa entre usuário e agente (5 interações)\n2. Gerar um resumo conciso mantendo APENAS o essencial\n3. Identificar se o usuário fez reflexões profundas\n4. Contar palavras totais do usuário\n5. Preservar contexto emocional e insights importantes\n\nREGRAS CRÍTICAS:\n- Remova redundâncias e repetições\n- Mantenha apenas informações únicas e relevantes\n- Preserve sentimentos, eventos e contextos mencionados\n- Seja objetivo e direto\n- Máximo de 300 palavras no resumo\n- Retorne APENAS JSON estruturado\n\nVocê está ajudando a construir o perfil psicológico do usuário ao longo do tempo, então cada palavra conta."
+          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas.\n\nSeu trabalho é:\n1. Analisar a conversa completa entre usuário e agente \n2. Gerar um resumo conciso mantendo APENAS o essencial\n3. Identificar se o usuário fez reflexões profundas\n4. Contar palavras totais do usuário\n5. Preservar contexto emocional e insights importantes\n\nREGRAS CRÍTICAS:\n- Remova redundâncias e repetições\n- Mantenha apenas informações únicas e relevantes\n- Preserve sentimentos, eventos e contextos mencionados\n- Seja objetivo e direto\n- Máximo de 600 palavras no resumo\n- Retorne APENAS JSON estruturado\n\nVocê está ajudando a construir o perfil psicológico do usuário ao longo do tempo, então cada palavra conta."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        304,
-        1200
+        -16,
+        992
       ],
-      "id": "6a0c685b-c25a-4483-bcb6-5e342964638e",
+      "id": "1391c151-e542-446d-b0a0-4b640892b069",
       "name": "Resumo das conversas"
     },
     {
@@ -523,10 +406,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        464,
-        1408
+        144,
+        1200
       ],
-      "id": "38cb79d1-3d37-4529-94ff-588775cad1f8",
+      "id": "d45a218f-a73f-4fb7-b2d8-6bfa5a5cce14",
       "name": "Structured Output Parser"
     },
     {
@@ -546,11 +429,10 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "id": "={{ $('call_experts').first().json.chat_id }}",
+            "id": "={{ $('start').item.json.chat_id }}",
             "total_palavras_usuario": "={{ $json.output.total_palavras_usuario }}",
             "resumo_conversa": "={{ $json.output.resumo_conversa }}",
-            "tem_reflexao": "={{ $json.output.tem_reflexao }}",
-            "processada_em": "={{ new Date().toISOString() }}"
+            "tem_reflexao": "={{ $json.output.tem_reflexao }}"
           },
           "matchingColumns": [
             "id"
@@ -711,10 +593,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        624,
-        1200
+        304,
+        992
       ],
-      "id": "51d87e68-5afc-460b-a2af-6bf40bf1a934",
+      "id": "42757760-3208-43fa-ae27-c9f8a8fa9f36",
       "name": "Update rows in a table",
       "credentials": {
         "postgres": {
@@ -725,21 +607,144 @@
     },
     {
       "parameters": {
+        "jsCode": "// VALIDA CONTEXTO MÍNIMO PARA ANÁLISE\nconst input = $input.first().json;\nconst mensagens = input.mensagens || '';\n\n// Conta palavras do usuário\nconst linhas = mensagens.split('\\n').filter(l => l.trim());\nconst palavrasUsuario = linhas\n  .filter(l => l.toLowerCase().startsWith('usuario:'))\n  .map(l => l.replace(/^usuario:\\s*/i, ''))\n  .join(' ')\n  .split(/\\s+/)\n  .filter(w => w.length > 0)\n  .length;\n\n// Critério: 50 ou mais palavras = válido\nconst MIN_PALAVRAS = 50;\nconst contextoSuficiente = palavrasUsuario >= MIN_PALAVRAS;\n\nreturn [{\n  ...input,\n  validacao: {\n    palavras_usuario: palavrasUsuario,\n    contexto_suficiente: contextoSuficiente,\n    motivo: contextoSuficiente \n      ? 'OK'\n      : `Contexto insuficiente: ${palavrasUsuario} palavras (min: ${MIN_PALAVRAS})`\n  }\n}];\n"
+      },
+      "id": "d1afcd2e-5073-4f7e-9ccd-620e9a170fe6",
+      "name": "valida_contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "ctx1",
+              "leftValue": "={{ $json.validacao.contexto_suficiente }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bc591a89-16a6-4e81-b03b-5ec5fdac53e7",
+      "name": "tem_contexto",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna status indicando que NÃO processou\nconst input = $input.first().json;\nreturn [{\n  processado: false,\n  motivo: input.validacao?.motivo || 'Contexto insuficiente',\n  chat_id: input.chat_id,\n  total_interactions: input.total_interactions\n}];"
+      },
+      "id": "66f1138b-04d2-468b-81f8-686ea23e82be",
+      "name": "contexto_insuficiente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna status indicando que processou com sucesso\nconst trigger = $('start').first().json;\nreturn [{\n  processado: true,\n  motivo: 'OK',\n  chat_id: trigger.chat_id,\n  total_interactions: trigger.total_interactions\n}];"
+      },
+      "id": "retorno-sucesso",
+      "name": "retorno_sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "mensagens"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            },
+            {
+              "name": "total_interactions"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1248,
+        736
+      ],
+      "id": "58fadc30-bd03-4213-81ef-156c2d955f79",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "content": "chama experts apenas se conversas tiverem mais de 50 palavras",
+        "height": 112,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        576
+      ],
+      "id": "c4383c7a-8dac-463c-8552-93d3db532a95",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "vJRfrbY4NhpNyfCD",
+          "value": "ItBastfCTkWxm41M",
           "mode": "list",
-          "cachedResultUrl": "/workflow/vJRfrbY4NhpNyfCD",
-          "cachedResultName": "sw_experts_panas"
+          "cachedResultUrl": "/workflow/ItBastfCTkWxm41M",
+          "cachedResultName": "sw_xp_conversas"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $input.first().json.usuario_id }}",
-            "chat_id": "={{ $input.first().json.chat_id }}",
-            "mensagens": "={{ $input.first().json.mensagens_texto }}"
+            "usuario_id": "={{ $json.id }}",
+            "calcular_apenas_novos": true
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "usuario_id"
+          ],
           "schema": [
             {
               "id": "usuario_id",
@@ -751,23 +756,57 @@
               "type": "string"
             },
             {
-              "id": "mensagens",
-              "displayName": "mensagens",
+              "id": "calcular_apenas_novos",
+              "displayName": "calcular_apenas_novos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "888b7f23-fd71-46fd-8f1f-58e3f29fee11",
+      "name": "Executar XP Conversas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LKjU8NE9aNHw7kEh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "cachedResultName": "sw_criar_quest"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').item.json.usuario_id }}",
+            "chat_id": "={{ $('start').item.json.chat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
               "type": "string"
-            },
-            {
-              "id": "data_conversa",
-              "displayName": "data_conversa",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
             },
             {
               "id": "chat_id",
@@ -783,75 +822,25 @@
           "convertFieldsToString": true
         },
         "options": {
-          "waitForSubWorkflow": false
+          "waitForSubWorkflow": true
         }
       },
-      "id": "ea3276e0-abf2-4210-9829-6011abe567ad",
-      "name": "expert_panas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        -80
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 23 * * *"
-            }
-          ]
-        }
-      },
-      "id": "schedule_trigger",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1584,
-        528
-      ]
+        336,
+        192
+      ],
+      "id": "c29b2ffd-def4-4ca5-9513-21b966c269d1",
+      "name": "Executar Expert Quests"
     }
   ],
   "connections": {
-    "call_experts": {
+    "expert_sabotadores": {
       "main": [
         [
           {
-            "node": "sw_expert_sabotadores",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sw_expert_insights",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sw_expert_humor_energia",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "expert_panas",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sw_expert_bigfive",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sw_xp_conversas",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Resumo das conversas",
+            "node": "Executar Expert Quests",
             "type": "main",
             "index": 0
           }
@@ -891,33 +880,81 @@
         ]
       ]
     },
-    "sw_expert_sabotadores": {
+    "valida_contexto": {
       "main": [
         [
           {
-            "node": "sw_criar_quest",
+            "node": "tem_contexto",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Schedule Trigger": {
+    "tem_contexto": {
       "main": [
         [
           {
-            "node": "busca_pendentes",
+            "node": "expert_panas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "expert_sabotadores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "expert_insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "expert_humor_energia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "expert_bigfive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resumo das conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Executar XP Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "contexto_insuficiente",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "busca_pendentes": {
+    "Update rows in a table": {
       "main": [
         [
           {
-            "node": "call_experts",
+            "node": "retorno_sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "valida_contexto",
             "type": "main",
             "index": 0
           }
@@ -931,33 +968,26 @@
     "availableInMCP": false
   },
   "staticData": null,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
+  "meta": null,
   "pinData": {
-    "Schedule Trigger": [
+    "start": [
       {
         "json": {
-          "timestamp": "2025-12-07T11:34:58.095-05:00",
-          "Readable date": "December 7th 2025, 11:34:58 am",
-          "Readable time": "11:34:58 am",
-          "Day of week": "Sunday",
-          "Year": "2025",
-          "Month": "December",
-          "Day of month": "07",
-          "Hour": "11",
-          "Minute": "34",
-          "Second": "58",
-          "Timezone": "America/New_York (UTC-05:00)"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "mensagens": "usuario: olá\nagente: Olá, Aldo! Que bom te ver por aqui. Como você está hoje? Me conta um pouco do que tem passado desde nossa última conversa.",
+          "data_conversa": "2025-12-11T00:00:00.000Z",
+          "chat_id": "93a352b5-8ee0-4f83-8216-cfd9d2215efb",
+          "usr_nome_preferencia": "Aldo",
+          "total_interactions": "1"
         }
       }
     ]
   },
   "shared": [
     {
-      "createdAt": "2025-12-07T15:02:38.138Z",
+      "createdAt": "2025-12-11T10:28:22.897Z",
       "role": "workflow:owner",
-      "workflowId": "6Mb1qRAaheSQ9L0y",
+      "workflowId": "M6wDT4LzEiYcAo5Y",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",

@@ -380,3 +380,4 @@ return [$json];
 
 **Status:** Aguardando aprovação para implementação  
 **Prioridade:** Alta (impacta UX - quests repetitivas frustram usuário)
+

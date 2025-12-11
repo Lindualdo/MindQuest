@@ -7,6 +7,7 @@
 - permitir reativar quets concluidas
 - permitir cadastrar usr e senha para logar sem token
 - rever expiração dos tokens
+- mostrar detalhes ao clicar nos cards
 
 #Back
 - Melhorar agente mentor
@@ -16,6 +17,7 @@
 - enviar relatorio semanal
 - tratamento de interações do mentor (conversa, lembretes, demais..)
 - Mentor: sabotador mais ativo, o ultimo ou os 3 mais ativos
+- rever criação de quests junto com experts
 
 #Infra
 - Apagar aquivos obsoletos

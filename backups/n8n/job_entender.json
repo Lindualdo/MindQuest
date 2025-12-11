@@ -1,0 +1,407 @@
+{
+  "createdAt": "2025-12-11T10:45:19.174Z",
+  "id": "Rn3nIn29Q2ZGv7ti",
+  "name": "job_entender",
+  "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "trigger-001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Busca chats com interações NÃO processadas + dados completos\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\nORDER BY c.data_conversa DESC\nLIMIT 50;",
+        "options": {}
+      },
+      "id": "busca-pendentes-001",
+      "name": "busca_pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        112
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "loop-001",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        208,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Upsert com histórico de execuções\nINSERT INTO log_experts (chat_id, ultima_interaction, historico, processado_em, atualizado_em)\nVALUES (\n  '{{ $json.chat_id }}'::uuid, \n  {{ $json.total_interactions }}, \n  jsonb_build_array(jsonb_build_object(\n    'de', 0,\n    'ate', {{ $json.total_interactions }},\n    'novas', {{ $json.total_interactions }},\n    'em', NOW()\n  )),\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) \nDO UPDATE SET \n  historico = log_experts.historico || jsonb_build_array(jsonb_build_object(\n    'de', log_experts.ultima_interaction,\n    'ate', {{ $json.total_interactions }},\n    'novas', {{ $json.total_interactions }} - log_experts.ultima_interaction,\n    'em', NOW()\n  )),\n  ultima_interaction = {{ $json.total_interactions }},\n  atualizado_em = NOW();",
+        "options": {}
+      },
+      "id": "marca-processada-001",
+      "name": "marca_processada",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1184,
+        112
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// PREPARA DADOS PARA OS EXPERTS\nconst item = $input.first().json;\n\nconst mensagens = item.mensagens || [];\n\n// Converte mensagens para texto\nconst mensagensTexto = Array.isArray(mensagens) \n  ? mensagens.map(m => `${m.autor}: ${m.texto}`).join('\\n')\n  : '';\n\nreturn [{\n  usuario_id: item.usuario_id,\n  chat_id: item.id,\n  data_conversa: item.data_conversa,\n  mensagens: mensagensTexto,\n  usr_nome_preferencia: item.usr_nome_preferencia || 'Usuário',\n  total_interactions: item.total_interactions\n}];"
+      },
+      "id": "4aaa6410-19de-4c4a-b4d8-7eb38cc52f41",
+      "name": "prepara_dados_experts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-processado",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.processado }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "verifica-resultado",
+      "name": "foi_processado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usr_chat\nSET status = 'finalizado', horario_fim = NOW(), atualizado_em = NOW()\nWHERE id = $1\nRETURNING id, usuario_id, data_conversa, status, mensagens;",
+        "options": {
+          "queryReplacement": "={{ $('Loop Over Items').item.json.id }}"
+        }
+      },
+      "id": "85d89c42-d071-49e2-9163-a3ad535bd5bd",
+      "name": "finaliza_sessao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1456,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "M6wDT4LzEiYcAo5Y",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/M6wDT4LzEiYcAo5Y",
+          "cachedResultName": "sw_entender"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "mensagens": "={{ $json.mensagens }}",
+            "data_conversa": "={{ $json.data_conversa }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "usr_nome_preferencia": "={{ $json.usr_nome_preferencia }}",
+            "total_interactions": "={{ $json.total_interactions }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mensagens",
+              "displayName": "mensagens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_nome_preferencia",
+              "displayName": "usr_nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "total_interactions",
+              "displayName": "total_interactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "call-experts-001",
+      "name": "chama_sw_entender",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        128
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "busca_pendentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_pendentes": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "prepara_dados_experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "marca_processada": {
+      "main": [
+        [
+          {
+            "node": "finaliza_sessao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepara_dados_experts": {
+      "main": [
+        [
+          {
+            "node": "chama_sw_entender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "foi_processado": {
+      "main": [
+        [
+          {
+            "node": "marca_processada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "finaliza_sessao": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chama_sw_entender": {
+      "main": [
+        [
+          {
+            "node": "foi_processado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "shared": [
+    {
+      "createdAt": "2025-12-11T10:45:19.174Z",
+      "role": "workflow:owner",
+      "workflowId": "Rn3nIn29Q2ZGv7ti",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
