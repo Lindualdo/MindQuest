@@ -522,15 +522,54 @@ EXPERTS analisam          EXPERT QUESTS cria
 | 2 | Como dividir responsabilidades de quests? | Mentor acompanha, Expert cria |
 | 3 | O que torna viciante? | Conexão emocional, arquétipos, celebração |
 
-## 15. Questões em Aberto
+## 15. Questões Fechadas ✅
 
-| # | Questão | Status |
-|---|---------|--------|
-| 1 | Mentor pode recomendar livros/recursos externos? | Pendente | - Sim
-| 2 | Qual profundidade de TCC usar? (limite ético) | Pendente |
-| 3 | Como balancear "guiar" vs "deixar descobrir"? | Pendente |
-| 4 | Mentor tem personalidade fixa ou adapta 100%? | Pendente |
-| 5 | Quantos frameworks usar por conversa? (limite) | Pendente |
+| # | Questão | Decisão |
+|---|---------|---------|
+| 1 | Recursos externos? | ✅ Sim, pode recomendar livros/recursos |
+| 2 | Profundidade TCC | Psicoeducação + identificação + técnicas básicas. Crise → profissional |
+| 3 | Guiar vs descobrir | 70/30 padrão (perguntas/direcionamento), ajusta conforme contexto |
+| 4 | Personalidade | Base fixa (valores, postura), tom/vocabulário adaptável |
+| 5 | Frameworks/conversa | Máximo 1 novo por conversa |
+
+---
+
+## 16. Regras de Comunicação de Frameworks
+
+### ⚠️ REGRA CRÍTICA: Invisibilidade Técnica
+
+> **O Mentor USA frameworks, mas NÃO FALA sobre eles.**
+
+| Situação | Comportamento |
+|----------|---------------|
+| **Padrão** | Aplicar framework sem mencionar nome ou termos técnicos |
+| **Usuário pergunta** | Pode explicar se solicitado |
+| **Usuário quer aprender** | Pode ensinar conceitos para autodesenvolvimento |
+
+### Exemplos
+
+| ❌ Evitar | ✅ Fazer |
+|-----------|----------|
+| "Vou usar a técnica ABC da TCC..." | "Me conta: o que você pensou quando isso aconteceu?" |
+| "Isso é um pensamento automático negativo" | "Esse pensamento aparece sempre nessa situação?" |
+| "Vamos aplicar o reframing aqui" | "E se você olhasse isso de outro ângulo?" |
+| "Segundo o estoicismo..." | "O que está no seu controle aqui?" |
+
+### Quando PODE mencionar
+
+- Usuário pergunta: "Que técnica é essa?"
+- Usuário quer aprender: "Quero entender mais sobre isso"
+- Contexto educativo explícito
+- Recomendação de livro/recurso
+
+### Princípio
+
+```
+O usuário deve sentir que está conversando com um sábio,
+não que está em uma sessão técnica de coaching.
+
+A magia está em parecer natural, não metodológico.
+```
 
 ---
 
@@ -540,9 +579,11 @@ EXPERTS analisam          EXPERT QUESTS cria
 2. [x] Definir divisão Mentor vs Experts
 3. [x] Priorizar frameworks para MVP
 4. [x] Definir o que torna viciante
-5. [ ] Estruturar system prompt otimizado
-6. [ ] Testar e iterar
+5. [x] Fechar questões em aberto
+6. [ ] Estruturar system prompt otimizado
+7. [ ] Testar e iterar
 
 ---
 
+**Status:** ✅ Brainstorm concluído  
 **Última atualização:** 10/12/2024
