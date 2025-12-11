@@ -36,6 +36,7 @@ PGPASSWORD="$PGPASSWORD" psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATA
 - `usuarios_sabotadores` - Sabotadores detectados
 - `notificacoes` - Configuração das notificações
 - `notificacoes_log` - Log de notificações enviadas (controle reenvio)
+- `log_experts` - Controle de processamento dos experts por conversa
 
 ## Regras
 
