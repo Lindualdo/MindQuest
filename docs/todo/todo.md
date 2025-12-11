@@ -18,6 +18,8 @@
 - tratamento de interações do mentor (conversa, lembretes, demais..)
 - Mentor: sabotador mais ativo, o ultimo ou os 3 mais ativos
 - rever criação de quests junto com experts
+- campos da tabela usr_chat - limpar obsoletos e verifcar campos de contagem palavras
+- analisar performance jobs e dados trafegados (job_entender)
 
 #Infra
 - Apagar aquivos obsoletos
