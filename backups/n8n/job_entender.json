@@ -2,9 +2,8 @@
   "createdAt": "2025-12-11T10:45:19.174Z",
   "id": "Rn3nIn29Q2ZGv7ti",
   "name": "job_entender",
-  "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados",
+  "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados - com validação inteligente de delta",
   "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -21,10 +20,7 @@
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [
-        -240,
-        112
-      ]
+      "position": [-240, 112]
     },
     {
       "parameters": {
@@ -36,376 +32,117 @@
       "name": "busca_pendentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [
-        -32,
-        112
-      ],
-      "alwaysOutputData": false,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
+      "position": [-32, 112],
+      "credentials": {"postgres": {"id": "8ySWxtSO7gYK5uue", "name": "Postgres account"}}
     },
     {
-      "parameters": {
-        "options": {}
-      },
+      "parameters": {"options": {}},
       "id": "loop-001",
       "name": "Loop Over Items",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [
-        208,
-        112
-      ]
+      "position": [208, 112]
     },
     {
+      "id": "valida-delta-001",
+      "name": "valida_delta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 128],
       "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Upsert com histórico de execuções\nINSERT INTO log_experts (chat_id, ultima_interaction, historico, processado_em, atualizado_em)\nVALUES (\n  '{{ $json.chat_id }}'::uuid, \n  {{ $json.total_interactions }}, \n  jsonb_build_array(jsonb_build_object(\n    'de', 0,\n    'ate', {{ $json.total_interactions }},\n    'novas', {{ $json.total_interactions }},\n    'em', NOW()\n  )),\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) \nDO UPDATE SET \n  historico = log_experts.historico || jsonb_build_array(jsonb_build_object(\n    'de', log_experts.ultima_interaction,\n    'ate', {{ $json.total_interactions }},\n    'novas', {{ $json.total_interactions }} - log_experts.ultima_interaction,\n    'em', NOW()\n  )),\n  ultima_interaction = {{ $json.total_interactions }},\n  atualizado_em = NOW();",
-        "options": {}
-      },
-      "id": "marca-processada-001",
-      "name": "marca_processada",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1184,
-        112
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
+        "jsCode": "// VALIDAÇÃO INTELIGENTE DO DELTA\nconst item = $input.first().json;\nconst mensagens = item.mensagens || [];\nconst ultimaProcessada = item.ultima_processada || 0;\nconst totalAtual = item.total_interactions || 0;\nconst mensagensNovas = Array.isArray(mensagens) ? mensagens.slice(ultimaProcessada) : [];\nconst mensagensUsuario = mensagensNovas.filter(m => m.autor && m.autor.toLowerCase() === 'usuario');\nconst palavrasNovas = mensagensUsuario.map(m => (m.texto || '').split(/\\s+/).filter(p => p.length > 0).length).reduce((a, b) => a + b, 0);\nconst numInteracoesNovas = totalAtual - ultimaProcessada;\nconst volumeAlto = palavrasNovas >= 80;\nconst volumeMedio = palavrasNovas >= 30 && palavrasNovas < 80;\nconst volumeBaixo = palavrasNovas < 30;\nconst mensagensTexto = mensagensUsuario.map(m => m.texto || '').join(' ').toLowerCase();\nconst temPalavrasChave = /\\b(sinto|sentir|sentindo|senti|emoção|emocional|medo|frustração|ansiedade|ansioso|triste|feliz|preocupado|reflexão|pensei|pensando|percebi|percebo)\\b/i.test(mensagensTexto);\nconst conversaProfunda = mensagensUsuario.length >= 4;\nlet deveProcessar = false;\nlet motivo = '';\nif (volumeAlto) { deveProcessar = true; motivo = `Volume alto: ${palavrasNovas} palavras novas`; } else if (volumeMedio && (temPalavrasChave || conversaProfunda)) { deveProcessar = true; motivo = `Volume médio com contexto relevante: ${palavrasNovas} palavras`; } else if (volumeBaixo) { deveProcessar = false; motivo = `Volume insuficiente: ${palavrasNovas} palavras (mín: 30)`; } else { deveProcessar = false; motivo = `Volume médio sem contexto significativo: ${palavrasNovas} palavras`; }\nconst mensagensNovasTexto = mensagensNovas.map(m => `${m.autor}: ${m.texto}`).join('\\n');\nreturn [{...item, deve_processar: deveProcessar, motivo_validacao: motivo, palavras_novas: palavrasNovas, interacoes_novas: numInteracoesNovas, mensagens_delta: mensagensNovasTexto, mensagens_completas: item.mensagens}];"
+      }
+    },
+    {
+      "id": "verifica-delta-001",
+      "name": "tem_contexto_suficiente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [432, 128],
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "caseSensitive": true, "typeValidation": "strict"},
+          "combinator": "and",
+          "conditions": [{"id": "check-deve-processar", "leftValue": "={{ $json.deve_processar }}", "rightValue": "", "operator": {"type": "boolean", "operation": "true", "singleValue": true}}]
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// PREPARA DADOS PARA OS EXPERTS\nconst item = $input.first().json;\n\nconst mensagens = item.mensagens || [];\n\n// Converte mensagens para texto\nconst mensagensTexto = Array.isArray(mensagens) \n  ? mensagens.map(m => `${m.autor}: ${m.texto}`).join('\\n')\n  : '';\n\nreturn [{\n  usuario_id: item.usuario_id,\n  chat_id: item.id,\n  data_conversa: item.data_conversa,\n  mensagens: mensagensTexto,\n  usr_nome_preferencia: item.usr_nome_preferencia || 'Usuário',\n  total_interactions: item.total_interactions\n}];"
+        "jsCode": "// PREPARA DADOS PARA OS EXPERTS (APENAS DELTA)\nconst item = $input.first().json;\nconst mensagensDelta = item.mensagens_delta || '';\nreturn [{usuario_id: item.usuario_id, chat_id: item.id, data_conversa: item.data_conversa, mensagens: mensagensDelta, usr_nome_preferencia: item.usr_nome_preferencia || 'Usuário', total_interactions: item.total_interactions, palavras_novas: item.palavras_novas, interacoes_novas: item.interacoes_novas, motivo_validacao: item.motivo_validacao}];"
       },
       "id": "4aaa6410-19de-4c4a-b4d8-7eb38cc52f41",
       "name": "prepara_dados_experts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        512,
-        128
-      ]
+      "position": [512, 128]
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "version": 2,
-            "leftValue": "",
-            "caseSensitive": true,
-            "typeValidation": "strict"
-          },
-          "combinator": "and",
-          "conditions": [
-            {
-              "id": "check-processado",
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              },
-              "leftValue": "={{ $json.processado }}",
-              "rightValue": ""
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "verifica-resultado",
-      "name": "foi_processado",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        944,
-        128
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE usr_chat\nSET status = 'finalizado', horario_fim = NOW(), atualizado_em = NOW()\nWHERE id = $1\nRETURNING id, usuario_id, data_conversa, status, mensagens;",
-        "options": {
-          "queryReplacement": "={{ $('Loop Over Items').item.json.id }}"
-        }
-      },
-      "id": "85d89c42-d071-49e2-9163-a3ad535bd5bd",
-      "name": "finaliza_sessao",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1456,
-        112
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "M6wDT4LzEiYcAo5Y",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/M6wDT4LzEiYcAo5Y",
-          "cachedResultName": "sw_entender"
-        },
+        "workflowId": {"__rl": true, "value": "M6wDT4LzEiYcAo5Y", "mode": "list"},
         "workflowInputs": {
           "mappingMode": "defineBelow",
-          "value": {
-            "usuario_id": "={{ $json.usuario_id }}",
-            "mensagens": "={{ $json.mensagens }}",
-            "data_conversa": "={{ $json.data_conversa }}",
-            "chat_id": "={{ $json.chat_id }}",
-            "usr_nome_preferencia": "={{ $json.usr_nome_preferencia }}",
-            "total_interactions": "={{ $json.total_interactions }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "usuario_id",
-              "displayName": "usuario_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "mensagens",
-              "displayName": "mensagens",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "data_conversa",
-              "displayName": "data_conversa",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "usr_nome_preferencia",
-              "displayName": "usr_nome_preferencia",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "total_interactions",
-              "displayName": "total_interactions",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            }
-          ],
-          "attemptToConvertTypes": true,
-          "convertFieldsToString": true
+          "value": {"usuario_id": "={{ $json.usuario_id }}", "mensagens": "={{ $json.mensagens }}", "data_conversa": "={{ $json.data_conversa }}", "chat_id": "={{ $json.chat_id }}", "usr_nome_preferencia": "={{ $json.usr_nome_preferencia }}", "total_interactions": "={{ $json.total_interactions }}"},
+          "attemptToConvertTypes": true
         },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "options": {"waitForSubWorkflow": true}
       },
       "id": "call-experts-001",
       "name": "chama_sw_entender",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
-      "position": [
-        752,
-        128
-      ]
+      "position": [752, 128]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"version": 2, "caseSensitive": true, "typeValidation": "strict"},
+          "combinator": "and",
+          "conditions": [{"id": "check-processado", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.processado }}"}]
+        }
+      },
+      "id": "verifica-resultado",
+      "name": "foi_processado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [944, 128]
+    },
+    {
+      "parameters": {
+        "query": "=-- Upsert com histórico de execuções\nINSERT INTO log_experts (chat_id, ultima_interaction, historico, processado_em, atualizado_em)\nVALUES ('{{ $json.chat_id }}'::uuid, {{ $json.total_interactions }}, jsonb_build_array(jsonb_build_object('de', 0, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }}, 'em', NOW())), NOW(), NOW())\nON CONFLICT (chat_id) DO UPDATE SET historico = log_experts.historico || jsonb_build_array(jsonb_build_object('de', log_experts.ultima_interaction, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }} - log_experts.ultima_interaction, 'em', NOW())), ultima_interaction = {{ $json.total_interactions }}, atualizado_em = NOW();"
+      },
+      "id": "marca-processada-001",
+      "name": "marca_processada",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1184, 112],
+      "credentials": {"postgres": {"id": "8ySWxtSO7gYK5uue", "name": "Postgres account"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usr_chat SET status = 'finalizado', horario_fim = NOW(), atualizado_em = NOW() WHERE id = $1 RETURNING id, usuario_id, data_conversa, status, mensagens;",
+        "options": {"queryReplacement": "={{ $('Loop Over Items').item.json.id }}"}
+      },
+      "id": "85d89c42-d071-49e2-9163-a3ad535bd5bd",
+      "name": "finaliza_sessao",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1456, 112],
+      "credentials": {"postgres": {"id": "8ySWxtSO7gYK5uue", "name": "Postgres account"}}
     }
   ],
   "connections": {
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "busca_pendentes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "busca_pendentes": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items": {
-      "main": [
-        [],
-        [
-          {
-            "node": "prepara_dados_experts",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "marca_processada": {
-      "main": [
-        [
-          {
-            "node": "finaliza_sessao",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "prepara_dados_experts": {
-      "main": [
-        [
-          {
-            "node": "chama_sw_entender",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "foi_processado": {
-      "main": [
-        [
-          {
-            "node": "marca_processada",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "finaliza_sessao": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "chama_sw_entender": {
-      "main": [
-        [
-          {
-            "node": "foi_processado",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+    "Schedule Trigger": {"main": [[{"node": "busca_pendentes", "type": "main", "index": 0}]]},
+    "busca_pendentes": {"main": [[{"node": "Loop Over Items", "type": "main", "index": 0}]]},
+    "Loop Over Items": {"main": [[], [{"node": "valida_delta", "type": "main", "index": 0}]]},
+    "valida_delta": {"main": [[{"node": "tem_contexto_suficiente", "type": "main", "index": 0}]]},
+    "tem_contexto_suficiente": {"main": [[{"node": "prepara_dados_experts", "type": "main", "index": 0}], [{"node": "Loop Over Items", "type": "main", "index": 0}]]},
+    "prepara_dados_experts": {"main": [[{"node": "chama_sw_entender", "type": "main", "index": 0}]]},
+    "chama_sw_entender": {"main": [[{"node": "foi_processado", "type": "main", "index": 0}]]},
+    "foi_processado": {"main": [[{"node": "marca_processada", "type": "main", "index": 0}], [{"node": "Loop Over Items", "type": "main", "index": 0}]]},
+    "marca_processada": {"main": [[{"node": "finaliza_sessao", "type": "main", "index": 0}]]},
+    "finaliza_sessao": {"main": [[{"node": "Loop Over Items", "type": "main", "index": 0}]]}
   },
-  "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
-  },
-  "staticData": {
-    "node:Schedule Trigger": {
-      "recurrenceRules": []
-    }
-  },
-  "meta": null,
-  "pinData": {},
-  "shared": [
-    {
-      "createdAt": "2025-12-11T10:45:19.174Z",
-      "role": "workflow:owner",
-      "workflowId": "Rn3nIn29Q2ZGv7ti",
-      "projectId": "u1M57XAwIiLpPwjp",
-      "project": {
-        "createdAt": "2025-09-16T16:13:20.606Z",
-        "id": "u1M57XAwIiLpPwjp",
-        "name": "Aldo Santos <lindualdo@hotmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "createdAt": "2025-09-16T16:13:20.606Z",
-            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
-            "projectId": "u1M57XAwIiLpPwjp",
-            "user": {
-              "createdAt": "2025-09-16T16:13:20.056Z",
-              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
-              "email": "lindualdo@hotmail.com",
-              "firstName": "Aldo",
-              "lastName": "Santos",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
-                "personalization_survey_n8n_version": "1.108.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
-                "userActivatedAt": 1758041156747,
-                "easyAIWorkflowOnboarded": true,
-                "dismissedCallouts": {
-                  "preBuiltAgentsModalCallout": true
-                },
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1759918723295
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
-  "tags": []
+  "settings": {"executionOrder": "v1"}
 }
