@@ -1,0 +1,188 @@
+{
+  "name": "sw_expert_resumo_conversa_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id", "type": "string" },
+            { "name": "chat_id", "type": "string" },
+            { "name": "mensagens", "type": "string" },
+            { "name": "data_conversa", "type": "string" },
+            { "name": "usr_nome_preferencia", "type": "string" },
+            { "name": "total_interactions", "type": "number" }
+          ]
+        }
+      },
+      "id": "start-001",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Expert: Resumo Conversa (v2.0)\n\n### Objetivo\nAnalisar conversa, gerar/incorporar resumo por temas\n\n### Funcionalidades\n1. Buscar resumo existente (usr_chat)\n2. Validar se delta tem contexto relevante\n3. Incorporar ao resumo (não substituir)\n4. Agrupar por temas\n5. Retornar se tem contexto para demais experts\n\n### Temas para Agrupamento\n- Emocional (sentimentos, humor)\n- Trabalho/Carreira\n- Relacionamentos\n- Saúde/Bem-estar\n- Finanças\n- Objetivos/Metas\n- Reflexões/Insights\n\n### Output\n- tem_contexto: boolean (para demais experts)\n- tem_reflexao: boolean\n- resumo_atualizado: string (por temas)"
+      },
+      "id": "sticky-rules",
+      "name": "Regras Resumo v2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-300, 0],
+      "width": 400,
+      "height": 420
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Buscar resumo existente e dados do chat\nSELECT\n  id,\n  resumo_conversa,\n  tem_reflexao,\n  total_palavras_usuario\nFROM usr_chat\nWHERE id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "pg-buscar-resumo",
+      "name": "Buscar Resumo Existente",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n**RESUMO ANTERIOR (se existir):**\n```\n{{ $('Buscar Resumo Existente').item.json.resumo_conversa || 'Nenhum resumo anterior' }}\n```\n\n**NOVAS MENSAGENS (delta):**\n```\n{{ $('start').item.json.mensagens }}\n```\n\n---\n\n**SUA TAREFA:**\n\n1. **ANALISAR O DELTA**\n   - As novas mensagens têm conteúdo relevante para análise?\n   - Há informações novas ou é apenas conversa casual/repetitiva?\n\n2. **INCORPORAR AO RESUMO EXISTENTE**\n   - NÃO substitua o resumo anterior\n   - ADICIONE as novas informações relevantes\n   - Elimine redundâncias (se algo já está no resumo, não repita)\n\n3. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n4. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n5. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"breve explicação\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
+        }
+      },
+      "id": "agent-resumo",
+      "name": "Analisar e Resumir",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "llm-openrouter",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [380, 520],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"string\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"string\"\n}"
+      },
+      "id": "output-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [540, 520]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Atualizar resumo e dados no usr_chat\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  tem_reflexao = $3,\n  total_palavras_usuario = COALESCE(total_palavras_usuario, 0) + $4,\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, resumo_conversa, tem_reflexao, total_palavras_usuario;",
+        "options": {
+          "queryReplacement": "={{ [$('start').item.json.chat_id, $json.output.resumo_atualizado, $json.output.tem_reflexao, $json.output.total_palavras_delta || 0] }}"
+        }
+      },
+      "id": "pg-atualizar",
+      "name": "Atualizar usr_chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [720, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Registrar processamento no log_experts\nINSERT INTO log_experts (usuario_id, chat_id, expert_name, ultima_interaction, historico, criado_em, atualizado_em)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'resumo_conversa',\n  $3::int,\n  jsonb_build_array(jsonb_build_object(\n    'de', 0,\n    'ate', $3::int,\n    'novas', $3::int,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean\n  )),\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id, expert_name) DO UPDATE SET\n  historico = log_experts.historico || jsonb_build_array(jsonb_build_object(\n    'de', log_experts.ultima_interaction,\n    'ate', $3::int,\n    'novas', $3::int - log_experts.ultima_interaction,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean\n  )),\n  ultima_interaction = $3::int,\n  atualizado_em = NOW()\nRETURNING id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').item.json.usuario_id, $('start').item.json.chat_id, $('start').item.json.total_interactions, $('Analisar e Resumir').item.json.output.tem_contexto, $('Analisar e Resumir').item.json.output.tem_reflexao] }}"
+        }
+      },
+      "id": "pg-log",
+      "name": "Registrar Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [940, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna resultado para o sw_entender decidir se chama demais experts\nconst analise = $('Analisar e Resumir').item.json.output;\nconst start = $('start').item.json;\n\nreturn [{\n  json: {\n    usuario_id: start.usuario_id,\n    chat_id: start.chat_id,\n    tem_contexto: analise.tem_contexto,\n    tem_reflexao: analise.tem_reflexao,\n    justificativa: analise.justificativa,\n    total_palavras_delta: analise.total_palavras_delta,\n    processar_demais_experts: analise.tem_contexto === true\n  }\n}];"
+      },
+      "id": "code-resultado",
+      "name": "Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1160, 300]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [[{ "node": "Buscar Resumo Existente", "type": "main", "index": 0 }]]
+    },
+    "Buscar Resumo Existente": {
+      "main": [[{ "node": "Analisar e Resumir", "type": "main", "index": 0 }]]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [[{ "node": "Analisar e Resumir", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [[{ "node": "Analisar e Resumir", "type": "ai_outputParser", "index": 0 }]]
+    },
+    "Analisar e Resumir": {
+      "main": [[{ "node": "Atualizar usr_chat", "type": "main", "index": 0 }]]
+    },
+    "Atualizar usr_chat": {
+      "main": [[{ "node": "Registrar Log", "type": "main", "index": 0 }]]
+    },
+    "Registrar Log": {
+      "main": [[{ "node": "Resultado", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "fae2c26e-ec33-4bb5-979d-1af6f2bd2068",
+          "mensagens": "usuario: olá\nagente: Olá! Como posso ajudar?\nusuario: estou me sentindo ansioso hoje por causa do trabalho",
+          "data_conversa": "2025-12-12",
+          "usr_nome_preferencia": "Aldo",
+          "total_interactions": 6
+        }
+      }
+    ]
+  }
+}

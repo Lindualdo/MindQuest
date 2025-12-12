@@ -1,0 +1,218 @@
+{
+  "name": "sw_xp_conversas_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id", "type": "string" },
+            { "name": "chat_id", "type": "string" },
+            { "name": "data_conversa", "type": "string" },
+            { "name": "total_interactions", "type": "number" }
+          ]
+        }
+      },
+      "id": "start-001",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 240]
+    },
+    {
+      "parameters": {
+        "content": "## Regras: XP Conversas (v2.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia de conversa válida |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje |\n| `log_experts` | 1 registro por chat_id + expert_name |\n\n### Decisão Autônoma\n- Já processou este chat? → ignora\n- Já deu XP hoje (outro chat)? → ignora\n- Novo dia válido? → processa\n\n### Observação\n- Validação de contexto (≥30 palavras) feita no job_experts\n- Sem streaks (implementar depois)"
+      },
+      "id": "sticky-rules",
+      "name": "Regras XP Conversas v2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-280, -60],
+      "width": 380,
+      "height": 340
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Verificar se deve processar e preparar dados\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions,\n    'xp_conversa'::text AS expert_name\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nlog_existente AS (\n  SELECT id FROM log_experts\n  WHERE chat_id = (SELECT chat_id FROM params)\n    AND expert_name = (SELECT expert_name FROM params)\n),\nxp_hoje AS (\n  SELECT EXISTS (\n    SELECT 1 FROM log_experts le\n    JOIN usr_chat uc ON uc.id = le.chat_id\n    WHERE uc.usuario_id = (SELECT usuario_id FROM params)\n      AND le.expert_name = (SELECT expert_name FROM params)\n      AND DATE(uc.data_conversa) = (SELECT data_conversa FROM params)\n      AND le.chat_id != (SELECT chat_id FROM params)\n  ) AS ja_ganhou\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM log_existente) IS NOT NULL THEN 'ja_processado'\n    WHEN (SELECT ja_ganhou FROM xp_hoje) THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  p.expert_name,\n  (SELECT acao FROM decisao) AS acao,\n  (SELECT xp_valor FROM quest_catalogo) AS xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa, $json.total_interactions] }}"
+        }
+      },
+      "id": "pg-verificar",
+      "name": "Verificar Processamento",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [220, 240],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "version": 2, "caseSensitive": true, "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-processar",
+              "leftValue": "={{ $json.acao }}",
+              "rightValue": "processar",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-processar",
+      "name": "Deve Processar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [440, 240]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Buscar ou criar quest reflexão diária (ÚNICA por usuário, sempre ativa)\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::uuid AS catalogo_id\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND is_padrao = true AND status = 'ativo'\n  LIMIT 1\n),\nquest_existente AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT catalogo_id FROM params)\n  LIMIT 1\n),\ncriar_quest AS (\n  INSERT INTO usuarios_quest (id, usuario_id, catalogo_id, status, ativado_em, objetivo_id, config)\n  SELECT\n    gen_random_uuid(),\n    (SELECT usuario_id FROM params),\n    (SELECT catalogo_id FROM params),\n    'ativa',\n    NOW(),\n    (SELECT id FROM objetivo_padrao),\n    jsonb_build_object('titulo', 'Reflexão Diária', 'recorrencia', 'diaria', 'conversa', true, 'permanente', true)\n  WHERE NOT EXISTS (SELECT 1 FROM quest_existente)\n  RETURNING id\n)\nSELECT COALESCE((SELECT id FROM quest_existente), (SELECT id FROM criar_quest)) AS usuarios_quest_id;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id] }}"
+        }
+      },
+      "id": "pg-quest",
+      "name": "Buscar/Criar Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [700, 140],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Inserir recorrência da quest\nINSERT INTO quests_recorrencias (\n  usuarios_quest_id,\n  data_planejada,\n  data_concluida,\n  status,\n  xp_base,\n  xp_bonus\n) VALUES (\n  $1::uuid,\n  $2::date,\n  $2::date,\n  'concluida',\n  $3::int,\n  0\n)\nON CONFLICT (usuarios_quest_id, data_planejada) DO UPDATE SET\n  data_concluida = EXCLUDED.data_concluida,\n  status = 'concluida',\n  atualizado_em = NOW()\nRETURNING id, usuarios_quest_id, data_planejada, xp_base;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuarios_quest_id, $('Verificar Processamento').item.json.data_conversa, $('Verificar Processamento').item.json.xp_valor] }}"
+        }
+      },
+      "id": "pg-recorrencia",
+      "name": "Inserir Recorrência",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [920, 140],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Atualizar XP do usuário\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::int AS xp_valor, $3::date AS data_conversa\n)\nUPDATE usuarios_conquistas SET\n  xp_total = xp_total + (SELECT xp_valor FROM params),\n  xp_base = COALESCE(xp_base, 0) + (SELECT xp_valor FROM params),\n  total_xp_hoje = (SELECT xp_valor FROM params),\n  ultima_conversa_em = (SELECT data_conversa FROM params),\n  atualizado_em = NOW()\nWHERE usuario_id = (SELECT usuario_id FROM params)\nRETURNING usuario_id, xp_total, xp_base, total_xp_hoje;",
+        "options": {
+          "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.xp_valor, $('Verificar Processamento').item.json.data_conversa] }}"
+        }
+      },
+      "id": "pg-update-xp",
+      "name": "Atualizar XP",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1140, 140],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Registrar processamento no log\nINSERT INTO log_experts (usuario_id, chat_id, expert_name, ultima_interaction, historico, criado_em, atualizado_em)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::text,\n  $4::int,\n  jsonb_build_array(jsonb_build_object('de', 0, 'ate', $4::int, 'novas', $4::int, 'em', NOW(), 'xp', $5::int)),\n  NOW(),\n  NOW()\n)\nRETURNING id, chat_id, expert_name;",
+        "options": {
+          "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.chat_id, $('Verificar Processamento').item.json.expert_name, $('Verificar Processamento').item.json.total_interactions, $('Verificar Processamento').item.json.xp_valor] }}"
+        }
+      },
+      "id": "pg-log",
+      "name": "Registrar Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1360, 140],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna resultado do processamento\nconst verificar = $('Verificar Processamento').item.json;\nconst xpAtualizado = $('Atualizar XP').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: 'processado',\n    xp_ganho: verificar.xp_valor,\n    xp_total: xpAtualizado.xp_total,\n    data_conversa: verificar.data_conversa\n  }\n}];"
+      },
+      "id": "code-resultado-ok",
+      "name": "Resultado Processado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 140]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna resultado quando não processa\nconst verificar = $('Verificar Processamento').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: verificar.acao,\n    xp_ganho: 0,\n    xp_total: null,\n    data_conversa: verificar.data_conversa\n  }\n}];"
+      },
+      "id": "code-resultado-skip",
+      "name": "Resultado Ignorado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 340]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [[{ "node": "Verificar Processamento", "type": "main", "index": 0 }]]
+    },
+    "Verificar Processamento": {
+      "main": [[{ "node": "Deve Processar?", "type": "main", "index": 0 }]]
+    },
+    "Deve Processar?": {
+      "main": [
+        [{ "node": "Buscar/Criar Quest", "type": "main", "index": 0 }],
+        [{ "node": "Resultado Ignorado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Buscar/Criar Quest": {
+      "main": [[{ "node": "Inserir Recorrência", "type": "main", "index": 0 }]]
+    },
+    "Inserir Recorrência": {
+      "main": [[{ "node": "Atualizar XP", "type": "main", "index": 0 }]]
+    },
+    "Atualizar XP": {
+      "main": [[{ "node": "Registrar Log", "type": "main", "index": 0 }]]
+    },
+    "Registrar Log": {
+      "main": [[{ "node": "Resultado Processado", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff",
+          "chat_id": "uuid-do-chat",
+          "data_conversa": "2025-12-12",
+          "total_interactions": 15
+        }
+      }
+    ]
+  }
+}
