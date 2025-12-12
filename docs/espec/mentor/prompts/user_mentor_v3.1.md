@@ -1,3 +1,8 @@
+# User Prompt - Mentor MindQuest v3.1
+
+
+## User input
+
 <user_input>
 
 <message>
@@ -11,10 +16,38 @@
 </session_context>
 </user_input>
 
+## Notificações
 
-<!-- ============================================ -->
-<!-- CONTEXTO DO USUÁRIO -->
-<!-- ============================================ -->
+{{ $('contexto_completo').first().json.tem_notificacao_recente ? `
+<notification_context>
+<has_pending_notification>SIM</has_pending_notification>
+<notification_type>${$('contexto_completo').first().json.notificacao_recente.tipo || ''}</notification_type>
+<notification_title>${$('contexto_completo').first().json.notificacao_recente.titulo || ''}</notification_title>
+<notification_message>
+${$('contexto_completo').first().json.notificacao_recente.mensagem || ''}
+</notification_message>
+<mentor_context>${$('contexto_completo').first().json.notificacao_recente.contexto_mentor || ''}</mentor_context>
+
+<instruction>
+ANALISE A MENSAGEM DO USUÁRIO:
+
+1. Se for um NÚMERO (1, 2, 3, 4...):
+   - O usuário está respondendo à alternativa correspondente na notificação
+   - Use o contexto_mentor para conduzir a conversa sobre esse tema
+   - NÃO pergunte "sobre o que quer falar", você já sabe!
+
+2. Se for TEXTO relacionado ao tema:
+   - O usuário está respondendo sobre a notificação
+   - Conduza a conversa naturalmente
+
+3. Se for TEXTO não relacionado:
+   - O usuário quer falar de outro assunto
+   - Siga o novo tema, não force a notificação
+</instruction>
+</notification_context>
+` : '' }}
+
+## CONTEXTO DO USUARIO
 
 <user_context>
 <profile>
@@ -34,23 +67,22 @@
 </mental_profile>
 
 <quests>
-<active_quest>{{ JSON.stringify($('contexto_completo').first().json.quests_ativas || []) }}</active_quest>
+<has_quests>{{ $('contexto_completo').first().json.tem_quests ? 'SIM' : 'NÃO' }}</has_quests>
+<total_ativas>{{ $('contexto_completo').first().json.quests_ativas_total || 0 }}</total_ativas>
+<total_a_planejar>{{ $('contexto_completo').first().json.quests_disponiveis_total || 0 }}</total_a_planejar>
+<note>Use quest_tool para detalhes das quests quando necessário</note>
 </quests>
 
 <progress>
 <level>{{ $('contexto_completo').first().json.nivel_atual }}</level>
 <title>{{ $('contexto_completo').first().json.titulo_nivel }}</title>
-<total_xp></total_xp>
 </progress>
 
 <conversation_history>{{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}</conversation_history>
 </user_context>
 
 
-<!-- ============================================ -->
-<!-- DIRETRIZES PRIORITÁRIAS (pré-processadas) -->
-<!-- ============================================ -->
-
+## DIRETRIZES PRIORITÁRIAS
 
 <diretrizes>
 {{ (() => {
@@ -59,11 +91,11 @@
   
   // Prioridade 1: Objetivos
   if (!ctx.tem_objetivos) {
-    diretrizes.push('PRIORIDADE: Usuário não tem objetivos definidos. Conduza a conversa para descobrir o que ele quer tirar do papel. Pergunte sobre projetos, metas ou mudanças que ele deseja fazer.');
+    diretrizes.push('PRIORIDADE: Usuário não tem objetivos definidos. Conduza a conversa para descobrir o que ele quer tirar do papel.');
   }
   
-  // Nova sessão: abertura contextual
-  if (ctx.is_nova_sessao && ctx.interacao_atual === 1) {
+  // Nova sessão: abertura contextual (só se NÃO tiver notificação)
+  if (ctx.is_nova_sessao && ctx.interacao_atual === 1 && !ctx.tem_notificacao_recente) {
     if (ctx.is_primeira_conversa) {
       diretrizes.push('Primeira conversa: Acolha, apresente-se brevemente como mentor do MindQuest, e foque em conhecer o usuário.');
     } else {
@@ -71,16 +103,12 @@
     }
   }
   
-  // Quests
-  const quests = ctx.quests_ativas || [];
-  if (quests.length > 0) {
-    diretrizes.push('Quests ativas: Pergunte sobre progresso quando fizer sentido. Motive nas concluídas, ajude a destravar nas paradas.');
-  }
-  
   return diretrizes.join('\n');
 })() }}
 </diretrizes>
 
+## FORMATO DE SAÍDA
+
 <output_format>
-Retorne APENAS este JSON, sem texto adicional, seguindo rigorosamente as intruções do system: {"mensagem_usuario":"sua resposta","tema_atual":{"titulo":"tema","resumo":["ponto 1","ponto 2"],"decisoes":[]},"checkpoint_encerramento":false,"tema_atual_fechado":false,"objetivo_sugerido":null}
+Retorne APENAS este JSON, sem texto adicional, seguindo rigorosamente as intruções do system: {"mensagem_usuario":"sua resposta"}
 </output_format>
