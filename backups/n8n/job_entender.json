@@ -2,18 +2,13 @@
   "createdAt": "2025-12-11T10:45:19.174Z",
   "id": "Rn3nIn29Q2ZGv7ti",
   "name": "job_entender",
-  "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados - com validação inteligente de delta",
+  "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados - com validação inteligente de delta + janela de tempo",
   "active": true,
   "nodes": [
     {
       "parameters": {
         "rule": {
-          "interval": [
-            {
-              "field": "minutes",
-              "minutesInterval": 30
-            }
-          ]
+          "interval": [{"field": "minutes", "minutesInterval": 30}]
         }
       },
       "id": "trigger-001",
@@ -24,9 +19,7 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Busca chats com interações NÃO processadas + dados completos\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\nORDER BY c.data_conversa DESC\nLIMIT 50;",
-        "options": {}
+        "query": "-- Busca chats com interações NÃO processadas + dados completos + timestamp última processamento\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada,\n  le.atualizado_em AS ultima_processada_em\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\nORDER BY c.data_conversa DESC\nLIMIT 50;"
       },
       "id": "busca-pendentes-001",
       "name": "busca_pendentes",
@@ -50,7 +43,7 @@
       "typeVersion": 2,
       "position": [320, 128],
       "parameters": {
-        "jsCode": "// VALIDAÇÃO INTELIGENTE DO DELTA\nconst item = $input.first().json;\nconst mensagens = item.mensagens || [];\nconst ultimaProcessada = item.ultima_processada || 0;\nconst totalAtual = item.total_interactions || 0;\nconst mensagensNovas = Array.isArray(mensagens) ? mensagens.slice(ultimaProcessada) : [];\nconst mensagensUsuario = mensagensNovas.filter(m => m.autor && m.autor.toLowerCase() === 'usuario');\nconst palavrasNovas = mensagensUsuario.map(m => (m.texto || '').split(/\\s+/).filter(p => p.length > 0).length).reduce((a, b) => a + b, 0);\nconst numInteracoesNovas = totalAtual - ultimaProcessada;\nconst volumeAlto = palavrasNovas >= 80;\nconst volumeMedio = palavrasNovas >= 30 && palavrasNovas < 80;\nconst volumeBaixo = palavrasNovas < 30;\nconst mensagensTexto = mensagensUsuario.map(m => m.texto || '').join(' ').toLowerCase();\nconst temPalavrasChave = /\\b(sinto|sentir|sentindo|senti|emoção|emocional|medo|frustração|ansiedade|ansioso|triste|feliz|preocupado|reflexão|pensei|pensando|percebi|percebo)\\b/i.test(mensagensTexto);\nconst conversaProfunda = mensagensUsuario.length >= 4;\nlet deveProcessar = false;\nlet motivo = '';\nif (volumeAlto) { deveProcessar = true; motivo = `Volume alto: ${palavrasNovas} palavras novas`; } else if (volumeMedio && (temPalavrasChave || conversaProfunda)) { deveProcessar = true; motivo = `Volume médio com contexto relevante: ${palavrasNovas} palavras`; } else if (volumeBaixo) { deveProcessar = false; motivo = `Volume insuficiente: ${palavrasNovas} palavras (mín: 30)`; } else { deveProcessar = false; motivo = `Volume médio sem contexto significativo: ${palavrasNovas} palavras`; }\nconst mensagensNovasTexto = mensagensNovas.map(m => `${m.autor}: ${m.texto}`).join('\\n');\nreturn [{...item, deve_processar: deveProcessar, motivo_validacao: motivo, palavras_novas: palavrasNovas, interacoes_novas: numInteracoesNovas, mensagens_delta: mensagensNovasTexto, mensagens_completas: item.mensagens}];"
+        "jsCode": "// VALIDAÇÃO INTELIGENTE DO DELTA + JANELA DE TEMPO\nconst item = $input.first().json;\nconst mensagens = item.mensagens || [];\nconst ultimaProcessada = item.ultima_processada || 0;\nconst totalAtual = item.total_interactions || 0;\nconst ultimaProcessadaEm = item.ultima_processada_em;\nconst mensagensNovas = Array.isArray(mensagens) ? mensagens.slice(ultimaProcessada) : [];\nconst mensagensUsuario = mensagensNovas.filter(m => m.autor && m.autor.toLowerCase() === 'usuario');\nconst palavrasNovas = mensagensUsuario.map(m => (m.texto || '').split(/\\s+/).filter(p => p.length > 0).length).reduce((a, b) => a + b, 0);\nconst numInteracoesNovas = totalAtual - ultimaProcessada;\nconst JANELA_MAXIMA_HORAS = 2;\nlet horasSemProcessar = null;\nlet tempoExcedido = false;\nif (ultimaProcessadaEm) {\n  const agora = new Date();\n  const ultimaData = new Date(ultimaProcessadaEm);\n  horasSemProcessar = (agora - ultimaData) / (1000 * 60 * 60);\n  tempoExcedido = horasSemProcessar > JANELA_MAXIMA_HORAS;\n}\nconst volumeAlto = palavrasNovas >= 80;\nconst volumeMedio = palavrasNovas >= 30 && palavrasNovas < 80;\nconst volumeBaixo = palavrasNovas < 30;\nconst mensagensTexto = mensagensUsuario.map(m => m.texto || '').join(' ').toLowerCase();\nconst temPalavrasChave = /\\b(sinto|sentir|sentindo|senti|emoção|emocional|medo|frustração|ansiedade|ansioso|triste|feliz|preocupado|reflexão|pensei|pensando|percebi|percebo)\\b/i.test(mensagensTexto);\nconst conversaProfunda = mensagensUsuario.length >= 4;\nlet deveProcessar = false;\nlet motivo = '';\nif (tempoExcedido) {\n  deveProcessar = true;\n  motivo = `Tempo excedido: ${horasSemProcessar.toFixed(1)}h sem processar (máx: ${JANELA_MAXIMA_HORAS}h) - ${palavrasNovas} palavras acumuladas`;\n} else if (volumeAlto) {\n  deveProcessar = true;\n  motivo = `Volume alto: ${palavrasNovas} palavras novas`;\n} else if (volumeMedio && (temPalavrasChave || conversaProfunda)) {\n  deveProcessar = true;\n  motivo = `Volume médio com contexto relevante: ${palavrasNovas} palavras`;\n} else if (volumeBaixo) {\n  deveProcessar = false;\n  const tempoInfo = horasSemProcessar ? ` (último processamento: ${horasSemProcessar.toFixed(1)}h atrás)` : '';\n  motivo = `Volume insuficiente: ${palavrasNovas} palavras (mín: 30)${tempoInfo}`;\n} else {\n  deveProcessar = false;\n  motivo = `Volume médio sem contexto significativo: ${palavrasNovas} palavras`;\n}\nconst mensagensNovasTexto = mensagensNovas.map(m => `${m.autor}: ${m.texto}`).join('\\n');\nreturn [{...item, deve_processar: deveProcessar, motivo_validacao: motivo, palavras_novas: palavrasNovas, interacoes_novas: numInteracoesNovas, horas_sem_processar: horasSemProcessar, tempo_excedido: tempoExcedido, mensagens_delta: mensagensNovasTexto, mensagens_completas: item.mensagens}];"
       }
     },
     {
