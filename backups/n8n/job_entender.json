@@ -19,7 +19,9 @@
     },
     {
       "parameters": {
-        "query": "-- Busca chats com interações NÃO processadas + dados completos + timestamp última processamento\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada,\n  le.atualizado_em AS ultima_processada_em\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\nORDER BY c.data_conversa DESC\nLIMIT 50;"
+        "operation": "executeQuery",
+        "query": "-- Busca chats com interações NÃO processadas + dados completos + timestamp última processamento\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada,\n  le.atualizado_em AS ultima_processada_em\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\nORDER BY c.data_conversa DESC\nLIMIT 50;",
+        "options": {}
       },
       "id": "busca-pendentes-001",
       "name": "busca_pendentes",
@@ -102,7 +104,9 @@
     },
     {
       "parameters": {
-        "query": "=-- Upsert com histórico de execuções\nINSERT INTO log_experts (chat_id, ultima_interaction, historico, processado_em, atualizado_em)\nVALUES ('{{ $json.chat_id }}'::uuid, {{ $json.total_interactions }}, jsonb_build_array(jsonb_build_object('de', 0, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }}, 'em', NOW())), NOW(), NOW())\nON CONFLICT (chat_id) DO UPDATE SET historico = log_experts.historico || jsonb_build_array(jsonb_build_object('de', log_experts.ultima_interaction, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }} - log_experts.ultima_interaction, 'em', NOW())), ultima_interaction = {{ $json.total_interactions }}, atualizado_em = NOW();"
+        "operation": "executeQuery",
+        "query": "=-- Upsert com histórico de execuções\nINSERT INTO log_experts (chat_id, ultima_interaction, historico, processado_em, atualizado_em)\nVALUES ('{{ $json.chat_id }}'::uuid, {{ $json.total_interactions }}, jsonb_build_array(jsonb_build_object('de', 0, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }}, 'em', NOW())), NOW(), NOW())\nON CONFLICT (chat_id) DO UPDATE SET historico = log_experts.historico || jsonb_build_array(jsonb_build_object('de', log_experts.ultima_interaction, 'ate', {{ $json.total_interactions }}, 'novas', {{ $json.total_interactions }} - log_experts.ultima_interaction, 'em', NOW())), ultima_interaction = {{ $json.total_interactions }}, atualizado_em = NOW();",
+        "options": {}
       },
       "id": "marca-processada-001",
       "name": "marca_processada",
