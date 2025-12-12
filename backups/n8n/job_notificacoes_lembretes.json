@@ -3,7 +3,7 @@
   "id": "i5VG5rHZ39ytueyu",
   "name": "job_notificacoes_lembretes",
   "description": null,
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {

@@ -3,7 +3,7 @@
   "id": "Rn3nIn29Q2ZGv7ti",
   "name": "job_entender",
   "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -349,7 +349,11 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
   "shared": [
