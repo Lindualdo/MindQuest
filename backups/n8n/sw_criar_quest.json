@@ -270,7 +270,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('start').item.json.usuario_id }}",
+            "usuario_id": "={{ $('start').first().json.usuario_id }}",
             "quests_personalizadas": "={{ JSON.stringify($json.novas_quests) }}",
             "atualizacoes_status": "={{ JSON.stringify($json.atualizacoes) }}"
           },
@@ -716,8 +716,20 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "fae2c26e-ec33-4bb5-979d-1af6f2bd2068"
+          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa",
+          "chat_id": "c475f518-d1b4-4e51-ad78-0bdbacb4b32d"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa",
+          "chat_id": "c475f518-d1b4-4e51-ad78-0bdbacb4b32d"
+        },
+        "pairedItem": {
+          "item": 1
         }
       }
     ]

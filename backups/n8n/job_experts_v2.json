@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-12-11T10:45:19.174Z",
   "id": "Rn3nIn29Q2ZGv7ti",
-  "name": "job_experts",
+  "name": "job_experts_v2",
   "description": "Chama o sw entender que executa os experts para analisar as conversas do usuario e gerar dados",
   "active": true,
   "isArchived": false,
@@ -29,7 +29,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-          "query": "-- Busca chats válidos: >= 30 palavras e com interações novas\n-- Calcula total_palavras diretamente do campo mensagens (autor = 'usuario')\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  (\n    SELECT COALESCE(SUM(array_length(string_to_array(m->>'texto', ' '), 1)), 0)\n    FROM jsonb_array_elements(c.mensagens) AS m\n    WHERE m->>'autor' = 'usuario'\n      AND m->>'texto' IS NOT NULL\n  ) AS total_palavras,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id AND le.expert_name = 'hub'\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\n  AND (\n    SELECT COALESCE(SUM(array_length(string_to_array(m->>'texto', ' '), 1)), 0)\n    FROM jsonb_array_elements(c.mensagens) AS m\n    WHERE m->>'autor' = 'usuario'\n      AND m->>'texto' IS NOT NULL\n  ) >= 30\nORDER BY c.data_conversa DESC\nLIMIT 50;",
+        "query": "-- Busca chats não finalizados com >= 30 palavras do usuário\nWITH palavras_calculadas AS (\n  SELECT \n    c.id,\n    c.usuario_id,\n    c.data_conversa,\n    c.mensagens,\n    c.total_interactions,\n    c.status,\n    u.nome_preferencia AS usr_nome_preferencia,\n    COALESCE(le.ultima_interaction, 0) AS ultima_processada,\n    -- Calcula palavras do usuário diretamente do JSON\n    COALESCE((\n      SELECT SUM(array_length(regexp_split_to_array(trim(msg->>'texto'), '\\s+'), 1))\n      FROM jsonb_array_elements(c.mensagens) AS msg\n      WHERE msg->>'autor' = 'usuario'\n    ), 0) AS palavras_usuario\n  FROM usr_chat c\n  JOIN usuarios u ON u.id = c.usuario_id\n  LEFT JOIN log_experts le ON le.chat_id = c.id AND le.expert_name = 'hub'\n  WHERE c.status != 'finalizado'\n    AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\n)\nSELECT \n  id,\n  usuario_id,\n  data_conversa,\n  mensagens,\n  total_interactions,\n  palavras_usuario AS total_palavras,\n  usr_nome_preferencia,\n  ultima_processada\nFROM palavras_calculadas\nWHERE palavras_usuario >= 30\nORDER BY data_conversa DESC\nLIMIT 50;",
         "options": {}
       },
       "id": "6c8a1a58-8c9d-4f9a-9dc2-631bdc305bef",
@@ -86,8 +86,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2320,
-        -192
+        2672,
+        -128
       ],
       "credentials": {
         "postgres": {
@@ -98,8 +98,8 @@
     },
     {
       "parameters": {
-        "content": "## Regras: job_experts (v2.0)\n\n### Filtro de Contexto\n- **Mínimo:** 30 palavras do usuário\n- **Janela:** últimos 7 dias\n- **Limite:** 50 chats por execução\n\n### Fluxo\n1. Busca chats válidos (≥30 palavras + novas interações)\n2. Prepara delta de mensagens\n3. Chama sw_entender (hub dos experts)\n4. Atualiza log_experts + finaliza sessão\n\n### Controle\n- `log_experts.expert_name = 'hub'`\n- Histórico JSONB incremental\n- 1 registro por chat_id + expert_name",
-        "height": 656,
+        "content": "## Regras: job_experts (v2.2)\n\n### Filtro de Contexto\n- **Status:** != 'finalizado' (qualquer data)\n- **Mínimo:** 30 palavras do usuário\n- **Cálculo:** direto do JSON mensagens\n- **Limite:** 50 chats por execução\n\n### Fluxo\n1. Busca chats não finalizados\n2. Calcula palavras do usuário (SQL)\n3. Filtra >= 30 palavras\n4. Prepara delta de mensagens\n5. Chama sw_experts (hub)\n6. **IF processado = true:**\n   - Atualiza log + marca finalizado\n7. **ELSE:** volta ao loop (não finaliza)\n\n### Controle\n- `log_experts.expert_name = 'hub'`\n- Histórico JSONB incremental\n- Só finaliza se `processado = true`",
+        "height": 700,
         "width": 432
       },
       "id": "aa744652-e6b5-404c-9efe-e0880b657312",
@@ -115,10 +115,10 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "M6wDT4LzEiYcAo5Y",
+          "value": "af4tqT4UNTFznKEu",
           "mode": "list",
-          "cachedResultUrl": "/workflow/M6wDT4LzEiYcAo5Y",
-          "cachedResultName": "sw_experts"
+          "cachedResultUrl": "/workflow/af4tqT4UNTFznKEu",
+          "cachedResultName": "sw_experts_v2"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -135,6 +135,15 @@
             {
               "id": "usuario_id",
               "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -160,15 +169,6 @@
               "type": "string"
             },
             {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
               "id": "usr_nome_preferencia",
               "displayName": "usr_nome_preferencia",
               "required": false,
@@ -184,7 +184,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string"
+              "type": "number"
             }
           ],
           "attemptToConvertTypes": true,
@@ -200,6 +200,39 @@
       "typeVersion": 1.3,
       "position": [
         2096,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond_processado",
+              "leftValue": "={{ $json.processado }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "verifica_processado",
+      "name": "Se Processou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2288,
         -192
       ]
     }
@@ -265,7 +298,25 @@
       "main": [
         [
           {
+            "node": "Se Processou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se Processou?": {
+      "main": [
+        [
+          {
             "node": "atualiza_log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -284,8 +335,29 @@
     }
   },
   "meta": null,
-  "pinData": {},
-  "activeVersionId": "2e9a5642-411a-4d12-9592-ab9174d10c82",
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-12-13T11:48:53.264-05:00",
+          "Readable date": "December 13th 2025, 11:48:53 am",
+          "Readable time": "11:48:53 am",
+          "Day of week": "Saturday",
+          "Year": "2025",
+          "Month": "December",
+          "Day of month": "13",
+          "Hour": "11",
+          "Minute": "48",
+          "Second": "53",
+          "Timezone": "America/New_York (UTC-05:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": "889a2e27-5100-492f-9bdf-dd48fc468ec5",
   "shared": [
     {
       "createdAt": "2025-12-11T10:45:19.174Z",
@@ -339,7 +411,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-12T20:02:38.578Z",
+    "createdAt": "2025-12-13T21:02:37.485Z",
     "workflowId": "Rn3nIn29Q2ZGv7ti",
     "nodes": [
       {
@@ -365,7 +437,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "-- Busca chats válidos: >= 30 palavras e com interações novas\n-- Calcula total_palavras diretamente do campo mensagens (autor = 'usuario')\nSELECT \n  c.id,\n  c.usuario_id,\n  c.data_conversa,\n  c.mensagens,\n  c.total_interactions,\n  (\n    SELECT COALESCE(SUM(array_length(string_to_array(m->>'texto', ' '), 1)), 0)\n    FROM jsonb_array_elements(c.mensagens) AS m\n    WHERE m->>'autor' = 'usuario'\n      AND m->>'texto' IS NOT NULL\n  ) AS total_palavras,\n  u.nome_preferencia AS usr_nome_preferencia,\n  COALESCE(le.ultima_interaction, 0) AS ultima_processada\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nLEFT JOIN log_experts le ON le.chat_id = c.id AND le.expert_name = 'hub'\nWHERE c.data_conversa >= CURRENT_DATE - INTERVAL '7 days'\n  AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\n  AND (\n    SELECT COALESCE(SUM(array_length(string_to_array(m->>'texto', ' '), 1)), 0)\n    FROM jsonb_array_elements(c.mensagens) AS m\n    WHERE m->>'autor' = 'usuario'\n      AND m->>'texto' IS NOT NULL\n  ) >= 30\nORDER BY c.data_conversa DESC\nLIMIT 50;",
+          "query": "-- Busca chats não finalizados com >= 30 palavras do usuário\nWITH palavras_calculadas AS (\n  SELECT \n    c.id,\n    c.usuario_id,\n    c.data_conversa,\n    c.mensagens,\n    c.total_interactions,\n    c.status,\n    u.nome_preferencia AS usr_nome_preferencia,\n    COALESCE(le.ultima_interaction, 0) AS ultima_processada,\n    -- Calcula palavras do usuário diretamente do JSON\n    COALESCE((\n      SELECT SUM(array_length(regexp_split_to_array(trim(msg->>'texto'), '\\s+'), 1))\n      FROM jsonb_array_elements(c.mensagens) AS msg\n      WHERE msg->>'autor' = 'usuario'\n    ), 0) AS palavras_usuario\n  FROM usr_chat c\n  JOIN usuarios u ON u.id = c.usuario_id\n  LEFT JOIN log_experts le ON le.chat_id = c.id AND le.expert_name = 'hub'\n  WHERE c.status != 'finalizado'\n    AND c.total_interactions > COALESCE(le.ultima_interaction, 0)\n)\nSELECT \n  id,\n  usuario_id,\n  data_conversa,\n  mensagens,\n  total_interactions,\n  palavras_usuario AS total_palavras,\n  usr_nome_preferencia,\n  ultima_processada\nFROM palavras_calculadas\nWHERE palavras_usuario >= 30\nORDER BY data_conversa DESC\nLIMIT 50;",
           "options": {}
         },
         "id": "6c8a1a58-8c9d-4f9a-9dc2-631bdc305bef",
@@ -422,8 +494,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2320,
-          -192
+          2672,
+          -128
         ],
         "credentials": {
           "postgres": {
@@ -434,8 +506,8 @@
       },
       {
         "parameters": {
-          "content": "## Regras: job_experts (v2.0)\n\n### Filtro de Contexto\n- **Mínimo:** 30 palavras do usuário\n- **Janela:** últimos 7 dias\n- **Limite:** 50 chats por execução\n\n### Fluxo\n1. Busca chats válidos (≥30 palavras + novas interações)\n2. Prepara delta de mensagens\n3. Chama sw_entender (hub dos experts)\n4. Atualiza log_experts + finaliza sessão\n\n### Controle\n- `log_experts.expert_name = 'hub'`\n- Histórico JSONB incremental\n- 1 registro por chat_id + expert_name",
-          "height": 656,
+          "content": "## Regras: job_experts (v2.2)\n\n### Filtro de Contexto\n- **Status:** != 'finalizado' (qualquer data)\n- **Mínimo:** 30 palavras do usuário\n- **Cálculo:** direto do JSON mensagens\n- **Limite:** 50 chats por execução\n\n### Fluxo\n1. Busca chats não finalizados\n2. Calcula palavras do usuário (SQL)\n3. Filtra >= 30 palavras\n4. Prepara delta de mensagens\n5. Chama sw_experts (hub)\n6. **IF processado = true:**\n   - Atualiza log + marca finalizado\n7. **ELSE:** volta ao loop (não finaliza)\n\n### Controle\n- `log_experts.expert_name = 'hub'`\n- Histórico JSONB incremental\n- Só finaliza se `processado = true`",
+          "height": 700,
           "width": 432
         },
         "id": "aa744652-e6b5-404c-9efe-e0880b657312",
@@ -451,10 +523,10 @@
         "parameters": {
           "workflowId": {
             "__rl": true,
-            "value": "M6wDT4LzEiYcAo5Y",
+            "value": "af4tqT4UNTFznKEu",
             "mode": "list",
-            "cachedResultUrl": "/workflow/M6wDT4LzEiYcAo5Y",
-            "cachedResultName": "sw_experts"
+            "cachedResultUrl": "/workflow/af4tqT4UNTFznKEu",
+            "cachedResultName": "sw_experts_v2"
           },
           "workflowInputs": {
             "mappingMode": "defineBelow",
@@ -471,6 +543,15 @@
               {
                 "id": "usuario_id",
                 "displayName": "usuario_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
                 "required": false,
                 "defaultMatch": false,
                 "display": true,
@@ -496,15 +577,6 @@
                 "type": "string"
               },
               {
-                "id": "chat_id",
-                "displayName": "chat_id",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "canBeUsedToMatch": true,
-                "type": "string"
-              },
-              {
                 "id": "usr_nome_preferencia",
                 "displayName": "usr_nome_preferencia",
                 "required": false,
@@ -520,7 +592,7 @@
                 "defaultMatch": false,
                 "display": true,
                 "canBeUsedToMatch": true,
-                "type": "string"
+                "type": "number"
               }
             ],
             "attemptToConvertTypes": true,
@@ -536,6 +608,39 @@
         "typeVersion": 1.3,
         "position": [
           2096,
+          -192
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "cond_processado",
+                "leftValue": "={{ $json.processado }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "verifica_processado",
+        "name": "Se Processou?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          2288,
           -192
         ]
       }
@@ -601,7 +706,25 @@
         "main": [
           [
             {
+              "node": "Se Processou?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Se Processou?": {
+        "main": [
+          [
+            {
               "node": "atualiza_log",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Loop Over Items",
               "type": "main",
               "index": 0
             }

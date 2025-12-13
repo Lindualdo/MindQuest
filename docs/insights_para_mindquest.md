@@ -150,3 +150,5 @@ Ao final, você teria um diagrama de fluxo (ou um pseudo-código, se preferir!) 
 O que o seu Realizador pensa sobre a ideia de 'codificar' seu método de trading? Isso te daria mais clareza e reduziria a dependência do 'instinto'?
 
 (A ideia seria o usuário ir preenchendo isso com a ajuda do Mentor, não eu dar a fórmula pronta, claro!)
+
+*Ideia 2: "MAPA MENTAL - criar mapa mental ações, emoções, objetivos..."*
