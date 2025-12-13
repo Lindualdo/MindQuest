@@ -120,6 +120,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "8b0f0b68-31f6-4562-8cc9-2d731c202c3f",
   "shared": [
     {
       "createdAt": "2025-11-26T20:13:11.881Z",
@@ -171,5 +172,115 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "iAprTDnlVh7Qxlkk",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "ativar-quest",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          208
+        ],
+        "webhookId": "69441bda-e3b3-4791-acfc-d0908f1290ac",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const query = $input.first().json.query || {};\nconst body = $input.first().json.body || {};\n\nconst usuarioId = query.usuario_id || body.usuario_id || null;\nconst questId = query.quest_id || body.quest_id || null;\nconst recorrenciaDias = parseInt(query.recorrencia_dias || body.recorrencia_dias || '0', 10);\nconst tipoRecorrencia = (query.tipo_recorrencia || body.tipo_recorrencia || 'diaria').toLowerCase();\n\nif (!usuarioId || !questId || !recorrenciaDias || recorrenciaDias < 1) {\n  throw new Error('usuario_id, quest_id e recorrencia_dias são obrigatórios');\n}\n\nif (!['diaria', 'semanal'].includes(tipoRecorrencia)) {\n  throw new Error('tipo_recorrencia deve ser \"diaria\" ou \"semanal\"');\n}\n\n// Para semanal, o intervalo é de 7 dias entre cada recorrência\nconst intervalo = tipoRecorrencia === 'semanal' ? 7 : 1;\n\nreturn [{\n  json: {\n    usuario_id: usuarioId.trim(),\n    quest_id: questId.trim(),\n    recorrencia_dias: recorrenciaDias,\n    tipo_recorrencia: tipoRecorrencia,\n    intervalo: intervalo\n  }\n}];"
+        },
+        "id": "validar",
+        "name": "Validar Entrada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH payload AS (\n  SELECT \n    $1::uuid AS usuario_id,\n    $2::uuid AS quest_id,\n    $3::integer AS recorrencia_dias,\n    $4::integer AS intervalo\n),\nvalidar_quest AS (\n  SELECT \n    uq.id,\n    uq.usuario_id,\n    uq.status,\n    COALESCE(qc.xp, 10) AS xp_base\n  FROM public.usuarios_quest uq\n  LEFT JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.id = (SELECT quest_id FROM payload)\n    AND uq.usuario_id = (SELECT usuario_id FROM payload)\n    AND uq.status = 'disponivel'\n),\nativar_quest AS (\n  UPDATE public.usuarios_quest\n  SET \n    status = 'ativa',\n    ativado_em = NOW(),\n    atualizado_em = NOW()\n  FROM validar_quest vq\n  WHERE usuarios_quest.id = vq.id\n    AND usuarios_quest.status = 'disponivel'\n  RETURNING usuarios_quest.id, usuarios_quest.usuario_id\n),\ncriar_recorrencias AS (\n  INSERT INTO public.quests_recorrencias (\n    usuarios_quest_id,\n    data_planejada,\n    status,\n    xp_base,\n    criado_em,\n    atualizado_em\n  )\n  SELECT\n    aq.id,\n    (CURRENT_DATE + (generate_series(0, (SELECT recorrencia_dias FROM payload) - 1) * (SELECT intervalo FROM payload)))::date AS data_planejada,\n    'pendente',\n    vq.xp_base,\n    NOW(),\n    NOW()\n  FROM ativar_quest aq\n  CROSS JOIN validar_quest vq\n  WHERE aq.id IS NOT NULL\n  RETURNING id, usuarios_quest_id, data_planejada, status\n)\nSELECT\n  (SELECT usuario_id FROM payload) AS usuario_id,\n  (SELECT quest_id FROM payload) AS quest_id,\n  (SELECT COUNT(*) FROM ativar_quest) AS quest_ativada,\n  (SELECT COUNT(*) FROM criar_recorrencias) AS recorrencias_criadas,\n  (SELECT jsonb_agg(\n    jsonb_build_object(\n      'id', id,\n      'data_planejada', data_planejada,\n      'status', status\n    )\n  ) FROM criar_recorrencias) AS recorrencias;",
+          "options": {
+            "queryReplacement": "={{ [$json.usuario_id, $json.quest_id, $json.recorrencia_dias, $json.intervalo] }}"
+          }
+        },
+        "id": "ativar",
+        "name": "Ativar Quest e Criar Recorrencias",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          208
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "responder",
+        "name": "Responder",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          208,
+          208
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Validar Entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Entrada": {
+        "main": [
+          [
+            {
+              "node": "Ativar Quest e Criar Recorrencias",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ativar Quest e Criar Recorrencias": {
+        "main": [
+          [
+            {
+              "node": "Responder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

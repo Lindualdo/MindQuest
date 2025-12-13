@@ -157,6 +157,7 @@
       }
     ]
   },
+  "activeVersionId": "edc9503f-26e3-4db2-aa93-3e0abc2c8825",
   "shared": [
     {
       "createdAt": "2025-10-07T10:10:22.720Z",
@@ -208,5 +209,114 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "K6wCa8HaaUwdp6bP",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "humor-historico",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "c6bf4419-61be-4560-a67a-9475d6ee5af8",
+        "name": "Webhook",
+        "webhookId": "b9cfce67-b271-4b34-a00a-9d699318d8dd"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH base AS (\n  SELECT\n    uhe.usuario_id,\n    uhe.data_registro,\n    uhe.hora_registro,\n    uhe.detectado_em,\n    uhe.humor_dia,\n    uhe.periodo_dia,\n    uhe.variacao_humor,\n    uhe.justificativa_humor,\n    uhe.confianca_analise,\n    uhe.chat_id,\n    ROW_NUMBER() OVER (\n      ORDER BY COALESCE(uhe.detectado_em, uhe.data_registro::timestamp + COALESCE(uhe.hora_registro, '00:00'::time)) DESC,\n               uhe.hora_registro DESC\n    ) AS rn\n  FROM public.usuarios_humor_energia uhe\n  WHERE uhe.usuario_id = $1\n),\nregistros AS (\n  SELECT *\n  FROM base\n  WHERE rn <= 7\n),\nperiodo AS (\n  SELECT\n    COALESCE(MIN(data_registro), CURRENT_DATE) AS inicio,\n    COALESCE(MAX(data_registro), CURRENT_DATE) AS fim\n  FROM registros\n),\nlinha_base AS (\n  SELECT\n    data_registro,\n    AVG(humor_dia)::numeric(4,2) AS humor_medio_dia\n  FROM registros\n  GROUP BY data_registro\n),\nemocoes_conversa AS (\n  SELECT\n    ue.chat_id,\n    ue.emocao_id,\n    ep.nome AS emocao_nome,\n    ep.emoji,\n    ue.intensidade,\n    ue.detectado_em,\n    ue.criado_em,\n    ROW_NUMBER() OVER (\n      PARTITION BY ue.chat_id\n      ORDER BY ue.intensidade DESC NULLS LAST,\n               ue.detectado_em DESC NULLS LAST,\n               ue.criado_em DESC NULLS LAST\n    ) AS rn\n  FROM public.usuarios_emocoes ue\n  LEFT JOIN public.emocoes_plutchik ep\n    ON ep.id = ue.emocao_id\n  WHERE ue.usuario_id = $1\n    AND ue.chat_id IN (SELECT DISTINCT chat_id FROM registros WHERE chat_id IS NOT NULL)\n),\nconversas AS (\n  SELECT\n    uc.id AS chat_id,\n    uc.data_conversa,\n    uc.horario_inicio,\n    uc.horario_fim,\n    ec.emocao_nome,\n    ec.emoji,\n    ec.intensidade AS intensidade_emocao\n  FROM public.usr_chat uc\n  LEFT JOIN emocoes_conversa ec\n    ON ec.chat_id = uc.id AND ec.rn = 1\n  WHERE uc.usuario_id = $1\n    AND uc.data_conversa BETWEEN (SELECT inicio FROM periodo) AND (SELECT fim FROM periodo)\n)\nSELECT jsonb_build_object(\n  'periodo', jsonb_build_object(\n      'inicio', (SELECT inicio FROM periodo),\n      'fim',    (SELECT fim    FROM periodo)\n  ),\n  'serie', (\n    SELECT jsonb_agg(\n      jsonb_build_object(\n        'data',          lb.data_registro,\n        'humor_medio',   lb.humor_medio_dia,\n        'energia_media', NULL,\n        'pico_dia',      up.humor_dia,\n        'emoji',         conv.emoji,\n        'emocao',        conv.emocao_nome\n      )\n      ORDER BY lb.data_registro\n    )\n    FROM linha_base lb\n    LEFT JOIN registros up\n      ON up.data_registro = lb.data_registro\n    LEFT JOIN conversas conv\n      ON conv.data_conversa = lb.data_registro\n  ),\n  'detalhes', (\n    SELECT jsonb_agg(\n      jsonb_build_object(\n        'data',             reg.data_registro,\n        'hora',             reg.hora_registro,\n        'humor',            reg.humor_dia,\n        'energia',          NULL,\n        'variacao_humor',   reg.variacao_humor,\n        'variacao_energia', NULL,\n        'periodo_dia',      reg.periodo_dia,\n        'justificativa',    reg.justificativa_humor,\n        'confianca',        reg.confianca_analise,\n        'conversa', (\n          SELECT jsonb_build_object(\n            'id',                 conv.chat_id,\n            'horario_inicio',     conv.horario_inicio,\n            'horario_fim',        conv.horario_fim,\n            'emocao',             conv.emocao_nome,\n            'intensidade_emocao', conv.intensidade_emocao,\n            'emoji',              conv.emoji\n          )\n          FROM conversas conv\n          WHERE conv.chat_id = reg.chat_id\n        )\n      )\n      ORDER BY reg.data_registro DESC, reg.hora_registro DESC\n    )\n    FROM registros reg\n  )\n) AS historico_humor;\n",
+          "options": {
+            "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}\n\n# Param 2 – início do período (default 7 dias)\n{{ $json.query.data_inicio ?? $now.minus({ days: 6 }).startOf('day').toFormat('yyyy-LL-dd') }}\n\n# Param 3 – fim do período (default hoje)\n{{ $json.query.data_fim ?? $now.startOf('day').toFormat('yyyy-LL-dd') }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          208,
+          0
+        ],
+        "id": "9808b7d2-5d36-4931-acbd-0a50a8bf99f1",
+        "name": "Execute a SQL query",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          416,
+          0
+        ],
+        "id": "9cfb101f-cf9e-4325-bd15-bad04b224665",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH periodo AS (\n  SELECT\n    (CURRENT_DATE - INTERVAL '6 day') AS inicio,\n    CURRENT_DATE                    AS fim\n),\nregistros AS (\n  SELECT\n    uhe.usuario_id,\n    uhe.data_registro,\n    uhe.hora_registro,\n    uhe.detectado_em,\n    uhe.humor_dia,\n    uhe.energia_nivel,\n    uhe.periodo_dia,\n    uhe.variacao_humor,\n    uhe.variacao_energia,\n    uhe.justificativa_humor,\n    uhe.confianca_analise,\n    uhe.chat_id\n  FROM public.usuarios_humor_energia uhe\n  JOIN periodo p\n    ON uhe.data_registro BETWEEN p.inicio AND p.fim\n  WHERE uhe.usuario_id = $1\n),\nultimos_por_dia AS (\n  SELECT DISTINCT ON (data_registro)\n    data_registro,\n    hora_registro,\n    detectado_em,\n    humor_dia,\n    energia_nivel,\n    periodo_dia,\n    variacao_humor,\n    variacao_energia,\n    justificativa_humor,\n    confianca_analise,\n    chat_id\n  FROM registros\n  ORDER BY data_registro, detectado_em DESC, hora_registro DESC\n),\nlinha_base AS (\n  SELECT\n    data_registro,\n    AVG(humor_dia)::numeric(4,2)     AS humor_medio_dia,\n    AVG(energia_nivel)::numeric(4,2) AS energia_media_dia\n  FROM registros\n  GROUP BY data_registro\n),\nemocoes_conversa AS (\n  SELECT\n    ue.chat_id,\n    ue.emocao_id,\n    ep.nome       AS emocao_nome,\n    ep.emoji,\n    ue.intensidade,\n    ue.detectado_em,\n    ue.criado_em,\n    ROW_NUMBER() OVER (\n      PARTITION BY ue.chat_id\n      ORDER BY ue.intensidade DESC NULLS LAST,\n               ue.detectado_em DESC NULLS LAST,\n               ue.criado_em DESC NULLS LAST\n    ) AS rn\n  FROM public.usuarios_emocoes ue\n  JOIN periodo p\n    ON COALESCE(ue.detectado_em, p.fim) BETWEEN p.inicio AND p.fim\n  LEFT JOIN public.emocoes_plutchik ep\n    ON ep.id = ue.emocao_id\n  WHERE ue.usuario_id = $1\n),\nconversas AS (\n  SELECT\n    uc.id              AS chat_id,\n    uc.data_conversa,\n    uc.horario_inicio,\n    uc.horario_fim,\n    ec.emocao_nome,\n    ec.emoji,\n    ec.intensidade AS intensidade_emocao\n  FROM public.usr_chat uc\n  JOIN periodo p\n    ON uc.data_conversa BETWEEN p.inicio AND p.fim\n  LEFT JOIN emocoes_conversa ec\n    ON ec.chat_id = uc.id AND ec.rn = 1\n  WHERE uc.usuario_id = $1\n)\nSELECT jsonb_build_object(\n  'periodo', jsonb_build_object(\n      'inicio', (SELECT inicio FROM periodo),\n      'fim',    (SELECT fim    FROM periodo)\n  ),\n  'serie', (\n    SELECT jsonb_agg(\n      jsonb_build_object(\n        'data',          lb.data_registro,\n        'humor_medio',   lb.humor_medio_dia,\n        'energia_media', lb.energia_media_dia,\n        'pico_dia',      up.humor_dia,\n        'emoji',         conv.emoji,\n        'emocao',        conv.emocao_nome\n      )\n      ORDER BY lb.data_registro\n    )\n    FROM linha_base lb\n    LEFT JOIN ultimos_por_dia up\n      ON up.data_registro = lb.data_registro\n    LEFT JOIN conversas conv\n      ON conv.data_conversa = lb.data_registro\n  ),\n  'detalhes', (\n    SELECT jsonb_agg(\n      jsonb_build_object(\n        'data',       up.data_registro,\n        'hora',       up.hora_registro,\n        'humor',      up.humor_dia,\n        'energia',    up.energia_nivel,\n        'variacao_humor',   up.variacao_humor,\n        'variacao_energia', up.variacao_energia,\n        'periodo_dia',      up.periodo_dia,\n        'justificativa',    up.justificativa_humor,\n        'confianca',        up.confianca_analise,\n        'conversa', (\n          SELECT jsonb_build_object(\n            'id',                  conv.chat_id,\n            'horario_inicio',      conv.horario_inicio,\n            'horario_fim',         conv.horario_fim,\n            'emocao',              conv.emocao_nome,\n            'intensidade_emocao',  conv.intensidade_emocao,\n            'emoji',               conv.emoji\n          )\n          FROM conversas conv\n          WHERE conv.chat_id = up.chat_id\n        )\n      )\n      ORDER BY up.data_registro DESC, up.hora_registro DESC\n    )\n    FROM ultimos_por_dia up\n  )\n) AS historico_humor;\n",
+          "options": {
+            "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.user_id }}\n\n# Param 2 – início do período (default 7 dias)\n{{ $json.query.data_inicio ?? $now.minus({ days: 6 }).startOf('day').toFormat('yyyy-LL-dd') }}\n\n# Param 3 – fim do período (default hoje)\n{{ $json.query.data_fim ?? $now.startOf('day').toFormat('yyyy-LL-dd') }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -432,
+          -240
+        ],
+        "id": "90d8d9fc-9f94-480f-ac5f-aab1fb401870",
+        "name": "versao: humor e energia",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "disabled": true
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL query": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

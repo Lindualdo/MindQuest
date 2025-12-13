@@ -278,6 +278,7 @@
       }
     ]
   },
+  "activeVersionId": "6b17a32b-873e-47d1-bf30-7f600025a967",
   "shared": [
     {
       "createdAt": "2025-11-05T17:35:05.601Z",
@@ -329,5 +330,236 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "yvg9NkBsLF3mbr5f",
+    "nodes": [
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          384,
+          144
+        ],
+        "id": "6231036d-b2d2-4e98-acb0-12217b82c6e1",
+        "name": "Responder"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n  quests.id AS instancia_id,\n  quests.meta_codigo,\n  quests.status,\n  quests.atualizado_em,\n  quests.ativado_em,\n  quests.area_vida_id,\n  quests.sabotador_id,\n  quests.insight_id,\n  quests.titulo,\n  quests.descricao,\n  quests.config,\n  quests.xp_recompensa,\n  quests.meta_codigo AS modelo_codigo,\n  quests.tipo,\n  quests.catalogo_id,\n  quests.catalogo_codigo,\n  quests.catalogo_titulo,\n  quests.catalogo_xp,\n  -- Calcular estágio baseado nos novos status (CORRIGIDO: verificar se hoje teve conversa concluída)\n  CASE\n    WHEN quests.status = 'disponivel' THEN 'a_fazer'\n    -- Quest de conversa: verificar se hoje foi concluída\n    WHEN quests.catalogo_codigo = 'reflexao_diaria' AND quests.status = 'ativa' THEN\n      CASE\n        WHEN EXISTS (\n          SELECT 1 FROM public.quests_recorrencias qr\n          WHERE qr.usuarios_quest_id = quests.id\n            AND qr.data_planejada = CURRENT_DATE\n            AND qr.status = 'concluida'\n        ) THEN 'feito'\n        ELSE 'fazendo'\n      END\n    -- Outras quests ativas com recorrências pendentes\n    WHEN quests.status = 'ativa' AND EXISTS (\n      SELECT 1 FROM public.quests_recorrencias qr\n      WHERE qr.usuarios_quest_id = quests.id\n        AND qr.status = 'pendente'\n    ) THEN 'fazendo'\n    -- Quest inativa ou todas recorrências concluídas\n    WHEN quests.status = 'inativa' OR (\n      quests.status = 'ativa' AND NOT EXISTS (\n        SELECT 1 FROM public.quests_recorrencias qr\n        WHERE qr.usuarios_quest_id = quests.id\n          AND qr.status = 'pendente'\n      ) AND EXISTS (\n        SELECT 1 FROM public.quests_recorrencias qr\n        WHERE qr.usuarios_quest_id = quests.id\n          AND qr.status = 'concluida'\n      )\n    ) THEN 'feito'\n    ELSE 'a_fazer'\n  END AS quest_estagio,\n  -- Recorrências: buscar de quests_recorrencias\n  COALESCE(\n    (\n      SELECT jsonb_build_object(\n        'dias', jsonb_agg(\n          jsonb_build_object(\n            'data', qr.data_planejada::text,\n            'xp_previsto', qr.xp_base,\n            'status', qr.status\n          ) ORDER BY qr.data_planejada\n        )\n      )\n      FROM public.quests_recorrencias qr\n      WHERE qr.usuarios_quest_id = quests.id\n    ),\n    '{\"dias\": []}'::jsonb\n  ) AS recorrencias,\n  -- Datas concluídas: buscar de quests_recorrencias\n  COALESCE(\n    (\n      SELECT jsonb_agg(DISTINCT qr.data_concluida::text)\n      FROM public.quests_recorrencias qr\n      WHERE qr.usuarios_quest_id = quests.id\n        AND qr.status = 'concluida'\n        AND qr.data_concluida IS NOT NULL\n    ),\n    '[]'::jsonb\n  ) AS datas_concluidas,\n  -- Data de conclusão: última data concluída\n  (\n    SELECT MAX(qr.data_concluida)\n    FROM public.quests_recorrencias qr\n    WHERE qr.usuarios_quest_id = quests.id\n      AND qr.status = 'concluida'\n  ) AS concluido_em\nFROM (\n  SELECT\n    uq.id,\n    uq.status,\n    uq.atualizado_em,\n    uq.ativado_em,\n    uq.area_vida_id,\n    uq.sabotador_id,\n    uq.insight_id,\n    uq.config,\n    uq.catalogo_id,\n    COALESCE(uq.config->>'meta_codigo', uq.id::text) AS meta_codigo,\n    COALESCE(\n      uq.config->>'titulo',\n      qc.titulo,\n      'Quest personalizada'\n    ) AS titulo,\n    COALESCE(\n      uq.config->>'descricao',\n      qc.descricao\n    ) AS descricao,\n    uq.config->>'prioridade' AS prioridade,\n    uq.config->>'recorrencia' AS recorrencia,\n    COALESCE(\n      qc.xp,\n      (uq.config->>'xp_recompensa')::int,\n      NULL\n    ) AS xp_recompensa,\n    COALESCE(\n      qc.codigo,\n      uq.config->>'tipo',\n      NULL\n    ) AS tipo,\n    qc.codigo AS catalogo_codigo,\n    qc.titulo AS catalogo_titulo,\n    qc.xp AS catalogo_xp\n  FROM public.usuarios_quest uq\n  LEFT JOIN public.quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('disponivel', 'ativa', 'inativa')\n) AS quests\nORDER BY\n  CASE quests.status\n    WHEN 'ativa' THEN 0\n    WHEN 'disponivel' THEN 1\n    WHEN 'inativa' THEN 2\n    ELSE 3\n  END,\n  quests.atualizado_em DESC;",
+          "options": {
+            "queryReplacement": "={{ [$json.usuario_id] }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -208,
+          -16
+        ],
+        "id": "248853ed-4f91-42af-843f-85b1a1281b81",
+        "name": "Listar Usuarios Quest",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n  usuario_id,\n  xp_total,\n  xp_proximo_nivel,\n  nivel_atual,\n  titulo_nivel,\n  sequencia_atual,\n  sequencia_recorde,\n  meta_sequencia_codigo,\n  proxima_meta_codigo,\n  sequencia_status\nFROM public.usuarios_conquistas\nWHERE usuario_id = $1::uuid;",
+          "options": {
+            "queryReplacement": "={{ [$json.usuario_id] }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -432,
+          144
+        ],
+        "id": "dbb84df2-16f3-4b00-a0a4-741fbced31a8",
+        "name": "Ler Usuarios Conquistas",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const input = $input.first()?.json ?? {};\nconst query = input.query ?? {};\nconst body = input.body ?? {};\n\nconst candidate = [\n  query.usuario_id,\n  query.user_id,\n  query.id_usuario,\n  body.usuario_id,\n  body.user_id,\n  body.id_usuario,\n  input.headers?.usuario_id,\n  input.headers?.user_id,\n].find((value) => typeof value === 'string' && value.trim().length > 0);\n\nif (!candidate) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: candidate.trim(),\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -672,
+          144
+        ],
+        "id": "ac0356b3-4b7d-475d-abb0-7a0eb9473516",
+        "name": "Validar Entrada"
+      },
+      {
+        "parameters": {
+          "path": "quests",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -896,
+          144
+        ],
+        "id": "f6b2f9cb-a97f-4de0-9ddb-ca87187cb80d",
+        "name": "Webhook",
+        "webhookId": "5d8f7b9a-4f2e-4c7b-9d32-quests",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const getItem = (nodeName) => {\n  const list = $items(nodeName, 0, 0) || [];\n  return list[0]?.json || {};\n};\n\nconst getItems = (nodeName) => {\n  try {\n    const list = $items(nodeName, 0, 0) || [];\n    return list.map((entry) => entry?.json || {});\n  } catch (err) {\n    return [];\n  }\n};\n\nconst toNumber = (value, fallback = null) => {\n  if (value === null || value === undefined || value === '') return fallback;\n  const coerced = Number(value);\n  return Number.isFinite(coerced) ? coerced : fallback;\n};\n\nconst parseJson = (value) => {\n  if (!value) return null;\n  if (typeof value === 'object') return value;\n  if (typeof value !== 'string') return null;\n  const trimmed = value.trim();\n  if (!trimmed) return null;\n  try {\n    return JSON.parse(trimmed);\n  } catch (_err) {\n    return null;\n  }\n};\n\nfunction humanizeDate(iso) {\n  if (!iso) return null;\n  const date = new Date(iso);\n  if (Number.isNaN(date.getTime())) return null;\n  const now = new Date();\n  const diffMs = Math.max(0, now.getTime() - date.getTime());\n  const days = Math.floor(diffMs / 86_400_000);\n  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);\n  const parts = [];\n  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);\n  if (hours > 0) parts.push(`${hours} h`);\n  if (parts.length === 0) return 'agora';\n  return `há ${parts.join(' e ')}`;\n}\n\nfunction extractXpRecompensa(quest) {\n  const config = parseJson(quest.config) || {};\n  const recorrencias = parseJson(quest.recorrencias) || null;\n  \n  if (recorrencias && Array.isArray(recorrencias.dias) && recorrencias.dias.length > 0) {\n    const xpPrevisto = toNumber(recorrencias.dias[0]?.xp_previsto, null);\n    if (xpPrevisto !== null) return xpPrevisto;\n  }\n  \n  const xpQuestField = toNumber(quest.xp_recompensa, null);\n  if (xpQuestField !== null) return xpQuestField;\n  \n  const xpConfigField = toNumber(config?.xp_recompensa, null);\n  if (xpConfigField !== null) return xpConfigField;\n  \n  return null;\n}\n\nfunction normalizarData(data) {\n  if (!data) return null;\n  const str = String(data);\n  const normalized = str.split('T')[0].split(' ')[0];\n  if (normalized.length >= 10) {\n    return normalized.substring(0, 10);\n  }\n  return null;\n}\n\nfunction isConversaQuest(quest) {\n  const config = parseJson(quest.config) || {};\n  return quest.catalogo_codigo === 'reflexao_diaria' ||\n    quest.tipo === 'reflexao_diaria' ||\n    (config.conversa !== undefined && config.conversa !== null && (\n      config.conversa === true || String(config.conversa).toLowerCase() === 'true'\n    ));\n}\n\nfunction calcularProgresso(recorrencias, datasConcluidas, isConversa = false) {\n  if (!recorrencias || !Array.isArray(recorrencias.dias)) {\n    return { atual: 0, meta: 0, percentual: 0, label: '0/0' };\n  }\n  \n  const datas = Array.isArray(datasConcluidas) ? datasConcluidas : [];\n  const meta = recorrencias.dias.length;\n  \n  const atual = recorrencias.dias.filter((dia) => {\n    const dataDia = normalizarData(dia.data);\n    if (!dataDia) return false;\n    \n    if (isConversa) {\n      return datas.includes(dataDia);\n    } else {\n      return datas.includes(dataDia);\n    }\n  }).length;\n  \n  const percentual = meta > 0 ? Math.round((atual / meta) * 100) : 0;\n  \n  return {\n    atual,\n    meta,\n    percentual,\n    label: `${atual}/${meta}`,\n  };\n}\n\nfunction enriquecerRecorrencias(recorrencias, datasConcluidas, isConversa = false) {\n  if (!recorrencias || !Array.isArray(recorrencias.dias)) {\n    return recorrencias;\n  }\n  \n  const datas = Array.isArray(datasConcluidas) ? datasConcluidas : [];\n  \n  let diasEnriquecidos = recorrencias.dias.map((dia) => {\n    const dataDia = normalizarData(dia.data);\n    \n    if (!dataDia) {\n      return {\n        ...dia,\n        status: 'pendente'\n      };\n    }\n    \n    const estaConcluida = datas.includes(dataDia);\n    \n    return {\n      ...dia,\n      status: estaConcluida ? 'concluida' : 'pendente'\n    };\n  });\n  \n  if (isConversa && datas.length > 0) {\n    const datasNaJanela = new Set(recorrencias.dias.map(d => normalizarData(d.data)).filter(Boolean));\n    const datasHistoricas = datas.filter(d => !datasNaJanela.has(d));\n    \n    datasHistoricas.forEach((dataHist) => {\n      diasEnriquecidos.unshift({\n        data: dataHist,\n        xp_previsto: recorrencias.dias[0]?.xp_previsto || 10,\n        status: 'concluida'\n      });\n    });\n  }\n  \n  return {\n    ...recorrencias,\n    dias: diasEnriquecidos\n  };\n}\n\nfunction calcularXpConcedido(quest) {\n  const recorrencias = parseJson(quest.recorrencias) || null;\n  const datasConcluidas = quest.datas_concluidas || [];\n  const xpRecompensa = extractXpRecompensa(quest) || 0;\n  \n  if (!recorrencias || !Array.isArray(recorrencias.dias) || datasConcluidas.length === 0) {\n    return 0;\n  }\n  \n  const datas = Array.isArray(datasConcluidas) ? datasConcluidas : [];\n  const ocorrenciasConcluidas = recorrencias.dias.filter((dia) => {\n    const dataDia = normalizarData(dia.data);\n    return dataDia && datas.includes(dataDia);\n  }).length;\n  \n  return ocorrenciasConcluidas * xpRecompensa;\n}\n\nconst estado = getItem('Ler Usuarios Conquistas');\nconst questsRaw = getItems('Listar Usuarios Quest');\n\n// Ajustar filtro para novos status\nconst questAtiva = questsRaw\n  .filter((q) => q.status === 'ativa' || q.status === 'disponivel')\n  .sort((a, b) => {\n    if (a.status === 'ativa' && b.status !== 'ativa') return -1;\n    if (a.status !== 'ativa' && b.status === 'ativa') return 1;\n    const dateA = a.atualizado_em ? new Date(a.atualizado_em).getTime() : 0;\n    const dateB = b.atualizado_em ? new Date(b.atualizado_em).getTime() : 0;\n    return dateB - dateA;\n  })[0] || null;\n\nlet quest = null;\nif (questAtiva) {\n  const config = parseJson(questAtiva.config) || {};\n  const recorrencias = parseJson(questAtiva.recorrencias) || null;\n  const datasConcluidas = questAtiva.datas_concluidas || [];\n  const isConversa = isConversaQuest(questAtiva);\n  const progresso = calcularProgresso(recorrencias, datasConcluidas, isConversa);\n  const xpRecompensa = extractXpRecompensa(questAtiva);\n  \n  quest = {\n    id: questAtiva.instancia_id || questAtiva.meta_codigo || null,\n    titulo: questAtiva.titulo || config?.titulo || 'Quest personalizada',\n    descricao: questAtiva.descricao || config?.descricao || null,\n    status: questAtiva.status || 'disponivel',\n    prioridade: questAtiva.prioridade || config?.prioridade || null,\n    recorrencia: questAtiva.recorrencia || config?.recorrencia || null,\n    progresso,\n    xp_recompensa: xpRecompensa,\n    ultima_atualizacao: questAtiva.atualizado_em || null,\n    ultima_atualizacao_label: humanizeDate(questAtiva.atualizado_em),\n  };\n}\n\nconst totalPersonalizadas = questsRaw.length;\n// Usar quest_estagio ao invés de status === 'concluida'\nconst totalConcluidas = questsRaw.filter((q) => q.quest_estagio === 'feito').length;\n\nlet xpBaseTotal = 0;\nlet xpBonusTotal = 0;\n// Usar quest_estagio ao invés de status === 'concluida'\nquestsRaw.forEach((q) => {\n  if (q.quest_estagio === 'feito') {\n    const xpConcedido = calcularXpConcedido(q);\n    xpBaseTotal += xpConcedido;\n  }\n});\n\nconst xpBase = 30;\nconst xpBonusRecorrencia = 0;\n\nconst beneficios = [];\nbeneficios.push(`+${xpBase} XP base`);\nif (xpBonusRecorrencia > 0) beneficios.push(`+${xpBonusRecorrencia} XP bônus (recorrência)`);\nbeneficios.push('Novo insight aplicado na prática');\nbeneficios.push('Progresso em hábitos chaves');\n\nconst questsPersonalizadas = questsRaw.map((q) => {\n  const xpRecompensa = extractXpRecompensa(q);\n  const config = parseJson(q.config) || {};\n  const recorrencias = parseJson(q.recorrencias) || null;\n  const datasConcluidas = q.datas_concluidas || [];\n  const isConversa = isConversaQuest(q);\n  const recorrenciasEnriquecidas = enriquecerRecorrencias(recorrencias, datasConcluidas, isConversa);\n  const progresso = calcularProgresso(recorrencias, datasConcluidas, isConversa);\n  \n  return {\n    instancia_id: q.instancia_id || q.meta_codigo || null,\n    meta_codigo: q.meta_codigo || q.instancia_id || null,\n    titulo: q.titulo || config?.titulo || 'Quest personalizada',\n    descricao: q.descricao || config?.descricao || null,\n    status: q.status || 'disponivel',\n    quest_estagio: q.quest_estagio || 'a_fazer',\n    concluido_em: q.concluido_em || null,\n    progresso_meta: progresso.meta,\n    progresso_atual: progresso.atual,\n    xp_recompensa: xpRecompensa,\n    prioridade: q.prioridade || config?.prioridade || null,\n    recorrencia: q.recorrencia || config?.recorrencia || null,\n    recorrencias: recorrenciasEnriquecidas,\n    atualizado_em: q.atualizado_em || null,\n    tipo: q.tipo || null,\n    catalogo_codigo: q.catalogo_codigo || null,\n    insight_id: q.insight_id || null,\n    config: config,\n  };\n});\n\nconst usuarioId = estado.usuario_id || $json.usuario_id || null;\n\nconst response = {\n  success: true,\n  usuario_id: usuarioId,\n  xp_total: toNumber(estado.xp_total, 0) || 0,\n  xp_proximo_nivel: toNumber(estado.xp_proximo_nivel, null),\n  nivel_atual: toNumber(estado.nivel_atual, 1) || 1,\n  titulo_nivel: estado.titulo_nivel || null,\n  sequencia_atual: toNumber(estado.sequencia_atual, 0) || 0,\n  sequencia_recorde: toNumber(estado.sequencia_recorde, 0) || 0,\n  meta_sequencia_codigo: estado.meta_sequencia_codigo || null,\n  proxima_meta_codigo: estado.proxima_meta_codigo || null,\n  sequencia_status: estado.sequencia_status || null,\n  quests_personalizadas: questsPersonalizadas,\n  card_quests: {\n    quest,\n    snapshot: {\n      total_concluidas: totalConcluidas,\n      total_personalizadas: totalPersonalizadas,\n      xp_base_total: xpBaseTotal,\n      xp_bonus_total: xpBonusTotal,\n    },\n    beneficios,\n    recompensas: {\n      xp_base: xpBase,\n      xp_bonus_recorrencia: xpBonusRecorrencia,\n    },\n  },\n};\n\nreturn [{ json: response }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          176,
+          144
+        ],
+        "id": "70fdf1ce-66f4-4179-ae4e-82652f41e91b",
+        "name": "Montar Resposta"
+      },
+      {
+        "parameters": {},
+        "id": "a0fd9e1b-a9ae-4a24-b378-9f2e86302a4b",
+        "name": "Aguardar Dados",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          -48,
+          144
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n  ch.meta_codigo AS quest_id,\n  jsonb_agg(\n    DISTINCT (occ->>'data_concluida')::date::text\n  ) AS datas_concluidas\nFROM public.conquistas_historico ch\nCROSS JOIN LATERAL jsonb_array_elements(ch.detalhes->'ocorrencias') AS occ\nWHERE ch.usuario_id = $1::uuid\n  AND ch.tipo = 'quest'\n  AND (occ->>'data_concluida') IS NOT NULL\nGROUP BY ch.meta_codigo;",
+          "options": {
+            "queryReplacement": "={{ [$json.usuario_id] }}"
+          }
+        },
+        "id": "637d6d20-91f2-4522-a1df-e3aeee092380",
+        "name": "Buscar Conclusoes Historico",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -208,
+          144
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "onError": "continueRegularOutput",
+        "disabled": true
+      }
+    ],
+    "connections": {
+      "Ler Usuarios Conquistas": {
+        "main": [
+          [
+            {
+              "node": "Listar Usuarios Quest",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar Conclusoes Historico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Entrada": {
+        "main": [
+          [
+            {
+              "node": "Ler Usuarios Conquistas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Validar Entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Responder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Listar Usuarios Quest": {
+        "main": [
+          [
+            {
+              "node": "Aguardar Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aguardar Dados": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Conclusoes Historico": {
+        "main": [
+          [
+            {
+              "node": "Aguardar Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

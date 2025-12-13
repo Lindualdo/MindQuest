@@ -362,6 +362,7 @@
       }
     ]
   },
+  "activeVersionId": "612c956f-e8ad-46d8-9870-4a84d2286ba3",
   "shared": [
     {
       "createdAt": "2025-11-30T08:50:57.471Z",
@@ -413,5 +414,281 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "spEKOyT8lgjGABqB",
+    "nodes": [
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n  co.id,\n  co.objetivo_id,\n  co.pontuacao,\n  co.observacoes,\n  co.data_checkin,\n  co.semana_ano,\n  uo.titulo as objetivo_titulo,\n  av.nome as area_nome,\n  av.icone as area_icone\nFROM checkins_objetivos co\nJOIN usuarios_objetivos uo ON co.objetivo_id = uo.id\nJOIN areas_vida_catalogo av ON uo.area_vida_id = av.id\nWHERE co.usuario_id = $1\nORDER BY co.criado_em DESC\nLIMIT 20",
+          "options": {
+            "queryReplacement": "={{ [$json.query.user_id] }}"
+          }
+        },
+        "id": "buscar-checkins",
+        "name": "Buscar Check-ins",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          512,
+          256
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH semana_atual AS (\n  SELECT to_char(CURRENT_DATE, 'IYYY-\"W\"IW') as semana\n)\nSELECT \n  uo.id,\n  uo.titulo,\n  av.nome as area_nome,\n  av.icone as area_icone,\n  sa.semana as semana_atual,\n  co.id as checkin_id,\n  co.pontuacao as checkin_pontuacao,\n  co.observacoes as checkin_observacoes,\n  CASE WHEN co.id IS NOT NULL THEN true ELSE false END as checkin_feito\nFROM usuarios_objetivos uo\nJOIN areas_vida_catalogo av ON uo.area_vida_id = av.id\nCROSS JOIN semana_atual sa\nLEFT JOIN checkins_objetivos co ON co.objetivo_id = uo.id AND co.semana_ano = sa.semana\nWHERE uo.usuario_id = $1\nAND uo.status = 'ativo'\nORDER BY uo.criado_em DESC",
+          "options": {
+            "queryReplacement": "={{ [$json.query.user_id] }}"
+          }
+        },
+        "id": "buscar-objetivos-ativos",
+        "name": "Buscar Objetivos Ativos",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          512,
+          400
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Pegar dados dos nós anteriores\nconst allItems = $input.all();\n\n// Arrays para armazenar os resultados\nconst checkins = [];\nconst objetivos = [];\n\n// Separar os dados\nfor (const item of allItems) {\n  const data = item.json;\n  \n  // Check-in do histórico: tem objetivo_id + pontuacao + objetivo_titulo\n  if (data.objetivo_id && data.pontuacao && data.objetivo_titulo) {\n    checkins.push(data);\n  }\n  \n  // Objetivo ativo: tem id + titulo + area_nome (da query de objetivos)\n  if (data.id && data.titulo && data.area_nome) {\n    objetivos.push({\n      id: data.id,\n      titulo: data.titulo,\n      area_nome: data.area_nome,\n      area_icone: data.area_icone,\n      semana_atual: data.semana_atual,\n      checkin_feito: data.checkin_feito || false,\n      checkin_id: data.checkin_id || null,\n      checkin_pontuacao: data.checkin_pontuacao || null,\n      checkin_observacoes: data.checkin_observacoes || null,\n      data_checkin: data.data_checkin || null\n    });\n  }\n}\n\nconst semanaAtual = objetivos.length > 0 ? objetivos[0].semana_atual : null;\n\nreturn [{\n  json: {\n    success: true,\n    semana_atual: semanaAtual,\n    objetivos_ativos: objetivos,\n    historico_checkins: checkins\n  }\n}];"
+        },
+        "id": "montar-resposta-get",
+        "name": "Montar Resposta GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          752,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-get",
+        "name": "Responder GET",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1008,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO checkins_objetivos (usuario_id, objetivo_id, pontuacao, observacoes, semana_ano)\nVALUES ($1, $2, $3, $4, COALESCE($5, to_char(CURRENT_DATE, 'IYYY-\"W\"IW')))\nON CONFLICT (objetivo_id, semana_ano) \nDO UPDATE SET \n  pontuacao = EXCLUDED.pontuacao,\n  observacoes = EXCLUDED.observacoes\nRETURNING *",
+          "options": {
+            "queryReplacement": "={{ [$json.body.user_id, $json.body.objetivo_id, $json.body.pontuacao, $json.body.observacoes || '', $json.body.semana_ano || null] }}"
+          }
+        },
+        "id": "salvar-checkin",
+        "name": "Salvar Check-in",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          512,
+          608
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const resultado = $input.first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'Check-in salvo com sucesso',\n    checkin: resultado\n  }\n}];"
+        },
+        "id": "montar-resposta-post",
+        "name": "Montar Resposta POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          752,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-post",
+        "name": "Responder POST",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1008,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "path": "checkin-objetivo",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          192,
+          336
+        ],
+        "id": "eeb04404-f420-43dd-b2a0-599685c485cf",
+        "name": "Webhook",
+        "webhookId": "0043f9fd-9fd7-4bd9-9f33-26a40e75526f"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "checkin-objetivo",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          208,
+          608
+        ],
+        "id": "fe12a337-e385-4dfb-a4d0-6b6b20561231",
+        "name": "Webhook2",
+        "webhookId": "3df371b9-156b-469c-9a66-48a8ff53c437"
+      },
+      {
+        "id": "merge-dados",
+        "name": "Merge Dados",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3,
+        "position": [
+          640,
+          320
+        ],
+        "parameters": {
+          "mode": "append"
+        }
+      }
+    ],
+    "connections": {
+      "Montar Resposta GET": {
+        "main": [
+          [
+            {
+              "node": "Responder GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Salvar Check-in": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta POST": {
+        "main": [
+          [
+            {
+              "node": "Responder POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Buscar Check-ins",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar Objetivos Ativos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook2": {
+        "main": [
+          [
+            {
+              "node": "Salvar Check-in",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Check-ins": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Objetivos Ativos": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge Dados": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

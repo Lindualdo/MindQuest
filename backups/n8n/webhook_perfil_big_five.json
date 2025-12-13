@@ -137,6 +137,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "09c9f76c-9343-4d44-97fc-c8666d91e4dc",
   "shared": [
     {
       "createdAt": "2025-11-21T21:14:04.779Z",
@@ -188,5 +189,138 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "0wrajE1i3w9sieeQ",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "perfil-big-five",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "name": "Webhook Perfil Big Five",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          144,
+          -96
+        ],
+        "id": "332eae54-c9a4-445f-b1bc-a2c12a9d1e46",
+        "webhookId": "53149375-880a-438d-987d-df690b03b480"
+      },
+      {
+        "parameters": {
+          "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório.');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+        },
+        "name": "Validar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          336,
+          -96
+        ],
+        "id": "788c5d87-0f1c-4bac-b83b-464b4c984159"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH pesos AS (\n  SELECT \n    *,\n    -- Peso de frequência para cada traço\n    CASE \n      WHEN perfil_primario = 'openness' THEN 2.0\n      WHEN perfil_secundario = 'openness' THEN 1.0\n      ELSE 0.5\n    END as peso_freq_openness,\n    CASE \n      WHEN perfil_primario = 'conscientiousness' THEN 2.0\n      WHEN perfil_secundario = 'conscientiousness' THEN 1.0\n      ELSE 0.5\n    END as peso_freq_conscientiousness,\n    CASE \n      WHEN perfil_primario = 'extraversion' THEN 2.0\n      WHEN perfil_secundario = 'extraversion' THEN 1.0\n      ELSE 0.5\n    END as peso_freq_extraversion,\n    CASE \n      WHEN perfil_primario = 'agreeableness' THEN 2.0\n      WHEN perfil_secundario = 'agreeableness' THEN 1.0\n      ELSE 0.5\n    END as peso_freq_agreeableness,\n    CASE \n      WHEN perfil_primario = 'neuroticism' THEN 2.0\n      WHEN perfil_secundario = 'neuroticism' THEN 1.0\n      ELSE 0.5\n    END as peso_freq_neuroticism,\n    -- Peso temporal (mais recente = mais peso)\n    POWER(0.95::numeric, (EXTRACT(DAY FROM AGE(CURRENT_DATE, data_conversa))::numeric)) as peso_temporal,\n    -- Peso de confiabilidade\n    confianca_media / 100.0 as peso_confianca\n  FROM public.usuarios_perfis\n  WHERE usuario_id = $1::uuid\n),\nscores_calculados AS (\n  SELECT \n    -- Scores finais ponderados para cada traço\n    COALESCE(\n      SUM(score_openness * peso_confianca * peso_freq_openness * peso_temporal) \n      / NULLIF(SUM(peso_confianca * peso_freq_openness * peso_temporal), 0),\n      0\n    )::numeric(5,2) as score_openness,\n    COALESCE(\n      SUM(score_conscientiousness * peso_confianca * peso_freq_conscientiousness * peso_temporal) \n      / NULLIF(SUM(peso_confianca * peso_freq_conscientiousness * peso_temporal), 0),\n      0\n    )::numeric(5,2) as score_conscientiousness,\n    COALESCE(\n      SUM(score_extraversion * peso_confianca * peso_freq_extraversion * peso_temporal) \n      / NULLIF(SUM(peso_confianca * peso_freq_extraversion * peso_temporal), 0),\n      0\n    )::numeric(5,2) as score_extraversion,\n    COALESCE(\n      SUM(score_agreeableness * peso_confianca * peso_freq_agreeableness * peso_temporal) \n      / NULLIF(SUM(peso_confianca * peso_freq_agreeableness * peso_temporal), 0),\n      0\n    )::numeric(5,2) as score_agreeableness,\n    COALESCE(\n      SUM(score_neuroticism * peso_confianca * peso_freq_neuroticism * peso_temporal) \n      / NULLIF(SUM(peso_confianca * peso_freq_neuroticism * peso_temporal), 0),\n      0\n    )::numeric(5,2) as score_neuroticism,\n    -- Confiabilidade média\n    COALESCE(AVG(confianca_media), 0)::numeric(5,2) as confianca_media,\n    -- Data de última atualização\n    MAX(data_conversa) as ultima_atualizacao,\n    -- Total de registros\n    COUNT(*) as total_registros\n  FROM pesos\n),\nultimo_perfil AS (\n  SELECT \n    perfil_primario,\n    perfil_secundario,\n    resumo_perfil\n  FROM public.usuarios_perfis \n  WHERE usuario_id = $1::uuid \n  ORDER BY confianca_media DESC, data_conversa DESC \n  LIMIT 1\n)\nSELECT \n  sc.score_openness,\n  sc.score_conscientiousness,\n  sc.score_extraversion,\n  sc.score_agreeableness,\n  sc.score_neuroticism,\n  up.perfil_primario,\n  up.perfil_secundario,\n  up.resumo_perfil,\n  sc.confianca_media,\n  sc.ultima_atualizacao,\n  sc.total_registros\nFROM scores_calculados sc\nCROSS JOIN ultimo_perfil up;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        },
+        "name": "Calcular Perfis Big Five",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          544,
+          -96
+        ],
+        "id": "4f16b83a-09f0-44e1-93ea-0db2f50d77df",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const row = $input.first()?.json || {};\n\nif (!row.perfil_primario && row.total_registros === 0) {\n  return [{\n    json: {\n      success: false,\n      error: 'Perfil Big Five não encontrado para este usuário.'\n    }\n  }];\n}\n\n// Ordenar traços por score para determinar perfil primário e secundário calculados\nconst tracos = [\n  { nome: 'openness', score: parseFloat(row.score_openness || 0), nome_pt: 'Abertura à Experiência' },\n  { nome: 'conscientiousness', score: parseFloat(row.score_conscientiousness || 0), nome_pt: 'Conscienciosidade' },\n  { nome: 'extraversion', score: parseFloat(row.score_extraversion || 0), nome_pt: 'Extroversão' },\n  { nome: 'agreeableness', score: parseFloat(row.score_agreeableness || 0), nome_pt: 'Amabilidade' },\n  { nome: 'neuroticism', score: parseFloat(row.score_neuroticism || 0), nome_pt: 'Neuroticismo' }\n].sort((a, b) => b.score - a.score);\n\nreturn [{\n  json: {\n    success: true,\n    perfil: {\n      usuario_id: $json.user_id,\n      // Perfis detectados (último registro)\n      perfil_primario: row.perfil_primario || null,\n      perfil_secundario: row.perfil_secundario || null,\n      // Scores calculados (ponderados)\n      scores: {\n        openness: parseFloat(row.score_openness || 0),\n        conscientiousness: parseFloat(row.score_conscientiousness || 0),\n        extraversion: parseFloat(row.score_extraversion || 0),\n        agreeableness: parseFloat(row.score_agreeableness || 0),\n        neuroticism: parseFloat(row.score_neuroticism || 0)\n      },\n      // Traços ordenados por score\n      tracos_ordenados: tracos.map(t => ({\n        nome: t.nome,\n        nome_pt: t.nome_pt,\n        score: t.score\n      })),\n      // Metadados\n      resumo_perfil: row.resumo_perfil || null,\n      confianca_media: parseFloat(row.confianca_media || 0),\n      ultima_atualizacao: row.ultima_atualizacao || null,\n      total_registros: parseInt(row.total_registros || 0)\n    }\n  }\n}];"
+        },
+        "name": "Montar Resposta",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          736,
+          -96
+        ],
+        "id": "230ff7c2-9c5d-48c1-83f6-2eb1d9d46aa1"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "name": "Responder Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          944,
+          -96
+        ],
+        "id": "1eb19a17-509f-484c-ba17-26bc1794a08a"
+      }
+    ],
+    "connections": {
+      "Webhook Perfil Big Five": {
+        "main": [
+          [
+            {
+              "node": "Validar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params": {
+        "main": [
+          [
+            {
+              "node": "Calcular Perfis Big Five",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calcular Perfis Big Five": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Responder Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

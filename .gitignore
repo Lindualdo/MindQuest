@@ -27,3 +27,7 @@ config/postgres.env
 config/vapid-keys.json
 # n8n backup logs (nunca versionar - sempre ignorar)
 backups/n8n-backup.log.jsonl
+
+# PostgreSQL backups (nunca versionar - sempre ignorar)
+backups/postgres_backup_*.dump
+backups/postgres_backup_*.sql

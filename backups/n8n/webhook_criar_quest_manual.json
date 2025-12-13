@@ -175,6 +175,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "bacfcaae-b48f-4eae-937e-7e290e7cb777",
   "shared": [
     {
       "createdAt": "2025-11-27T12:06:33.792Z",
@@ -226,5 +227,170 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "mhLvkBPpZu8a4Ozw",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "criar-quest-manual"
+        },
+        "id": "webhook",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          240,
+          304
+        ],
+        "webhookId": "f2a3a1f2-e67c-4c36-bd97-7185ff06b869"
+      },
+      {
+        "parameters": {
+          "jsCode": "const query = $input.item.json.query || $input.item.json || {};\n\nconst usuarioId = query.user_id || query.usuario_id || null;\nconst titulo = query.titulo || null;\nconst descricao = query.descricao || null;\nconst instrucoes = query.instrucoes || null;\nconst insightId = query.insight_id || null;\nconst areaVidaId = query.area_vida_id || null;\nconst resourceIndex = query.resource_index !== undefined ? parseInt(query.resource_index, 10) : null;\n\nif (!usuarioId) {\n  throw new Error('usuario_id é obrigatório');\n}\n\nif (!titulo || typeof titulo !== 'string' || !titulo.trim()) {\n  throw new Error('titulo é obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId.trim(),\n    titulo: titulo.trim(),\n    descricao: descricao ? descricao.trim() : null,\n    instrucoes: instrucoes ? instrucoes.trim() : null,\n    insight_id: insightId ? insightId.trim() : null,\n    area_vida_id: areaVidaId ? areaVidaId.trim() : null,\n    resource_index: resourceIndex\n  }\n}];"
+        },
+        "id": "normalizar",
+        "name": "Normalizar Entrada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          464,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id FROM public.quests_catalogo WHERE codigo = 'quest_custom' LIMIT 1;",
+          "options": {}
+        },
+        "id": "buscar_catalogo",
+        "name": "Buscar Catálogo Quest Custom",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          688,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH entrada AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::text AS titulo,\n    $3::text AS descricao,\n    $4::text AS instrucoes,\n    $5::uuid AS insight_id,\n    $6::uuid AS area_vida_id,\n    $7::uuid AS catalogo_id,\n    $8::int AS resource_index\n),\nverificar_limite AS (\n  SELECT\n    CASE\n      WHEN entrada.insight_id IS NULL THEN 0\n      ELSE (\n        SELECT COUNT(*)::int\n        FROM public.usuarios_quest\n        WHERE usuario_id = entrada.usuario_id\n          AND insight_id = entrada.insight_id\n          AND status IN ('disponivel', 'ativa', 'inativa')\n          AND (config->>'contexto_origem') = 'insight_manual'\n      )\n    END AS total_existente\n  FROM entrada\n),\nverificar_resource AS (\n  SELECT\n    CASE\n      WHEN entrada.insight_id IS NULL OR entrada.resource_index IS NULL THEN false\n      ELSE EXISTS (\n        SELECT 1\n        FROM public.usuarios_quest\n        WHERE usuario_id = entrada.usuario_id\n          AND insight_id = entrada.insight_id\n          AND status IN ('disponivel', 'ativa', 'inativa')\n          AND (config->>'contexto_origem') = 'insight_manual'\n          AND (config->>'resource_index')::int = entrada.resource_index\n      )\n    END AS resource_ja_existe\n  FROM entrada\n),\ninserir AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    catalogo_id,\n    status,\n    ativado_em,\n    config,\n    insight_id,\n    area_vida_id\n  )\n  SELECT\n    gen_random_uuid(),\n    entrada.usuario_id,\n    entrada.catalogo_id,\n    'disponivel',\n    NOW(),\n    jsonb_build_object(\n      'titulo', entrada.titulo,\n      'descricao', COALESCE(entrada.descricao, ''),\n      'instrucoes', COALESCE(entrada.instrucoes, ''),\n      'prioridade', 'media',\n      'recorrencia', 'unica',\n      'contexto_origem', 'insight_manual',\n      'resource_index', entrada.resource_index\n    ),\n    entrada.insight_id,\n    entrada.area_vida_id\n  FROM entrada\n  CROSS JOIN verificar_limite\n  CROSS JOIN verificar_resource\n  WHERE entrada.catalogo_id IS NOT NULL\n    AND (entrada.insight_id IS NULL OR verificar_limite.total_existente < 2)\n    AND NOT verificar_resource.resource_ja_existe\n  RETURNING id, usuario_id, status\n)\nSELECT\n  inserir.id AS quest_id,\n  inserir.usuario_id,\n  inserir.status,\n  CASE WHEN inserir.id IS NOT NULL THEN true ELSE false END AS success,\n  (SELECT total_existente FROM verificar_limite) AS total_existente,\n  (SELECT resource_ja_existe FROM verificar_resource) AS resource_ja_existe\nFROM inserir\nUNION ALL\nSELECT\n  NULL::uuid AS quest_id,\n  entrada.usuario_id,\n  NULL::text AS status,\n  false AS success,\n  (SELECT total_existente FROM verificar_limite) AS total_existente,\n  (SELECT resource_ja_existe FROM verificar_resource) AS resource_ja_existe\nFROM entrada\nCROSS JOIN verificar_limite\nCROSS JOIN verificar_resource\nWHERE NOT EXISTS (SELECT 1 FROM inserir);",
+          "options": {
+            "queryReplacement": "={{ [ $json.usuario_id, $json.titulo, $json.descricao, $json.instrucoes, $json.insight_id, $json.area_vida_id, $json.catalogo_id, $json.resource_index ] }}"
+          }
+        },
+        "id": "inserir_quest",
+        "name": "Inserir Quest",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          912,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { \"success\": $json.success, \"quest_id\": $json.quest_id, \"status\": $json.status, \"error\": ($json.resource_ja_existe === true) ? \"Esta ação já possui uma quest criada\" : (($json.total_existente !== undefined && $json.total_existente >= 2) ? \"Limite de 2 quests por insight atingido\" : null) } }}"
+        },
+        "id": "response",
+        "name": "Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          304
+        ]
+      },
+      {
+        "id": "combinar_dados",
+        "name": "Combinar Dados",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          800,
+          304
+        ],
+        "parameters": {
+          "jsCode": "const catalogo = $input.item.json || {};\nconst entradaItems = $items('Normalizar Entrada', 0, 0) || [];\nconst entrada = entradaItems[0]?.json || {};\n\nif (!catalogo.id) {\n  throw new Error('Catálogo quest_custom não encontrado');\n}\n\nif (!entrada.usuario_id) {\n  throw new Error('Dados de entrada não encontrados');\n}\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    titulo: entrada.titulo,\n    descricao: entrada.descricao,\n    instrucoes: entrada.instrucoes,\n    insight_id: entrada.insight_id,\n    area_vida_id: entrada.area_vida_id,\n    resource_index: entrada.resource_index,\n    catalogo_id: catalogo.id\n  }\n}];"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalizar Entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalizar Entrada": {
+        "main": [
+          [
+            {
+              "node": "Buscar Catálogo Quest Custom",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Inserir Quest": {
+        "main": [
+          [
+            {
+              "node": "Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combinar Dados": {
+        "main": [
+          [
+            {
+              "node": "Inserir Quest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Catálogo Quest Custom": {
+        "main": [
+          [
+            {
+              "node": "Combinar Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

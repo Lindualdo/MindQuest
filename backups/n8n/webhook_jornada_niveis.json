@@ -120,6 +120,7 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
+  "activeVersionId": "d3eb3ce9-efe1-4f27-b6f9-f0a6d59729b0",
   "shared": [
     {
       "createdAt": "2025-11-29T18:03:28.412Z",
@@ -171,5 +172,115 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "nOb9qxPUob3pPgfQ",
+    "nodes": [
+      {
+        "id": "webhook-get",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          250,
+          300
+        ],
+        "webhookId": "j0rn4d4-n1v31s-w3bh00k-1d",
+        "parameters": {
+          "path": "jornada-niveis",
+          "httpMethod": "GET",
+          "responseMode": "responseNode"
+        }
+      },
+      {
+        "id": "buscar-niveis",
+        "name": "Buscar Níveis",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          500,
+          300
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH usuario AS (\n  SELECT xp_total \n  FROM usuarios_conquistas \n  WHERE usuario_id = $1\n)\nSELECT \n  jn.nivel, jn.nome, jn.descricao, jn.estagio, jn.estagio_nome, \n  jn.xp_minimo, jn.xp_proximo_nivel,\n  COALESCE(u.xp_total, 0) as user_xp_total\nFROM jornada_niveis jn\nCROSS JOIN usuario u\nORDER BY jn.nivel",
+          "options": {
+            "queryReplacement": "={{ [$json.query.user_id] }}"
+          }
+        }
+      },
+      {
+        "id": "montar-resposta",
+        "name": "Montar Resposta",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          750,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const niveisData = $input.all();\n\nconst xpTotal = niveisData[0]?.json?.user_xp_total ?? 0;\n\nconst niveis = niveisData.map(item => ({\n  nivel: item.json.nivel,\n  nome: item.json.nome,\n  descricao: item.json.descricao,\n  estagio: item.json.estagio,\n  estagio_nome: item.json.estagio_nome,\n  xp_minimo: item.json.xp_minimo,\n  xp_proximo_nivel: item.json.xp_proximo_nivel\n}));\n\n// Calcular nível atual baseado nos pontos\nconst nivelAtual = niveis.find(n => \n  xpTotal >= n.xp_minimo && (n.xp_proximo_nivel === null || xpTotal < n.xp_proximo_nivel)\n);\n\n// Agrupar por estágio\nconst estagios = {};\nniveis.forEach(n => {\n  if (!estagios[n.estagio]) {\n    estagios[n.estagio] = {\n      numero: n.estagio,\n      nome: n.estagio_nome,\n      niveis: []\n    };\n  }\n  estagios[n.estagio].niveis.push(n);\n});\n\nreturn [{\n  json: {\n    success: true,\n    usuario: {\n      xp_total: xpTotal,\n      nivel_atual: nivelAtual?.nivel ?? 1,\n      titulo_nivel: nivelAtual?.nome ?? 'Despertar',\n      estagio_atual: nivelAtual?.estagio ?? 1\n    },\n    niveis,\n    estagios: Object.values(estagios)\n  }\n}];"
+        }
+      },
+      {
+        "id": "responder",
+        "name": "Responder",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Buscar Níveis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Níveis": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Responder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

@@ -642,6 +642,7 @@
       }
     ]
   },
+  "activeVersionId": "f007be03-5160-492f-ba93-7d836c909258",
   "shared": [
     {
       "createdAt": "2025-09-23T18:04:11.192Z",
@@ -693,5 +694,560 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-11T01:59:48.786Z",
+    "workflowId": "6R8bagGlYkBwyyMC",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "UlInW9nmQs7vnPIP",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/UlInW9nmQs7vnPIP",
+            "cachedResultName": "chat_onboarding_simplificado"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "remoteJid": "={{ $('start').item.json.body.data.key.remoteJid }}",
+              "pushName": "={{ $('start').first().json.body.data.pushName }}",
+              "id": "={{ $('start').first().json.body.data.key.id }}",
+              "evolution_instancia": "={{ $('start').first().json.body.instance }}",
+              "menssagem": "={{ $('start').first().json.body.data.message.conversation }}",
+              "whatsapp_number": "={{ $('start').first().json.body.data.key.remoteJid.split('@')[0]}}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "remoteJid",
+                "displayName": "remoteJid",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "pushName",
+                "displayName": "pushName",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "whatsapp_number",
+                "displayName": "whatsapp_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "evolution_instancia",
+                "displayName": "evolution_instancia",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "menssagem",
+                "displayName": "menssagem",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          -192,
+          -1472
+        ],
+        "id": "71f9c335-e04f-4c11-8760-75cc631fcf1f",
+        "name": "new_user"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "3bf7a3c4-d2a9-4e86-af60-1af16d0b2dc7",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -448,
+          -1584
+        ],
+        "id": "3acabf8a-2b84-4f70-9ba8-498d8eeb6544",
+        "name": "usr_exist?"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "usuarios",
+            "mode": "list",
+            "cachedResultName": "usuarios"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "whatsapp_numero",
+                "value": "={{ $('start').item.json.body.data.key.remoteJid.replace(\"@s.whatsapp.net\", \"\") }}"
+              },
+              {
+                "column": "ativo",
+                "value": "={{ true }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -688,
+          -1584
+        ],
+        "id": "463baabd-2496-48ee-a938-20077d9e80c4",
+        "name": "usr_validate",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "## usr_chat\n**interface de entrada das msg do usr** ",
+          "height": 80,
+          "width": 288
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -1424,
+          -1840
+        ],
+        "id": "1fd157c9-00d6-40c4-bc46-b060eecc2d54",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "bdb7cd24-5cc8-4efd-899e-06716680dcdb",
+                "leftValue": "={{ $json.ativo }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -192,
+          -1664
+        ],
+        "id": "bb9df853-2609-477b-840b-22a7993486da",
+        "name": "Usr Ativo?"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "MindQuest",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -1184,
+          -1504
+        ],
+        "id": "ce8efc7f-b6cc-473a-ba0a-f7c95b5c962a",
+        "name": "start",
+        "webhookId": "9f15db7a-9363-4715-8605-f86bdb16c4fc"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          -688,
+          -1376
+        ],
+        "id": "831fa89d-fc01-4a38-8656-b82cbbb5da2a",
+        "name": "No Operation, do nothing"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "83a54f6a-a7e0-4a37-aa35-523c03b74b9c",
+                "leftValue": "={{ $json.body.event }}",
+                "rightValue": "messages.upsert",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -960,
+          -1504
+        ],
+        "id": "dbba9915-6d1d-4fd4-a6b2-d9a1090d940d",
+        "name": "messages.upsert ?"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "DJB5qWudX1Hqap1O",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+            "cachedResultName": "sw_evolution_send_message_v2"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "instanceName": "={{ $('start').first().json.body.instance }}",
+              "remoteJidOrNumber": "={{ $('start').item.json.body.data.key.remoteJid }}",
+              "messageText": "Ah que pena! Sua conta está inativa. Procure o suporte MindQuest"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "instanceName",
+                "displayName": "instanceName",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "remoteJidOrNumber",
+                "displayName": "remoteJidOrNumber",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "messageText",
+                "displayName": "messageText",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "linkPreview",
+                "displayName": "linkPreview",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "minDelayMs",
+                "displayName": "minDelayMs",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          144,
+          -1488
+        ],
+        "id": "259a5852-efec-40ed-bfdf-4273f1b5f770",
+        "name": "msg - Inativo"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "GGJQTfLsJSoRW3I0",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/GGJQTfLsJSoRW3I0",
+            "cachedResultName": "mentor_mindquest_v3"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "body.data.key.fromMe": "={{ $('start').first().json.body.data.key.fromMe }}",
+              "usr_id": "={{ $('usr_validate').first().json.id }}",
+              "body.instance": "={{ $('start').first().json.body.instance }}",
+              "body.data.key.remoteJid": "={{ $('start').first().json.body.data.key.remoteJid }}",
+              "body.data.key.id": "={{ $('start').first().json.body.data.key.id }}",
+              "body.data.pushName": "={{ $('start').first().json.body.data.pushName }}",
+              "body.data.messageType": "={{ $('start').first().json.body.data.messageType }}",
+              "body.data.message.conversation": "={{ $('start').first().json.body.data.message.conversation }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "usr_id",
+                "displayName": "usr_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.instance",
+                "displayName": "body.instance",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.data.key.remoteJid",
+                "displayName": "body.data.key.remoteJid",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.data.key.id",
+                "displayName": "body.data.key.id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.data.key.fromMe",
+                "displayName": "body.data.key.fromMe",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "boolean"
+              },
+              {
+                "id": "body.data.pushName",
+                "displayName": "body.data.pushName",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.data.message.conversation",
+                "displayName": "body.data.message.conversation",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "body.data.messageType",
+                "displayName": "body.data.messageType",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          160,
+          -1776
+        ],
+        "id": "9a6e2716-4a09-47d8-94f8-2572ea01d013",
+        "name": "Mentor v3"
+      }
+    ],
+    "connections": {
+      "usr_exist?": {
+        "main": [
+          [
+            {
+              "node": "Usr Ativo?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "new_user",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "usr_validate": {
+        "main": [
+          [
+            {
+              "node": "usr_exist?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Usr Ativo?": {
+        "main": [
+          [
+            {
+              "node": "Mentor v3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "msg - Inativo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "start": {
+        "main": [
+          [
+            {
+              "node": "messages.upsert ?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "messages.upsert ?": {
+        "main": [
+          [
+            {
+              "node": "usr_validate",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No Operation, do nothing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Aldo Santos",
+    "name": null,
+    "description": null
+  }
 }

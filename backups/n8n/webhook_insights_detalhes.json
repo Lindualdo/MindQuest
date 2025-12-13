@@ -149,6 +149,7 @@
       }
     ]
   },
+  "activeVersionId": "c7442b50-843f-476e-9468-44adfca4278f",
   "shared": [
     {
       "createdAt": "2025-10-09T16:27:21.938Z",
@@ -200,5 +201,111 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "hJiLj3MC3V3LMDKV",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "insights",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "3cd50132-9333-4c65-971a-103082ff306b",
+        "name": "Webhook",
+        "webhookId": "eed817c9-2b31-4af7-ac5c-a2f6dcd071cf"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          416,
+          0
+        ],
+        "id": "defa58d7-c243-4bf1-aba7-acd9618c4ba1",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "insights",
+            "mode": "list",
+            "cachedResultName": "insights"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "usuario_id",
+                "value": "={{ $json.query.user_id }}"
+              },
+              {
+                "column": "id",
+                "value": "={{ $json.query.insight_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          208,
+          0
+        ],
+        "id": "777e60f4-fa18-4b8e-a9e7-ba47a738459a",
+        "name": "Select rows from a table",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Select rows from a table",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select rows from a table": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

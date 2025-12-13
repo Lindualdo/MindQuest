@@ -128,6 +128,7 @@
       }
     ]
   },
+  "activeVersionId": "4e3dbc47-f791-4861-84e3-fbba9a4aab9b",
   "shared": [
     {
       "createdAt": "2025-10-16T11:52:20.583Z",
@@ -179,5 +180,91 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "CGdzaV8rqARmJCwO",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "full_chat",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "da8c9637-2c77-483e-a512-f72bdc50180e",
+        "name": "Webhook",
+        "webhookId": "47a7dd1b-8e15-4b94-b91e-494ec7d40a86"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * from usr_chat \nWHERE id = $1",
+          "options": {
+            "queryReplacement": "=# Param 1 – usuário\n{{ $json.query.chat_id }}\n"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          208,
+          0
+        ],
+        "id": "346e7ff2-8d53-4ca8-aabe-7e38b6bebc60",
+        "name": "Execute a SQL query",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          416,
+          0
+        ],
+        "id": "47e1b2b3-1240-4a4a-a9fb-a4c16738c55a",
+        "name": "Respond to Webhook"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL query": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

@@ -272,6 +272,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "6fc317f3-f5eb-4836-88cc-1385029202d5",
   "shared": [
     {
       "createdAt": "2025-11-28T21:18:02.550Z",
@@ -323,5 +324,267 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "t2V2FjqurbcnvMvh",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "objetivos",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-get",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -512,
+          304
+        ],
+        "webhookId": "76f2286f-9b5e-4350-87d6-0a8864121c17"
+      },
+      {
+        "parameters": {
+          "jsCode": "const webhookData = $input.first().json || {};\nconst query = webhookData.query || {};\nconst user_id = query.user_id || query.userId || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\nreturn [{ json: { user_id: user_id } }];"
+        },
+        "id": "validar-get",
+        "name": "Validar Params GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    uo.id,\n    uo.usuario_id as user_id,\n    uo.area_vida_id,\n    av.codigo as area_codigo,\n    av.nome as area_nome,\n    av.icone as area_icone,\n    uo.objetivo_catalogo_id,\n    oc.codigo as objetivo_codigo,\n    uo.titulo,\n    uo.detalhamento,\n    uo.prazo_dias,\n    uo.data_inicio,\n    uo.data_limite,\n    uo.status,\n    uo.alcancado_em,\n    uo.criado_em,\n    uo.atualizado_em,\n    uo.is_padrao,\n    CASE WHEN uo.is_padrao THEN NULL ELSE (uo.data_limite - CURRENT_DATE)::int END as dias_restantes\nFROM usuarios_objetivos uo\nJOIN areas_vida_catalogo av ON av.id = uo.area_vida_id\nLEFT JOIN objetivos_catalogo oc ON oc.id = uo.objetivo_catalogo_id\nWHERE uo.usuario_id = $1::uuid\nORDER BY \n    uo.is_padrao DESC,\n    CASE uo.status WHEN 'ativo' THEN 0 ELSE 1 END,\n    uo.data_limite ASC;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        },
+        "id": "buscar-objetivo",
+        "name": "Buscar Objetivos",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all().map(i => i.json);\n\n// Se não houver objetivos, retorna lista vazia\nif (!items || items.length === 0 || !items[0].id) {\n  return [{\n    json: {\n      success: true,\n      objetivos: [],\n      total_ativos: 0,\n      limite_ativos: 3,\n      pode_criar: true\n    }\n  }];\n}\n\n// Formatar objetivos\nconst objetivos = items.map(obj => ({\n  id: obj.id,\n  area: {\n    id: obj.area_vida_id,\n    codigo: obj.area_codigo,\n    nome: obj.area_nome,\n    icone: obj.area_icone\n  },\n  objetivo_catalogo_id: obj.objetivo_catalogo_id,\n  objetivo_codigo: obj.objetivo_codigo,\n  titulo: obj.titulo,\n  detalhamento: obj.detalhamento,\n  prazo_dias: obj.prazo_dias,\n  data_inicio: obj.data_inicio,\n  data_limite: obj.data_limite,\n  dias_restantes: obj.dias_restantes,\n  status: obj.status,\n  alcancado_em: obj.alcancado_em,\n  criado_em: obj.criado_em,\n  is_padrao: obj.is_padrao || false\n}));\n\n// Contar todos os ativos (incluindo padrão)\nconst todosAtivos = objetivos.filter(o => o.status === 'ativo');\n// Contar específicos para verificar se pode criar\nconst especificosAtivos = todosAtivos.filter(o => !o.is_padrao);\n\nreturn [{\n  json: {\n    success: true,\n    objetivos: objetivos,\n    total_ativos: todosAtivos.length,\n    limite_ativos: 3,\n    pode_criar: especificosAtivos.length < 2\n  }\n}];"
+        },
+        "id": "montar-resposta-get",
+        "name": "Montar Resposta GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-get",
+        "name": "Responder GET",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || {};\nconst user_id = body.user_id || body.usuario_id || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\n// Validações obrigatórias\nconst area_vida_id = body.area_vida_id || null;\nif (!area_vida_id) {\n  throw new Error('area_vida_id obrigatório');\n}\n\nconst titulo = (body.titulo || '').trim();\nif (!titulo) {\n  throw new Error('titulo obrigatório');\n}\n\nconst detalhamento = (body.detalhamento || '').trim();\nif (!detalhamento || detalhamento.length < 20) {\n  throw new Error('detalhamento obrigatório (mínimo 20 caracteres)');\n}\n\nconst prazo_dias = parseInt(body.prazo_dias, 10);\nif (![30, 45, 60].includes(prazo_dias)) {\n  throw new Error('prazo_dias deve ser 30, 45 ou 60');\n}\n\n// Campos opcionais\nconst objetivo_catalogo_id = body.objetivo_catalogo_id || null;\n\nconst dados = {\n  user_id: user_id,\n  area_vida_id: area_vida_id,\n  objetivo_catalogo_id: objetivo_catalogo_id,\n  titulo: titulo,\n  detalhamento: detalhamento,\n  prazo_dias: prazo_dias\n};\n\nreturn [{ json: dados }];"
+        },
+        "id": "validar-post",
+        "name": "Validar Params POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO usuarios_objetivos (\n    usuario_id,\n    area_vida_id,\n    objetivo_catalogo_id,\n    titulo,\n    detalhamento,\n    prazo_dias,\n    data_inicio,\n    data_limite,\n    status\n) VALUES (\n    $1::uuid,\n    $2::uuid,\n    CASE WHEN $3 IS NOT NULL AND $3 != '' THEN $3::uuid ELSE NULL END,\n    $4,\n    $5,\n    $6::int,\n    CURRENT_DATE,\n    CURRENT_DATE + ($6::int || ' days')::interval,\n    'ativo'\n)\nRETURNING \n    id,\n    usuario_id as user_id,\n    area_vida_id,\n    objetivo_catalogo_id,\n    titulo,\n    detalhamento,\n    prazo_dias,\n    data_inicio,\n    data_limite,\n    status,\n    criado_em;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id, $json.area_vida_id, $json.objetivo_catalogo_id, $json.titulo, $json.detalhamento, $json.prazo_dias] }}"
+          }
+        },
+        "id": "atualizar-objetivo",
+        "name": "Criar Objetivo",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          512
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\nif (!item || !item.id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Erro ao criar objetivo'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    objetivo: {\n      id: item.id,\n      area_vida_id: item.area_vida_id,\n      objetivo_catalogo_id: item.objetivo_catalogo_id,\n      titulo: item.titulo,\n      detalhamento: item.detalhamento,\n      prazo_dias: item.prazo_dias,\n      data_inicio: item.data_inicio,\n      data_limite: item.data_limite,\n      status: item.status,\n      criado_em: item.criado_em\n    }\n  }\n}];"
+        },
+        "id": "montar-resposta-post",
+        "name": "Montar Resposta POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-post",
+        "name": "Responder POST",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "objetivos",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "69b784a7-708b-4b06-a24e-eca8c5686a77",
+        "name": "Webhook POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -512,
+          512
+        ],
+        "webhookId": "76f2286f-9b5e-4350-87d6-0a8864121c17"
+      }
+    ],
+    "connections": {
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Validar Params GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params GET": {
+        "main": [
+          [
+            {
+              "node": "Buscar Objetivos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Objetivos": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta GET": {
+        "main": [
+          [
+            {
+              "node": "Responder GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params POST": {
+        "main": [
+          [
+            {
+              "node": "Criar Objetivo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Criar Objetivo": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta POST": {
+        "main": [
+          [
+            {
+              "node": "Responder POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook POST": {
+        "main": [
+          [
+            {
+              "node": "Validar Params POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

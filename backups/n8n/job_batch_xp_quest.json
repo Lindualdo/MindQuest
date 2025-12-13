@@ -170,6 +170,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
+  "activeVersionId": null,
   "shared": [
     {
       "createdAt": "2025-11-12T12:21:14.768Z",
@@ -221,5 +222,6 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": null
 }

@@ -276,6 +276,7 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
+  "activeVersionId": "4cbda0e3-16c5-4b65-9b37-b19473a0b270",
   "shared": [
     {
       "createdAt": "2025-12-03T16:20:47.245Z",
@@ -327,5 +328,271 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "4bgnz09qqRCnZ5uM",
+    "nodes": [
+      {
+        "id": "webhook-get",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          304
+        ],
+        "parameters": {
+          "path": "notificacoes",
+          "responseMode": "responseNode",
+          "options": {
+            "onError": "continueRegularOutput"
+          }
+        },
+        "webhookId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "disabled": false
+      },
+      {
+        "id": "validar-get",
+        "name": "Validar Params GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          304
+        ],
+        "parameters": {
+          "jsCode": "const query = $input.first().json.query || {};\nconst user_id = query.user_id || query.userId || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\nreturn [{ json: { user_id: user_id } }];"
+        }
+      },
+      {
+        "id": "buscar-notificacoes",
+        "name": "Buscar Notificações",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          304
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    usuario_id,\n    conversas_ia_ativo,\n    conversas_ia_periodo,\n    conversas_ia_motivacionais,\n    conversas_ia_sabotadores,\n    conversas_ia_resumo_semanal,\n    lembretes_ativo,\n    lembretes_periodo,\n    lembretes_conversas_diarias,\n    lembretes_quests,\n    lembretes_conquistas,\n    lembretes_canais\nFROM notificacoes\nWHERE usuario_id = $1::uuid\nLIMIT 1;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "montar-resposta-get",
+        "name": "Montar Resposta GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          304
+        ],
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\n// Se não encontrou, retornar valores padrão\nif (!item || !item.usuario_id) {\n  return [{\n    json: {\n      success: true,\n      notificacoes: {\n        conversas_ia_ativo: true,\n        conversas_ia_periodo: 'manha',\n        conversas_ia_motivacionais: true,\n        conversas_ia_sabotadores: true,\n        conversas_ia_resumo_semanal: true,\n        lembretes_ativo: true,\n        lembretes_periodo: 'manha',\n        lembretes_conversas_diarias: true,\n        lembretes_quests: true,\n        lembretes_conquistas: true,\n        lembretes_canais: ['whatsapp']\n      }\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    notificacoes: {\n      conversas_ia_ativo: item.conversas_ia_ativo ?? true,\n      conversas_ia_periodo: item.conversas_ia_periodo || 'manha',\n      conversas_ia_motivacionais: item.conversas_ia_motivacionais ?? true,\n      conversas_ia_sabotadores: item.conversas_ia_sabotadores ?? true,\n      conversas_ia_resumo_semanal: item.conversas_ia_resumo_semanal ?? true,\n      lembretes_ativo: item.lembretes_ativo ?? true,\n      lembretes_periodo: item.lembretes_periodo || 'manha',\n      lembretes_conversas_diarias: item.lembretes_conversas_diarias ?? true,\n      lembretes_quests: item.lembretes_quests ?? true,\n      lembretes_conquistas: item.lembretes_conquistas ?? true,\n      lembretes_canais: item.lembretes_canais || ['whatsapp']\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "responder-get",
+        "name": "Responder GET",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          304
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "webhook-post",
+        "name": "Webhook POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          512
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "notificacoes",
+          "responseMode": "responseNode",
+          "options": {
+            "onError": "continueRegularOutput"
+          }
+        },
+        "webhookId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "disabled": false
+      },
+      {
+        "id": "validar-post",
+        "name": "Validar Params POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          512
+        ],
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || {};\nconst user_id = body.user_id || body.usuario_id || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\n// Validar periodo\nconst periodosValidos = ['manha', 'tarde', 'noite'];\nconst conversas_ia_periodo = periodosValidos.includes(body.conversas_ia_periodo) ? body.conversas_ia_periodo : 'manha';\nconst lembretes_periodo = periodosValidos.includes(body.lembretes_periodo) ? body.lembretes_periodo : 'manha';\n\nconst dados = {\n  user_id: user_id,\n  conversas_ia_ativo: body.conversas_ia_ativo ?? true,\n  conversas_ia_periodo: conversas_ia_periodo,\n  conversas_ia_motivacionais: body.conversas_ia_motivacionais ?? true,\n  conversas_ia_sabotadores: body.conversas_ia_sabotadores ?? true,\n  conversas_ia_resumo_semanal: body.conversas_ia_resumo_semanal ?? true,\n  lembretes_ativo: body.lembretes_ativo ?? true,\n  lembretes_periodo: lembretes_periodo,\n  lembretes_conversas_diarias: body.lembretes_conversas_diarias ?? true,\n  lembretes_quests: body.lembretes_quests ?? true,\n  lembretes_conquistas: body.lembretes_conquistas ?? true,\n  lembretes_canais: Array.isArray(body.lembretes_canais) ? body.lembretes_canais : ['whatsapp']\n};\n\nreturn [{ json: dados }];"
+        }
+      },
+      {
+        "id": "salvar-notificacoes",
+        "name": "Salvar Notificações",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          512
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO notificacoes (\n    usuario_id,\n    conversas_ia_ativo,\n    conversas_ia_periodo,\n    conversas_ia_motivacionais,\n    conversas_ia_sabotadores,\n    conversas_ia_resumo_semanal,\n    lembretes_ativo,\n    lembretes_periodo,\n    lembretes_conversas_diarias,\n    lembretes_quests,\n    lembretes_conquistas,\n    lembretes_canais\n) VALUES (\n    $1::uuid,\n    $2::boolean,\n    $3::varchar,\n    $4::boolean,\n    $5::boolean,\n    $6::boolean,\n    $7::boolean,\n    $8::varchar,\n    $9::boolean,\n    $10::boolean,\n    $11::boolean,\n    $12::text[]\n)\nON CONFLICT (usuario_id) DO UPDATE SET\n    conversas_ia_ativo = EXCLUDED.conversas_ia_ativo,\n    conversas_ia_periodo = EXCLUDED.conversas_ia_periodo,\n    conversas_ia_motivacionais = EXCLUDED.conversas_ia_motivacionais,\n    conversas_ia_sabotadores = EXCLUDED.conversas_ia_sabotadores,\n    conversas_ia_resumo_semanal = EXCLUDED.conversas_ia_resumo_semanal,\n    lembretes_ativo = EXCLUDED.lembretes_ativo,\n    lembretes_periodo = EXCLUDED.lembretes_periodo,\n    lembretes_conversas_diarias = EXCLUDED.lembretes_conversas_diarias,\n    lembretes_quests = EXCLUDED.lembretes_quests,\n    lembretes_conquistas = EXCLUDED.lembretes_conquistas,\n    lembretes_canais = EXCLUDED.lembretes_canais,\n    atualizado_em = CURRENT_TIMESTAMP\nRETURNING \n    usuario_id,\n    conversas_ia_ativo,\n    conversas_ia_periodo,\n    conversas_ia_motivacionais,\n    conversas_ia_sabotadores,\n    conversas_ia_resumo_semanal,\n    lembretes_ativo,\n    lembretes_periodo,\n    lembretes_conversas_diarias,\n    lembretes_quests,\n    lembretes_conquistas,\n    lembretes_canais;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id, $json.conversas_ia_ativo, $json.conversas_ia_periodo, $json.conversas_ia_motivacionais, $json.conversas_ia_sabotadores, $json.conversas_ia_resumo_semanal, $json.lembretes_ativo, $json.lembretes_periodo, $json.lembretes_conversas_diarias, $json.lembretes_quests, $json.lembretes_conquistas, $json.lembretes_canais] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "montar-resposta-post",
+        "name": "Montar Resposta POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          512
+        ],
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\nif (!item || !item.usuario_id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Erro ao salvar notificações'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    notificacoes: {\n      conversas_ia_ativo: item.conversas_ia_ativo ?? true,\n      conversas_ia_periodo: item.conversas_ia_periodo || 'manha',\n      conversas_ia_motivacionais: item.conversas_ia_motivacionais ?? true,\n      conversas_ia_sabotadores: item.conversas_ia_sabotadores ?? true,\n      conversas_ia_resumo_semanal: item.conversas_ia_resumo_semanal ?? true,\n      lembretes_ativo: item.lembretes_ativo ?? true,\n      lembretes_periodo: item.lembretes_periodo || 'manha',\n      lembretes_conversas_diarias: item.lembretes_conversas_diarias ?? true,\n      lembretes_quests: item.lembretes_quests ?? true,\n      lembretes_conquistas: item.lembretes_conquistas ?? true,\n      lembretes_canais: item.lembretes_canais || ['whatsapp']\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "responder-post",
+        "name": "Responder POST",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          512
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Validar Params GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params GET": {
+        "main": [
+          [
+            {
+              "node": "Buscar Notificações",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Notificações": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta GET": {
+        "main": [
+          [
+            {
+              "node": "Responder GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook POST": {
+        "main": [
+          [
+            {
+              "node": "Validar Params POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params POST": {
+        "main": [
+          [
+            {
+              "node": "Salvar Notificações",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Salvar Notificações": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta POST": {
+        "main": [
+          [
+            {
+              "node": "Responder POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

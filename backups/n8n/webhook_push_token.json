@@ -148,6 +148,7 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
+  "activeVersionId": "9863869f-cbd6-4e8f-896d-001a96854aea",
   "shared": [
     {
       "createdAt": "2025-12-03T16:48:42.908Z",
@@ -199,5 +200,143 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "yDhAuyAdcFYrEzC0",
+    "nodes": [
+      {
+        "id": "webhook-post",
+        "name": "Webhook POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "push-token",
+          "responseMode": "responseNode",
+          "options": {
+            "onError": "continueRegularOutput"
+          }
+        },
+        "webhookId": "c3d4e5f6-a7b8-9012-cdef-123456789012"
+      },
+      {
+        "id": "validar-post",
+        "name": "Validar Params POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const input = $input.first().json || {};\nconst body = input.body || {};\nconst query = input.query || {};\n\n// Buscar user_id no body ou query\nconst user_id = body.user_id || body.usuario_id || query.user_id || query.usuario_id || null;\nconst token = body.token || query.token;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\nif (!token || typeof token !== 'string' || token.trim().length === 0) {\n  throw new Error('token obrigatório');\n}\n\nreturn [{\n  json: {\n    user_id: user_id,\n    token: token.trim(),\n    user_agent: body.user_agent || query.user_agent || null\n  }\n}];"
+        }
+      },
+      {
+        "id": "salvar-token",
+        "name": "Salvar Token",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO dispositivos_push (\n    usuario_id,\n    token,\n    user_agent\n) VALUES (\n    $1::uuid,\n    $2::text,\n    $3::text\n)\nON CONFLICT (usuario_id, token) DO UPDATE SET\n    user_agent = EXCLUDED.user_agent,\n    atualizado_em = CURRENT_TIMESTAMP\nRETURNING \n    id,\n    usuario_id,\n    token,\n    user_agent,\n    criado_em,\n    atualizado_em;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id, $json.token, $json.user_agent] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "montar-resposta",
+        "name": "Montar Resposta",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\nif (!item || !item.usuario_id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Erro ao salvar token'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    dispositivo: {\n      id: item.id,\n      usuario_id: item.usuario_id,\n      token: item.token,\n      criado_em: item.criado_em,\n      atualizado_em: item.atualizado_em\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "responder-post",
+        "name": "Responder POST",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook POST": {
+        "main": [
+          [
+            {
+              "node": "Validar Params POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params POST": {
+        "main": [
+          [
+            {
+              "node": "Salvar Token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Salvar Token": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Responder POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

@@ -138,6 +138,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "e7e0e6d6-fd20-4372-af5c-57085ccf8218",
   "shared": [
     {
       "createdAt": "2025-11-21T21:59:50.038Z",
@@ -189,5 +190,139 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "mVzX9PQljx3IEm86",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "roda/emocoes",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "0f60f2af-dbcd-4f4c-941b-ce4259205084",
+        "name": "Webhook Roda Emoções",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "webhook-roda-emocoes-webhook-id"
+      },
+      {
+        "parameters": {
+          "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
+        },
+        "id": "86c89090-4d97-4e99-b69f-12b2b5d7bf61",
+        "name": "Validar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH emocoes_todas AS (\n    SELECT \n        emocao_id,\n        SUM(intensidade) as intensidade_total\n    FROM usuarios_emocoes\n    WHERE usuario_id = $1\n    GROUP BY emocao_id\n)\nSELECT \n    json_build_object(\n        'alegria', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'joy'), 0),\n        'confianca', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'trust'), 0),\n        'medo', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'fear'), 0),\n        'surpresa', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'surprise'), 0),\n        'tristeza', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'sadness'), 0),\n        'angustia', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'disgust'), 0),\n        'raiva', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'anger'), 0),\n        'expectativa', COALESCE((SELECT intensidade_total FROM emocoes_todas WHERE emocao_id = 'anticipation'), 0)\n    )::text as emocoes_contagem;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "cc4bc804-7256-443d-836c-be9812a72a25",
+        "name": "roda_emocoes",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          480,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const row = $input.first()?.json || {};\n\nfunction parseJsonSafe(value, fallback) {\n  if (typeof value === 'string') {\n    try {\n      return JSON.parse(value);\n    } catch (error) {\n      console.warn('[Code Node] Erro ao parsear JSON:', error);\n      return fallback;\n    }\n  }\n  if (value && typeof value === 'object') return value;\n  return fallback;\n}\n\nfunction parseNullableNumber(value) {\n  if (value === undefined || value === null || value === '' || value === 'null') return null;\n  const num = Number(value);\n  return Number.isFinite(num) ? num : null;\n}\n\nconst distribuicaoEmocoes = (() => {\n  const source = row.emocoes_contagem ?? row.roda_emocoes;\n  const parsed = parseJsonSafe(source, {});\n  const defaults = {\n    alegria: 0,\n    confianca: 0,\n    medo: 0,\n    surpresa: 0,\n    tristeza: 0,\n    angustia: 0,\n    raiva: 0,\n    expectativa: 0,\n  };\n  for (const key of Object.keys(defaults)) {\n    const valor = parsed?.[key];\n    defaults[key] = parseNullableNumber(valor) ?? defaults[key];\n  }\n  return defaults;\n})();\n\nconst response = {\n  success: true,\n  roda_emocoes: distribuicaoEmocoes,\n  timestamp: new Date().toISOString(),\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+        },
+        "id": "cbcfc742-8780-431a-8e9e-0f00bf4d1f4f",
+        "name": "Montar Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "26ea99bd-e454-43db-a57e-a9d82938efd7",
+        "name": "Responder Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          960,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook Roda Emoções": {
+        "main": [
+          [
+            {
+              "node": "Validar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params": {
+        "main": [
+          [
+            {
+              "node": "roda_emocoes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "roda_emocoes": {
+        "main": [
+          [
+            {
+              "node": "Montar Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Response": {
+        "main": [
+          [
+            {
+              "node": "Responder Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

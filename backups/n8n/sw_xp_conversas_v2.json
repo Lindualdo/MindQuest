@@ -1,32 +1,55 @@
 {
+  "createdAt": "2025-12-12T20:21:50.690Z",
+  "id": "W0i3ufnDIIcx75ez",
   "name": "sw_xp_conversas_v2",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id", "type": "string" },
-            { "name": "chat_id", "type": "string" },
-            { "name": "data_conversa", "type": "string" },
-            { "name": "total_interactions", "type": "number" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "total_interactions",
+              "type": "number"
+            }
           ]
         }
       },
-      "id": "start-001",
+      "id": "62e03181-1b7f-47bf-8702-4cb6aefe384f",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [0, 240]
+      "position": [
+        768,
+        352
+      ]
     },
     {
       "parameters": {
-        "content": "## Regras: XP Conversas (v2.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia de conversa válida |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje |\n| `log_experts` | 1 registro por chat_id + expert_name |\n\n### Decisão Autônoma\n- Já processou este chat? → ignora\n- Já deu XP hoje (outro chat)? → ignora\n- Novo dia válido? → processa\n\n### Observação\n- Validação de contexto (≥30 palavras) feita no job_experts\n- Sem streaks (implementar depois)"
+        "content": "## Regras: XP Conversas (v2.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia de conversa válida |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje |\n| `log_experts` | 1 registro por chat_id + expert_name |\n\n### Decisão Autônoma\n- Já processou este chat? → ignora\n- Já deu XP hoje (outro chat)? → ignora\n- Novo dia válido? → processa\n\n### Observação\n- Validação de contexto (≥30 palavras) feita no job_experts\n- Sem streaks (implementar depois)",
+        "height": 624,
+        "width": 880,
+        "color": 5
       },
-      "id": "sticky-rules",
+      "id": "da5a336c-a461-4274-8fa7-fbdbb3b67e35",
       "name": "Regras XP Conversas v2",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-280, -60],
+      "position": [
+        -304,
+        -160
+      ],
       "width": 380,
       "height": 340
     },
@@ -38,11 +61,14 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa, $json.total_interactions] }}"
         }
       },
-      "id": "pg-verificar",
+      "id": "aff5d4d8-e45e-4cbd-9bf3-f346d322bb00",
       "name": "Verificar Processamento",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [220, 240],
+      "position": [
+        992,
+        352
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -53,24 +79,34 @@
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 2, "caseSensitive": true, "typeValidation": "strict" },
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
           "combinator": "and",
           "conditions": [
             {
               "id": "check-processar",
               "leftValue": "={{ $json.acao }}",
               "rightValue": "processar",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ]
         },
         "options": {}
       },
-      "id": "if-processar",
+      "id": "b6574fde-ca86-4f1a-b9f9-cfeb1fa7b067",
       "name": "Deve Processar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [440, 240]
+      "position": [
+        1200,
+        352
+      ]
     },
     {
       "parameters": {
@@ -80,11 +116,14 @@
           "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id] }}"
         }
       },
-      "id": "pg-quest",
+      "id": "61a15b68-0354-4892-bfe7-20a21742b733",
       "name": "Buscar/Criar Quest",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [700, 140],
+      "position": [
+        1472,
+        256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -100,11 +139,14 @@
           "queryReplacement": "={{ [$json.usuarios_quest_id, $('Verificar Processamento').item.json.data_conversa, $('Verificar Processamento').item.json.xp_valor] }}"
         }
       },
-      "id": "pg-recorrencia",
+      "id": "7a485d29-d167-4c59-8684-01b05ee909da",
       "name": "Inserir Recorrência",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [920, 140],
+      "position": [
+        1680,
+        256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -120,11 +162,14 @@
           "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.xp_valor, $('Verificar Processamento').item.json.data_conversa] }}"
         }
       },
-      "id": "pg-update-xp",
+      "id": "bfe362b5-1434-49a9-843b-78faeb388d4d",
       "name": "Atualizar XP",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1140, 140],
+      "position": [
+        1904,
+        256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -140,11 +185,14 @@
           "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.chat_id, $('Verificar Processamento').item.json.expert_name, $('Verificar Processamento').item.json.total_interactions, $('Verificar Processamento').item.json.xp_valor] }}"
         }
       },
-      "id": "pg-log",
+      "id": "984da6d9-4ace-49ec-a043-507a066f4d89",
       "name": "Registrar Log",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1360, 140],
+      "position": [
+        2128,
+        256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -156,53 +204,120 @@
       "parameters": {
         "jsCode": "// Retorna resultado do processamento\nconst verificar = $('Verificar Processamento').item.json;\nconst xpAtualizado = $('Atualizar XP').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: 'processado',\n    xp_ganho: verificar.xp_valor,\n    xp_total: xpAtualizado.xp_total,\n    data_conversa: verificar.data_conversa\n  }\n}];"
       },
-      "id": "code-resultado-ok",
+      "id": "2c64a925-1866-4f38-b253-b24119a11044",
       "name": "Resultado Processado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1580, 140]
+      "position": [
+        2352,
+        256
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Retorna resultado quando não processa\nconst verificar = $('Verificar Processamento').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: verificar.acao,\n    xp_ganho: 0,\n    xp_total: null,\n    data_conversa: verificar.data_conversa\n  }\n}];"
       },
-      "id": "code-resultado-skip",
+      "id": "7d5fe691-be8d-4754-a81e-914f6a258491",
       "name": "Resultado Ignorado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 340]
+      "position": [
+        1472,
+        448
+      ]
     }
   ],
   "connections": {
     "start": {
-      "main": [[{ "node": "Verificar Processamento", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verificar Processamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verificar Processamento": {
-      "main": [[{ "node": "Deve Processar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Deve Processar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Deve Processar?": {
       "main": [
-        [{ "node": "Buscar/Criar Quest", "type": "main", "index": 0 }],
-        [{ "node": "Resultado Ignorado", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Buscar/Criar Quest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado Ignorado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Buscar/Criar Quest": {
-      "main": [[{ "node": "Inserir Recorrência", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Inserir Recorrência",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Inserir Recorrência": {
-      "main": [[{ "node": "Atualizar XP", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Atualizar XP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Atualizar XP": {
-      "main": [[{ "node": "Registrar Log", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Registrar Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Registrar Log": {
-      "main": [[{ "node": "Resultado Processado", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Resultado Processado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
+  "staticData": null,
+  "meta": null,
   "pinData": {
     "start": [
       {
@@ -214,5 +329,59 @@
         }
       }
     ]
-  }
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-12T20:21:50.690Z",
+      "role": "workflow:owner",
+      "workflowId": "W0i3ufnDIIcx75ez",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }

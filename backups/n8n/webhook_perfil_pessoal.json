@@ -312,6 +312,7 @@
       }
     ]
   },
+  "activeVersionId": "78531069-e02d-4dce-954d-970f94533d34",
   "shared": [
     {
       "createdAt": "2025-11-28T19:39:38.779Z",
@@ -363,5 +364,265 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "Xo32TaonbDju1uF9",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "perfil-pessoal",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-get",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          304
+        ],
+        "webhookId": "539a6705-809e-44ff-a6b1-3e4f7e9c729d"
+      },
+      {
+        "parameters": {
+          "jsCode": "const query = $input.first().json.query || {};\nconst user_id = query.user_id || query.userId || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\nreturn [{ json: { user_id: user_id } }];"
+        },
+        "id": "validar-get",
+        "name": "Validar Params GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    u.id as user_id,\n    u.nome_preferencia,\n    COALESCE(u.nome_assistente, NULL) as nome_assistente,\n    COALESCE(u.tom_conversa, NULL) as tom_conversa,\n    COALESCE(u.sobre_voce, NULL) as sobre_voce\nFROM usuarios u\nWHERE u.id = $1::uuid\nLIMIT 1;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        },
+        "id": "buscar-perfil",
+        "name": "Buscar Perfil",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\n// Verificar se perfil não foi encontrado\nif (!item || Object.keys(item).length === 0 || !item.user_id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Perfil não encontrado'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    perfil: {\n      nome_preferencia: item.nome_preferencia || null,\n      nome_assistente: item.nome_assistente || null,\n      tom_conversa: item.tom_conversa || null,\n      sobre_voce: item.sobre_voce || null\n    }\n  }\n}];"
+        },
+        "id": "montar-resposta-get",
+        "name": "Montar Resposta GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-get",
+        "name": "Responder GET",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "perfil-pessoal",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-post",
+        "name": "Webhook POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          512
+        ],
+        "webhookId": "5bb10fb7-9cf4-460d-a418-da040dce5cad"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || {};\nconst user_id = body.user_id || body.usuario_id || null;\n\nif (!user_id) {\n  throw new Error('user_id obrigatório');\n}\n\nconst dados = {\n  user_id: user_id,\n  nome_preferencia: body.nome_preferencia || null,\n  nome_assistente: body.nome_assistente || null,\n  tom_conversa: body.tom_conversa || null,\n  sobre_voce: body.sobre_voce || null\n};\n\nreturn [{ json: dados }];"
+        },
+        "id": "validar-post",
+        "name": "Validar Params POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE usuarios\nSET \n    nome_preferencia = COALESCE($2, nome_preferencia),\n    nome_assistente = COALESCE($3, nome_assistente),\n    tom_conversa = COALESCE($4, tom_conversa),\n    sobre_voce = COALESCE($5, sobre_voce),\n    atualizado_em = CURRENT_TIMESTAMP\nWHERE id = $1::uuid\nRETURNING \n    id as user_id,\n    nome_preferencia,\n    COALESCE(nome_assistente, NULL) as nome_assistente,\n    COALESCE(tom_conversa, NULL) as tom_conversa,\n    COALESCE(sobre_voce, NULL) as sobre_voce;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id, $json.nome_preferencia, $json.nome_assistente, $json.tom_conversa, $json.sobre_voce] }}"
+          }
+        },
+        "id": "atualizar-perfil",
+        "name": "Atualizar Perfil",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          512
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first()?.json || {};\n\nif (!item || !item.user_id) {\n  return [{\n    json: {\n      success: false,\n      error: 'Erro ao atualizar perfil'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    perfil: {\n      nome_preferencia: item.nome_preferencia || null,\n      nome_assistente: item.nome_assistente || null,\n      tom_conversa: item.tom_conversa || null,\n      sobre_voce: item.sobre_voce || null\n    }\n  }\n}];"
+        },
+        "id": "montar-resposta-post",
+        "name": "Montar Resposta POST",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "responder-post",
+        "name": "Responder POST",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          400,
+          512
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Validar Params GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params GET": {
+        "main": [
+          [
+            {
+              "node": "Buscar Perfil",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Perfil": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta GET": {
+        "main": [
+          [
+            {
+              "node": "Responder GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook POST": {
+        "main": [
+          [
+            {
+              "node": "Validar Params POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params POST": {
+        "main": [
+          [
+            {
+              "node": "Atualizar Perfil",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar Perfil": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta POST": {
+        "main": [
+          [
+            {
+              "node": "Responder POST",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

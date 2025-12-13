@@ -165,6 +165,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "7059a6df-1259-491f-814d-ce7d1ddcd840",
   "shared": [
     {
       "createdAt": "2025-12-03T12:57:01.454Z",
@@ -216,5 +217,160 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "oQVnWaDhkvu3DPWs",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "ocorrencias/sabotador",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-node",
+        "name": "Webhook Ocorrências Sabotador",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -240,
+          272
+        ],
+        "webhookId": "b90e5887-831e-4039-bd01-2223444491df",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\nconst sabotadorId = $json.query?.sabotador_id ?? $json.body?.sabotador_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nif (typeof sabotadorId !== 'string' || sabotadorId.trim() === '') {\n  throw new Error('Parâmetro sabotador_id é obrigatório (?sabotador_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n      sabotador_id: sabotadorId.trim(),\n    },\n  },\n];"
+        },
+        "id": "validar-params",
+        "name": "Validar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          0,
+          272
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n  us.id,\n  us.chat_id,\n  us.insight_atual,\n  us.contramedida_ativa,\n  us.intensidade_media,\n  us.contexto_principal,\n  us.criado_em,\n  COALESCE(us.data_ultima_atividade, us.atualizado_em) AS data_ocorrencia,\n  uc.resumo_conversa,\n  uc.criado_em AS data_conversa\nFROM public.usuarios_sabotadores us\nLEFT JOIN public.usr_chat uc ON uc.id = us.chat_id\nWHERE us.usuario_id = $1::uuid\n  AND us.sabotador_id = $2\nORDER BY COALESCE(us.data_ultima_atividade, us.criado_em) DESC;",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id, $json.sabotador_id] }}"
+          }
+        },
+        "id": "buscar-ocorrencias",
+        "name": "Buscar Ocorrências",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          240,
+          400
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const ocorrenciasItems = $input.all().map(item => item.json || {});\nconst params = $('Validar Params').first().json || {};\n\nconst response = {\n  success: true,\n  usuario_id: params.user_id || null,\n  sabotador_id: params.sabotador_id || null,\n  ocorrencias: ocorrenciasItems.map((row) => ({\n    id: row.id,\n    chat_id: row.chat_id,\n    insight_atual: row.insight_atual || null,\n    contramedida_ativa: row.contramedida_ativa || null,\n    intensidade_media: row.intensidade_media || null,\n    contexto_principal: row.contexto_principal || null,\n    data_ocorrencia: row.data_ocorrencia || row.criado_em || null,\n    data_conversa: row.data_conversa || null,\n    resumo_conversa: row.resumo_conversa || null,\n  })),\n  total: ocorrenciasItems.length,\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+        },
+        "id": "montar-response",
+        "name": "Montar Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          704,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "responder",
+        "name": "Responder Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          864,
+          304
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "merge-node",
+        "name": "Merge Params",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          528,
+          288
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook Ocorrências Sabotador": {
+        "main": [
+          [
+            {
+              "node": "Validar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params": {
+        "main": [
+          [
+            {
+              "node": "Buscar Ocorrências",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Ocorrências": {
+        "main": [
+          [
+            {
+              "node": "Merge Params",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Montar Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Response": {
+        "main": [
+          [
+            {
+              "node": "Responder Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

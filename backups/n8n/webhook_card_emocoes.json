@@ -324,6 +324,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "c96b064e-a62d-4b74-837e-b2b1b8d7d270",
   "shared": [
     {
       "createdAt": "2025-11-14T12:27:57.408Z",
@@ -375,5 +376,319 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "zumEm0S27nyCEaDP",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "card/emocoes",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "794a651b-08a6-4103-b9b9-65bc25432964",
+        "name": "Webhook Card Emoções",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -224,
+          368
+        ],
+        "webhookId": "33423fbf-31d8-49c6-ad83-9da047c61601",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [\n  {\n    json: {\n      user_id: userId.trim(),\n    },\n  },\n];"
+        },
+        "id": "e49bcd0e-a60c-4f7e-a15d-09b75fdd9a20",
+        "name": "Validar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          16,
+          368
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH base AS (\n  SELECT\n    uhe.humor_dia,\n    uhe.data_registro,\n    uhe.hora_registro,\n    uhe.detectado_em\n  FROM usuarios_humor_energia uhe\n  WHERE uhe.usuario_id = $1\n),\nestatisticas AS (\n  SELECT\n    COUNT(*) AS total_registros,\n    ROUND(COALESCE(AVG(humor_dia)::numeric, 0), 2) AS humor_medio_7d\n  FROM base\n),\nultimo AS (\n  SELECT\n    humor_dia,\n    data_registro,\n    hora_registro,\n    detectado_em\n  FROM base\n  ORDER BY data_registro DESC,\n           COALESCE(detectado_em, data_registro::timestamp) DESC,\n           hora_registro DESC NULLS LAST\n  LIMIT 1\n)\nSELECT\n  'humor'::text AS bloco,\n  $1::uuid     AS user_id,\n  estatisticas.total_registros,\n  estatisticas.humor_medio_7d,\n  ultimo.humor_dia AS humor_atual,\n  ultimo.data_registro AS ultima_data,\n  ultimo.hora_registro AS ultima_hora\nFROM estatisticas\nLEFT JOIN ultimo ON TRUE;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "72c58e34-d0ea-4203-9c8b-c5bc2cb07abd",
+        "name": "Humor_Medio",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          256,
+          208
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH emocao_classificada AS (\n  SELECT\n    CASE\n      WHEN LOWER(emocao_id) IN ('joy','trust','anticipation') THEN 'POSITIVA'\n      WHEN LOWER(emocao_id) IN ('sadness','fear','anger','disgust') THEN 'NEGATIVA'\n      WHEN LOWER(emocao_id) = 'surprise' THEN 'NEUTRA'\n      ELSE 'NEUTRA'\n    END AS categoria\n  FROM usuarios_emocoes ue\n  WHERE ue.usuario_id = $1\n    AND ue.intensidade >= 45\n)\nSELECT\n  'panas'::text AS bloco,\n  $1::uuid     AS user_id,\n  COUNT(*) FILTER (WHERE categoria = 'POSITIVA') AS positivas,\n  COUNT(*) FILTER (WHERE categoria = 'NEGATIVA') AS negativas,\n  COUNT(*) FILTER (WHERE categoria = 'NEUTRA')   AS neutras,\n  COUNT(*)                                       AS total,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_positivas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_negativas,\n  CASE WHEN COUNT(*) > 0\n       THEN ROUND((COUNT(*) FILTER (WHERE categoria = 'NEUTRA')::numeric / COUNT(*)::numeric) * 100, 1)\n       ELSE 0 END AS percentual_neutras,\n  CASE\n    WHEN COUNT(*) = 0 THEN 'NEUTRA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'POSITIVA'\n    WHEN ( (COUNT(*) FILTER (WHERE categoria = 'NEGATIVA')::numeric / COUNT(*)::numeric) * 100\n         - (COUNT(*) FILTER (WHERE categoria = 'POSITIVA')::numeric / COUNT(*)::numeric) * 100 ) > 20\n         THEN 'NEGATIVA'\n    ELSE 'NEUTRA'\n  END AS resultado_panas\nFROM emocao_classificada;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "33a20e36-f5e1-4784-bd8a-14940c482c37",
+        "name": "Analise_PANAS",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          256,
+          368
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH emocoes_semana AS (\n  SELECT\n    ue.emocao_id,\n    SUM(ue.intensidade) AS intensidade_total\n  FROM usuarios_emocoes ue\n  WHERE ue.usuario_id = $1\n    AND ue.detectado_em >= CURRENT_DATE - INTERVAL '7 days'\n  GROUP BY ue.emocao_id\n),\ntotais AS (\n  SELECT COALESCE(SUM(intensidade_total), 0)::numeric AS total_intensidade\n  FROM emocoes_semana\n),\nranked AS (\n  SELECT\n    'emocoes'::text AS bloco,\n    $1::uuid AS user_id,\n    ep.nome AS emocao_nome,\n    COALESCE(ep.emoji, '❤️') AS emoji,\n    es.intensidade_total,\n    CASE\n      WHEN totais.total_intensidade > 0\n        THEN ROUND((es.intensidade_total / totais.total_intensidade) * 100, 1)\n      ELSE 0\n    END AS percentual,\n    ROW_NUMBER() OVER (ORDER BY es.intensidade_total DESC NULLS LAST) AS ordem\n  FROM emocoes_semana es\n  CROSS JOIN totais\n  LEFT JOIN emocoes_plutchik ep ON ep.id = es.emocao_id\n)\nSELECT\n  bloco,\n  user_id,\n  emocao_nome,\n  emoji,\n  percentual\nFROM ranked\nWHERE ordem <= 2\nORDER BY ordem;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "8fdb0143-67ec-43fa-b1e9-63a67e693bc1",
+        "name": "Emocoes_Dominantes",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          256,
+          528
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH sabotadores_agregados AS (\n  SELECT\n    us.sabotador_id,\n    COUNT(*) AS total_deteccoes,\n    COUNT(DISTINCT us.chat_id) AS conversas_afetadas,\n    AVG(us.intensidade_media) AS intensidade_media,\n    MAX(us.apelido_personalizado) AS apelido_personalizado,\n    MAX(us.contexto_principal) AS contexto_principal,\n    MAX(us.insight_atual) AS insight_atual,\n    MAX(us.contramedida_ativa) AS contramedida_ativa,\n    MAX(COALESCE(us.data_ultima_atividade, us.atualizado_em)) AS ultima_atualizacao\n  FROM usuarios_sabotadores us\n  WHERE us.usuario_id = $1\n  GROUP BY us.sabotador_id\n),\nsabotador_top AS (\n  SELECT *\n  FROM sabotadores_agregados\n  ORDER BY \n    total_deteccoes DESC,\n    conversas_afetadas DESC,\n    intensidade_media DESC\n  LIMIT 1\n),\nconversas_total AS (\n  SELECT COUNT(*) AS total_conversas\n  FROM usr_chat uc\n  WHERE uc.usuario_id = $1\n)\nSELECT\n  'sabotador'::text AS bloco,\n  $1::uuid         AS user_id,\n  st.sabotador_id,\n  sc.nome,\n  sc.emoji,\n  st.apelido_personalizado,\n  st.total_deteccoes,\n  ct.total_conversas,\n  st.conversas_afetadas,\n  st.contexto_principal,\n  st.insight_atual,\n  st.contramedida_ativa,\n  ROUND(st.intensidade_media::numeric, 2) AS intensidade_media\nFROM sabotador_top st\nJOIN sabotadores_catalogo sc ON sc.id = st.sabotador_id\nCROSS JOIN conversas_total ct;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "535ed51d-758f-40ee-b782-4be9898b2dc1",
+        "name": "Sabotador_Ativo",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          256,
+          688
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "numberInputs": 5
+        },
+        "id": "812549e0-68ec-4b62-a586-4d4309407d35",
+        "name": "Merge Dados",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          496,
+          448
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(item => item.json || {});\n\nfunction findRow(bloco) {\n  return rows.find((row) => row.bloco === bloco) || null;\n}\n\nconst humorRow = findRow('humor');\nconst panasRow = findRow('panas');\nconst sabotadorRow = findRow('sabotador');\nconst emocaoRows = rows.filter((row) => row.bloco === 'emocoes');\nconst sabotadoresListaRows = rows.filter((row) => row.bloco === 'sabotadores_lista');\n\nconst humorMedia = humorRow?.humor_medio_7d ?? null;\nconst humorAtual = humorRow?.humor_atual ?? humorMedia;\n\nconst response = {\n  success: true,\n  usuario_id: humorRow?.user_id || panasRow?.user_id || sabotadorRow?.user_id || emocaoRows[0]?.user_id || null,\n  card_panorama_emocional: {\n    humor: {\n      media_7d: humorMedia,\n      atual: humorAtual,\n      amostras: humorRow?.total_registros ?? 0,\n      ultima_data: humorRow?.ultima_data ?? null,\n      ultima_hora: humorRow?.ultima_hora ?? null,\n    },\n    energia: {\n      percentual_positiva: panasRow?.percentual_positivas ?? 0,\n      percentual_negativa: panasRow?.percentual_negativas ?? 0,\n      percentual_neutra: panasRow?.percentual_neutras ?? 0,\n      categoria: panasRow?.resultado_panas ?? 'NEUTRA',\n    },\n    emocoes_dominantes: emocaoRows.map((row) => ({\n      nome: row.emocao_nome ?? 'Emoção',\n      emoji: row.emoji ?? '❤️',\n      percentual: row.percentual ?? 0,\n    })),\n    sabotador: sabotadorRow\n      ? {\n          id: sabotadorRow.sabotador_id,\n          nome: sabotadorRow.nome,\n          emoji: sabotadorRow.emoji,\n          apelido: sabotadorRow.apelido_personalizado,\n          contexto: sabotadorRow.contexto_principal,\n          insight: sabotadorRow.insight_atual,\n          contramedida: sabotadorRow.contramedida_ativa,\n          intensidade_media: sabotadorRow.intensidade_media,\n          total_deteccoes: sabotadorRow.total_deteccoes,\n          conversas_afetadas: sabotadorRow.conversas_afetadas,\n        }\n      : null,\n    sabotadores_todos: sabotadoresListaRows.map((row) => ({\n      sabotador_id: row.sabotador_id,\n      nome: row.nome,\n      emoji: row.emoji,\n      total_deteccoes: row.total_deteccoes,\n      intensidade_media: row.intensidade_media,\n      score_impacto: row.score_impacto ?? (row.total_deteccoes * row.intensidade_media),\n      insight_atual: row.insight_atual,\n      contramedida_ativa: row.contramedida_ativa,\n      contexto_principal: row.contexto_principal,\n    })),\n  },\n};\n\nreturn [\n  {\n    json: response,\n  },\n];"
+        },
+        "id": "d8c757c0-1598-4008-95ae-ad789de9fac9",
+        "name": "Montar Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          736,
+          448
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "ea0ff123-20c0-4235-9b6b-f6f2af46e705",
+        "name": "Responder Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          976,
+          448
+        ]
+      },
+      {
+        "id": "todos-sabotadores-node",
+        "name": "Sabotadores_Todos",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          256,
+          848
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH sabotadores_agregados AS (\n  SELECT\n    us.sabotador_id,\n    COUNT(*) AS total_deteccoes,\n    COUNT(DISTINCT us.chat_id) AS conversas_afetadas,\n    AVG(us.intensidade_media) AS intensidade_media,\n    MAX(us.insight_atual) AS insight_atual,\n    MAX(us.contramedida_ativa) AS contramedida_ativa,\n    MAX(us.contexto_principal) AS contexto_principal,\n    MAX(COALESCE(us.data_ultima_atividade, us.atualizado_em)) AS ultima_atualizacao\n  FROM usuarios_sabotadores us\n  WHERE us.usuario_id = $1\n  GROUP BY us.sabotador_id\n),\nsabotadores_com_metrica AS (\n  SELECT\n    sa.*,\n    (sa.total_deteccoes * sa.intensidade_media)::numeric AS score_impacto\n  FROM sabotadores_agregados sa\n)\nSELECT\n  'sabotadores_lista'::text AS bloco,\n  $1::uuid AS user_id,\n  scm.sabotador_id,\n  sc.nome,\n  sc.emoji,\n  scm.total_deteccoes,\n  ROUND(scm.intensidade_media::numeric, 2) AS intensidade_media,\n  ROUND(scm.score_impacto::numeric, 2) AS score_impacto,\n  scm.insight_atual,\n  scm.contramedida_ativa,\n  scm.contexto_principal\nFROM sabotadores_com_metrica scm\nJOIN sabotadores_catalogo sc ON sc.id = scm.sabotador_id\nORDER BY scm.score_impacto DESC;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook Card Emoções": {
+        "main": [
+          [
+            {
+              "node": "Validar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params": {
+        "main": [
+          [
+            {
+              "node": "Humor_Medio",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Analise_PANAS",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Emocoes_Dominantes",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Sabotador_Ativo",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Sabotadores_Todos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Humor_Medio": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analise_PANAS": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Emocoes_Dominantes": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "Sabotador_Ativo": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 3
+            }
+          ]
+        ]
+      },
+      "Merge Dados": {
+        "main": [
+          [
+            {
+              "node": "Montar Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Response": {
+        "main": [
+          [
+            {
+              "node": "Responder Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sabotadores_Todos": {
+        "main": [
+          [
+            {
+              "node": "Merge Dados",
+              "type": "main",
+              "index": 4
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

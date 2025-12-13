@@ -217,6 +217,7 @@
       }
     ]
   },
+  "activeVersionId": "4887e6f5-70af-4e6e-bd5e-db6bdee3895d",
   "shared": [
     {
       "createdAt": "2025-10-12T07:55:47.675Z",
@@ -268,5 +269,173 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "v7HttxPItfsC82pA",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "resumo_conversas",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -480,
+          -16
+        ],
+        "id": "39a1ab4c-66a0-4c27-a64c-df9b474012eb",
+        "name": "Webhook",
+        "webhookId": "daf2181d-3e1c-4c2f-aa4a-78c4616b778e"
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          608,
+          16
+        ],
+        "id": "c81020fc-cb83-4640-8bd4-10f4e5e5e831",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "5a3fb558-2687-40d3-a1fc-c2463ae95fa1",
+                "leftValue": "={{ $json.query.conversa_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -192,
+          -16
+        ],
+        "id": "49ce36f5-fbcf-43a7-a964-6bfaf020f869",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "query": "SELECT DISTINCT ON (DATE(c.criado_em))\n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.usuario_id = $1\n  AND qc.id IS NOT NULL\nORDER BY DATE(c.criado_em) DESC, c.criado_em DESC\nLIMIT 10;",
+          "options": {
+            "queryReplacement": "={{ $json.query.user_id }}"
+          },
+          "operation": "executeQuery"
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          224,
+          128
+        ],
+        "id": "af018084-bb96-40b4-a6a1-49ce5cb174ba",
+        "name": "todos os resumos",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "query": "SELECT \n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.id = '{{ $json.query.conversa_id }}'\n  AND qc.id IS NOT NULL",
+          "operation": "executeQuery"
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          224,
+          -128
+        ],
+        "id": "536f4762-f018-4937-b671-dcec8726463d",
+        "name": "todos os resumos1",
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "todos os resumos1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "todos os resumos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "todos os resumos": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "todos os resumos1": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

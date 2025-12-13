@@ -187,6 +187,7 @@
       }
     ]
   },
+  "activeVersionId": "456d9b98-dd6e-419e-be62-3b1e7d7a73e2",
   "shared": [
     {
       "createdAt": "2025-11-27T20:13:45.434Z",
@@ -238,5 +239,140 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "Y435ZJF3humAmCLK",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "insights_historico",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-node",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -160,
+          0
+        ],
+        "webhookId": "e4a33dac-668f-4733-aead-9e0bfa26c5ba"
+      },
+      {
+        "parameters": {
+          "jsCode": "const user_id = $input.item.json.query?.user_id;\n\nif (!user_id) {\n  throw new Error('user_id é obrigatório');\n}\n\nreturn {\n  json: {\n    user_id\n  }\n};"
+        },
+        "id": "code-node",
+        "name": "Processar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          32,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, tipo, categoria, titulo, descricao, icone, prioridade, criado_em\nFROM public.insights\nWHERE usuario_id = $1::uuid\nORDER BY criado_em DESC\nLIMIT 10",
+          "options": {
+            "queryReplacement": "={{ [$json.user_id] }}"
+          }
+        },
+        "id": "postgres-node",
+        "name": "Select insights",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          224,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {
+            "responseData": "firstEntryJson"
+          }
+        },
+        "id": "respond-node",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          416,
+          0
+        ]
+      },
+      {
+        "id": "code-array-node",
+        "name": "Converter para Array",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          320,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst array = items.map(item => item.json);\nreturn [{ json: { data: array } }];"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Processar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Processar Params": {
+        "main": [
+          [
+            {
+              "node": "Select insights",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select insights": {
+        "main": [
+          [
+            {
+              "node": "Converter para Array",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Converter para Array": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

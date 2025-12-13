@@ -137,6 +137,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "758173c4-d751-4823-970a-66e4f37e10c6",
   "shared": [
     {
       "createdAt": "2025-11-17T09:21:58.283Z",
@@ -188,5 +189,138 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "LlL8f5Yv0dleQ11g",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "card/insight",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "22fef8b8-4db2-41c6-997f-bab7351e67d7",
+        "name": "Webhook Card Insight",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "2f43ab26-7791-4872-a306-f6cac3e34c22"
+      },
+      {
+        "parameters": {
+          "jsCode": "const userId = $json.query?.user_id ?? $json.body?.user_id;\n\nif (typeof userId !== 'string' || userId.trim() === '') {\n  throw new Error('Parâmetro user_id é obrigatório (?user_id=).');\n}\n\nreturn [{ json: { user_id: userId.trim() } }];"
+        },
+        "id": "6f68e1f3-a72a-4ccd-89e7-89e644683907",
+        "name": "Validar Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH ranked_insights AS (\n  SELECT\n    i.id,\n    i.usuario_id,\n    i.chat_id,\n    i.titulo,\n    NULLIF(i.descricao, '') AS descricao,\n    NULLIF(i.resumo_situacao, '') AS resumo_situacao,\n    i.prioridade,\n    i.categoria,\n    i.tipo,\n    i.criado_em,\n    ROW_NUMBER() OVER (\n      ORDER BY COALESCE(i.criado_em, NOW()) DESC, i.id DESC\n    ) AS rn\n  FROM public.insights i\n  WHERE i.usuario_id = $1\n    AND (i.ativo IS DISTINCT FROM FALSE)\n)\nSELECT\n  $1::uuid AS user_id,\n  r.id AS insight_id,\n  r.chat_id,\n  r.titulo,\n  COALESCE(r.descricao, r.resumo_situacao, 'Insight em validação') AS descricao,\n  r.prioridade,\n  r.categoria,\n  r.tipo,\n  r.criado_em,\n  uc.data_conversa,\n  to_char(COALESCE(uc.data_conversa, r.criado_em::date), 'DD/MM') AS data_label\nFROM ranked_insights r\nLEFT JOIN public.usr_chat uc ON uc.id = r.chat_id\nWHERE r.rn = 1;",
+          "options": {
+            "queryReplacement": "={{ $json.user_id }}"
+          }
+        },
+        "id": "27a893a8-2052-4f0f-a7f1-62fa65bcf1ff",
+        "name": "Selecionar Insight",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          480,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const row = $input.first()?.json || null;\n\nconst card = {\n  insight_id: row?.insight_id ?? null,\n  titulo: row?.titulo ?? 'Nenhum insight recente detectado',\n  descricao: row?.descricao ?? 'Assim que uma nova conversa for analisada, traremos um insight aqui.',\n  prioridade: row?.prioridade ?? null,\n  categoria: row?.categoria ?? null,\n  tipo: row?.tipo ?? null,\n  chat_id: row?.chat_id ?? null,\n  data_conversa: row?.data_conversa ?? null,\n  data_label: row?.data_label ?? null\n};\n\nreturn [{ json: {\n  success: true,\n  usuario_id: row?.user_id ?? null,\n  card_insight_ultima_conversa: card\n} }];"
+        },
+        "id": "c9c09908-9d54-4710-baba-1a8c31247b2f",
+        "name": "Montar Card",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "11b664f0-b7d3-43ea-bea3-828c32f5ca43",
+        "name": "Responder Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          960,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook Card Insight": {
+        "main": [
+          [
+            {
+              "node": "Validar Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params": {
+        "main": [
+          [
+            {
+              "node": "Selecionar Insight",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Selecionar Insight": {
+        "main": [
+          [
+            {
+              "node": "Montar Card",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Card": {
+        "main": [
+          [
+            {
+              "node": "Responder Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

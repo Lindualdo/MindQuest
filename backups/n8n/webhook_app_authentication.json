@@ -160,6 +160,7 @@
       }
     ]
   },
+  "activeVersionId": "cc450e4f-ba6e-4a82-aed4-4ea1e73cdd4f",
   "shared": [
     {
       "createdAt": "2025-09-24T12:07:20.876Z",
@@ -211,5 +212,117 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "r0CuG6F3S1TR8ohs",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "auth/validate",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "8ba9d6fa-aab2-4886-967c-4e40cff4e8a6",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -2048,
+          -272
+        ],
+        "webhookId": "9d6b39b5-4dde-442c-a4d6-8fb799ba9705"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    u.id as user_id,\n    u.nome,\n    u.nome_preferencia,\n    COALESCE(u.cronotipo_detectado, NULL) as cronotipo_detectado\nFROM usuarios u\nWHERE u.token_acesso = $1 \n  AND u.token_expira_em > CURRENT_TIMESTAMP\nLIMIT 1;",
+          "options": {
+            "queryReplacement": "={{ $json.body.token }}"
+          }
+        },
+        "id": "3141b8c7-1ea1-41c6-813b-3e1b9fa14605",
+        "name": "01_Validar_Usuario",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -1824,
+          -272
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json.response }}",
+          "options": {}
+        },
+        "id": "cc0475ed-22fd-40ad-b0f3-d5d759cb5574",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          -1296,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst userRow = items[0]?.json || {};\n\nfunction normalizeString(value, fallback = null) {\n  if (value === undefined || value === null) return fallback;\n  if (typeof value !== 'string') return String(value);\n  const trimmed = value.trim();\n  if (trimmed === '' || trimmed.toLowerCase() === 'null') return fallback;\n  return trimmed;\n}\n\n// Validar se usuário foi encontrado\nif (!userRow.user_id) {\n  return [{\n    json: {\n      response: {\n        success: false,\n        error: 'Token inválido ou expirado'\n      }\n    }\n  }];\n}\n\n// Retornar apenas dados do usuário\nconst user = {\n  id: normalizeString(userRow.user_id),\n  nome: normalizeString(userRow.nome, 'Usuário'),\n  nome_preferencia: normalizeString(userRow.nome_preferencia, userRow.nome || 'Usuário'),\n  cronotipo_detectado: normalizeString(userRow.cronotipo_detectado, null)\n};\n\nreturn [{\n  json: {\n    response: {\n      success: true,\n      user: user\n    }\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1552,
+          -272
+        ],
+        "id": "2578e50e-aefa-4fb9-b0f3-571ca2f12f97",
+        "name": "organiza_dados"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "01_Validar_Usuario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "01_Validar_Usuario": {
+        "main": [
+          [
+            {
+              "node": "organiza_dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "organiza_dados": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

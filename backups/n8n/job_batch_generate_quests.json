@@ -157,6 +157,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": null,
   "shared": [
     {
       "createdAt": "2025-11-07T12:42:26.199Z",
@@ -208,5 +209,6 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": null
 }

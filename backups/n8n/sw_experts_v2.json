@@ -1,38 +1,64 @@
 {
+  "createdAt": "2025-12-12T21:21:31.876Z",
+  "id": "af4tqT4UNTFznKEu",
   "name": "sw_experts_v2",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id", "type": "string" },
-            { "name": "chat_id", "type": "string" },
-            { "name": "mensagens", "type": "string" },
-            { "name": "data_conversa", "type": "string" },
-            { "name": "usr_nome_preferencia", "type": "string" },
-            { "name": "total_interactions", "type": "number" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "mensagens"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            },
+            {
+              "name": "total_interactions",
+              "type": "number"
+            }
           ]
         }
       },
-      "id": "start-001",
+      "id": "4cdf6fc0-46ff-4b6b-81a0-20208265f644",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [0, 500]
+      "position": [
+        -2768,
+        -256
+      ]
     },
     {
       "parameters": {
-        "content": "## sw_experts_v2 - Hub Consolidado\n\n### Fluxo\n1. **Resumo Conversa** (IA) → valida contexto\n2. **IF** tem_contexto = true\n3. **Experts em paralelo:**\n   - Sabotadores (busca catálogo + IA + grava)\n   - PANAS/Emoções (IA + grava)\n   - Humor/Energia (IA + grava)\n   - Big Five (busca histórico + IA + grava)\n   - Insights (IA + grava)\n4. **Atualiza usr_chat** (resumo, status)\n5. **Log final** em log_experts\n\n### Vantagens\n- Contexto compartilhado\n- Economia de tokens\n- Menos overhead de chamadas\n- Manutenção centralizada\n\n### Regras\n- Se tem_contexto=false → pula experts\n- Cada expert grava em sua tabela\n- Log único por execução"
+        "content": "## sw_experts_v2 - Hub Consolidado\n\n### Fluxo\n1. **Resumo Conversa** (IA) → valida contexto\n2. **IF** tem_contexto = true\n3. **Experts em paralelo:**\n   - Sabotadores (busca catálogo + IA + grava)\n   - PANAS/Emoções (IA + grava)\n   - Humor/Energia (IA + grava)\n   - Big Five (busca histórico + IA + grava)\n   - Insights (IA + grava)\n4. **Atualiza usr_chat** (resumo, status)\n5. **Log final** em log_experts\n\n### Vantagens\n- Contexto compartilhado\n- Economia de tokens\n- Menos overhead de chamadas\n- Manutenção centralizada\n\n### Regras\n- Se tem_contexto=false → pula experts\n- Cada expert grava em sua tabela\n- Log único por execução",
+        "height": 864,
+        "width": 624,
+        "color": 7
       },
-      "id": "sticky-001",
+      "id": "64928828-725e-48a3-91ad-e8afc9e656e0",
       "name": "Regras sw_experts_v2",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-400, 0],
+      "position": [
+        -3552,
+        -352
+      ],
       "width": 380,
       "height": 500
     },
-
     {
       "parameters": {
         "operation": "executeQuery",
@@ -41,33 +67,20 @@
           "queryReplacement": "={{ [$json.chat_id] }}"
         }
       },
-      "id": "pg-buscar-dados",
+      "id": "961eecee-664c-452f-949d-213ea311299f",
       "name": "Buscar Dados Chat",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [220, 500],
+      "position": [
+        -2576,
+        -256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
       }
-    },
-
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n**RESUMO ANTERIOR (se existir):**\n```\n{{ $('Buscar Dados Chat').item.json.resumo_conversa || 'Nenhum resumo anterior' }}\n```\n\n**NOVAS MENSAGENS (delta):**\n```\n{{ $('start').item.json.mensagens }}\n```\n\n---\n\n**SUA TAREFA:**\n\n1. **ANALISAR O DELTA**\n   - As novas mensagens têm conteúdo relevante para análise?\n   - Há informações novas ou é apenas conversa casual/repetitiva?\n\n2. **INCORPORAR AO RESUMO EXISTENTE**\n   - NÃO substitua o resumo anterior\n   - ADICIONE as novas informações relevantes\n   - Elimine redundâncias (se algo já está no resumo, não repita)\n\n3. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n4. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n5. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"breve explicação\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
-        }
-      },
-      "id": "agent-resumo",
-      "name": "1. Resumo Conversa",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [460, 500]
     },
     {
       "parameters": {
@@ -76,11 +89,14 @@
           "temperature": 0.2
         }
       },
-      "id": "llm-resumo",
+      "id": "a7954d87-1f48-430c-bf25-0329ac1f41af",
       "name": "LLM Resumo",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [380, 720],
+      "position": [
+        -2400,
+        -32
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -92,46 +108,61 @@
       "parameters": {
         "jsonSchemaExample": "{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"string\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"string\"\n}"
       },
-      "id": "parser-resumo",
+      "id": "61827f2d-fb95-457a-9f37-83c1ebeaf2bd",
       "name": "Parser Resumo",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [540, 720]
+      "position": [
+        -2240,
+        -32
+      ]
     },
-
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
           "conditions": [
             {
               "id": "condition-contexto",
               "leftValue": "={{ $json.output.tem_contexto }}",
               "rightValue": true,
-              "operator": { "type": "boolean", "operation": "equals" }
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       },
-      "id": "if-contexto",
+      "id": "48c0b979-82a6-42c6-bcbc-3054d9c621c4",
       "name": "Tem Contexto?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [720, 500]
+      "position": [
+        -2112,
+        -256
+      ]
     },
-
     {
       "parameters": {
         "operation": "executeQuery",
         "query": "SELECT id, nome, descricao FROM sabotadores_catalogo ORDER BY nome;",
         "options": {}
       },
-      "id": "pg-catalogo-sabotadores",
+      "id": "b2c09345-ac3d-4a69-a723-c2c6a597af6b",
       "name": "Buscar Catálogo Sabotadores",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [960, 200],
+      "position": [
+        -1136,
+        -704
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -141,32 +172,19 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=Analise a conversa e identifique sabotadores internos segundo Shirzad Chamine.\n\n**CONVERSA:**\n```json\n{{ $('start').first().json.mensagens }}\n```\nNome do usuário: {{ $('start').first().json.usr_nome_preferencia }}\n\n**SABOTADORES VÁLIDOS (use APENAS estes IDs):**\n{{ $('Buscar Catálogo Sabotadores').all().map(s => `- **${s.json.nome}** (${s.json.id}): ${s.json.descricao || ''}`).join('\\n') }}\n\n**CRÍTICO: sabotador_id DEVE ser EXATAMENTE um dos IDs acima**\n\n**SUA TAREFA:**\n1. Leia APENAS mensagens do usuário (autor: \"usuario\")\n2. Identifique sabotadores ativos (mínimo intensidade 30)\n3. Para cada sabotador:\n   - sabotador_id: EXATAMENTE um dos IDs da lista acima\n   - Intensidade: 0-100\n   - Contexto: vida_pessoal|profissional|financeiro|relacionamentos|saude|familia\n   - Frases gatilho: 2-4 frases CURTAS (máx 15 palavras)\n   - Insights: como impacta (use nome do usuário na 3ª pessoa)\n   - Confiabilidade: 0-100\n   - Apelido: curto e humanizado (ex: \"Sr. Ansioso\")\n   - Contramedida: UMA ação prática\n\n**REGRAS:**\n- Intensidade 0-100 (NÃO 0-10)\n- Apenas sabotadores com intensidade ≥ 30\n- Se não houver sabotadores, retorne array vazio\n- Retorne APENAS JSON estruturado",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você é especialista em detectar sabotadores internos segundo Shirzad Chamine.\n\nSeu trabalho:\n1. Identificar padrões de pensamento autodestrutivos\n2. Avaliar intensidades na escala 0-100 (IMPORTANTE: NÃO use 0-10)\n3. Extrair TRECHOS CURTOS E ESPECÍFICOS como frases gatilho (não textos longos)\n4. Classificar contextos corretamente\n5. Criar apelidos humanizados e contramedidas práticas\n\nEscala de intensidade 0-100:\n- 0-20: muito fraca\n- 21-40: fraca  \n- 41-60: moderada\n- 61-80: forte\n- 81-100: muito forte\n\nFRASES GATILHO:\n- Devem ser trechos CURTOS (máximo 15 palavras)\n- Extraia 2-4 frases específicas que evidenciam o sabotador\n- NÃO copie o texto inteiro\n- Exemplo bom: \"me senti desprezado\", \"ela não gostava mais de mim\"\n- Exemplo ruim: texto completo de 50+ palavras\n\nSeja criterioso: apenas inclua sabotadores com evidências claras e intensidade ≥ 30.\n\nRetorne SEMPRE JSON válido.",
-          "maxIterations": 3
-        }
-      },
-      "id": "agent-sabotadores",
-      "name": "2. Analisar Sabotadores",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [1200, 200]
-    },
-    {
-      "parameters": {
         "options": {
           "maxTokens": 2000,
           "temperature": 0.2
         }
       },
-      "id": "llm-sabotadores",
+      "id": "2c00d3fd-1a82-4228-b960-890758c57f91",
       "name": "LLM Sabotadores",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [1120, 420],
+      "position": [
+        -928,
+        -512
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -179,11 +197,14 @@
         "jsonSchemaExample": "{\n  \"sabotadores_detectados\": [\n    {\n      \"sabotador_id\": \"critico\",\n      \"nome_pt\": \"Crítico\",\n      \"intensidade\": 75,\n      \"contexto\": \"relacionamentos\",\n      \"frases_gatilho\": [\n        \"me senti desprezado\",\n        \"ela não gostava mais de mim\",\n        \"não encontrei alguém que vale a pena\"\n      ],\n      \"insights\": \"Autocrítica intensa sobre valor pessoal e capacidade de ser amado. Padrão recorrente de dúvida sobre próprio valor em relacionamentos.\",\n      \"confiabilidade\": 90,\n      \"apelido\": \"Sr. Exigente\",\n      \"contramedida\": \"Praticar autocompaixão: falar consigo como falaria com um amigo querido por 3 minutos\"\n    }\n  ]\n}",
         "autoFix": true
       },
-      "id": "parser-sabotadores",
+      "id": "55321f67-b7d0-43c3-918a-802fa92578e1",
       "name": "Parser Sabotadores",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [1280, 420]
+      "position": [
+        -672,
+        -544
+      ]
     },
     {
       "parameters": {
@@ -193,34 +214,20 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  JSON.stringify($json.output.sabotadores_detectados || [])\n] }}"
         }
       },
-      "id": "pg-gravar-sabotadores",
+      "id": "821c8d86-c520-48ca-a45a-ba36eb8e1379",
       "name": "Gravar Sabotadores",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1440, 200],
+      "position": [
+        -576,
+        -768
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
       }
-    },
-
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=### User Prompt  \nDADOS DA CONVERSA:  \nMensagens: {{ $('start').first().json.mensagens }}\n\nExecute a análise emocional conforme descrito no System Prompt identifique todas as emoções de Plutchik presentes, atribua intensidade, contexto e evidência, e então classifique o sentimento global da conversa como POSITIVA, NEGATIVA ou NEUTRA. Retorne **somente** o JSON estruturado conforme as regras.\n\n",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "=### System Prompt — Classificador Emocional (Plutchik + PANAS)\n\nVocê é um especialista em análise emocional com base nas **oito emoções primárias de Robert Plutchik** e em agregação de afeto inspirada no **PANAS**.\n\n---\n\n#### 🎯 Objetivo\nLer **todas as mensagens da conversa** e identificar **as emoções primárias presentes**, classificando-as conforme o modelo Plutchik e agregando o resultado segundo a escala PANAS.\n\n---\n\n#### 🧠 Tarefa passo a passo\n1. Analise **todas as mensagens** fornecidas.\n2. Detecte quais emoções primárias estão presentes (apenas as listadas abaixo).\n3. Para cada emoção detectada, retorne os campos:\n   - `emocao_id`: slug obrigatório (ver **Vocabulário permitido**).\n   - `intensidade`: número inteiro de **0 a 100**.\n   - `contexto`: valor fixo (**POSITIVA**, **NEGATIVA** ou **NEUTRA**) conforme tabela de polaridade.\n   - `evidencias`: lista de **trechos literais da conversa** (1–5 itens) que justifiquem a detecção.\n\n4. Após listar todas as emoções, gere um objeto `classificacao_geral` conforme as regras PANAS descritas abaixo.\n\n---\n\n#### 🔤 Vocabulário permitido\n| emocao_id | Nome (PT)      | Polaridade |\n|------------|----------------|-------------|\n| joy        | Alegria        | POSITIVA    |\n| trust      | Confiança      | POSITIVA    |\n| anticipation| Expectativa   | POSITIVA    |\n| sadness    | Tristeza       | NEGATIVA    |\n| fear       | Medo           | NEGATIVA    |\n| anger      | Raiva          | NEGATIVA    |\n| disgust    | Nojo           | NEGATIVA    |\n| surprise   | Surpresa       | NEUTRA      |\n\n> **Proibição:** Nenhum outro valor além dos 8 acima pode aparecer em `emocao_id`.\n\n---\n\n#### ⚖️ Mapeamento de polaridade\nUse **apenas** os seguintes contextos fixos:\n- POSITIVA → joy, trust, anticipation  \n- NEGATIVA → sadness, fear, anger, disgust  \n- NEUTRA → surprise  \n\n> O `contexto` não é inferido do tom, e sim **determinado diretamente** pela emoção.\n\n---\n\n#### 📊 Regras de agregação e classificação global\n- Somente emoções com `intensidade ≥ 45` participam do cálculo PANAS.  \n- Contagens:\n  - `positivas`: nº de emoções POSITIVAS\n  - `negativas`: nº de emoções NEGATIVAS\n  - `neutras`: nº de emoções NEUTRAS  \n  - `total`: soma de todas\n- Percentuais (0–100, uma casa decimal):  \n  - `percentual_positivas = positivas / total * 100`  \n  - `percentual_negativas = negativas / total * 100`  \n  - `percentual_neutras = neutras / total * 100`\n- Se `total = 0`, todos os valores devem ser 0 e `classificacao_global = \"NEUTRA\"`.\n- Regras PANAS:\n  - Se a diferença entre `percentual_positivas` e `percentual_negativas` for **menor que 20%**, classifique como **NEUTRA**.  \n  - Caso contrário, prevalece o maior percentual: **POSITIVA** ou **NEGATIVA**.\n\n---\n\n#### 🧩 Regras adicionais\n- Sempre use o campo `emocao_id` com **um dos slugs permitidos**.  \n- Se detectar nuances como **culpa**, **vergonha**, **orgulho**, **ansiedade** ou **gratidão**, mapeie para a emoção primária **mais próxima** (ex.: culpa → tristeza, orgulho → alegria).  \n- Antes de responder, **revise toda a lista `emocoes_detectadas`**:\n  - Se algum item estiver fora do vocabulário permitido, **corrija ou remova**.  \n  - Garanta que `intensidade` esteja entre 0 e 100.  \n  - Garanta que `contexto` corresponda à polaridade da emoção.  \n  - Garanta que `evidencias` seja um **array literal de frases reais**.  \n\n---\n\n#### 🧾 Boas práticas\n- Detecte cada emoção **no máximo uma vez**. Consolide múltiplas ocorrências em um único item, somando intensidade e reunindo as evidências mais fortes.  \n- Ordene `emocoes_detectadas` por `intensidade` **decrescente**.  \n- Evite interpretações ou narrativas; apenas relacione evidências textuais.\n\n---\n\n#### 🧮 Estrutura de saída esperada\nRetorne **somente um JSON válido**, sem texto livre, Markdown ou comentários.",
-          "maxIterations": 5
-        }
-      },
-      "id": "agent-panas",
-      "name": "3. Analisar Emoções PANAS",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [960, 400]
     },
     {
       "parameters": {
@@ -229,11 +236,14 @@
           "temperature": 0.2
         }
       },
-      "id": "llm-panas",
+      "id": "5851254c-d9d6-450a-b672-74b62f704e28",
       "name": "LLM PANAS",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [880, 620],
+      "position": [
+        -1136,
+        624
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -246,11 +256,14 @@
         "jsonSchemaExample": "{\n  \"emocoes_detectadas\": [\n    {\n      \"emocao_id\": \"sadness\",\n      \"nome_pt\": \"tristeza\",\n      \"intensidade\": 85,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"saudade\", \"solidão\", \"angústia\", \"me senti desprezado\"]\n    },\n    {\n      \"emocao_id\": \"anticipation\",\n      \"nome_pt\": \"expectativa\",\n      \"intensidade\": 40,\n      \"contexto\": \"POSITIVA\",\n      \"evidencias\": [\"projetos pessoais\", \"acompanhamento terapêutico\"]\n    },\n    {\n      \"emocao_id\": \"fear\",\n      \"nome_pt\": \"medo\",\n      \"intensidade\": 50,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"preocupação\", \"insegurança\"]\n    }\n  ],\n  \"classificacao_panas\": \"negativa\",\n  \"justificativa_panas\": \"Predominância de tristeza (85) relacionada a perda, solidão e rejeição. Expectativa presente mas em menor intensidade.\",\n  \"confianca_analise\": 90\n}",
         "autoFix": true
       },
-      "id": "parser-panas",
+      "id": "805c0e1d-b70e-4471-83c2-3163fd74f135",
       "name": "Parser PANAS",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [1040, 620]
+      "position": [
+        -960,
+        560
+      ]
     },
     {
       "parameters": {
@@ -260,34 +273,20 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa),\n  JSON.stringify($json.output.emocoes_detectadas || [])\n] }}"
         }
       },
-      "id": "pg-gravar-emocoes",
+      "id": "a46656a8-ead2-4fc1-b342-1b729689038b",
       "name": "Gravar Emoções",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1200, 400],
+      "position": [
+        -800,
+        368
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
       }
-    },
-
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Analise a conversa completa abaixo e detecte o HUMOR e ENERGIA do usuário com base APENAS no que foi dito.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $('start').first().json.mensagens }}\n```\n\nUser name: {{ $('start').first().json.usr_nome_preferencia }}\n\n**SUA TAREFA:**\n1. Leia TODA a conversa (autor: \"usuario\" apenas)\n2. Detecte o HUMOR GERAL do dia (1-10):\n   - 1-3: muito negativo (tristeza profunda, desesperança)\n   - 4-5: negativo (desânimo, frustração)\n   - 6-7: neutro/misto (altos e baixos)\n   - 8-9: positivo (animado, esperançoso)\n   - 10: muito positivo (eufórico, excelente)\n\n3. Detecte o NÍVEL DE ENERGIA (1-10):\n   - 1-3: exausto, sem forças\n   - 4-5: cansado, baixa energia\n   - 6-7: energia moderada\n   - 8-9: disposto, energizado\n   - 10: muito energizado, hiperativo\n\n4. Identifique VARIAÇÃO durante a conversa:\n   - estavel: humor/energia constante\n   - ascendente: melhora ao longo da conversa\n   - descendente: piora ao longo da conversa\n   - oscilatoria: alterna muito\n\n5. Detecte PERÍODO DO DIA (se mencionado):\n   - manha, tarde, noite, madrugada\n   - Se não mencionado: \"nao_identificado\"\n\n**REGRAS:**\n- Base a análise APENAS nas palavras do usuário\n- Considere: tom emocional, vocabulário, descrições de atividades\n- Seja preciso e realista\n- Justifique brevemente cada score\n- Ao gerar a justificativa e resumo das conversas relacionados com o humor, use sempre o nome do usuário: {{ $('start').first().json.usr_nome_preferencia }}\n- Caso o nome do usuário não seja informado, use o termo Usuário\n**RETORNE APENAS O JSON ESTRUTURADO**",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você é um especialista em análise de humor e energia em conversas.\n\nSeu trabalho é:\n1. Detectar o humor geral do dia (escala 1-10)\n2. Avaliar o nível de energia (escala 1-10)\n3. confianca_analise de 0 a 100\n4. Identificar variações durante a conversa\n5. Capturar período do dia se mencionado\n\nSeja objetivo, baseie-se apenas no texto real, e justifique suas avaliações de forma breve.\n\nRetorne SEMPRE um JSON válido com a estrutura exata solicitada.",
-          "maxIterations": 3
-        }
-      },
-      "id": "agent-humor",
-      "name": "4. Analisar Humor/Energia",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [960, 600]
     },
     {
       "parameters": {
@@ -296,11 +295,14 @@
           "temperature": 0.2
         }
       },
-      "id": "llm-humor",
+      "id": "3d509572-1b42-4997-a4fd-eb1bca699773",
       "name": "LLM Humor",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [880, 820],
+      "position": [
+        -1152,
+        1184
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -313,11 +315,14 @@
         "jsonSchemaExample": "{\n  \"humor_dia\": 4,\n  \"energia_nivel\": 6,\n  \"variacao_humor\": \"descendente\",\n  \"variacao_energia\": \"estavel\",\n  \"periodo_dia\": \"tarde\",\n  \"justificativa_humor\": \"Usuário começou o dia produtivo e animado, mas ao final relata tristeza profunda, angústia e desmotivação após ver fotos da ex-mulher\",\n  \"justificativa_energia\": \"Menciona que caminhou bastante, fez almoço, trabalhou no app - energia moderada/boa, mas manteve disposição física apesar da queda emocional\",\n  \"evidencias_textuais\": [\n    \"dia estava muito bom hoje, muito produtivo\",\n    \"estava disposto, animado\",\n    \"bateu uma coisa muito ruim\",\n    \"angústia, uma tristeza muito grande\",\n    \"muito desmotivado e desanimado\"\n  ],\n  \"confianca_analise\": 95\n}",
         "autoFix": true
       },
-      "id": "parser-humor",
+      "id": "f6f7478c-9e2e-48f7-b515-7966f4dffefc",
       "name": "Parser Humor",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [1040, 820]
+      "position": [
+        -944,
+        1104
+      ]
     },
     {
       "parameters": {
@@ -327,11 +332,14 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa),\n  $json.output.periodo_dia,\n  $json.output.humor_dia,\n  $json.output.energia_nivel,\n  $json.output.variacao_humor,\n  $json.output.variacao_energia,\n  JSON.stringify($json.output.justificativa_humor),\n  JSON.stringify($json.output.justificativa_energia),\n  JSON.stringify($json.output.evidencias_textuais || []),\n  $json.output.confianca_analise\n] }}"
         }
       },
-      "id": "pg-gravar-humor",
+      "id": "f2c64a21-cc2d-41c8-8f97-d6a2bae59c42",
       "name": "Gravar Humor",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1200, 600],
+      "position": [
+        -736,
+        912
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -339,7 +347,6 @@
         }
       }
     },
-
     {
       "parameters": {
         "workflowId": {
@@ -359,38 +366,28 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "sw-get-history",
+      "id": "e9593eca-5e96-4244-9124-77126bb8c55e",
       "name": "Buscar Histórico BigFive",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
-      "position": [960, 800],
+      "position": [
+        -1152,
+        -1232
+      ],
       "alwaysOutputData": true
     },
     {
       "parameters": {
         "functionCode": "const startData = $items('start')[0]?.json ?? {};\nconst historyItems = $items('Buscar Histórico BigFive').map((item) => item.json).filter(Boolean);\nconst formatDate = (value) => {\n  if (!value) return null;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return value;\n  return parsed.toISOString().slice(0, 10);\n};\nconst historicoOrdenado = historyItems\n  .map((entry) => ({\n    data: formatDate(entry.data_conversa),\n    resumo: entry.resumo_conversa ?? ''\n  }))\n  .filter((entry) => entry.data || entry.resumo)\n  .sort((a, b) => {\n    if (!a.data || !b.data) return 0;\n    return a.data < b.data ? 1 : -1;\n  });\nconst historicoResumo = historicoOrdenado.length\n  ? historicoOrdenado\n      .map((entry) => `- ${entry.data ?? 'data indeterminada'}: ${entry.resumo || 'sem resumo disponível'}`)\n      .join('\\n')\n  : 'Sem histórico relevante nos últimos 5 dias.';\nreturn [\n  {\n    json: {\n      ...startData,\n      historico_resumo: historicoResumo,\n      historico_itens: historicoOrdenado\n    }\n  }\n];"
       },
-      "id": "code-preparar-bigfive",
+      "id": "81e9e08e-7bb4-4b68-ada2-acde96a4fa1b",
       "name": "Preparar Contexto BigFive",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
-      "position": [1200, 800]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Use a conversa ATUAL como fonte principal e estime o perfil Big Five (OCEAN), tratando o histórico recente apenas como contexto complementar.\n\n**HISTÓRICO (resumos últimos 5 dias):**\n{{ $json.historico_resumo }}\n\n**CONVERSA ATUAL (JSON):**\n```json\n{{ $json.mensagens }}\n```\n**Nome do usuário:** {{ $json.usr_nome_preferencia }}\n\n**SEU OBJETIVO**\n1) Identificar sinais claros e textuais na conversa atual para cada traço: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.\n2) Atribuir **score 0-100** por traço (escala contínua; 50 = neutro/mediano).\n3) Extrair **EVIDÊNCIAS** em 2-4 trechos curtos (máx. 15 palavras cada) da conversa atual para cada traço.\n4) Estimar **confiabilidade (0-100)** por traço, baseada na quantidade/clareza das evidências.\n5) Determinar **perfil_primario** = traço com maior score (se diferença <5 pontos entre o 1º e 2º, retorne \"misto\").\n6) Produzir um **resumo_perfil** (máx. 400 caracteres) em linguagem acessível e não-clínica, coerente com o MindQuest.\n7) Se as evidências forem insuficientes para qualquer traço, retorne score=50 e confiabilidade ≤ 40 para aquele traço.\n\n**REGRAS CRÍTICAS**\n- Leia APENAS mensagens com `autor = \"usuario\"` da conversa atual.\n- Utilize o histórico somente para reconhecer padrões, mas NÃO use trechos do histórico como evidência literal.\n- **Proíba suposições**: não invente fatos não ditos; use somente trechos literais da conversa atual.\n- **Escala obrigatória 0-100** para scores e confiabilidade.\n- Mantenha saídas em **português**.\n- **NÃO** faça diagnósticos clínicos. Foco descritivo, orientado a autoconhecimento.\n- Retorne **APENAS JSON válido**, no formato definido em \"FORMATO DE SAÍDA\".\n\n**CRITÉRIOS DE INTERPRETAÇÃO (guia resumido)**\n- **Openness (Abertura):** curiosidade, ideias novas, explorar possibilidades; baixo: preferência por rotina.\n- **Conscientiousness (Conscienciosidade):** organização, disciplina, plano/execução; baixo: impulsividade, procrastinação.\n- **Extraversion (Extroversão):** energia social, busca de estímulos/contato; baixo: reserva, foco interno.\n- **Agreeableness (Amabilidade):** empatia, cooperação; baixo: assertividade dura, conflito, ceticismo.\n- **Neuroticism (Neuroticismo):** sensibilidade a estresse, ansiedade/ruminação; baixo: estabilidade emocional.\n\n**FORMATO DE SAÍDA (JSON):**\n{\n  \"big_five\": {\n    \"openness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"conscientiousness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"extraversion\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"agreeableness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"neuroticism\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    }\n  },\n  \"perfil_primario\": \"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\n  \"resumo_perfil\": \"texto curto e não clínico\",\n  \"insuficiente\": false\n}\n\n**NOTAS DE QUALIDADE**\n- Se a conversa for pobre em pistas, defina `insuficiente = true` e mantenha scores próximos de 50 com baixa confiabilidade.\n- \"Evidências\" DEVEM ser trechos literais e curtos da conversa atual (não use o histórico).",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você é um assistente especialista em Big Five (OCEAN) e ética em IA. Sua função é inferir tendências de personalidade com base EXCLUSIVAMENTE em trechos literais do usuário. Siga estes princípios:\n1) Precisão e parcimônia: sem extrapolações. Use apenas o que está escrito.\n2) Transparência: inclua evidências curtas (2-4) por traço.\n3) Escalas contínuas 0-100 para score e confiabilidade (50 = neutro; 0-20 muito baixo; 80-100 muito alto).\n4) Comunicação responsável: linguagem acessível, não clínica, acolhedora.\n5) Se faltarem sinais para um traço, use score=50, confiabilidade ≤ 40 e marque `insuficiente=true` se a conversa inteira não sustentar inferência.\nRetorne SEMPRE JSON válido no formato solicitado.",
-          "maxIterations": 3
-        }
-      },
-      "id": "agent-bigfive",
-      "name": "5. Analisar Big Five",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [1440, 800]
+      "position": [
+        -944,
+        -1232
+      ]
     },
     {
       "parameters": {
@@ -399,11 +396,14 @@
           "temperature": 0.2
         }
       },
-      "id": "llm-bigfive",
+      "id": "e95da6aa-2f82-4b08-8873-518ebaabba22",
       "name": "LLM BigFive",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [1360, 1020],
+      "position": [
+        -800,
+        -1024
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -416,21 +416,27 @@
         "jsonSchemaExample": "{\n  \"big_five\": {\n    \"openness\": {\"score\": 62, \"confiabilidade\": 78, \"evidencias\": [\"gosto de explorar ideias novas\", \"procuro alternativas criativas\"]},\n    \"conscientiousness\": {\"score\": 54, \"confiabilidade\": 65, \"evidencias\": [\"monitorei meu plano\", \"organizei meus passos\"]},\n    \"extraversion\": {\"score\": 41, \"confiabilidade\": 60, \"evidencias\": [\"prefiro ficar na minha\", \"evitei encontros\"]},\n    \"agreeableness\": {\"score\": 70, \"confiabilidade\": 72, \"evidencias\": [\"procurei conciliar\", \"quero evitar conflito\"]},\n    \"neuroticism\": {\"score\": 58, \"confiabilidade\": 68, \"evidencias\": [\"fiquei ansioso com perdas\", \"preocupação constante\"]}\n  },\n  \"perfil_primario\": \"agreeableness\",\n  \"resumo_perfil\": \"Pessoa colaborativa, aberta a diálogos e soluções conjuntas, mantendo equilíbrio em disciplina e energia social.\",\n  \"insuficiente\": false\n}",
         "autoFix": true
       },
-      "id": "parser-bigfive",
+      "id": "57519c37-b947-4c13-98aa-f5284560c2e3",
       "name": "Parser BigFive",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [1520, 1020]
+      "position": [
+        -640,
+        -1024
+      ]
     },
     {
       "parameters": {
         "functionCode": "const startItem = $items(\"start\")[0]?.json ?? {};\nconst preparado = $items(\"Preparar Contexto BigFive\")[0]?.json ?? {};\nconst payload = $json.output ?? {};\nconst traits = ['openness','conscientiousness','extraversion','agreeableness','neuroticism'];\nconst scores = traits.map((key) => {\n  const data = payload.big_five?.[key] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  return {\n    id: key,\n    score: Number.isFinite(score) ? score : null,\n    confiabilidade: Number.isFinite(confianca) ? confianca : null\n  };\n});\nconst sorted = [...scores].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));\nconst validTraits = new Set(traits);\nconst originalPrimary = payload.perfil_primario ?? null;\nlet primary = originalPrimary;\nif (!primary || primary === 'misto' || !validTraits.has(primary)) {\n  primary = sorted[0]?.id ?? null;\n}\nlet secondary = sorted.find((entry) => entry.id !== primary)?.id ?? null;\nif (!secondary && sorted[1]) {\n  secondary = sorted[1].id;\n}\nconst sumConfianca = scores.reduce((acc, entry) => acc + (entry.confiabilidade ?? 0), 0);\nconst confiancaMedia = scores.length ? Math.round(sumConfianca / scores.length) : null;\nconst rawDate = startItem.data_conversa || preparado.data_conversa;\nlet dataConversa = null;\nif (rawDate) {\n  const parsed = new Date(rawDate);\n  if (!isNaN(parsed)) {\n    dataConversa = parsed.toISOString().slice(0, 10);\n  }\n}\nif (!dataConversa) {\n  const now = new Date();\n  dataConversa = now.toISOString().slice(0, 10);\n}\nconst result = {\n  usuario_id: startItem.usuario_id ?? null,\n  chat_id: startItem.chat_id ?? null,\n  data_conversa: dataConversa,\n  perfil_original: originalPrimary,\n  perfil_primario: primary,\n  perfil_secundario: secondary,\n  resumo_perfil: payload.resumo_perfil ?? null,\n  insuficiente: Boolean(payload.insuficiente),\n  confianca_media: confiancaMedia,\n  raw_resposta: payload\n};\nfor (const trait of traits) {\n  const data = payload.big_five?.[trait] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  result[`score_${trait}`] = Number.isFinite(score) ? score : null;\n  result[`confianca_${trait}`] = Number.isFinite(confianca) ? confianca : null;\n}\nreturn [{ json: result }];"
       },
-      "id": "code-preparar-registro-bigfive",
+      "id": "f654373a-50de-4b75-ac13-317679fae46a",
       "name": "Preparar Registro BigFive",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
-      "position": [1680, 800]
+      "position": [
+        -416,
+        -1232
+      ]
     },
     {
       "parameters": {
@@ -440,34 +446,20 @@
           "queryReplacement": "={{ [\n  $json.usuario_id ?? null,\n  $json.chat_id ?? null,\n  $json.data_conversa ?? null,\n  $json.perfil_original ?? null,\n  $json.perfil_primario ?? null,\n  $json.perfil_secundario ?? null,\n  $json.resumo_perfil ?? null,\n  $json.insuficiente === true,\n  $json.score_openness ?? null,\n  $json.score_conscientiousness ?? null,\n  $json.score_extraversion ?? null,\n  $json.score_agreeableness ?? null,\n  $json.score_neuroticism ?? null,\n  $json.confianca_openness ?? null,\n  $json.confianca_conscientiousness ?? null,\n  $json.confianca_extraversion ?? null,\n  $json.confianca_agreeableness ?? null,\n  $json.confianca_neuroticism ?? null,\n  $json.confianca_media ?? null,\n  $json.raw_resposta ?? {}\n] }}"
         }
       },
-      "id": "pg-gravar-bigfive",
+      "id": "2c4ca0be-2a31-4515-92c6-310fa61ae282",
       "name": "Gravar BigFive",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1920, 800],
+      "position": [
+        -224,
+        -1232
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
       }
-    },
-
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Você é psicólogo especialista em desenvolvimento pessoal. Analise a conversa e contexto validado abaixo.\n\nCONVERSA:\n{{ $('start').first().json.mensagens }}\n\nUsuário: {{ $('start').first().json.usr_nome_preferencia }} | Data: {{ $('start').first().json.data_conversa }}\n\nChame a ferramenta: ´get_user_insight`\nConsidere também esses ultimos Insights na sua analise\n\nTAREFA: Gere 1 insights acionáveis com Feedback Sanduíche + Recursos Práticos.\nPriorize os pontos mais relevantes identificados na conversa\n\nAnalise os ultimos Insighs anteriores para evitar repetição\n\nESTRUTURA DE CADA INSIGHT:\n1. RESUMO (30-50 palavras): Sintetize estado emocional objetivamente\n2. FEEDBACK SANDUÍCHE:\n   - Positivo (20-30 pal): Reconheça forças\n   - Desenvolvimento (30-40 pal): Padrão que merece atenção\n   - Motivacional (20-30 pal): Esperança + próximos passos\n3. RECURSOS (2-4 itens): tipo, nome, descricao, aplicacao_pratica\n4. TITULO: Gere titulo curto 3 a 4 palavras. use tecnicas de copy do marketing para gerar curiosidade e e headlines clicáveis.\n\n═══════════════════════════════════════════════════════\n⚠️ VALORES PERMITIDOS - USE EXATAMENTE COMO LISTADO ⚠️\n═══════════════════════════════════════════════════════\n\nCATEGORIA (use APENAS estes valores):\n✓ comportamental\n✓ emocional\n✓ social\n✓ cognitivo\n✗ NUNCA: financeiro, profissional, financeiro-emocional, ou qualquer outro\n\nTIPO INSIGHT (use APENAS estes valores):\n✓ padrao\n✓ melhoria\n✓ positivo\n✓ alerta\n\nPRIORIDADE (use APENAS estes valores):\n✓ alta\n✓ media (SEM acento)\n✓ baixa\n\nTIPO RECURSO (use APENAS estes valores):\n✓ tecnica\n✓ conceito\n✓ leitura\n✓ pratica\n✓ reflexao\n\n═══════════════════════════════════════════════════════\n\nREGRAS CRÍTICAS:\n- Base TUDO no relatado (sem suposições)\n- Use APENAS os valores listados acima (sem variações, adaptações ou combinações)\n- Seja ESPECÍFICO nas evidências\n- Recursos PRÁTICOS e aplicáveis\n- Tom EMPÁTICO mas DIRETO\n- VALIDE cada campo antes de gerar o JSON\n\nANTES DE RETORNAR: Verifique se TODOS os valores de categoria, tipo, prioridade e tipo_recurso estão EXATAMENTE como listado acima.\n\nRETORNE JSON ARRAY com 1 insights no formato:\n[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Título\",\"icone\":\"🔄\",\"prioridade\":\"alta\",\"resumo_situacao\":\"...\",\"feedback_positivo\":\"...\",\"feedback_desenvolvimento\":\"...\",\"feedback_motivacional\":\"...\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"...\",\"descricao\":\"...\",\"aplicacao_pratica\":\"...\"}],\"baseado_em\":[\"evidência1\",\"evidência2\"]}]",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Psicólogo especialista. Gera insights acionáveis com feedback sanduíche e recursos práticos. Retorna array JSON com 2-4 insights.",
-          "maxIterations": 3
-        }
-      },
-      "id": "agent-insights",
-      "name": "6. Gerar Insights",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [960, 1000]
     },
     {
       "parameters": {
@@ -476,11 +468,14 @@
           "temperature": 0.3
         }
       },
-      "id": "llm-insights",
+      "id": "fdfe78f1-6ed2-48a5-9823-1bf194089273",
       "name": "LLM Insights",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [880, 1220],
+      "position": [
+        -1152,
+        112
+      ],
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -493,11 +488,14 @@
         "jsonSchemaExample": "[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Ciclo Produtividade\",\"icone\":\"🔄\",\"prioridade\":\"media\",\"resumo_situacao\":\"Resumo\",\"feedback_positivo\":\"Positivo\",\"feedback_desenvolvimento\":\"Desenvolvimento\",\"feedback_motivacional\":\"Motivacional\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"Nome\",\"descricao\":\"Desc\",\"aplicacao_pratica\":\"Aplicação\"}],\"baseado_em\":[\"ev1\"]}]",
         "autoFix": true
       },
-      "id": "parser-insights",
+      "id": "65b40be6-f5e7-417a-b793-acdceaa64d33",
       "name": "Parser Insights",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "position": [1040, 1220]
+      "position": [
+        -816,
+        16
+      ]
     },
     {
       "parameters": {
@@ -507,11 +505,14 @@
           "queryReplacement": "={{ $('start').first().json.usuario_id }}"
         }
       },
-      "id": "tool-get-insights",
+      "id": "a286e857-68b4-43bb-add9-54364267e809",
       "name": "get_user_insight",
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
-      "position": [1120, 1220],
+      "position": [
+        -960,
+        0
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -527,11 +528,14 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  JSON.stringify($json.output || [])\n] }}"
         }
       },
-      "id": "pg-gravar-insights",
+      "id": "bd1b69a9-0d1f-4e06-876a-fa4eda941001",
       "name": "Gravar Insights",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1200, 1000],
+      "position": [
+        -800,
+        -192
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -539,33 +543,22 @@
         }
       }
     },
-
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      },
-      "id": "merge-experts",
-      "name": "Merge Experts",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.1,
-      "position": [1700, 500]
-    },
-
     {
       "parameters": {
         "operation": "executeQuery",
         "query": "-- Atualizar usr_chat com resumo e status\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  tem_reflexao = $3,\n  total_palavras_usuario = COALESCE(total_palavras_usuario, 0) + $4,\n  status = 'finalizado',\n  horario_fim = NOW(),\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, status;",
         "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('1. Resumo Conversa').first().json.output.resumo_atualizado,\n  $('1. Resumo Conversa').first().json.output.tem_reflexao,\n  $('1. Resumo Conversa').first().json.output.total_palavras_delta || 0\n] }}"
+          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('resumo conversa').first().json.output.resumo_atualizado,\n  $('resumo conversa').first().json.output.tem_reflexao,\n  $('resumo conversa').first().json.output.total_palavras_delta || 0\n] }}"
         }
       },
-      "id": "pg-atualizar-chat",
+      "id": "915e6d19-c46e-412e-9df4-81633f1e6edf",
       "name": "Atualizar usr_chat",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1940, 500],
+      "position": [
+        -2752,
+        288
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -573,20 +566,22 @@
         }
       }
     },
-
     {
       "parameters": {
         "operation": "executeQuery",
         "query": "-- Registrar processamento final no log_experts\nINSERT INTO log_experts (usuario_id, chat_id, expert_name, ultima_interaction, historico, criado_em, atualizado_em)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'sw_experts_v2',\n  $3::int,\n  jsonb_build_array(jsonb_build_object(\n    'de', 0,\n    'ate', $3::int,\n    'novas', $3::int,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean,\n    'experts_executados', ARRAY['resumo','sabotadores','panas','humor','bigfive','insights']\n  )),\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id, expert_name) DO UPDATE SET\n  historico = log_experts.historico || jsonb_build_array(jsonb_build_object(\n    'de', log_experts.ultima_interaction,\n    'ate', $3::int,\n    'novas', $3::int - log_experts.ultima_interaction,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean,\n    'experts_executados', ARRAY['resumo','sabotadores','panas','humor','bigfive','insights']\n  )),\n  ultima_interaction = $3::int,\n  atualizado_em = NOW()\nRETURNING id;",
         "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  $('start').first().json.total_interactions,\n  $('1. Resumo Conversa').first().json.output.tem_contexto,\n  $('1. Resumo Conversa').first().json.output.tem_reflexao\n] }}"
+          "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  $('start').first().json.total_interactions,\n  $('resumo conversa').first().json.output.tem_contexto,\n  $('resumo conversa').first().json.output.tem_reflexao\n] }}"
         }
       },
-      "id": "pg-log-final",
+      "id": "819b7283-7f65-4a12-9e9b-a951b63a10db",
       "name": "Registrar Log Final",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [2160, 500],
+      "position": [
+        -2544,
+        288
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -594,20 +589,22 @@
         }
       }
     },
-
     {
       "parameters": {
         "operation": "executeQuery",
         "query": "-- Atualizar apenas resumo quando não tem contexto\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id;",
         "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('1. Resumo Conversa').first().json.output.resumo_atualizado\n] }}"
+          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('resumo conversa').first().json.output.resumo_atualizado\n] }}"
         }
       },
-      "id": "pg-atualizar-sem-contexto",
+      "id": "30fadd0a-3038-4976-8b49-4dc768671908",
       "name": "Atualizar Resumo (sem contexto)",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [960, 1200],
+      "position": [
+        -2640,
+        80
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -615,144 +612,798 @@
         }
       }
     },
-
     {
       "parameters": {
-        "jsCode": "// Retorna resultado final\nconst analise = $('1. Resumo Conversa').first().json.output;\nconst start = $('start').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    usuario_id: start.usuario_id,\n    chat_id: start.chat_id,\n    tem_contexto: analise.tem_contexto,\n    tem_reflexao: analise.tem_reflexao,\n    experts_executados: analise.tem_contexto \n      ? ['resumo','sabotadores','panas','humor','bigfive','insights']\n      : ['resumo']\n  }\n}];"
+        "jsCode": "// Retorna resultado final\nconst analise = $('resumo conversa').first().json.output;\nconst start = $('start').first().json;\n\nreturn [{\n  json: {\n    success: true,\n    usuario_id: start.usuario_id,\n    chat_id: start.chat_id,\n    tem_contexto: analise.tem_contexto,\n    tem_reflexao: analise.tem_reflexao,\n    experts_executados: analise.tem_contexto \n      ? ['resumo','sabotadores','panas','humor','bigfive','insights']\n      : ['resumo']\n  }\n}];"
       },
-      "id": "code-resultado-final",
+      "id": "95027d99-8b43-4012-af58-c923f3546230",
       "name": "Resultado Final",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2380, 500]
+      "position": [
+        -2320,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Expert - sabotadores",
+        "height": 464,
+        "width": 928,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -800
+      ],
+      "id": "b02959e3-a95b-4585-a778-5646e3f2bc1c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Expert - Insights",
+        "height": 512,
+        "width": 768,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -272
+      ],
+      "id": "86937348-86e4-4526-a989-916049ae9a38",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Expert - Resumo",
+        "height": 848,
+        "width": 1056,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2864,
+        -352
+      ],
+      "id": "98e6baf3-f272-48d2-8264-39632af8b087",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa e identifique sabotadores internos segundo Shirzad Chamine.\n\n**CONVERSA:**\n```json\n{{ $('start').first().json.mensagens }}\n```\nNome do usuário: {{ $('start').first().json.usr_nome_preferencia }}\n\n**SABOTADORES VÁLIDOS (use APENAS estes IDs):**\n{{ $('Buscar Catálogo Sabotadores').all().map(s => `- **${s.json.nome}** (${s.json.id}): ${s.json.descricao || ''}`).join('\\n') }}\n\n**CRÍTICO: sabotador_id DEVE ser EXATAMENTE um dos IDs acima**\n\n**SUA TAREFA:**\n1. Leia APENAS mensagens do usuário (autor: \"usuario\")\n2. Identifique sabotadores ativos (mínimo intensidade 30)\n3. Para cada sabotador:\n   - sabotador_id: EXATAMENTE um dos IDs da lista acima\n   - Intensidade: 0-100\n   - Contexto: vida_pessoal|profissional|financeiro|relacionamentos|saude|familia\n   - Frases gatilho: 2-4 frases CURTAS (máx 15 palavras)\n   - Insights: como impacta (use nome do usuário na 3ª pessoa)\n   - Confiabilidade: 0-100\n   - Apelido: curto e humanizado (ex: \"Sr. Ansioso\")\n   - Contramedida: UMA ação prática\n\n**REGRAS:**\n- Intensidade 0-100 (NÃO 0-10)\n- Apenas sabotadores com intensidade ≥ 30\n- Se não houver sabotadores, retorne array vazio\n- Retorne APENAS JSON estruturado",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é especialista em detectar sabotadores internos segundo Shirzad Chamine.\n\nSeu trabalho:\n1. Identificar padrões de pensamento autodestrutivos\n2. Avaliar intensidades na escala 0-100 (IMPORTANTE: NÃO use 0-10)\n3. Extrair TRECHOS CURTOS E ESPECÍFICOS como frases gatilho (não textos longos)\n4. Classificar contextos corretamente\n5. Criar apelidos humanizados e contramedidas práticas\n\nEscala de intensidade 0-100:\n- 0-20: muito fraca\n- 21-40: fraca  \n- 41-60: moderada\n- 61-80: forte\n- 81-100: muito forte\n\nFRASES GATILHO:\n- Devem ser trechos CURTOS (máximo 15 palavras)\n- Extraia 2-4 frases específicas que evidenciam o sabotador\n- NÃO copie o texto inteiro\n- Exemplo bom: \"me senti desprezado\", \"ela não gostava mais de mim\"\n- Exemplo ruim: texto completo de 50+ palavras\n\nSeja criterioso: apenas inclua sabotadores com evidências claras e intensidade ≥ 30.\n\nRetorne SEMPRE JSON válido.",
+          "maxIterations": 3
+        }
+      },
+      "id": "3665c8d0-3d2b-45d0-bf12-ae385a41822d",
+      "name": "sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -880,
+        -704
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é psicólogo especialista em desenvolvimento pessoal. Analise a conversa e contexto validado abaixo.\n\nCONVERSA:\n{{ $('start').first().json.mensagens }}\n\nUsuário: {{ $('start').first().json.usr_nome_preferencia }} | Data: {{ $('start').first().json.data_conversa }}\n\nChame a ferramenta: ´get_user_insight`\nConsidere também esses ultimos Insights na sua analise\n\nTAREFA: Gere 1 insights acionáveis com Feedback Sanduíche + Recursos Práticos.\nPriorize os pontos mais relevantes identificados na conversa\n\nAnalise os ultimos Insighs anteriores para evitar repetição\n\nESTRUTURA DE CADA INSIGHT:\n1. RESUMO (30-50 palavras): Sintetize estado emocional objetivamente\n2. FEEDBACK SANDUÍCHE:\n   - Positivo (20-30 pal): Reconheça forças\n   - Desenvolvimento (30-40 pal): Padrão que merece atenção\n   - Motivacional (20-30 pal): Esperança + próximos passos\n3. RECURSOS (2-4 itens): tipo, nome, descricao, aplicacao_pratica\n4. TITULO: Gere titulo curto 3 a 4 palavras. use tecnicas de copy do marketing para gerar curiosidade e e headlines clicáveis.\n\n═══════════════════════════════════════════════════════\n⚠️ VALORES PERMITIDOS - USE EXATAMENTE COMO LISTADO ⚠️\n═══════════════════════════════════════════════════════\n\nCATEGORIA (use APENAS estes valores):\n✓ comportamental\n✓ emocional\n✓ social\n✓ cognitivo\n✗ NUNCA: financeiro, profissional, financeiro-emocional, ou qualquer outro\n\nTIPO INSIGHT (use APENAS estes valores):\n✓ padrao\n✓ melhoria\n✓ positivo\n✓ alerta\n\nPRIORIDADE (use APENAS estes valores):\n✓ alta\n✓ media (SEM acento)\n✓ baixa\n\nTIPO RECURSO (use APENAS estes valores):\n✓ tecnica\n✓ conceito\n✓ leitura\n✓ pratica\n✓ reflexao\n\n═══════════════════════════════════════════════════════\n\nREGRAS CRÍTICAS:\n- Base TUDO no relatado (sem suposições)\n- Use APENAS os valores listados acima (sem variações, adaptações ou combinações)\n- Seja ESPECÍFICO nas evidências\n- Recursos PRÁTICOS e aplicáveis\n- Tom EMPÁTICO mas DIRETO\n- VALIDE cada campo antes de gerar o JSON\n\nANTES DE RETORNAR: Verifique se TODOS os valores de categoria, tipo, prioridade e tipo_recurso estão EXATAMENTE como listado acima.\n\nRETORNE JSON ARRAY com 1 insights no formato:\n[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Título\",\"icone\":\"🔄\",\"prioridade\":\"alta\",\"resumo_situacao\":\"...\",\"feedback_positivo\":\"...\",\"feedback_desenvolvimento\":\"...\",\"feedback_motivacional\":\"...\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"...\",\"descricao\":\"...\",\"aplicacao_pratica\":\"...\"}],\"baseado_em\":[\"evidência1\",\"evidência2\"]}]",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Psicólogo especialista. Gera insights acionáveis com feedback sanduíche e recursos práticos. Retorna array JSON com 2-4 insights.",
+          "maxIterations": 3
+        }
+      },
+      "id": "ed3c4373-101f-4463-8cf0-d8acc29d1e42",
+      "name": "insights",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n**RESUMO ANTERIOR (se existir):**\n```\n{{ $('Buscar Dados Chat').item.json.resumo_conversa || 'Nenhum resumo anterior' }}\n```\n\n**NOVAS MENSAGENS (delta):**\n```\n{{ $('start').item.json.mensagens }}\n```\n\n---\n\n**SUA TAREFA:**\n\n1. **ANALISAR O DELTA**\n   - As novas mensagens têm conteúdo relevante para análise?\n   - Há informações novas ou é apenas conversa casual/repetitiva?\n\n2. **INCORPORAR AO RESUMO EXISTENTE**\n   - NÃO substitua o resumo anterior\n   - ADICIONE as novas informações relevantes\n   - Elimine redundâncias (se algo já está no resumo, não repita)\n\n3. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n4. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n5. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"breve explicação\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
+        }
+      },
+      "id": "44de2586-5a5e-4281-ba59-df8a91856004",
+      "name": "resumo conversa",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2400,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Expert - PANAS + emoções",
+        "height": 480,
+        "width": 768,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        304
+      ],
+      "id": "741c3144-f599-4697-8a03-3e108714fa1b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Expert - Big Five",
+        "height": 464,
+        "width": 1248
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -1328
+      ],
+      "id": "fe62ab49-d839-430e-9b5d-b0207551812b",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use a conversa ATUAL como fonte principal e estime o perfil Big Five (OCEAN), tratando o histórico recente apenas como contexto complementar.\n\n**HISTÓRICO (resumos últimos 5 dias):**\n{{ $json.historico_resumo }}\n\n**CONVERSA ATUAL (JSON):**\n```json\n{{ $json.mensagens }}\n```\n**Nome do usuário:** {{ $json.usr_nome_preferencia }}\n\n**SEU OBJETIVO**\n1) Identificar sinais claros e textuais na conversa atual para cada traço: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.\n2) Atribuir **score 0-100** por traço (escala contínua; 50 = neutro/mediano).\n3) Extrair **EVIDÊNCIAS** em 2-4 trechos curtos (máx. 15 palavras cada) da conversa atual para cada traço.\n4) Estimar **confiabilidade (0-100)** por traço, baseada na quantidade/clareza das evidências.\n5) Determinar **perfil_primario** = traço com maior score (se diferença <5 pontos entre o 1º e 2º, retorne \"misto\").\n6) Produzir um **resumo_perfil** (máx. 400 caracteres) em linguagem acessível e não-clínica, coerente com o MindQuest.\n7) Se as evidências forem insuficientes para qualquer traço, retorne score=50 e confiabilidade ≤ 40 para aquele traço.\n\n**REGRAS CRÍTICAS**\n- Leia APENAS mensagens com `autor = \"usuario\"` da conversa atual.\n- Utilize o histórico somente para reconhecer padrões, mas NÃO use trechos do histórico como evidência literal.\n- **Proíba suposições**: não invente fatos não ditos; use somente trechos literais da conversa atual.\n- **Escala obrigatória 0-100** para scores e confiabilidade.\n- Mantenha saídas em **português**.\n- **NÃO** faça diagnósticos clínicos. Foco descritivo, orientado a autoconhecimento.\n- Retorne **APENAS JSON válido**, no formato definido em \"FORMATO DE SAÍDA\".\n\n**CRITÉRIOS DE INTERPRETAÇÃO (guia resumido)**\n- **Openness (Abertura):** curiosidade, ideias novas, explorar possibilidades; baixo: preferência por rotina.\n- **Conscientiousness (Conscienciosidade):** organização, disciplina, plano/execução; baixo: impulsividade, procrastinação.\n- **Extraversion (Extroversão):** energia social, busca de estímulos/contato; baixo: reserva, foco interno.\n- **Agreeableness (Amabilidade):** empatia, cooperação; baixo: assertividade dura, conflito, ceticismo.\n- **Neuroticism (Neuroticismo):** sensibilidade a estresse, ansiedade/ruminação; baixo: estabilidade emocional.\n\n**FORMATO DE SAÍDA (JSON):**\n{\n  \"big_five\": {\n    \"openness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"conscientiousness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"extraversion\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"agreeableness\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    },\n    \"neuroticism\": {\n      \"score\": 0,\n      \"confiabilidade\": 0,\n      \"evidencias\": [\"...\", \"...\"]\n    }\n  },\n  \"perfil_primario\": \"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\n  \"resumo_perfil\": \"texto curto e não clínico\",\n  \"insuficiente\": false\n}\n\n**NOTAS DE QUALIDADE**\n- Se a conversa for pobre em pistas, defina `insuficiente = true` e mantenha scores próximos de 50 com baixa confiabilidade.\n- \"Evidências\" DEVEM ser trechos literais e curtos da conversa atual (não use o histórico).",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um assistente especialista em Big Five (OCEAN) e ética em IA. Sua função é inferir tendências de personalidade com base EXCLUSIVAMENTE em trechos literais do usuário. Siga estes princípios:\n1) Precisão e parcimônia: sem extrapolações. Use apenas o que está escrito.\n2) Transparência: inclua evidências curtas (2-4) por traço.\n3) Escalas contínuas 0-100 para score e confiabilidade (50 = neutro; 0-20 muito baixo; 80-100 muito alto).\n4) Comunicação responsável: linguagem acessível, não clínica, acolhedora.\n5) Se faltarem sinais para um traço, use score=50, confiabilidade ≤ 40 e marque `insuficiente=true` se a conversa inteira não sustentar inferência.\nRetorne SEMPRE JSON válido no formato solicitado.",
+          "maxIterations": 3
+        }
+      },
+      "id": "aae8394f-7b86-458d-a5fd-f0c25b357265",
+      "name": "Big Five",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -752,
+        -1232
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Expert - Humor e energia",
+        "height": 480,
+        "width": 768,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        832
+      ],
+      "id": "6e76704c-cd2f-44fb-9eb0-695e756aa2b0",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa completa abaixo e detecte o HUMOR e ENERGIA do usuário com base APENAS no que foi dito.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $('start').first().json.mensagens }}\n```\n\nUser name: {{ $('start').first().json.usr_nome_preferencia }}\n\n**SUA TAREFA:**\n1. Leia TODA a conversa (autor: \"usuario\" apenas)\n2. Detecte o HUMOR GERAL do dia (1-10):\n   - 1-3: muito negativo (tristeza profunda, desesperança)\n   - 4-5: negativo (desânimo, frustração)\n   - 6-7: neutro/misto (altos e baixos)\n   - 8-9: positivo (animado, esperançoso)\n   - 10: muito positivo (eufórico, excelente)\n\n3. Detecte o NÍVEL DE ENERGIA (1-10):\n   - 1-3: exausto, sem forças\n   - 4-5: cansado, baixa energia\n   - 6-7: energia moderada\n   - 8-9: disposto, energizado\n   - 10: muito energizado, hiperativo\n\n4. Identifique VARIAÇÃO durante a conversa:\n   - estavel: humor/energia constante\n   - ascendente: melhora ao longo da conversa\n   - descendente: piora ao longo da conversa\n   - oscilatoria: alterna muito\n\n5. Detecte PERÍODO DO DIA (se mencionado):\n   - manha, tarde, noite, madrugada\n   - Se não mencionado: \"nao_identificado\"\n\n**REGRAS:**\n- Base a análise APENAS nas palavras do usuário\n- Considere: tom emocional, vocabulário, descrições de atividades\n- Seja preciso e realista\n- Justifique brevemente cada score\n- Ao gerar a justificativa e resumo das conversas relacionados com o humor, use sempre o nome do usuário: {{ $('start').first().json.usr_nome_preferencia }}\n- Caso o nome do usuário não seja informado, use o termo Usuário\n**RETORNE APENAS O JSON ESTRUTURADO**",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um especialista em análise de humor e energia em conversas.\n\nSeu trabalho é:\n1. Detectar o humor geral do dia (escala 1-10)\n2. Avaliar o nível de energia (escala 1-10)\n3. confianca_analise de 0 a 100\n4. Identificar variações durante a conversa\n5. Capturar período do dia se mencionado\n\nSeja objetivo, baseie-se apenas no texto real, e justifique suas avaliações de forma breve.\n\nRetorne SEMPRE um JSON válido com a estrutura exata solicitada.",
+          "maxIterations": 3
+        }
+      },
+      "id": "cce076f7-cc56-482e-8289-5e468e3863c6",
+      "name": "humor e energia",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### User Prompt  \nDADOS DA CONVERSA:  \nMensagens: {{ $('start').first().json.mensagens }}\n\nExecute a análise emocional conforme descrito no System Prompt identifique todas as emoções de Plutchik presentes, atribua intensidade, contexto e evidência, e então classifique o sentimento global da conversa como POSITIVA, NEGATIVA ou NEUTRA. Retorne **somente** o JSON estruturado conforme as regras.\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=### System Prompt — Classificador Emocional (Plutchik + PANAS)\n\nVocê é um especialista em análise emocional com base nas **oito emoções primárias de Robert Plutchik** e em agregação de afeto inspirada no **PANAS**.\n\n---\n\n#### 🎯 Objetivo\nLer **todas as mensagens da conversa** e identificar **as emoções primárias presentes**, classificando-as conforme o modelo Plutchik e agregando o resultado segundo a escala PANAS.\n\n---\n\n#### 🧠 Tarefa passo a passo\n1. Analise **todas as mensagens** fornecidas.\n2. Detecte quais emoções primárias estão presentes (apenas as listadas abaixo).\n3. Para cada emoção detectada, retorne os campos:\n   - `emocao_id`: slug obrigatório (ver **Vocabulário permitido**).\n   - `intensidade`: número inteiro de **0 a 100**.\n   - `contexto`: valor fixo (**POSITIVA**, **NEGATIVA** ou **NEUTRA**) conforme tabela de polaridade.\n   - `evidencias`: lista de **trechos literais da conversa** (1–5 itens) que justifiquem a detecção.\n\n4. Após listar todas as emoções, gere um objeto `classificacao_geral` conforme as regras PANAS descritas abaixo.\n\n---\n\n#### 🔤 Vocabulário permitido\n| emocao_id | Nome (PT)      | Polaridade |\n|------------|----------------|-------------|\n| joy        | Alegria        | POSITIVA    |\n| trust      | Confiança      | POSITIVA    |\n| anticipation| Expectativa   | POSITIVA    |\n| sadness    | Tristeza       | NEGATIVA    |\n| fear       | Medo           | NEGATIVA    |\n| anger      | Raiva          | NEGATIVA    |\n| disgust    | Nojo           | NEGATIVA    |\n| surprise   | Surpresa       | NEUTRA      |\n\n> **Proibição:** Nenhum outro valor além dos 8 acima pode aparecer em `emocao_id`.\n\n---\n\n#### ⚖️ Mapeamento de polaridade\nUse **apenas** os seguintes contextos fixos:\n- POSITIVA → joy, trust, anticipation  \n- NEGATIVA → sadness, fear, anger, disgust  \n- NEUTRA → surprise  \n\n> O `contexto` não é inferido do tom, e sim **determinado diretamente** pela emoção.\n\n---\n\n#### 📊 Regras de agregação e classificação global\n- Somente emoções com `intensidade ≥ 45` participam do cálculo PANAS.  \n- Contagens:\n  - `positivas`: nº de emoções POSITIVAS\n  - `negativas`: nº de emoções NEGATIVAS\n  - `neutras`: nº de emoções NEUTRAS  \n  - `total`: soma de todas\n- Percentuais (0–100, uma casa decimal):  \n  - `percentual_positivas = positivas / total * 100`  \n  - `percentual_negativas = negativas / total * 100`  \n  - `percentual_neutras = neutras / total * 100`\n- Se `total = 0`, todos os valores devem ser 0 e `classificacao_global = \"NEUTRA\"`.\n- Regras PANAS:\n  - Se a diferença entre `percentual_positivas` e `percentual_negativas` for **menor que 20%**, classifique como **NEUTRA**.  \n  - Caso contrário, prevalece o maior percentual: **POSITIVA** ou **NEGATIVA**.\n\n---\n\n#### 🧩 Regras adicionais\n- Sempre use o campo `emocao_id` com **um dos slugs permitidos**.  \n- Se detectar nuances como **culpa**, **vergonha**, **orgulho**, **ansiedade** ou **gratidão**, mapeie para a emoção primária **mais próxima** (ex.: culpa → tristeza, orgulho → alegria).  \n- Antes de responder, **revise toda a lista `emocoes_detectadas`**:\n  - Se algum item estiver fora do vocabulário permitido, **corrija ou remova**.  \n  - Garanta que `intensidade` esteja entre 0 e 100.  \n  - Garanta que `contexto` corresponda à polaridade da emoção.  \n  - Garanta que `evidencias` seja um **array literal de frases reais**.  \n\n---\n\n#### 🧾 Boas práticas\n- Detecte cada emoção **no máximo uma vez**. Consolide múltiplas ocorrências em um único item, somando intensidade e reunindo as evidências mais fortes.  \n- Ordene `emocoes_detectadas` por `intensidade` **decrescente**.  \n- Evite interpretações ou narrativas; apenas relacione evidências textuais.\n\n---\n\n#### 🧮 Estrutura de saída esperada\nRetorne **somente um JSON válido**, sem texto livre, Markdown ou comentários.",
+          "maxIterations": 5
+        }
+      },
+      "id": "c0dc3db0-ee44-40b6-bf81-43b07a813db0",
+      "name": "panas e emocoes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "W0i3ufnDIIcx75ez",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/W0i3ufnDIIcx75ez",
+          "cachedResultName": "sw_xp_conversas_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "total_interactions",
+              "displayName": "total_interactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "55419f55-f266-418a-9fa1-e9c57d94602f",
+      "name": "Executar XP Conversas",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1776,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna status indicando que processou com sucesso\nconst trigger = $('start').first().json;\nreturn [{\n  processado: true,\n  motivo: 'OK',\n  chat_id: trigger.chat_id,\n  total_interactions: trigger.total_interactions\n}];"
+      },
+      "id": "783f2d25-43de-4ece-a7e9-154424c7b3ed",
+      "name": "retorno_sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -640
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LKjU8NE9aNHw7kEh",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/LKjU8NE9aNHw7kEh",
+          "cachedResultName": "sw_criar_quest"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').first().json.usuario_id }}",
+            "chat_id": "={{ $('start').first().json.chat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        -640
+      ],
+      "id": "85056b63-5e91-46c5-bf8b-9e0cef5a607f",
+      "name": "Executar Expert Quests"
+    },
+    {
+      "parameters": {
+        "content": "## Expert - Criar quest",
+        "height": 464,
+        "width": 816,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -800
+      ],
+      "id": "41783267-a3ed-436c-b971-4cc07fd9fe20",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorna status indicando que NÃO processou\nconst input = $input.first().json;\nreturn [{\n  processado: false,\n  motivo: input.validacao?.motivo || 'Contexto insuficiente',\n  chat_id: input.chat_id,\n  total_interactions: input.total_interactions\n}];"
+      },
+      "id": "1c77d1ac-3e2e-4004-b12c-cc070d52f71c",
+      "name": "contexto_insuficiente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2032,
+        128
+      ]
     }
   ],
   "connections": {
     "start": {
-      "main": [[{ "node": "Buscar Dados Chat", "type": "main", "index": 0 }]]
-    },
-    "Buscar Dados Chat": {
-      "main": [[{ "node": "1. Resumo Conversa", "type": "main", "index": 0 }]]
-    },
-    "LLM Resumo": {
-      "ai_languageModel": [[{ "node": "1. Resumo Conversa", "type": "ai_languageModel", "index": 0 }]]
-    },
-    "Parser Resumo": {
-      "ai_outputParser": [[{ "node": "1. Resumo Conversa", "type": "ai_outputParser", "index": 0 }]]
-    },
-    "1. Resumo Conversa": {
-      "main": [[{ "node": "Tem Contexto?", "type": "main", "index": 0 }]]
-    },
-    
-    "Tem Contexto?": {
       "main": [
         [
-          { "node": "Buscar Catálogo Sabotadores", "type": "main", "index": 0 },
-          { "node": "3. Analisar Emoções PANAS", "type": "main", "index": 0 },
-          { "node": "4. Analisar Humor/Energia", "type": "main", "index": 0 },
-          { "node": "Buscar Histórico BigFive", "type": "main", "index": 0 },
-          { "node": "6. Gerar Insights", "type": "main", "index": 0 }
-        ],
-        [
-          { "node": "Atualizar Resumo (sem contexto)", "type": "main", "index": 0 }
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
-
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Resumo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Resumo": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Contexto?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Catálogo Sabotadores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "panas e emocoes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "humor e energia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Histórico BigFive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualizar usr_chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Executar XP Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Atualizar Resumo (sem contexto)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "contexto_insuficiente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Buscar Catálogo Sabotadores": {
-      "main": [[{ "node": "2. Analisar Sabotadores", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "LLM Sabotadores": {
-      "ai_languageModel": [[{ "node": "2. Analisar Sabotadores", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser Sabotadores": {
-      "ai_outputParser": [[{ "node": "2. Analisar Sabotadores", "type": "ai_outputParser", "index": 0 }]]
-    },
-    "2. Analisar Sabotadores": {
-      "main": [[{ "node": "Gravar Sabotadores", "type": "main", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gravar Sabotadores": {
-      "main": [[{ "node": "Merge Experts", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Executar Expert Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-
     "LLM PANAS": {
-      "ai_languageModel": [[{ "node": "3. Analisar Emoções PANAS", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser PANAS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser PANAS": {
-      "ai_outputParser": [[{ "node": "3. Analisar Emoções PANAS", "type": "ai_outputParser", "index": 0 }]]
-    },
-    "3. Analisar Emoções PANAS": {
-      "main": [[{ "node": "Gravar Emoções", "type": "main", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gravar Emoções": {
-      "main": [[{ "node": "Merge Experts", "type": "main", "index": 1 }]]
+      "main": [
+        []
+      ]
     },
-
     "LLM Humor": {
-      "ai_languageModel": [[{ "node": "4. Analisar Humor/Energia", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Humor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser Humor": {
-      "ai_outputParser": [[{ "node": "4. Analisar Humor/Energia", "type": "ai_outputParser", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "4. Analisar Humor/Energia": {
-      "main": [[{ "node": "Gravar Humor", "type": "main", "index": 0 }]]
-    },
-    "Gravar Humor": {
-      "main": [[{ "node": "Merge Experts", "type": "main", "index": 2 }]]
-    },
-
     "Buscar Histórico BigFive": {
-      "main": [[{ "node": "Preparar Contexto BigFive", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Contexto BigFive": {
-      "main": [[{ "node": "5. Analisar Big Five", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Big Five",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "LLM BigFive": {
-      "ai_languageModel": [[{ "node": "5. Analisar Big Five", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Big Five",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser BigFive",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser BigFive": {
-      "ai_outputParser": [[{ "node": "5. Analisar Big Five", "type": "ai_outputParser", "index": 0 }]]
-    },
-    "5. Analisar Big Five": {
-      "main": [[{ "node": "Preparar Registro BigFive", "type": "main", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "Big Five",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Registro BigFive": {
-      "main": [[{ "node": "Gravar BigFive", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Gravar BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Gravar BigFive": {
-      "main": [[{ "node": "Merge Experts", "type": "main", "index": 3 }]]
-    },
-
     "LLM Insights": {
-      "ai_languageModel": [[{ "node": "6. Gerar Insights", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "insights",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Insights",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parser Insights": {
-      "ai_outputParser": [[{ "node": "6. Gerar Insights", "type": "ai_outputParser", "index": 0 }]]
+      "ai_outputParser": [
+        [
+          {
+            "node": "insights",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "get_user_insight": {
-      "ai_tool": [[{ "node": "6. Gerar Insights", "type": "ai_tool", "index": 0 }]]
-    },
-    "6. Gerar Insights": {
-      "main": [[{ "node": "Gravar Insights", "type": "main", "index": 0 }]]
-    },
-    "Gravar Insights": {
-      "main": [[{ "node": "Merge Experts", "type": "main", "index": 4 }]]
-    },
-
-    "Merge Experts": {
-      "main": [[{ "node": "Atualizar usr_chat", "type": "main", "index": 0 }]]
+      "ai_tool": [
+        [
+          {
+            "node": "insights",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Atualizar usr_chat": {
-      "main": [[{ "node": "Registrar Log Final", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Registrar Log Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Registrar Log Final": {
-      "main": [[{ "node": "Resultado Final", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Resultado Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sabotadores": {
+      "main": [
+        [
+          {
+            "node": "Gravar Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insights": {
+      "main": [
+        [
+          {
+            "node": "Gravar Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resumo conversa": {
+      "main": [
+        [
+          {
+            "node": "Tem Contexto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Big Five": {
+      "main": [
+        [
+          {
+            "node": "Preparar Registro BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "humor e energia": {
+      "main": [
+        [
+          {
+            "node": "Gravar Humor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "panas e emocoes": {
+      "main": [
+        [
+          {
+            "node": "Gravar Emoções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Expert Quests": {
+      "main": [
+        [
+          {
+            "node": "retorno_sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
+  "staticData": null,
+  "meta": null,
   "pinData": {
     "start": [
       {
@@ -766,5 +1417,59 @@
         }
       }
     ]
-  }
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-12T21:21:31.876Z",
+      "role": "workflow:owner",
+      "workflowId": "af4tqT4UNTFznKEu",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }

@@ -346,6 +346,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
+  "activeVersionId": "3d805e96-5544-4217-9b9d-189207e97947",
   "shared": [
     {
       "createdAt": "2025-12-04T06:55:24.357Z",
@@ -397,5 +398,341 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-05T12:13:14.667Z",
+    "workflowId": "X96zV1QdYbn865XD",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "anotacoes",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          208
+        ],
+        "webhookId": "783a6f9f-5e50-478f-97d9-8378e5b0d06a",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "// No n8n webhook POST, o body JSON vem parseado em input.json.body\nconst input = $input.first().json;\nconst body = input.body || {};\n\n// Extrair valores diretamente do body\nconst tipo = body.tipo ? String(body.tipo).toLowerCase().trim() : '';\nconst id = body.id ? String(body.id).trim() : null;\nconst anotacao = body.anotacao !== undefined && body.anotacao !== null ? String(body.anotacao) : null;\nconst usuarioId = body.usuario_id || body.user_id ? String(body.usuario_id || body.user_id).trim() : null;\n\nif (!tipo || !['conversa', 'quest'].includes(tipo)) {\n  throw new Error('tipo deve ser \"conversa\" ou \"quest\". Recebido: ' + tipo);\n}\n\nif (!id) {\n  throw new Error('id é obrigatório');\n}\n\nif (!usuarioId) {\n  throw new Error('usuario_id é obrigatório');\n}\n\nreturn [{\n  json: {\n    tipo: tipo,\n    id: id,\n    anotacao: anotacao, // Preservar string vazia ou null\n    usuario_id: usuarioId\n  }\n}];"
+        },
+        "id": "validar",
+        "name": "Validar Entrada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE public.usr_chat\nSET anotacoes_usr = $2::text,\n    atualizado_em = NOW()\nWHERE id = $1::uuid\n  AND usuario_id = $3::uuid\n  AND $4::text = 'conversa'\nRETURNING id, anotacoes_usr, atualizado_em;",
+          "options": {
+            "queryReplacement": "={{ [$json.id, $json.anotacao, $json.usuario_id, $json.tipo] }}"
+          }
+        },
+        "id": "atualizar_conversa",
+        "name": "Atualizar Anotação Conversa",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          112
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE public.quests_recorrencias\nSET anotacoes_quest = $2::text,\n    atualizado_em = NOW()\nWHERE id = $1::uuid\n  AND EXISTS (\n    SELECT 1 FROM public.usuarios_quest uq\n    WHERE uq.id = quests_recorrencias.usuarios_quest_id\n      AND uq.usuario_id = $3::uuid\n  )\n  AND $4::text = 'quest'\nRETURNING id, anotacoes_quest, atualizado_em;",
+          "options": {
+            "queryReplacement": "={{ [$json.id, $json.anotacao, $json.usuario_id, $json.tipo] }}"
+          }
+        },
+        "id": "atualizar_quest",
+        "name": "Atualizar Anotação Quest",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// O nó recebe input de ambos nós Postgres (conversa e quest)\n// Como ambos conectam aqui, ele executa 2 vezes\n// Usar $input.first() que terá o resultado do nó que foi executado\nconst resultado = $input.first()?.json;\nconst validacao = $('Validar Entrada').first()?.json;\n\n// Se não tem id no resultado, provavelmente veio do nó que não atualizou nada\n// Retornar resposta vazia que será ignorada (o primeiro nó já respondeu)\nif (!resultado || !resultado.id) {\n  return [{ json: { _skip: true } }];\n}\n\nconst tipo = validacao?.tipo || 'quest';\nconst id = validacao?.id || resultado.id;\n\nreturn [{\n  json: {\n    success: true,\n    tipo: tipo,\n    id: id,\n    anotacao: resultado.anotacoes_usr || resultado.anotacoes_quest || null,\n    atualizado_em: resultado.atualizado_em || new Date().toISOString()\n  }\n}];"
+        },
+        "id": "formatar_resposta",
+        "name": "Formatar Resposta",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "responder",
+        "name": "Responder",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          416,
+          208
+        ]
+      },
+      {
+        "id": "webhook-get",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -400,
+          500
+        ],
+        "parameters": {
+          "path": "anotacoes",
+          "responseMode": "responseNode",
+          "options": {}
+        }
+      },
+      {
+        "id": "validar-get",
+        "name": "Validar Params GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -208,
+          500
+        ],
+        "parameters": {
+          "jsCode": "const query = $input.first().json.query || {};\nconst tipo = (query.tipo || '').toLowerCase().trim();\nconst id = query.id || query.conversa_id || query.quest_id || null;\nconst user_id = query.user_id || query.usuario_id || null;\n\nif (!tipo || !['conversa', 'quest'].includes(tipo)) {\n  throw new Error('tipo deve ser \"conversa\" ou \"quest\"');\n}\n\nif (!id) {\n  throw new Error('id é obrigatório');\n}\n\nif (!user_id) {\n  throw new Error('user_id é obrigatório');\n}\n\nreturn [{ json: { tipo, id, user_id } }];"
+        }
+      },
+      {
+        "id": "buscar-anotacao-conversa",
+        "name": "Buscar Anotação Conversa",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          400
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, anotacoes_usr as anotacao, atualizado_em\nFROM public.usr_chat\nWHERE id = $1::uuid\n  AND usuario_id = $2::uuid\n  AND $3::text = 'conversa'\nLIMIT 1;",
+          "options": {
+            "queryReplacement": "={{ [$json.id, $json.user_id, $json.tipo] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "buscar-anotacao-quest",
+        "name": "Buscar Anotação Quest",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          0,
+          600
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT qr.id, qr.anotacoes_quest as anotacao, qr.atualizado_em\nFROM public.quests_recorrencias qr\nINNER JOIN public.usuarios_quest uq ON uq.id = qr.usuarios_quest_id\nWHERE qr.id = $1::uuid\n  AND uq.usuario_id = $2::uuid\n  AND $3::text = 'quest'\nLIMIT 1;",
+          "options": {
+            "queryReplacement": "={{ [$json.id, $json.user_id, $json.tipo] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "montar-resposta-get",
+        "name": "Montar Resposta GET",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          500
+        ],
+        "parameters": {
+          "jsCode": "const resultado = $input.first()?.json;\nconst validacao = $('Validar Params GET').first()?.json;\n\nreturn [{\n  json: {\n    success: true,\n    tipo: validacao?.tipo || 'conversa',\n    id: validacao?.id || resultado?.id,\n    anotacao: resultado?.anotacao || null,\n    atualizado_em: resultado?.atualizado_em || null\n  }\n}];"
+        }
+      },
+      {
+        "id": "responder-get",
+        "name": "Responder GET",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          416,
+          500
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Validar Entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Entrada": {
+        "main": [
+          [
+            {
+              "node": "Atualizar Anotação Conversa",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualizar Anotação Quest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar Anotação Conversa": {
+        "main": [
+          [
+            {
+              "node": "Formatar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar Anotação Quest": {
+        "main": [
+          [
+            {
+              "node": "Formatar Resposta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar Resposta": {
+        "main": [
+          [
+            {
+              "node": "Responder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Validar Params GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar Params GET": {
+        "main": [
+          [
+            {
+              "node": "Buscar Anotação Conversa",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar Anotação Quest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Anotação Conversa": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Anotação Quest": {
+        "main": [
+          [
+            {
+              "node": "Montar Resposta GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Resposta GET": {
+        "main": [
+          [
+            {
+              "node": "Responder GET",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null
+  }
 }

@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-12-11T10:28:22.897Z",
   "id": "M6wDT4LzEiYcAo5Y",
-  "name": "sw_entender",
+  "name": "sw_experts",
   "description": null,
   "active": false,
   "isArchived": false,
@@ -70,13 +70,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "5de1bb75-be29-4eff-acd4-3f5a38e75439",
+      "id": "4062e231-25fc-424d-836e-2713f25d7c5a",
       "name": "expert_panas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        400
+        -1776,
+        624
       ]
     },
     {
@@ -154,13 +154,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "ca9da84b-86bc-4cb3-86dd-778deb09a48a",
+      "id": "bcd0193a-e42f-472a-8df8-366ce408b9e8",
       "name": "expert_sabotadores",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        1184
+        -1776,
+        1408
       ]
     },
     {
@@ -249,13 +249,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "2f35148a-2ea4-4959-b84a-2c223554d2b3",
+      "id": "0505acd8-ea8f-4e35-b291-d593b14e9fca",
       "name": "expert_insights",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        576
+        -1776,
+        800
       ]
     },
     {
@@ -333,13 +333,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "33e6172c-817f-4037-aa9b-f24479422993",
+      "id": "b437553c-1f90-4790-b67f-6dcc165944be",
       "name": "expert_humor_energia",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        768
+        -1776,
+        992
       ]
     },
     {
@@ -417,13 +417,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "1921f843-f452-4415-8e70-614073d1e221",
+      "id": "fa1133df-e48e-4f17-b9eb-5bfb1921fca7",
       "name": "expert_bigfive",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        992
+        -1776,
+        1216
       ]
     },
     {
@@ -433,10 +433,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -1136,
-        1008
+        -2976,
+        1232
       ],
-      "id": "9a95bf3f-d77a-47df-b09d-275fd256ee23",
+      "id": "af7e44e2-c669-4554-8a6b-c90cd00aa6ac",
       "name": "OpenRouter Chat Model1",
       "credentials": {
         "openRouterApi": {
@@ -457,10 +457,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1104,
-        800
+        -2944,
+        1024
       ],
-      "id": "1391c151-e542-446d-b0a0-4b640892b069",
+      "id": "d2bf5227-a93e-4df6-8fbf-73f0ceefe3ed",
       "name": "Resumo das conversas"
     },
     {
@@ -470,10 +470,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -944,
-        1008
+        -2784,
+        1232
       ],
-      "id": "d45a218f-a73f-4fb7-b2d8-6bfa5a5cce14",
+      "id": "4fae856d-0851-42b2-8685-8d3754459618",
       "name": "Structured Output Parser"
     },
     {
@@ -657,10 +657,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -768,
-        800
+        -2608,
+        1024
       ],
-      "id": "42757760-3208-43fa-ae27-c9f8a8fa9f36",
+      "id": "5ed3b5a0-d416-4b78-bb80-6fd084cc2168",
       "name": "Update rows in a table",
       "credentials": {
         "postgres": {
@@ -673,26 +673,26 @@
       "parameters": {
         "jsCode": "// Retorna status indicando que NÃO processou\nconst input = $input.first().json;\nreturn [{\n  processado: false,\n  motivo: input.validacao?.motivo || 'Contexto insuficiente',\n  chat_id: input.chat_id,\n  total_interactions: input.total_interactions\n}];"
       },
-      "id": "66f1138b-04d2-468b-81f8-686ea23e82be",
+      "id": "9917f4f2-8ca5-4426-b110-98c509040592",
       "name": "contexto_insuficiente",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        64,
-        1408
+        -1776,
+        1632
       ]
     },
     {
       "parameters": {
         "jsCode": "// Retorna status indicando que processou com sucesso\nconst trigger = $('start').first().json;\nreturn [{\n  processado: true,\n  motivo: 'OK',\n  chat_id: trigger.chat_id,\n  total_interactions: trigger.total_interactions\n}];"
       },
-      "id": "retorno-sucesso",
+      "id": "5aa9ddc4-b5f0-458b-bd97-6819f4e8d5fd",
       "name": "retorno_sucesso",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        688,
-        1184
+        -1152,
+        1408
       ]
     },
     {
@@ -723,25 +723,26 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1344,
-        800
+        -3184,
+        1024
       ],
-      "id": "58fadc30-bd03-4213-81ef-156c2d955f79",
+      "id": "d6e3c368-271a-4876-a8da-a343fed5058b",
       "name": "start"
     },
     {
       "parameters": {
-        "content": "chama experts apenas se conversas tiverem mais de 50 palavras",
-        "height": 112,
+        "content": "",
+        "height": 320,
+        "width": 800,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1088,
-        528
+        -3680,
+        480
       ],
-      "id": "c4383c7a-8dac-463c-8552-93d3db532a95",
+      "id": "f04faf9d-1a3a-4e70-91de-978768667444",
       "name": "Sticky Note"
     },
     {
@@ -790,13 +791,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "888b7f23-fd71-46fd-8f1f-58e3f29fee11",
+      "id": "c30b0e73-7988-4d69-b27f-b5f9432ae004",
       "name": "Executar XP Conversas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        64,
-        176
+        -1776,
+        400
       ]
     },
     {
@@ -845,10 +846,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        400,
-        1184
+        -1440,
+        1408
       ],
-      "id": "c29b2ffd-def4-4ca5-9513-21b966c269d1",
+      "id": "01b13c53-11fe-4883-b407-a6495b580033",
       "name": "Executar Expert Quests"
     },
     {
@@ -888,10 +889,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -560,
-        800
+        -2400,
+        1024
       ],
-      "id": "fe31d3a0-2af0-4c61-8742-04d215ba2007",
+      "id": "63c4377c-75bd-41a9-bfc8-22761ef1dc34",
       "name": "tem reflexão e contexto"
     }
   ],
@@ -1038,6 +1039,7 @@
       }
     ]
   },
+  "activeVersionId": null,
   "shared": [
     {
       "createdAt": "2025-12-11T10:28:22.897Z",
@@ -1089,5 +1091,6 @@
       }
     }
   ],
-  "tags": []
+  "tags": [],
+  "activeVersion": null
 }
