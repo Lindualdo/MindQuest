@@ -143,12 +143,11 @@
 |-------|-------|
 | **Trigger** | Após gravar sabotadores |
 | **Limite** | Máximo **15 quests** ativas por usuário |
-| **Delta mínimo** | ≥ 50 palavras (1ª vez) ou ≥ 30 palavras (reprocessamento) |
+| **Contexto** | Já validado por `job_experts` (≥30 palavras) + `resumo_conversa` (tem_contexto) |
 
 ### Validações prévias:
 | Status | Ação |
 |--------|------|
-| `delta_insuficiente` | Não processa |
 | `limite_atingido` | Não cria novas quests |
 | `pode_processar` | Executa lógica de criação |
 
