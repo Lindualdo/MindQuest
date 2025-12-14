@@ -374,11 +374,6 @@ const EvoluirPageV13: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Seção: Progresso na Vida */}
-        <div className="mb-4">
-          <p className="mq-eyebrow text-center mb-3">NA VIDA</p>
-        </div>
-
         <div className="space-y-3">
           {/* Meus Objetivos */}
           <motion.section
