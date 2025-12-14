@@ -75,6 +75,7 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   resumoConversasReturnView: null,
   painelQuestsReturnView: null,
   niveisJornadaReturnView: null,
+  evoluirReturnView: null,
   panoramaCard: null,
   panoramaCardUserId: null,
   panoramaCardLoading: false,
@@ -743,13 +744,28 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
   },
 
   setView: (view, forceReturnView) => {
+    // Tabs principais do menu - não mostrar botão voltar quando vier delas
+    const mainTabs = ['painelQuests', 'evoluir', 'dashboard', 'conversar', 'dashEmocoes'];
+    
     // Salvar returnView quando navegando para painelQuests
     if (view === 'painelQuests') {
       const { view: currentView } = get();
-      const originView = forceReturnView ?? (currentView === 'painelQuests' ? get().painelQuestsReturnView ?? 'dashboard' : currentView);
+      const originView = forceReturnView ?? (currentView === 'painelQuests' ? get().painelQuestsReturnView : currentView);
+      // Se veio de uma tab principal do menu, não mostrar botão voltar
+      const shouldShowBack = originView && !mainTabs.includes(originView);
       set({ 
         view,
-        painelQuestsReturnView: originView === 'painelQuests' ? 'dashboard' : originView
+        painelQuestsReturnView: shouldShowBack ? originView : null
+      });
+    } else if (view === 'evoluir') {
+      // Salvar returnView quando navegando para evoluir
+      const { view: currentView } = get();
+      const originView = forceReturnView ?? (currentView === 'evoluir' ? get().evoluirReturnView : currentView);
+      // Se veio de uma tab principal do menu, não mostrar botão voltar
+      const shouldShowBack = originView && !mainTabs.includes(originView);
+      set({ 
+        view,
+        evoluirReturnView: shouldShowBack ? originView : null
       });
     } else if (view === 'niveisJornada') {
       // Salvar returnView quando navegando para niveisJornada
@@ -770,12 +786,14 @@ const useStore = create<ExtendedStoreState>((set, get) => ({
         });
       }
     } else {
-      // Limpar returnView quando sair do painelQuests ou niveisJornada
+      // Limpar returnView quando sair do painelQuests, niveisJornada ou evoluir
       const { view: currentView } = get();
       if (currentView === 'painelQuests') {
         set({ view, painelQuestsReturnView: null });
       } else if (currentView === 'niveisJornada') {
         set({ view, niveisJornadaReturnView: null });
+      } else if (currentView === 'evoluir') {
+        set({ view, evoluirReturnView: null });
       } else {
         set({ view });
       }
@@ -1282,6 +1300,7 @@ export const useDashboard = () => {
     sabotadorDetailReturnView,
     painelQuestsReturnView,
     niveisJornadaReturnView,
+    evoluirReturnView,
     resumoConversas,
     resumoConversasLoading,
     resumoConversasError,
@@ -1377,6 +1396,7 @@ export const useDashboard = () => {
     sabotadorDetailReturnView,
     painelQuestsReturnView,
     niveisJornadaReturnView,
+    evoluirReturnView,
     resumoConversas,
     resumoConversasLoading,
     resumoConversasError,
