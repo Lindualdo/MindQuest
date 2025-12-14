@@ -254,7 +254,7 @@ const EvoluirPageV13: React.FC = () => {
 
         {/* Título da página */}
         <div className="mb-6 text-center">
-          <h1 className="mq-page-title">Jornada</h1>
+          <h1 className="mq-page-title">Evoluir</h1>
           <p className="mq-page-subtitle">Sua evolução no MindQuest</p>
         </div>
 
