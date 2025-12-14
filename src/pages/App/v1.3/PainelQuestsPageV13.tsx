@@ -856,17 +856,19 @@ const PainelQuestsPageV13: React.FC = () => {
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={18} />
-            Voltar
-          </button>
-        </div>
+        {/* Botão voltar - só aparece se veio de atalho (não do menu) */}
+        {painelQuestsReturnView && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="mq-btn-back"
+            >
+              <ArrowLeft size={18} />
+              Voltar
+            </button>
+          </div>
+        )}
 
         {/* Título da página */}
         <div className="mb-8 text-center">

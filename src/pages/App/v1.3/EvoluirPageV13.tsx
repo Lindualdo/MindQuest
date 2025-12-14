@@ -28,6 +28,7 @@ const EvoluirPageV13: React.FC = () => {
     questSnapshot,
     setView,
     openResumoConversas,
+    evoluirReturnView,
   } = useDashboard();
 
   const nomeUsuario =
@@ -240,17 +241,19 @@ const EvoluirPageV13: React.FC = () => {
       <HeaderV1_3 nomeUsuario={nomeUsuario} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={18} />
-            Voltar
-          </button>
-        </div>
+        {/* Botão voltar - só aparece se veio de atalho (não do menu) */}
+        {evoluirReturnView && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="mq-btn-back"
+            >
+              <ArrowLeft size={18} />
+              Voltar
+            </button>
+          </div>
+        )}
 
         {/* Título da página */}
         <div className="mb-6 text-center">
@@ -258,10 +261,6 @@ const EvoluirPageV13: React.FC = () => {
           <p className="mq-page-subtitle">Sua evolução no MindQuest</p>
         </div>
 
-        {/* Seção: Progresso no App */}
-        <div className="mb-4">
-          <p className="mq-eyebrow text-center mb-3">NO APP</p>
-        </div>
 
         {/* Cards de Progresso: Conversas, Ações e Pontos */}
         <div className="mb-6 grid grid-cols-3 gap-4">
