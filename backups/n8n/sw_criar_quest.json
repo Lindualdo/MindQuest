@@ -44,7 +44,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Verifica limite + delta palavras + busca quests ativas e substituíveis (v1.3.19)\nWITH chat_info AS (\n  SELECT \n    total_palavras_usuario,\n    COALESCE(palavras_ultimo_processamento, 0) AS palavras_processadas,\n    (total_palavras_usuario - COALESCE(palavras_ultimo_processamento, 0)) AS delta_palavras,\n    CASE WHEN COALESCE(palavras_ultimo_processamento, 0) = 0 THEN 50 ELSE 30 END AS delta_minimo\n  FROM usr_chat WHERE id = $2::uuid\n),\nquests_count AS (\n  SELECT COUNT(*) AS total_quests FROM usuarios_quest\n  WHERE usuario_id = $1::uuid AND status IN ('ativa', 'disponivel')\n),\nverificacao AS (\n  SELECT \n    COALESCE((SELECT delta_palavras FROM chat_info), 0) AS delta_palavras,\n    COALESCE((SELECT delta_minimo FROM chat_info), 50) AS delta_minimo,\n    COALESCE((SELECT palavras_processadas FROM chat_info), 0) AS palavras_processadas,\n    COALESCE((SELECT total_palavras_usuario FROM chat_info), 0) AS total_palavras_usuario,\n    COALESCE((SELECT total_quests FROM quests_count), 0) AS total_quests_ativas,\n    CASE \n      WHEN COALESCE((SELECT delta_palavras FROM chat_info), 0) < COALESCE((SELECT delta_minimo FROM chat_info), 50) THEN 'delta_insuficiente'\n      WHEN COALESCE((SELECT total_quests FROM quests_count), 0) >= 15 THEN 'limite_atingido'\n      ELSE 'pode_processar'\n    END AS status_processamento,\n    CASE WHEN COALESCE((SELECT palavras_processadas FROM chat_info), 0) > 0 THEN TRUE ELSE FALSE END AS is_reprocessamento\n),\nquests AS (\n  SELECT uq.id, uq.status, uq.catalogo_id, uq.sabotador_id,\n    COALESCE(uq.config->>'contexto_origem', '') AS contexto_origem,\n    COALESCE(uq.config->>'titulo', '') AS titulo,\n    COALESCE(uq.config->>'tipo', '') AS tipo,\n    uq.ativado_em, uq.config,\n    DATE(uq.ativado_em) = CURRENT_DATE AS is_hoje\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid AND uq.status IN ('disponivel', 'ativa')\n),\nquests_substituiveis AS (\n  SELECT q.* FROM quests q\n  WHERE q.is_hoje = TRUE AND q.status = 'disponivel'\n)\nSELECT \n  (SELECT status_processamento FROM verificacao) AS status_processamento,\n  (SELECT is_reprocessamento FROM verificacao) AS is_reprocessamento,\n  (SELECT delta_palavras FROM verificacao) AS delta_palavras,\n  (SELECT total_palavras_usuario FROM verificacao) AS total_palavras_usuario,\n  (SELECT total_quests_ativas FROM verificacao) AS total_quests_ativas,\n  json_build_object(\n    'quests_ativas', COALESCE((SELECT json_agg(json_build_object(\n      'id', quests.id, 'status', quests.status, 'catalogo_id', quests.catalogo_id,\n      'sabotador_id', quests.sabotador_id, 'tipo', quests.tipo,\n      'contexto_origem', quests.contexto_origem, 'titulo', quests.titulo,\n      'criado_em', quests.ativado_em, 'config', quests.config, 'is_hoje', quests.is_hoje\n    ) ORDER BY quests.ativado_em DESC) FROM quests), '[]'::json),\n    'quests_substituiveis', COALESCE((SELECT json_agg(json_build_object(\n      'id', qs.id, 'status', qs.status, 'catalogo_id', qs.catalogo_id,\n      'sabotador_id', qs.sabotador_id, 'tipo', qs.tipo,\n      'contexto_origem', qs.contexto_origem, 'titulo', qs.titulo\n    )) FROM quests_substituiveis qs), '[]'::json)\n  ) AS contexto;",
+        "query": "-- Verifica limite de quests + busca quests ativas e substituíveis (v1.4.0)\n-- REMOVIDO: validação de delta_palavras (feita no job_experts + resumo_conversa)\nWITH quests_count AS (\n  SELECT COUNT(*) AS total_quests FROM usuarios_quest\n  WHERE usuario_id = $1::uuid AND status IN ('ativa', 'disponivel')\n),\nverificacao AS (\n  SELECT \n    COALESCE((SELECT total_quests FROM quests_count), 0) AS total_quests_ativas,\n    CASE \n      WHEN COALESCE((SELECT total_quests FROM quests_count), 0) >= 15 THEN 'limite_atingido'\n      ELSE 'pode_processar'\n    END AS status_processamento\n),\nquests AS (\n  SELECT uq.id, uq.status, uq.catalogo_id, uq.sabotador_id,\n    COALESCE(uq.config->>'contexto_origem', '') AS contexto_origem,\n    COALESCE(uq.config->>'titulo', '') AS titulo,\n    COALESCE(uq.config->>'tipo', '') AS tipo,\n    uq.ativado_em, uq.config,\n    DATE(uq.ativado_em) = CURRENT_DATE AS is_hoje\n  FROM public.usuarios_quest uq\n  WHERE uq.usuario_id = $1::uuid AND uq.status IN ('disponivel', 'ativa')\n),\nquests_substituiveis AS (\n  SELECT q.* FROM quests q\n  WHERE q.is_hoje = TRUE AND q.status = 'disponivel'\n)\nSELECT \n  (SELECT status_processamento FROM verificacao) AS status_processamento,\n  (SELECT total_quests_ativas FROM verificacao) AS total_quests_ativas,\n  json_build_object(\n    'quests_ativas', COALESCE((SELECT json_agg(json_build_object(\n      'id', quests.id, 'status', quests.status, 'catalogo_id', quests.catalogo_id,\n      'sabotador_id', quests.sabotador_id, 'tipo', quests.tipo,\n      'contexto_origem', quests.contexto_origem, 'titulo', quests.titulo,\n      'criado_em', quests.ativado_em, 'config', quests.config, 'is_hoje', quests.is_hoje\n    ) ORDER BY quests.ativado_em DESC) FROM quests), '[]'::json),\n    'quests_substituiveis', COALESCE((SELECT json_agg(json_build_object(\n      'id', qs.id, 'status', qs.status, 'catalogo_id', qs.catalogo_id,\n      'sabotador_id', qs.sabotador_id, 'tipo', qs.tipo,\n      'contexto_origem', qs.contexto_origem, 'titulo', qs.titulo\n    )) FROM quests_substituiveis qs), '[]'::json)\n  ) AS contexto;",
         "options": {
           "queryReplacement": "={{ [$('Normalizar Entrada').item.json.usuario_id, $('Normalizar Entrada').item.json.chat_id] }}"
         }
@@ -247,19 +247,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
-      },
-      "id": "e063624a-1aea-419e-ab77-9f471ac24141",
-      "name": "Montar Saída",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        4512,
-        272
-      ]
-    },
-    {
-      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "bTeLj5qOKQo9PDMO",
@@ -368,8 +355,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1840,
-        576
+        1760,
+        480
       ]
     },
     {
@@ -428,7 +415,7 @@
       "typeVersion": 2.6,
       "position": [
         1760,
-        176
+        144
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -475,6 +462,19 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
+      },
+      "id": "ec0a6012-36c2-45f8-8ee3-fc7dc246135f",
+      "name": "Montar Saída1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4512,
+        272
+      ]
     }
   ],
   "connections": {
@@ -572,6 +572,15 @@
       ]
     },
     "Calcula Xps quest": {
+      "0": [
+        [
+          {
+            "node": "Montar Saída",
+            "type": "0",
+            "index": 0
+          }
+        ]
+      ],
       "main": [
         [
           {
@@ -580,11 +589,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Montar Saída": {
-      "main": [
-        []
       ]
     },
     "Montar Contexto": {
@@ -697,7 +701,7 @@
       "main": [
         [
           {
-            "node": "Montar Saída",
+            "node": "Montar Saída1",
             "type": "main",
             "index": 0
           }

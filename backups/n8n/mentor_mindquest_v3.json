@@ -368,21 +368,6 @@
     },
     {
       "parameters": {
-        "mode": "delete",
-        "deleteMode": "all"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryManager",
-      "typeVersion": 1.1,
-      "position": [
-        256,
-        -64
-      ],
-      "id": "afa7d5f9-1359-4d45-936b-53f2e7a25cff",
-      "name": "Chat Memory Manager",
-      "disabled": true
-    },
-    {
-      "parameters": {
         "descriptionType": "manual",
         "toolDescription": "Call this tool to generate a new user access token.",
         "operation": "executeQuery",
@@ -497,11 +482,6 @@
             "node": "mentor",
             "type": "ai_memory",
             "index": 0
-          },
-          {
-            "node": "Chat Memory Manager",
-            "type": "ai_memory",
-            "index": 0
           }
         ]
       ]
@@ -533,11 +513,6 @@
         [
           {
             "node": "busca_notificacao",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Chat Memory Manager",
             "type": "main",
             "index": 0
           }
