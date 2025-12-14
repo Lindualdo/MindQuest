@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { ArrowLeft, MessageSquare, ArrowUpRight, Star, StickyNote } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -109,10 +110,8 @@ const ConversaResumoPageV13 = () => {
     };
   }, []);
 
-  const paragraphs = useMemo(() => {
-    const texto = conversaResumo?.resumo_conversa?.trim();
-    if (!texto) return [];
-    return texto.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const resumoTexto = useMemo(() => {
+    return conversaResumo?.resumo_conversa?.trim() || '';
   }, [conversaResumo]);
 
   const detalhesExtras = useMemo(() => {
@@ -263,11 +262,47 @@ const ConversaResumoPageV13 = () => {
                     </div>
                   )}
 
-                  {paragraphs.length > 0 && (
+                  {resumoTexto && (
                     <div className="space-y-3 rounded-2xl border border-[var(--mq-border-subtle)] bg-[var(--mq-card)] px-4 py-3 text-sm leading-relaxed text-[var(--mq-text)]">
-                      {paragraphs.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
+                      <ReactMarkdown
+                        components={{
+                          h1: ({ node, ...props }) => (
+                            <h1 className="mb-3 mt-4 text-lg font-bold text-[var(--mq-text)] first:mt-0" {...props} />
+                          ),
+                          h2: ({ node, ...props }) => (
+                            <h2 className="mb-2 mt-3 text-base font-semibold text-[var(--mq-text)] first:mt-0" {...props} />
+                          ),
+                          h3: ({ node, ...props }) => (
+                            <h3 className="mb-2 mt-3 text-sm font-semibold text-[var(--mq-text)] first:mt-0" {...props} />
+                          ),
+                          p: ({ node, ...props }) => (
+                            <p className="mb-2 text-sm leading-relaxed text-[var(--mq-text)] last:mb-0" {...props} />
+                          ),
+                          ul: ({ node, ...props }) => (
+                            <ul className="mb-2 ml-4 list-disc space-y-1 text-sm text-[var(--mq-text)]" {...props} />
+                          ),
+                          ol: ({ node, ...props }) => (
+                            <ol className="mb-2 ml-4 list-decimal space-y-1 text-sm text-[var(--mq-text)]" {...props} />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li className="text-sm leading-relaxed text-[var(--mq-text)]" {...props} />
+                          ),
+                          strong: ({ node, ...props }) => (
+                            <strong className="font-semibold text-[var(--mq-text)]" {...props} />
+                          ),
+                          em: ({ node, ...props }) => (
+                            <em className="italic text-[var(--mq-text)]" {...props} />
+                          ),
+                          code: ({ node, ...props }) => (
+                            <code className="rounded bg-[var(--mq-surface)] px-1.5 py-0.5 text-xs font-mono text-[var(--mq-primary)]" {...props} />
+                          ),
+                          blockquote: ({ node, ...props }) => (
+                            <blockquote className="my-2 border-l-4 border-[var(--mq-primary)] pl-3 italic text-[var(--mq-text-muted)]" {...props} />
+                          ),
+                        }}
+                      >
+                        {resumoTexto}
+                      </ReactMarkdown>
                     </div>
                   )}
 
