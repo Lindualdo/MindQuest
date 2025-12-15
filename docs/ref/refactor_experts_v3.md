@@ -215,3 +215,18 @@ Este módulo **não muda** na v3 - continua recebendo contexto e gerando quests.
 | Perda de histórico intra-dia | Aceitável - objetivo é snapshot atual |
 | Chats muito longos | Limitar a últimas N mensagens se necessário |
 
+---
+
+## Workflows Criados
+
+| Workflow | ID | Status |
+|----------|-----|--------|
+| `job_experts_v3` | `BdfMcFNxLd0CbwZN` | ✅ Criado (inativo) |
+| `sw_experts_v3` | `DztMpxVJw7Mvfke8` | ✅ Criado (inativo) |
+
+### Pendências para Ativar
+
+1. **Adicionar campo `processado_em`** em `usr_chat` (migration SQL)
+2. **Testar** com chat de exemplo
+3. **Ativar** `job_experts_v3` e desativar `job_experts_v2`
+
