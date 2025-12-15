@@ -170,7 +170,7 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        192,
+        256,
         -576
       ],
       "credentials": {
@@ -193,7 +193,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -32,
+        96,
         -832
       ],
       "credentials": {
@@ -205,30 +205,7 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "WITH input AS (\n  SELECT $1::uuid AS usuario_id\n),\nsnapshot AS (\n  INSERT INTO public.usuarios_conquistas (\n    usuario_id,\n    xp_total,\n    xp_proximo_nivel,\n    nivel_atual,\n    titulo_nivel,\n    sequencia_atual,\n    sequencia_recorde,\n    meta_sequencia_codigo,\n    proxima_meta_codigo,\n    sequencia_status,\n    total_quests_concluidas,\n    total_quests_personalizadas,\n    total_xp_hoje,\n    ultima_conversa_em,\n    xp_base,\n    xp_bonus,\n    historico_resumido,\n    criado_em,\n    atualizado_em\n  )\n  VALUES (\n    input.usuario_id,\n    0,\n    500,\n    1,\n    'Despertar',\n    0,\n    0,\n    'streak_003',\n    'streak_005',\n    jsonb_build_object('estado','ativa','alvo_conversas',3,'reinicios',0,'completado_em',NULL),\n    0,\n    0,\n    0,\n    NULL,\n    0,\n    0,\n    '[]'::jsonb,\n    NOW(),\n    NOW()\n  )\n  ON CONFLICT (usuario_id) DO NOTHING\n  RETURNING usuario_id\n),\nbase AS (\n  SELECT usuario_id FROM snapshot\n  UNION\n  SELECT usuario_id FROM input\n),\nmeta_alvo AS (\n  SELECT\n    base.usuario_id,\n    mc.id   AS modelo_id,\n    mc.codigo,\n    COALESCE(\n      NULLIF(mc.config->>'gatilho_valor','')::int,\n      NULLIF(mc.config->>'progresso_meta','')::int,\n      CASE mc.codigo\n        WHEN 'streak_003' THEN 3\n        WHEN 'streak_005' THEN 5\n        ELSE 0\n      END\n    ) AS gatilho_valor\n  FROM base\n  JOIN public.metas_catalogo mc ON mc.codigo IN ('streak_003','streak_005')\n),\ninserted AS (\n  INSERT INTO public.usuarios_quest (\n    id,\n    usuario_id,\n    modelo_id,\n    meta_codigo,\n    status,\n    progresso_atual,\n    progresso_meta,\n    progresso_percentual,\n    xp_concedido,\n    tentativas,\n    referencia_data,\n    ativado_em,\n    atualizado_em\n  )\n  SELECT\n    gen_random_uuid(),\n    m.usuario_id,\n    m.modelo_id,\n    m.codigo,\n    CASE m.codigo WHEN 'streak_003' THEN 'ativa' ELSE 'pendente' END,\n    0,\n    m.gatilho_valor,\n    0,\n    0,\n    0,\n    CURRENT_DATE,\n    NOW(),\n    NOW()\n  FROM meta_alvo m\n  LEFT JOIN public.usuarios_quest uq\n    ON uq.usuario_id = m.usuario_id\n   AND uq.meta_codigo = m.codigo\n  WHERE uq.id IS NULL\n  RETURNING usuario_id, meta_codigo\n)\nSELECT usuario_id FROM base;",
-        "options": {
-          "queryReplacement": "={{ [$json.id] }}"
-        }
-      },
-      "id": "285311c2-f97b-4db2-adf3-e1ab15b77a69",
-      "name": "Insert Gamif",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        176,
-        -832
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso está liberado: ${url};\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.`;\nreturn { json: { mensagem } };"
+        "jsCode": "const dados = $('Code - Parse Determinístico').first().json || {};\nconst historico = (() => {\n  try {\n    return JSON.parse($('Redis Get').first().json.sessionData || '{}');\n  } catch (error) {\n    return {};\n  }\n})();\n\nconst preferido = (dados.nome_usuario && dados.nome_usuario.trim())\n  || (historico.nome_preferido && historico.nome_preferido.trim())\n  || ($('start').item.json.pushName || '').trim()\n  || 'você';\nconst nomeUsuario = preferido;\nconst token = $('Insert User').first().json.token_acesso;\nconst url = `https://mindquest.pt/app/auth?token=${token}`;\n\nconst mensagem = `Perfeito, ${nomeUsuario}! 😊\n\nSeu acesso app MindQuest está liberado: ${url};\n\n🔒 Esse link já vem com seu token pessoal, sem precisar criar senha.`;\nreturn { json: { mensagem } };"
       },
       "id": "8906d45b-d966-42a5-bf4a-f2287388fd11",
       "name": "monta link para usuario",
@@ -260,71 +237,6 @@
           "name": "Redis account"
         }
       }
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "messageText": "={{ $json.mensagem }}",
-            "remoteJid": "={{ $('start').item.json.remoteJid }}",
-            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "instanceName",
-              "displayName": "instanceName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "messageText",
-              "displayName": "messageText",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        608,
-        -832
-      ],
-      "id": "15745bcb-071a-485f-ac2e-adc58e61c675",
-      "name": "Call 'sw_send_message_with_retry'"
     },
     {
       "parameters": {
@@ -385,7 +297,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -32,
+        32,
         -576
       ],
       "id": "9ed5b291-fbfa-42fa-bbd6-7e7b26ad8b71",
@@ -401,7 +313,7 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        1232,
+        912,
         -832
       ],
       "credentials": {
@@ -463,33 +375,19 @@
     },
     {
       "parameters": {
-        "amount": "={{ 5 }}"
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        832,
-        -832
-      ],
-      "id": "1dfa46ae-e6e1-442a-8b4a-021eb84bc303",
-      "name": "Wait",
-      "webhookId": "c929985f-0e38-41dd-8f39-81282d3765bb"
-    },
-    {
-      "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
+          "value": "DJB5qWudX1Hqap1O",
           "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "messageText": "=Antes de começarmos, aqui vai algumas dicas...\n\n- Use este canal para conversar comigo; as interações aqui alimentam o seu App com resumo das conversas, humor, emoções, padrões mentais, perfil comportamental, dicas úteis e conquistas para te dar clareza mental e te ajudar em suas realizações .\n\n- Lembrando que o MindQuest não é terapia nem App de produtividade, o propósito aqui é te dar clareza mental para você se conhecer melhor e usar suas emoções a seu favor.\n\n- Na primeira conversa fale sobre o que sentir vontade; emoções, padrões de pensamento, hábitos, relações ou decisões — qualquer tema relevante vira dado útil para você.\n\n- Se não souber por onde começar, é só me dizer que vou te orientando combinado?\n\nQuer começar agora?",
-            "remoteJid": "={{ $('start').item.json.remoteJid }}",
-            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
+            "messageText": "={{ $json.mensagem }}",
+            "instanceName": "={{ $('start').first().json.evolution_instancia }}",
+            "remoteJidOrNumber": "={{ $('start').first().json.remoteJid }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -504,8 +402,8 @@
               "removed": false
             },
             {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -516,6 +414,26 @@
             {
               "id": "messageText",
               "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -534,11 +452,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1024,
+        608,
         -832
       ],
-      "id": "a24b51c9-1ddf-4b23-9c53-21361230ad49",
-      "name": "Orientações iniciais"
+      "id": "15745bcb-071a-485f-ac2e-adc58e61c675",
+      "name": "Call 'sw_evolution_send_message_v2'"
     }
   ],
   "connections": {
@@ -640,17 +558,6 @@
       "main": [
         [
           {
-            "node": "Insert Gamif",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Insert Gamif": {
-      "main": [
-        [
-          {
             "node": "monta link para usuario",
             "type": "main",
             "index": 0
@@ -662,7 +569,7 @@
       "main": [
         [
           {
-            "node": "Call 'sw_send_message_with_retry'",
+            "node": "Call 'sw_evolution_send_message_v2'",
             "type": "main",
             "index": 0
           }
@@ -690,17 +597,6 @@
         ]
       ]
     },
-    "Call 'sw_send_message_with_retry'": {
-      "main": [
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Call 'sw_send_message_with_retry'1": {
       "main": [
         [
@@ -723,18 +619,7 @@
         ]
       ]
     },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "Orientações iniciais",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Orientações iniciais": {
+    "Call 'sw_evolution_send_message_v2'": {
       "main": [
         [
           {
@@ -755,12 +640,15 @@
     "start": [
       {
         "json": {
-          "remoteJid": "5512982389360@s.whatsapp.net",
-          "pushName": "Aldo",
-          "id": "3AB86843CF3B227F3612",
-          "whatsapp_number": "5512982389360",
+          "remoteJid": "351934738786@s.whatsapp.net",
+          "pushName": "Rodrigo dutra",
+          "id": "A5A3DAE222FE8EC730B695D793EFC2ED",
+          "whatsapp_number": "351934738786",
           "evolution_instancia": "MindQuest",
-          "menssagem": "Aldo"
+          "menssagem": "Rodrigo"
+        },
+        "pairedItem": {
+          "item": 0
         }
       }
     ]
