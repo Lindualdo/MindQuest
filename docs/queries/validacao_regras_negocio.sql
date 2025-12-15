@@ -122,3 +122,4 @@ SELECT
   COUNT(*) FILTER (WHERE status = 'concluida') AS processadas
 FROM public.usuarios_quest
 WHERE usuario_id = 'f6d4c6b0-5496-4035-b670-d8009df6c413';
+

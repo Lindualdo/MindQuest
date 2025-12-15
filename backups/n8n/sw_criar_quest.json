@@ -19,26 +19,26 @@
           ]
         }
       },
-      "id": "c43fc970-0850-46f6-975c-3996929c90f9",
+      "id": "0a3494b9-4d16-4289-9e18-494214203ac7",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        720,
-        224
+        1712,
+        608
       ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
       },
-      "id": "15919d89-9c11-4278-b1ad-84b55447a7bc",
+      "id": "e6f0a821-c0f7-4e5c-92c5-ac6380fca714",
       "name": "Normalizar Entrada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        896,
-        224
+        1888,
+        608
       ]
     },
     {
@@ -49,13 +49,13 @@
           "queryReplacement": "={{ [$('Normalizar Entrada').item.json.usuario_id, $('Normalizar Entrada').item.json.chat_id] }}"
         }
       },
-      "id": "8e45dc1e-23c4-4123-8dd4-8bf5cabfc199",
+      "id": "d154d294-c8bc-4943-9dd9-f054c4f6d7c1",
       "name": "Buscar Quests e Verificar Limite",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1088,
-        224
+        2080,
+        608
       ],
       "credentials": {
         "postgres": {
@@ -72,13 +72,13 @@
           "queryReplacement": "={{ $('Normalizar Entrada').first().json.usuario_id }}"
         }
       },
-      "id": "031743af-77d7-4156-b842-897fa36c240c",
+      "id": "18ab6a07-4888-45e9-b998-5151ea53be18",
       "name": "Buscar Conversas Recentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1280,
-        224
+        2272,
+        608
       ],
       "credentials": {
         "postgres": {
@@ -93,13 +93,13 @@
         "query": "SELECT json_build_object(\n  'areas_vida',\n  COALESCE(json_agg(\n    json_build_object(\n      'id', avc.id,\n      'codigo', avc.codigo,\n      'nome', avc.nome,\n      'descricao', avc.descricao\n    )\n    ORDER BY avc.nome ASC\n  ), '[]'::json)\n) AS areas\nFROM public.areas_vida_catalogo avc\nWHERE avc.ativo IS TRUE;",
         "options": {}
       },
-      "id": "fe78930b-b147-4149-9783-e4aeacec0b4c",
+      "id": "8a5b2cc0-bef4-4dd6-a521-a7bc3700a1a2",
       "name": "Listar Áreas da Vida",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2192,
-        272
+        3184,
+        656
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -117,13 +117,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "7839cc77-e9f3-4c1d-9a71-26b0c0536b08",
+      "id": "652c367c-93c5-4514-b6d2-3ae43561ba0a",
       "name": "Buscar Estágio Usuário",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2400,
-        272
+        3392,
+        656
       ],
       "credentials": {
         "postgres": {
@@ -140,13 +140,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "e0316a6d-ceca-4872-b043-21aca51fa6d4",
+      "id": "fea47f02-61a4-48ad-a03d-531582415fdf",
       "name": "Buscar Quests Catálogo",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2576,
-        272
+        3568,
+        656
       ],
       "credentials": {
         "postgres": {
@@ -159,39 +159,39 @@
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\nconst getNested = (source, path, fallback = undefined) => {\n  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), source) ?? fallback;\n};\n\nconst entrada = getJson(\"Normalizar Entrada\");\nconst verificacaoRaw = getJson(\"Buscar Quests e Verificar Limite\");\nconst questsRaw = verificacaoRaw;\n\nconst conversasRaw = getJson(\"Buscar Conversas Recentes\");\nconst objetivosRaw = getJson(\"Buscar Objetivos Ativos\");\nconst sabotadoresRaw = getJson(\"Buscar Sabotadores Ativo\");\nconst areasRaw = getJson(\"Listar Áreas da Vida\");\nconst estagioRaw = getJson(\"Buscar Estágio Usuário\");\nconst catalogoRaw = getJson(\"Buscar Quests Catálogo\");\n\nconst quests = questsRaw.contexto || {};\nconst questsAtivas = Array.isArray(quests.quests_ativas) ? quests.quests_ativas : [];\n\n// === REPROCESSAMENTO (v1.4.1) ===\nconst isReprocessamento = verificacaoRaw.is_reprocessamento === true;\nconst questsSubstituiveis = Array.isArray(quests.quests_substituiveis) ? quests.quests_substituiveis : [];\nconst totalPalavrasUsuario = verificacaoRaw.total_palavras_usuario || 0;\nconst totalQuestsHoje = verificacaoRaw.total_quests_hoje || 0;\nconst sabotadoresHoje = verificacaoRaw.sabotadores_hoje || 0;\nconst personalizadasHoje = verificacaoRaw.personalizadas_hoje || 0;\nconst catalogoHoje = verificacaoRaw.catalogo_hoje || 0;\n\n// Lista de quests já criadas (para evitar duplicatas)\nconst questsJaCriadas = questsAtivas.map(q => ({\n  id: q.id,\n  titulo: q.titulo || q.config?.titulo || '',\n  catalogo_id: q.catalogo_id,\n  contexto_origem: q.contexto_origem || '',\n  status: q.status,\n  concluido_em: q.concluido_em\n}));\n\n// IDs de catálogo já usados (para priorizar quests novas)\nconst catalogoIdsJaUsados = new Set(\n  questsAtivas\n    .filter(q => q.catalogo_id)\n    .map(q => q.catalogo_id)\n);\n\nconst estagioJornada = estagioRaw.estagio_jornada || 1;\n\nconst catalogoData = catalogoRaw.catalogo || {};\nconst questsCatalogo = Array.isArray(catalogoData.quests_catalogo) ? catalogoData.quests_catalogo : [];\n\n// Filtrar quests do catálogo: priorizar as que ainda não foram usadas\n// EXCLUIR quests de sabotador do catálogo (v1.3.18 - sabotadores são gerados do zero)\nconst questsCatalogoSemSabotador = questsCatalogo.filter(q => !q.sabotador_id);\nconst questsCatalogoNovas = questsCatalogoSemSabotador.filter(q => !catalogoIdsJaUsados.has(q.id));\nconst questsCatalogoUsadas = questsCatalogoSemSabotador.filter(q => catalogoIdsJaUsados.has(q.id));\n\n// === CONVERSAS RECENTES ===\nconst conversas = conversasRaw.conversas || {};\nconst conversasRecentes = Array.isArray(conversas.conversas_recentes) ? conversas.conversas_recentes : [];\n\n// === PEGAR chat_id DA CONVERSA MAIS RECENTE ===\nconst chatIdMaisRecente = conversasRecentes.length > 0 ? conversasRecentes[0].chat_id : null;\n// Se não veio chat_id na entrada, usar o da conversa mais recente\nconst chatIdFinal = entrada.chat_id || chatIdMaisRecente;\n\n// === ESTRUTURA DE SABOTADORES (v1.3.18) ===\nconst sabotadoresData = sabotadoresRaw.sabotadores?.sabotadores || sabotadoresRaw.sabotadores || {};\nconst top3Historicos = Array.isArray(sabotadoresData.top3_historicos) ? sabotadoresData.top3_historicos : [];\nconst sabotadorAtual = sabotadoresData.sabotador_atual || null;\n\n// === LÓGICA SIMPLIFICADA (v1.3.18) ===\n// REGRA: SEMPRE prioriza as informações do sabotador ATUAL\n// 1. Se atual está no top 3 → usa o ATUAL (não o top 1)\n// 2. Se atual NÃO está no top 3 E intensidade >= 60 → cria quest adicional para o top 1\n\nconst top3Ids = top3Historicos.map(s => s.sabotador_id);\nconst sabotadorAtualId = sabotadorAtual?.sabotador_id || null;\nconst isAtualNoTop3 = sabotadorAtualId && top3Ids.includes(sabotadorAtualId);\nconst intensidadeAtual = sabotadorAtual?.intensidade_media || 0;\n\n// === SABOTADOR PRINCIPAL PARA QUEST ===\n// SEMPRE usa o sabotador ATUAL se existir (prioridade absoluta)\nlet sabotadorPrincipal = null;\nif (sabotadorAtual && sabotadorAtualId) {\n  // Sabotador atual existe → usar ele (independente de estar no top 3)\n  sabotadorPrincipal = sabotadorAtual;\n} else if (top3Historicos.length > 0) {\n  // Sem sabotador atual → usar o top 1 histórico\n  sabotadorPrincipal = top3Historicos[0];\n}\n\n// === QUEST ADICIONAL (v1.3.18) ===\n// Se atual NÃO está no top 3 E intensidade >= 60 → criar quest adicional para o top 1 histórico\nconst criarQuestAdicional = !isAtualNoTop3 && sabotadorAtual && sabotadorAtualId && intensidadeAtual >= 60 && top3Historicos.length > 0;\n\n// Se criar quest adicional, o sabotador secundário é o top 1 histórico\nconst sabotadorSecundario = criarQuestAdicional ? top3Historicos[0] : null;\n\nconst temSabotadorParaQuest = sabotadorPrincipal !== null;\n\n// Buscar quests do catálogo por categoria (priorizando novas)\n// NOTA: Não incluir quests de sabotador do catálogo (v1.3.18)\nconst questReflexao = questsCatalogoNovas.find(q => q.codigo === 'reflexao_diaria') \n  || questsCatalogoUsadas.find(q => q.codigo === 'reflexao_diaria') \n  || null;\n\nconst questsTCC = [\n  ...questsCatalogoNovas.filter(q => q.categoria === 'tcc'),\n  ...questsCatalogoUsadas.filter(q => q.categoria === 'tcc')\n];\n\nconst questsEstoicismo = [\n  ...questsCatalogoNovas.filter(q => q.categoria === 'estoicismo'),\n  ...questsCatalogoUsadas.filter(q => q.categoria === 'estoicismo')\n];\n\nconst areasVida = getNested(areasRaw, ['areas', 'areas_vida'], []);\n\n// === OBJETIVOS DO USUÁRIO ===\nconst objetivosData = objetivosRaw.objetivos || {};\nconst objetivosAtivos = Array.isArray(objetivosData.objetivos_ativos) ? objetivosData.objetivos_ativos : [];\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: chatIdFinal,\n    estagio_jornada: estagioJornada,\n    quests_ativas: questsAtivas.filter(q => q.status === 'pendente' || q.status === 'ativa'),\n    quests_ja_criadas: questsJaCriadas,\n    conversas_recentes: conversasRecentes,\n    \n    // === REPROCESSAMENTO (v1.4.1) ===\n    is_reprocessamento: isReprocessamento,\n    quests_substituiveis: questsSubstituiveis,\n    total_palavras_usuario: totalPalavrasUsuario,\n    total_quests_hoje: totalQuestsHoje,\n    sabotadores_hoje: sabotadoresHoje,\n    personalizadas_hoje: personalizadasHoje,\n    catalogo_hoje: catalogoHoje,\n    \n    // === ESTRUTURA SABOTADORES (v1.3.18) ===\n    top3_historicos: top3Historicos,\n    sabotador_atual: sabotadorAtual,\n    sabotador_principal: sabotadorPrincipal,\n    sabotador_secundario: sabotadorSecundario,\n    criar_quest_adicional: criarQuestAdicional,\n    tem_sabotador: temSabotadorParaQuest,\n    is_atual_no_top3: isAtualNoTop3,\n    \n    areas_vida_disponiveis: areasVida,\n    objetivos_ativos: objetivosAtivos,\n    quests_catalogo: {\n      reflexao: questReflexao,\n      // REMOVIDO: sabotador (v1.3.18 - quests de sabotador são geradas do zero)\n      tcc: questsTCC,\n      estoicismo: questsEstoicismo,\n      todas: questsCatalogoSemSabotador,\n      novas: questsCatalogoNovas,\n      usadas: questsCatalogoUsadas\n    }\n  }\n}];"
       },
-      "id": "4fbd488b-7f00-4061-958d-c34846cb34cf",
+      "id": "7e2f7c12-c153-4cc3-ad6e-227f7c98ee54",
       "name": "Montar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2752,
-        272
+        3744,
+        656
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\n\n// === REPROCESSAMENTO (v1.4.1) ===\nconst isReprocessamento = entrada.is_reprocessamento === true;\nconst questsSubstituiveis = entrada.quests_substituiveis || [];\nconst totalPalavrasUsuario = entrada.total_palavras_usuario || 0;\nconst totalQuestsHoje = entrada.total_quests_hoje || 0;\nconst sabotadoresHoje = entrada.sabotadores_hoje || 0;\nconst personalizadasHoje = entrada.personalizadas_hoje || 0;\nconst catalogoHoje = entrada.catalogo_hoje || 0;\n\n// Identificar quests substituíveis por tipo\nconst questPersonalizadaSubstituivel = questsSubstituiveis.find(q => \n  q.tipo === 'personalizada' || \n  (q.contexto_origem && q.contexto_origem.includes('conversa'))\n) || null;\n\nconst questSabotadorSubstituivel = questsSubstituiveis.find(q => \n  q.tipo === 'sabotador' || q.sabotador_id\n) || null;\n\n// === ESTRUTURA SABOTADORES (v1.3.18) ===\nconst top3Historicos = entrada.top3_historicos || [];\nconst sabotadorAtual = entrada.sabotador_atual || null;\nconst sabotadorPrincipal = entrada.sabotador_principal || null;\nconst sabotadorSecundario = entrada.sabotador_secundario || null;\nconst criarQuestAdicional = entrada.criar_quest_adicional || false;\n\nconst questsCatalogo = entrada.quests_catalogo || {};\nconst questsJaCriadas = entrada.quests_ja_criadas || [];\n\n// IDs de catálogo já usados\nconst catalogoIdsUsados = new Set(\n  questsJaCriadas\n    .filter(q => q.catalogo_id)\n    .map(q => q.catalogo_id)\n);\n\n// Função genérica para escolher quest do catálogo\nconst escolherQuestCatalogo = (lista, priorizarNovas = true) => {\n  if (!Array.isArray(lista) || lista.length === 0) return null;\n  \n  const novas = lista.filter(q => !catalogoIdsUsados.has(q.id));\n  const usadas = lista.filter(q => catalogoIdsUsados.has(q.id));\n  \n  const candidatas = priorizarNovas && novas.length > 0 ? novas : (usadas.length > 0 ? usadas : lista);\n  \n  return candidatas.length > 0 ? candidatas[0] : null;\n};\n\n// === v1.3.18: QUESTS DE SABOTADOR SÃO GERADAS DO ZERO ===\n// Não usar catálogo para sabotadores - usar insight_atual e contramedida_ativa\n// O agente vai gerar a quest baseada no contexto específico\n\n// Escolher quest TCC, Estoicismo ou outras categorias (SEMPRE necessário)\nconst todasQuests = questsCatalogo.todas || [];\nconst questsTCCEstoicismoOutras = todasQuests.filter(q => {\n  if (q.sabotador_id) return false; // Excluir quests de sabotador\n  if (q.codigo === 'reflexao_diaria') return false;\n  return q.categoria && q.categoria !== 'personalizada';\n});\n\nconst questTCCEstoicismoOutras = escolherQuestCatalogo(questsTCCEstoicismoOutras, true);\n\n// Garantir que conversas_recentes seja array\nconst conversasRecentes = Array.isArray(entrada.conversas_recentes) \n  ? entrada.conversas_recentes \n  : [];\n\n// === SEPARAR CONVERSA ATUAL DO HISTÓRICO ===\nconst conversaAtual = conversasRecentes.length > 0 \n  ? {\n      data: conversasRecentes[0].data_conversa || conversasRecentes[0].data || null,\n      resumo: conversasRecentes[0].resumo || conversasRecentes[0].resumo_conversa || ''\n    }\n  : null;\n\nconst conversasHistorico = conversasRecentes\n  .slice(1, 3)\n  .map(c => ({\n    data: c.data_conversa || c.data || null,\n    resumo: c.resumo || c.resumo_conversa || ''\n  }))\n  .filter(c => c.data && c.resumo);\n\n// === QUESTS JÁ CRIADAS (títulos para evitar duplicação) ===\nconst questsJaCriadasTitulos = questsJaCriadas\n  .slice(0, 10)\n  .map(q => q.titulo || q.config?.titulo || '')\n  .filter(t => t && t.trim() !== '');\n\n// === OBJETIVOS DO USUÁRIO ===\nconst objetivosAtivos = Array.isArray(entrada.objetivos_ativos) ? entrada.objetivos_ativos : [];\nconst objetivoPadrao = objetivosAtivos.find(o => o.is_padrao) || null;\nconst objetivosEspecificos = objetivosAtivos.filter(o => !o.is_padrao);\n\n// === ÁREAS DA VIDA (apenas id e nome) ===\nconst areasDisponiveis = (Array.isArray(entrada.areas_vida_disponiveis) ? entrada.areas_vida_disponiveis : [])\n  .map(a => ({ id: a.id || null, nome: a.nome || '' }))\n  .filter(a => a.id && a.nome);\n\n// === QUEST TCC RESUMIDA ===\nconst questTCCResumida = questTCCEstoicismoOutras ? {\n  catalogo_id: questTCCEstoicismoOutras.id,\n  titulo: questTCCEstoicismoOutras.titulo,\n  descricao: questTCCEstoicismoOutras.descricao,\n  categoria: questTCCEstoicismoOutras.categoria,\n  xp: questTCCEstoicismoOutras.xp\n} : null;\n\n// Preparar contexto limpo para o agente\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    \n    // === REPROCESSAMENTO (v1.4.1) ===\n    is_reprocessamento: isReprocessamento,\n    total_palavras_usuario: totalPalavrasUsuario,\n    total_quests_hoje: totalQuestsHoje,\n    sabotadores_hoje: sabotadoresHoje,\n    personalizadas_hoje: personalizadasHoje,\n    catalogo_hoje: catalogoHoje,\n    quests_substituiveis: {\n      personalizada: questPersonalizadaSubstituivel,\n      sabotador: questSabotadorSubstituivel\n    },\n    \n    // === CONVERSAS ===\n    conversa_atual: conversaAtual,\n    conversas_historico: conversasHistorico,\n    \n    // === ANTI-DUPLICAÇÃO ===\n    quests_ja_criadas_titulos: questsJaCriadasTitulos,\n    \n    // === ÁREAS ===\n    areas_disponiveis: areasDisponiveis,\n    \n    // === ESTRUTURA SABOTADORES (v1.3.18) ===\n    // Sabotadores com insight/contramedida para o agente gerar quest do zero\n    top3_historicos: top3Historicos,\n    sabotador_atual: sabotadorAtual,\n    sabotador_principal: sabotadorPrincipal,\n    sabotador_secundario: sabotadorSecundario,\n    criar_quest_adicional: criarQuestAdicional,\n    \n    // === OBJETIVOS ===\n    objetivos_usuario: {\n      padrao: objetivoPadrao ? {\n        id: objetivoPadrao.id,\n        titulo: objetivoPadrao.titulo,\n        area_vida: objetivoPadrao.area_vida\n      } : null,\n      especificos: objetivosEspecificos.map(o => ({\n        id: o.id,\n        titulo: o.titulo,\n        area_vida: o.area_vida\n      }))\n    },\n    \n    // === QUESTS DO CATÁLOGO (v1.3.18) ===\n    // REMOVIDO: sabotador_principal e sabotador_secundario do catálogo\n    // Quests de sabotador são geradas do zero pelo agente\n    quests_catalogo_escolhidas: {\n      tcc_estoicismo_outras: questTCCResumida\n    }\n  }\n}];"
       },
-      "id": "a7e4cb22-d212-4156-a4e0-b0c25556fe06",
+      "id": "dcbe1e08-2025-41f2-9abd-7e9859a8672c",
       "name": "Preparar Quest do Catálogo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2976,
-        272
+        3968,
+        656
       ]
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "e3f08851-426b-4011-bba2-f9699051c938",
+      "id": "31249015-39a8-4d84-ac7a-3a07c4a7a323",
       "name": "OpenRouter Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3120,
-        656
+        4112,
+        1040
       ],
       "credentials": {
         "openRouterApi": {
@@ -209,13 +209,13 @@
           "systemMessage": "Você é o **Especialista em Criação de Quests** do MindQuest.\n\n=== SUA MISSÃO ===\nTransformar conversas em ações práticas. Você é o coração do **AGIR** no framework CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n\n=== REGRAS OBRIGATÓRIAS ===\n\n1. **Gerar 3 ou 4 quests** dependendo de `criar_quest_adicional`:\n   - Se `criar_quest_adicional = false`: 3 quests (1 personalizada + 1 sabotador + 1 TCC)\n   - Se `criar_quest_adicional = true`: 4 quests (1 personalizada + 2 sabotador + 1 TCC)\n2. **SEMPRE incluir `base_cientifica`** completo em cada quest\n3. **NUNCA criar títulos similares** aos já existentes\n4. **NUNCA sugerir ferramentas externas** - usar sempre MindQuest\n5. **SEMPRE usar nomes originais dos sabotadores** (Ex: Sr. Perfeccionista, Sr. Inquieto)\n\n🚨🚨🚨 REGRA CRÍTICA - CAMPO \"tipo\" 🚨🚨🚨\n\nO campo \"tipo\" DEVE corresponder ao tipo real da quest:\n- \"personalizada\" → quests criadas do zero baseadas na conversa (SEM sabotador_id)\n- \"sabotador\" → quests de sabotador (OBRIGATÓRIO se sabotador_id existir)\n- \"tcc\" ou \"catalogo\" → quests do catálogo TCC/Estoicismo/outras\n\n⚠️ NUNCA usar tipo=\"personalizada\" para quest de sabotador!\n⚠️ Se tem sabotador_id → tipo DEVE SER \"sabotador\"\n\n=== MAPEAMENTO DE FUNCIONALIDADES ===\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Diário/Registro | Conversa com mentor |\n| Check-in emocional | Menu Conversar → Check-in |\n| Reflexão | Conversa diária/semanal |\n| Acompanhamento | Menu Entender → Dashboard |\n| Progresso | Menu Evoluir → Pontos |\n| Padrões | Menu Entender → Sabotadores |\n\n=== 🚨 REGRAS DE QUESTS DE SABOTADOR (v1.3.18) 🚨 ===\n\n**REGRA CRÍTICA: QUESTS DE SABOTADOR SÃO GERADAS DO ZERO**\n- **tipo = \"sabotador\"** (OBRIGATÓRIO - nunca \"personalizada\")\n- **NUNCA usar catálogo** para quests de sabotador\n- **SEMPRE usar** `insight_atual` e `contramedida_ativa` do sabotador\n- **catalogo_id = null** para todas as quests de sabotador\n- **sabotador_id** = OBRIGATÓRIO, usar o ID do sabotador_principal ou sabotador_secundario\n\n**COMO CRIAR QUEST DE SABOTADOR:**\n1. tipo = \"sabotador\" (CRÍTICO!)\n2. Pegar o `sabotador_principal` (ou `sabotador_secundario` se for a quest adicional)\n3. Usar o `insight_atual` como base para a descrição da quest\n4. Incorporar a `contramedida_ativa` no campo `como_aplicar` da base_cientifica\n5. Título deve referenciar o sabotador pelo nome (Ex: \"Desafie o Sr. Perfeccionista\")\n6. contexto_origem = \"sabotador_contextualizado\"\n\n**EXEMPLO DE QUEST DE SABOTADOR:**\n```json\n{\n  \"tipo\": \"sabotador\",\n  \"catalogo_id\": null,\n  \"titulo\": \"Desafie o Sr. Perfeccionista com pequenas entregas\",\n  \"descricao\": \"Baseado no insight: [insight_atual do sabotador]. Pratique a imperfeição consciente.\",\n  \"base_cientifica\": {\n    \"tipo\": \"sabotador\",\n    \"objetivo\": \"Reduzir a influência do perfeccionismo\",\n    \"fundamentos\": \"A Psicologia Positiva mostra que...\",\n    \"como_aplicar\": \"[contramedida_ativa do sabotador]. 1. No MindQuest... 2. Registre...\",\n    \"links_referencias\": []\n  },\n  \"contexto_origem\": \"sabotador_contextualizado\",\n  \"sabotador_id\": \"critico\",\n  \"objetivo_id\": \"uuid-do-objetivo-padrao\",\n  \"xp_recompensa\": 50\n}\n```\n\n=== REGRAS POR TIPO DE QUEST ===\n\n**1. PERSONALIZADA (tipo=\"personalizada\", catalogo_id=null):**\n- Criar do zero baseada na conversa atual\n- Foco em ações PRÁTICAS (trabalho, saúde, projetos, finanças)\n- NÃO incluir questões emocionais/comportamentais (cobertas pelo sabotador)\n- sabotador_id: SEMPRE null\n- objetivo_id: específico se relacionado, senão padrão\n\n**2. SABOTADOR (tipo=\"sabotador\", catalogo_id=null):**\n- GERAR DO ZERO usando insight_atual e contramedida_ativa\n- tipo: \"sabotador\" (OBRIGATÓRIO!)\n- sabotador_id: OBRIGATÓRIO (ex: \"critico\", \"inquieto\", etc.)\n- objetivo_id: SEMPRE o padrão\n- Referenciar pelo nome original (Ex: \"Para combater o Sr. Perfeccionista...\")\n\n**3. TCC/ESTOICISMO/OUTRAS (tipo=\"tcc\", do catálogo):**\n- Adaptar ao contexto das conversas\n- MANTER catalogo_id fornecido\n- objetivo_id: SEMPRE o padrão\n- objetivos_secundarios: SEMPRE [] (vazio)\n\n=== ESTRUTURA base_cientifica ===\n```json\n{\n  \"tipo\": \"personalizada|sabotador|tcc|estoicismo|boa_pratica\",\n  \"objetivo\": \"Benefício claro (por que fazer?)\",\n  \"fundamentos\": \"Embasamento científico/filosófico\",\n  \"como_aplicar\": \"Passos práticos usando MindQuest\",\n  \"links_referencias\": []\n}\n```\n\n🚨🚨🚨 REGRA CRÍTICA - VINCULAÇÃO DE OBJETIVOS 🚨🚨🚨\n\nPara CADA quest PERSONALIZADA:\n- Se conversa menciona trabalho/app/negócio → usar objetivo com area_vida=\"Trabalho\"\n- Se conversa menciona finanças/BTC/investimento → usar objetivo com area_vida=\"Finanças\"\n- NUNCA usar objetivo PADRÃO se existir objetivo específico relacionado ao tema\n\nPara quests de SABOTADOR e TCC:\n- objetivo_id: SEMPRE o objetivo PADRÃO"
         }
       },
-      "id": "810f7b5d-76ee-4035-bec4-378dfeca85d6",
+      "id": "af189331-81fb-4155-bf3f-57b6a0f336a6",
       "name": "Agente Quests",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        3232,
-        272
+        4224,
+        656
       ],
       "alwaysOutputData": true
     },
@@ -223,26 +223,26 @@
       "parameters": {
         "jsCode": "const getJson = (nodeName) => {\n  const data = $items(nodeName, 0, 0) || [];\n  const item = data[0] || {};\n  return item.json || {};\n};\n\n// Buscar contexto do nó \"Montar Contexto\" para ter insights_recentes completo\nconst contextoMontar = getJson(\"Montar Contexto\");\nconst contextoPreparar = getJson(\"Preparar Quest do Catálogo\");\n\nconst rawOutput = $json.output ?? { quests: [] };\nlet resultado;\nif (typeof rawOutput === 'string') {\n  try {\n    resultado = JSON.parse(rawOutput);\n  } catch (error) {\n    resultado = { quests: [] };\n  }\n} else if (rawOutput && typeof rawOutput === 'object') {\n  resultado = rawOutput;\n} else {\n  resultado = { quests: [] };\n}\n\nconst novasQuests = Array.isArray(resultado.quests) ? resultado.quests : [];\n\n// === CATALOGO_IDS PRÉ-SELECIONADOS (v1.3.17) ===\nconst questsEscolhidas = contextoPreparar.quests_catalogo_escolhidas || {};\nconst catalogoIdSabotadorPrincipal = questsEscolhidas.sabotador_principal?.catalogo_id || null;\nconst catalogoIdSabotadorSecundario = questsEscolhidas.sabotador_secundario?.catalogo_id || null;\nconst catalogoIdTCC = questsEscolhidas.tcc_estoicismo_outras?.catalogo_id || null;\n\n// === REPROCESSAMENTO (v1.3.19) ===\nconst isReprocessamento = contextoPreparar.is_reprocessamento || false;\nconst questsSubstituiveis = contextoPreparar.quests_substituiveis || {};\nconst totalPalavrasUsuario = contextoPreparar.total_palavras_usuario || 0;\n\nreturn [{\n  json: {\n    usuario_id: contextoPreparar.usuario_id,\n    chat_id: contextoPreparar.chat_id,\n    novas_quests_sugeridas: novasQuests,\n    atualizacoes_sugeridas: [],\n    sabotadores_recentes: contextoMontar.sabotadores_recentes || [],\n    insights_recentes: contextoMontar.insights_recentes || [],\n    areas_disponiveis: contextoPreparar.areas_disponiveis || [],\n    objetivos_disponiveis: contextoMontar.objetivos_ativos || [],\n    \n    // === REPROCESSAMENTO (v1.3.19) ===\n    is_reprocessamento: isReprocessamento,\n    quests_substituiveis: questsSubstituiveis,\n    total_palavras_usuario: totalPalavrasUsuario,\n    \n    // === NOVA ESTRUTURA SABOTADORES (v1.3.14) ===\n    top3_historicos: contextoPreparar.top3_historicos || [],\n    sabotador_atual: contextoPreparar.sabotador_atual || null,\n    sabotador_principal: contextoPreparar.sabotador_principal || null,\n    criar_quest_adicional: contextoPreparar.criar_quest_adicional || false,\n    \n    // === CATALOGO_IDS VÁLIDOS (v1.3.17) ===\n    catalogo_id_sabotador_principal: catalogoIdSabotadorPrincipal,\n    catalogo_id_sabotador_secundario: catalogoIdSabotadorSecundario,\n    catalogo_id_tcc: catalogoIdTCC\n  }\n}];"
       },
-      "id": "742c82d5-70c6-475a-92a9-b8f2937b6db4",
+      "id": "0e2db5b4-427a-474d-85b9-c3ff500cf279",
       "name": "Interpretar Resultado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3584,
-        272
+        4576,
+        656
       ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = ($input.item && $input.item.json) ? $input.item.json : {};\nconst questsAtivas = Array.isArray(entrada.quests_ativas) ? entrada.quests_ativas : [];\nconst questsJaCriadas = Array.isArray(entrada.quests_ja_criadas) ? entrada.quests_ja_criadas : [];\n\n// === REPROCESSAMENTO (v1.4.1) ===\nconst isReprocessamento = entrada.is_reprocessamento === true;\nconst questsSubstituiveis = entrada.quests_substituiveis || {};\nconst totalPalavrasUsuario = entrada.total_palavras_usuario || 0;\nconst totalQuestsHoje = entrada.total_quests_hoje || 0;\nconst sabotadoresHoje = entrada.sabotadores_hoje || 0;\nconst personalizadasHoje = entrada.personalizadas_hoje || 0;\nconst catalogoHoje = entrada.catalogo_hoje || 0;\n\n// Quests a substituir (será preenchido durante processamento)\nconst questsParaSubstituir = [];\n\n// Sabotador atual para comparação\nconst sabotadorAtualId = entrada.sabotador_atual?.sabotador_id || null;\n\n// === QUESTS OBRIGATÓRIAS (v1.4.1) ===\n// Se criar_quest_adicional = true → até 4 quests (1 personalizada + 2 sabotador + 1 TCC)\n// Senão → 3 quests (1 personalizada + 1 sabotador + 1 TCC)\nconst criarQuestAdicional = entrada.criar_quest_adicional || false;\nconst MAX_QUESTS_DIA = criarQuestAdicional ? 4 : 3;\nconst MAX_QUESTS_SABOTADOR = criarQuestAdicional ? 2 : 1;\n\n// === CATALOGO_IDS PRÉ-SELECIONADOS (v1.3.17) ===\nconst catalogoIdSabotadorPrincipal = entrada.catalogo_id_sabotador_principal || null;\nconst catalogoIdSabotadorSecundario = entrada.catalogo_id_sabotador_secundario || null;\nconst catalogoIdTCC = entrada.catalogo_id_tcc || null;\n\n// === LÓGICA DE SUBSTITUIÇÃO (v1.4.1) ===\n// Flags para controlar quais tipos de quests criar\nlet criarPersonalizada = true;\nlet criarSabotador = true;\nlet criarCatalogo = true;\nlet sabotadorMudou = false;\n\nif (isReprocessamento) {\n  // Quest personalizada: SEMPRE substituir se disponivel\n  if (questsSubstituiveis.personalizada) {\n    questsParaSubstituir.push({\n      tipo: 'personalizada',\n      quest_id: questsSubstituiveis.personalizada.id,\n      motivo: 'mais_contexto'\n    });\n    // Criar nova personalizada (vai substituir a antiga)\n    criarPersonalizada = true;\n  } else if (personalizadasHoje > 0) {\n    // Já tem personalizada hoje mas não é substituível (status=ativa)\n    criarPersonalizada = false;\n  }\n  \n  // Quest sabotador: substituir APENAS se sabotador mudou\n  if (questsSubstituiveis.sabotador && sabotadorAtualId) {\n    const sabotadorAnterior = questsSubstituiveis.sabotador.sabotador_id;\n    if (sabotadorAnterior !== sabotadorAtualId) {\n      sabotadorMudou = true;\n      questsParaSubstituir.push({\n        tipo: 'sabotador',\n        quest_id: questsSubstituiveis.sabotador.id,\n        sabotador_anterior: sabotadorAnterior,\n        sabotador_novo: sabotadorAtualId,\n        motivo: 'sabotador_mudou'\n      });\n      criarSabotador = true;\n    } else {\n      // Sabotador não mudou, não criar nova\n      criarSabotador = false;\n    }\n  } else if (sabotadoresHoje > 0) {\n    // Já tem sabotador hoje mas não é substituível\n    criarSabotador = false;\n  }\n  \n  // Quest catálogo: NUNCA substituir\n  if (catalogoHoje > 0) {\n    criarCatalogo = false;\n  }\n}\n\n// === CALCULAR QUESTS A CRIAR (v1.4.1) ===\n// REGRA CRÍTICA: Máximo 3 ou 4 quests por dia\nlet questsAindaPodeCriar = MAX_QUESTS_DIA - totalQuestsHoje + questsParaSubstituir.length;\nif (questsAindaPodeCriar < 0) questsAindaPodeCriar = 0;\n\nconst dedupe = new Set();\nconst catalogoIdsUsados = new Set();\nconst titulosUsados = new Set();\nconst uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;\n\n// === CONSTANTES ===\nconst QUEST_CUSTOM_CATALOGO_ID = '00000000-0000-0000-0000-000000000001';\nconst SABOTADORES_VALIDOS = new Set([\n  'critico', 'insistente', 'prestativo', 'hiper_realizador', 'vitima',\n  'hiper_racional', 'hipervigilante', 'inquieto', 'controlador', 'esquivo'\n]);\n\nconst insightsValidos = new Set(\n  (Array.isArray(entrada.insights_recentes) ? entrada.insights_recentes : [])\n    .map((item) => (typeof item?.id === 'string' ? item.id.trim().toLowerCase() : null))\n    .filter(Boolean)\n);\n\n// === VALIDAÇÃO DE ÁREAS DA VIDA ===\nconst areasValidas = new Set(\n  (Array.isArray(entrada.areas_disponiveis) ? entrada.areas_disponiveis : [])\n    .map((item) => (typeof item?.id === 'string' ? item.id.trim().toLowerCase() : null))\n    .filter(Boolean)\n);\n\n// === VALIDAÇÃO DE OBJETIVOS ===\nconst objetivosValidos = new Set(\n  (Array.isArray(entrada.objetivos_disponiveis) ? entrada.objetivos_disponiveis : [])\n    .map((item) => (typeof item?.id === 'string' ? item.id.trim().toLowerCase() : null))\n    .filter(Boolean)\n);\n\n// Preencher sets de duplicatas com quests já criadas\nfor (const questJaCriada of questsJaCriadas) {\n  const titulo = String(questJaCriada?.titulo || '').toLowerCase().trim();\n  const catalogoId = questJaCriada?.catalogo_id;\n  \n  if (titulo) {\n    titulosUsados.add(titulo);\n  }\n  \n  if (catalogoId && uuidRegex.test(catalogoId)) {\n    catalogoIdsUsados.add(catalogoId);\n  }\n  \n  const contexto = String(questJaCriada?.contexto_origem || '').toLowerCase().trim();\n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\n// Verificar duplicatas das quests ativas\nfor (const ativo of questsAtivas) {\n  const contexto = String(ativo?.contexto_origem || '').toLowerCase().trim();\n  const titulo = String((ativo?.config?.titulo ?? ativo?.titulo ?? '')).toLowerCase().trim();\n  const catalogoId = ativo?.catalogo_id;\n  \n  if (titulo) {\n    titulosUsados.add(titulo);\n  }\n  \n  if (catalogoId && uuidRegex.test(catalogoId)) {\n    catalogoIdsUsados.add(catalogoId);\n  }\n  \n  if (contexto || titulo) {\n    dedupe.add(`${contexto}|${titulo}`);\n  }\n}\n\nconst atualizacoes = Array.isArray(entrada.atualizacoes_sugeridas) ? entrada.atualizacoes_sugeridas : [];\nconst candidatas = Array.isArray(entrada.novas_quests_sugeridas) ? entrada.novas_quests_sugeridas : [];\n\n// Função para verificar similaridade de títulos (evitar duplicatas)\nconst tituloSimilar = (titulo1, titulo2) => {\n  const t1 = String(titulo1 || '').toLowerCase().trim();\n  const t2 = String(titulo2 || '').toLowerCase().trim();\n  \n  if (!t1 || !t2) return false;\n  \n  const palavras1 = t1.split(/\\s+/);\n  const palavras2 = t2.split(/\\s+/);\n  const palavrasComuns = palavras1.filter(p => palavras2.includes(p));\n  const similaridade = palavrasComuns.length / Math.max(palavras1.length, palavras2.length);\n  \n  return similaridade >= 0.8 || t1.includes(t2) || t2.includes(t1);\n};\n\n// === ESTRUTURA PARA PERMITIR ATÉ 2 SABOTADORES (v1.3.15) ===\nconst questsPorTipo = { \n  personalizada: null, \n  sabotador: [], // Array para permitir até 2\n  tcc_estoicismo: null \n};\n\nlet sabotadorQuestCount = 0; // Contador para usar IDs corretos\n\nfor (const quest of candidatas) {\n  if (!quest || typeof quest !== 'object') continue;\n  \n  const contexto = String(quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = String(quest.titulo || '').toLowerCase().trim();\n  const chave = `${contexto}|${titulo}`;\n  \n  if (!contexto && !titulo) continue;\n  if (dedupe.has(chave)) continue;\n  \n  let tituloMuitoSimilar = false;\n  for (const tituloUsado of titulosUsados) {\n    if (tituloSimilar(titulo, tituloUsado)) {\n      tituloMuitoSimilar = true;\n      break;\n    }\n  }\n  if (tituloMuitoSimilar) continue;\n  \n  // === VALIDAR sabotador_id PRIMEIRO (v1.3.19) ===\n  let sabotadorId = null;\n  if (typeof quest.sabotador_id === 'string') {\n    const trimmed = quest.sabotador_id.trim().toLowerCase();\n    if (trimmed) {\n      if (SABOTADORES_VALIDOS.has(trimmed) || uuidRegex.test(quest.sabotador_id.trim())) {\n        sabotadorId = quest.sabotador_id.trim();\n      }\n    }\n  }\n  \n  // === DETECTAR SE É QUEST DE SABOTADOR (prioridade absoluta) ===\n  const tipoQuest = String(quest.tipo || '').toLowerCase();\n  const isSabotadorQuest = sabotadorId !== null || \n                          tipoQuest === 'sabotador' ||\n                          contexto.includes('sabotador') || \n                          contexto.includes('sabot');\n  \n  // === DETERMINAR catalogo_id ===\n  let catalogoId = null;\n  \n  // Quest de sabotador: catalogo_id = null (v1.3.19)\n  if (isSabotadorQuest) {\n    catalogoId = null; // Sabotador quests são geradas do zero, sem catálogo\n  } else if (tipoQuest === 'personalizada' || !quest.catalogo_id) {\n    catalogoId = QUEST_CUSTOM_CATALOGO_ID;\n  } else if (typeof quest.catalogo_id === 'string') {\n    const trimmed = quest.catalogo_id.trim();\n    \n    // Para quest TCC: usar o ID pré-selecionado\n    if (catalogoIdTCC && tipoQuest === 'tcc') {\n      catalogoId = catalogoIdTCC;\n    } else if (trimmed && uuidRegex.test(trimmed)) {\n      catalogoId = trimmed;\n    }\n    \n    // Verificar duplicata de catalogo_id\n    if (catalogoId && catalogoIdsUsados.has(catalogoId) && catalogoId !== QUEST_CUSTOM_CATALOGO_ID) {\n      continue;\n    }\n  }\n  \n  // === VALIDAR area_vida_id contra lista de IDs válidos ===\n  let areaVidaId = null;\n  if (typeof quest.area_vida_id === 'string') {\n    const trimmed = quest.area_vida_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && areasValidas.has(trimmed.toLowerCase())) {\n      areaVidaId = trimmed;\n    }\n  }\n  \n  let insightId = null;\n  if (typeof quest.insight_id === 'string') {\n    const trimmed = quest.insight_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && insightsValidos.has(trimmed.toLowerCase())) {\n      insightId = trimmed;\n    }\n  }\n  \n  // === VALIDAR objetivo_id contra lista de IDs válidos ===\n  let objetivoId = null;\n  if (typeof quest.objetivo_id === 'string') {\n    const trimmed = quest.objetivo_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && objetivosValidos.has(trimmed.toLowerCase())) {\n      objetivoId = trimmed;\n    }\n  }\n  \n  // === OBJETIVOS_SECUNDARIOS - validar cada um ===\n  let objetivosSecundarios = [];\n  if (Array.isArray(quest.objetivos_secundarios)) {\n    objetivosSecundarios = quest.objetivos_secundarios\n      .filter(os => os && typeof os.objetivo_id === 'string' && uuidRegex.test(os.objetivo_id.trim()) && objetivosValidos.has(os.objetivo_id.trim().toLowerCase()))\n      .map(os => ({ objetivo_id: os.objetivo_id.trim() }));\n  }\n  \n  // === REGRA FORÇADA: Quest do catálogo SEM sabotador = SEM objetivos secundários ===\n  if (catalogoId && catalogoId !== QUEST_CUSTOM_CATALOGO_ID && !sabotadorId) {\n    objetivosSecundarios = [];\n  }\n  \n  // === DETERMINAR TIPO/CATEGORIA (v1.3.19 - priorizar sabotador_id) ===\n  let tipoCategoria = 'personalizada';\n  \n  // 1. PRIMEIRO: verificar se é quest de sabotador (tem sabotador_id ou tipo=sabotador)\n  if (isSabotadorQuest) {\n    tipoCategoria = 'sabotador';\n  // 2. DEPOIS: verificar personalizada\n  } else if (catalogoId === QUEST_CUSTOM_CATALOGO_ID || tipoQuest === 'personalizada') {\n    tipoCategoria = 'personalizada';\n  // 3. Verificar reflexão (ignorar)\n  } else if (contexto.includes('reflexao') || contexto.includes('reflex')) {\n    continue;\n  // 4. Demais (TCC, estoicismo, etc)\n  } else if (catalogoId) {\n    tipoCategoria = 'tcc_estoicismo';\n  }\n  \n  // === DETERMINAR tipo FINAL (corrigir se necessário) ===\n  let tipoFinal = tipoQuest;\n  if (isSabotadorQuest) {\n    tipoFinal = 'sabotador'; // Forçar tipo correto\n  } else if (!tipoFinal || tipoFinal === 'catalogo') {\n    tipoFinal = catalogoId === QUEST_CUSTOM_CATALOGO_ID ? 'personalizada' : 'tcc';\n  }\n  \n  // === DETERMINAR catalogo_id FINAL ===\n  // Quest personalizada sem sabotador usa QUEST_CUSTOM_CATALOGO_ID\n  // Quest de sabotador usa null\n  let catalogoIdFinal = catalogoId;\n  if (tipoCategoria === 'personalizada' && !sabotadorId) {\n    catalogoIdFinal = QUEST_CUSTOM_CATALOGO_ID;\n  } else if (tipoCategoria === 'sabotador') {\n    catalogoIdFinal = null; // Sabotador não usa catálogo\n  }\n  \n  const questProcessada = {\n    tipo: tipoFinal,\n    catalogo_id: catalogoIdFinal,\n    titulo: quest.titulo,\n    descricao: quest.descricao,\n    base_cientifica: quest.base_cientifica || null,\n    contexto_origem: quest.contexto_origem,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    prazo_inicio: quest.prazo_inicio || null,\n    prazo_fim: quest.prazo_fim || null,\n    progresso_meta: quest.progresso_meta ?? 1,\n    status_inicial: quest.status_inicial || 'disponivel',\n    area_vida_id: areaVidaId,\n    sabotador_id: sabotadorId,\n    insight_id: insightId,\n    objetivo_id: objetivoId,\n    objetivos_secundarios: objetivosSecundarios,\n    complexidade: quest.complexidade ?? 0,\n    payload_extra: quest.payload_extra || {},\n    xp_recompensa: quest.xp_recompensa || 40\n  };\n  \n  // === RESPEITAR FLAGS DE REPROCESSAMENTO (v1.4.1) ===\n  if (tipoCategoria === 'personalizada' && !questsPorTipo.personalizada && criarPersonalizada) {\n    questsPorTipo.personalizada = questProcessada;\n  } else if (tipoCategoria === 'sabotador' && questsPorTipo.sabotador.length < MAX_QUESTS_SABOTADOR && criarSabotador) {\n    // Permitir até MAX_QUESTS_SABOTADOR quests de sabotador\n    questsPorTipo.sabotador.push(questProcessada);\n    sabotadorQuestCount++;\n  } else if (tipoCategoria === 'tcc_estoicismo' && !questsPorTipo.tcc_estoicismo && criarCatalogo) {\n    questsPorTipo.tcc_estoicismo = questProcessada;\n  }\n  \n  dedupe.add(chave);\n  if (titulo) titulosUsados.add(titulo);\n  if (catalogoIdFinal && catalogoIdFinal !== QUEST_CUSTOM_CATALOGO_ID) catalogoIdsUsados.add(catalogoIdFinal);\n}\n\nconst questsFinais = [];\nif (questsPorTipo.personalizada && criarPersonalizada) questsFinais.push(questsPorTipo.personalizada);\n// Adicionar todas as quests de sabotador (até 2) se permitido\nif (criarSabotador) {\n  for (const questSab of questsPorTipo.sabotador) {\n    questsFinais.push(questSab);\n  }\n}\nif (questsPorTipo.tcc_estoicismo && criarCatalogo) questsFinais.push(questsPorTipo.tcc_estoicismo);\n\n// Segunda passada para preencher se faltou algum tipo\nfor (const quest of candidatas) {\n  if (questsFinais.length >= MAX_QUESTS_DIA) break;\n  if (!quest || typeof quest !== 'object') continue;\n  \n  const contexto = String(quest.contexto_origem || '').toLowerCase().trim();\n  const titulo = String(quest.titulo || '').toLowerCase().trim();\n  const chave = `${contexto}|${titulo}`;\n  \n  if (contexto.includes('reflexao') || contexto.includes('reflex')) {\n    continue;\n  }\n  \n  if (dedupe.has(chave)) continue;\n  \n  let tituloMuitoSimilar = false;\n  for (const tituloUsado of titulosUsados) {\n    if (tituloSimilar(titulo, tituloUsado)) {\n      tituloMuitoSimilar = true;\n      break;\n    }\n  }\n  if (tituloMuitoSimilar) continue;\n  \n  const tipoQuest = String(quest.tipo || '').toLowerCase();\n  \n  // Validar sabotador_id\n  let sabotadorId = null;\n  if (typeof quest.sabotador_id === 'string') {\n    const trimmed = quest.sabotador_id.trim().toLowerCase();\n    if (trimmed) {\n      if (SABOTADORES_VALIDOS.has(trimmed) || uuidRegex.test(quest.sabotador_id.trim())) {\n        sabotadorId = quest.sabotador_id.trim();\n      }\n    }\n  }\n  \n  const isSabotadorQuest = sabotadorId !== null || tipoQuest === 'sabotador';\n  \n  let catalogoId = null;\n  if (isSabotadorQuest) {\n    catalogoId = null;\n  } else if (tipoQuest === 'personalizada' || !quest.catalogo_id) {\n    catalogoId = QUEST_CUSTOM_CATALOGO_ID;\n  } else if (typeof quest.catalogo_id === 'string') {\n    const trimmed = quest.catalogo_id.trim();\n    if (trimmed && uuidRegex.test(trimmed)) {\n      if (catalogoIdsUsados.has(trimmed) && trimmed !== QUEST_CUSTOM_CATALOGO_ID) {\n        continue;\n      }\n      catalogoId = trimmed;\n    }\n  }\n  \n  let insightId = null;\n  if (typeof quest.insight_id === 'string') {\n    const trimmed = quest.insight_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && insightsValidos.has(trimmed.toLowerCase())) {\n      insightId = trimmed;\n    }\n  }\n  \n  let areaVidaId = null;\n  if (typeof quest.area_vida_id === 'string') {\n    const trimmed = quest.area_vida_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && areasValidas.has(trimmed.toLowerCase())) {\n      areaVidaId = trimmed;\n    }\n  }\n  \n  let objetivoId = null;\n  if (typeof quest.objetivo_id === 'string') {\n    const trimmed = quest.objetivo_id.trim();\n    if (trimmed && uuidRegex.test(trimmed) && objetivosValidos.has(trimmed.toLowerCase())) {\n      objetivoId = trimmed;\n    }\n  }\n  \n  let objetivosSecundarios = [];\n  if (Array.isArray(quest.objetivos_secundarios)) {\n    objetivosSecundarios = quest.objetivos_secundarios\n      .filter(os => os && typeof os.objetivo_id === 'string' && uuidRegex.test(os.objetivo_id.trim()) && objetivosValidos.has(os.objetivo_id.trim().toLowerCase()))\n      .map(os => ({ objetivo_id: os.objetivo_id.trim() }));\n  }\n  \n  if (catalogoId && catalogoId !== QUEST_CUSTOM_CATALOGO_ID && !sabotadorId) {\n    objetivosSecundarios = [];\n  }\n  \n  let tipoFinal = tipoQuest;\n  if (isSabotadorQuest) {\n    tipoFinal = 'sabotador';\n  } else if (!tipoFinal || tipoFinal === 'catalogo') {\n    tipoFinal = catalogoId === QUEST_CUSTOM_CATALOGO_ID ? 'personalizada' : 'tcc';\n  }\n  \n  questsFinais.push({\n    tipo: tipoFinal,\n    catalogo_id: catalogoId,\n    titulo: quest.titulo,\n    descricao: quest.descricao,\n    base_cientifica: quest.base_cientifica || null,\n    contexto_origem: quest.contexto_origem,\n    prioridade: quest.prioridade || 'media',\n    recorrencia: quest.recorrencia || 'unica',\n    prazo_inicio: quest.prazo_inicio || null,\n    prazo_fim: quest.prazo_fim || null,\n    progresso_meta: quest.progresso_meta ?? 1,\n    status_inicial: quest.status_inicial || 'disponivel',\n    area_vida_id: areaVidaId,\n    sabotador_id: sabotadorId,\n    insight_id: insightId,\n    objetivo_id: objetivoId,\n    objetivos_secundarios: objetivosSecundarios,\n    complexidade: quest.complexidade ?? 0,\n    payload_extra: quest.payload_extra || {},\n    xp_recompensa: quest.xp_recompensa || 40\n  });\n  \n  dedupe.add(chave);\n  if (titulo) titulosUsados.add(titulo);\n  if (catalogoId && catalogoId !== QUEST_CUSTOM_CATALOGO_ID) catalogoIdsUsados.add(catalogoId);\n}\n\n// === LIMITAR PELO MÁXIMO DO DIA (v1.4.1) ===\nconst questsParaCriar = questsFinais.slice(0, questsAindaPodeCriar);\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id || null,\n    chat_id: entrada.chat_id || null,\n    total_palavras_usuario: totalPalavrasUsuario,\n    novas_quests: questsParaCriar,\n    quests_para_substituir: questsParaSubstituir,\n    atualizacoes,\n    estado_inicial: entrada,\n    // Debug info (v1.4.1)\n    _debug: {\n      is_reprocessamento: isReprocessamento,\n      criar_quest_adicional: criarQuestAdicional,\n      max_quests_dia: MAX_QUESTS_DIA,\n      total_quests_hoje: totalQuestsHoje,\n      quests_ainda_pode_criar: questsAindaPodeCriar,\n      flags: {\n        criar_personalizada: criarPersonalizada,\n        criar_sabotador: criarSabotador,\n        criar_catalogo: criarCatalogo,\n        sabotador_mudou: sabotadorMudou\n      },\n      quests_hoje_por_tipo: {\n        personalizadas: personalizadasHoje,\n        sabotadores: sabotadoresHoje,\n        catalogo: catalogoHoje\n      },\n      quests_substituiveis: questsSubstituiveis,\n      quests_geradas: questsFinais.length,\n      quests_enviadas: questsParaCriar.length\n    }\n  }\n}];"
       },
-      "id": "2a8486f6-8c9c-4f62-8656-3fa439f3b613",
+      "id": "95839eaf-2a2f-4a1b-aac9-fa8551a50a7f",
       "name": "Aplicar Limites & Dedupe",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3792,
-        272
+        4784,
+        656
       ]
     },
     {
@@ -308,13 +308,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "7ce8c566-04a9-4531-bf73-6b0fdf84c4bd",
+      "id": "fff78d2d-e0d7-441c-8d82-18daa13978e3",
       "name": "Calcula Xps quest",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        4016,
-        272
+        5008,
+        656
       ]
     },
     {
@@ -326,10 +326,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        3392,
-        560
+        4384,
+        944
       ],
-      "id": "c5204f2e-4bd2-44d4-8cee-4a20fec1db68",
+      "id": "360198ee-4ff3-45bb-b68b-602e0e246bc7",
       "name": "Parser Quests"
     },
     {
@@ -340,13 +340,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "4870ee57-c407-4909-8af2-b952c07a23c8",
+      "id": "5253de0b-e013-49e0-8d91-93ea9f4d650e",
       "name": "Buscar Sabotadores Ativo",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1984,
-        240
+        2976,
+        624
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -360,13 +360,13 @@
       "parameters": {
         "jsCode": "// Saída quando não pode processar (v1.3.19)\nconst verificacao = $('Buscar Quests e Verificar Limite').first().json;\nconst entrada = $('Normalizar Entrada').first().json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: 0,\n    motivo: verificacao.status_processamento || 'sem_conversa',\n    total_quests_ativas: verificacao.total_quests_ativas || 0,\n    delta_palavras: verificacao.delta_palavras || 0,\n    is_reprocessamento: verificacao.is_reprocessamento || false\n  }\n}];"
       },
-      "id": "08e4276e-f979-4138-8c4d-3b758c10c43b",
+      "id": "7820843e-943a-470e-8b4f-907a54fc61b5",
       "name": "Saida Bloqueado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1760,
-        480
+        2752,
+        864
       ]
     },
     {
@@ -405,10 +405,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1504,
-        224
+        2496,
+        608
       ],
-      "id": "b8d43f92-1631-47f0-804e-375f7d6ea2eb",
+      "id": "ebfe26e8-b090-4439-b975-d57c10587ad7",
       "name": "Pode Processar?"
     },
     {
@@ -419,13 +419,13 @@
           "queryReplacement": "={{ [ $('Normalizar Entrada').item.json.usuario_id ] }}"
         }
       },
-      "id": "99cca801-9428-45f6-ade1-7e325e6de9fd",
+      "id": "90c55ef2-8fb2-4278-a61f-d988061b841a",
       "name": "Buscar Objetivos Ativos",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1760,
-        144
+        2752,
+        528
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -444,10 +444,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -128,
-        -304
+        864,
+        80
       ],
-      "id": "f6ec13e6-7596-4bba-9318-693dbc0bbb09",
+      "id": "ff0da16b-f176-4c04-97f3-27a2d89c9a01",
       "name": "Sticky Note"
     },
     {
@@ -458,13 +458,13 @@
           "queryReplacement": "={{ [$('Aplicar Limites & Dedupe').first().json.chat_id, $('Aplicar Limites & Dedupe').first().json.total_palavras_usuario] }}"
         }
       },
-      "id": "e827dc4a-0ebd-4990-a616-99be6e3e9a51",
+      "id": "9b60ca9d-f3bb-454c-ab32-ac6f6e14e97b",
       "name": "Atualizar Palavras Processadas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        4272,
-        272
+        5264,
+        656
       ],
       "credentials": {
         "postgres": {
@@ -477,13 +477,13 @@
       "parameters": {
         "jsCode": "const data = $items(\"Aplicar Limites & Dedupe\", 0, 0) || [];\nconst entrada = (data[0] || {}).json || {};\nconst retorno = $input.item.json || {};\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    quests_registradas: entrada.novas_quests,\n    atualizacoes_enviadas: entrada.atualizacoes,\n    gamificacao_retorno: retorno\n  }\n}];"
       },
-      "id": "ec0a6012-36c2-45f8-8ee3-fc7dc246135f",
+      "id": "1c041982-feb8-4d74-a866-81ca79a904a5",
       "name": "Montar Saída1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4512,
-        272
+        5504,
+        656
       ]
     }
   ],
@@ -582,15 +582,6 @@
       ]
     },
     "Calcula Xps quest": {
-      "0": [
-        [
-          {
-            "node": "Montar Saída",
-            "type": "0",
-            "index": 0
-          }
-        ]
-      ],
       "main": [
         [
           {
