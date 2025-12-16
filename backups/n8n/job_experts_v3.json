@@ -1,0 +1,597 @@
+{
+  "createdAt": "2025-12-15T23:11:16.175Z",
+  "id": "BdfMcFNxLd0CbwZN",
+  "name": "job_experts_v3",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "trigger-v3",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v3: Busca chats onde atualizado_em > processado_em (sem log_experts)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp)\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
+        "options": {}
+      },
+      "id": "busca-chats-v3",
+      "name": "Buscar Chats Pendentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "loop-v3",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        848,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// v3: Envia conversa COMPLETA (sem delta)\nconst item = $input.first().json;\n\n\n\nreturn [{\n  json: {\n    chat_id: item.chat_id,\n    usuario_id: item.usuario_id,\n    data_conversa: item.data_conversa,\n    usr_nome_preferencia: item.usr_nome_preferencia || 'Usuário'\n  }\n}];"
+      },
+      "id": "prepara-v3",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DztMpxVJw7Mvfke8",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DztMpxVJw7Mvfke8",
+          "cachedResultName": "sw_experts_v3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "data_conversa": "={{ $json.data_conversa }}",
+            "usr_nome_preferencia": "={{ $json.usr_nome_preferencia }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "usr_nome_preferencia",
+              "displayName": "usr_nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "chama-experts-v3",
+      "name": "Chamar sw_experts_v3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v3: Atualiza processado_em no chat\nUPDATE usr_chat \nSET processado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, processado_em;",
+        "options": {
+          "queryReplacement": "={{ [$('Preparar Dados').first().json.chat_id] }}"
+        }
+      },
+      "id": "atualiza-processado-v3",
+      "name": "Atualizar processado_em",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1504,
+        320
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## job_experts_v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
+        "height": 764,
+        "width": 280
+      },
+      "id": "regras-v3",
+      "name": "Regras job_experts_v3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -96
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Buscar Chats Pendentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Chats Pendentes": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Preparar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados": {
+      "main": [
+        [
+          {
+            "node": "Chamar sw_experts_v3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chamar sw_experts_v3": {
+      "main": [
+        [
+          {
+            "node": "Atualizar processado_em",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar processado_em": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-12-15T20:30:18.008-05:00",
+          "Readable date": "December 15th 2025, 8:30:18 pm",
+          "Readable time": "8:30:18 pm",
+          "Day of week": "Monday",
+          "Year": "2025",
+          "Month": "December",
+          "Day of month": "15",
+          "Hour": "20",
+          "Minute": "30",
+          "Second": "18",
+          "Timezone": "America/New_York (UTC-05:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": "eba47520-cca7-4051-97ad-27124cd2fd82",
+  "shared": [
+    {
+      "createdAt": "2025-12-15T23:11:16.175Z",
+      "role": "workflow:owner",
+      "workflowId": "BdfMcFNxLd0CbwZN",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-16T01:53:18.679Z",
+    "workflowId": "BdfMcFNxLd0CbwZN",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        },
+        "id": "trigger-v3",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          400,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "-- v3: Busca chats onde atualizado_em > processado_em (sem log_experts)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp)\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
+          "options": {}
+        },
+        "id": "busca-chats-v3",
+        "name": "Buscar Chats Pendentes",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          624,
+          304
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "loop-v3",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          848,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// v3: Envia conversa COMPLETA (sem delta)\nconst item = $input.first().json;\n\n\n\nreturn [{\n  json: {\n    chat_id: item.chat_id,\n    usuario_id: item.usuario_id,\n    data_conversa: item.data_conversa,\n    usr_nome_preferencia: item.usr_nome_preferencia || 'Usuário'\n  }\n}];"
+        },
+        "id": "prepara-v3",
+        "name": "Preparar Dados",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1072,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "DztMpxVJw7Mvfke8",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/DztMpxVJw7Mvfke8",
+            "cachedResultName": "sw_experts_v3"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "usuario_id": "={{ $json.usuario_id }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "data_conversa": "={{ $json.data_conversa }}",
+              "usr_nome_preferencia": "={{ $json.usr_nome_preferencia }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "usuario_id",
+                "displayName": "usuario_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "data_conversa",
+                "displayName": "data_conversa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "usr_nome_preferencia",
+                "displayName": "usr_nome_preferencia",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "chama-experts-v3",
+        "name": "Chamar sw_experts_v3",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1280,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "-- v3: Atualiza processado_em no chat\nUPDATE usr_chat \nSET processado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, processado_em;",
+          "options": {
+            "queryReplacement": "={{ [$('Preparar Dados').first().json.chat_id] }}"
+          }
+        },
+        "id": "atualiza-processado-v3",
+        "name": "Atualizar processado_em",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1504,
+          320
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "## job_experts_v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
+          "height": 764,
+          "width": 280
+        },
+        "id": "regras-v3",
+        "name": "Regras job_experts_v3",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          -96
+        ]
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Buscar Chats Pendentes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Chats Pendentes": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Preparar Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Dados": {
+        "main": [
+          [
+            {
+              "node": "Chamar sw_experts_v3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Chamar sw_experts_v3": {
+        "main": [
+          [
+            {
+              "node": "Atualizar processado_em",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar processado_em": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Aldo Santos",
+    "name": null,
+    "description": null
+  }
+}

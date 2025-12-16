@@ -1,7 +1,7 @@
 {
-  "createdAt": "2025-12-12T21:21:31.876Z",
-  "id": "af4tqT4UNTFznKEu",
-  "name": "sw_experts_v2",
+  "createdAt": "2025-12-15T23:15:20.309Z",
+  "id": "DztMpxVJw7Mvfke8",
+  "name": "sw_experts_v3",
   "description": null,
   "active": false,
   "isArchived": false,
@@ -17,63 +17,38 @@
               "name": "chat_id"
             },
             {
-              "name": "mensagens"
-            },
-            {
               "name": "data_conversa"
             },
             {
               "name": "usr_nome_preferencia"
-            },
-            {
-              "name": "total_interactions",
-              "type": "number"
             }
           ]
         }
       },
-      "id": "e87d9964-334b-4b25-8fe1-b8ab324d048d",
+      "id": "62eba3df-04a1-4823-bfec-c1aa63911895",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
         -4240,
-        1520
+        1120
       ]
     },
     {
       "parameters": {
-        "content": "## sw_experts_v2 - Hub Consolidado\n\n### Fluxo\n1. **Resumo Conversa** (IA) → valida contexto\n2. **IF** tem_contexto = true\n3. **Experts em paralelo:**\n   - Sabotadores (busca catálogo + IA + grava)\n   - PANAS/Emoções (IA + grava)\n   - Humor/Energia (IA + grava)\n   - Big Five (busca histórico + IA + grava)\n   - Insights (IA + grava)\n4. **Atualiza usr_chat** (resumo, status)\n5. **Log final** em log_experts\n\n### Vantagens\n- Contexto compartilhado\n- Economia de tokens\n- Menos overhead de chamadas\n- Manutenção centralizada\n\n### Regras\n- Se tem_contexto=false → pula experts\n- Cada expert grava em sua tabela\n- Log único por execução",
-        "height": 864,
-        "width": 624,
-        "color": 7
-      },
-      "id": "68b9e587-5441-4e81-91f5-2e8da7cee717",
-      "name": "Regras sw_experts_v2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -5440,
-        1376
-      ],
-      "width": 380,
-      "height": 500
-    },
-    {
-      "parameters": {
         "operation": "executeQuery",
-        "query": "-- Buscar dados do chat e resumo existente\nSELECT\n  c.id,\n  c.resumo_conversa,\n  c.tem_reflexao,\n  c.total_palavras_usuario,\n  u.nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.id = $1::uuid;",
+        "query": "-- Buscar dados do chat e resumo existente\nSELECT\n  c.id,\n  c.resumo_conversa,\n  c.tem_reflexao,\n  c.mensagens,\n  c.total_palavras_usuario,\n  u.nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.id = $1::uuid;",
         "options": {
           "queryReplacement": "={{ [$json.chat_id] }}"
         }
       },
-      "id": "ce597e51-ce20-4759-8bbf-b736bea5bb62",
+      "id": "68b05a6c-4719-40ac-a357-628631f8f890",
       "name": "Buscar Dados Chat",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
         -4048,
-        1520
+        1120
       ],
       "credentials": {
         "postgres": {
@@ -89,13 +64,13 @@
           "temperature": 0.2
         }
       },
-      "id": "2f0e518e-07cc-4748-9d77-344c1d593314",
+      "id": "cbf8612d-2a4a-4475-9938-5a0a5f41ae38",
       "name": "LLM Resumo",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
         -3872,
-        1744
+        1344
       ],
       "credentials": {
         "openRouterApi": {
@@ -106,15 +81,15 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"string\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"string\"\n}"
+        "jsonSchemaExample": "{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"string\",\n  \"total_palavras\": 150,\n  \"resumo_atualizado\": \"string\"\n}"
       },
-      "id": "1233bfe0-1c5f-4bc5-a880-e6647c31c0b1",
+      "id": "cf4b4c98-a54f-41cc-b421-906a3a7918ce",
       "name": "Parser Resumo",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
         -3712,
-        1744
+        1344
       ]
     },
     {
@@ -140,13 +115,13 @@
         },
         "options": {}
       },
-      "id": "83dbef5c-09a3-4fad-949e-837f0be608ff",
+      "id": "64a90476-397f-43a7-9b5a-6f6372680561",
       "name": "Tem Contexto?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -3584,
-        1520
+        -3536,
+        1120
       ]
     },
     {
@@ -155,13 +130,13 @@
         "query": "SELECT jsonb_agg(\n  jsonb_build_object('codigo', codigo, 'nome', nome)\n  ORDER BY codigo\n) AS catalogo_sabotadores\nFROM sabotadores_catalogo;",
         "options": {}
       },
-      "id": "a2c653fd-04d9-4ed4-9244-0257b82f4161",
+      "id": "40928a4a-eee1-4af1-9524-e40c652a6540",
       "name": "Buscar Catálogo Sabotadores",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2656,
-        1072
+        -2128,
+        640
       ],
       "credentials": {
         "postgres": {
@@ -177,13 +152,13 @@
           "temperature": 0.2
         }
       },
-      "id": "75a00803-98ae-476a-bbcf-45802d8edd3c",
+      "id": "4f667e64-477d-488a-b938-ee9890bfb838",
       "name": "LLM Sabotadores",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2400,
-        1264
+        -1872,
+        832
       ],
       "credentials": {
         "openRouterApi": {
@@ -197,31 +172,32 @@
         "jsonSchemaExample": "{\n  \"sabotadores_detectados\": [\n    {\n      \"codigo\": 1,\n      \"intensidade\": 75,\n      \"contexto\": \"relacionamentos\",\n      \"frases_gatilho\": [\n        \"me senti desprezado\",\n        \"ela não gostava mais de mim\"\n      ],\n      \"insights\": \"Autocrítica intensa sobre valor pessoal.\",\n      \"confiabilidade\": 90,\n      \"apelido\": \"Sr. Exigente\",\n      \"contramedida\": \"Praticar autocompaixão por 3 minutos\"\n    }\n  ]\n}",
         "autoFix": true
       },
-      "id": "64ce6549-dbf5-4869-aed8-5b5475917c8d",
+      "id": "8eca443a-83b5-41fb-93a9-b11f9d061d34",
       "name": "Parser Sabotadores",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2144,
-        1232
+        -1616,
+        800
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- UPSERT sabotadores: lookup por codigo numérico\nWITH sabotadores_input AS (\n  SELECT \n    $1::uuid as usuario_id,\n    $2::uuid as chat_id,\n    $3::jsonb as sabotadores_array\n),\nsabotadores_com_id AS (\n  SELECT \n    si.usuario_id,\n    si.chat_id,\n    sc.id AS sabotador_id,\n    (sabotador->>'intensidade')::integer AS intensidade,\n    (sabotador->>'contexto')::varchar(100) AS contexto,\n    (sabotador->>'insights')::text AS insights,\n    (sabotador->>'apelido')::varchar(50) AS apelido,\n    (sabotador->>'contramedida')::text AS contramedida\n  FROM sabotadores_input si,\n       jsonb_array_elements(si.sabotadores_array) AS sabotador\n  JOIN sabotadores_catalogo sc ON sc.codigo = (sabotador->>'codigo')::integer\n  WHERE (sabotador->>'intensidade')::integer >= 30\n)\nINSERT INTO usuarios_sabotadores (\n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade_media,\n  intensidade_acumulada_dia,\n  total_deteccoes_dia,\n  total_deteccoes,\n  contexto_principal,\n  insight_atual,\n  apelido_personalizado,\n  contramedida_ativa,\n  sabotador_predominante,\n  data_ultima_atividade\n)\nSELECT \n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade,\n  intensidade,\n  1,\n  1,\n  contexto,\n  insights,\n  apelido,\n  contramedida,\n  true,\n  CURRENT_DATE\nFROM sabotadores_com_id\nON CONFLICT (usuario_id, sabotador_id, chat_id) DO UPDATE SET\n  total_deteccoes_dia = usuarios_sabotadores.total_deteccoes_dia + 1,\n  total_deteccoes = usuarios_sabotadores.total_deteccoes + 1,\n  intensidade_acumulada_dia = usuarios_sabotadores.intensidade_acumulada_dia + EXCLUDED.intensidade_media,\n  intensidade_media = (usuarios_sabotadores.intensidade_acumulada_dia + EXCLUDED.intensidade_media) / \n                      (usuarios_sabotadores.total_deteccoes_dia + 1),\n  contexto_principal = CASE \n    WHEN EXCLUDED.intensidade_media > usuarios_sabotadores.intensidade_media \n    THEN EXCLUDED.contexto_principal ELSE usuarios_sabotadores.contexto_principal END,\n  insight_atual = CASE \n    WHEN EXCLUDED.intensidade_media > usuarios_sabotadores.intensidade_media \n    THEN EXCLUDED.insight_atual ELSE usuarios_sabotadores.insight_atual END,\n  contramedida_ativa = CASE \n    WHEN EXCLUDED.intensidade_media > usuarios_sabotadores.intensidade_media \n    THEN EXCLUDED.contramedida_ativa ELSE usuarios_sabotadores.contramedida_ativa END,\n  data_ultima_atividade = CURRENT_DATE,\n  atualizado_em = NOW()\nRETURNING id, sabotador_id, intensidade_media, total_deteccoes_dia;",
+        "query": "-- v3: INSERT simples (DELETE já foi executado)\nWITH sabotadores_input AS (\n  SELECT \n    $1::uuid as usuario_id,\n    $2::uuid as chat_id,\n    $3::jsonb as sabotadores_array\n),\nsabotadores_com_id AS (\n  SELECT \n    si.usuario_id,\n    si.chat_id,\n    sc.id AS sabotador_id,\n    (sabotador->>'intensidade')::integer AS intensidade,\n    (sabotador->>'contexto')::varchar(100) AS contexto,\n    (sabotador->>'insights')::text AS insights,\n    (sabotador->>'apelido')::varchar(50) AS apelido,\n    (sabotador->>'contramedida')::text AS contramedida\n  FROM sabotadores_input si,\n       jsonb_array_elements(si.sabotadores_array) AS sabotador\n  JOIN sabotadores_catalogo sc ON sc.codigo = (sabotador->>'codigo')::integer\n  WHERE (sabotador->>'intensidade')::integer >= 30\n)\nINSERT INTO usuarios_sabotadores (\n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade_media,\n  intensidade_acumulada_dia,\n  total_deteccoes_dia,\n  total_deteccoes,\n  contexto_principal,\n  insight_atual,\n  apelido_personalizado,\n  contramedida_ativa,\n  sabotador_predominante,\n  data_ultima_atividade\n)\nSELECT \n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade,\n  intensidade,\n  1,\n  1,\n  contexto,\n  insights,\n  apelido,\n  contramedida,\n  true,\n  CURRENT_DATE\nFROM sabotadores_com_id\nRETURNING id, sabotador_id, intensidade_media;",
         "options": {
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  JSON.stringify($json.output.sabotadores_detectados || [])\n] }}"
         }
       },
-      "id": "a80d0179-f283-461f-84ed-190d0221f794",
+      "id": "a7a087c9-28b0-471a-9bf7-7d05724fab9b",
       "name": "Gravar Sabotadores",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1984,
-        1008
+        -1456,
+        576
       ],
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -236,13 +212,13 @@
           "temperature": 0.2
         }
       },
-      "id": "2f529cd7-a41d-4434-a5a3-24a80c87c93e",
+      "id": "1bdbb905-ae5d-4dd5-808b-67c3eab50f16",
       "name": "LLM PANAS",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2608,
-        2400
+        -2080,
+        1968
       ],
       "credentials": {
         "openRouterApi": {
@@ -256,13 +232,13 @@
         "jsonSchemaExample": "{\n  \"emocoes_detectadas\": [\n    {\n      \"emocao_id\": \"sadness\",\n      \"nome_pt\": \"tristeza\",\n      \"intensidade\": 85,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"saudade\", \"solidão\", \"angústia\", \"me senti desprezado\"]\n    },\n    {\n      \"emocao_id\": \"anticipation\",\n      \"nome_pt\": \"expectativa\",\n      \"intensidade\": 40,\n      \"contexto\": \"POSITIVA\",\n      \"evidencias\": [\"projetos pessoais\", \"acompanhamento terapêutico\"]\n    },\n    {\n      \"emocao_id\": \"fear\",\n      \"nome_pt\": \"medo\",\n      \"intensidade\": 50,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"preocupação\", \"insegurança\"]\n    }\n  ],\n  \"classificacao_panas\": \"negativa\",\n  \"justificativa_panas\": \"Predominância de tristeza (85) relacionada a perda, solidão e rejeição. Expectativa presente mas em menor intensidade.\",\n  \"confianca_analise\": 90\n}",
         "autoFix": true
       },
-      "id": "1d5f535e-aac0-4fa1-9eec-9c05e5b69711",
+      "id": "d092317c-c39d-44fd-ba14-fda2442d3dc6",
       "name": "Parser PANAS",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2432,
-        2336
+        -1904,
+        1904
       ]
     },
     {
@@ -273,13 +249,13 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa),\n  JSON.stringify($json.output.emocoes_detectadas || [])\n] }}"
         }
       },
-      "id": "843d9b4c-373c-4c99-ac9c-ef16dc62f5cd",
+      "id": "7458ebde-2cd2-463b-a8eb-c169f0463235",
       "name": "Gravar Emoções",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2272,
-        2144
+        -1744,
+        1712
       ],
       "credentials": {
         "postgres": {
@@ -295,13 +271,13 @@
           "temperature": 0.2
         }
       },
-      "id": "ada113fd-5f7a-4914-a076-1b24bb9ed243",
+      "id": "6ad5f215-46b8-4d4c-a78f-94be231a8476",
       "name": "LLM Humor",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2624,
-        2960
+        -2096,
+        2528
       ],
       "credentials": {
         "openRouterApi": {
@@ -315,13 +291,13 @@
         "jsonSchemaExample": "{\n  \"humor_dia\": 4,\n  \"energia_nivel\": 6,\n  \"variacao_humor\": \"descendente\",\n  \"variacao_energia\": \"estavel\",\n  \"periodo_dia\": \"tarde\",\n  \"justificativa_humor\": \"Usuário começou o dia produtivo e animado, mas ao final relata tristeza profunda, angústia e desmotivação após ver fotos da ex-mulher\",\n  \"justificativa_energia\": \"Menciona que caminhou bastante, fez almoço, trabalhou no app - energia moderada/boa, mas manteve disposição física apesar da queda emocional\",\n  \"evidencias_textuais\": [\n    \"dia estava muito bom hoje, muito produtivo\",\n    \"estava disposto, animado\",\n    \"bateu uma coisa muito ruim\",\n    \"angústia, uma tristeza muito grande\",\n    \"muito desmotivado e desanimado\"\n  ],\n  \"confianca_analise\": 95\n}",
         "autoFix": true
       },
-      "id": "417d4f1d-4afa-4059-adf8-7ce30f9e695b",
+      "id": "f60dcfb2-7934-41fc-a055-7bb2cb35959f",
       "name": "Parser Humor",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2416,
-        2880
+        -1888,
+        2448
       ]
     },
     {
@@ -332,13 +308,13 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa),\n  $json.output.periodo_dia,\n  $json.output.humor_dia,\n  $json.output.energia_nivel,\n  $json.output.variacao_humor,\n  $json.output.variacao_energia,\n  JSON.stringify($json.output.justificativa_humor),\n  JSON.stringify($json.output.justificativa_energia),\n  JSON.stringify($json.output.evidencias_textuais || []),\n  $json.output.confianca_analise\n] }}"
         }
       },
-      "id": "82d16ee1-c48e-440f-886b-5d60f34b1377",
+      "id": "32998058-e3ed-4e6a-87e1-e51bed74e77f",
       "name": "Gravar Humor",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2208,
-        2688
+        -1680,
+        2256
       ],
       "credentials": {
         "postgres": {
@@ -366,13 +342,13 @@
           "waitForSubWorkflow": true
         }
       },
-      "id": "740baee1-7949-44c2-b841-cb3bb7f47ce8",
+      "id": "1891593a-9e8e-43b7-b549-58a8d63bfefb",
       "name": "Buscar Histórico BigFive",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -2624,
-        544
+        -2096,
+        112
       ],
       "alwaysOutputData": true
     },
@@ -380,13 +356,13 @@
       "parameters": {
         "functionCode": "const startData = $items('start')[0]?.json ?? {};\nconst historyItems = $items('Buscar Histórico BigFive').map((item) => item.json).filter(Boolean);\nconst formatDate = (value) => {\n  if (!value) return null;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return value;\n  return parsed.toISOString().slice(0, 10);\n};\nconst historicoOrdenado = historyItems\n  .map((entry) => ({\n    data: formatDate(entry.data_conversa),\n    resumo: entry.resumo_conversa ?? ''\n  }))\n  .filter((entry) => entry.data || entry.resumo)\n  .sort((a, b) => {\n    if (!a.data || !b.data) return 0;\n    return a.data < b.data ? 1 : -1;\n  });\nconst historicoResumo = historicoOrdenado.length\n  ? historicoOrdenado\n      .map((entry) => `- ${entry.data ?? 'data indeterminada'}: ${entry.resumo || 'sem resumo disponível'}`)\n      .join('\\n')\n  : 'Sem histórico relevante nos últimos 5 dias.';\nreturn [\n  {\n    json: {\n      ...startData,\n      historico_resumo: historicoResumo,\n      historico_itens: historicoOrdenado\n    }\n  }\n];"
       },
-      "id": "8a36a0ec-2953-4b82-97b9-402f1f0204f7",
+      "id": "1045f919-c402-4621-afec-894ae8fa1421",
       "name": "Preparar Contexto BigFive",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        -2416,
-        544
+        -1888,
+        112
       ]
     },
     {
@@ -396,13 +372,13 @@
           "temperature": 0.2
         }
       },
-      "id": "ab800d8a-ba5e-4533-b302-73e8c2d6ef2c",
+      "id": "6582d1ea-f869-427c-ba3c-2e9dcf6928b2",
       "name": "LLM BigFive",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2272,
-        752
+        -1744,
+        320
       ],
       "credentials": {
         "openRouterApi": {
@@ -416,26 +392,26 @@
         "jsonSchemaExample": "{\n  \"big_five\": {\n    \"openness\": {\"score\": 62, \"confiabilidade\": 78, \"evidencias\": [\"gosto de explorar ideias novas\", \"procuro alternativas criativas\"]},\n    \"conscientiousness\": {\"score\": 54, \"confiabilidade\": 65, \"evidencias\": [\"monitorei meu plano\", \"organizei meus passos\"]},\n    \"extraversion\": {\"score\": 41, \"confiabilidade\": 60, \"evidencias\": [\"prefiro ficar na minha\", \"evitei encontros\"]},\n    \"agreeableness\": {\"score\": 70, \"confiabilidade\": 72, \"evidencias\": [\"procurei conciliar\", \"quero evitar conflito\"]},\n    \"neuroticism\": {\"score\": 58, \"confiabilidade\": 68, \"evidencias\": [\"fiquei ansioso com perdas\", \"preocupação constante\"]}\n  },\n  \"perfil_primario\": \"agreeableness\",\n  \"resumo_perfil\": \"Pessoa colaborativa, aberta a diálogos e soluções conjuntas, mantendo equilíbrio em disciplina e energia social.\",\n  \"insuficiente\": false\n}",
         "autoFix": true
       },
-      "id": "ed4f16ec-b7b3-4267-a566-9870ee5d4217",
+      "id": "905698bb-94ed-4f4d-84e1-20b77735e4fc",
       "name": "Parser BigFive",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2112,
-        752
+        -1584,
+        320
       ]
     },
     {
       "parameters": {
         "functionCode": "const startItem = $items(\"start\")[0]?.json ?? {};\nconst preparado = $items(\"Preparar Contexto BigFive\")[0]?.json ?? {};\nconst payload = $json.output ?? {};\nconst traits = ['openness','conscientiousness','extraversion','agreeableness','neuroticism'];\nconst scores = traits.map((key) => {\n  const data = payload.big_five?.[key] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  return {\n    id: key,\n    score: Number.isFinite(score) ? score : null,\n    confiabilidade: Number.isFinite(confianca) ? confianca : null\n  };\n});\nconst sorted = [...scores].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));\nconst validTraits = new Set(traits);\nconst originalPrimary = payload.perfil_primario ?? null;\nlet primary = originalPrimary;\nif (!primary || primary === 'misto' || !validTraits.has(primary)) {\n  primary = sorted[0]?.id ?? null;\n}\nlet secondary = sorted.find((entry) => entry.id !== primary)?.id ?? null;\nif (!secondary && sorted[1]) {\n  secondary = sorted[1].id;\n}\nconst sumConfianca = scores.reduce((acc, entry) => acc + (entry.confiabilidade ?? 0), 0);\nconst confiancaMedia = scores.length ? Math.round(sumConfianca / scores.length) : null;\nconst rawDate = startItem.data_conversa || preparado.data_conversa;\nlet dataConversa = null;\nif (rawDate) {\n  const parsed = new Date(rawDate);\n  if (!isNaN(parsed)) {\n    dataConversa = parsed.toISOString().slice(0, 10);\n  }\n}\nif (!dataConversa) {\n  const now = new Date();\n  dataConversa = now.toISOString().slice(0, 10);\n}\nconst result = {\n  usuario_id: startItem.usuario_id ?? null,\n  chat_id: startItem.chat_id ?? null,\n  data_conversa: dataConversa,\n  perfil_original: originalPrimary,\n  perfil_primario: primary,\n  perfil_secundario: secondary,\n  resumo_perfil: payload.resumo_perfil ?? null,\n  insuficiente: Boolean(payload.insuficiente),\n  confianca_media: confiancaMedia,\n  raw_resposta: payload\n};\nfor (const trait of traits) {\n  const data = payload.big_five?.[trait] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  result[`score_${trait}`] = Number.isFinite(score) ? score : null;\n  result[`confianca_${trait}`] = Number.isFinite(confianca) ? confianca : null;\n}\nreturn [{ json: result }];"
       },
-      "id": "0db159dc-fda0-4364-864d-d4ae120d4aab",
+      "id": "f7e681e7-9beb-4df9-998c-178cd2b9e5c9",
       "name": "Preparar Registro BigFive",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        -1888,
-        544
+        -1360,
+        112
       ]
     },
     {
@@ -446,13 +422,13 @@
           "queryReplacement": "={{ [\n  $json.usuario_id ?? null,\n  $json.chat_id ?? null,\n  $json.data_conversa ?? null,\n  $json.perfil_original ?? null,\n  $json.perfil_primario ?? null,\n  $json.perfil_secundario ?? null,\n  $json.resumo_perfil ?? null,\n  $json.insuficiente === true,\n  $json.score_openness ?? null,\n  $json.score_conscientiousness ?? null,\n  $json.score_extraversion ?? null,\n  $json.score_agreeableness ?? null,\n  $json.score_neuroticism ?? null,\n  $json.confianca_openness ?? null,\n  $json.confianca_conscientiousness ?? null,\n  $json.confianca_extraversion ?? null,\n  $json.confianca_agreeableness ?? null,\n  $json.confianca_neuroticism ?? null,\n  $json.confianca_media ?? null,\n  $json.raw_resposta ?? {}\n] }}"
         }
       },
-      "id": "1121b528-6d66-4841-b3b7-c21912f6c3da",
+      "id": "62348899-004d-4c90-a921-c24b148165e5",
       "name": "Gravar BigFive",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1696,
-        544
+        -1168,
+        112
       ],
       "credentials": {
         "postgres": {
@@ -468,13 +444,13 @@
           "temperature": 0.3
         }
       },
-      "id": "6da38809-9c1d-4a31-b14a-88b0d3d322da",
+      "id": "0106a61e-176e-4ee6-893b-808d9958b175",
       "name": "LLM Insights",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2624,
-        1888
+        -2096,
+        1456
       ],
       "credentials": {
         "openRouterApi": {
@@ -488,13 +464,13 @@
         "jsonSchemaExample": "[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Ciclo Produtividade\",\"icone\":\"🔄\",\"prioridade\":\"media\",\"resumo_situacao\":\"Resumo\",\"feedback_positivo\":\"Positivo\",\"feedback_desenvolvimento\":\"Desenvolvimento\",\"feedback_motivacional\":\"Motivacional\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"Nome\",\"descricao\":\"Desc\",\"aplicacao_pratica\":\"Aplicação\"}],\"baseado_em\":[\"ev1\"]}]",
         "autoFix": true
       },
-      "id": "c5afbe7b-37af-47c7-8109-a71c6e981c5f",
+      "id": "c959368a-244d-41e4-a810-f3a2258860e2",
       "name": "Parser Insights",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2288,
-        1792
+        -1760,
+        1360
       ]
     },
     {
@@ -505,13 +481,13 @@
           "queryReplacement": "={{ $('start').first().json.usuario_id }}"
         }
       },
-      "id": "328d7bb2-92d5-4903-8033-6279fe0e7a04",
+      "id": "62aae7f8-9da4-400e-91bd-313ecdf3f271",
       "name": "get_user_insight",
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        -2432,
-        1776
+        -1904,
+        1344
       ],
       "credentials": {
         "postgres": {
@@ -528,82 +504,13 @@
           "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  JSON.stringify($json.output || [])\n] }}"
         }
       },
-      "id": "9438b2a7-1e6b-4622-ba40-da9559ed07a2",
+      "id": "3718fa86-03a8-4c03-b6c5-1f710b5a780a",
       "name": "Gravar Insights",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2272,
-        1584
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Atualizar usr_chat com resumo e status\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  tem_reflexao = $3,\n  total_palavras_usuario = COALESCE(total_palavras_usuario, 0) + $4,\n  status = 'finalizado',\n  horario_fim = NOW(),\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, status;",
-        "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('resumo conversa').first().json.output.resumo_atualizado,\n  $('resumo conversa').first().json.output.tem_reflexao,\n  $('resumo conversa').first().json.output.total_palavras_delta || 0\n] }}"
-        }
-      },
-      "id": "3b8711be-7165-4e55-ba51-c597d0b32db7",
-      "name": "Atualizar usr_chat",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -4224,
-        2064
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Registrar processamento final no log_experts\nINSERT INTO log_experts (usuario_id, chat_id, expert_name, ultima_interaction, historico, criado_em, atualizado_em)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'sw_experts_v2',\n  $3::int,\n  jsonb_build_array(jsonb_build_object(\n    'de', 0,\n    'ate', $3::int,\n    'novas', $3::int,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean,\n    'experts_executados', ARRAY['resumo','sabotadores','panas','humor','bigfive','insights']\n  )),\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id, expert_name) DO UPDATE SET\n  historico = log_experts.historico || jsonb_build_array(jsonb_build_object(\n    'de', log_experts.ultima_interaction,\n    'ate', $3::int,\n    'novas', $3::int - log_experts.ultima_interaction,\n    'em', NOW(),\n    'tem_contexto', $4::boolean,\n    'tem_reflexao', $5::boolean,\n    'experts_executados', ARRAY['resumo','sabotadores','panas','humor','bigfive','insights']\n  )),\n  ultima_interaction = $3::int,\n  atualizado_em = NOW()\nRETURNING id;",
-        "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.usuario_id,\n  $('start').first().json.chat_id,\n  $('start').first().json.total_interactions,\n  $('resumo conversa').first().json.output.tem_contexto,\n  $('resumo conversa').first().json.output.tem_reflexao\n] }}"
-        }
-      },
-      "id": "316bade8-aaa9-4e9f-ac23-0f728791324d",
-      "name": "Registrar Log Final",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -4016,
-        2064
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Atualizar apenas resumo quando não tem contexto\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id;",
-        "options": {
-          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('resumo conversa').first().json.output.resumo_atualizado\n] }}"
-        }
-      },
-      "id": "c922144b-7015-41b0-aa34-b2391a044798",
-      "name": "Atualizar Resumo (sem contexto)",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -4112,
-        1856
+        -1744,
+        1152
       ],
       "credentials": {
         "postgres": {
@@ -622,10 +529,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2912,
-        976
+        -2384,
+        544
       ],
-      "id": "f8c6b6bf-772e-42e0-8f69-9f29a8e83270",
+      "id": "1cc76a21-7284-4b7f-99f9-526875686f33",
       "name": "Sticky Note"
     },
     {
@@ -638,26 +545,26 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2720,
-        1504
+        -2192,
+        1072
       ],
-      "id": "b726338b-43d8-4c0f-9cfd-931b5c25d39f",
+      "id": "a6bd7b4c-e2da-4d86-a3e0-f3f92cd659c2",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
         "content": "## Expert - Resumo",
-        "height": 848,
-        "width": 1056,
+        "height": 672,
+        "width": 1552,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4336,
-        1424
+        -4304,
+        944
       ],
-      "id": "15e83128-e71e-4e9e-a0a9-4cfe78abc830",
+      "id": "7ea81d72-6b66-495d-9914-81149c3f7194",
       "name": "Sticky Note2"
     },
     {
@@ -670,13 +577,13 @@
           "maxIterations": 3
         }
       },
-      "id": "2310f350-ce70-41f6-9bb5-a7f5d41042ba",
+      "id": "228ca688-b746-4853-8e27-79254e6034f5",
       "name": "sabotadores",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2352,
-        1072
+        -1824,
+        640
       ]
     },
     {
@@ -689,31 +596,31 @@
           "maxIterations": 3
         }
       },
-      "id": "029150db-a4ad-4ad9-82a0-12c2f5ff83a0",
+      "id": "c1f2e74a-9efc-4f26-a474-4e1b6f61a6a5",
       "name": "insights",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2608,
-        1600
+        -2080,
+        1168
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n**RESUMO ANTERIOR (se existir):**\n```\n{{ $('Buscar Dados Chat').item.json.resumo_conversa || 'Nenhum resumo anterior' }}\n```\n\n**NOVAS MENSAGENS (delta):**\n```\n{{ $('start').item.json.mensagens }}\n```\n\n---\n\n**SUA TAREFA:**\n\n1. **ANALISAR O DELTA**\n   - As novas mensagens têm conteúdo relevante para análise?\n   - Há informações novas ou é apenas conversa casual/repetitiva?\n\n2. **INCORPORAR AO RESUMO EXISTENTE**\n   - NÃO substitua o resumo anterior\n   - ADICIONE as novas informações relevantes\n   - Elimine redundâncias (se algo já está no resumo, não repita)\n\n3. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n4. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n5. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\nCRITICO: Sempre se referir ao usuário usando o seu nome:\nExemplo correto: Aldo está em dia feliz com muitas realizações...\nExemplo errado: O usuário está em um dia feliz....\n\nUse o nome do usário: {{ $('start').item.json.usr_nome_preferencia }}\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"justificativa\": \"breve explicação\",\n  \"total_palavras_delta\": 150,\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
+        "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n\n**NOVAS MENSAGENS:**\n{{ JSON.stringify($json.mensagens) }}\n---\n\n**SUA TAREFA:**\n\n1. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n2. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n3. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\n4. **USUARIO**: Use o nome do usário ao se referir a ele: {{ $('start').item.json.usr_nome_preferencia }}\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"total_palavras\": 150,\n  \"justificativa\": \"breve explicação\",\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
+          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
         }
       },
-      "id": "8f1e612a-42ba-43d8-9b8b-13114074df30",
+      "id": "5907bd75-9a96-4504-8489-77f7635835c8",
       "name": "resumo conversa",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
         -3872,
-        1520
+        1120
       ]
     },
     {
@@ -726,10 +633,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2736,
-        2080
+        -2208,
+        1648
       ],
-      "id": "fc4702b2-6663-4700-ae2d-693174e95b7f",
+      "id": "e73118df-fc7c-4633-bb7c-e26d0f250abb",
       "name": "Sticky Note3"
     },
     {
@@ -741,10 +648,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2720,
-        448
+        -2192,
+        16
       ],
-      "id": "79af8656-75fe-4677-9ba6-4ba5880855b2",
+      "id": "1ad42a75-666f-40a1-9d83-f09226335794",
       "name": "Sticky Note4"
     },
     {
@@ -757,13 +664,13 @@
           "maxIterations": 3
         }
       },
-      "id": "b9658976-13ba-4101-b227-e21d8a9a5bc5",
+      "id": "8e512726-9734-4f31-bd24-f6d783225fdb",
       "name": "Big Five",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2224,
-        544
+        -1696,
+        112
       ]
     },
     {
@@ -776,10 +683,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2736,
-        2608
+        -2208,
+        2176
       ],
-      "id": "ac3c6661-3419-4536-9fd6-9682675f57c5",
+      "id": "e7374f35-9119-40d2-a928-044d8fc60077",
       "name": "Sticky Note5"
     },
     {
@@ -792,13 +699,13 @@
           "maxIterations": 3
         }
       },
-      "id": "ba5dd932-7e57-45b9-903f-d52a69559409",
+      "id": "c0bbaacc-d4a3-4d0b-bef9-36e7ca9408ff",
       "name": "humor e energia",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2608,
-        2688
+        -2080,
+        2256
       ]
     },
     {
@@ -811,13 +718,13 @@
           "maxIterations": 5
         }
       },
-      "id": "4b44ded6-03ea-4c60-bec7-1166ef1343ea",
+      "id": "f03a73bc-5a1f-40b9-992a-52eddf5bdeb1",
       "name": "panas e emocoes",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2608,
-        2144
+        -2080,
+        1712
       ]
     },
     {
@@ -883,26 +790,13 @@
           "waitForSubWorkflow": false
         }
       },
-      "id": "c09c5861-2347-4935-b186-8bc9f427b405",
+      "id": "3f51ad19-d79d-4cf5-a26c-f51f642248b1",
       "name": "Executar XP Conversas",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -3248,
-        848
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Retorna status indicando que processou com sucesso\nconst trigger = $('start').first().json;\nreturn [{\n  processado: true,\n  motivo: 'OK',\n  chat_id: trigger.chat_id,\n  total_interactions: trigger.total_interactions\n}];"
-      },
-      "id": "c6b34cb7-8541-4212-9638-c2f7efb5d334",
-      "name": "retorno_sucesso",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -3776,
-        2064
+        -2528,
+        112
       ]
     },
     {
@@ -951,10 +845,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1440,
-        1136
+        -912,
+        704
       ],
-      "id": "00b6739d-d020-4a3c-9704-c4a93a978dc0",
+      "id": "94c4e015-9790-4605-9c67-5029f5b960f3",
       "name": "Executar Expert Quests"
     },
     {
@@ -967,23 +861,23 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1744,
-        976
+        -1216,
+        544
       ],
-      "id": "21df84af-90df-4e6f-b305-35421c0c205e",
+      "id": "6e52ad91-b3d4-453a-a8b0-37c8d57b0550",
       "name": "Sticky Note6"
     },
     {
       "parameters": {
         "jsCode": "// Retorna status indicando que NÃO processou\nconst input = $input.first().json;\nreturn [{\n  processado: false,\n  motivo: input.validacao?.motivo || 'Contexto insuficiente',\n  chat_id: input.chat_id,\n  total_interactions: input.total_interactions\n}];"
       },
-      "id": "29a31fec-bff9-4a66-a7f3-0681c4a99ef2",
+      "id": "cf09090a-be4c-4d63-b71a-fb1482be1e24",
       "name": "contexto_insuficiente",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -3504,
-        1904
+        -3296,
+        1328
       ]
     },
     {
@@ -995,11 +889,85 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1744,
-        1504
+        -1216,
+        1072
       ],
-      "id": "eb4b369d-9546-4127-9668-5f672beb8ed2",
+      "id": "7e454871-024e-4807-8cab-bf2a9b2e5ca4",
       "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v3: DELETE dados anteriores do chat antes de reprocessar\nDELETE FROM usuarios_sabotadores WHERE id = $1::uuid;\nDELETE FROM usuarios_emocoes WHERE id = $1::uuid;\nDELETE FROM usuarios_humor_energia WHERE id = $1::uuid;\nDELETE FROM usuarios_perfis WHERE id = $1::uuid;\nDELETE FROM insights WHERE id = $1::uuid;\n-- DELETE quests do usuário criadas hoje que não têm recorrências\nDELETE FROM usuarios_quest uq\nWHERE uq.usuario_id = $2::uuid \n  AND uq.status = 'disponivel'\n  AND DATE(uq.ativado_em) = CURRENT_DATE\n  AND NOT EXISTS (\n    SELECT 1 FROM quests_recorrencias qr \n    WHERE qr.usuarios_quest_id = uq.id\n  );",
+        "options": {
+          "queryReplacement": "={{ $('start').first().json.chat_id }},{{ $('start').first().json.usuario_id }}"
+        }
+      },
+      "id": "4dcd69f2-0c4d-4b6f-bbf1-fcf507e1643b",
+      "name": "DELETE Dados Anteriores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2832,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// v3: Retorna sucesso\nconst trigger = $('start').first().json;\nreturn [{\n  json: {\n    processado: true,\n    motivo: 'OK',\n    chat_id: trigger.chat_id\n  }\n}];"
+      },
+      "id": "61a53a57-bcc5-4071-bc74-3f6b057b4c01",
+      "name": "Retorno Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2960,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Atualizar usr_chat com resumo e status\nUPDATE usr_chat SET\n  resumo_conversa = $2,\n  tem_reflexao = $3,\n  total_palavras_usuario = COALESCE(total_palavras_usuario, 0) + $4,\n  status = 'finalizado',\n  horario_fim = NOW(),\n  atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, status;",
+        "options": {
+          "queryReplacement": "={{ [\n  $('start').first().json.chat_id,\n  $('resumo conversa').first().json.output.resumo_atualizado,\n  $('resumo conversa').first().json.output.tem_reflexao,\n  $('resumo conversa').first().json.output.total_palavras_delta || 0\n] }}"
+        }
+      },
+      "id": "3fa57a00-926d-4c45-8288-b20608205df2",
+      "name": "Atualizar usr_chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -3200,
+        1088
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## sw_experts_v3 - Simplificado\n\n### Mudancas da v2\n- DELETE antes de INSERT (sem UPSERT)\n- Sem log_experts\n- Sem delta de mensagens\n- Processa conversa COMPLETA\n\n### Fluxo\n1. Recebe conversa completa\n2. Gera resumo (valida contexto)\n3. SE tem_contexto:\n   - DELETE dados anteriores do chat\n   - Executa experts em paralelo\n   - Atualiza usr_chat\n4. Retorna processado true/false\n\n### Experts\n- Sabotadores\n- PANAS/Emocoes\n- Humor/Energia\n- Big Five\n- Insights\n- Criar Quest (apos sabotadores)",
+        "height": 932,
+        "width": 300
+      },
+      "id": "5421d17b-b3ed-489c-ae54-bdbe39ee646c",
+      "name": "Regras sw_experts_v3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4896,
+        784
+      ]
     }
   ],
   "connections": {
@@ -1051,27 +1019,7 @@
       "main": [
         [
           {
-            "node": "Buscar Catálogo Sabotadores",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "panas e emocoes",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "humor e energia",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Buscar Histórico BigFive",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "insights",
+            "node": "DELETE Dados Anteriores",
             "type": "main",
             "index": 0
           },
@@ -1079,19 +1027,9 @@
             "node": "Atualizar usr_chat",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Executar XP Conversas",
-            "type": "main",
-            "index": 0
           }
         ],
         [
-          {
-            "node": "Atualizar Resumo (sem contexto)",
-            "type": "main",
-            "index": 0
-          },
           {
             "node": "contexto_insuficiente",
             "type": "main",
@@ -1301,28 +1239,6 @@
         ]
       ]
     },
-    "Atualizar usr_chat": {
-      "main": [
-        [
-          {
-            "node": "Registrar Log Final",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Registrar Log Final": {
-      "main": [
-        [
-          {
-            "node": "retorno_sucesso",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "sabotadores": {
       "main": [
         [
@@ -1388,10 +1304,59 @@
           }
         ]
       ]
+    },
+    "DELETE Dados Anteriores": {
+      "main": [
+        [
+          {
+            "node": "Executar XP Conversas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Histórico BigFive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Catálogo Sabotadores",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "panas e emocoes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "humor e energia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar usr_chat": {
+      "main": [
+        [
+          {
+            "node": "Retorno Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
@@ -1399,12 +1364,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "17628edb-2485-43f6-8feb-467d0fa209ae",
-          "chat_id": "c89d6aba-45ce-4da9-b016-b447a740fc94",
-          "mensagens": "usuario: E ai ?\nagente: E aí, Rodrigo! Tudo tranquilo por aqui. Que bom te ver por aqui no MindQuest! Eu sou seu mentor e estou aqui para te acompanhar nessa jornada de autoconhecimento.\n\nPara a gente começar, me conta um pouco: o que te trouxe ao MindQuest hoje? Tem alguma coisa específica que gostaria de explorar ou conversar?\nusuario: Vim por indicação de um amigo\nagente: Que legal, Rodrigo! É sempre bom quando a gente recebe uma indicação de alguém que confia.\n\nE por que você acha que seu amigo te indicou? O que ele viu no MindQuest que poderia te ajudar?\nusuario: Nao sei , mas quero descobrir\nagente: Entendi! Essa busca por descoberta já é um ótimo ponto de partida. É como um convite para você olhar para dentro.\n\nSe você pudesse escolher uma área da sua vida — seja no pessoal, profissional, nos relacionamentos — que gostaria de explorar ou melhorar agora, qual seria?\nusuario: Poderia ser no profissional,  pois acabei de chegar em portugal vindo do Brasil,  faz 15 dias . E sou barbeiro ha mais de 10 anos , porém  percebo que aqui é  bem diferente\nagente: Puxa, que virada de jogo, Rodrigo! Chegar a um novo país já é um desafio e tanto, ainda mais com uma carreira consolidada como a sua. Essa percepção de que \"aqui é bem diferente\" é super válida. O que você acha que é a maior diferença, ou o que te pega mais nesse novo contexto profissional?\nusuario: Eu sou muito comunicativo durante meus atendimentos mas , as pessoas aqui são bem reservadas\nagente: Ah, entendi! É a diferença cultural no jeito de interagir, principalmente no ambiente de trabalho. Chega a ser um choque, ainda mais para quem tem a comunicação como uma ferramenta forte, né?\n\nComo essa diferença no modo de se comunicar impacta o seu dia a dia na barbearia? Você sente que te impede de fazer algo?",
-          "data_conversa": "2025-12-14T00:00:00.000Z",
-          "usr_nome_preferencia": "Rodrigo",
-          "total_interactions": 5
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "afac68d2-e4c1-42de-9402-7ef7c7b6a715",
+          "data_conversa": "2025-12-15T00:00:00.000Z",
+          "usr_nome_preferencia": "Aldo"
         },
         "pairedItem": {
           "item": 0
@@ -1415,9 +1378,9 @@
   "activeVersionId": null,
   "shared": [
     {
-      "createdAt": "2025-12-12T21:21:31.876Z",
+      "createdAt": "2025-12-15T23:15:20.309Z",
       "role": "workflow:owner",
-      "workflowId": "af4tqT4UNTFznKEu",
+      "workflowId": "DztMpxVJw7Mvfke8",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",
