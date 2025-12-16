@@ -16,8 +16,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1136,
-        384
+        992,
+        496
       ],
       "credentials": {
         "openRouterApi": {
@@ -29,7 +29,7 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\"type\": \"string\"},\n    \"corpo_push\": {\"type\": \"string\"},\n    \"corpo_whatsapp\": {\"type\": \"string\"},\n    \"sugestoes_resposta\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"contexto_mentor\": {\"type\": \"string\"},\n    \"subtipo\": {\"type\": \"string\"}\n  },\n  \"required\": [\"titulo\", \"corpo_push\", \"corpo_whatsapp\", \"sugestoes_resposta\", \"contexto_mentor\", \"subtipo\"]\n}",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\"type\": \"string\", \"description\": \"Título curto para push (max 50 chars)\"},\n    \"corpo_push\": {\"type\": \"string\", \"description\": \"Versão curta para push (max 100 chars)\"},\n    \"corpo_whatsapp\": {\"type\": \"string\", \"description\": \"Mensagem completa para WhatsApp\"},\n    \"contexto_mentor\": {\"type\": \"string\", \"description\": \"Contexto para continuidade se usuário responder\"},\n    \"subtipo\": {\"type\": \"string\", \"description\": \"Subtipo específico (ex: conversa_emocional, quest_atrasada)\"}\n  },\n  \"required\": [\"titulo\", \"corpo_push\", \"corpo_whatsapp\", \"contexto_mentor\", \"subtipo\"]\n}",
         "autoFix": true
       },
       "id": "parser_conversa",
@@ -37,21 +37,21 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1344,
-        320
+        1424,
+        416
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=## Dados do Usuario\n- Nome: {{ $('start').item.json.nome_preferencia }}\n- Periodo: {{ $('start').item.json.lembrete_periodo }}\n\n## Ultima Conversa\nData: {{ $json.data_conversa }}\nResumo:{{ $json.resumo_conversa }}",
+        "text": "=<notification_request>\n<type>{{ $('start').first().json.tipo_notificacao }}</type>\n\n<user>\n<name>{{ $('start').first().json.nome_preferencia }}</name>\n<preferred_tone>{{ $('start').first().json.tom_conversa || 'empatico' }}</preferred_tone>\n</user>\n\n<context>\n{{ JSON.stringify($('start').first().json.contexto) }}\n</context>\n</notification_request>\n\nCrie a notificação seguindo as guidelines do tipo \"{{ $('start').first().json.tipo_notificacao }}\".\nRetorne APENAS o JSON de resposta.",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=Voce eh o Mentor do MindQuest\n\nSua tarefa eh criar UMA mensagem convidando o {{ $('start').item.json.nome_preferencia }} para uma conversar com você\n\n## Filosofia MindQuest\n- Conversar -> Entender -> Agir -> Evoluir\n- Tom: Acolhedor, humano, empatico\n- Objetivo: Engajar sem pressionar\n\n## Regras da Mensagem\n1. SEMPRE use o nome do usuario\n2. cumprimente (bom dia, boa tarde..) de acordo com período do dia\n2. Reconheca conquistas recentes (se houver)\n3. Faca referencia a ultima conversa (se relevante)\n4. Termine com convite aberto, nunca imperativo\n5. frase única e convidativa\n6. disperte curiosidade do usário falando algo interessante que conecte com a ultima conversa\n\n"
+          "systemMessage": "=# System Prompt - Mentor Notificações v1.1\n\n<role>\nVocê é o Mentor MindQuest em modo proativo - a voz que chama o usuário de volta para sua jornada de autoconhecimento.\n\nSua missão é criar mensagens que geram conexão emocional e despertam curiosidade genuína, fazendo o usuário QUERER responder.\n</role>\n\n<objective>\nCriar UMA mensagem de notificação que:\n- Gere conexão emocional imediata\n- Desperte curiosidade (não entregue tudo, deixe um gancho)\n- Pareça conversa de amigo, não robô\n- Respeite o momento do usuário (não pressione)\n\nSucesso = usuário lê e sente vontade de responder.\n</objective>\n\n---\n\n## Filosofia MindQuest\n\n<philosophy>\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n\nComo Mentor Notificações, você é o primeiro passo deste ciclo:\n- **Seu papel**: Trazer o usuário de volta para a conversa\n- **Não é seu papel**: Resolver problemas, dar conselhos, cobrar ações\n</philosophy>\n\n---\n\n## Princípios Fundamentais\n\n<rules>\n1. **Conexão antes de conteúdo** - Faça o usuário se sentir visto\n2. **Curiosidade, não pressão** - Convide, nunca cobre\n3. **Personalização real** - Use contexto específico do usuário\n4. **Brevidade intencional** - Menos é mais (máx 3 frases)\n5. **Um foco por mensagem** - Não misture assuntos\n6. **Respeite o tipo** - Cada tipo tem seu escopo específico\n</rules>\n\n---\n\n## Tipos de Notificação\n\n<notification_types>\n\n<!-- ============================================ -->\n<!-- PRIMEIRA CONVERSA (NOVO USUÁRIO) -->\n<!-- ============================================ -->\n\n<type id=\"primeira_conversa\">\n<name>Primeira Conversa</name>\n<trigger>Usuário nunca conversou com o Mentor</trigger>\n\n<guidelines>\nFOCO:\n- Despertar curiosidade sobre O QUE VOCÊ PODE FAZER POR ELE\n- Mostrar interesse GENUÍNO pelo usuário\n- Criar um convite irresistível para a primeira conversa\n\nDEVE:\n- Usar o nome do usuário\n- Ser caloroso e acolhedor\n- Mostrar que você está ali para ELE (não para você)\n- Fazer UMA pergunta simples que convide resposta\n- Despertar curiosidade sem revelar tudo\n\nNÃO DEVE:\n- ❌ Falar sobre você ou suas capacidades técnicas\n- ❌ Explicar como funciona o MindQuest\n- ❌ Listar features ou funcionalidades\n- ❌ Usar linguagem de marketing ou vendas\n- ❌ Ser formal ou robótico\n- ❌ Fazer promessas grandiosas\n\nTOM:\n- Como um amigo curioso que quer te conhecer\n- Leve, sem pressão\n- Foco 100% no usuário\n</guidelines>\n\n<examples>\n<example>\nOutput: \"Oi Aldo! Que bom que você tá aqui. Fico curioso pra saber mais sobre você... o que te trouxe até o MindQuest?\"\n</example>\n\n<example>\nOutput: \"E aí, Aldo! Tava te esperando. Me conta uma coisa: se você pudesse mudar algo na sua vida agora, qualquer coisa, o que seria?\"\n</example>\n\n<example>\nOutput: \"Aldo, prazer! Antes de qualquer coisa, quero te conhecer. O que anda ocupando sua cabeça nesses dias?\"\n</example>\n</examples>\n</type>\n\n<!-- ============================================ -->\n<!-- LEMBRETE DE CONVERSA -->\n<!-- ============================================ -->\n\n<type id=\"conversa\">\n<name>Lembrete de Conversa</name>\n<trigger>09:00 - Usuário não conversou hoje</trigger>\n\n<guidelines>\nFOCO:\n- Olhar para DENTRO do usuário\n- Conectar com emoções e assuntos que ele gosta\n- Despertar curiosidade sobre si mesmo\n\nDEVE:\n- Usar nome do usuário\n- Referenciar algo específico das conversas anteriores\n- Terminar com convite aberto (não pergunta fechada)\n- Adaptar ao tom_conversa preferido\n\nNÃO DEVE:\n- ❌ Mencionar quests, conquistas ou objetivos\n- ❌ Tocar em pontos sensíveis identificados\n- ❌ Dar conselhos ou soluções\n- ❌ Usar frases genéricas (\"como você está?\")\n</guidelines>\n\n<examples>\n<example tone=\"empatico\">\nInput: Conversas sobre ansiedade no trabalho e desejo de mais equilíbrio\nOutput: \"Aldo, lembrei de algo que você mencionou sobre querer mais leveza no dia a dia. Fiquei pensando em como anda essa busca... quer me contar?\"\n</example>\n\n<example tone=\"direto\">\nInput: Conversas sobre foco e produtividade\nOutput: \"Aldo, na última conversa você estava refletindo sobre suas prioridades. Descobriu algo novo desde então?\"\n</example>\n</examples>\n</type>\n\n<!-- ============================================ -->\n<!-- LEMBRETE DE QUEST -->\n<!-- ============================================ -->\n\n<type id=\"quest\">\n<name>Lembrete de Quest</name>\n<trigger>15:00 - Quests atrasadas relacionadas a objetivos</trigger>\n\n<guidelines>\nFOCO:\n- Lembrete gentil, não cobrança\n- Conectar quest com objetivo maior (significado)\n- Oferecer ajuda para destravar\n\nDEVE:\n- Mencionar a quest mais relevante pelo nome\n- Conectar com o objetivo relacionado\n- Perguntar se precisa de ajuda (não assumir bloqueio)\n\nNÃO DEVE:\n- ❌ Listar todas as quests atrasadas\n- ❌ Usar tom de cobrança ou culpa\n- ❌ Focar no atraso (dias)\n- ❌ Sugerir que o usuário está falhando\n</guidelines>\n\n<examples>\n<example>\nInput: Quest \"Reflexão Diária\" atrasada 3 dias, objetivo \"Autoconhecimento\"\nOutput: \"Aldo, a quest 'Reflexão Diária' está te esperando. Ela conecta direto com seu objetivo de autoconhecimento. Quer uma mão pra retomar?\"\n</example>\n</examples>\n</type>\n\n<!-- FASES FUTURAS: conquista, motivacao, sabotador, resumo_semanal -->\n\n</notification_types>\n\n---\n\n## Diretrizes de Linguagem\n\n<language_guidelines>\n\n<guideline name=\"tom\">\nAdapte ao tom_conversa do usuário:\n\n| Tom | Características |\n|-----|------------------|\n| **empático** | Acolhedor, validação, ritmo suave |\n| **direto** | Objetivo, sem floreios, ação clara |\n| **interativo** | Leve, curioso, convida exploração |\n| **equilibrado** | Mix de validação + direcionamento |\n</guideline>\n\n<guideline name=\"estrutura\">\n- Máximo 3 frases curtas\n- Parágrafos de 1-2 linhas\n- Sem emojis em excesso (máx 1 no início)\n- Linguagem natural, coloquial\n</guideline>\n\n<guideline name=\"gancho\">\nSempre termine com algo que convide resposta:\n- Pergunta aberta (não sim/não)\n- Curiosidade não resolvida\n- Convite gentil\n</guideline>\n\n</language_guidelines>\n\n---\n\n## Formato de Resposta\n\n<response_format>\nRetorne SEMPRE este JSON:\n\n{\n  \"titulo\": \"string - título curto para push notification (máx 50 chars)\",\n  \"corpo_push\": \"string - versão curta para push (máx 100 chars)\",\n  \"corpo_whatsapp\": \"string - mensagem completa para WhatsApp\",\n  \"contexto_mentor\": \"string - contexto para o Mentor v3 usar se usuário responder\",\n  \"subtipo\": \"string - subtipo específico (ex: primeira_conversa, conversa_emocional, quest_atrasada)\"\n}\n</response_format>\n\n---\n\n## Regras Críticas\n\n<critical_rules>\n\nFORMATO:\n1. Retorne APENAS JSON puro\n2. Respeite limites de caracteres\n3. Não inclua sugestões numéricas (1, 2, 3...)\n\nCONTEÚDO:\n4. Respeite o escopo do tipo (não misture)\n5. Use contexto específico (não genérico)\n6. Conexão emocional > informação\n7. Curiosidade > completude\n\nLINGUAGEM:\n8. PT-BR coloquial e natural\n9. Adapte ao tom_conversa do usuário\n10. Nunca mencione \"sistema\", \"notificação\", \"lembrete\"\n\n</critical_rules>"
         }
       },
       "id": "agente_conversa",
-      "name": "Agente Conversa",
+      "name": "Mentor Notificacoes",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
@@ -59,32 +59,6 @@
         112
       ],
       "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT \n  data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1::uuid\n  AND resumo_conversa IS NOT NULL\nORDER BY data_conversa DESC\nLIMIT 1;",
-        "options": {
-          "queryReplacement": "={{ $json.usuario_id }}"
-        }
-      },
-      "id": "query_contexto",
-      "name": "busca_ultimas_conversas",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1040,
-        112
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 1000,
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -98,12 +72,12 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "usuario_id": "={{ $('start').item.json.usuario_id }}",
-            "nome_preferencia": "={{ $('start').item.json.nome_preferencia }}",
-            "whats_number": "={{ $('start').item.json.whats_number }}",
-            "lembretes_canais": "={{ $('start').item.json.lembretes_canais }}",
-            "push_tokens": "={{ $('start').item.json.push_tokens }}",
-            "lembrete_periodo": "={{ $('start').item.json.lembrete_periodo }}",
+            "usuario_id": "={{ $('start').first().json.usuario_id }}",
+            "nome_preferencia": "={{ $('start').first().json.nome_preferencia }}",
+            "whats_number": "={{ $('start').first().json.whats_number }}",
+            "lembretes_canais": "={{ $('start').first().json.lembretes_canais }}",
+            "push_tokens": "={{ $('start').first().json.push_tokens }}",
+            "lembrete_periodo": "={{ $('start').first().json.tipo_notificacao }}",
             "notificacao": "={{ $json.output }}"
           },
           "matchingColumns": [],
@@ -204,6 +178,9 @@
               "name": "nome_preferencia"
             },
             {
+              "name": "tom_conversa"
+            },
+            {
               "name": "whats_number"
             },
             {
@@ -215,7 +192,11 @@
               "type": "array"
             },
             {
-              "name": "lembrete_periodo"
+              "name": "tipo_notificacao"
+            },
+            {
+              "name": "contexto",
+              "type": "object"
             }
           ]
         }
@@ -223,11 +204,33 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        800,
+        896,
         112
       ],
       "id": "7240274f-5997-4020-82c9-92a5fbc8da07",
       "name": "start"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ 'MindQuest' }}{{ $('start').first().json.usuario_id }}{{ $('start').first().json.whats_number }}",
+        "sessionTTL": 43200,
+        "contextWindowLength": 50
+      },
+      "id": "memory_redis",
+      "name": "memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        352
+      ],
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "connections": {
@@ -235,7 +238,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Agente Conversa",
+            "node": "Mentor Notificacoes",
             "type": "ai_languageModel",
             "index": 0
           },
@@ -251,14 +254,14 @@
       "ai_outputParser": [
         [
           {
-            "node": "Agente Conversa",
+            "node": "Mentor Notificacoes",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Agente Conversa": {
+    "Mentor Notificacoes": {
       "main": [
         [
           {
@@ -269,12 +272,12 @@
         ]
       ]
     },
-    "busca_ultimas_conversas": {
-      "main": [
+    "memory": {
+      "ai_memory": [
         [
           {
-            "node": "Agente Conversa",
-            "type": "main",
+            "node": "Mentor Notificacoes",
+            "type": "ai_memory",
             "index": 0
           }
         ]
@@ -284,7 +287,7 @@
       "main": [
         [
           {
-            "node": "busca_ultimas_conversas",
+            "node": "Mentor Notificacoes",
             "type": "main",
             "index": 0
           }
@@ -307,18 +310,35 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "nome_preferencia": "Aldo",
-          "whats_number": "351932786582",
+          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa",
+          "nome_preferencia": "Davi",
+          "tom_conversa": "empatico",
+          "whats_number": "5512974070207",
           "lembretes_canais": [
-            "whatsapp",
-            "push"
+            "whatsapp"
           ],
           "push_tokens": [
-            "https://fcm.googleapis.com/fcm/send/dyo0g87m0pU:APA91bEh0eeavhKXTunYpkQGi1ga2J59pUxR0rZu9ncJGXv4UEnV_qme-QUyz_Bizf2zcv3fb9EB5sqG_35NvE1k3G8_G1xPw5bluclS_Ypn9ZnW9Bgt_voI9RrCQ-tE1Z3Nqq4BJNw8::BJVz7/4NlIq8I3YjplQm4voq+GUBt1INyBNBx7kEDxNB6pwgIHEjnizxndKl4QzioEoW2d4aOrJtTZm5P0k1eSA=::/Jb3kjU0XeyoD8XZNj+m3g==",
-            "https://fcm.googleapis.com/fcm/send/fThD8vHeEAI:APA91bGzNovpQBsEN0iggTHbaJYwpaqmzzSR0XAqPaLMlmtEbrrbdTvL3rMUvA3thczYEmNhJnBV_zYY8SfeMbQX-ZyA8Ph9v6d4jJ4PjlMLFUW8kOs6h_XHy-VLVkRZXvhKZaFdl3LO::BJTyLSFumTZcLK/LZ63oKh51HzRBLrq4MNvpWXjgG6wPBWHxYJCrvmVuZSb+JiKqsYG6ZFWfohVRmfraMhRrVCg=::b1mMcNCOLSBvHO7cLPX9pw=="
+            "https://fcm.googleapis.com/fcm/send/cj4Jlg30jqE:APA91bEw7MhimyLOhsvYaBNQBBKVdaARv-hqPXWLUPtUmMkMt7mvZe-46wOGbAw8FeNM0ePQkLe4hq1tYyinNGwuId6RL3WSUVMMliEczH11-jbcgMSoQkBqE8VU-bFLp3HUNwHHX-oI::BDdquWZQqD7X1IYcEUkAuh49ThVT+efi0SBY7hqKj9WjlHrVXVQnMSc3u1nSTdnpDc+Bln/kjbDNJi/d7J6vHIE=::wBSteQsD4VygM7rVg4f2iA==",
+            "https://fcm.googleapis.com/fcm/send/cqZyuPWhV7Q:APA91bFdJnc0pq0Es3NpvdWvWDSq0jpSq54PfCC7Cw4RpYZoeCfSHqnWWTCVhBsHc7MDwKaVwKJZHqix4eK0cAczpObRC9tuL3Y24wJ8QaxeBC8KE2yRSOS96FScLGEvUB5CItIVGJMV::BNqhvwSPxKBCujnJp/hkBop1bZmPi6RJvIOFTJvK52rdtYq7M08lpIS+sow7xBaRbaUc9JZyOJW6q10iHvA5SQE=::RWKAcN3nX7/Te2N4VWL0ew==",
+            "https://fcm.googleapis.com/fcm/send/dyo0g87m0pU:APA91bEh0eeavhKXTunYpkQGi1ga2J59pUxR0rZu9ncJGXv4UEnV_qme-QUyz_Bizf2zcv3fb9EB5sqG_35NvE1k3G8_G1xPw5bluclS_Ypn9ZnW9Bgt_voI9RrCQ-tE1Z3Nqq4BJNw8::BJVz7/4NlIq8I3YjplQm4voq+GUBt1INyBNBx7kEDxNB6pwgIHEjnizxndKl4QzioEoW2d4aOrJtTZm5P0k1eSA=::/Jb3kjU0XeyoD8XZNj+m3g=="
           ],
-          "lembrete_periodo": "manha"
+          "tipo_notificacao": "conversa",
+          "contexto": {
+            "ultimas_conversas": [
+              {
+                "data_conversa": "2025-12-15",
+                "resumo": "## Emocional\n- Davi relata estar se sentindo muito bem após sair com amigos, indicando um estado mental positivo e leve.\n- Ele conseguiu manter a calma e não se estressar diante de comentários que poderiam ter provocado irritação, mostrando controle emocional significativo.\n\n## Relacionamentos\n- O usuário mencionou sair com amigos, valorizando momentos sociais como revigorantes e importantes para seu bem-estar.\n\n## Reflexões\n- Davi demonstra ter evoluído na prática do estoicismo, especificamente na temperança, ao não se deixar afetar por situações fora do seu controle.\n- Ele reconhece que focar no que pode controlar é fundamental para manter a serenidade, indicando um aprendizado e autoconhecimento importantes."
+              },
+              {
+                "data_conversa": "2025-12-13",
+                "resumo": "## Emocional\n- Davi relatou inicialmente estar com problemas e desânimo, mas posteriormente expressou estar muito mais feliz, mesmo sem identificar exatamente o motivo da melhora.\n- Há um conflito interno mencionado sobre reservar tempo para si mesmo versus cumprir obrigações, indicando uma reflexão emocional importante.\n- Davi observa que fica bravo ou triste com as ações dos outros, mas depois percebe que não valia a pena essa reação, indicando consciência emocional crescente.\n\n## Reflexões\n- Davi está estudando estoicismo e quer entender melhor essa filosofia, que foca em controlar o que se pode e aceitar o que não se pode, buscando tranquilidade e virtude.\n- O usuário demonstra interesse em aprofundar o autoconhecimento e os conceitos que influenciam seu bem-estar e perspectiva de vida.\n- Manifestou interesse em aplicar o estoicismo na prática, escolhendo focar no princípio de aceitar o que não pode mudar como objetivo.\n- Aceitar as ações dos outros, que estão fora de seu controle, foi destacado como um desafio relevante.\n- Foi explicado que o estoicismo ensina a criar um espaço entre o ocorrido e a reação emocional para exercer a temperança, escolhendo respostas mais equilibradas.\n- Davi reconhece a raiva e tristeza como reações automáticas, mas está buscando maneirar essas emoções em situações pequenas, especialmente em relação às ações de terceiros.\n- Em relação ao desenvolvimento pessoal, foi sugerida e aceita uma tarefa prática diária denominada \"Focar no Círculo de Controle\", visando ajudar a identificar e soltar o que está fora de seu controle, fortalecendo a aceitação.\n- Davi também envolveu-se com o sistema de quests para incorporar o estoicismo em sua rotina, mostrando intenção de evolução pessoal e uso de ferramentas para apoio na jornada.\n\n## Objetivos\n- Davi manifestou o desejo de ser um aluno melhor na nova escola, com foco especial em melhorar o desempenho nas matérias de matemática e física.\n- Reconheceu honestamente a falta de estudo como causa principal das notas ruins nessas matérias.\n- Relatou ter TDAH, associando a dificuldade de foco à busca por dopamina, e aceitou a ideia de estudar em blocos curtos com pequenas pausas para facilitar o foco.\n- Apesar de não iniciar os estudos agora, pois está de férias, há um planejamento consciente para desenvolver essa estratégia no próximo ano letivo.\n- Davi pretende usar parte das férias para aprofundar seus estudos sobre estoicismo.\n"
+              },
+              {
+                "data_conversa": "2025-10-19",
+                "resumo": "Davi expressa um desânimo recente, sem identificar causa clara, que impacta negativamente seu dia a dia. Para lidar com isso, ele tenta reservar tempo livre, mas relata um conflito interno ao deixar suas obrigações de lado, sugerindo uma dificuldade em equilibrar descanso e responsabilidades. Ele não acrescentou mais detalhes ou reflexões, apenas pediu uma solução concreta para seu desconforto emocional."
+              }
+            ]
+          }
         },
         "pairedItem": {
           "item": 0
