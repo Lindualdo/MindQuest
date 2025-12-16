@@ -394,14 +394,37 @@ const PainelQuestsPageV13: React.FC = () => {
                 <p className="text-xs text-[var(--mq-text-muted)] mt-1 line-clamp-1">{quest.descricao}</p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => questId && handlePlanejarQuest(questId)}
-              className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mq-primary)] text-white shadow-sm hover:bg-[var(--mq-primary-hover)] active:scale-95 transition-all"
-              aria-label="Planejar quest"
-            >
-              <Settings2 size={16} />
-            </button>
+            <div className="flex items-center gap-2 ml-3">
+              {/* Botão Concluir */}
+              <button
+                type="button"
+                onClick={() => questId && handleConcluirQuest(questId)}
+                disabled={questLoading || isFutureDate}
+                className={`
+                  flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all
+                  ${isFutureDate 
+                    ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-300' 
+                    : 'border-[var(--mq-primary)] bg-white text-[var(--mq-primary)] hover:bg-[var(--mq-primary)] hover:text-white hover:shadow-md active:scale-95'
+                  }
+                `}
+                aria-label="Concluir quest"
+              >
+                {questLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-[#0EA5E9]" />
+                ) : (
+                  <CheckCircle2 size={16} />
+                )}
+              </button>
+              {/* Botão Planejar */}
+              <button
+                type="button"
+                onClick={() => questId && handlePlanejarQuest(questId)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mq-primary)] text-white shadow-sm hover:bg-[var(--mq-primary-hover)] active:scale-95 transition-all"
+                aria-label="Planejar quest"
+              >
+                <Settings2 size={16} />
+              </button>
+            </div>
           </div>
           
           {/* Ações */}
