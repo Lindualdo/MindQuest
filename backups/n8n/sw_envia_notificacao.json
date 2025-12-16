@@ -1,0 +1,575 @@
+{
+  "createdAt": "2025-12-16T11:54:41.457Z",
+  "id": "AkxTfShjkgiu6lLL",
+  "name": "sw_envia_notificacao",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst notif = input.notificacao || {};\n\nconst notificacoes = [];\nconst canais = input.lembretes_canais || [];\n\nconst titulo = notif.titulo || `${input.nome_preferencia}, vamos conversar?`;\nconst corpo_push = notif.corpo_push || 'Como esta seu dia? Seu mentor esta aqui.';\nconst corpo_whatsapp = notif.corpo_whatsapp || `Oi ${input.nome_preferencia}! Como esta seu dia?`;\nconst sugestoes = notif.sugestoes_resposta || ['Sim, vamos!', 'Agora nao'];\nconst contexto_mentor = notif.contexto_mentor || 'Notificacao de conversa';\nconst subtipo = notif.subtipo || 'geral';\n\nif (canais.includes('push') && input.push_tokens?.length > 0) {\n  for (const token of input.push_tokens) {\n    notificacoes.push({\n      json: {\n        usuario_id: input.usuario_id,\n        nome: input.nome_preferencia,\n        canal: 'push',\n        tipo: `conversa_${subtipo}`,\n        token,\n        titulo,\n        corpo: corpo_push,\n        contexto_mentor\n      }\n    });\n  }\n}\n\nif (canais.includes('whatsapp') && input.whats_number) {\n  const msgWhats = corpo_whatsapp + '\\n\\n' + sugestoes.map((s, i) => `${i+1}. ${s}`).join('\\n');\n  notificacoes.push({\n    json: {\n      usuario_id: input.usuario_id,\n      nome: input.nome_preferencia,\n      canal: 'whatsapp',\n      tipo: `conversa_${subtipo}`,\n      whatsapp_numero: input.whats_number,\n      titulo,\n      corpo: msgWhats,\n      contexto_mentor\n    }\n  });\n}\n\nreturn notificacoes;"
+      },
+      "id": "4c50482a-5edd-4200-a0c3-f90e96cd9272",
+      "name": "Processar Conversa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "push",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a9711ed9-a128-4dd9-882c-a12f41ac88a1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "whatsapp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ab34d262-7796-4cec-bde5-8d85a7d6fe6f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.canal }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "50020884-c59e-4fdc-a486-31bae4662e07"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5da075a6-7c1b-4f4e-88fc-b5bdd207d0ef",
+      "name": "Switch Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1232,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://mindquest.pt/api/send-push",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $json.token }}"
+            },
+            {
+              "name": "titulo",
+              "value": "={{ $json.titulo }}"
+            },
+            {
+              "name": "corpo",
+              "value": "={{ $json.corpo }}"
+            },
+            {
+              "name": "usuario_id",
+              "value": "={{ $json.usuario_id }}"
+            },
+            {
+              "name": "tipo",
+              "value": "={{ $json.tipo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e4a2a5df-30e7-460d-ad43-2016f383e500",
+      "name": "Enviar Push",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        -112
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'push', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid AND nl.tipo = $2 AND DATE(nl.criado_em) = CURRENT_DATE AND canal = 'push'\n)",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
+        }
+      },
+      "id": "ceebc2f4-4b9d-45f3-b672-fdc6c8c88385",
+      "name": "Log Push",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1808,
+        -112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fVrO1PaqFuA957u0",
+          "mode": "list",
+          "cachedResultName": "MindQuest"
+        }
+      },
+      "id": "1d55176f-6535-41a5-91a1-37d3421a8fda",
+      "name": "Config",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $json.Instancia_evolution }}",
+            "remoteJidOrNumber": "={{ $('Switch Canal').item.json.whatsapp_numero }}",
+            "messageText": "={{ $('Switch Canal').item.json.corpo }}",
+            "minDelayMs": "2000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "10636eac-0fd9-4336-beea-b3591bfa27eb",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1808,
+        96
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'whatsapp', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid AND nl.tipo = $2 AND DATE(nl.criado_em) = CURRENT_DATE AND canal = 'whatsapp'\n)",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
+        }
+      },
+      "id": "fdf2fed6-7c0c-4bf2-a51e-5218bb4623a6",
+      "name": "Log WhatsApp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2048,
+        96
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "85409e20-e410-4834-8126-6e924e6d5cf2",
+      "name": "Email (TODO)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        288
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "2f1f0bba-e6a2-4061-9a0d-fabc2b0b7cf7",
+      "name": "End",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2288,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "nome_preferencia"
+            },
+            {
+              "name": "whats_number"
+            },
+            {
+              "name": "lembretes_canais",
+              "type": "array"
+            },
+            {
+              "name": "push_tokens",
+              "type": "array"
+            },
+            {
+              "name": "lembrete_periodo"
+            },
+            {
+              "name": "notificacao",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        96
+      ],
+      "id": "ec98be37-9cc5-4175-9f05-ffa441df9728",
+      "name": "start"
+    }
+  ],
+  "connections": {
+    "Processar Conversa": {
+      "main": [
+        [
+          {
+            "node": "Switch Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Canal": {
+      "main": [
+        [
+          {
+            "node": "Enviar Push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Push": {
+      "main": [
+        [
+          {
+            "node": "Log Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Push": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Log WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email (TODO)": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Processar Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "nome_preferencia": "Aldo",
+          "whats_number": "351932786582",
+          "lembretes_canais": [
+            "whatsapp",
+            "push"
+          ],
+          "push_tokens": [
+            "https://fcm.googleapis.com/fcm/send/dyo0g87m0pU:APA91bEh0eeavhKXTunYpkQGi1ga2J59pUxR0rZu9ncJGXv4UEnV_qme-QUyz_Bizf2zcv3fb9EB5sqG_35NvE1k3G8_G1xPw5bluclS_Ypn9ZnW9Bgt_voI9RrCQ-tE1Z3Nqq4BJNw8::BJVz7/4NlIq8I3YjplQm4voq+GUBt1INyBNBx7kEDxNB6pwgIHEjnizxndKl4QzioEoW2d4aOrJtTZm5P0k1eSA=::/Jb3kjU0XeyoD8XZNj+m3g==",
+            "https://fcm.googleapis.com/fcm/send/fThD8vHeEAI:APA91bGzNovpQBsEN0iggTHbaJYwpaqmzzSR0XAqPaLMlmtEbrrbdTvL3rMUvA3thczYEmNhJnBV_zYY8SfeMbQX-ZyA8Ph9v6d4jJ4PjlMLFUW8kOs6h_XHy-VLVkRZXvhKZaFdl3LO::BJTyLSFumTZcLK/LZ63oKh51HzRBLrq4MNvpWXjgG6wPBWHxYJCrvmVuZSb+JiKqsYG6ZFWfohVRmfraMhRrVCg=::b1mMcNCOLSBvHO7cLPX9pw=="
+          ],
+          "lembrete_periodo": "manha",
+          "notificacao": {
+            "titulo": "Um convite do seu mentor",
+            "corpo_push": "Aldo, vamos conversar sobre suas conquistas e os próximos passos.",
+            "corpo_whatsapp": "Bom dia, Aldo! Que bom ver seu foco e dedicação em aprimorar o MindQuest. Lembro da nossa última conversa sobre a importância de celebrar cada vitória, e queria te perguntar: como você tem se preparado para \"O Grito da Conquista\" agora que o lançamento está tão próximo? Que tal conversarmos um pouco sobre como canalizar essa sua inquietação para tornar o lançamento um verdadeiro marco?",
+            "sugestoes_resposta": [
+              "Vamos!",
+              "Estou curioso para ouvir mais",
+              "Tenho algumas ideias!"
+            ],
+            "contexto_mentor": "Aldo, Mentor do MindQuest",
+            "subtipo": "convite_conversa"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-16T11:54:41.457Z",
+      "role": "workflow:owner",
+      "workflowId": "AkxTfShjkgiu6lLL",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

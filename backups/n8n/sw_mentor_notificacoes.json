@@ -1,0 +1,383 @@
+{
+  "createdAt": "2025-12-05T14:22:05.076Z",
+  "id": "i5VG5rHZ39ytueyu",
+  "name": "sw_mentor_notificacoes",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {}
+      },
+      "id": "model_conversa",
+      "name": "OpenRouter Conversa",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        384
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\"type\": \"string\"},\n    \"corpo_push\": {\"type\": \"string\"},\n    \"corpo_whatsapp\": {\"type\": \"string\"},\n    \"sugestoes_resposta\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}},\n    \"contexto_mentor\": {\"type\": \"string\"},\n    \"subtipo\": {\"type\": \"string\"}\n  },\n  \"required\": [\"titulo\", \"corpo_push\", \"corpo_whatsapp\", \"sugestoes_resposta\", \"contexto_mentor\", \"subtipo\"]\n}",
+        "autoFix": true
+      },
+      "id": "parser_conversa",
+      "name": "Parser Conversa",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1344,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## Dados do Usuario\n- Nome: {{ $('start').item.json.nome_preferencia }}\n- Periodo: {{ $('start').item.json.lembrete_periodo }}\n\n## Ultima Conversa\nData: {{ $json.data_conversa }}\nResumo:{{ $json.resumo_conversa }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Voce eh o Mentor do MindQuest\n\nSua tarefa eh criar UMA mensagem convidando o {{ $('start').item.json.nome_preferencia }} para uma conversar com você\n\n## Filosofia MindQuest\n- Conversar -> Entender -> Agir -> Evoluir\n- Tom: Acolhedor, humano, empatico\n- Objetivo: Engajar sem pressionar\n\n## Regras da Mensagem\n1. SEMPRE use o nome do usuario\n2. cumprimente (bom dia, boa tarde..) de acordo com período do dia\n2. Reconheca conquistas recentes (se houver)\n3. Faca referencia a ultima conversa (se relevante)\n4. Termine com convite aberto, nunca imperativo\n5. frase única e convidativa\n6. disperte curiosidade do usário falando algo interessante que conecte com a ultima conversa\n\n"
+        }
+      },
+      "id": "agente_conversa",
+      "name": "Agente Conversa",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        112
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  data_conversa,\n  resumo_conversa\nFROM usr_chat\nWHERE usuario_id = $1::uuid\n  AND resumo_conversa IS NOT NULL\nORDER BY data_conversa DESC\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.usuario_id }}"
+        }
+      },
+      "id": "query_contexto",
+      "name": "busca_ultimas_conversas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1040,
+        112
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "AkxTfShjkgiu6lLL",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/AkxTfShjkgiu6lLL",
+          "cachedResultName": "sw_envia_notificacao"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').item.json.usuario_id }}",
+            "nome_preferencia": "={{ $('start').item.json.nome_preferencia }}",
+            "whats_number": "={{ $('start').item.json.whats_number }}",
+            "lembretes_canais": "={{ $('start').item.json.lembretes_canais }}",
+            "push_tokens": "={{ $('start').item.json.push_tokens }}",
+            "lembrete_periodo": "={{ $('start').item.json.lembrete_periodo }}",
+            "notificacao": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "nome_preferencia",
+              "displayName": "nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "whats_number",
+              "displayName": "whats_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "lembretes_canais",
+              "displayName": "lembretes_canais",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "push_tokens",
+              "displayName": "push_tokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "lembrete_periodo",
+              "displayName": "lembrete_periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "notificacao",
+              "displayName": "notificacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1664,
+        112
+      ],
+      "id": "73cc0c9c-fb28-4fcf-9b71-3f6041c7d3a3",
+      "name": "Call 'sw_envia_notificacao'"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "nome_preferencia"
+            },
+            {
+              "name": "whats_number"
+            },
+            {
+              "name": "lembretes_canais",
+              "type": "array"
+            },
+            {
+              "name": "push_tokens",
+              "type": "array"
+            },
+            {
+              "name": "lembrete_periodo"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        112
+      ],
+      "id": "7240274f-5997-4020-82c9-92a5fbc8da07",
+      "name": "start"
+    }
+  ],
+  "connections": {
+    "OpenRouter Conversa": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Conversa",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Conversa",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Conversa": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente Conversa",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Conversa": {
+      "main": [
+        [
+          {
+            "node": "Call 'sw_envia_notificacao'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_ultimas_conversas": {
+      "main": [
+        [
+          {
+            "node": "Agente Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "busca_ultimas_conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "nome_preferencia": "Aldo",
+          "whats_number": "351932786582",
+          "lembretes_canais": [
+            "whatsapp",
+            "push"
+          ],
+          "push_tokens": [
+            "https://fcm.googleapis.com/fcm/send/dyo0g87m0pU:APA91bEh0eeavhKXTunYpkQGi1ga2J59pUxR0rZu9ncJGXv4UEnV_qme-QUyz_Bizf2zcv3fb9EB5sqG_35NvE1k3G8_G1xPw5bluclS_Ypn9ZnW9Bgt_voI9RrCQ-tE1Z3Nqq4BJNw8::BJVz7/4NlIq8I3YjplQm4voq+GUBt1INyBNBx7kEDxNB6pwgIHEjnizxndKl4QzioEoW2d4aOrJtTZm5P0k1eSA=::/Jb3kjU0XeyoD8XZNj+m3g==",
+            "https://fcm.googleapis.com/fcm/send/fThD8vHeEAI:APA91bGzNovpQBsEN0iggTHbaJYwpaqmzzSR0XAqPaLMlmtEbrrbdTvL3rMUvA3thczYEmNhJnBV_zYY8SfeMbQX-ZyA8Ph9v6d4jJ4PjlMLFUW8kOs6h_XHy-VLVkRZXvhKZaFdl3LO::BJTyLSFumTZcLK/LZ63oKh51HzRBLrq4MNvpWXjgG6wPBWHxYJCrvmVuZSb+JiKqsYG6ZFWfohVRmfraMhRrVCg=::b1mMcNCOLSBvHO7cLPX9pw=="
+          ],
+          "lembrete_periodo": "manha"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-05T14:22:05.076Z",
+      "role": "workflow:owner",
+      "workflowId": "i5VG5rHZ39ytueyu",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

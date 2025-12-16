@@ -1,0 +1,277 @@
+{
+  "createdAt": "2025-12-16T12:23:46.864Z",
+  "id": "vO3MP2nV0jI6692g",
+  "name": "job_notificacoes",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.whatsapp_numero,\n  n.lembretes_periodo,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  -- Não conversou hoje\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  -- Não foi notificado hoje\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE 'conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.whatsapp_numero, \n         n.lembretes_periodo, n.lembretes_canais;",
+        "options": {}
+      },
+      "id": "e50aa4b1-c5b2-4321-a73b-71f593af6d76",
+      "name": "usuarios_elegiveis",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        128
+      ],
+      "retryOnFail": false,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        672,
+        128
+      ],
+      "id": "2c136e72-01a5-42bf-9b7a-46ce97d9da6c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "i5VG5rHZ39ytueyu",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/i5VG5rHZ39ytueyu",
+          "cachedResultName": "sw_lembrete_conversa"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('usuarios_elegiveis').item.json.usuario_id }}",
+            "nome_preferencia": "={{ $('usuarios_elegiveis').item.json.nome_preferencia }}",
+            "whats_number": "={{ $('usuarios_elegiveis').item.json.whatsapp_numero }}",
+            "lembretes_canais": "={{ $('usuarios_elegiveis').item.json.lembretes_canais }}",
+            "push_tokens": "={{ $('usuarios_elegiveis').item.json.push_tokens }}",
+            "lembrete_periodo": "={{ $json.lembretes_periodo }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "nome_preferencia",
+              "displayName": "nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "whats_number",
+              "displayName": "whats_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "lembretes_canais",
+              "displayName": "lembretes_canais",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "push_tokens",
+              "displayName": "push_tokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "lembrete_periodo",
+              "displayName": "lembrete_periodo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        144
+      ],
+      "id": "7aafc8ff-2924-43f4-857a-91da7f370119",
+      "name": "Call 'sw_lembrete_conversa'"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        128
+      ],
+      "id": "c409881a-2485-47cb-986a-96f913e6175c",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "connections": {
+    "usuarios_elegiveis": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'sw_lembrete_conversa'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'sw_lembrete_conversa'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "usuarios_elegiveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-16T12:23:46.864Z",
+      "role": "workflow:owner",
+      "workflowId": "vO3MP2nV0jI6692g",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
