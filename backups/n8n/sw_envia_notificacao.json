@@ -149,7 +149,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'push', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid AND nl.tipo = $2 AND DATE(nl.criado_em) = CURRENT_DATE AND canal = 'push'\n)",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'push', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'push'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)",
         "options": {
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
@@ -273,7 +273,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'whatsapp', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid AND nl.tipo = $2 AND DATE(nl.criado_em) = CURRENT_DATE AND canal = 'whatsapp'\n)",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'whatsapp', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'whatsapp'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)",
         "options": {
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
@@ -373,7 +373,7 @@
       "main": [
         [
           {
-            "node": "Enviar Push",
+            "node": "Log Push",
             "type": "main",
             "index": 0
           }
@@ -388,61 +388,6 @@
         [
           {
             "node": "Email (TODO)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Enviar Push": {
-      "main": [
-        [
-          {
-            "node": "Log Push",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Log Push": {
-      "main": [
-        [
-          {
-            "node": "End",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Config": {
-      "main": [
-        [
-          {
-            "node": "Enviar WhatsApp",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Enviar WhatsApp": {
-      "main": [
-        [
-          {
-            "node": "Log WhatsApp",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Log WhatsApp": {
-      "main": [
-        [
-          {
-            "node": "End",
             "type": "main",
             "index": 0
           }
@@ -465,6 +410,61 @@
         [
           {
             "node": "Processar Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Log WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Push": {
+      "main": [
+        [
+          {
+            "node": "Enviar Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Push": {
+      "main": [
+        [
+          {
+            "node": "End",
             "type": "main",
             "index": 0
           }
