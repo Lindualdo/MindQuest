@@ -959,22 +959,17 @@ const PainelQuestsPageV13: React.FC = () => {
             <>
               {questsDoDiaSelecionado.a_fazer.length > 0 ? (
                 <>
-                  <div className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 space-y-2">
-                    <p className="flex items-center justify-center gap-2 flex-wrap">
-                      <span>Toque no ícone</span>
-                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-full border-2 border-[var(--mq-primary)] bg-white">
-                        <CheckCircle2 size={14} className="text-[var(--mq-primary)]" />
-                      </span>
-                      <span>para concluir</span>
-                    </p>
-                    <p className="flex items-center justify-center gap-2 flex-wrap">
-                      <span>Toque no ícone</span>
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--mq-primary)] shadow-sm">
-                        <Settings2 size={14} className="text-white" />
-                      </span>
-                      <span>para definir recorrências</span>
-                    </p>
-                  </div>
+                  <p className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 flex items-center justify-center gap-2">
+                    <span>Recorrências:</span>
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[var(--mq-primary)]">
+                      <Settings2 size={12} className="text-white" />
+                    </span>
+                    <span className="text-[var(--mq-border)]">|</span>
+                    <span>Concluir:</span>
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full border-2 border-[var(--mq-primary)] bg-white">
+                      <CheckCircle2 size={12} className="text-[var(--mq-primary)]" />
+                    </span>
+                  </p>
                   <div className="space-y-3">
                     {questsDoDiaSelecionado.a_fazer.map(quest => renderQuestItemSimples(quest))}
                   </div>
