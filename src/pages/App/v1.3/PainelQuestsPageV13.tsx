@@ -959,13 +959,22 @@ const PainelQuestsPageV13: React.FC = () => {
             <>
               {questsDoDiaSelecionado.a_fazer.length > 0 ? (
                 <>
-                  <p className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 flex items-center justify-center gap-2 flex-wrap">
-                    <span>Toque no ícone</span>
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--mq-primary)] shadow-sm">
-                      <Settings2 size={16} className="text-white" />
-                    </span>
-                    <span>para definir recorrências</span>
-                  </p>
+                  <div className="text-xs text-[var(--mq-text-subtle)] text-center mb-3 space-y-2">
+                    <p className="flex items-center justify-center gap-2 flex-wrap">
+                      <span>Toque no ícone</span>
+                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-full border-2 border-[var(--mq-primary)] bg-white">
+                        <CheckCircle2 size={14} className="text-[var(--mq-primary)]" />
+                      </span>
+                      <span>para concluir</span>
+                    </p>
+                    <p className="flex items-center justify-center gap-2 flex-wrap">
+                      <span>Toque no ícone</span>
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--mq-primary)] shadow-sm">
+                        <Settings2 size={14} className="text-white" />
+                      </span>
+                      <span>para definir recorrências</span>
+                    </p>
+                  </div>
                   <div className="space-y-3">
                     {questsDoDiaSelecionado.a_fazer.map(quest => renderQuestItemSimples(quest))}
                   </div>
