@@ -611,7 +611,7 @@
         "text": "=Você é um especialista em análise e síntese de conversas.\n\n**NOME DO USUÁRIO:** {{ $('start').item.json.usr_nome_preferencia }}\n\n\n**NOVAS MENSAGENS:**\n{{ JSON.stringify($json.mensagens) }}\n---\n\n**SUA TAREFA:**\n\n1. **ORGANIZAR POR TEMAS**\n   Agrupe as informações nos temas abaixo (use apenas os que tiverem conteúdo):\n   - **Emocional**: sentimentos, humor, estado mental\n   - **Trabalho**: carreira, projetos, produtividade\n   - **Relacionamentos**: família, amigos, social\n   - **Saúde**: bem-estar físico, sono, energia\n   - **Finanças**: dinheiro, investimentos, trading\n   - **Objetivos**: metas, planos, decisões\n   - **Reflexões**: insights, aprendizados, autoconhecimento\n\n2. **AVALIAR REFLEXÃO**\n   - tem_reflexao = true SE o usuário demonstrou autoconhecimento, fez conexões entre eventos e emoções, ou analisou seus padrões\n   - tem_reflexao = false SE apenas relatou fatos superficialmente\n\n3. **AVALIAR CONTEXTO**\n   - tem_contexto = true SE há conteúdo suficiente para análises de emoções, sabotadores, humor\n   - tem_contexto = false SE conversa foi muito superficial ou casual\n\n4. **USUARIO**: Use o nome do usário ao se referir a ele: {{ $('start').item.json.usr_nome_preferencia }}\n\n---\n\n**RETORNE APENAS ESTE JSON:**\n```json\n{\n  \"tem_contexto\": true,\n  \"tem_reflexao\": true,\n  \"total_palavras\": 150,\n  \"justificativa\": \"breve explicação\",\n  \"resumo_atualizado\": \"## Emocional\\n- item 1\\n- item 2\\n\\n## Trabalho\\n- item 1\\n\\n## Reflexões\\n- insight importante\"\n}\n```",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado"
+          "systemMessage": "=Você é um especialista em análise e síntese de conversas terapêuticas e de desenvolvimento pessoal.\n\nREGRAS CRÍTICAS:\n1. NUNCA substitua o resumo anterior - sempre INCORPORE\n2. Elimine redundâncias - não repita informações já presentes\n3. Organize SEMPRE por temas usando markdown (## Tema)\n4. Seja objetivo e direto\n5. Máximo de 800 palavras no resumo total\n6. Preserve contexto emocional e insights importantes\n7. Retorne APENAS JSON estruturado\n8. não use o termo usuário, use sempre o nome do contexto\n9. não use o termo agente, use sempre Mentor"
         }
       },
       "id": "5907bd75-9a96-4504-8489-77f7635835c8",
@@ -1364,10 +1364,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "afac68d2-e4c1-42de-9402-7ef7c7b6a715",
-          "data_conversa": "2025-12-15T00:00:00.000Z",
-          "usr_nome_preferencia": "Aldo"
+          "usuario_id": "21187ef1-9728-4a92-b6fc-35b3dac100cb",
+          "chat_id": "8e5d0f7b-0d86-4349-b5f7-56fae461ecb7",
+          "data_conversa": "2025-12-16T00:00:00.000Z",
+          "usr_nome_preferencia": "Marcello"
         },
         "pairedItem": {
           "item": 0

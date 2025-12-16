@@ -37,26 +37,24 @@
     },
     {
       "parameters": {
-        "content": "## Regras: XP Conversas (v2.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia de conversa válida |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje |\n| `log_experts` | 1 registro por chat_id + expert_name |\n\n### Decisão Autônoma\n- Já processou este chat? → ignora\n- Já deu XP hoje (outro chat)? → ignora\n- Novo dia válido? → processa\n\n### Observação\n- Validação de contexto (≥30 palavras) feita no job_experts\n- Sem streaks (implementar depois)",
+        "content": "## Regras: XP Conversas (v3.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia (constraint: usuarios_quest_id + data_planejada) |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje, ultima_conversa_em |\n\n### Decisão Autônoma\n- Já existe recorrência para hoje? → ignora\n- Novo dia válido? → processa\n\n### Controle de Duplicatas\n- Verifica diretamente em `quests_recorrencias`\n- INSERT com ON CONFLICT garante 1 registro/dia\n- Sem dependência de `log_experts` (descontinuado v3)",
         "height": 624,
         "width": 880,
         "color": 5
       },
       "id": "da5a336c-a461-4274-8fa7-fbdbb3b67e35",
-      "name": "Regras XP Conversas v2",
+      "name": "Regras XP Conversas v3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         -304,
         -160
-      ],
-      "width": 380,
-      "height": 340
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Verificar se deve processar e preparar dados\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions,\n    'xp_conversa'::text AS expert_name\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nlog_existente AS (\n  SELECT id FROM log_experts\n  WHERE chat_id = (SELECT chat_id FROM params)\n    AND expert_name = (SELECT expert_name FROM params)\n),\nxp_hoje AS (\n  SELECT EXISTS (\n    SELECT 1 FROM log_experts le\n    JOIN usr_chat uc ON uc.id = le.chat_id\n    WHERE uc.usuario_id = (SELECT usuario_id FROM params)\n      AND le.expert_name = (SELECT expert_name FROM params)\n      AND DATE(uc.data_conversa) = (SELECT data_conversa FROM params)\n      AND le.chat_id != (SELECT chat_id FROM params)\n  ) AS ja_ganhou\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM log_existente) IS NOT NULL THEN 'ja_processado'\n    WHEN (SELECT ja_ganhou FROM xp_hoje) THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  p.expert_name,\n  (SELECT acao FROM decisao) AS acao,\n  (SELECT xp_valor FROM quest_catalogo) AS xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
+        "query": "-- Verificar se deve processar (sem log_experts - arquitetura v3)\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nquest_usuario AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT id FROM quest_catalogo)\n  LIMIT 1\n),\nrecorrencia_hoje AS (\n  SELECT id FROM quests_recorrencias\n  WHERE usuarios_quest_id = (SELECT id FROM quest_usuario)\n    AND data_planejada = (SELECT data_conversa FROM params)\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM recorrencia_hoje) IS NOT NULL THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  (SELECT acao FROM decisao) AS acao,\n  (SELECT xp_valor FROM quest_catalogo) AS xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa, $json.total_interactions] }}"
         }
@@ -82,7 +80,8 @@
           "options": {
             "version": 2,
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "leftValue": ""
           },
           "combinator": "and",
           "conditions": [
@@ -179,29 +178,6 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Registrar processamento no log\nINSERT INTO log_experts (usuario_id, chat_id, expert_name, ultima_interaction, historico, criado_em, atualizado_em)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::text,\n  $4::int,\n  jsonb_build_array(jsonb_build_object('de', 0, 'ate', $4::int, 'novas', $4::int, 'em', NOW(), 'xp', $5::int)),\n  NOW(),\n  NOW()\n)\nRETURNING id, chat_id, expert_name;",
-        "options": {
-          "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.chat_id, $('Verificar Processamento').item.json.expert_name, $('Verificar Processamento').item.json.total_interactions, $('Verificar Processamento').item.json.xp_valor] }}"
-        }
-      },
-      "id": "984da6d9-4ace-49ec-a043-507a066f4d89",
-      "name": "Registrar Log",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2128,
-        256
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "jsCode": "// Retorna resultado do processamento\nconst verificar = $('Verificar Processamento').item.json;\nconst xpAtualizado = $('Atualizar XP').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: 'processado',\n    xp_ganho: verificar.xp_valor,\n    xp_total: xpAtualizado.xp_total,\n    data_conversa: verificar.data_conversa\n  }\n}];"
       },
       "id": "2c64a925-1866-4f38-b253-b24119a11044",
@@ -209,7 +185,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2128,
         256
       ]
     },
@@ -294,17 +270,6 @@
       "main": [
         [
           {
-            "node": "Registrar Log",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Registrar Log": {
-      "main": [
-        [
-          {
             "node": "Resultado Processado",
             "type": "main",
             "index": 0
@@ -314,7 +279,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": null,
@@ -322,10 +289,12 @@
     "start": [
       {
         "json": {
-          "usuario_id": "1d74e1c4-a42c-4641-8db9-da3b80b8dbff",
-          "chat_id": "uuid-do-chat",
-          "data_conversa": "2025-12-12",
-          "total_interactions": 15
+          "usuario_id": "0847d8a7-4fba-45f2-9470-a7eeacaa4bd4",
+          "chat_id": "5311b88e-54e9-4053-9f7a-b2c5303ef622",
+          "data_conversa": "2025-12-16T00:00:00.000Z"
+        },
+        "pairedItem": {
+          "item": 0
         }
       }
     ]
