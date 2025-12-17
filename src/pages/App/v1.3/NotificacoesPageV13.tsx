@@ -330,7 +330,7 @@ const NotificacoesPageV13: React.FC = () => {
 
             {formData.conversas_ia_ativo && (
               <div className="space-y-4">
-                {/* Período */}
+                {/* TODO: Período preferido - habilitar em versão futura
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--mq-text)]">
                     <Clock size={16} />
@@ -346,6 +346,7 @@ const NotificacoesPageV13: React.FC = () => {
                     <option value="noite">Noite</option>
                   </select>
                 </div>
+                */}
 
                 {/* Tipos de conversas */}
                 <div className="space-y-3">
