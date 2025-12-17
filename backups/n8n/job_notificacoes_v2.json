@@ -1,0 +1,234 @@
+{
+  "name": "job_notificacoes_v2",
+  "description": "v2.0.0 - Rotação de 5 categorias de quests + prioridade bem-estar se humor/energia < 5",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "triggerAtHour": 9 }]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [192, 128],
+      "id": "c409881a-2485-47cb-986a-96f913e6175c",
+      "name": "Trigger Conversas 09h"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens,\n  CASE \n    WHEN NOT EXISTS (SELECT 1 FROM usr_chat WHERE usuario_id = n.usuario_id) \n    THEN true \n    ELSE false \n  END AS is_primeira_conversa,\n  (SELECT json_agg(json_build_object(\n    'data_conversa', c.data_conversa,\n    'resumo', c.resumo_conversa\n  ) ORDER BY c.data_conversa DESC)\n   FROM (\n     SELECT data_conversa, resumo_conversa\n     FROM usr_chat\n     WHERE usuario_id = n.usuario_id\n       AND resumo_conversa IS NOT NULL\n     ORDER BY data_conversa DESC\n     LIMIT 5\n   ) c\n  ) AS ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE 'conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais;",
+        "options": {}
+      },
+      "id": "e50aa4b1-c5b2-4321-a73b-71f593af6d76",
+      "name": "usuarios_conversas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [400, 128],
+      "credentials": {
+        "postgres": { "id": "8ySWxtSO7gYK5uue", "name": "Postgres account" }
+      }
+    },
+    {
+      "parameters": { "options": {} },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [672, 128],
+      "id": "2c136e72-01a5-42bf-9b7a-46ce97d9da6c",
+      "name": "Loop Conversas"
+    },
+    {
+      "parameters": {
+        "workflowId": { "__rl": true, "value": "i5VG5rHZ39ytueyu", "mode": "list", "cachedResultName": "sw_mentor_notificacoes" },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('usuarios_conversas').item.json.usuario_id }}",
+            "nome_preferencia": "={{ $('usuarios_conversas').item.json.nome_preferencia }}",
+            "tom_conversa": "={{ $('usuarios_conversas').item.json.tom_conversa || 'empatico' }}",
+            "whats_number": "={{ $('usuarios_conversas').item.json.whatsapp_numero }}",
+            "lembretes_canais": "={{ $('usuarios_conversas').item.json.lembretes_canais }}",
+            "push_tokens": "={{ $('usuarios_conversas').item.json.push_tokens }}",
+            "tipo_notificacao": "={{ $('usuarios_conversas').item.json.is_primeira_conversa ? 'primeira_conversa' : 'conversa' }}",
+            "contexto": "={{ { ultimas_conversas: $('usuarios_conversas').item.json.ultimas_conversas, is_primeira_conversa: $('usuarios_conversas').item.json.is_primeira_conversa } }}"
+          },
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [960, 144],
+      "id": "7aafc8ff-2924-43f4-857a-91da7f370119",
+      "name": "Call sw_mentor_notificacoes (conversas)"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "triggerAtHour": 15 }]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [176, 400],
+      "id": "79084208-9153-4934-8c80-1c864893ac1f",
+      "name": "Trigger Quests 15h"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v2.0.0: Buscar usuários elegíveis para notificação de quest\n-- Inclui: humor, energia, quests por categoria, última categoria notificada\n\nWITH ultimo_humor AS (\n  SELECT DISTINCT ON (c.usuario_id)\n    c.usuario_id,\n    uhe.humor_dia as humor_nivel\n  FROM usuarios_humor_energia uhe\n  INNER JOIN usr_chat c ON c.id = uhe.chat_id\n  ORDER BY c.usuario_id, c.data_conversa DESC\n),\nenergia_panas AS (\n  SELECT \n    ue.usuario_id,\n    CASE WHEN COUNT(*) > 0\n      THEN ROUND((COUNT(*) FILTER (WHERE LOWER(ue.emocao_id) IN ('joy','trust','anticipation'))::numeric / COUNT(*)::numeric) * 100, 1)\n      ELSE 60 END AS percentual_positiva\n  FROM usuarios_emocoes ue\n  WHERE ue.intensidade >= 45\n  GROUP BY ue.usuario_id\n),\n-- v2.0.0: Última categoria notificada\nultima_categoria_notificada AS (\n  SELECT DISTINCT ON (nl.usuario_id)\n    nl.usuario_id,\n    CASE \n      WHEN nl.tipo LIKE '%tcc%' THEN 'tcc'\n      WHEN nl.tipo LIKE '%estoicismo%' THEN 'estoicismo'\n      WHEN nl.tipo LIKE '%sabotador%' THEN 'sabotador'\n      WHEN nl.tipo LIKE '%personalizada%' THEN 'personalizada'\n      WHEN nl.tipo LIKE '%objetivo%' THEN 'objetivo'\n      ELSE NULL\n    END AS ultima_categoria\n  FROM notificacoes_log nl\n  WHERE nl.tipo LIKE 'quest%'\n  ORDER BY nl.usuario_id, nl.criado_em DESC\n),\n-- v2.0.0: Quests agrupadas por categoria\nquests_por_categoria AS (\n  SELECT \n    uq.usuario_id,\n    json_build_object(\n      'tcc', COALESCE((SELECT json_agg(json_build_object(\n        'quest_id', uq2.id, 'titulo', uq2.config->>'titulo', 'descricao', uq2.config->>'descricao',\n        'base_cientifica', uq2.config->'base_cientifica', 'categoria', 'tcc'\n      )) FROM usuarios_quest uq2 \n      LEFT JOIN quests_catalogo qc ON qc.id = uq2.catalogo_id\n      WHERE uq2.usuario_id = uq.usuario_id AND uq2.status IN ('disponivel', 'ativa') \n        AND qc.categoria = 'tcc'), '[]'::json),\n      \n      'estoicismo', COALESCE((SELECT json_agg(json_build_object(\n        'quest_id', uq2.id, 'titulo', uq2.config->>'titulo', 'descricao', uq2.config->>'descricao',\n        'base_cientifica', uq2.config->'base_cientifica', 'categoria', 'estoicismo'\n      )) FROM usuarios_quest uq2 \n      LEFT JOIN quests_catalogo qc ON qc.id = uq2.catalogo_id\n      WHERE uq2.usuario_id = uq.usuario_id AND uq2.status IN ('disponivel', 'ativa') \n        AND qc.categoria = 'estoicismo'), '[]'::json),\n      \n      'sabotador', COALESCE((SELECT json_agg(json_build_object(\n        'quest_id', uq2.id, 'titulo', uq2.config->>'titulo', 'descricao', uq2.config->>'descricao',\n        'base_cientifica', uq2.config->'base_cientifica', 'sabotador_id', uq2.sabotador_id, 'categoria', 'sabotador'\n      )) FROM usuarios_quest uq2 \n      WHERE uq2.usuario_id = uq.usuario_id AND uq2.status IN ('disponivel', 'ativa') \n        AND uq2.sabotador_id IS NOT NULL), '[]'::json),\n      \n      'personalizada', COALESCE((SELECT json_agg(json_build_object(\n        'quest_id', uq2.id, 'titulo', uq2.config->>'titulo', 'descricao', uq2.config->>'descricao',\n        'base_cientifica', uq2.config->'base_cientifica', 'categoria', 'personalizada'\n      )) FROM usuarios_quest uq2 \n      WHERE uq2.usuario_id = uq.usuario_id AND uq2.status IN ('disponivel', 'ativa') \n        AND uq2.catalogo_id = '00000000-0000-0000-0000-000000000001'\n        AND uq2.sabotador_id IS NULL), '[]'::json),\n      \n      'objetivo', COALESCE((SELECT json_agg(json_build_object(\n        'quest_id', uq2.id, 'titulo', uq2.config->>'titulo', 'descricao', uq2.config->>'descricao',\n        'base_cientifica', uq2.config->'base_cientifica', 'objetivo_id', uq2.objetivo_id, 'categoria', 'objetivo'\n      )) FROM usuarios_quest uq2 \n      WHERE uq2.usuario_id = uq.usuario_id AND uq2.status IN ('disponivel', 'ativa') \n        AND uq2.objetivo_id IS NOT NULL\n        AND uq2.sabotador_id IS NULL\n        AND uq2.catalogo_id != '00000000-0000-0000-0000-000000000001'), '[]'::json)\n    ) AS quests_por_categoria\n  FROM (SELECT DISTINCT usuario_id FROM usuarios_quest WHERE status IN ('disponivel', 'ativa')) uq\n),\nultimas_conversas AS (\n  SELECT \n    uc.usuario_id,\n    (SELECT json_agg(json_build_object(\n      'data_conversa', c.data_conversa,\n      'resumo', c.resumo_conversa\n    ) ORDER BY c.data_conversa DESC)\n     FROM (\n       SELECT data_conversa, resumo_conversa\n       FROM usr_chat\n       WHERE usuario_id = uc.usuario_id\n         AND resumo_conversa IS NOT NULL\n       ORDER BY data_conversa DESC\n       LIMIT 5\n     ) c\n    ) AS ultimas_conversas\n  FROM (SELECT DISTINCT usuario_id FROM usr_chat) uc\n)\nSELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  (SELECT ARRAY_AGG(DISTINCT dp.token) FROM dispositivos_push dp WHERE dp.usuario_id = n.usuario_id AND dp.token IS NOT NULL) AS push_tokens,\n  COALESCE(uh.humor_nivel, 6) as humor_nivel,\n  COALESCE(ROUND(ep.percentual_positiva / 10, 0), 6) as energia_nivel,\n  COALESCE(ucn.ultima_categoria, NULL) as ultima_categoria_notificada,\n  COALESCE(qpc.quests_por_categoria, '{}'::json) as quests_por_categoria,\n  COALESCE(ulc.ultimas_conversas, '[]'::json) as ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN ultimo_humor uh ON uh.usuario_id = n.usuario_id\nLEFT JOIN energia_panas ep ON ep.usuario_id = n.usuario_id\nLEFT JOIN ultima_categoria_notificada ucn ON ucn.usuario_id = n.usuario_id\nLEFT JOIN quests_por_categoria qpc ON qpc.usuario_id = n.usuario_id\nLEFT JOIN ultimas_conversas ulc ON ulc.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_quests = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE 'quest%'\n  );",
+        "options": {}
+      },
+      "id": "query_usuarios_elegiveis",
+      "name": "usuarios_elegiveis_quests",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [400, 400],
+      "credentials": {
+        "postgres": { "id": "8ySWxtSO7gYK5uue", "name": "Postgres account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// v2.0.0: Selecionar Quest por Rotação de Categorias\n// REGRAS:\n// 1. Rotação: TCC → Estoicismo → Sabotador → Personalizada → Objetivo\n// 2. Se não tem da categoria, pula para próxima\n// 3. Se humor OU energia < 5, manda TCC/Estoicismo e pula a rotação\n\nconst CATEGORIAS_ROTACAO = ['tcc', 'estoicismo', 'sabotador', 'personalizada', 'objetivo'];\nconst CATEGORIAS_BEM_ESTAR = ['tcc', 'estoicismo'];\n\nconst items = $input.all();\nconst resultados = [];\n\nfor (const item of items) {\n  const data = item.json;\n  const humorNivel = data.humor_nivel || 6;\n  const energiaNivel = data.energia_nivel || 6;\n  const ultimaCategoria = data.ultima_categoria_notificada || null;\n  const questsPorCategoria = data.quests_por_categoria || {};\n  \n  let questSelecionada = null;\n  let categoriaSelecionada = null;\n  let motivoSelecao = '';\n  \n  // REGRA 3: Se humor OU energia < 5, priorizar bem-estar\n  const precisaBemEstar = humorNivel < 5 || energiaNivel < 5;\n  \n  if (precisaBemEstar) {\n    // Buscar quest de TCC ou Estoicismo\n    for (const cat of CATEGORIAS_BEM_ESTAR) {\n      const questsDaCategoria = questsPorCategoria[cat] || [];\n      if (Array.isArray(questsDaCategoria) && questsDaCategoria.length > 0) {\n        questSelecionada = questsDaCategoria[0];\n        categoriaSelecionada = cat;\n        motivoSelecao = 'bem_estar_prioritario';\n        break;\n      }\n    }\n  }\n  \n  // Se não precisou de bem-estar OU não encontrou quest de bem-estar\n  if (!questSelecionada) {\n    // REGRA 1 e 2: Rotação de categorias\n    let indiceInicio = 0;\n    \n    if (ultimaCategoria) {\n      const indiceUltima = CATEGORIAS_ROTACAO.indexOf(ultimaCategoria);\n      if (indiceUltima !== -1) {\n        indiceInicio = (indiceUltima + 1) % CATEGORIAS_ROTACAO.length;\n      }\n    }\n    \n    // Tentar cada categoria a partir do índice de início\n    for (let i = 0; i < CATEGORIAS_ROTACAO.length; i++) {\n      const indice = (indiceInicio + i) % CATEGORIAS_ROTACAO.length;\n      const cat = CATEGORIAS_ROTACAO[indice];\n      const questsDaCategoria = questsPorCategoria[cat] || [];\n      \n      if (Array.isArray(questsDaCategoria) && questsDaCategoria.length > 0) {\n        questSelecionada = questsDaCategoria[0];\n        categoriaSelecionada = cat;\n        motivoSelecao = 'rotacao_categoria';\n        break;\n      }\n    }\n  }\n  \n  // Se ainda não encontrou nenhuma quest\n  if (!questSelecionada) {\n    motivoSelecao = 'sem_quest_disponivel';\n  }\n  \n  resultados.push({\n    json: {\n      ...data,\n      quest_selecionada: questSelecionada,\n      categoria_selecionada: categoriaSelecionada,\n      motivo_selecao: motivoSelecao,\n      precisa_bem_estar: precisaBemEstar\n    }\n  });\n}\n\nreturn resultados;"
+      },
+      "id": "selecionar_quest",
+      "name": "Selecionar Quest (Rotação)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "version": 2, "caseSensitive": true, "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "tem_quest",
+              "leftValue": "={{ $json.quest_selecionada }}",
+              "rightValue": "",
+              "operator": { "type": "object", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [880, 400],
+      "id": "if_tem_quest",
+      "name": "Tem Quest?"
+    },
+    {
+      "parameters": { "options": {} },
+      "id": "loop_quests",
+      "name": "Loop Quests",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 320]
+    },
+    {
+      "parameters": {
+        "workflowId": { "__rl": true, "value": "i5VG5rHZ39ytueyu", "mode": "list", "cachedResultName": "sw_mentor_notificacoes" },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('Selecionar Quest (Rotação)').item.json.usuario_id }}",
+            "nome_preferencia": "={{ $('Selecionar Quest (Rotação)').item.json.nome_preferencia }}",
+            "tom_conversa": "={{ $('Selecionar Quest (Rotação)').item.json.tom_conversa || 'empatico' }}",
+            "whats_number": "={{ $('Selecionar Quest (Rotação)').item.json.whatsapp_numero }}",
+            "lembretes_canais": "={{ $('Selecionar Quest (Rotação)').item.json.lembretes_canais }}",
+            "push_tokens": "={{ $('Selecionar Quest (Rotação)').item.json.push_tokens }}",
+            "tipo_notificacao": "quest",
+            "contexto": "={{ { quest_selecionada: $('Selecionar Quest (Rotação)').item.json.quest_selecionada, categoria_selecionada: $('Selecionar Quest (Rotação)').item.json.categoria_selecionada, motivo_selecao: $('Selecionar Quest (Rotação)').item.json.motivo_selecao, precisa_bem_estar: $('Selecionar Quest (Rotação)').item.json.precisa_bem_estar, humor_nivel: $('Selecionar Quest (Rotação)').item.json.humor_nivel, energia_nivel: $('Selecionar Quest (Rotação)').item.json.energia_nivel, ultimas_conversas: $('Selecionar Quest (Rotação)').item.json.ultimas_conversas } }}"
+          },
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "call_mentor_quests",
+      "name": "Call sw_mentor_notificacoes (quests)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [1392, 320]
+    },
+    {
+      "parameters": {},
+      "id": "no_quest",
+      "name": "Sem Quest (skip)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "width": 480,
+        "height": 520,
+        "content": "## Notificação Quests v2.0.0\n\n### Rotação de 5 Categorias\n\n| Ordem | Categoria |\n|-------|----------|\n| 1 | TCC |\n| 2 | Estoicismo |\n| 3 | Sabotador |\n| 4 | Personalizada |\n| 5 | Objetivo |\n\n### Regras\n\n1. **Rotação sequencial** - cada dia próxima categoria\n2. **Sem quest?** - pula para próxima disponível\n3. **Humor OU Energia < 5** - manda TCC/Estoicismo (bem-estar)\n\n### Contexto para o Mentor\n\n```json\n{\n  \"quest_selecionada\": {...},\n  \"categoria_selecionada\": \"tcc\",\n  \"motivo_selecao\": \"rotacao_categoria\",\n  \"precisa_bem_estar\": false\n}\n```\n\n**O LLM NÃO decide a quest, apenas cria a mensagem.**"
+      },
+      "id": "sticky-regras-quests",
+      "name": "Regras Notificação Quests v2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [176, 600]
+    }
+  ],
+  "connections": {
+    "Trigger Conversas 09h": {
+      "main": [[{ "node": "usuarios_conversas", "type": "main", "index": 0 }]]
+    },
+    "usuarios_conversas": {
+      "main": [[{ "node": "Loop Conversas", "type": "main", "index": 0 }]]
+    },
+    "Loop Conversas": {
+      "main": [
+        [],
+        [{ "node": "Call sw_mentor_notificacoes (conversas)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call sw_mentor_notificacoes (conversas)": {
+      "main": [[{ "node": "Loop Conversas", "type": "main", "index": 0 }]]
+    },
+    "Trigger Quests 15h": {
+      "main": [[{ "node": "usuarios_elegiveis_quests", "type": "main", "index": 0 }]]
+    },
+    "usuarios_elegiveis_quests": {
+      "main": [[{ "node": "Selecionar Quest (Rotação)", "type": "main", "index": 0 }]]
+    },
+    "Selecionar Quest (Rotação)": {
+      "main": [[{ "node": "Tem Quest?", "type": "main", "index": 0 }]]
+    },
+    "Tem Quest?": {
+      "main": [
+        [{ "node": "Loop Quests", "type": "main", "index": 0 }],
+        [{ "node": "Sem Quest (skip)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Loop Quests": {
+      "main": [
+        [],
+        [{ "node": "Call sw_mentor_notificacoes (quests)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Call sw_mentor_notificacoes (quests)": {
+      "main": [[{ "node": "Loop Quests", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo"
+  },
+  "staticData": {},
+  "meta": { "templateCredsSetupCompleted": true },
+  "pinData": {},
+  "tags": []
+}

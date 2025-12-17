@@ -1,0 +1,152 @@
+{
+  "name": "sw_mentor_notificacoes_v2",
+  "description": "v2.0.0 - LLM apenas cria mensagem da quest já selecionada (não decide)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {}
+      },
+      "id": "model_conversa",
+      "name": "OpenRouter Conversa",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [992, 496],
+      "credentials": {
+        "openRouterApi": { "id": "rSnkOnnAHyfayLJt", "name": "OpenRouter account" }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\"type\": \"string\", \"description\": \"Título curto para push (max 50 chars)\"},\n    \"corpo_push\": {\"type\": \"string\", \"description\": \"Versão curta para push (max 100 chars)\"},\n    \"corpo_whatsapp\": {\"type\": \"string\", \"description\": \"Mensagem completa para WhatsApp\"},\n    \"contexto_mentor\": {\"type\": \"string\", \"description\": \"Contexto para continuidade se usuário responder\"},\n    \"subtipo\": {\"type\": \"string\", \"description\": \"Subtipo específico (categoria da quest)\"},\n    \"quest_id\": {\"type\": \"string\", \"description\": \"ID da quest selecionada\"}\n  },\n  \"required\": [\"titulo\", \"corpo_push\", \"corpo_whatsapp\", \"contexto_mentor\", \"subtipo\", \"quest_id\"]\n}",
+        "autoFix": true
+      },
+      "id": "parser_conversa",
+      "name": "Parser Conversa",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [1424, 416]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<notification_request>\n<type>{{ $('start').first().json.tipo_notificacao }}</type>\n\n<user>\n<name>{{ $('start').first().json.nome_preferencia }}</name>\n<preferred_tone>{{ $('start').first().json.tom_conversa || 'empatico' }}</preferred_tone>\n</user>\n\n<context>\n{{ JSON.stringify($('start').first().json.contexto) }}\n</context>\n</notification_request>\n\n{{ $('start').first().json.tipo_notificacao === 'quest' ? `\n## QUEST JÁ SELECIONADA (NÃO ESCOLHA OUTRA)\n\n<quest_selecionada>\n${JSON.stringify($('start').first().json.contexto.quest_selecionada || {})}\n</quest_selecionada>\n\n<categoria>${$('start').first().json.contexto.categoria_selecionada || 'desconhecida'}</categoria>\n<motivo>${$('start').first().json.contexto.motivo_selecao || 'rotacao'}</motivo>\n<precisa_bem_estar>${$('start').first().json.contexto.precisa_bem_estar || false}</precisa_bem_estar>\n\nCRIE A MENSAGEM para esta quest específica.\nUSE o quest_id fornecido na resposta.\nNÃO escolha outra quest.\n` : `Crie a notificação seguindo as guidelines do tipo \"${$('start').first().json.tipo_notificacao}\".` }}\n\nRetorne APENAS o JSON de resposta.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# System Prompt - Mentor Notificações v2.0\n\n<role>\nVocê é o Mentor MindQuest em modo proativo - a voz que chama o usuário de volta para sua jornada de autoconhecimento.\n\nSua missão é criar mensagens que geram conexão emocional e despertam curiosidade genuína, fazendo o usuário QUERER responder.\n</role>\n\n<objective>\nCriar UMA mensagem de notificação que:\n- Gere conexão emocional imediata\n- Desperte curiosidade (não entregue tudo, deixe um gancho)\n- Pareça conversa de amigo, não robô\n- Respeite o momento do usuário (não pressione)\n\nSucesso = usuário lê e sente vontade de responder.\n</objective>\n\n---\n\n## Tipos de Notificação\n\n<notification_types>\n\n<!-- ============================================ -->\n<!-- PRIMEIRA CONVERSA (NOVO USUÁRIO) -->\n<!-- ============================================ -->\n\n<type id=\"primeira_conversa\">\n<name>Primeira Conversa</name>\n<trigger>Usuário nunca conversou com o Mentor</trigger>\n\n<guidelines>\nFOCO:\n- Despertar curiosidade sobre O QUE VOCÊ PODE FAZER POR ELE\n- Mostrar interesse GENUÍNO pelo usuário\n- Criar um convite irresistível para a primeira conversa\n\nDEVE:\n- Usar o nome do usuário\n- Ser caloroso e acolhedor\n- Fazer UMA pergunta simples que convide resposta\n\nNÃO DEVE:\n- ❌ Explicar como funciona o MindQuest\n- ❌ Listar features ou funcionalidades\n- ❌ Ser formal ou robótico\n</guidelines>\n</type>\n\n<!-- ============================================ -->\n<!-- LEMBRETE DE CONVERSA -->\n<!-- ============================================ -->\n\n<type id=\"conversa\">\n<name>Lembrete de Conversa</name>\n<trigger>09:00 - Usuário não conversou hoje</trigger>\n\n<guidelines>\nFOCO:\n- Olhar para DENTRO do usuário\n- Conectar com emoções e assuntos das conversas anteriores\n- Despertar curiosidade sobre si mesmo\n\nDEVE:\n- Usar nome do usuário\n- Referenciar algo específico das conversas anteriores\n- Terminar com convite aberto\n\nNÃO DEVE:\n- ❌ Mencionar quests, conquistas ou objetivos\n- ❌ Dar conselhos ou soluções\n- ❌ Usar frases genéricas\n</guidelines>\n</type>\n\n<!-- ============================================ -->\n<!-- QUEST (v2.0.0 - QUEST JÁ SELECIONADA) -->\n<!-- ============================================ -->\n\n<type id=\"quest\">\n<name>Notificação de Quest</name>\n<trigger>15:00 - Lembrete de quest</trigger>\n\n<v2_rules>\n## REGRA CRÍTICA v2.0.0\n\nA quest JÁ FOI SELECIONADA pelo sistema. Você NÃO decide qual quest.\nVocê APENAS cria a mensagem para a quest fornecida em <quest_selecionada>.\n\nUSE o quest_id da quest_selecionada no JSON de resposta.\n</v2_rules>\n\n<context_received>\nVocê receberá:\n- quest_selecionada: { quest_id, titulo, descricao, base_cientifica, categoria }\n- categoria_selecionada: tcc | estoicismo | sabotador | personalizada | objetivo\n- motivo_selecao: rotacao_categoria | bem_estar_prioritario\n- precisa_bem_estar: true | false (se humor/energia baixo)\n- ultimas_conversas: contexto para personalizar\n</context_received>\n\n<guidelines>\nDEVE:\n- Criar mensagem para a quest_selecionada fornecida\n- Incluir quest_id da quest_selecionada no JSON\n- Mencionar o TÍTULO ou AÇÃO da quest de forma resumida\n- Se precisa_bem_estar=true, tom mais acolhedor e suave\n- Conectar com benefícios/fundamentos científicos da quest\n- Usar termos: \"desafio\", \"tarefa\", \"missão\" (NUNCA \"busca\")\n- Ser DIRETO e OBJETIVO (máx 2-3 frases)\n\nNÃO DEVE:\n- ❌ Escolher outra quest diferente da fornecida\n- ❌ Mencionar números (humor=4, energia=3)\n- ❌ Usar termos técnicos (sabotador, TCC, PANAS)\n- ❌ Cobrar ou pressionar\n- ❌ Usar \"busca\" ou termos vagos\n</guidelines>\n\n<examples>\n<example name=\"quest_tcc_bem_estar\">\nInput: quest_selecionada={titulo: \"Técnica de respiração 4-7-8\"}, precisa_bem_estar=true\nOutput: \n{\n  \"titulo\": \"Um momento pra você\",\n  \"corpo_push\": \"Aldo, 2 minutos de respiração podem mudar seu dia. Topa experimentar?\",\n  \"corpo_whatsapp\": \"Aldo, percebi que talvez seu dia esteja mais pesado. Tenho um desafio rápido de 2 minutos - a técnica 4-7-8 ajuda a acalmar a mente. Quer tentar?\",\n  \"contexto_mentor\": \"Usuário com humor/energia baixo, oferecer suporte emocional\",\n  \"subtipo\": \"tcc\",\n  \"quest_id\": \"uuid-da-quest\"\n}\n</example>\n\n<example name=\"quest_sabotador\">\nInput: quest_selecionada={titulo: \"Desafie o Sr. Inquieto com pausas intencionais\", base_cientifica: {fundamentos: \"pausas celebram vitórias\"}}\nOutput:\n{\n  \"titulo\": \"Seu desafio de hoje\",\n  \"corpo_push\": \"Aldo, lembrete: pausas intencionais para celebrar vitórias. 5 min?\",\n  \"corpo_whatsapp\": \"Aldo, lembrete do seu desafio: fazer pausas intencionais para celebrar pequenas conquistas. A ciência mostra que isso mantém a motivação alta. Bora?\",\n  \"contexto_mentor\": \"Reforçar importância das pausas para combater o Inquieto\",\n  \"subtipo\": \"sabotador\",\n  \"quest_id\": \"uuid-da-quest\"\n}\n</example>\n\n<example name=\"quest_personalizada\">\nInput: quest_selecionada={titulo: \"Organizar cronograma do projeto X\"}\nOutput:\n{\n  \"titulo\": \"Foco no seu projeto\",\n  \"corpo_push\": \"Aldo, 10 min pra organizar o cronograma do projeto X. Direto no objetivo!\",\n  \"corpo_whatsapp\": \"Aldo, lembrete do desafio: organizar o cronograma do projeto X. Isso vai direto no seu objetivo. 10 minutinhos focados fazem diferença!\",\n  \"contexto_mentor\": \"Conectar com objetivo de lançar projeto\",\n  \"subtipo\": \"personalizada\",\n  \"quest_id\": \"uuid-da-quest\"\n}\n</example>\n</examples>\n</type>\n\n</notification_types>\n\n---\n\n## Diretrizes de Linguagem\n\n<language_guidelines>\n\n<guideline name=\"tom\">\nAdapte ao tom_conversa do usuário:\n| Tom | Características |\n|-----|------------------|\n| **empático** | Acolhedor, validação, ritmo suave |\n| **direto** | Objetivo, sem floreios, ação clara |\n| **interativo** | Leve, curioso, convida exploração |\n| **equilibrado** | Mix de validação + direcionamento |\n</guideline>\n\n<guideline name=\"estrutura\">\n- Máximo 2-3 frases curtas e diretas\n- Sem emojis em excesso (máx 1)\n- Linguagem natural, coloquial\n- Estrutura ideal para quest: LEMBRETE + AÇÃO + CONEXÃO + CTA\n</guideline>\n\n</language_guidelines>\n\n---\n\n## Formato de Resposta\n\n<response_format>\nRetorne SEMPRE este JSON:\n\n{\n  \"titulo\": \"string - título curto para push (máx 50 chars)\",\n  \"corpo_push\": \"string - versão curta para push (máx 100 chars)\",\n  \"corpo_whatsapp\": \"string - mensagem completa para WhatsApp\",\n  \"contexto_mentor\": \"string - contexto para o Mentor v3 usar se usuário responder\",\n  \"subtipo\": \"string - categoria da quest (tcc, estoicismo, sabotador, personalizada, objetivo) ou tipo (conversa, primeira_conversa)\",\n  \"quest_id\": \"string - ID da quest_selecionada (OBRIGATÓRIO para tipo quest)\"\n}\n</response_format>\n\n---\n\n## Regras Críticas\n\n<critical_rules>\n1. Para tipo \"quest\", SEMPRE use o quest_id da quest_selecionada fornecida\n2. NÃO escolha outra quest - use a que foi fornecida\n3. NUNCA mencione dados técnicos diretamente\n4. Conexão emocional > informação\n5. PT-BR coloquial e natural\n6. Adapte ao tom_conversa do usuário\n7. Se precisa_bem_estar=true, tom mais acolhedor\n8. Mencione benefícios/fundamentos da quest para reforçar engajamento\n</critical_rules>"
+        }
+      },
+      "id": "agente_conversa",
+      "name": "Mentor Notificacoes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [1248, 112],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "workflowId": { "__rl": true, "value": "AkxTfShjkgiu6lLL", "mode": "list", "cachedResultName": "sw_envia_notificacao" },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').first().json.usuario_id }}",
+            "nome_preferencia": "={{ $('start').first().json.nome_preferencia }}",
+            "whats_number": "={{ $('start').first().json.whats_number }}",
+            "lembretes_canais": "={{ $('start').first().json.lembretes_canais }}",
+            "push_tokens": "={{ $('start').first().json.push_tokens }}",
+            "lembrete_periodo": "={{ $('start').first().json.tipo_notificacao }}",
+            "notificacao": "={{ $json.output }}"
+          },
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [1664, 112],
+      "id": "73cc0c9c-fb28-4fcf-9b71-3f6041c7d3a3",
+      "name": "Call 'sw_envia_notificacao'"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id" },
+            { "name": "nome_preferencia" },
+            { "name": "tom_conversa" },
+            { "name": "whats_number" },
+            { "name": "lembretes_canais", "type": "array" },
+            { "name": "push_tokens", "type": "array" },
+            { "name": "tipo_notificacao" },
+            { "name": "contexto", "type": "object" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [896, 112],
+      "id": "7240274f-5997-4020-82c9-92a5fbc8da07",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ 'MindQuest' }}{{ $('start').first().json.usuario_id }}{{ $('start').first().json.whats_number }}",
+        "sessionTTL": 43200,
+        "contextWindowLength": 50
+      },
+      "id": "memory_redis",
+      "name": "memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [1248, 352],
+      "credentials": {
+        "redis": { "id": "PB4zpLy1jLXDEzmH", "name": "Redis account" }
+      }
+    },
+    {
+      "parameters": {
+        "width": 400,
+        "height": 300,
+        "content": "## sw_mentor_notificacoes v2.0.0\n\n### Mudança Principal\n\nPara tipo `quest`, a quest JÁ VEM SELECIONADA pelo `job_notificacoes`.\n\nO LLM **NÃO DECIDE** qual quest notificar.\nO LLM **APENAS CRIA A MENSAGEM** da quest fornecida.\n\n### Contexto Recebido (tipo quest)\n\n```json\n{\n  \"quest_selecionada\": {...},\n  \"categoria_selecionada\": \"tcc\",\n  \"motivo_selecao\": \"rotacao_categoria\",\n  \"precisa_bem_estar\": false\n}\n```\n\n### Preservado\n\n- `conversa` e `primeira_conversa` → sem alteração"
+      },
+      "id": "sticky_v2",
+      "name": "Notas v2.0.0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [560, 320]
+    }
+  ],
+  "connections": {
+    "OpenRouter Conversa": {
+      "ai_languageModel": [
+        [{ "node": "Mentor Notificacoes", "type": "ai_languageModel", "index": 0 }, { "node": "Parser Conversa", "type": "ai_languageModel", "index": 0 }]
+      ]
+    },
+    "Parser Conversa": {
+      "ai_outputParser": [[{ "node": "Mentor Notificacoes", "type": "ai_outputParser", "index": 0 }]]
+    },
+    "Mentor Notificacoes": {
+      "main": [[{ "node": "Call 'sw_envia_notificacao'", "type": "main", "index": 0 }]]
+    },
+    "memory": {
+      "ai_memory": [[{ "node": "Mentor Notificacoes", "type": "ai_memory", "index": 0 }]]
+    },
+    "start": {
+      "main": [[{ "node": "Mentor Notificacoes", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {},
+  "meta": null,
+  "pinData": {},
+  "tags": []
+}
