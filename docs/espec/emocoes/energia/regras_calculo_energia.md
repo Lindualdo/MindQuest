@@ -1,49 +1,63 @@
-# Regras de Cálculo de Energia - Documento Executivo
+# Regras de Cálculo de Energia
 
-**Data:** 2025-11-27  
+**Data:** 2025-12-17  
 **Status:** Ativo  
-**Versão:** 1.0
+**Versão:** 2.0
 
-## Visão Geral
+## Cálculo Atual
 
-O sistema detecta o nível de energia do usuário através de análise por IA das conversas, gerando uma escala de 1 a 10 onde 1-3 é muito baixa (exausto, sem forças), 4-5 baixa (cansado), 6-7 moderada, 8-9 alta (disposto, energizado) e 10 muito alta (hiperativo).
+**Método:** PANAS (Positive and Negative Affect Schedule)
 
-## Regras de Cálculo (Atual)
+### Fórmula
 
-**Energia no Card de Emoções:** Atualmente calculada através da análise PANAS (emotions), considerando emoções positivas/negativas de **todo o histórico** do usuário, sem filtro de período. Retorna percentuais de emoções positivas, negativas e neutras, além de uma categoria geral (POSITIVA/NEGATIVA/NEUTRA).
+```
+energia_nivel = percentual_positiva / 10
+```
 
-**Energia Nível (Detectada):** O sistema detecta `energia_nivel` (1-10) através de IA e armazena na tabela `usuarios_humor_energia`, mas este valor não é utilizado no card de emoções atualmente.
+Onde `percentual_positiva` = % de emoções positivas do total detectado.
 
-## Justificativa (Atual)
+### Classificação de Emoções
 
-A análise PANAS fornece uma visão indireta da energia através do balanço emocional. Emoções positivas (joy, trust, anticipation) indicam maior energia, enquanto emoções negativas (sadness, fear, anger, disgust) indicam menor energia.
+| Categoria | Emoções (emocao_id) |
+|-----------|---------------------|
+| **Positiva** | joy, trust, anticipation |
+| **Negativa** | sadness, fear, anger, disgust |
+| **Neutra** | surprise |
 
-## Aplicação (Atual)
+### Filtros
 
-- **Percentual Positivo > 60%:** Indica energia positiva predominante
-- **Percentual Negativo > 60%:** Indica energia negativa predominante
-- **Balanço equilibrado:** Indica energia neutra/estável
+- Intensidade >= 45
+- Todo histórico do usuário
 
-## Dados Adicionais
+### Escala Final
 
-Além do nível de energia, o sistema também detecta variação durante a conversa (estável/ascendente/descendente/oscilatória), período do dia e confiança da análise (0-100).
+| % Positiva | Energia (1-10) |
+|------------|----------------|
+| 80% | 8 |
+| 60% | 6 |
+| 50% | 5 |
+| 40% | 4 |
 
-## Melhorias Futuras
+### Fonte de Dados
 
-**Implementar Cálculo de Energia Nível:** Utilizar o campo `energia_nivel` (1-10) já detectado pela IA, similar ao cálculo de humor:
+- **Tabela:** `usuarios_emocoes`
+- **Campo:** `emocao_id`, `intensidade`
 
-**Média de Energia:** Calcular com base em **todos os registros históricos** de `energia_nivel`, sem filtro de período. Média aritmética simples arredondada para 2 casas decimais.
+## Query de Referência
 
-**Energia Atual:** Corresponde ao **último registro** de `energia_nivel` detectado, independente da data.
+```sql
+SELECT 
+  usuario_id,
+  CASE WHEN COUNT(*) > 0
+    THEN ROUND((COUNT(*) FILTER (
+      WHERE LOWER(emocao_id) IN ('joy','trust','anticipation')
+    )::numeric / COUNT(*)::numeric) * 100, 1)
+    ELSE 60 END AS percentual_positiva
+FROM usuarios_emocoes
+WHERE intensidade >= 45
+GROUP BY usuario_id
+```
 
-**Médias Recentes:** Implementar cálculo de médias por período específico:
-- Últimos 7 dias
-- Última semana (segunda a domingo)
-- Último mês (30 dias)
+## Uso em Notificações
 
-**Visualização:** Criar gráfico de linhas comparando:
-- Média histórica (linha base)
-- Médias recentes por período
-- Energia atual
-- Evolução/regressão ao longo do tempo
-
+**Gatilho TCC/Estoicismo:** `energia_nivel <= 5` (percentual_positiva <= 50%)
