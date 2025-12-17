@@ -146,6 +146,11 @@ const NotificacoesPageV13: React.FC = () => {
       setError(null);
       setSuccess(false);
 
+      // Garantir que WhatsApp sempre esteja nos canais
+      const canaisComWhatsApp = formData.lembretes_canais.includes('whatsapp')
+        ? formData.lembretes_canais
+        : ['whatsapp', ...formData.lembretes_canais];
+
       const response = await fetch('/api/notificacoes', {
         method: 'POST',
         headers: {
@@ -154,6 +159,7 @@ const NotificacoesPageV13: React.FC = () => {
         body: JSON.stringify({
           user_id: usuarioId,
           ...formData,
+          lembretes_canais: canaisComWhatsApp,
         }),
       });
 
@@ -435,7 +441,7 @@ const NotificacoesPageV13: React.FC = () => {
 
             {formData.lembretes_ativo && (
               <div className="space-y-4">
-                {/* Período */}
+                {/* TODO: Período preferido - habilitar em versão futura
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-[var(--mq-text)]">
                     <Clock size={16} />
@@ -451,6 +457,7 @@ const NotificacoesPageV13: React.FC = () => {
                     <option value="noite">Noite</option>
                   </select>
                 </div>
+                */}
 
                 {/* Tipos de lembretes */}
                 <div className="space-y-3">
@@ -507,22 +514,25 @@ const NotificacoesPageV13: React.FC = () => {
                   <p className="mb-3 text-sm font-semibold text-[var(--mq-text)]">Canais de notificação:</p>
                   <div className="grid grid-cols-2 gap-3">
                     {(['whatsapp', 'email', 'push', 'sms'] as CanalNotificacao[]).map((canal) => {
-                      const isSelected = formData.lembretes_canais.includes(canal);
+                      const isWhatsApp = canal === 'whatsapp';
+                      const isSelected = isWhatsApp || formData.lembretes_canais.includes(canal);
+                      const isDisabled = !isWhatsApp; // Apenas WhatsApp habilitado por enquanto
                       return (
                         <button
                           key={canal}
                           type="button"
-                          onClick={() => toggleCanal(canal)}
+                          onClick={() => !isWhatsApp && !isDisabled && toggleCanal(canal)}
+                          disabled={isDisabled}
                           className={`flex items-center gap-2 rounded-xl border-2 p-3 transition-all ${
-                            isSelected
+                            isWhatsApp
                               ? 'border-[var(--mq-primary)] bg-[var(--mq-primary-light)]'
-                              : 'border-[var(--mq-border)] bg-[var(--mq-card)]'
+                              : 'border-[var(--mq-border)] bg-[var(--mq-card)] opacity-50 cursor-not-allowed'
                           }`}
                         >
-                          <div className={`${isSelected ? 'text-[var(--mq-primary)]' : 'text-[var(--mq-text-muted)]'}`}>
+                          <div className={`${isWhatsApp ? 'text-[var(--mq-primary)]' : 'text-[var(--mq-text-muted)]'}`}>
                             {getCanalIcon(canal)}
                           </div>
-                          <span className={`text-xs font-semibold ${isSelected ? 'text-[var(--mq-primary)]' : 'text-[var(--mq-text-muted)]'}`}>
+                          <span className={`text-xs font-semibold ${isWhatsApp ? 'text-[var(--mq-primary)]' : 'text-[var(--mq-text-muted)]'}`}>
                             {getCanalLabel(canal)}
                           </span>
                         </button>
@@ -530,7 +540,7 @@ const NotificacoesPageV13: React.FC = () => {
                     })}
                   </div>
                   <p className="mt-2 text-xs text-[var(--mq-text-muted)]">
-                    Selecione um ou mais canais para receber os lembretes
+                    Outros canais em breve
                   </p>
                 </div>
               </div>
