@@ -382,3 +382,4 @@ return [$json];
 **Prioridade:** Alta (impacta UX - quests repetitivas frustram usuário)
 
 
+
