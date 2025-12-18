@@ -1,8 +1,8 @@
 {
   "createdAt": "2025-12-18T00:00:00.000Z",
   "id": "j0bR3p0rc0rfH0j1",
-  "name": "job_reprocess_experts_orfaos_hoje_v1",
-  "description": "Busca chats de hoje sem dados (humor, bigfive, sabotadores, emoções) e chama sw_experts_repro_v1.",
+  "name": "job_reprocess_experts_orfaos_v1",
+  "description": "Busca chats órfãos (qualquer data) sem dados (humor, bigfive, sabotadores, emoções) e chama sw_experts_repro_v1.",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -20,7 +20,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Chats órfãos: apenas HOJE e apenas experts (humor, bigfive, sabotadores, emoções)\nSELECT\n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE DATE(c.data_conversa) = CURRENT_DATE\n  AND (\n    NOT EXISTS (SELECT 1 FROM usuarios_sabotadores us WHERE us.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_emocoes ue WHERE ue.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_humor_energia uh WHERE uh.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_perfis up WHERE up.chat_id = c.id)\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
+        "query": "-- Chats órfãos: qualquer data e apenas experts (humor, bigfive, sabotadores, emoções)\nSELECT\n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE (\n    NOT EXISTS (SELECT 1 FROM usuarios_sabotadores us WHERE us.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_emocoes ue WHERE ue.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_humor_energia uh WHERE uh.chat_id = c.id)\n    OR NOT EXISTS (SELECT 1 FROM usuarios_perfis up WHERE up.chat_id = c.id)\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
         "options": {}
       },
       "id": "buscar-orfaos",
