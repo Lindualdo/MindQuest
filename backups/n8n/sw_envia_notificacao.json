@@ -353,6 +353,116 @@
       ],
       "id": "ec98be37-9cc5-4175-9f05-ffa441df9728",
       "name": "start"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*)::int AS total\nFROM notificacoes_log nl\nWHERE nl.usuario_id = $1::uuid\n  AND nl.canal = 'push'\n  AND DATE(nl.criado_em) = CURRENT_DATE\n  AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1);",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo] }}"
+        }
+      },
+      "id": "04e068fc-582a-4685-aabb-f377e362b9d6",
+      "name": "Check Log Push",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1568,
+        -112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no_row",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "db8f88c6-bccd-400a-a660-b2ca132c4eb8",
+      "name": "Nao existe log Push?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1768,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*)::int AS total\nFROM notificacoes_log nl\nWHERE nl.usuario_id = $1::uuid\n  AND nl.canal = 'whatsapp'\n  AND DATE(nl.criado_em) = CURRENT_DATE\n  AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1);",
+        "options": {
+          "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo] }}"
+        }
+      },
+      "id": "e1ece4af-f1d1-4cf7-ac3d-e01c4691222b",
+      "name": "Check Log WhatsApp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1488,
+        96
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no_row",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4c82b2e4-88bb-49f9-baa4-a5e38f82379c",
+      "name": "Nao existe log WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1688,
+        96
+      ]
     }
   ],
   "connections": {
@@ -371,7 +481,7 @@
       "main": [
         [
           {
-            "node": "Log Push",
+            "node": "Check Log Push",
             "type": "main",
             "index": 0
           }
@@ -418,7 +528,7 @@
       "main": [
         [
           {
-            "node": "Log WhatsApp",
+            "node": "Check Log WhatsApp",
             "type": "main",
             "index": 0
           }
@@ -460,6 +570,64 @@
     },
     "Enviar Push": {
       "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Log Push": {
+      "main": [
+        [
+          {
+            "node": "Nao existe log Push?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Log WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Nao existe log WhatsApp?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nao existe log Push?": {
+      "main": [
+        [
+          {
+            "node": "Log Push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nao existe log WhatsApp?": {
+      "main": [
+        [
+          {
+            "node": "Log WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "End",
