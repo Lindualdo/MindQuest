@@ -28,7 +28,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens,\n  CASE \n    WHEN NOT EXISTS (SELECT 1 FROM usr_chat WHERE usuario_id = n.usuario_id) \n    THEN true \n    ELSE false \n  END AS is_primeira_conversa,\n  (SELECT json_agg(json_build_object(\n    'data_conversa', c.data_conversa,\n    'resumo', c.resumo_conversa\n  ) ORDER BY c.data_conversa DESC)\n   FROM (\n     SELECT data_conversa, resumo_conversa\n     FROM usr_chat\n     WHERE usuario_id = n.usuario_id\n       AND resumo_conversa IS NOT NULL\n     ORDER BY data_conversa DESC\n   ) c\n  ) AS ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE 'conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais;",
+        "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens,\n  CASE \n    WHEN NOT EXISTS (SELECT 1 FROM usr_chat WHERE usuario_id = n.usuario_id) \n    THEN true \n    ELSE false \n  END AS is_primeira_conversa,\n  (SELECT json_agg(json_build_object(\n    'data_conversa', c.data_conversa,\n    'resumo', c.resumo_conversa\n  ) ORDER BY c.data_conversa DESC)\n   FROM (\n     SELECT data_conversa, resumo_conversa\n     FROM usr_chat\n     WHERE usuario_id = n.usuario_id\n       AND resumo_conversa IS NOT NULL\n     ORDER BY data_conversa DESC\n   ) c\n  ) AS ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE '%conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais;",
         "options": {}
       },
       "id": "073dab68-d3a7-4497-b0a8-b059b6e2e1df",
@@ -226,9 +226,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -237,12 +238,14 @@
               "rightValue": "",
               "operator": {
                 "type": "object",
-                "operation": "notEmpty"
+                "operation": "notEmpty",
+                "singleValue": true
               }
             }
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.if",
@@ -387,21 +390,6 @@
         432,
         368
       ]
-    },
-    {
-      "parameters": {
-        "content": "## Notificação Quests v2.0.0\n\n### Rotação de 5 Categorias\n\n| Ordem | Categoria |\n|-------|----------|\n| 1 | TCC |\n| 2 | Estoicismo |\n| 3 | Sabotador |\n| 4 | Personalizada |\n| 5 | Objetivo |\n\n### Regras\n\n1. **Rotação sequencial** - cada dia próxima categoria\n2. **Sem quest?** - pula para próxima disponível\n3. **Humor OU Energia < 5** - manda TCC/Estoicismo (bem-estar)\n\n### Contexto para o Mentor\n\n```json\n{\n  \"quest_selecionada\": {...},\n  \"categoria_selecionada\": \"tcc\",\n  \"motivo_selecao\": \"rotacao_categoria\",\n  \"precisa_bem_estar\": false\n}\n```\n\n**O LLM NÃO decide a quest, apenas cria a mensagem.**",
-        "height": 824,
-        "width": 480
-      },
-      "id": "7250dc06-f19a-4d0d-b713-7c8444b5ef44",
-      "name": "Regras Notificação Quests v2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1184,
-        -176
-      ]
     }
   ],
   "connections": {
@@ -542,7 +530,7 @@
   },
   "meta": null,
   "pinData": {},
-  "activeVersionId": "455b7e9d-4e4c-4ab9-883c-6e64666f7ccd",
+  "activeVersionId": "57371035-548f-417a-a4ce-4f85210399fe",
   "shared": [
     {
       "createdAt": "2025-12-17T20:18:16.166Z",
@@ -596,7 +584,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-18T11:07:10.060Z",
+    "createdAt": "2025-12-18T12:25:10.463Z",
     "workflowId": "vGLluHVYupmxKJWT",
     "nodes": [
       {
@@ -621,7 +609,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens,\n  CASE \n    WHEN NOT EXISTS (SELECT 1 FROM usr_chat WHERE usuario_id = n.usuario_id) \n    THEN true \n    ELSE false \n  END AS is_primeira_conversa,\n  (SELECT json_agg(json_build_object(\n    'data_conversa', c.data_conversa,\n    'resumo', c.resumo_conversa\n  ) ORDER BY c.data_conversa DESC)\n   FROM (\n     SELECT data_conversa, resumo_conversa\n     FROM usr_chat\n     WHERE usuario_id = n.usuario_id\n       AND resumo_conversa IS NOT NULL\n     ORDER BY data_conversa DESC\n   ) c\n  ) AS ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE 'conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais;",
+          "query": "SELECT \n  n.usuario_id,\n  u.nome_preferencia,\n  u.tom_conversa,\n  u.whatsapp_numero,\n  n.lembretes_canais,\n  ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens,\n  CASE \n    WHEN NOT EXISTS (SELECT 1 FROM usr_chat WHERE usuario_id = n.usuario_id) \n    THEN true \n    ELSE false \n  END AS is_primeira_conversa,\n  (SELECT json_agg(json_build_object(\n    'data_conversa', c.data_conversa,\n    'resumo', c.resumo_conversa\n  ) ORDER BY c.data_conversa DESC)\n   FROM (\n     SELECT data_conversa, resumo_conversa\n     FROM usr_chat\n     WHERE usuario_id = n.usuario_id\n       AND resumo_conversa IS NOT NULL\n     ORDER BY data_conversa DESC\n   ) c\n  ) AS ultimas_conversas\nFROM notificacoes n\nINNER JOIN usuarios u ON u.id = n.usuario_id\nLEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\nWHERE n.lembretes_ativo = true\n  AND n.lembretes_conversas_diarias = true\n  AND 'whatsapp' = ANY(n.lembretes_canais)\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM usr_chat c \n    WHERE c.usuario_id = n.usuario_id \n      AND DATE(c.data_conversa) = CURRENT_DATE\n  )\n  AND NOT EXISTS (\n    SELECT 1 \n    FROM notificacoes_log nl \n    WHERE nl.usuario_id = n.usuario_id \n      AND DATE(nl.criado_em) = CURRENT_DATE \n      AND nl.tipo LIKE '%conversa%'\n  )\nGROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais;",
           "options": {}
         },
         "id": "073dab68-d3a7-4497-b0a8-b059b6e2e1df",
@@ -819,9 +807,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
             },
             "conditions": [
               {
@@ -830,12 +819,14 @@
                 "rightValue": "",
                 "operator": {
                   "type": "object",
-                  "operation": "notEmpty"
+                  "operation": "notEmpty",
+                  "singleValue": true
                 }
               }
             ],
             "combinator": "and"
           },
+          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.if",
@@ -979,21 +970,6 @@
         "position": [
           432,
           368
-        ]
-      },
-      {
-        "parameters": {
-          "content": "## Notificação Quests v2.0.0\n\n### Rotação de 5 Categorias\n\n| Ordem | Categoria |\n|-------|----------|\n| 1 | TCC |\n| 2 | Estoicismo |\n| 3 | Sabotador |\n| 4 | Personalizada |\n| 5 | Objetivo |\n\n### Regras\n\n1. **Rotação sequencial** - cada dia próxima categoria\n2. **Sem quest?** - pula para próxima disponível\n3. **Humor OU Energia < 5** - manda TCC/Estoicismo (bem-estar)\n\n### Contexto para o Mentor\n\n```json\n{\n  \"quest_selecionada\": {...},\n  \"categoria_selecionada\": \"tcc\",\n  \"motivo_selecao\": \"rotacao_categoria\",\n  \"precisa_bem_estar\": false\n}\n```\n\n**O LLM NÃO decide a quest, apenas cria a mensagem.**",
-          "height": 824,
-          "width": 480
-        },
-        "id": "7250dc06-f19a-4d0d-b713-7c8444b5ef44",
-        "name": "Regras Notificação Quests v2",
-        "type": "n8n-nodes-base.stickyNote",
-        "typeVersion": 1,
-        "position": [
-          -1184,
-          -176
         ]
       }
     ],

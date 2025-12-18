@@ -10,13 +10,13 @@
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst notif = input.notificacao || {};\n\nconst notificacoes = [];\nconst canais = input.lembretes_canais || [];\n\nconst titulo = notif.titulo || `${input.nome_preferencia}, vamos conversar?`;\nconst corpo_push = notif.corpo_push || 'Como esta seu dia? Seu mentor esta aqui.';\nconst corpo_whatsapp = notif.corpo_whatsapp || `Oi ${input.nome_preferencia}! Como esta seu dia?`;\nconst contexto_mentor = notif.contexto_mentor || 'Notificacao de conversa';\n\nconst periodo = input.lembrete_periodo || 'conversa';\nconst subtipo = notif.subtipo || 'geral';\n\n// Regra: tipo deve caber em notificacoes_log.tipo (varchar(30))\n// - Se subtipo == periodo ou subtipo == 'geral', usar apenas periodo\n// - Se ainda ficar grande, fallback para periodo e por fim truncar\nlet tipo = (subtipo === periodo || subtipo === 'geral') ? periodo : `${periodo}_${subtipo}`;\nif (tipo.length > 30) tipo = periodo;\nif (tipo.length > 30) tipo = tipo.slice(0, 30);\n\nif (canais.includes('push') && input.push_tokens?.length > 0) {\n  for (const token of input.push_tokens) {\n    notificacoes.push({\n      json: {\n        usuario_id: input.usuario_id,\n        nome: input.nome_preferencia,\n        canal: 'push',\n        tipo,\n        token,\n        titulo,\n        corpo: corpo_push,\n        contexto_mentor\n      }\n    });\n  }\n}\n\nif (canais.includes('whatsapp') && input.whats_number) {\n  // Usar corpo_whatsapp direto, sem sugestoes numericas\n  notificacoes.push({\n    json: {\n      usuario_id: input.usuario_id,\n      nome: input.nome_preferencia,\n      canal: 'whatsapp',\n      tipo,\n      whatsapp_numero: input.whats_number,\n      titulo,\n      corpo: corpo_whatsapp,\n      contexto_mentor\n    }\n  });\n}\n\nreturn notificacoes;"
       },
-      "id": "4c50482a-5edd-4200-a0c3-f90e96cd9272",
+      "id": "62b89a3e-3acf-45c5-986a-4c2dac68aedb",
       "name": "Processar Conversa",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
-        96
+        672,
+        288
       ]
     },
     {
@@ -93,13 +93,13 @@
         },
         "options": {}
       },
-      "id": "5da075a6-7c1b-4f4e-88fc-b5bdd207d0ef",
+      "id": "f1626085-549e-46a4-9670-7973a7561442",
       "name": "Switch Canal",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1232,
-        80
+        896,
+        272
       ]
     },
     {
@@ -133,13 +133,13 @@
         },
         "options": {}
       },
-      "id": "e4a2a5df-30e7-460d-ad43-2016f383e500",
+      "id": "7ddba960-caf0-4369-857b-b0f6e99cf207",
       "name": "Enviar Push",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2048,
-        -112
+        1776,
+        32
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -154,13 +154,13 @@
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
       },
-      "id": "ceebc2f4-4b9d-45f3-b672-fdc6c8c88385",
+      "id": "b1fde415-c2f0-4db0-80fb-eee03780f21d",
       "name": "Log Push",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1808,
-        -112
+        1568,
+        32
       ],
       "credentials": {
         "postgres": {
@@ -179,13 +179,13 @@
           "cachedResultName": "MindQuest"
         }
       },
-      "id": "1d55176f-6535-41a5-91a1-37d3421a8fda",
+      "id": "83fbc228-3836-4925-89cc-37f74f64b27a",
       "name": "Config",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        1520,
-        96
+        1120,
+        288
       ]
     },
     {
@@ -259,13 +259,13 @@
         },
         "options": {}
       },
-      "id": "10636eac-0fd9-4336-beea-b3591bfa27eb",
+      "id": "4efc5b9d-3152-4e98-be34-e3b3d005e05d",
       "name": "Enviar WhatsApp",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1952,
-        96
+        1984,
+        272
       ],
       "onError": "continueRegularOutput"
     },
@@ -277,13 +277,13 @@
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
       },
-      "id": "fdf2fed6-7c0c-4bf2-a51e-5218bb4623a6",
+      "id": "8ee733ee-537f-43bd-be59-cc9accd6bbe1",
       "name": "Log WhatsApp",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1728,
-        96
+        1776,
+        272
       ],
       "credentials": {
         "postgres": {
@@ -294,24 +294,13 @@
     },
     {
       "parameters": {},
-      "id": "85409e20-e410-4834-8126-6e924e6d5cf2",
-      "name": "Email (TODO)",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1568,
-        288
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "2f1f0bba-e6a2-4061-9a0d-fabc2b0b7cf7",
+      "id": "da88b9f7-d532-4e9a-bf1a-850b10760ad9",
       "name": "End",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2384,
-        208
+        2256,
+        112
       ]
     },
     {
@@ -348,10 +337,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        752,
-        96
+        448,
+        288
       ],
-      "id": "ec98be37-9cc5-4175-9f05-ffa441df9728",
+      "id": "d76049e6-bbda-48c1-84d3-7fdeb6138fae",
       "name": "start"
     },
     {
@@ -362,13 +351,13 @@
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo] }}"
         }
       },
-      "id": "04e068fc-582a-4685-aabb-f377e362b9d6",
+      "id": "c2384c42-a117-46d0-bcb2-c156f254ca31",
       "name": "Check Log Push",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1568,
-        -112
+        1104,
+        48
       ],
       "credentials": {
         "postgres": {
@@ -400,13 +389,13 @@
         },
         "options": {}
       },
-      "id": "db8f88c6-bccd-400a-a660-b2ca132c4eb8",
+      "id": "7bec9626-4fe5-46d4-90bf-477f76377ed5",
       "name": "Nao existe log Push?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1768,
-        -112
+        1296,
+        48
       ]
     },
     {
@@ -417,13 +406,13 @@
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo] }}"
         }
       },
-      "id": "e1ece4af-f1d1-4cf7-ac3d-e01c4691222b",
+      "id": "f9c112d4-f7a0-427e-9d0b-20f0ab0bc88f",
       "name": "Check Log WhatsApp",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1488,
-        96
+        1296,
+        288
       ],
       "credentials": {
         "postgres": {
@@ -455,13 +444,13 @@
         },
         "options": {}
       },
-      "id": "4c82b2e4-88bb-49f9-baa4-a5e38f82379c",
+      "id": "8af36beb-ae74-451d-b1ef-b555f06d7793",
       "name": "Nao existe log WhatsApp?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1688,
-        96
+        1504,
+        288
       ]
     }
   ],
@@ -493,24 +482,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Email (TODO)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Email (TODO)": {
-      "main": [
-        [
-          {
-            "node": "End",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "start": {
@@ -610,13 +582,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "End",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Nao existe log WhatsApp?": {
@@ -628,13 +594,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "End",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
