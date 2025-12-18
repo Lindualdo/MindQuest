@@ -390,6 +390,159 @@
         432,
         368
       ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        520
+      ],
+      "id": "1b487a81-7983-40cc-b861-81088e13ec6e",
+      "name": "Trigger Conquistas 18h"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v1.0.0: Buscar usuários elegíveis para notificação de conquistas (18h)\n-- Eventos reconhecidos:\n-- - Novo nível atingido (XP cruzou faixa -> nível atual)\n-- - Marcos de sequência de conversas: 3/5/10/15 (terminando hoje)\n-- - Quests recorrentes concluídas hoje\n-- - Marcos de sequência de quests concluídas: 3/5/10/15 (terminando hoje)\n-- Anti-spam:\n-- - Não enviar mais de 1 notificação de conquistas por dia (base tipo = 'conquista')\n\nWITH usuarios_base AS (\n  SELECT\n    n.usuario_id,\n    u.nome_preferencia,\n    u.tom_conversa,\n    u.whatsapp_numero,\n    n.lembretes_canais,\n    ARRAY_AGG(DISTINCT dp.token) FILTER (WHERE dp.token IS NOT NULL) AS push_tokens\n  FROM notificacoes n\n  INNER JOIN usuarios u ON u.id = n.usuario_id\n  LEFT JOIN dispositivos_push dp ON dp.usuario_id = n.usuario_id\n  WHERE n.lembretes_ativo = true\n    AND 'whatsapp' = ANY(n.lembretes_canais)\n  GROUP BY n.usuario_id, u.nome_preferencia, u.tom_conversa, u.whatsapp_numero, n.lembretes_canais\n),\n\nxp AS (\n  SELECT usuario_id, COALESCE(xp_total, 0) AS xp_total, COALESCE(total_xp_hoje, 0) AS xp_ganho_hoje\n  FROM usuarios_conquistas\n),\n\nnivel_calc AS (\n  SELECT\n    ub.usuario_id,\n    jn.nivel AS nivel_atual,\n    jn.nome AS nivel_nome,\n    jn.estagio AS estagio,\n    jn.estagio_nome AS estagio_nome,\n    jn.xp_minimo AS xp_minimo,\n    jn.xp_proximo_nivel AS xp_proximo_nivel\n  FROM usuarios_base ub\n  LEFT JOIN xp x ON x.usuario_id = ub.usuario_id\n  LEFT JOIN LATERAL (\n    SELECT *\n    FROM jornada_niveis\n    WHERE COALESCE(x.xp_total, 0) >= xp_minimo\n      AND (xp_proximo_nivel IS NULL OR COALESCE(x.xp_total, 0) < xp_proximo_nivel)\n    ORDER BY nivel DESC\n    LIMIT 1\n  ) jn ON true\n),\n\nstreak_conversa AS (\n  WITH days AS (\n    SELECT DISTINCT usuario_id, data_conversa::date AS d\n    FROM usr_chat\n    WHERE data_conversa >= CURRENT_DATE - INTERVAL '40 days'\n  ),\n  groups AS (\n    SELECT\n      usuario_id,\n      d,\n      (d - (ROW_NUMBER() OVER (PARTITION BY usuario_id ORDER BY d)) * INTERVAL '1 day') AS grp\n    FROM days\n  ),\n  streaks AS (\n    SELECT usuario_id, COUNT(*)::int AS streak_dias, MAX(d) AS max_d\n    FROM groups\n    GROUP BY usuario_id, grp\n  )\n  SELECT usuario_id, streak_dias\n  FROM streaks\n  WHERE max_d = CURRENT_DATE\n),\n\nstreak_quest AS (\n  WITH days AS (\n    SELECT DISTINCT uq.usuario_id, qr.data_concluida::date AS d\n    FROM quests_recorrencias qr\n    INNER JOIN usuarios_quest uq ON uq.id = qr.usuarios_quest_id\n    WHERE qr.status = 'concluida'\n      AND qr.data_concluida IS NOT NULL\n      AND qr.data_concluida >= CURRENT_DATE - INTERVAL '40 days'\n  ),\n  groups AS (\n    SELECT\n      usuario_id,\n      d,\n      (d - (ROW_NUMBER() OVER (PARTITION BY usuario_id ORDER BY d)) * INTERVAL '1 day') AS grp\n    FROM days\n  ),\n  streaks AS (\n    SELECT usuario_id, COUNT(*)::int AS streak_dias, MAX(d) AS max_d\n    FROM groups\n    GROUP BY usuario_id, grp\n  )\n  SELECT usuario_id, streak_dias\n  FROM streaks\n  WHERE max_d = CURRENT_DATE\n),\n\nquests_concluidas_hoje AS (\n  SELECT\n    uq.usuario_id,\n    COUNT(*)::int AS total,\n    COALESCE(\n      json_agg(DISTINCT COALESCE(uq.config->>'titulo', 'Quest')),\n      '[]'::json\n    ) AS titulos\n  FROM quests_recorrencias qr\n  INNER JOIN usuarios_quest uq ON uq.id = qr.usuarios_quest_id\n  WHERE qr.status = 'concluida'\n    AND qr.data_concluida = CURRENT_DATE\n  GROUP BY uq.usuario_id\n),\n\neventos AS (\n  SELECT\n    ub.usuario_id,\n    ub.nome_preferencia,\n    ub.tom_conversa,\n    ub.whatsapp_numero,\n    ub.lembretes_canais,\n    ub.push_tokens,\n\n    x.xp_total,\n    x.xp_ganho_hoje,\n\n    nc.nivel_atual,\n    nc.nivel_nome,\n    nc.estagio,\n    nc.estagio_nome,\n    nc.xp_minimo,\n    nc.xp_proximo_nivel,\n\n    -- Novo nível: só se ainda não celebrou este nível em nenhuma data\n    CASE\n      WHEN nc.nivel_atual IS NOT NULL\n        AND NOT EXISTS (\n          SELECT 1 FROM notificacoes_log nl\n          WHERE nl.usuario_id = ub.usuario_id\n            AND nl.tipo = ('conquista_nivel_' || nc.nivel_atual::text)\n        )\n      THEN nc.nivel_atual\n      ELSE NULL\n    END AS nivel_novo,\n\n    COALESCE(sc.streak_dias, 0) AS streak_conversa_dias,\n    CASE\n      WHEN sc.streak_dias IN (3,5,10,15)\n        AND NOT EXISTS (\n          SELECT 1 FROM notificacoes_log nl\n          WHERE nl.usuario_id = ub.usuario_id\n            AND nl.tipo = ('conquista_streak_conversa_' || sc.streak_dias::text)\n        )\n      THEN sc.streak_dias\n      ELSE NULL\n    END AS streak_conversa_marco,\n\n    COALESCE(sq.streak_dias, 0) AS streak_quest_dias,\n    CASE\n      WHEN sq.streak_dias IN (3,5,10,15)\n        AND NOT EXISTS (\n          SELECT 1 FROM notificacoes_log nl\n          WHERE nl.usuario_id = ub.usuario_id\n            AND nl.tipo = ('conquista_streak_quest_' || sq.streak_dias::text)\n        )\n      THEN sq.streak_dias\n      ELSE NULL\n    END AS streak_quest_marco,\n\n    COALESCE(qh.total, 0) AS quests_concluidas_total,\n    COALESCE(qh.titulos, '[]'::json) AS quests_concluidas_titulos\n\n  FROM usuarios_base ub\n  LEFT JOIN xp x ON x.usuario_id = ub.usuario_id\n  LEFT JOIN nivel_calc nc ON nc.usuario_id = ub.usuario_id\n  LEFT JOIN streak_conversa sc ON sc.usuario_id = ub.usuario_id\n  LEFT JOIN streak_quest sq ON sq.usuario_id = ub.usuario_id\n  LEFT JOIN quests_concluidas_hoje qh ON qh.usuario_id = ub.usuario_id\n)\n\nSELECT\n  e.usuario_id,\n  e.nome_preferencia,\n  e.tom_conversa,\n  e.whatsapp_numero,\n  e.lembretes_canais,\n  e.push_tokens,\n\n  -- Subtipo principal (define o tipo gravado no log)\n  CASE\n    WHEN e.nivel_novo IS NOT NULL THEN 'nivel_' || e.nivel_atual::text\n    WHEN e.streak_conversa_marco IS NOT NULL THEN 'streak_conversa_' || e.streak_conversa_marco::text\n    WHEN e.streak_quest_marco IS NOT NULL THEN 'streak_quest_' || e.streak_quest_marco::text\n    WHEN e.quests_concluidas_total > 0 THEN 'quest_concluida'\n    ELSE NULL\n  END AS subtipo,\n\n  json_build_object(\n    'subtipo', CASE\n      WHEN e.nivel_novo IS NOT NULL THEN 'nivel_' || e.nivel_atual::text\n      WHEN e.streak_conversa_marco IS NOT NULL THEN 'streak_conversa_' || e.streak_conversa_marco::text\n      WHEN e.streak_quest_marco IS NOT NULL THEN 'streak_quest_' || e.streak_quest_marco::text\n      WHEN e.quests_concluidas_total > 0 THEN 'quest_concluida'\n      ELSE NULL\n    END,\n    'xp_total', e.xp_total,\n    'xp_ganho_hoje', e.xp_ganho_hoje,\n    'nivel_atual', e.nivel_atual,\n    'nivel_nome', e.nivel_nome,\n    'estagio', e.estagio,\n    'estagio_nome', e.estagio_nome,\n    'nivel_novo', e.nivel_novo,\n    'streak_conversa_dias', e.streak_conversa_dias,\n    'streak_conversa_marco', e.streak_conversa_marco,\n    'streak_quest_dias', e.streak_quest_dias,\n    'streak_quest_marco', e.streak_quest_marco,\n    'quests_concluidas_total', e.quests_concluidas_total,\n    'quests_concluidas_titulos', e.quests_concluidas_titulos\n  ) AS contexto\n\nFROM eventos e\nWHERE (\n    e.nivel_novo IS NOT NULL\n OR e.streak_conversa_marco IS NOT NULL\n OR e.streak_quest_marco IS NOT NULL\n OR e.quests_concluidas_total > 0\n)\nAND NOT EXISTS (\n  SELECT 1\n  FROM notificacoes_log nl\n  WHERE nl.usuario_id = e.usuario_id\n    AND DATE(nl.criado_em) = CURRENT_DATE\n    AND SPLIT_PART(nl.tipo, '_', 1) = 'conquista'\n);\n",
+        "options": {}
+      },
+      "id": "97ad04db-362a-4d71-8fe3-436bca3d2347",
+      "name": "usuarios_elegiveis_conquistas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -304,
+        520
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        112,
+        520
+      ],
+      "id": "116470dc-7bf9-4182-91ee-2572ca4673c0",
+      "name": "Loop Conquistas"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cQz4nq1h3Kp9Lm2N",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/cQz4nq1h3Kp9Lm2N",
+          "cachedResultName": "sw_mentor_notificacoes_conquistas_v1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('usuarios_elegiveis_conquistas').item.json.usuario_id }}",
+            "nome_preferencia": "={{ $('usuarios_elegiveis_conquistas').item.json.nome_preferencia }}",
+            "tom_conversa": "={{ $('usuarios_elegiveis_conquistas').item.json.tom_conversa || 'empatico' }}",
+            "whats_number": "={{ $('usuarios_elegiveis_conquistas').item.json.whatsapp_numero }}",
+            "lembretes_canais": "={{ $('usuarios_elegiveis_conquistas').item.json.lembretes_canais }}",
+            "push_tokens": "={{ $('usuarios_elegiveis_conquistas').item.json.push_tokens }}",
+            "contexto": "={{ $('usuarios_elegiveis_conquistas').item.json.contexto }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "nome_preferencia",
+              "displayName": "nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tom_conversa",
+              "displayName": "tom_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "whats_number",
+              "displayName": "whats_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "lembretes_canais",
+              "displayName": "lembretes_canais",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "push_tokens",
+              "displayName": "push_tokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "contexto",
+              "displayName": "contexto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        536
+      ],
+      "id": "cce83639-122c-4c02-899e-664c6ece12ac",
+      "name": "Call sw_mentor_notificacoes (conquistas)"
     }
   ],
   "connections": {
@@ -506,6 +659,51 @@
         [
           {
             "node": "Loop Quests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Conquistas 18h": {
+      "main": [
+        [
+          {
+            "node": "usuarios_elegiveis_conquistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usuarios_elegiveis_conquistas": {
+      "main": [
+        [
+          {
+            "node": "Loop Conquistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Conquistas": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call sw_mentor_notificacoes (conquistas)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call sw_mentor_notificacoes (conquistas)": {
+      "main": [
+        [
+          {
+            "node": "Loop Conquistas",
             "type": "main",
             "index": 0
           }
