@@ -8,7 +8,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst notif = input.notificacao || {};\n\nconst notificacoes = [];\nconst canais = input.lembretes_canais || [];\n\nconst titulo = notif.titulo || `${input.nome_preferencia}, vamos conversar?`;\nconst corpo_push = notif.corpo_push || 'Como esta seu dia? Seu mentor esta aqui.';\nconst corpo_whatsapp = notif.corpo_whatsapp || `Oi ${input.nome_preferencia}! Como esta seu dia?`;\nconst contexto_mentor = notif.contexto_mentor || 'Notificacao de conversa';\nconst subtipo = notif.subtipo || 'geral';\n\nif (canais.includes('push') && input.push_tokens?.length > 0) {\n  for (const token of input.push_tokens) {\n    notificacoes.push({\n      json: {\n        usuario_id: input.usuario_id,\n        nome: input.nome_preferencia,\n        canal: 'push',\n        tipo: `${input.lembrete_periodo || 'conversa'}_${subtipo}`,\n        token,\n        titulo,\n        corpo: corpo_push,\n        contexto_mentor\n      }\n    });\n  }\n}\n\nif (canais.includes('whatsapp') && input.whats_number) {\n  // Usar corpo_whatsapp direto, sem sugestoes numericas\n  notificacoes.push({\n    json: {\n      usuario_id: input.usuario_id,\n      nome: input.nome_preferencia,\n      canal: 'whatsapp',\n      tipo: `${input.lembrete_periodo || 'conversa'}_${subtipo}`,\n      whatsapp_numero: input.whats_number,\n      titulo,\n      corpo: corpo_whatsapp,\n      contexto_mentor\n    }\n  });\n}\n\nreturn notificacoes;"
+        "jsCode": "const input = $input.first().json;\nconst notif = input.notificacao || {};\n\nconst notificacoes = [];\nconst canais = input.lembretes_canais || [];\n\nconst titulo = notif.titulo || `${input.nome_preferencia}, vamos conversar?`;\nconst corpo_push = notif.corpo_push || 'Como esta seu dia? Seu mentor esta aqui.';\nconst corpo_whatsapp = notif.corpo_whatsapp || `Oi ${input.nome_preferencia}! Como esta seu dia?`;\nconst contexto_mentor = notif.contexto_mentor || 'Notificacao de conversa';\n\nconst periodo = input.lembrete_periodo || 'conversa';\nconst subtipo = notif.subtipo || 'geral';\n\n// Regra: tipo deve caber em notificacoes_log.tipo (varchar(30))\n// - Se subtipo == periodo ou subtipo == 'geral', usar apenas periodo\n// - Se ainda ficar grande, fallback para periodo e por fim truncar\nlet tipo = (subtipo === periodo || subtipo === 'geral') ? periodo : `${periodo}_${subtipo}`;\nif (tipo.length > 30) tipo = periodo;\nif (tipo.length > 30) tipo = tipo.slice(0, 30);\n\nif (canais.includes('push') && input.push_tokens?.length > 0) {\n  for (const token of input.push_tokens) {\n    notificacoes.push({\n      json: {\n        usuario_id: input.usuario_id,\n        nome: input.nome_preferencia,\n        canal: 'push',\n        tipo,\n        token,\n        titulo,\n        corpo: corpo_push,\n        contexto_mentor\n      }\n    });\n  }\n}\n\nif (canais.includes('whatsapp') && input.whats_number) {\n  // Usar corpo_whatsapp direto, sem sugestoes numericas\n  notificacoes.push({\n    json: {\n      usuario_id: input.usuario_id,\n      nome: input.nome_preferencia,\n      canal: 'whatsapp',\n      tipo,\n      whatsapp_numero: input.whats_number,\n      titulo,\n      corpo: corpo_whatsapp,\n      contexto_mentor\n    }\n  });\n}\n\nreturn notificacoes;"
       },
       "id": "4c50482a-5edd-4200-a0c3-f90e96cd9272",
       "name": "Processar Conversa",
@@ -111,23 +111,23 @@
           "parameters": [
             {
               "name": "token",
-              "value": "={{ $json.token }}"
+              "value": "={{ $('Switch Canal').item.json.token }}"
             },
             {
               "name": "titulo",
-              "value": "={{ $json.titulo }}"
+              "value": "={{ $('Switch Canal').item.json.titulo }}"
             },
             {
               "name": "corpo",
-              "value": "={{ $json.corpo }}"
+              "value": "={{ $('Switch Canal').item.json.corpo }}"
             },
             {
               "name": "usuario_id",
-              "value": "={{ $json.usuario_id }}"
+              "value": "={{ $('Switch Canal').item.json.usuario_id }}"
             },
             {
               "name": "tipo",
-              "value": "={{ $json.tipo }}"
+              "value": "={{ $('Switch Canal').item.json.tipo }}"
             }
           ]
         },
@@ -149,7 +149,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'push', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'push'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'push', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'push'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)\nRETURNING id",
         "options": {
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
@@ -167,8 +167,7 @@
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
@@ -273,7 +272,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'whatsapp', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'whatsapp'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)",
+        "query": "INSERT INTO notificacoes_log (usuario_id, canal, tipo, titulo, mensagem, contexto_mentor, status)\nSELECT $1::uuid, 'whatsapp', $2, $3, $4, $5, 'enviado'\nWHERE NOT EXISTS (\n  SELECT 1 FROM notificacoes_log nl\n  WHERE nl.usuario_id = $1::uuid \n    AND nl.canal = 'whatsapp'\n    AND DATE(nl.criado_em) = CURRENT_DATE \n    AND SPLIT_PART(nl.tipo, '_', 1) = SPLIT_PART($2, '_', 1)\n)\nRETURNING id",
         "options": {
           "queryReplacement": "={{ [$('Switch Canal').item.json.usuario_id, $('Switch Canal').item.json.tipo, $('Switch Canal').item.json.titulo, $('Switch Canal').item.json.corpo, $('Switch Canal').item.json.contexto_mentor] }}"
         }
@@ -291,8 +290,7 @@
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      },
-      "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {},
