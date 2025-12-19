@@ -227,7 +227,7 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
             Personalidade influencia comportamento e preferências
           </p>
           {onBarClick && (
-            <p className="text-sm font-semibold text-[var(--mq-primary)]">
+            <p className="text-sm font-bold text-[var(--mq-highlight)]">
               Toque na barra para saber mais...
             </p>
           )}

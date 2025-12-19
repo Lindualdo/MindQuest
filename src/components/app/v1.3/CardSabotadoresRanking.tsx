@@ -239,7 +239,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
             Pensamentos geram emoções que movem suas ações
           </p>
           {onBarClick && (
-            <p className="text-sm font-semibold text-[var(--mq-primary)]">
+            <p className="text-sm font-bold text-[var(--mq-highlight)]">
               Toque na barra para saber mais...
             </p>
           )}
