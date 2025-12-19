@@ -27,6 +27,7 @@
   /* === ACCENT === */
   --mq-accent: #D90368;
   --mq-accent-hover: #B80258;
+  --mq-highlight: var(--mq-accent);
   
   /* === CORES SEMÂNTICAS === */
   --mq-success: #22C55E;
@@ -280,6 +281,7 @@
   --mq-primary-light: #E0F2FE;
   --mq-accent: #D90368;
   --mq-accent-hover: #B80258;
+  --mq-highlight: #FF6B35;
   --mq-bar: #C5DDF2;
   --mq-shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
   --mq-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
@@ -302,6 +304,7 @@
   --mq-primary-light: #E8F5E9;
   --mq-accent: #FF6B35;
   --mq-accent-hover: #E55A28;
+  --mq-highlight: #FF6B35;
   --mq-bar: #C8E6C9;
   --mq-shadow-sm: 0 4px 12px rgba(45, 58, 31, 0.04);
   --mq-shadow-md: 0 10px 24px rgba(45, 58, 31, 0.08);
@@ -324,6 +327,7 @@
   --mq-primary-light: rgba(56, 189, 248, 0.15);
   --mq-accent: #F472B6;
   --mq-accent-hover: #F9A8D4;
+  --mq-highlight: #F472B6;
   --mq-bar: #475569;
   --mq-success: #4ADE80;
   --mq-success-light: rgba(74, 222, 128, 0.15);
@@ -354,6 +358,7 @@
   --mq-primary-light: rgba(167, 139, 250, 0.15);
   --mq-accent: #F472B6;
   --mq-accent-hover: #F9A8D4;
+  --mq-highlight: #F472B6;
   --mq-bar: #4C4270;
   --mq-success: #34D399;
   --mq-success-light: rgba(52, 211, 153, 0.15);

@@ -469,7 +469,7 @@ const ConversarPageV13 = () => {
 
           {/* Link histórico e instrução */}
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-[0.65rem] text-[var(--mq-text-muted)]">
+            <p className="text-[0.65rem] font-bold text-[var(--mq-highlight)]">
               Toque no dia para resumo e anotações
             </p>
             <button
