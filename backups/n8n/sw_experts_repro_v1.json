@@ -1,0 +1,871 @@
+{
+  "createdAt": "2025-12-18T00:00:00.000Z",
+  "id": "r3pR0cXp3rtsV1aB",
+  "name": "sw_experts_repro_v1",
+  "description": "Reprocessa apenas experts órfãos (qualquer data) (humor, bigfive, sabotadores, emoções). Não roda quests/xp/insights.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            }
+          ]
+        }
+      },
+      "id": "start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2200,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Reprocessamento: qualquer data e flags de faltantes\nSELECT\n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  u.nome_preferencia AS usr_nome_preferencia,\n  c.mensagens,\n  NOT EXISTS (SELECT 1 FROM usuarios_sabotadores us WHERE us.chat_id = c.id) AS missing_sabotadores,\n  NOT EXISTS (SELECT 1 FROM usuarios_emocoes ue WHERE ue.chat_id = c.id) AS missing_emocoes,\n  NOT EXISTS (SELECT 1 FROM usuarios_humor_energia uh WHERE uh.chat_id = c.id) AS missing_humor,\n  NOT EXISTS (SELECT 1 FROM usuarios_perfis up WHERE up.chat_id = c.id) AS missing_bigfive\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "buscar-chat-flags",
+      "name": "Buscar Chat + Flags",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1960,
+        640
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "missing-sabotadores",
+              "leftValue": "={{ $json.missing_sabotadores }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-missing-sabotadores",
+      "name": "Falta Sabotadores?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1680,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "missing-emocoes",
+              "leftValue": "={{ $json.missing_emocoes }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-missing-emocoes",
+      "name": "Falta Emoções?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1680,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "missing-humor",
+              "leftValue": "={{ $json.missing_humor }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-missing-humor",
+      "name": "Falta Humor/Energia?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1680,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "missing-bigfive",
+              "leftValue": "={{ $json.missing_bigfive }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-missing-bigfive",
+      "name": "Falta BigFive?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1680,
+        928
+      ]
+    },
+
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT jsonb_agg(\n  jsonb_build_object('codigo', codigo, 'nome', nome)\n  ORDER BY codigo\n) AS catalogo_sabotadores\nFROM sabotadores_catalogo;",
+        "options": {}
+      },
+      "id": "40928a4a-eee1-4af1-9524-e40c652a6540",
+      "name": "Buscar Catálogo Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1440,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.2
+        }
+      },
+      "id": "4f667e64-477d-488a-b938-ee9890bfb838",
+      "name": "LLM Sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        544
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"sabotadores_detectados\": [\n    {\n      \"codigo\": 1,\n      \"intensidade\": 75,\n      \"contexto\": \"relacionamentos\",\n      \"frases_gatilho\": [\n        \"me senti desprezado\",\n        \"ela não gostava mais de mim\"\n      ],\n      \"insights\": \"Autocrítica intensa sobre valor pessoal.\",\n      \"confiabilidade\": 90,\n      \"apelido\": \"Sr. Exigente\",\n      \"contramedida\": \"Praticar autocompaixão por 3 minutos\"\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "id": "8eca443a-83b5-41fb-93a9-b11f9d061d34",
+      "name": "Parser Sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -928,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa e identifique sabotadores internos segundo Shirzad Chamine.\n\n**CONVERSA:**\n```json\n{{ $('Buscar Chat + Flags').first().json.mensagens }}\n```\nNome do usuário: {{ $('Buscar Chat + Flags').first().json.usr_nome_preferencia }}\n\n**SABOTADORES VÁLIDOS (use APENAS estes códigos):**\n{{ JSON.stringify($json.catalogo_sabotadores) }}\n\n\n**CRÍTICO: o campo \"codigo\" DEVE ser um número de 1 a 10 da lista acima**\n\n**SUA TAREFA:**\n1. Leia APENAS mensagens do usuário (autor: \"usuario\")\n2. Identifique sabotadores ativos (mínimo intensidade 30)\n3. Para cada sabotador:\n   - sabotador_id: EXATAMENTE um dos IDs da lista acima\n   - Intensidade: 0-100\n   - Contexto: vida_pessoal|profissional|financeiro|relacionamentos|saude|familia\n   - Frases gatilho: 2-4 frases CURTAS (máx 15 palavras)\n   - Insights: como impacta (use nome do usuário na 3ª pessoa)\n   - Confiabilidade: 0-100\n   - Apelido: curto e humanizado (ex: \"Sr. Ansioso\")\n   - Contramedida: UMA ação prática\n\n**REGRAS:**\n- Intensidade 0-100 (NÃO 0-10)\n- Apenas sabotadores com intensidade ≥ 30\n- Se não houver sabotadores, retorne array vazio\n- Retorne APENAS JSON estruturado",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é especialista em detectar sabotadores internos segundo Shirzad Chamine.\n\nSeu trabalho:\n1. Identificar padrões de pensamento autodestrutivos\n2. Avaliar intensidades na escala 0-100 (IMPORTANTE: NÃO use 0-10)\n3. Extrair TRECHOS CURTOS E ESPECÍFICOS como frases gatilho (não textos longos)\n4. Classificar contextos corretamente\n5. Criar apelidos humanizados e contramedidas práticas\n\nREGRA CRÍTICA: Use APENAS os códigos numéricos (1-10) da lista abaixo.\nSABOTADORES VÁLIDOS: {{ JSON.stringify($json.catalogo_sabotadores) }}\n\nEscala de intensidade 0-100:\n- 0-20: muito fraca\n- 21-40: fraca\n- 41-60: moderada\n- 61-80: forte\n- 81-100: muito forte\n\nFRASES GATILHO:\n- Devem ser trechos CURTOS (máximo 15 palavras)\n- Extraia 2-4 frases específicas que evidenciam o sabotador\n- NÃO copie o texto inteiro\n- Exemplo bom: \"me senti desprezado\", \"ela não gostava mais de mim\"\n- Exemplo ruim: texto completo de 50+ palavras\n\nSeja criterioso: apenas inclua sabotadores com evidências claras e intensidade ≥ 30.\n\nRetorne SEMPRE JSON válido.",
+          "maxIterations": 3
+        }
+      },
+      "id": "228ca688-b746-4853-8e27-79254e6034f5",
+      "name": "sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- REPRO: INSERT simples (somente quando não existe dado no chat)\nWITH sabotadores_input AS (\n  SELECT \n    $1::uuid as usuario_id,\n    $2::uuid as chat_id,\n    $3::jsonb as sabotadores_array\n),\nsabotadores_com_id AS (\n  SELECT \n    si.usuario_id,\n    si.chat_id,\n    sc.id AS sabotador_id,\n    (sabotador->>'intensidade')::integer AS intensidade,\n    (sabotador->>'contexto')::varchar(100) AS contexto,\n    (sabotador->>'insights')::text AS insights,\n    (sabotador->>'apelido')::varchar(50) AS apelido,\n    (sabotador->>'contramedida')::text AS contramedida\n  FROM sabotadores_input si,\n       jsonb_array_elements(si.sabotadores_array) AS sabotador\n  JOIN sabotadores_catalogo sc ON sc.codigo = (sabotador->>'codigo')::integer\n  WHERE (sabotador->>'intensidade')::integer >= 30\n)\nINSERT INTO usuarios_sabotadores (\n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade_media,\n  intensidade_acumulada_dia,\n  total_deteccoes_dia,\n  total_deteccoes,\n  contexto_principal,\n  insight_atual,\n  apelido_personalizado,\n  contramedida_ativa,\n  sabotador_predominante,\n  data_ultima_atividade\n)\nSELECT \n  usuario_id,\n  chat_id,\n  sabotador_id,\n  intensidade,\n  intensidade,\n  1,\n  1,\n  contexto,\n  insights,\n  apelido,\n  contramedida,\n  true,\n  CURRENT_DATE\nFROM sabotadores_com_id\nRETURNING id, sabotador_id, intensidade_media;",
+        "options": {
+          "queryReplacement": "={{ [\n  $('Buscar Chat + Flags').first().json.usuario_id,\n  $('Buscar Chat + Flags').first().json.chat_id,\n  JSON.stringify($json.output.sabotadores_detectados || [])\n] }}"
+        }
+      },
+      "id": "a7a087c9-28b0-471a-9bf7-7d05724fab9b",
+      "name": "Gravar Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -864,
+        368
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.2
+        }
+      },
+      "id": "1bdbb905-ae5d-4dd5-808b-67c3eab50f16",
+      "name": "LLM PANAS",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        704
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"emocoes_detectadas\": [\n    {\n      \"emocao_id\": \"sadness\",\n      \"nome_pt\": \"tristeza\",\n      \"intensidade\": 85,\n      \"contexto\": \"NEGATIVA\",\n      \"evidencias\": [\"saudade\", \"solidão\", \"angústia\", \"me senti desprezado\"]\n    }\n  ],\n  \"classificacao_panas\": \"negativa\",\n  \"justificativa_panas\": \"...\",\n  \"confianca_analise\": 90\n}",
+        "autoFix": true
+      },
+      "id": "d092317c-c39d-44fd-ba14-fda2442d3dc6",
+      "name": "Parser PANAS",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -928,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### User Prompt\nDADOS DA CONVERSA:\nMensagens: {{ $json.mensagens }}\n\nExecute a análise emocional conforme descrito no System Prompt identifique todas as emoções de Plutchik presentes, atribua intensidade, contexto e evidência, e então classifique o sentimento global da conversa como POSITIVA, NEGATIVA ou NEUTRA. Retorne **somente** o JSON estruturado conforme as regras.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=### System Prompt — Classificador Emocional (Plutchik + PANAS)\n\nVocê é um especialista em análise emocional com base nas **oito emoções primárias de Robert Plutchik** e em agregação de afeto inspirada no **PANAS**.\n\n---\n\n#### 🎯 Objetivo\nLer **todas as mensagens da conversa** e identificar **as emoções primárias presentes**, classificando-as conforme o modelo Plutchik e agregando o resultado segundo a escala PANAS.\n\n---\n\n#### 🧠 Tarefa passo a passo\n1. Analise **todas as mensagens** fornecidas.\n2. Detecte quais emoções primárias estão presentes (apenas as listadas abaixo).\n3. Para cada emoção detectada, retorne os campos:\n   - `emocao_id`: slug obrigatório (ver **Vocabulário permitido**).\n   - `intensidade`: número inteiro de **0 a 100**.\n   - `contexto`: valor fixo (**POSITIVA**, **NEGATIVA** ou **NEUTRA**) conforme tabela de polaridade.\n   - `evidencias`: lista de **trechos literais da conversa** (1–5 itens) que justifiquem a detecção.\n\n4. Após listar todas as emoções, gere um objeto `classificacao_geral` conforme as regras PANAS descritas abaixo.\n\n---\n\n#### 🔤 Vocabulário permitido\n| emocao_id | Nome (PT)      | Polaridade |\n|------------|----------------|-------------|\n| joy        | Alegria        | POSITIVA    |\n| trust      | Confiança      | POSITIVA    |\n| anticipation| Expectativa   | POSITIVA    |\n| sadness    | Tristeza       | NEGATIVA    |\n| fear       | Medo           | NEGATIVA    |\n| anger      | Raiva          | NEGATIVA    |\n| disgust    | Nojo           | NEGATIVA    |\n| surprise   | Surpresa       | NEUTRA      |\n\n> **Proibição:** Nenhum outro valor além dos 8 acima pode aparecer em `emocao_id`.\n\n---\n\n#### ⚖️ Mapeamento de polaridade\nUse **apenas** os seguintes contextos fixos:\n- POSITIVA → joy, trust, anticipation\n- NEGATIVA → sadness, fear, anger, disgust\n- NEUTRA → surprise\n\n---\n\n#### 📊 Regras de agregação e classificação global\n- Somente emoções com `intensidade ≥ 45` participam do cálculo PANAS.\n- Se `total = 0`, classifique como **NEUTRA**.\n- Se diferença entre positivas e negativas < 20%, classifique como **NEUTRA**.\n\n---\n\nRetorne **somente** JSON válido.",
+          "maxIterations": 5
+        }
+      },
+      "id": "f03a73bc-5a1f-40b9-992a-52eddf5bdeb1",
+      "name": "panas e emocoes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- UPSERT emoções: 1 registro por (chat_id, emocao_id)\nWITH emocoes_json AS (\n  SELECT \n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    jsonb_array_elements($4::jsonb) AS emocao\n)\nINSERT INTO usuarios_emocoes (\n  usuario_id, chat_id, emocao_id, intensidade, intensidade_acumulada,\n  ocorrencias_dia, detectado_em, contexto, evidencias, emocao_pt\n)\nSELECT \n  ej.usuario_id, ej.chat_id,\n  (ej.emocao->>'emocao_id')::varchar(20),\n  (ej.emocao->>'intensidade')::integer,\n  (ej.emocao->>'intensidade')::integer,\n  1,\n  ej.data_conversa,\n  (ej.emocao->>'contexto')::varchar(100),\n  (ej.emocao->>'evidencias')::jsonb,\n  (ej.emocao->>'nome_pt')::varchar(20)\nFROM emocoes_json ej\nWHERE (ej.emocao->>'intensidade')::integer >= 45\nON CONFLICT (chat_id, emocao_id) DO UPDATE SET\n  ocorrencias_dia = usuarios_emocoes.ocorrencias_dia + 1,\n  intensidade_acumulada = usuarios_emocoes.intensidade_acumulada + EXCLUDED.intensidade,\n  intensidade = (usuarios_emocoes.intensidade_acumulada + EXCLUDED.intensidade) / \n                (usuarios_emocoes.ocorrencias_dia + 1),\n  evidencias = usuarios_emocoes.evidencias || EXCLUDED.evidencias,\n  contexto = EXCLUDED.contexto,\n  criado_em = NOW()\nRETURNING id, emocao_id, intensidade, ocorrencias_dia;",
+        "options": {
+          "queryReplacement": "={{ [\n  $('Buscar Chat + Flags').first().json.usuario_id,\n  $('Buscar Chat + Flags').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('Buscar Chat + Flags').first().json.data_conversa),\n  JSON.stringify($json.output.emocoes_detectadas || [])\n] }}"
+        }
+      },
+      "id": "7458ebde-2cd2-463b-a8eb-c169f0463235",
+      "name": "Gravar Emoções",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -864,
+        560
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.2
+        }
+      },
+      "id": "6ad5f215-46b8-4d4c-a78f-94be231a8476",
+      "name": "LLM Humor",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        896
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"humor_dia\": 6,\n  \"energia_nivel\": 6,\n  \"variacao_humor\": \"estavel\",\n  \"variacao_energia\": \"estavel\",\n  \"periodo_dia\": \"nao_identificado\",\n  \"justificativa_humor\": \"...\",\n  \"justificativa_energia\": \"...\",\n  \"evidencias_textuais\": [\"...\"],\n  \"confianca_analise\": 80\n}",
+        "autoFix": true
+      },
+      "id": "f60dcfb2-7934-41fc-a055-7bb2cb35959f",
+      "name": "Parser Humor",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -928,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analise a conversa completa abaixo e detecte o HUMOR e ENERGIA do usuário com base APENAS no que foi dito.\n\n**CONVERSA COMPLETA:**\n```json\n{{ $json.mensagens }}\n```\n\nUser name: {{ $json.usr_nome_preferencia }}\n\n**RETORNE APENAS O JSON ESTRUTURADO**",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um especialista em análise de humor e energia em conversas.\nRetorne SEMPRE um JSON válido com a estrutura exata solicitada.",
+          "maxIterations": 3
+        }
+      },
+      "id": "c0bbaacc-d4a3-4d0b-bef9-36e7ca9408ff",
+      "name": "humor e energia",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- UPSERT humor/energia: 1 registro por chat\nINSERT INTO usuarios_humor_energia (\n  usuario_id, chat_id, data_registro, hora_registro,\n  periodo_dia, humor_dia, humor_acumulado, energia_nivel, energia_acumulada,\n  ocorrencias_dia, variacao_humor, variacao_energia,\n  justificativa_humor, justificativa_energia,\n  evidencias_textuais, confianca_analise\n)\nVALUES (\n  $1::uuid, $2::uuid, $3::date, CURRENT_TIME,\n  $4, $5::integer, $5::integer, $6::integer, $6::integer,\n  1, $7, $8, $9, $10, $11::jsonb, $12::integer\n)\nON CONFLICT (chat_id) DO UPDATE SET\n  ocorrencias_dia = usuarios_humor_energia.ocorrencias_dia + 1,\n  humor_acumulado = usuarios_humor_energia.humor_acumulado + EXCLUDED.humor_dia,\n  energia_acumulada = usuarios_humor_energia.energia_acumulada + EXCLUDED.energia_nivel,\n  humor_dia = (usuarios_humor_energia.humor_acumulado + EXCLUDED.humor_dia) / \n              (usuarios_humor_energia.ocorrencias_dia + 1),\n  energia_nivel = (usuarios_humor_energia.energia_acumulada + EXCLUDED.energia_nivel) / \n                  (usuarios_humor_energia.ocorrencias_dia + 1),\n  hora_registro = CURRENT_TIME,\n  periodo_dia = EXCLUDED.periodo_dia,\n  variacao_humor = EXCLUDED.variacao_humor,\n  variacao_energia = EXCLUDED.variacao_energia,\n  justificativa_humor = EXCLUDED.justificativa_humor,\n  justificativa_energia = EXCLUDED.justificativa_energia,\n  evidencias_textuais = usuarios_humor_energia.evidencias_textuais || EXCLUDED.evidencias_textuais,\n  confianca_analise = EXCLUDED.confianca_analise,\n  detectado_em = NOW()\nRETURNING id, humor_dia, energia_nivel, ocorrencias_dia;",
+        "options": {
+          "queryReplacement": "={{ [\n  $('Buscar Chat + Flags').first().json.usuario_id,\n  $('Buscar Chat + Flags').first().json.chat_id,\n  ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('Buscar Chat + Flags').first().json.data_conversa),\n  $json.output.periodo_dia,\n  $json.output.humor_dia,\n  $json.output.energia_nivel,\n  $json.output.variacao_humor,\n  $json.output.variacao_energia,\n  JSON.stringify($json.output.justificativa_humor),\n  JSON.stringify($json.output.justificativa_energia),\n  JSON.stringify($json.output.evidencias_textuais || []),\n  $json.output.confianca_analise\n] }}"
+        }
+      },
+      "id": "32998058-e3ed-4e6a-87e1-e51bed74e77f",
+      "name": "Gravar Humor",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -864,
+        736
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "HDTrSrJiBIv2FFks",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HDTrSrJiBIv2FFks",
+          "cachedResultName": "sw_get_history"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usr_id": "={{ $json.usuario_id }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "1891593a-9e8e-43b7-b549-58a8d63bfefb",
+      "name": "Buscar Histórico BigFive",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -1440,
+        928
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "functionCode": "const chat = $items('Buscar Chat + Flags')[0]?.json ?? {};\nconst historyItems = $items('Buscar Histórico BigFive').map((item) => item.json).filter(Boolean);\nconst formatDate = (value) => {\n  if (!value) return null;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return value;\n  return parsed.toISOString().slice(0, 10);\n};\nconst historicoOrdenado = historyItems\n  .map((entry) => ({\n    data: formatDate(entry.data_conversa),\n    resumo: entry.resumo_conversa ?? ''\n  }))\n  .filter((entry) => entry.data || entry.resumo)\n  .sort((a, b) => {\n    if (!a.data || !b.data) return 0;\n    return a.data < b.data ? 1 : -1;\n  });\nconst historicoResumo = historicoOrdenado.length\n  ? historicoOrdenado\n      .map((entry) => `- ${entry.data ?? 'data indeterminada'}: ${entry.resumo || 'sem resumo disponível'}`)\n      .join('\\n')\n  : 'Sem histórico relevante nos últimos 5 dias.';\nreturn [\n  {\n    json: {\n      ...chat,\n      historico_resumo: historicoResumo,\n      historico_itens: historicoOrdenado\n    }\n  }\n];"
+      },
+      "id": "1045f919-c402-4621-afec-894ae8fa1421",
+      "name": "Preparar Contexto BigFive",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.2
+        }
+      },
+      "id": "6582d1ea-f869-427c-ba3c-2e9dcf6928b2",
+      "name": "LLM BigFive",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        1120
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"big_five\": {\n    \"openness\": {\"score\": 62, \"confiabilidade\": 78, \"evidencias\": [\"...\"]},\n    \"conscientiousness\": {\"score\": 54, \"confiabilidade\": 65, \"evidencias\": [\"...\"]},\n    \"extraversion\": {\"score\": 41, \"confiabilidade\": 60, \"evidencias\": [\"...\"]},\n    \"agreeableness\": {\"score\": 70, \"confiabilidade\": 72, \"evidencias\": [\"...\"]},\n    \"neuroticism\": {\"score\": 58, \"confiabilidade\": 68, \"evidencias\": [\"...\"]}\n  },\n  \"perfil_primario\": \"agreeableness\",\n  \"resumo_perfil\": \"...\",\n  \"insuficiente\": false\n}",
+        "autoFix": true
+      },
+      "id": "905698bb-94ed-4f4d-84e1-20b77735e4fc",
+      "name": "Parser BigFive",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -800,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use a conversa ATUAL como fonte principal e estime o perfil Big Five (OCEAN), tratando o histórico recente apenas como contexto complementar.\n\n**HISTÓRICO (resumos últimos 5 dias):**\n{{ $json.historico_resumo }}\n\n**CONVERSA ATUAL (JSON):**\n```json\n{{ $json.mensagens }}\n```\n**Nome do usuário:** {{ $json.usr_nome_preferencia }}\n\nRetorne APENAS JSON válido no formato solicitado.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um assistente especialista em Big Five (OCEAN) e ética em IA. Retorne SEMPRE JSON válido no formato solicitado.",
+          "maxIterations": 3
+        }
+      },
+      "id": "8e512726-9734-4f31-bd24-f6d783225fdb",
+      "name": "Big Five",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -992,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const chat = $items('Buscar Chat + Flags')[0]?.json ?? {};\nconst payload = $json.output ?? {};\nconst traits = ['openness','conscientiousness','extraversion','agreeableness','neuroticism'];\nconst scores = traits.map((key) => {\n  const data = payload.big_five?.[key] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  return {\n    id: key,\n    score: Number.isFinite(score) ? score : null,\n    confiabilidade: Number.isFinite(confianca) ? confianca : null\n  };\n});\nconst sorted = [...scores].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));\nconst validTraits = new Set(traits);\nconst originalPrimary = payload.perfil_primario ?? null;\nlet primary = originalPrimary;\nif (!primary || primary === 'misto' || !validTraits.has(primary)) {\n  primary = sorted[0]?.id ?? null;\n}\nlet secondary = sorted.find((entry) => entry.id !== primary)?.id ?? null;\nif (!secondary && sorted[1]) {\n  secondary = sorted[1].id;\n}\nconst sumConfianca = scores.reduce((acc, entry) => acc + (entry.confiabilidade ?? 0), 0);\nconst confiancaMedia = scores.length ? Math.round(sumConfianca / scores.length) : null;\nlet dataConversa = null;\nif (chat.data_conversa) {\n  const parsed = new Date(chat.data_conversa);\n  if (!isNaN(parsed)) dataConversa = parsed.toISOString().slice(0, 10);\n}\nif (!dataConversa) dataConversa = new Date().toISOString().slice(0, 10);\nconst result = {\n  usuario_id: chat.usuario_id ?? null,\n  chat_id: chat.chat_id ?? chat.id ?? null,\n  data_conversa: dataConversa,\n  perfil_original: originalPrimary,\n  perfil_primario: primary,\n  perfil_secundario: secondary,\n  resumo_perfil: payload.resumo_perfil ?? null,\n  insuficiente: Boolean(payload.insuficiente),\n  confianca_media: confiancaMedia,\n  raw_resposta: payload\n};\nfor (const trait of traits) {\n  const data = payload.big_five?.[trait] ?? {};\n  const score = Number(data.score);\n  const confianca = Number(data.confiabilidade);\n  result[`score_${trait}`] = Number.isFinite(score) ? score : null;\n  result[`confianca_${trait}`] = Number.isFinite(confianca) ? confianca : null;\n}\nreturn [{ json: result }];"
+      },
+      "id": "f7e681e7-9beb-4df9-998c-178cd2b9e5c9",
+      "name": "Preparar Registro BigFive",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO usuarios_perfis (\n  usuario_id,\n  chat_id,\n  data_conversa,\n  perfil_original,\n  perfil_primario,\n  perfil_secundario,\n  resumo_perfil,\n  insuficiente,\n  score_openness,\n  score_conscientiousness,\n  score_extraversion,\n  score_agreeableness,\n  score_neuroticism,\n  confianca_openness,\n  confianca_conscientiousness,\n  confianca_extraversion,\n  confianca_agreeableness,\n  confianca_neuroticism,\n  confianca_media,\n  raw_resposta,\n  criado_em,\n  atualizado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::date,\n  $4::varchar,\n  $5::varchar,\n  $6::varchar,\n  $7::text,\n  $8::boolean,\n  $9::integer,\n  $10::integer,\n  $11::integer,\n  $12::integer,\n  $13::integer,\n  $14::integer,\n  $15::integer,\n  $16::integer,\n  $17::integer,\n  $18::integer,\n  $19::integer,\n  $20::jsonb,\n  NOW(),\n  NOW()\n)\nON CONFLICT (chat_id) DO UPDATE SET\n  perfil_original = EXCLUDED.perfil_original,\n  perfil_primario = EXCLUDED.perfil_primario,\n  perfil_secundario = EXCLUDED.perfil_secundario,\n  resumo_perfil = EXCLUDED.resumo_perfil,\n  insuficiente = EXCLUDED.insuficiente,\n  score_openness = EXCLUDED.score_openness,\n  score_conscientiousness = EXCLUDED.score_conscientiousness,\n  score_extraversion = EXCLUDED.score_extraversion,\n  score_agreeableness = EXCLUDED.score_agreeableness,\n  score_neuroticism = EXCLUDED.score_neuroticism,\n  confianca_openness = EXCLUDED.confianca_openness,\n  confianca_conscientiousness = EXCLUDED.confianca_conscientiousness,\n  confianca_extraversion = EXCLUDED.confianca_extraversion,\n  confianca_agreeableness = EXCLUDED.confianca_agreeableness,\n  confianca_neuroticism = EXCLUDED.confianca_neuroticism,\n  confianca_media = EXCLUDED.confianca_media,\n  raw_resposta = EXCLUDED.raw_resposta,\n  atualizado_em = NOW()\nRETURNING id, perfil_primario;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.usuario_id ?? null,\n  $json.chat_id ?? null,\n  $json.data_conversa ?? null,\n  $json.perfil_original ?? null,\n  $json.perfil_primario ?? null,\n  $json.perfil_secundario ?? null,\n  $json.resumo_perfil ?? null,\n  $json.insuficiente === true,\n  $json.score_openness ?? null,\n  $json.score_conscientiousness ?? null,\n  $json.score_extraversion ?? null,\n  $json.score_agreeableness ?? null,\n  $json.score_neuroticism ?? null,\n  $json.confianca_openness ?? null,\n  $json.confianca_conscientiousness ?? null,\n  $json.confianca_extraversion ?? null,\n  $json.confianca_agreeableness ?? null,\n  $json.confianca_neuroticism ?? null,\n  $json.confianca_media ?? null,\n  $json.raw_resposta ?? {}\n] }}"
+        }
+      },
+      "id": "62348899-004d-4c90-a921-c24b148165e5",
+      "name": "Gravar BigFive",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -544,
+        928
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Chat + Flags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Chat + Flags": {
+      "main": [
+        [
+          {
+            "node": "Falta Sabotadores?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Falta Emoções?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Falta Humor/Energia?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Falta BigFive?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Falta Sabotadores?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Catálogo Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Buscar Catálogo Sabotadores": {
+      "main": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sabotadores": {
+      "main": [
+        [
+          {
+            "node": "Gravar Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "Falta Emoções?": {
+      "main": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "panas e emocoes": {
+      "main": [
+        [
+          {
+            "node": "Gravar Emoções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "Falta Humor/Energia?": {
+      "main": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "humor e energia": {
+      "main": [
+        [
+          {
+            "node": "Gravar Humor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "Falta BigFive?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Histórico BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Buscar Histórico BigFive": {
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Contexto BigFive": {
+      "main": [
+        [
+          {
+            "node": "Big Five",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Big Five": {
+      "main": [
+        [
+          {
+            "node": "Preparar Registro BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro BigFive": {
+      "main": [
+        [
+          {
+            "node": "Gravar BigFive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "LLM Sabotadores": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Sabotadores": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "LLM PANAS": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser PANAS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser PANAS": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "LLM Humor": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Humor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Humor": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+
+    "LLM BigFive": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Big Five",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser BigFive",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser BigFive": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Big Five",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "tags": []
+}
