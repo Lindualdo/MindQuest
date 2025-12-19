@@ -40,6 +40,7 @@
     },
     {
       "parameters": {
+        "batchSize": 1,
         "options": {}
       },
       "id": "loop",
@@ -60,6 +61,7 @@
           "cachedResultUrl": "/workflow/r3pR0cXp3rtsV1aB",
           "cachedResultName": "sw_experts_repro_v1"
         },
+        "mode": "each",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
