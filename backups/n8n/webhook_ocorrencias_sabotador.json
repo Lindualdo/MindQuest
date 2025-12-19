@@ -39,7 +39,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  us.id,\n  us.chat_id,\n  us.insight_atual,\n  us.contramedida_ativa,\n  us.intensidade_media,\n  us.contexto_principal,\n  us.criado_em,\n  COALESCE(us.data_ultima_atividade, us.atualizado_em) AS data_ocorrencia,\n  uc.resumo_conversa,\n  uc.criado_em AS data_conversa\nFROM public.usuarios_sabotadores us\nLEFT JOIN public.usr_chat uc ON uc.id = us.chat_id\nWHERE us.usuario_id = $1::uuid\n  AND us.sabotador_id = $2\nORDER BY COALESCE(us.data_ultima_atividade, us.criado_em) DESC;",
+        "query": "SELECT\n  us.id,\n  us.chat_id,\n  us.insight_atual,\n  us.contramedida_ativa,\n  us.intensidade_media,\n  us.contexto_principal,\n  us.criado_em,\n  uc.data_conversa AS data_ocorrencia,\n  uc.resumo_conversa,\n  uc.criado_em AS data_conversa\nFROM public.usuarios_sabotadores us\nLEFT JOIN public.usr_chat uc ON uc.id = us.chat_id\nWHERE us.usuario_id = $1::uuid\n  AND us.sabotador_id = $2\nORDER BY uc.data_conversa DESC, us.criado_em DESC;",
         "options": {
           "queryReplacement": "={{ [$json.user_id, $json.sabotador_id] }}"
         }
@@ -165,7 +165,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "activeVersionId": "7059a6df-1259-491f-814d-ce7d1ddcd840",
+  "activeVersionId": "46ad5fe7-08b6-4a58-b4f0-11482f077a3c",
   "shared": [
     {
       "createdAt": "2025-12-03T12:57:01.454Z",
@@ -219,7 +219,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-05T12:13:14.667Z",
+    "createdAt": "2025-12-19T16:51:14.264Z",
     "workflowId": "oQVnWaDhkvu3DPWs",
     "nodes": [
       {
@@ -255,7 +255,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT\n  us.id,\n  us.chat_id,\n  us.insight_atual,\n  us.contramedida_ativa,\n  us.intensidade_media,\n  us.contexto_principal,\n  us.criado_em,\n  COALESCE(us.data_ultima_atividade, us.atualizado_em) AS data_ocorrencia,\n  uc.resumo_conversa,\n  uc.criado_em AS data_conversa\nFROM public.usuarios_sabotadores us\nLEFT JOIN public.usr_chat uc ON uc.id = us.chat_id\nWHERE us.usuario_id = $1::uuid\n  AND us.sabotador_id = $2\nORDER BY COALESCE(us.data_ultima_atividade, us.criado_em) DESC;",
+          "query": "SELECT\n  us.id,\n  us.chat_id,\n  us.insight_atual,\n  us.contramedida_ativa,\n  us.intensidade_media,\n  us.contexto_principal,\n  us.criado_em,\n  uc.data_conversa AS data_ocorrencia,\n  uc.resumo_conversa,\n  uc.criado_em AS data_conversa\nFROM public.usuarios_sabotadores us\nLEFT JOIN public.usr_chat uc ON uc.id = us.chat_id\nWHERE us.usuario_id = $1::uuid\n  AND us.sabotador_id = $2\nORDER BY uc.data_conversa DESC, us.criado_em DESC;",
           "options": {
             "queryReplacement": "={{ [$json.user_id, $json.sabotador_id] }}"
           }
@@ -369,7 +369,7 @@
         ]
       }
     },
-    "authors": "system migration",
+    "authors": "Aldo Santos",
     "name": null,
     "description": null
   }

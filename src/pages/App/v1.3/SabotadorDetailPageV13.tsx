@@ -191,9 +191,9 @@ const SabotadorDetailPageV13: React.FC = () => {
                 )}
               </div>
               
-              {ultimaOcorrencia.resumo_conversa && (
-                <p className="text-sm text-[var(--mq-text)] leading-relaxed line-clamp-3">
-                  {ultimaOcorrencia.resumo_conversa}
+              {ultimaOcorrencia.insight_atual && (
+                <p className="text-sm text-[var(--mq-text)] leading-relaxed">
+                  {ultimaOcorrencia.insight_atual}
                 </p>
               )}
             </div>
