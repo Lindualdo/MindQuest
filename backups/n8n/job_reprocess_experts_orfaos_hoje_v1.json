@@ -93,7 +93,11 @@
       "position": [
         48,
         320
-      ]
+      ],
+      "continueOnFail": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     }
   ],
   "connections": {
