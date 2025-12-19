@@ -81,7 +81,7 @@ const AjustesPageV13: React.FC = () => {
       id: 'perfil',
       icon: <User size={20} className="text-[var(--mq-primary)]" />,
       title: 'Perfil Pessoal',
-      subtitle: 'Nome, foto e preferências',
+      subtitle: 'Como você quer ser visto pela IA?',
       onClick: () => {
         setView('perfilPessoal');
       },
@@ -99,7 +99,7 @@ const AjustesPageV13: React.FC = () => {
       id: 'ia',
       icon: <Bot size={20} className="text-[var(--mq-primary)]" />,
       title: 'Interações com IA',
-      subtitle: 'Tom e frequência das mensagens',
+      subtitle: 'Personalidade da IA',
       onClick: () => {
         setView('interacoesIA');
       },
