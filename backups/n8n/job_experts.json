@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-12-15T23:11:16.175Z",
   "id": "BdfMcFNxLd0CbwZN",
-  "name": "job_experts_v3",
+  "name": "job_experts",
   "description": null,
   "active": true,
   "isArchived": false,
@@ -98,7 +98,7 @@
     },
     {
       "parameters": {
-        "content": "## job_experts_v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
+        "content": "## job_experts v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
         "height": 764,
         "width": 280
       },
@@ -118,7 +118,7 @@
           "value": "8LDaqMPpSFj2AggT",
           "mode": "list",
           "cachedResultUrl": "/workflow/8LDaqMPpSFj2AggT",
-          "cachedResultName": "sw_experts_v4"
+          "cachedResultName": "sw_expert"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -286,7 +286,7 @@
       }
     ]
   },
-  "activeVersionId": "e780f4da-50b2-48f2-83a8-f8a99b9f5556",
+  "activeVersionId": "5cad17c6-7533-4dc5-ae1a-1ee43c752370",
   "shared": [
     {
       "createdAt": "2025-12-15T23:11:16.175Z",
@@ -340,7 +340,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-19T16:39:50.626Z",
+    "createdAt": "2025-12-19T21:42:17.415Z",
     "workflowId": "BdfMcFNxLd0CbwZN",
     "nodes": [
       {
@@ -435,7 +435,7 @@
       },
       {
         "parameters": {
-          "content": "## job_experts_v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
+          "content": "## job_experts v3 - Simplificado\n\n### Mudanças da v2\n- ❌ Sem log_experts\n- ❌ Sem delta de mensagens\n- ❌ Sem validação de 30 palavras no job\n- ✅ Controle via processado_em em usr_chat\n- ✅ Envia conversa COMPLETA\n\n### Fluxo\n1. Busca chats onde atualizado_em > processado_em\n2. Para cada chat: chama sw_experts_v3\n3. Após sucesso: atualiza processado_em = NOW()\n\n### Frequência\n- A cada 30 minutos",
           "height": 764,
           "width": 280
         },
@@ -455,7 +455,7 @@
             "value": "8LDaqMPpSFj2AggT",
             "mode": "list",
             "cachedResultUrl": "/workflow/8LDaqMPpSFj2AggT",
-            "cachedResultName": "sw_experts_v4"
+            "cachedResultName": "sw_expert"
           },
           "workflowInputs": {
             "mappingMode": "defineBelow",

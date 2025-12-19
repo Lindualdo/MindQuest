@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-12-19T14:44:18.372Z",
   "id": "8LDaqMPpSFj2AggT",
-  "name": "sw_experts_v4",
+  "name": "sw_expert",
   "description": null,
   "active": false,
   "isArchived": false,
@@ -59,6 +59,7 @@
     },
     {
       "parameters": {
+        "model": "google/gemini-3-flash-preview",
         "options": {
           "maxTokens": 1000,
           "temperature": 0.2
@@ -98,7 +99,7 @@
         "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Use nome do usuário, nunca \"usuário\" ou \"agente\"\n- Máximo 600 palavras no resumo\n- Retorne APENAS JSON válido\n</rules>\n\n<output_format>\n{\n  \"tem_contexto\": boolean,\n  \"tem_reflexao\": boolean,\n  \"total_palavras\": number,\n  \"justificativa\": \"string\",\n  \"resumo_atualizado\": \"## Tema\\n- item\"\n}\n</output_format>\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>",
+          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Use nome do usuário, nunca \"usuário\" ou \"agente\"\n- Máximo 800 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown \"## Tema\\n- item\"\n</rules>\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
           "maxIterations": 3
         }
       },
@@ -239,6 +240,7 @@
     },
     {
       "parameters": {
+        "model": "google/gemini-2.5-flash",
         "options": {
           "maxTokens": 1500,
           "temperature": 0.2
@@ -685,8 +687,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1296,
-        624
+        -1280,
+        640
       ]
     },
     {
@@ -753,6 +755,20 @@
       ],
       "id": "29c45485-592d-4efc-928e-bb2552486ab3",
       "name": "Structured Output Parser4"
+    },
+    {
+      "parameters": {
+        "content": "## sw_expert_v4\n",
+        "height": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5072,
+        480
+      ],
+      "id": "55702081-ae9c-4701-8fc8-e3fd18179322",
+      "name": "Sticky Note"
     }
   ],
   "connections": {

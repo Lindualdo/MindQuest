@@ -1,7 +1,7 @@
 {
   "createdAt": "2025-12-17T20:18:16.166Z",
   "id": "vGLluHVYupmxKJWT",
-  "name": "job_notificacoes_v2",
+  "name": "job_notificacoes",
   "description": null,
   "active": true,
   "isArchived": false,
@@ -530,7 +530,7 @@
   },
   "meta": null,
   "pinData": {},
-  "activeVersionId": "57371035-548f-417a-a4ce-4f85210399fe",
+  "activeVersionId": "4e3dc16b-e830-4731-992e-77632c93e0b4",
   "shared": [
     {
       "createdAt": "2025-12-17T20:18:16.166Z",
@@ -584,7 +584,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-18T12:25:10.463Z",
+    "createdAt": "2025-12-19T21:42:32.823Z",
     "workflowId": "vGLluHVYupmxKJWT",
     "nodes": [
       {
