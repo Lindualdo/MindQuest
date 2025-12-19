@@ -155,6 +155,54 @@
               },
               "renameOutput": true,
               "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e08071c3-92f9-4711-b0ad-84dcbcc90462",
+                    "leftValue": "={{ $json.body.data.messageType }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fa8b358a-9df5-42b8-a5a4-c52fe0ce8b15",
+                    "leftValue": "={{ $json.body.data.messageType }}",
+                    "rightValue": "documentMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
             }
           ]
         },
@@ -343,209 +391,11 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        224,
+        288,
         -608
       ],
       "id": "a42e2e9f-0956-4bd3-a587-35fa08173722",
       "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "value": "public",
-          "mode": "list",
-          "cachedResultName": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "vw_registros_completos",
-          "mode": "list",
-          "cachedResultName": "vw_registros_completos"
-        },
-        "returnAll": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        464,
-        -64
-      ],
-      "id": "f2d199e0-1abf-49e8-8af1-019cb5c5d1fd",
-      "name": "Select rows from a table",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "\n-- =====================================================\n-- MINDQUEST DATABASE - Apaga todas as tabelas e dados\n-- Sistema de Autoconhecimento e Bem-estar\n-- FAÇA BACKUP DE TUDO ANTES, POIS ESSA AÇÃO NÃO TEM RECUPERAÇÃO\n-- =====================================================\n\n\nDROP SCHEMA IF EXISTS public CASCADE;\n\nCREATE SCHEMA public;\nGRANT ALL ON SCHEMA public TO public;\nGRANT ALL ON SCHEMA public TO CURRENT_USER;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        48,
-        -64
-      ],
-      "id": "ff7421cf-9023-4c4b-b361-8436fa029e4b",
-      "name": "Limpa toda a base public",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- =====================================================\n-- MINDQUEST DATABASE - SPRINT 1 (versão corrigida)\n-- Sistema de Autoconhecimento e Bem-estar\n-- =====================================================\n\nCREATE EXTENSION IF NOT EXISTS \"pgcrypto\";\n\n-- =====================================================\n-- 1. TABELA USUARIOS\n-- =====================================================\nCREATE TABLE usuarios (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  whatsapp_numero VARCHAR(20) UNIQUE NOT NULL,\n  nome VARCHAR(100),\n  nome_preferencia VARCHAR(50),\n  token_acesso VARCHAR(255) UNIQUE,\n  token_expira_em TIMESTAMP,\n  cronotipo_detectado VARCHAR(20) CHECK (cronotipo_detectado IN ('matutino', 'vespertino', 'noturno')),\n  status_onboarding VARCHAR(20) DEFAULT 'pendente' CHECK (status_onboarding IN ('pendente', 'parcial', 'completo')),\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_usuarios_whatsapp ON usuarios(whatsapp_numero);\nCREATE INDEX idx_usuarios_token ON usuarios(token_acesso);\n\n-- =====================================================\n-- 2. TABELA PERFIS BIG FIVE\n-- =====================================================\nCREATE TABLE perfis_big_five (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  openness INTEGER CHECK (openness BETWEEN 0 AND 100),\n  conscientiousness INTEGER CHECK (conscientiousness BETWEEN 0 AND 100),\n  extraversion INTEGER CHECK (extraversion BETWEEN 0 AND 100),\n  agreeableness INTEGER CHECK (agreeableness BETWEEN 0 AND 100),\n  neuroticism INTEGER CHECK (neuroticism BETWEEN 0 AND 100),\n  confiabilidade INTEGER CHECK (confiabilidade BETWEEN 0 AND 100),\n  perfil_primario VARCHAR(30) CHECK (perfil_primario IN ('perfeccionista', 'disciplinado', 'desorganizado', 'depressivo')),\n  perfil_secundario VARCHAR(30),\n  metodo_deteccao VARCHAR(20) CHECK (metodo_deteccao IN ('onboarding', 'checkin', 'conversa')),\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_perfis_usuario ON perfis_big_five(usuario_id);\n\n-- =====================================================\n-- 3. TABELA CHECKINS DIÁRIOS\n-- =====================================================\nCREATE TABLE checkins_diarios (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  data_checkin DATE NOT NULL,\n  horario_envio TIME,\n  horario_resposta TIME,\n  resposta_texto TEXT,\n  resposta_audio_url VARCHAR(500),\n  humor_autoavaliado INTEGER CHECK (humor_autoavaliado BETWEEN 1 AND 10),\n  emocao_primaria VARCHAR(50),\n  intensidade_emocao INTEGER CHECK (intensidade_emocao BETWEEN 1 AND 10),\n  energia_detectada INTEGER CHECK (energia_detectada BETWEEN 1 AND 10),\n  qualidade_interacao INTEGER CHECK (qualidade_interacao BETWEEN 1 AND 10),\n  status_resposta VARCHAR(20) CHECK (status_resposta IN ('respondido', 'perdido', 'pendente')),\n  emoji_dia VARCHAR(10),\n  observacoes_usuario TEXT,\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_checkins_usuario ON checkins_diarios(usuario_id);\nCREATE INDEX idx_checkins_data ON checkins_diarios(data_checkin);\n\n-- Trigger para garantir NULL em check-ins perdidos\nCREATE OR REPLACE FUNCTION validar_checkin_perdido()\nRETURNS TRIGGER AS $$\nBEGIN\n  IF NEW.status_resposta = 'perdido' THEN\n    NEW.humor_autoavaliado := NULL;\n    NEW.intensidade_emocao := NULL;\n    NEW.energia_detectada := NULL;\n    NEW.qualidade_interacao := NULL;\n  END IF;\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER trg_validar_checkin_perdido\nBEFORE INSERT OR UPDATE ON checkins_diarios\nFOR EACH ROW EXECUTE FUNCTION validar_checkin_perdido();\n\n-- =====================================================\n-- 4. EMOÇÕES PLUTCHIK + RELAÇÕES\n-- =====================================================\nCREATE TABLE emocoes_plutchik (\n  id VARCHAR(20) PRIMARY KEY,\n  nome VARCHAR(50) NOT NULL,\n  cor VARCHAR(7) NOT NULL,\n  emoji VARCHAR(10) NOT NULL,\n  categoria VARCHAR(20) CHECK (categoria IN ('primaria', 'secundaria'))\n);\n\nCREATE TABLE usuarios_emocoes (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  emocao_id VARCHAR(20) REFERENCES emocoes_plutchik(id),\n  intensidade INTEGER CHECK (intensidade BETWEEN 0 AND 100),\n  detectado_em DATE,\n  contexto VARCHAR(100),\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_usuarios_emocoes_usuario ON usuarios_emocoes(usuario_id);\nCREATE INDEX idx_usuarios_emocoes_data ON usuarios_emocoes(detectado_em);\n\n-- =====================================================\n-- 5. SABOTADORES\n-- =====================================================\nCREATE TABLE sabotadores_catalogo (\n  id VARCHAR(30) PRIMARY KEY,\n  nome VARCHAR(50) NOT NULL,\n  emoji VARCHAR(10),\n  descricao TEXT,\n  contextos_tipicos TEXT[],\n  contramedidas_sugeridas TEXT[]\n);\n\nCREATE TABLE usuarios_sabotadores (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  sabotador_id VARCHAR(30) REFERENCES sabotadores_catalogo(id),\n  apelido_personalizado VARCHAR(50),\n  total_deteccoes INTEGER DEFAULT 0,\n  contexto_principal VARCHAR(100),\n  insight_atual TEXT,\n  contramedida_ativa TEXT,\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_usuarios_sabotadores_usuario ON usuarios_sabotadores(usuario_id);\n\n-- =====================================================\n-- 6. PILARES DA VIDA\n-- =====================================================\nCREATE TABLE pilares_vida_catalogo (\n  id VARCHAR(30) PRIMARY KEY,\n  nome VARCHAR(50) NOT NULL,\n  emoji VARCHAR(10),\n  descricao TEXT,\n  areas_avaliacao TEXT[],\n  perguntas_reflexao TEXT[]\n);\n\nCREATE TABLE usuarios_pilares (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  pilar_id VARCHAR(30) REFERENCES pilares_vida_catalogo(id),\n  avaliacao_atual INTEGER CHECK (avaliacao_atual BETWEEN 1 AND 10),\n  meta_definida INTEGER CHECK (meta_definida BETWEEN 1 AND 10),\n  observacoes TEXT,\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_usuarios_pilares_usuario ON usuarios_pilares(usuario_id);\n\n-- =====================================================\n-- 7. GAMIFICAÇÃO\n-- =====================================================\nCREATE TABLE gamificacao (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  xp_total INTEGER DEFAULT 0,\n  nivel_atual INTEGER DEFAULT 1,\n  streak_checkins_dias INTEGER DEFAULT 0,\n  conquistas_desbloqueadas TEXT[],\n  quest_diaria_status VARCHAR(20) DEFAULT 'pendente' CHECK (quest_diaria_status IN ('pendente', 'parcial', 'completa')),\n  quest_diaria_progresso INTEGER DEFAULT 0 CHECK (quest_diaria_progresso BETWEEN 0 AND 100),\n  quest_diaria_descricao TEXT,\n  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_gamificacao_usuario ON gamificacao(usuario_id);\n\n-- =====================================================\n-- 8. INSIGHTS\n-- =====================================================\nCREATE TABLE insights (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  tipo VARCHAR(20) CHECK (tipo IN ('padrao', 'melhoria', 'positivo', 'alerta')),\n  categoria VARCHAR(20) CHECK (categoria IN ('comportamental', 'emocional', 'social', 'cognitivo')),\n  titulo VARCHAR(150) NOT NULL,\n  descricao TEXT NOT NULL,\n  icone VARCHAR(10),\n  prioridade VARCHAR(10) CHECK (prioridade IN ('baixa', 'media', 'alta')),\n  ativo BOOLEAN DEFAULT true,\n  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX idx_insights_usuario ON insights(usuario_id);\nCREATE INDEX idx_insights_tipo ON insights(tipo);\n\n-- =====================================================\n-- CARGA INICIAL (CATÁLOGOS)\n-- =====================================================\n-- Emoções Plutchik\nINSERT INTO emocoes_plutchik VALUES\n('joy','Alegria','#FFD700','😊','primaria'),\n('trust','Confiança','#90EE90','🤗','primaria'),\n('fear','Medo','#FF6347','😨','primaria'),\n('surprise','Surpresa','#FF69B4','😲','primaria'),\n('sadness','Tristeza','#4169E1','😢','primaria'),\n('disgust','Nojo','#8B4513','🤢','primaria'),\n('anger','Raiva','#DC143C','😠','primaria'),\n('anticipation','Expectativa','#FFA500','🤔','primaria');\n\n-- Sabotadores\nINSERT INTO sabotadores_catalogo VALUES\n('critico','Crítico','🎭','Encontra defeitos em si mesmo e nos outros',ARRAY['trabalho','relacionamentos'],ARRAY['Praticar autocompaixão','Listar 3 conquistas do dia']),\n('controlador','Controlador','👑','Necessidade de controlar situações e pessoas',ARRAY['trabalho','família'],ARRAY['Aceitar o que não pode controlar','Focar no que está ao seu alcance']);\n\n-- Pilares da Vida (exemplo simplificado)\nINSERT INTO pilares_vida_catalogo VALUES\n('trabalho','Trabalho/Carreira','💼','Satisfação profissional',ARRAY['satisfação','propósito'],ARRAY['Como me sinto no meu trabalho?']),\n('relacionamentos','Relacionamentos','❤️','Família e amigos',ARRAY['família','amizades'],ARRAY['Meus relacionamentos são saudáveis?']);\n\n-- =====================================================\n-- CARGA DE USUÁRIO DE TESTE (ALDO)\n-- =====================================================\n-- Usuário\nINSERT INTO usuarios (id, whatsapp_numero, nome, nome_preferencia, cronotipo_detectado, status_onboarding)\nVALUES ('550e8400-e29b-41d4-a716-446655440001','5512982389360','Lindualdo Silva','Aldo','matutino','completo');\n\n-- Perfil Big Five\nINSERT INTO perfis_big_five (usuario_id, openness, conscientiousness, extraversion, agreeableness, neuroticism, confiabilidade, perfil_primario, metodo_deteccao)\nVALUES ('550e8400-e29b-41d4-a716-446655440001',75,85,60,80,35,87,'disciplinado','onboarding');\n\n-- Check-ins (NULL corrigido no dia 2025-09-18)\nINSERT INTO checkins_diarios (usuario_id,data_checkin,horario_envio,horario_resposta,resposta_texto,humor_autoavaliado,emocao_primaria,intensidade_emocao,energia_detectada,qualidade_interacao,status_resposta,emoji_dia) VALUES\n('550e8400-e29b-41d4-a716-446655440001','2025-09-22','09:00','09:15','Me sentindo bem hoje!',8,'joy',8,7,9,'respondido','😊'),\n('550e8400-e29b-41d4-a716-446655440001','2025-09-18','09:00',NULL,NULL,NULL,'',NULL,NULL,NULL,'perdido','❌');\n\n-- Emoções do Aldo\nINSERT INTO usuarios_emocoes (usuario_id, emocao_id, intensidade, detectado_em, contexto)\nVALUES ('550e8400-e29b-41d4-a716-446655440001','joy',75,'2025-09-22','trabalho');\n\n-- Sabotador\nINSERT INTO usuarios_sabotadores (usuario_id,sabotador_id,apelido_personalizado,total_deteccoes,contexto_principal,insight_atual,contramedida_ativa)\nVALUES ('550e8400-e29b-41d4-a716-446655440001','critico','Sr. Exigente',4,'trabalho','Seu Sr. Exigente apareceu no trabalho.','Praticar autocompaixão');\n\n-- Gamificação\nINSERT INTO gamificacao (usuario_id,xp_total,nivel_atual,streak_checkins_dias,conquistas_desbloqueadas,quest_diaria_status,quest_diaria_progresso,quest_diaria_descricao)\nVALUES ('550e8400-e29b-41d4-a716-446655440001',1240,8,12,ARRAY['primeira_semana'],'parcial',67,'Complete sua conversa diária');\n\n-- Insights\nINSERT INTO insights (usuario_id,tipo,categoria,titulo,descricao,icone,prioridade)\nVALUES ('550e8400-e29b-41d4-a716-446655440001','positivo','comportamental','Consistência','Você manteve conversas diárias.','🏆','alta');\n\nCOMMIT;\n",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        256,
-        -64
-      ],
-      "id": "6ff9ff4f-3db6-4fd7-b58e-1af696b420f7",
-      "name": "Drpa e recria a base v 1.1",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "deleteTable",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "usuarios",
-          "mode": "list",
-          "cachedResultName": "usuarios"
-        },
-        "deleteCommand": "delete",
-        "where": {
-          "values": [
-            {
-              "column": "whatsapp_numero",
-              "value": "351932786582"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1392,
-        -64
-      ],
-      "id": "b2a5e310-9f3a-4a52-add4-012f9d5f6384",
-      "name": "Limpa Aldo PT teste",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "messages-api",
-        "instanceName": "MindQuest",
-        "remoteJid": "={{ $json.whatsapp_numero }}",
-        "messageText": "=Oi, {{ $json.nome_preferencia }}! 🎉\n\nPronto! Sua conta está criada e nossa conversa pode começar. \n\nEstou aqui para te ouvir e te ajudar a se conhecer melhor.\n\nSeu dashboard pessoal está te esperando:\n\nhttps://mind-quest-orcin.vercel.app/auth?token={{ $json.token_acesso }}",
-        "options_message": {
-          "delay": 3000
-        }
-      },
-      "type": "n8n-nodes-evolution-api.evolutionApi",
-      "typeVersion": 1,
-      "position": [
-        1152,
-        -64
-      ],
-      "id": "ce26080a-0679-420c-a5e6-3f9e5f4704a9",
-      "name": "Envia link e boas vindas1",
-      "credentials": {
-        "evolutionApi": {
-          "id": "H4gurJcNVV0yrS90",
-          "name": "Evolution account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE usuarios \nSET \n    nome_preferencia = 'Usr_teste',\n    token_acesso = gen_random_uuid()::text || '_' || EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint::text,\n    token_expira_em = CURRENT_TIMESTAMP + INTERVAL '7 days',\n    status_onboarding = 'pendente',\n    atualizado_em = CURRENT_TIMESTAMP\nWHERE whatsapp_numero = '5512982389360'\nRETURNING \n    id, \n    token_acesso, \n    whatsapp_numero, \n    nome_preferencia,\n    token_expira_em;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        912,
-        -64
-      ],
-      "id": "78b9384c-6342-460a-90c4-a649cb3b6dc0",
-      "name": "Update",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "usuarios",
-          "mode": "list",
-          "cachedResultName": "usuarios"
-        },
-        "returnAll": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        688,
-        -64
-      ],
-      "id": "593e4a7f-a681-4ee6-a659-138f06c1c057",
-      "name": "Lista usuarios",
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
     },
     {
       "parameters": {
@@ -616,6 +466,216 @@
       ],
       "id": "96189238-e60d-46c3-a715-75cbea9d1586",
       "name": "msg"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d9d30a1-d4d6-4778-8c1a-c36ff6df78b8",
+              "name": "message",
+              "value": "=Poxa! que pena ainda não consigo ler imagens ☺️",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -288
+      ],
+      "id": "8cd32892-496d-45d0-9129-d8da52b72902",
+      "name": "msg1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('When Executed by Another Workflow').item.json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('When Executed by Another Workflow').item.json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $json.message }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "3c02c2b4-3ee9-42c9-baa2-2039186ea683",
+      "name": "envia_mensagem",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d9d30a1-d4d6-4778-8c1a-c36ff6df78b8",
+              "name": "message",
+              "value": "=Poxa! que pena ainda não consigo ler documentos ☺️",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -48
+      ],
+      "id": "750c6c1b-2cde-4cd1-911c-239eb6efdc65",
+      "name": "msg2"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "DJB5qWudX1Hqap1O",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message_v2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('When Executed by Another Workflow').item.json['body.instance'] }}",
+            "remoteJidOrNumber": "={{ $('When Executed by Another Workflow').item.json['body.data.key.remoteJid'] }}",
+            "messageText": "={{ $json.message }}",
+            "linkPreview": "false",
+            "minDelayMs": "3000"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instanceName",
+              "displayName": "instanceName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "messageText",
+              "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "ae3bedee-4e37-428a-b4a9-21b3da6cea61",
+      "name": "envia_mensagem1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        -48
+      ]
     }
   ],
   "connections": {
@@ -653,6 +713,20 @@
         [
           {
             "node": "Obter media em base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "msg1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "msg2",
             "type": "main",
             "index": 0
           }
@@ -714,28 +788,6 @@
         ]
       ]
     },
-    "Limpa toda a base public": {
-      "main": [
-        [
-          {
-            "node": "Drpa e recria a base v 1.1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update": {
-      "main": [
-        [
-          {
-            "node": "Envia link e boas vindas1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "get_usr": {
       "main": [
         [
@@ -757,6 +809,28 @@
           }
         ]
       ]
+    },
+    "msg1": {
+      "main": [
+        [
+          {
+            "node": "envia_mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "msg2": {
+      "main": [
+        [
+          {
+            "node": "envia_mensagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -772,20 +846,13 @@
         "json": {
           "body.instance": "MindQuest",
           "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
-          "body.data.key.id": "2AF8A089EF5164E8BEF7",
+          "body.data.key.id": "3BD8FDE4BBB35C46318E",
           "body.data.key.fromMe": false,
           "body.data.pushName": "Aldo Santos",
-          "body.data.messageType": "audioMessage"
-        }
-      },
-      {
-        "json": {
-          "body.instance": "MindQuest",
-          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
-          "body.data.key.id": "2AF8A089EF5164E8BEF7",
-          "body.data.key.fromMe": false,
-          "body.data.pushName": "Aldo Santos",
-          "body.data.messageType": "audioMessage"
+          "body.data.messageType": "documentMessage"
+        },
+        "pairedItem": {
+          "item": 0
         }
       }
     ]
