@@ -264,10 +264,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Identifique sabotadores internos na conversa.\n\n<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<catalogo>{{ JSON.stringify($json.catalogo) }}</catalogo>\n</input>\n\n",
+        "text": "=Identifique sabotadores internos na conversa.\n\n<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<catalogo>{{ JSON.stringify($json.catalogo) }}</catalogo>\n</input>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Especialista em Sabotadores Internos (Shirzad Chamine)</role>\n\n<objective>Detectar padrões de pensamento sabotadores com evidências textuais</objective>\n\n<rules>\n- Use Mensagens do agente para entender o contexto, mas o foco são as mensagens do usuário\n- Use APENAS códigos 1-10 do catálogo fornecido\n- Intensidade: escala 0-100 (não 0-10)\n- Mínimo intensidade 30 para incluir\n- Frases gatilho: 2-4 trechos CURTOS (max 15 palavras)\n- Se nenhum detectado, retorne array vazio\n</rules>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>\n<scale>\n0-20: muito fraca | 21-40: fraca | 41-60: moderada | 61-80: forte | 81-100: muito forte\n</scale>",
+          "systemMessage": "=<role>Especialista em Sabotadores Internos (Shirzad Chamine)</role>\n\n<objective>Detectar padrões de pensamento sabotadores com evidências textuais</objective>\n\n<rules>\n- Use Mensagens do agente para entender o contexto, mas o foco são as mensagens do usuário\n- Use APENAS códigos 1-10 do catálogo fornecido\n- Intensidade: escala 0-100 (não 0-10)\n- Mínimo intensidade 30 para incluir\n- Frases gatilho: 2-4 trechos CURTOS (max 15 palavras)\n- Se nenhum detectado, retorne array vazio\n</rules>\n\n<scale>\n0-20: muito fraca | 21-40: fraca | 41-60: moderada | 61-80: forte | 81-100: muito forte\n</scale>",
           "maxIterations": 3
         }
       },
@@ -329,10 +329,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n</input>\n\nClassifique emoções presentes na conversa.",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n</input>\n\nClassifique emoções presentes na conversa.\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Classificador Emocional (Plutchik + PANAS)</role>\n\n<objective>Identificar emoções primárias e classificar afeto global</objective>\n\n<vocabulary>\njoy=Alegria(+) | trust=Confiança(+) | anticipation=Expectativa(+)\nsadness=Tristeza(-) | fear=Medo(-) | anger=Raiva(-) | disgust=Nojo(-)\nsurprise=Surpresa(~)\n</vocabulary>\n\n<rules>\n- Use APENAS os 8 emocao_id acima\n- Intensidade: 0-100 (só inclua se >= 45)\n- Contexto: POSITIVA|NEGATIVA|NEUTRA (determinado pela emoção, não pelo tom)\n- Evidências: 1-5 trechos literais\n- Uma emoção por tipo (consolide múltiplas ocorrências)\n</rules>\n\n<panas_rules>\n- Só emoções com intensidade >= 45 participam\n- Se diferença positivas vs negativas < 20%: NEUTRA\n- Se total = 0: NEUTRA\n</panas_rules>\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>\n",
+          "systemMessage": "=<role>Classificador Emocional (Plutchik + PANAS)</role>\n\n<objective>Identificar emoções primárias e classificar afeto global</objective>\n\n<vocabulary>\njoy=Alegria(+) | trust=Confiança(+) | anticipation=Expectativa(+)\nsadness=Tristeza(-) | fear=Medo(-) | anger=Raiva(-) | disgust=Nojo(-)\nsurprise=Surpresa(~)\n</vocabulary>\n\n<rules>\n- Use APENAS os 8 emocao_id acima\n- Intensidade: 0-100 (só inclua se >= 45)\n- Contexto: POSITIVA|NEGATIVA|NEUTRA (determinado pela emoção, não pelo tom)\n- Evidências: 1-5 trechos literais\n- Uma emoção por tipo (consolide múltiplas ocorrências)\n</rules>\n\n<panas_rules>\n- Só emoções com intensidade >= 45 participam\n- Se diferença positivas vs negativas < 20%: NEUTRA\n- Se total = 0: NEUTRA\n</panas_rules>\n\n\n",
           "maxIterations": 3
         }
       },
@@ -393,10 +393,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n</input>\n\nAnalise humor e energia do usuário.",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n</input>\n\nAnalise humor e energia do usuário.\n\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Analista de Humor e Energia</role>\n\n<objective>Detectar estado emocional e nível de energia a partir da conversa</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Se sem evidência clara: humor=5, energia=5\n- Use nome do usuário nas justificativas\n</rules>\n\n<scales>\nhumor_dia: 1-10 (1=péssimo, 5=neutro, 10=excelente)\nenergia_nivel: 1-10 (1=exausto, 5=normal, 10=energizado)\nconfianca_analise: 0-100\n</scales>\n\n<allowed_values>\nperiodo_dia: madrugada|manha|tarde|noite|nao_identificado\nvariacao_humor: estavel|ascendente|descendente|oscilatoria\nvariacao_energia: estavel|ascendente|descendente|oscilatoria\n</allowed_values>\n\n<output_format>\n{\n  \"humor_dia\": number,\n  \"energia_nivel\": number,\n  \"variacao_humor\": \"string\",\n  \"variacao_energia\": \"string\",\n  \"periodo_dia\": \"string\",\n  \"justificativa_humor\": \"string (max 200 chars)\",\n  \"justificativa_energia\": \"string (max 200 chars)\",\n  \"evidencias_textuais\": [\"2-5 trechos curtos\"],\n  \"confianca_analise\": number\n}\n</output_format>",
+          "systemMessage": "=<role>Analista de Humor e Energia</role>\n\n<objective>Detectar estado emocional e nível de energia a partir da conversa</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Se sem evidência clara: humor=5, energia=5\n- Use nome do usuário nas justificativas\n</rules>\n\n<scales>\nhumor_dia: 1-10 (1=péssimo, 5=neutro, 10=excelente)\nenergia_nivel: 1-10 (1=exausto, 5=normal, 10=energizado)\nconfianca_analise: 0-100\n</scales>\n\n<allowed_values>\nperiodo_dia: madrugada|manha|tarde|noite|nao_identificado\nvariacao_humor: estavel|ascendente|descendente|oscilatoria\nvariacao_energia: estavel|ascendente|descendente|oscilatoria\n</allowed_values>",
           "maxIterations": 3
         }
       },
@@ -597,10 +597,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<date>{{ $('start').first().json.data_conversa }}</date>\n</input>\n\nChame get_user_insight para ver insights anteriores.\nGere 1 insight acionável com feedback sanduíche.",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<date>{{ $('start').first().json.data_conversa }}</date>\n</input>\n\nChame get_user_insight para ver insights anteriores.\nGere 1 insight acionável com feedback sanduíche.\n\n<output_format>\n[{\"tipo\":\"string\",\"categoria\":\"string\",\"titulo\":\"3-4 palavras\",\"icone\":\"emoji\",\"prioridade\":\"string\",\"resumo_situacao\":\"30-50 palavras\",\"feedback_positivo\":\"string\",\"feedback_desenvolvimento\":\"string\",\"feedback_motivacional\":\"string\",\"recursos_sugeridos\":[{\"tipo\":\"string\",\"nome\":\"string\",\"descricao\":\"string\",\"aplicacao_pratica\":\"string\"}],\"baseado_em\":[\"evidencia1\",\"evidencia2\"]}]\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Psicólogo especialista em desenvolvimento pessoal</role>\n\n<objective>Gerar insight acionável com feedback sanduíche + recursos práticos</objective>\n\n<tools>\nget_user_insight: consulta insights anteriores para evitar repetição\n</tools>\n\n<allowed_values>\ncategoria: comportamental|emocional|social|cognitivo\ntipo: padrao|melhoria|positivo|alerta\nprioridade: alta|media|baixa\ntipo_recurso: tecnica|conceito|leitura|pratica|reflexao\n</allowed_values>\n\n<feedback_sanduiche>\n1. feedback_positivo: reconheça forças (20-30 palavras)\n2. feedback_desenvolvimento: padrão que merece atenção (30-40 palavras)\n3. feedback_motivacional: esperança + próximos passos (20-30 palavras)\n</feedback_sanduiche>\n\n<rules>\n- Base TUDO no relatado (sem suposições)\n- Use APENAS valores permitidos acima\n- Evite repetir insights anteriores\n- 2-4 recursos práticos por insight\n</rules>\n\n<output_format>\n[{\"tipo\":\"string\",\"categoria\":\"string\",\"titulo\":\"3-4 palavras\",\"icone\":\"emoji\",\"prioridade\":\"string\",\"resumo_situacao\":\"30-50 palavras\",\"feedback_positivo\":\"string\",\"feedback_desenvolvimento\":\"string\",\"feedback_motivacional\":\"string\",\"recursos_sugeridos\":[{\"tipo\":\"string\",\"nome\":\"string\",\"descricao\":\"string\",\"aplicacao_pratica\":\"string\"}],\"baseado_em\":[\"evidencia1\",\"evidencia2\"]}]\n</output_format>",
+          "systemMessage": "=<role>Psicólogo especialista em desenvolvimento pessoal</role>\n\n<objective>Gerar insight acionável com feedback sanduíche + recursos práticos</objective>\n\n<tools>\nget_user_insight: consulta insights anteriores para evitar repetição\n</tools>\n\n<allowed_values>\ncategoria: comportamental|emocional|social|cognitivo\ntipo: padrao|melhoria|positivo|alerta\nprioridade: alta|media|baixa\ntipo_recurso: tecnica|conceito|leitura|pratica|reflexao\n</allowed_values>\n\n<feedback_sanduiche>\n1. feedback_positivo: reconheça forças (20-30 palavras)\n2. feedback_desenvolvimento: padrão que merece atenção (30-40 palavras)\n3. feedback_motivacional: esperança + próximos passos (20-30 palavras)\n</feedback_sanduiche>\n\n<rules>\n- Base TUDO no relatado (sem suposições)\n- Use APENAS valores permitidos acima\n- Evite repetir insights anteriores\n- 2-4 recursos práticos por insight\n</rules>\n\n",
           "maxIterations": 3
         }
       },
@@ -1241,8 +1241,8 @@
       {
         "json": {
           "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "8e2a56e9-50e4-4664-8fe7-32b3d043c886",
-          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "chat_id": "fa029c1c-a134-4bbc-9f9b-8010b9b96b13",
+          "data_conversa": "2025-12-16T00:00:00.000Z",
           "usr_nome_preferencia": "Aldo"
         },
         "pairedItem": {
