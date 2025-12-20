@@ -96,10 +96,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.",
+        "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown \"## Tema\\n- item\"\n- Conte e retone sempre a quatidade total de palavras do usuário\n</rules>\n\n\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
+          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown\n- Conte e retone sempre a quatidade total de palavras do usuário\n</rules>\n\n\n<summary_example>\n\n\n</summary_example>\n\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
           "maxIterations": 3
         }
       },
@@ -125,6 +125,15 @@
             {
               "id": "cond-ctx",
               "leftValue": "={{ $json.output.tem_contexto }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "22246224-bd1c-4caa-87b4-f6288d18c97a",
+              "leftValue": "={{ $json.output.tem_reflexao }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -267,7 +276,7 @@
         "text": "=Identifique sabotadores internos na conversa.\n\n<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<catalogo>{{ JSON.stringify($json.catalogo) }}</catalogo>\n</input>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Especialista em Sabotadores Internos (Shirzad Chamine)</role>\n\n<objective>Detectar padrões de pensamento sabotadores com evidências textuais</objective>\n\n<rules>\n- Use Mensagens do agente para entender o contexto, mas o foco são as mensagens do usuário\n- Use APENAS códigos 1-10 do catálogo fornecido\n- Intensidade: escala 0-100 (não 0-10)\n- Mínimo intensidade 30 para incluir\n- Frases gatilho: 2-4 trechos CURTOS (max 15 palavras)\n- Se nenhum detectado, retorne array vazio\n</rules>\n\n<scale>\n0-20: muito fraca | 21-40: fraca | 41-60: moderada | 61-80: forte | 81-100: muito forte\n</scale>",
+          "systemMessage": "=<role>Especialista em Sabotadores Internos (Shirzad Chamine)</role>\n\n<objective>Detectar padrões de pensamento sabotadores com evidências textuais</objective>\n\n<rules>\n- Use Mensagens do agente para entender o contexto, mas o foco são as mensagens do usuário\n- Use APENAS códigos 1-10 do catálogo fornecido\n- Intensidade: escala 0-100 (não 0-10)\n- Mínimo intensidade 30 para incluir\n- Frases gatilho: 2-4 trechos CURTOS (max 15 palavras)\n- Se nenhum detectado, retorne array vazio\n</rules>\n\n<scale>\n0-20: muito fraca | 21-40: fraca | 41-60: moderada | 61-80: forte | 81-100: muito forte\n</scale>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>",
           "maxIterations": 3
         }
       },
@@ -332,7 +341,7 @@
         "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n</input>\n\nClassifique emoções presentes na conversa.\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Classificador Emocional (Plutchik + PANAS)</role>\n\n<objective>Identificar emoções primárias e classificar afeto global</objective>\n\n<vocabulary>\njoy=Alegria(+) | trust=Confiança(+) | anticipation=Expectativa(+)\nsadness=Tristeza(-) | fear=Medo(-) | anger=Raiva(-) | disgust=Nojo(-)\nsurprise=Surpresa(~)\n</vocabulary>\n\n<rules>\n- Use APENAS os 8 emocao_id acima\n- Intensidade: 0-100 (só inclua se >= 45)\n- Contexto: POSITIVA|NEGATIVA|NEUTRA (determinado pela emoção, não pelo tom)\n- Evidências: 1-5 trechos literais\n- Uma emoção por tipo (consolide múltiplas ocorrências)\n</rules>\n\n<panas_rules>\n- Só emoções com intensidade >= 45 participam\n- Se diferença positivas vs negativas < 20%: NEUTRA\n- Se total = 0: NEUTRA\n</panas_rules>\n\n\n",
+          "systemMessage": "=<role>Classificador Emocional (Plutchik + PANAS)</role>\n\n<objective>Identificar emoções primárias e classificar afeto global</objective>\n\n<vocabulary>\njoy=Alegria(+) | trust=Confiança(+) | anticipation=Expectativa(+)\nsadness=Tristeza(-) | fear=Medo(-) | anger=Raiva(-) | disgust=Nojo(-)\nsurprise=Surpresa(~)\n</vocabulary>\n\n<rules>\n- Use APENAS os 8 emocao_id acima\n- Intensidade: 0-100 (só inclua se >= 45)\n- Contexto: POSITIVA|NEGATIVA|NEUTRA (determinado pela emoção, não pelo tom)\n- Evidências: 1-5 trechos literais\n- Uma emoção por tipo (consolide múltiplas ocorrências)\n</rules>\n\n<panas_rules>\n- Só emoções com intensidade >= 45 participam\n- Se diferença positivas vs negativas < 20%: NEUTRA\n- Se total = 0: NEUTRA\n</panas_rules>\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>\n\n",
           "maxIterations": 3
         }
       },
@@ -393,10 +402,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n</input>\n\nAnalise humor e energia do usuário.\n\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n</input>\n\nAnalise humor e energia do usuário.\n\n<output_format>\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}\n</output_format>\n",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Analista de Humor e Energia</role>\n\n<objective>Detectar estado emocional e nível de energia a partir da conversa</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Se sem evidência clara: humor=5, energia=5\n- Use nome do usuário nas justificativas\n</rules>\n\n<scales>\nhumor_dia: 1-10 (1=péssimo, 5=neutro, 10=excelente)\nenergia_nivel: 1-10 (1=exausto, 5=normal, 10=energizado)\nconfianca_analise: 0-100\n</scales>\n\n<allowed_values>\nperiodo_dia: madrugada|manha|tarde|noite|nao_identificado\nvariacao_humor: estavel|ascendente|descendente|oscilatoria\nvariacao_energia: estavel|ascendente|descendente|oscilatoria\n</allowed_values>",
+          "systemMessage": "=<role>Analista de Humor e Energia</role>\n\n<objective>Detectar estado emocional e nível de energia a partir da conversa</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Se sem evidência clara: humor=5, energia=5\n- Use nome do usuário nas justificativas\n</rules>\n\n<scales>\nhumor_dia: 1-10 (1=péssimo, 5=neutro, 10=excelente)\nenergia_nivel: 1-10 (1=exausto, 5=normal, 10=energizado)\nconfianca_analise: 0-100\n</scales>\n\n<allowed_values>\nperiodo_dia: madrugada|manha|tarde|noite|nao_identificado\nvariacao_humor: estavel|ascendente|descendente|oscilatoria\nvariacao_energia: estavel|ascendente|descendente|oscilatoria\n</allowed_values>\n\n<output_format>\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}\n</output_format>",
           "maxIterations": 3
         }
       },
@@ -500,7 +509,7 @@
         "text": "=<input>\n<historico>{{ $json.historico_resumo }}</historico>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $json.usr_nome_preferencia }}</user_name>\n</input>\n\nEstime perfil Big Five (OCEAN) do usuário.\n\n<output_format>\n{\"big_five\":{\"openness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"conscientiousness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"extraversion\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"agreeableness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"neuroticism\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]}},\"perfil_primario\":\"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\"resumo_perfil\":\"max 400 chars\",\"insuficiente\":boolean}\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Especialista em Big Five (OCEAN)</role>\n\n<objective>Inferir tendências de personalidade com evidências textuais</objective>\n\n<traits>\nO=Openness (curiosidade, ideias novas)\nC=Conscientiousness (organização, disciplina)\nE=Extraversion (energia social)\nA=Agreeableness (empatia, cooperação)\nN=Neuroticism (sensibilidade a estresse)\n</traits>\n\n<rules>\n- Use APENAS mensagens com autor=\"usuario\"\n- Histórico: apenas contexto, não use como evidência\n- Score e confiabilidade: 0-100 (50=neutro)\n- Evidências: 2-4 trechos curtos (max 15 palavras)\n- Se insuficiente: score=50, confiabilidade<=40\n- NÃO faça diagnósticos clínicos\n</rules>\n\n<perfil_primario_rule>\nSe diferença entre 1º e 2º < 5 pontos: \"misto\"\nSenão: traço com maior score\n</perfil_primario_rule>\n",
+          "systemMessage": "=<role>Especialista em Big Five (OCEAN)</role>\n\n<objective>Inferir tendências de personalidade com evidências textuais</objective>\n\n<traits>\nO=Openness (curiosidade, ideias novas)\nC=Conscientiousness (organização, disciplina)\nE=Extraversion (energia social)\nA=Agreeableness (empatia, cooperação)\nN=Neuroticism (sensibilidade a estresse)\n</traits>\n\n<rules>\n- Use APENAS mensagens com autor=\"usuario\"\n- Histórico: apenas contexto, não use como evidência\n- Score e confiabilidade: 0-100 (50=neutro)\n- Evidências: 2-4 trechos curtos (max 15 palavras)\n- Se insuficiente: score=50, confiabilidade<=40\n- NÃO faça diagnósticos clínicos\n</rules>\n\n<perfil_primario_rule>\nSe diferença entre 1º e 2º < 5 pontos: \"misto\"\nSenão: traço com maior score\n</perfil_primario_rule>\n\n<output_format>\n{\"big_five\":{\"openness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"conscientiousness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"extraversion\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"agreeableness\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]},\"neuroticism\":{\"score\":n,\"confiabilidade\":n,\"evidencias\":[]}},\"perfil_primario\":\"openness|conscientiousness|extraversion|agreeableness|neuroticism|misto\",\"resumo_perfil\":\"max 400 chars\",\"insuficiente\":boolean}\n</output_format>\n",
           "maxIterations": 3
         }
       },
@@ -561,8 +570,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2160,
-        1392
+        -2096,
+        1376
       ],
       "credentials": {
         "openRouterApi": {
@@ -573,34 +582,11 @@
     },
     {
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT tipo, categoria, titulo, prioridade FROM insights WHERE usuario_id = $1 ORDER BY criado_em DESC LIMIT 5",
-        "options": {
-          "queryReplacement": "={{ $('start').first().json.usuario_id }}"
-        }
-      },
-      "id": "tool-insights-v4",
-      "name": "get_user_insight",
-      "type": "n8n-nodes-base.postgresTool",
-      "typeVersion": 2.6,
-      "position": [
-        -2000,
-        1376
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<date>{{ $('start').first().json.data_conversa }}</date>\n</input>\n\nChame get_user_insight para ver insights anteriores.\nGere 1 insight acionável com feedback sanduíche.\n\n<output_format>\n[{\"tipo\":\"string\",\"categoria\":\"string\",\"titulo\":\"3-4 palavras\",\"icone\":\"emoji\",\"prioridade\":\"string\",\"resumo_situacao\":\"30-50 palavras\",\"feedback_positivo\":\"string\",\"feedback_desenvolvimento\":\"string\",\"feedback_motivacional\":\"string\",\"recursos_sugeridos\":[{\"tipo\":\"string\",\"nome\":\"string\",\"descricao\":\"string\",\"aplicacao_pratica\":\"string\"}],\"baseado_em\":[\"evidencia1\",\"evidencia2\"]}]\n</output_format>",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<date>{{ $('start').first().json.data_conversa }}</date>\n</input>\n\n\nGere 1 insight com feedback sanduíche.\n\n<output_format>\n[{\"tipo\":\"string\",\"categoria\":\"string\",\"titulo\":\"3-4 palavras\",\"icone\":\"emoji\",\"prioridade\":\"string\",\"resumo_situacao\":\"30-50 palavras\",\"feedback_positivo\":\"string\",\"feedback_desenvolvimento\":\"string\",\"feedback_motivacional\":\"string\",\"recursos_sugeridos\":[{\"tipo\":\"string\",\"nome\":\"string\",\"descricao\":\"string\",\"aplicacao_pratica\":\"string\"}],\"baseado_em\":[\"evidencia1\",\"evidencia2\"]}]\n</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Psicólogo especialista em desenvolvimento pessoal</role>\n\n<objective>Gerar insight acionável com feedback sanduíche + recursos práticos</objective>\n\n<tools>\nget_user_insight: consulta insights anteriores para evitar repetição\n</tools>\n\n<allowed_values>\ncategoria: comportamental|emocional|social|cognitivo\ntipo: padrao|melhoria|positivo|alerta\nprioridade: alta|media|baixa\ntipo_recurso: tecnica|conceito|leitura|pratica|reflexao\n</allowed_values>\n\n<feedback_sanduiche>\n1. feedback_positivo: reconheça forças (20-30 palavras)\n2. feedback_desenvolvimento: padrão que merece atenção (30-40 palavras)\n3. feedback_motivacional: esperança + próximos passos (20-30 palavras)\n</feedback_sanduiche>\n\n<rules>\n- Base TUDO no relatado (sem suposições)\n- Use APENAS valores permitidos acima\n- Evite repetir insights anteriores\n- 2-4 recursos práticos por insight\n</rules>\n\n",
+          "systemMessage": "=<role>Psicólogo especialista em desenvolvimento pessoal</role>\n\n<objective>Gerar insight acionável com feedback sanduíche + recursos práticos</objective>\n\n<tools>\nget_user_insight: consulta insights anteriores para evitar repetição\n</tools>\n\n<allowed_values>\ncategoria: comportamental|emocional|social|cognitivo\ntipo: padrao|melhoria|positivo|alerta\nprioridade: alta|media|baixa\ntipo_recurso: tecnica|conceito|leitura|pratica|reflexao\n\nCRITICO: Use somente os valores definidos\n</allowed_values>\n\n<feedback_sanduiche>\n1. feedback_positivo: reconheça forças (20-30 palavras)\n2. feedback_desenvolvimento: padrão que merece atenção (30-40 palavras)\n3. feedback_motivacional: esperança + próximos passos (20-30 palavras)\n</feedback_sanduiche>\n\n<rules>\n- Base TUDO no relatado (sem suposições)\n- Use APENAS valores permitidos acima\n- Evite repetir insights anteriores\n- 2-4 recursos práticos por insight\n</rules>\n\n\n\n\n",
           "maxIterations": 3
         }
       },
@@ -784,8 +770,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -1840,
-        1392
+        -1920,
+        1376
       ],
       "id": "d1c10c7a-0f4b-4571-be13-f5b413c8e78f",
       "name": "Parser Insights"
@@ -1137,20 +1123,6 @@
         ]
       ]
     },
-    "get_user_insight": {
-      "main": [
-        []
-      ],
-      "ai_tool": [
-        [
-          {
-            "node": "insights",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "insights": {
       "main": [
         [
@@ -1240,10 +1212,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "fa029c1c-a134-4bbc-9f9b-8010b9b96b13",
-          "data_conversa": "2025-12-16T00:00:00.000Z",
-          "usr_nome_preferencia": "Aldo"
+          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa",
+          "chat_id": "a5d6b35c-b781-48f2-9df3-e93ef76631c3",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Davi"
         },
         "pairedItem": {
           "item": 0

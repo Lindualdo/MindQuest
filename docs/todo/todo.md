@@ -1,6 +1,6 @@
 
 
-#Front
+# Front
 - card conversa da home: dar mais destaque a frase "toque no dia para..." - feito
 - rever expiração dos tokens - feito - retirado
 - destaque em frases orientativas - feito
@@ -25,6 +25,7 @@
 - tratamento de interações do mentor (conversa, lembretes, demais..) - feito
 - rever criação de quests junto com experts - feito
 
+- definir regras de processamento de conversa (contexto e reflexão)
 - logar e reprocessar experts não executados 
 - Rever criação de quests
 - Quests de sbotadores X contramedidas do expert sabotador
