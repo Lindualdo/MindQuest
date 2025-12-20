@@ -26,6 +26,7 @@
 - rever criação de quests junto com experts - feito
 
 - definir regras de processamento de conversa (contexto e reflexão)
+- ERRO  Crítico: se der erro em algum expert, o job_expert fica em loop infinito
 - logar e reprocessar experts não executados 
 - Rever criação de quests
 - Quests de sbotadores X contramedidas do expert sabotador

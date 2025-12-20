@@ -1,0 +1,232 @@
+{
+  "name": "sw_expert_v5",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {"name": "usuario_id"},
+            {"name": "chat_id"},
+            {"name": "data_conversa"},
+            {"name": "usr_nome_preferencia"},
+            {"name": "motivo"},
+            {"name": "experts_para_processar"},
+            {"name": "experts_processados_atual"}
+          ]
+        }
+      },
+      "id": "start-v5",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-4240, 1120]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.resumo_conversa, c.tem_reflexao, c.mensagens, c.total_palavras_usuario, c.experts_processados, u.nome_preferencia\nFROM usr_chat c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "buscar-dados-v5",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-4048, 1120],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// v5: Parse experts_para_processar (pode vir como string JSON)\nconst item = $input.first().json;\nlet experts = [];\n\nif (typeof item.experts_para_processar === 'string') {\n  try {\n    experts = JSON.parse(item.experts_para_processar);\n  } catch (e) {\n    experts = [];\n  }\n} else if (Array.isArray(item.experts_para_processar)) {\n  experts = item.experts_para_processar;\n}\n\nreturn [{\n  json: {\n    ...item,\n    experts_para_processar: experts,\n    deve_processar_sabotadores: experts.includes('sabotadores'),\n    deve_processar_emocoes: experts.includes('emocoes'),\n    deve_processar_humor: experts.includes('humor'),\n    deve_processar_bigfive: experts.includes('bigfive'),\n    deve_processar_insights: experts.includes('insights')\n  }\n}];"
+      },
+      "id": "parse-experts-v5",
+      "name": "Parse Experts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-3872, 1120]
+    },
+    {
+      "parameters": {
+        "dataType": "number",
+        "value1": "={{ $json.deve_processar_sabotadores }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": true,
+              "output": 0
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "switch-sabotadores-v5",
+      "name": "Processar Sabotadores?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-2832, 640]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM usuarios_sabotadores WHERE chat_id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.chat_id] }}"
+        }
+      },
+      "id": "delete-sabotadores-v5",
+      "name": "DELETE Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-2624, 640],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT jsonb_agg(jsonb_build_object('codigo', codigo, 'nome', nome) ORDER BY codigo) AS catalogo FROM sabotadores_catalogo;",
+        "options": {}
+      },
+      "id": "buscar-catalogo-v5",
+      "name": "Buscar Catalogo",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-2416, 640],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input AS (SELECT $1::uuid as usuario_id, $2::uuid as chat_id, $3::jsonb as arr),\ndata AS (SELECT i.usuario_id, i.chat_id, sc.id as sabotador_id,\n  (s->>'intensidade')::int as intensidade, (s->>'contexto')::varchar(100) as contexto,\n  (s->>'insights')::text as insights, (s->>'apelido')::varchar(50) as apelido,\n  (s->>'contramedida')::text as contramedida\n  FROM input i, jsonb_array_elements(i.arr) s\n  JOIN sabotadores_catalogo sc ON sc.codigo = (s->>'codigo')::int\n  WHERE (s->>'intensidade')::int >= 30)\nINSERT INTO usuarios_sabotadores (usuario_id, chat_id, sabotador_id, intensidade_media,\n  intensidade_acumulada_dia, total_deteccoes_dia, total_deteccoes, contexto_principal,\n  insight_atual, apelido_personalizado, contramedida_ativa, sabotador_predominante, data_ultima_atividade)\nSELECT usuario_id, chat_id, sabotador_id, intensidade, intensidade, 1, 1, contexto,\n  insights, apelido, contramedida, true, CURRENT_DATE FROM data\nRETURNING id, sabotador_id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.usuario_id, $('start').first().json.chat_id, JSON.stringify($json.output.sabotadores_detectados || [])] }}"
+        }
+      },
+      "id": "gravar-sabotadores-v5",
+      "name": "Gravar Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-1808, 640],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v5: Atualiza log de sucesso para Sabotadores\nUPDATE usr_chat\nSET experts_processados = jsonb_set(\n  COALESCE(experts_processados, '{}'::jsonb),\n  '{sabotadores}',\n  jsonb_build_object(\n    'processado_em', to_char(NOW(), 'YYYY-MM-DD\"T\"HH24:MI:SS'),\n    'status', 'sucesso',\n    'tentativas', 0\n  )\n)\nWHERE id = $1::uuid\nRETURNING id, experts_processados;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.chat_id] }}"
+        }
+      },
+      "id": "log-sucesso-sabotadores-v5",
+      "name": "Log Sucesso Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-1600, 640],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v5: Atualiza log de erro para Sabotadores\nWITH tentativas_anterior AS (\n  SELECT COALESCE((experts_processados->'sabotadores'->>'tentativas')::int, 0) AS t\n  FROM usr_chat WHERE id = $1::uuid\n)\nUPDATE usr_chat\nSET experts_processados = jsonb_set(\n  COALESCE(experts_processados, '{}'::jsonb),\n  '{sabotadores}',\n  jsonb_build_object(\n    'processado_em', to_char(NOW(), 'YYYY-MM-DD\"T\"HH24:MI:SS'),\n    'status', CASE WHEN (SELECT t FROM tentativas_anterior) >= 4 THEN 'bloqueado' ELSE 'erro' END,\n    'tentativas', (SELECT t FROM tentativas_anterior) + 1,\n    'ultimo_erro_em', to_char(NOW(), 'YYYY-MM-DD\"T\"HH24:MI:SS'),\n    'ultimo_erro_msg', $2\n  )\n)\nWHERE id = $1::uuid\nRETURNING id, experts_processados;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.chat_id, $json.error?.message || 'erro desconhecido'] }}"
+        }
+      },
+      "id": "log-erro-sabotadores-v5",
+      "name": "Log Erro Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-1600, 800],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Expert: Sabotadores\n- Switch: só processa se 'sabotadores' está na lista\n- DELETE apenas registros de sabotadores (chat_id)\n- Grava + atualiza log (sucesso/erro)",
+        "height": 300,
+        "width": 1200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-2880, 528],
+      "id": "note-sabotadores-v5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retorno final\nreturn [{json: {processado: true, motivo: 'OK', chat_id: $('start').first().json.chat_id}}];"
+      },
+      "id": "retorno-ok-v5",
+      "name": "Retorno Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-960, 1088]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [[{"node": "Buscar Dados Chat", "type": "main", "index": 0}]]
+    },
+    "Buscar Dados Chat": {
+      "main": [[{"node": "Parse Experts", "type": "main", "index": 0}]]
+    },
+    "Parse Experts": {
+      "main": [[{"node": "Processar Sabotadores?", "type": "main", "index": 0}]]
+    },
+    "Processar Sabotadores?": {
+      "main": [
+        [{"node": "DELETE Sabotadores", "type": "main", "index": 0}],
+        [{"node": "Retorno Sucesso", "type": "main", "index": 0}]
+      ]
+    },
+    "DELETE Sabotadores": {
+      "main": [[{"node": "Buscar Catalogo", "type": "main", "index": 0}]]
+    },
+    "Gravar Sabotadores": {
+      "main": [[{"node": "Log Sucesso Sabotadores", "type": "main", "index": 0}]],
+      "error": [[{"node": "Log Erro Sabotadores", "type": "error", "index": 0}]]
+    },
+    "Log Sucesso Sabotadores": {
+      "main": [[{"node": "Retorno Sucesso", "type": "main", "index": 0}]]
+    },
+    "Log Erro Sabotadores": {
+      "main": [[{"node": "Retorno Sucesso", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+
