@@ -25,13 +25,16 @@
 - tratamento de interações do mentor (conversa, lembretes, demais..) - feito
 - rever criação de quests junto com experts - feito
 
+- logar e reprocessar experts não executados 
+- Rever criação de quests
+- Quests de sbotadores X contramedidas do expert sabotador
 - enviar audio
 - ler imagens
 - ler pdfs
 - permitir ao usr excluir quets
 - exportação - relatorio semanal
 - enviar relatorio semanal
-- Mentor: sabotador mais ativo, o ultimo ou os 3 mais ativos
+- Mentor: sabotador mais ativo, o ultimo ou os 3 mais ativos ?
 - campos da tabela usr_chat - limpar obsoletos e verifcar campos de contagem palavras
 - analisar performance jobs e dados trafegados (job_entender)
 
