@@ -25,6 +25,7 @@
 - tratamento de interações do mentor (conversa, lembretes, demais..) - feito
 - rever criação de quests junto com experts - feito
 
+- CRITICO: getão de tools erro ao processar quests e link token só funciona com gpt 4.1 - erro com gemini 3 flash
 - definir regras de processamento de conversa (contexto e reflexão)
 - ERRO  Crítico: se der erro em algum expert, o job_expert fica em loop infinito
 - logar e reprocessar experts não executados 

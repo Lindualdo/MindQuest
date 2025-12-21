@@ -59,7 +59,6 @@
     },
     {
       "parameters": {
-        "model": "google/gemini-3-flash-preview",
         "options": {
           "maxTokens": 1000,
           "temperature": 0.2
@@ -249,7 +248,6 @@
     },
     {
       "parameters": {
-        "model": "google/gemini-2.5-flash",
         "options": {
           "maxTokens": 1500,
           "temperature": 0.2
@@ -1212,10 +1210,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "4bb8706a-7886-4ccb-8263-ff51aaafaafa",
-          "chat_id": "a5d6b35c-b781-48f2-9df3-e93ef76631c3",
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
           "data_conversa": "2025-12-20T00:00:00.000Z",
-          "usr_nome_preferencia": "Davi"
+          "usr_nome_preferencia": "Nice"
         },
         "pairedItem": {
           "item": 0
