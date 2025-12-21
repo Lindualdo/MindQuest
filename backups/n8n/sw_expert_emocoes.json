@@ -1,0 +1,286 @@
+{
+  "createdAt": "2025-12-21T12:50:00.984Z",
+  "id": "894DcPpjiaRYbW5J",
+  "name": "sw_expert_emocoes",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1200,
+          "temperature": 0.2
+        }
+      },
+      "id": "c69e1163-5481-4eb5-85bd-6f61af6e6f46",
+      "name": "LLM PANAS",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        1904
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n</input>\n\nClassifique emoções presentes na conversa.\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Classificador Emocional (Plutchik + PANAS)</role>\n\n<objective>Identificar emoções primárias e classificar afeto global</objective>\n\n<vocabulary>\njoy=Alegria(+) | trust=Confiança(+) | anticipation=Expectativa(+)\nsadness=Tristeza(-) | fear=Medo(-) | anger=Raiva(-) | disgust=Nojo(-)\nsurprise=Surpresa(~)\n</vocabulary>\n\n<rules>\n- Use APENAS os 8 emocao_id acima\n- Intensidade: 0-100 (só inclua se >= 45)\n- Contexto: POSITIVA|NEGATIVA|NEUTRA (determinado pela emoção, não pelo tom)\n- Evidências: 1-5 trechos literais\n- Uma emoção por tipo (consolide múltiplas ocorrências)\n</rules>\n\n<panas_rules>\n- Só emoções com intensidade >= 45 participam\n- Se diferença positivas vs negativas < 20%: NEUTRA\n- Se total = 0: NEUTRA\n</panas_rules>\n\n<output_format>\n{\"emocoes_detectadas\":[{\"emocao_id\":\"slug\",\"nome_pt\":\"nome\",\"intensidade\":number,\"contexto\":\"POSITIVA|NEGATIVA|NEUTRA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"positiva|negativa|neutra\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":number}\n</output_format>\n\n",
+          "maxIterations": 3
+        }
+      },
+      "id": "f8d19a12-27d6-40b4-986d-0e3cac27ca83",
+      "name": "panas e emocoes",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM usuarios_emocoes WHERE chat_id = $2::uuid;\nWITH ej AS (SELECT $1::uuid AS usuario_id, $2::uuid AS chat_id, $3::date AS dt, jsonb_array_elements($4::jsonb) AS e)\nINSERT INTO usuarios_emocoes (usuario_id, chat_id, emocao_id, intensidade, intensidade_acumulada,\n  ocorrencias_dia, detectado_em, contexto, evidencias, emocao_pt)\nSELECT usuario_id, chat_id, (e->>'emocao_id')::varchar(20), (e->>'intensidade')::int,\n  (e->>'intensidade')::int, 1, dt, (e->>'contexto')::varchar(100),\n  (e->>'evidencias')::jsonb, (e->>'nome_pt')::varchar(20) FROM ej WHERE (e->>'intensidade')::int >= 45\nON CONFLICT (chat_id, emocao_id) DO UPDATE SET\n  ocorrencias_dia = usuarios_emocoes.ocorrencias_dia + 1,\n  intensidade_acumulada = usuarios_emocoes.intensidade_acumulada + EXCLUDED.intensidade,\n  intensidade = (usuarios_emocoes.intensidade_acumulada + EXCLUDED.intensidade) / (usuarios_emocoes.ocorrencias_dia + 1)\nRETURNING id, emocao_id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.usuario_id, $('start').first().json.chat_id, ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa), JSON.stringify($json.output.emocoes_detectadas || [])] }}"
+        }
+      },
+      "id": "86bce5a2-324f-47f8-9812-2668bcd0a724",
+      "name": "Gravar Emocoes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1760,
+        1712
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Emoções - Panas",
+        "height": 416,
+        "width": 992
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2528,
+        1632
+      ],
+      "id": "14afeb94-7967-42fc-8aec-789bca327d37",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"emocoes_detectadas\":[{\"emocao_id\":\"sadness\",\"nome_pt\":\"tristeza\",\"intensidade\":85,\"contexto\":\"NEGATIVA\",\"evidencias\":[\"trecho1\"]}],\"classificacao_panas\":\"negativa\",\"justificativa_panas\":\"motivo\",\"confianca_analise\":90}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1920,
+        1904
+      ],
+      "id": "839e0b8d-41f2-4410-a5e6-ff4431a156ec",
+      "name": "Parser PANAS"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "4ec1031b-7c8a-40c5-bda9-86532a2f004e",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2448,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.resumo_conversa, c.tem_reflexao, c.mensagens, c.total_palavras_usuario, u.nome_preferencia\nFROM usr_chat c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "4c5b5275-07ba-4dc8-8476-5fe20be6d74f",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2256,
+        1712
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "LLM PANAS": {
+      "main": [
+        []
+      ],
+      "ai_languageModel": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "panas e emocoes": {
+      "main": [
+        [
+          {
+            "node": "Gravar Emocoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser PANAS": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "panas e emocoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Nice"
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T12:50:00.984Z",
+      "role": "workflow:owner",
+      "workflowId": "894DcPpjiaRYbW5J",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

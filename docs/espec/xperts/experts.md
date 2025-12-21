@@ -12,8 +12,9 @@
 | **Filtro status** | `status != 'finalizado'` (qualquer data) |
 | **Filtro palavras** | ≥ 30 palavras do usuário (calculado do JSON) |
 | **Limite** | 50 chats por execução |
-| **Finalização** | Só marca `finalizado` se `processado = true` |
-| **Log** | `log_experts.expert_name = 'hub'` |
+| **Retry** | Processa chats com `status = 'processando'` e experts com erro (tentativas < 5) |
+| **Finalização** | Marca `finalizado` apenas se todos experts retornarem sucesso |
+| **Log** | Gravado em `usr_chat.experts_processados` (JSONB) |
 
 ---
 
@@ -177,28 +178,42 @@
 ```
 job_experts (30 min)
     │
-    ├─ busca_validas (≥30 palavras, não finalizado)
+    ├─ busca_validas (≥30 palavras, status != 'finalizado')
+    │   ├─ Novos: atualizado_em > processado_em
+    │   └─ Retry: experts com erro e tentativas < 5
     │
     └─ Para cada chat:
         │
-        ├─ sw_experts_v2
+        ├─ Marcar status = 'processando'
+        │
+        ├─ sw_expert_v6 (com retry automático)
         │   │
         │   ├─ 1. Resumo Conversa → tem_contexto?
         │   │
-        │   ├─ Se TRUE:
-        │   │   ├─ Sabotadores (UPSERT média)
-        │   │   ├─ Emoções (UPSERT média)
-        │   │   ├─ Humor/Energia (UPSERT média)
-        │   │   ├─ Big Five (UPSERT sobrescreve)
-        │   │   ├─ Insights (UPSERT sobrescreve)
-        │   │   ├─ XP Conversas
-        │   │   └─ Criar Quests
+        │   ├─ Se TRUE → Loop dinâmico (7 experts):
+        │   │   │
+        │   │   ├─ Para cada expert:
+        │   │   │   ├─ Executar subworkflow (continueOnFail)
+        │   │   │   ├─ Gravar log individual (sucesso/erro + tentativas)
+        │   │   │   └─ Continuar próximo (mesmo se falhar)
+        │   │   │
+        │   │   ├─ Experts processados:
+        │   │   │   ├─ xp_conversas (1x/dia)
+        │   │   │   ├─ bigfive (sobrescreve)
+        │   │   │   ├─ sabotadores (UPSERT média)
+        │   │   │   ├─ insights (sobrescreve)
+        │   │   │   ├─ humor (UPSERT média)
+        │   │   │   ├─ emocoes (UPSERT média)
+        │   │   │   └─ quests (máx 15)
+        │   │   │
+        │   │   └─ Retorno: sucesso se TODOS ok, erro se ALGUM falhou
         │   │
         │   └─ Se FALSE:
         │       └─ Apenas atualiza resumo
         │
-        └─ Se processado = true:
-            └─ Marca chat como 'finalizado'
+        └─ Atualizar status final:
+            ├─ Se sucesso → 'finalizado'
+            └─ Se erro → mantém 'processando' (retry na próxima)
 ```
 
 ---
@@ -216,4 +231,42 @@ job_experts (30 min)
 
 ---
 
-*Última atualização: 2025-12-14*
+## 10. Sistema de Retry e Logs
+
+| Regra | Valor |
+|-------|-------|
+| **Campo de log** | `usr_chat.experts_processados` (JSONB) |
+| **Tentativas máximas** | 5 por expert |
+| **Retry granular** | Só reprocessa experts que falharam |
+| **Status processamento** | `processando` enquanto houver erros |
+| **Status final** | `finalizado` quando todos experts ok |
+
+### Estrutura do log:
+```json
+{
+  "inicio": "timestamp",
+  "xp_conversas": {
+    "status": "sucesso|erro",
+    "tentativas": 1,
+    "data": "timestamp",
+    "erro": "mensagem (se erro)"
+  },
+  "bigfive": { ... },
+  "sabotadores": { ... },
+  "insights": { ... },
+  "humor": { ... },
+  "emocoes": { ... },
+  "quests": { ... }
+}
+```
+
+### Lógica de retry:
+| Cenário | Ação |
+|---------|------|
+| Expert com `tentativas < 5` e `status = 'erro'` | Reprocessa |
+| Expert com `tentativas >= 5` ou `status = 'sucesso'` | Ignora |
+| Todos experts com sucesso | Marca chat como `finalizado` |
+
+---
+
+*Última atualização: 2025-12-21*

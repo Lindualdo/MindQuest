@@ -1,0 +1,646 @@
+{
+  "createdAt": "2025-12-21T14:17:07.458Z",
+  "id": "S8RDRKmUOvoynWol",
+  "name": "sw_expert_v6",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "start-v6",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -912,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.status,\n  c.mensagens,\n  c.total_interactions,\n  COALESCE(c.experts_processados, '{}'::jsonb) AS experts_processado,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "buscar-dados-v6",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -704,
+        224
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// v11: Sempre processa todos EXCETO em retry com erros específicos\n// Limite de falhas já filtrado no job_experts\nconst start = $('start').first().json;\nconst chatData = $('Buscar Dados Chat').first().json;\nconst ep = chatData.experts_processado || {};\n\n// Dados comuns para todos subworkflows\nconst dadosComuns = {\n  usuario_id: start.usuario_id,\n  chat_id: start.chat_id,\n  data_conversa: start.data_conversa.replace(/\"/g, ''),\n  usr_nome_preferencia: start.usr_nome_preferencia || chatData.usr_nome_preferencia,\n  total_interactions: chatData.total_interactions || 0\n};\n\n// Mapeamento expert -> workflowId\nconst EXPERTS = [\n  { key: 'xp_conversas', workflowId: 'W0i3ufnDIIcx75ez' },\n  { key: 'bigfive', workflowId: 'JOqIaAhynreLzGPs' },\n  { key: 'sabotadores', workflowId: 'rMbgvBQIx0j3XQiy' },\n  { key: 'insights', workflowId: 'HlrSjUpsESMuWGKy' },\n  { key: 'humor', workflowId: 'YJzwKg6vmlEMFEX5' },\n  { key: 'emocoes', workflowId: '894DcPpjiaRYbW5J' },\n  { key: 'quests', workflowId: 'QyIfpyS7zBCOe8AC' }\n];\n\n// Verifica se é retry com erros pendentes\nconst isProcessando = chatData.status === 'processando';\nconst hasErrors = EXPERTS.some(e => {\n  const log = ep[e.key];\n  return log && log.status === 'erro';\n});\nconst isRetryComErros = isProcessando && hasErrors;\n\n// Filtra experts\nlet lista;\nif (isRetryComErros) {\n  // Retry: só processa experts com erro\n  lista = EXPERTS.filter(e => {\n    const log = ep[e.key];\n    if (!log) return true; // Nunca rodou, processa\n    return log.status === 'erro'; // Só os com erro\n  });\n} else {\n  // Novo ciclo: processa TODOS\n  lista = EXPERTS;\n}\n\n// Retorna cada expert como item separado\nreturn lista.map(e => ({\n  json: {\n    expert_key: e.key,\n    workflow_id: e.workflowId,\n    skip: false,\n    ...dadosComuns,\n    experts_processado: ep,\n    is_retry: isRetryComErros\n  }\n}));"
+      },
+      "id": "preparar-lista-v6",
+      "name": "Preparar Lista Experts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "loop-v6",
+      "name": "Loop Experts",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        816,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $json.workflow_id }}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('start').item.json.usuario_id }}",
+            "chat_id": "={{ $('start').item.json.chat_id }}",
+            "data_conversa": "={{ new Date($('start').item.json.data_conversa.replace(/\"/g, '')).toISOString().split('T')[0] }}",
+            "total_interactions": 1
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "data_conversa",
+              "displayName": "data_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "total_interactions",
+              "displayName": "total_interactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "executar-expert-v6",
+      "name": "Executar Expert",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        112
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// v11: Consolida resultado dos experts processados\nconst chatId = $('start').first().json.chat_id;\nconst chatData = $('Buscar Dados Chat').first().json;\nconst epInicial = chatData.experts_processado || {};\n\n// Busca todos os logs gravados nesta rodada\nlet allItems = [];\ntry {\n  allItems = $('Gravar Log Expert').all();\n} catch (e) {\n  // Nenhum expert processado\n}\n\n// Processa resultados dos experts que rodaram\nlet temErro = false;\nconst resultados = {};\n\nfor (const item of allItems) {\n  const ep = item.json.experts_processados || {};\n  for (const key of Object.keys(ep)) {\n    if (['ciclo', 'falhas_consecutivas', 'ultimo_processamento', 'inicio', 'tentativas'].includes(key)) continue;\n    if (ep[key] && ep[key].status) {\n      resultados[key] = ep[key].status;\n      if (ep[key].status === 'erro') temErro = true;\n    }\n  }\n}\n\n// Calcula novos contadores\nconst cicloAtual = (epInicial.ciclo || 0) + 1;\nconst novasFalhas = temErro \n  ? (epInicial.falhas_consecutivas || 0) + 1 \n  : 0;\n\nreturn [{\n  json: {\n    chat_id: chatId,\n    sucesso: !temErro,\n    resultados: resultados,\n    motivo: temErro ? 'Alguns experts falharam' : 'Todos experts processados',\n    ciclo: cicloAtual,\n    falhas_consecutivas: novasFalhas\n  }\n}];"
+      },
+      "id": "consolidar-v6",
+      "name": "Consolidar Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## sw_expert_v7 - Loop Dinâmico com Retry\n\n### Experts Processados\n\n| Expert | Workflow ID |\n|--------|-------------|\n| xp_conversas | W0i3ufnDIIcx75ez |\n| bigfive | JOqIaAhynreLzGPs |\n| sabotadores | rMbgvBQIx0j3XQiy |\n| insights | HlrSjUpsESMuWGKy |\n| humor | YJzwKg6vmlEMFEX5 |\n| emocoes | 894DcPpjiaRYbW5J |\n| quests | QyIfpyS7zBCOe8AC |\n\n### Contadores (em experts_processados)\n\n| Campo | Descrição |\n|-------|----------|\n| `ciclo` | Total de processamentos (sempre incrementa) |\n| `falhas_consecutivas` | Rodadas seguidas com erro (reseta se todos ok) |\n| `ultimo_processamento` | Timestamp da última execução |\n\n### Regras de Processamento\n\n1. **Novo processamento:** Roda todos 7 experts\n2. **Retry:** Só processa experts com `status='erro'` na última rodada\n3. **Limite:** Se `falhas_consecutivas >= 5`, NÃO processa mais\n4. **Status final:**\n   - `finalizado` → todos experts ok\n   - `processando` → algum expert falhou (aguarda retry)\n\n### Fluxo\n\n```\nstart → Buscar Dados → Resumo → Tem Contexto?\n    ↓ (true)\nPreparar Lista → Deve Processar?\n    ↓ (true)              ↓ (false/skip)\n  Loop Experts          Status Skip\n    ↓ (loop)                ↓\n  Executar Expert           ↓\n    ↓                       ↓\n  Preparar Log              ↓\n    ↓                       ↓\n  Gravar Log → Loop         ↓\n    ↓ (done)                ↓\n  Consolidar →→→→→→→→→→→→→↓\n                            ↓\n              Atualizar Status Final\n```",
+        "height": 900,
+        "width": 560
+      },
+      "id": "nota-v6",
+      "name": "Regras sw_expert_v6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1936,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.2
+        }
+      },
+      "id": "fbd25eb0-86b7-42ca-a54f-0cebca9710e8",
+      "name": "LLM Resumo",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        544
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"tem_contexto\":true,\"tem_reflexao\":true,\"justificativa\":\"string\",\"total_palavras\":150,\"resumo_atualizado\":\"string\"}"
+      },
+      "id": "8d2c9f39-2737-4a7f-a95d-e84af2eb507f",
+      "name": "Parser Resumo",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown\n- Conte e retone o total_palavras no json de saida\n- Não mostre total palavras no resumo\n- Use somente e exatamente os <themes> definidos\n</rules>\n\n\n<summary_example>\n\n\n</summary_example>\n\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
+          "maxIterations": 3
+        }
+      },
+      "id": "b43323e9-4ad7-43ed-9319-539569db7fb2",
+      "name": "resumo conversa",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-ctx",
+              "leftValue": "={{ $json.output.tem_contexto }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "22246224-bd1c-4caa-87b4-f6288d18c97a",
+              "leftValue": "={{ $json.output.tem_reflexao }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f1b2dfd7-fca7-4894-b865-1dbd7ee8eecd",
+      "name": "Tem Contexto?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usr_chat SET resumo_conversa = $2, tem_reflexao = $3, total_palavras_usuario = $4 WHERE id = $1::uuid RETURNING id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.chat_id, $('resumo conversa').first().json.output.resumo_atualizado, $('resumo conversa').first().json.output.tem_reflexao, $('resumo conversa').first().json.output.total_palavras] }}"
+        }
+      },
+      "id": "633a00e5-5b45-425b-8d4a-b823b9b19d07",
+      "name": "Atualizar usr_chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        176,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Resumo da conversa",
+        "height": 624,
+        "width": 1088
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        64
+      ],
+      "id": "42ee8f02-060f-4c50-bd88-a8c7695d5dd5",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=[\n  {\n    \"chat_id\": {{ $('start').item.json.chat_id }} ,\n    \"sucesso\": true,\n    \"resultados\": {},\n    \"motivo\": \"Todos experts processados\"\n  }\n]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        320
+      ],
+      "id": "9c5ff696-aa30-445f-90bf-1d66cfb8a290",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "## Processa Experts",
+        "height": 528,
+        "width": 992
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -176
+      ],
+      "id": "c611147a-66a4-4b80-bd2e-c3ca8f64b11c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// v10: Preparar Log - sem skip (todos itens são experts reais)\nconst loopItem = $('Loop Experts').item.json;\nconst execResult = $input.item.json;\n\n// Verifica se houve erro na execução\nconst hasError = !!execResult.error;\nconst errorMsg = hasError ? (execResult.error.message || execResult.error || 'Erro desconhecido') : null;\n\nreturn [{\n  json: {\n    chat_id: loopItem.chat_id,\n    expert_key: loopItem.expert_key,\n    has_error: hasError,\n    error_message: errorMsg,\n    skip: false\n  }\n}];"
+      },
+      "id": "preparar-log-v6",
+      "name": "Preparar Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        112
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v9: Grava log apenas se nao for skip\nDO $$\nBEGIN\n  IF $3::text != 'true' THEN\n    UPDATE usr_chat \n    SET experts_processados = COALESCE(experts_processados, '{}'::jsonb) || \n      jsonb_build_object($2::text, jsonb_build_object(\n        'status', CASE WHEN $4::boolean THEN 'erro' ELSE 'sucesso' END,\n        'tentativas', COALESCE((experts_processados->$2::text->>'tentativas')::int, 0) + 1,\n        'data', NOW()::text,\n        'erro', CASE WHEN $4::boolean THEN $5::text ELSE null END\n      ))\n    WHERE id = $1::uuid;\n  END IF;\nEND $$;\nSELECT id, experts_processados FROM usr_chat WHERE id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id, $json.expert_key || '', String($json.skip), $json.has_error || false, $json.error_message || ''] }}"
+        }
+      },
+      "id": "gravar-log-v6",
+      "name": "Gravar Log Expert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1504,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- v7: Atualiza contadores e status final\nUPDATE usr_chat \nSET \n  experts_processados = COALESCE(experts_processados, '{}'::jsonb) || \n    jsonb_build_object(\n      'ciclo', $2::int,\n      'falhas_consecutivas', $3::int,\n      'ultimo_processamento', NOW()::text\n    ),\n  status = CASE \n    WHEN $4::boolean THEN 'finalizado'\n    ELSE 'processando'\n  END,\n  processado_em = CASE \n    WHEN $4::boolean THEN NOW()\n    ELSE processado_em\n  END\nWHERE id = $1::uuid\nRETURNING id, status, experts_processados;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id, $json.ciclo, $json.falhas_consecutivas, $json.sucesso] }}"
+        }
+      },
+      "id": "atualizar-status-v7",
+      "name": "Atualizar Status Final",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        -112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Experts": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Executar Expert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Expert": {
+      "main": [
+        [
+          {
+            "node": "Preparar Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Resumo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Resumo": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resumo conversa": {
+      "main": [
+        [
+          {
+            "node": "Tem Contexto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Contexto?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar usr_chat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar usr_chat": {
+      "main": [
+        [
+          {
+            "node": "Preparar Lista Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Log": {
+      "main": [
+        [
+          {
+            "node": "Gravar Log Expert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar Log Expert": {
+      "main": [
+        [
+          {
+            "node": "Loop Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Resultado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Lista Experts": {
+      "main": [
+        [
+          {
+            "node": "Loop Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "0a40e917-6c89-4b38-9f44-372ff9038530",
+          "data_conversa": "\"2025-12-21T00:00:00.000Z\"",
+          "usr_nome_preferencia": "Aldo"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T14:17:07.458Z",
+      "role": "workflow:owner",
+      "workflowId": "S8RDRKmUOvoynWol",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

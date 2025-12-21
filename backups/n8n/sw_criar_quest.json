@@ -8,28 +8,6 @@
   "nodes": [
     {
       "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "usuario_id"
-            },
-            {
-              "name": "chat_id"
-            }
-          ]
-        }
-      },
-      "id": "f23b86e5-79fb-4472-8211-91381fb54c76",
-      "name": "start",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        8304,
-        1824
-      ]
-    },
-    {
-      "parameters": {
         "jsCode": "// Normalizar Entrada v2.0.0\nconst input = $input.item.json || {};\n\nconst usuarioId = input.usuario_id;\nif (!usuarioId) {\n  throw new Error('usuario_id obrigatório');\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    chat_id: input.chat_id || null\n  }\n}];"
       },
       "id": "c6913ead-a139-45df-a2bb-8b7449952886",
@@ -462,20 +440,37 @@
         12096,
         1872
       ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "61fb99b7-ee7e-46f2-a607-3b97539dc488",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        8272,
+        1824
+      ]
     }
   ],
   "connections": {
-    "start": {
-      "main": [
-        [
-          {
-            "node": "Normalizar Entrada",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Normalizar Entrada": {
       "main": [
         [
@@ -674,6 +669,17 @@
           }
         ]
       ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -685,7 +691,18 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Nice"
+        }
+      }
+    ]
+  },
   "activeVersionId": null,
   "shared": [
     {

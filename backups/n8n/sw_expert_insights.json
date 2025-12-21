@@ -1,0 +1,289 @@
+{
+  "createdAt": "2025-12-21T12:40:54.260Z",
+  "id": "HlrSjUpsESMuWGKy",
+  "name": "sw_expert_insights",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "abe550c7-2a4e-4ea0-a666-9101d3c9db04",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.resumo_conversa, c.tem_reflexao, c.mensagens, c.total_palavras_usuario, u.nome_preferencia\nFROM usr_chat c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "382cd646-07cb-4c48-9f3f-6eccfcd46c72",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2272,
+        1168
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.3
+        }
+      },
+      "id": "b0a6449e-e985-4c14-9fbe-69f6ac81b637",
+      "name": "LLM Insights",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        1376
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<date>{{ $('start').first().json.data_conversa }}</date>\n</input>\n\n\nGere 1 insight com feedback sanduíche.\n\n<output_format>\n[{\"tipo\":\"string\",\"categoria\":\"string\",\"titulo\":\"3-4 palavras\",\"icone\":\"emoji\",\"prioridade\":\"string\",\"resumo_situacao\":\"30-50 palavras\",\"feedback_positivo\":\"string\",\"feedback_desenvolvimento\":\"string\",\"feedback_motivacional\":\"string\",\"recursos_sugeridos\":[{\"tipo\":\"string\",\"nome\":\"string\",\"descricao\":\"string\",\"aplicacao_pratica\":\"string\"}],\"baseado_em\":[\"evidencia1\",\"evidencia2\"]}]\n</output_format>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Psicólogo especialista em desenvolvimento pessoal</role>\n\n<objective>Gerar insight acionável com feedback sanduíche + recursos práticos</objective>\n\n<tools>\nget_user_insight: consulta insights anteriores para evitar repetição\n</tools>\n\n<allowed_values>\ncategoria: comportamental|emocional|social|cognitivo\ntipo: padrao|melhoria|positivo|alerta\nprioridade: alta|media|baixa\ntipo_recurso: tecnica|conceito|leitura|pratica|reflexao\n\nCRITICO: Use somente os valores definidos\n</allowed_values>\n\n<feedback_sanduiche>\n1. feedback_positivo: reconheça forças (20-30 palavras)\n2. feedback_desenvolvimento: padrão que merece atenção (30-40 palavras)\n3. feedback_motivacional: esperança + próximos passos (20-30 palavras)\n</feedback_sanduiche>\n\n<rules>\n- Base TUDO no relatado (sem suposições)\n- Use APENAS valores permitidos acima\n- Evite repetir insights anteriores\n- 2-4 recursos práticos por insight\n</rules>\n\n\n\n\n",
+          "maxIterations": 3
+        }
+      },
+      "id": "bf089e00-ce74-4da1-9dde-de12ac32dc8e",
+      "name": "insights",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM insights WHERE chat_id = $2::uuid;\n\nWITH d AS (\n  SELECT\n    $1::uuid as uid,\n    $2::uuid as cid,\n    e->>'tipo' as tipo,\n    e->>'categoria' as cat,\n    e->>'titulo' as tit,\n    e->>'resumo_situacao' as res,\n    e->>'icone' as ico,\n    CASE\n      WHEN translate(lower(coalesce(e->>'prioridade','')),\n        'áàâãäéèêëíìîïóòôõöúùûüç',\n        'aaaaaeeeeiiiiooooouuuuc'\n      ) IN ('alta','media','baixa')\n      THEN translate(lower(coalesce(e->>'prioridade','')),\n        'áàâãäéèêëíìîïóòôõöúùûüç',\n        'aaaaaeeeeiiiiooooouuuuc'\n      )\n      ELSE 'media'\n    END as pri,\n    e->>'feedback_positivo' as fp,\n    e->>'feedback_desenvolvimento' as fd,\n    e->>'feedback_motivacional' as fm,\n    e->'recursos_sugeridos' as rec,\n    e->'baseado_em' as base\n  FROM jsonb_array_elements($3::jsonb) e\n  LIMIT 1\n)\nINSERT INTO insights (usuario_id, chat_id, tipo, categoria, titulo, descricao, icone, prioridade, ativo, resumo_situacao, feedback_positivo, feedback_desenvolvimento, feedback_motivacional, recursos_sugeridos, baseado_em)\nSELECT uid, cid, tipo, cat, tit, res, ico, pri, true, res, fp, fd, fm, rec, ARRAY(SELECT jsonb_array_elements_text(base)) FROM d\nON CONFLICT (chat_id) DO UPDATE SET\n  tipo = EXCLUDED.tipo,\n  categoria = EXCLUDED.categoria,\n  titulo = EXCLUDED.titulo,\n  prioridade = EXCLUDED.prioridade,\n  resumo_situacao = EXCLUDED.resumo_situacao,\n  feedback_positivo = EXCLUDED.feedback_positivo,\n  feedback_desenvolvimento = EXCLUDED.feedback_desenvolvimento,\n  feedback_motivacional = EXCLUDED.feedback_motivacional,\n  recursos_sugeridos = EXCLUDED.recursos_sugeridos,\n  criado_em = NOW()\nRETURNING id, titulo;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.usuario_id, $('start').first().json.chat_id, JSON.stringify($json.output || [])] }}"
+        }
+      },
+      "id": "bb3cec85-04bb-4d45-a4aa-0b54c4c0feca",
+      "name": "Gravar Insights",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1712,
+        1168
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Insights",
+        "height": 464,
+        "width": 1264
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2640,
+        1104
+      ],
+      "id": "869f7063-617a-4857-adbc-7259ef4403ec",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[{\"tipo\":\"padrao\",\"categoria\":\"emocional\",\"titulo\":\"Titulo\",\"icone\":\"emoji\",\"prioridade\":\"media\",\"resumo_situacao\":\"resumo\",\"feedback_positivo\":\"positivo\",\"feedback_desenvolvimento\":\"desenvolvimento\",\"feedback_motivacional\":\"motivacional\",\"recursos_sugeridos\":[{\"tipo\":\"tecnica\",\"nome\":\"nome\",\"descricao\":\"desc\",\"aplicacao_pratica\":\"aplicacao\"}],\"baseado_em\":[\"evidencia\"]}]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1920,
+        1376
+      ],
+      "id": "16234e88-42cd-4658-9efb-14b1c664676a",
+      "name": "Parser Insights"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Insights": {
+      "main": [
+        []
+      ],
+      "ai_languageModel": [
+        [
+          {
+            "node": "insights",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insights": {
+      "main": [
+        [
+          {
+            "node": "Gravar Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Insights": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "insights",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Nice"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T12:40:54.260Z",
+      "role": "workflow:owner",
+      "workflowId": "HlrSjUpsESMuWGKy",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

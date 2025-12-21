@@ -1,0 +1,378 @@
+{
+  "createdAt": "2025-12-21T15:24:38.161Z",
+  "id": "KrvBPdMTUcrf8GTW",
+  "name": "sw_expert_resumo",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "42abc144-98e1-4a14-9c30-edf48475a98b",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3056,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  c.id, \n  c.resumo_conversa, \n  c.tem_reflexao, \n  c.mensagens, \n  c.total_palavras_usuario,\n  c.status,\n  COALESCE(c.experts_processado, '{}'::jsonb) AS experts_processado,\n  u.nome_preferencia\nFROM usr_chat c \nJOIN usuarios u ON u.id = c.usuario_id \nWHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "ab953db9-9600-4efb-afd2-7b83297b5e01",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2864,
+        1824
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.2
+        }
+      },
+      "id": "56968fa7-5aba-479a-8232-3dbc33a6135e",
+      "name": "LLM Resumo",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2784,
+        2144
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"tem_contexto\":true,\"tem_reflexao\":true,\"justificativa\":\"string\",\"total_palavras\":150,\"resumo_atualizado\":\"string\"}"
+      },
+      "id": "87356b6d-9631-4007-b510-331c0fc97e89",
+      "name": "Parser Resumo",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -2528,
+        2128
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown\n- Conte e retone sempre a quatidade total de palavras do usuário\n</rules>\n\n\n<summary_example>\n\n\n</summary_example>\n\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
+          "maxIterations": 3
+        }
+      },
+      "id": "f5ec5e09-cede-4a97-8dd7-34ffdd7a8090",
+      "name": "resumo conversa",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2688,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-ctx",
+              "leftValue": "={{ $json.output.tem_contexto }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "22246224-bd1c-4caa-87b4-f6288d18c97a",
+              "leftValue": "={{ $json.output.tem_reflexao }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2d879dc8-0b9a-415a-a4e2-120729783778",
+      "name": "Tem Contexto?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2352,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usr_chat SET resumo_conversa = $2, tem_reflexao = $3, total_palavras_usuario = $4 WHERE id = $1::uuid RETURNING id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.chat_id, $('resumo conversa').first().json.output.resumo_atualizado, $('resumo conversa').first().json.output.tem_reflexao, $('resumo conversa').first().json.output.total_palavras] }}"
+        }
+      },
+      "id": "f39b89b8-e135-476a-a37c-23f60885df38",
+      "name": "Atualizar usr_chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2128,
+        1792
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json: {processado: false, motivo: 'Contexto insuficiente', chat_id: $input.first().json.chat_id}}];"
+      },
+      "id": "5ed080c6-2f6b-4fb7-99d8-b13bc1db533c",
+      "name": "contexto_insuficiente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2128,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Resumo da conversa",
+        "height": 624,
+        "width": 1248
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3136,
+        1664
+      ],
+      "id": "87a0da52-2c93-423e-92c5-aab85465f53c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// v5: Define quais experts precisam rodar\nconst start = $('start').first().json;\nconst chatData = $('Buscar Dados Chat').first().json;\nconst expertsProcessado = chatData.experts_processado || {};\nconst statusChat = chatData.status;\n\n// Lista de experts\nconst EXPERTS = ['xp_conversas', 'bigfive', 'sabotadores', 'insights', 'humor', 'emocoes', 'quests'];\n\n// Se status = processando (retry), só processa experts com erro\nconst isRetry = statusChat === 'processando';\n\nconst expertsParaRodar = EXPERTS.filter(key => {\n  const log = expertsProcessado[key];\n  if (!isRetry) return true;\n  if (!log) return true;\n  return log.status === 'erro' && (log.tentativas || 0) < 5;\n});\n\nreturn [{\n  json: {\n    ...start,\n    is_retry: isRetry,\n    experts_para_rodar: expertsParaRodar,\n    experts_processado: expertsProcessado,\n    resultados: {}\n  }\n}];"
+      },
+      "id": "0a6666a3-8961-416c-9a14-8e7d5aee17da",
+      "name": "Preparar Lista Experts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1888,
+        1792
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Resumo": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Resumo": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "resumo conversa",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resumo conversa": {
+      "main": [
+        [
+          {
+            "node": "Tem Contexto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Contexto?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar usr_chat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "contexto_insuficiente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar usr_chat": {
+      "main": [
+        [
+          {
+            "node": "Preparar Lista Experts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Nice"
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T15:24:38.161Z",
+      "role": "workflow:owner",
+      "workflowId": "KrvBPdMTUcrf8GTW",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

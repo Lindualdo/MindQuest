@@ -132,6 +132,33 @@ get_node_info(nodeType)       # Propriedades do node
 validate_workflow(workflow)   # Validar antes de aplicar
 ```
 
+## ⚠️ Conexões de IF Nodes - CRÍTICO
+
+### ❌ NUNCA Fazer via MCP
+Conexões de **segunda saída** (FALSE) de IF nodes via MCP (`addConnection` com `sourceOutput: "1"`) **criam linhas pontilhadas fantasmas** que:
+- Não executam
+- Não podem ser excluídas facilmente
+- Quebram o fluxo do workflow
+
+### ✅ Sempre Fazer Manualmente
+Para conectar a segunda saída de um IF node:
+1. Abrir workflow na **interface n8n**
+2. Arrastar conexão manualmente da saída FALSE para o node destino
+3. Salvar workflow
+
+### Sintomas de Conexão Fantasma
+- Linha pontilhada em vez de sólida
+- Node destino não executa mesmo recebendo dados
+- Impossível excluir a conexão pela interface
+
+### Como Corrigir
+1. Exportar workflow como JSON
+2. Editar manualmente removendo a conexão quebrada
+3. Reimportar workflow
+4. Reconectar manualmente na interface
+
+---
+
 ## Regras Gerais
 
 1. **Usar `n8n_update_partial_workflow`** → mais eficiente
@@ -140,3 +167,4 @@ validate_workflow(workflow)   # Validar antes de aplicar
 4. **Confirmar tipo via MCP** → `get_node_info` antes de supor
 5. **Code nodes** → `n8n-nodes-base.code` (nunca `function`)
 6. **Ler workflows** → usar `mode="structure"` para visão geral
+7. **Conexões IF** → NUNCA criar segunda saída via MCP (fazer manual)

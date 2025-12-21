@@ -152,3 +152,10 @@ O que o seu Realizador pensa sobre a ideia de 'codificar' seu método de trading
 (A ideia seria o usuário ir preenchendo isso com a ajuda do Mentor, não eu dar a fórmula pronta, claro!)
 
 *Ideia 2: "MAPA MENTAL - criar mapa mental ações, emoções, objetivos..."*
+
+# personalização
+
+1.⁠ ⁠*Hiper-personalização Emocional*: O app precisa sentir não só suas tarefas, mas sua curva de energia. Se você está exausto, ele sugere descanso; se está animado, ele te empurra gentilmente.
+
+2.⁠ ⁠*Antecipação de Padrões*: O sistema deve identificar quando um sabotador (como o Inquieto) está prestes a agir e intervir antes que você se sinta sobrecarregado.
+

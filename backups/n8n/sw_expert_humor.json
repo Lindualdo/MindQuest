@@ -1,0 +1,289 @@
+{
+  "createdAt": "2025-12-21T12:47:30.606Z",
+  "id": "YJzwKg6vmlEMFEX5",
+  "name": "sw_expert_humor",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 800,
+          "temperature": 0.2
+        }
+      },
+      "id": "5c6e9d05-235b-4582-a630-48ce22312a0c",
+      "name": "LLM Humor",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        2336
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n</input>\n\nAnalise humor e energia do usuário.\n\n<output_format>\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}\n</output_format>\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Analista de Humor e Energia</role>\n\n<objective>Detectar estado emocional e nível de energia a partir da conversa</objective>\n\n<rules>\n- Analise APENAS mensagens com autor=\"usuario\"\n- Se sem evidência clara: humor=5, energia=5\n- Use nome do usuário nas justificativas\n</rules>\n\n<scales>\nhumor_dia: 1-10 (1=péssimo, 5=neutro, 10=excelente)\nenergia_nivel: 1-10 (1=exausto, 5=normal, 10=energizado)\nconfianca_analise: 0-100\n</scales>\n\n<allowed_values>\nperiodo_dia: madrugada|manha|tarde|noite|nao_identificado\nvariacao_humor: estavel|ascendente|descendente|oscilatoria\nvariacao_energia: estavel|ascendente|descendente|oscilatoria\n</allowed_values>\n\n<output_format>\n{\"humor_dia\": number, \"energia_nivel\": number, \"variacao_humor\": \"string\", \"variacao_energia\": \"string\", \"periodo_dia\": \"string\", \"justificativa_humor\": \"string (max 200 chars)\", \"justificativa_energia\": \"string (max 200 chars)\", \"evidencias_textuais\": [\"2-5 trechos curtos\"], \"confianca_analise\": number}\n</output_format>",
+          "maxIterations": 3
+        }
+      },
+      "id": "e6195566-7fdc-4253-801e-2ad84fe5161b",
+      "name": "humor e energia",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        2128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM usuarios_humor_energia WHERE chat_id = $2::uuid;\nINSERT INTO usuarios_humor_energia (usuario_id, chat_id, data_registro, hora_registro,\n  periodo_dia, humor_dia, humor_acumulado, energia_nivel, energia_acumulada,\n  ocorrencias_dia, variacao_humor, variacao_energia, justificativa_humor,\n  justificativa_energia, evidencias_textuais, confianca_analise)\nVALUES ($1::uuid, $2::uuid, $3::date, CURRENT_TIME, $4, $5::int, $5::int, $6::int, $6::int,\n  1, $7, $8, $9, $10, $11::jsonb, $12::int)\nON CONFLICT (chat_id) DO UPDATE SET\n  ocorrencias_dia = usuarios_humor_energia.ocorrencias_dia + 1,\n  humor_acumulado = usuarios_humor_energia.humor_acumulado + EXCLUDED.humor_dia,\n  energia_acumulada = usuarios_humor_energia.energia_acumulada + EXCLUDED.energia_nivel,\n  humor_dia = (usuarios_humor_energia.humor_acumulado + EXCLUDED.humor_dia) / (usuarios_humor_energia.ocorrencias_dia + 1),\n  energia_nivel = (usuarios_humor_energia.energia_acumulada + EXCLUDED.energia_nivel) / (usuarios_humor_energia.ocorrencias_dia + 1),\n  detectado_em = NOW()\nRETURNING id, humor_dia, energia_nivel;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.usuario_id, $('start').first().json.chat_id, ((v) => v ? new Date(v).toISOString().slice(0,10) : null)($('start').first().json.data_conversa), $json.output.periodo_dia, $json.output.humor_dia, $json.output.energia_nivel, $json.output.variacao_humor, $json.output.variacao_energia, JSON.stringify($json.output.justificativa_humor), JSON.stringify($json.output.justificativa_energia), JSON.stringify($json.output.evidencias_textuais || []), $json.output.confianca_analise] }}"
+        }
+      },
+      "id": "3bcd467a-c78b-4b61-8cf5-35886525d344",
+      "name": "Gravar Humor",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1776,
+        2128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Humor e energia",
+        "height": 448,
+        "width": 1008
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        2032
+      ],
+      "id": "ddaf18e8-2691-4653-a3c8-1b9d62cab697",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"humor_dia\":6,\"energia_nivel\":6,\"variacao_humor\":\"estavel\",\"variacao_energia\":\"estavel\",\"periodo_dia\":\"tarde\",\"justificativa_humor\":\"motivo\",\"justificativa_energia\":\"motivo\",\"evidencias_textuais\":[\"trecho1\"],\"confianca_analise\":80}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1952,
+        2336
+      ],
+      "id": "ece56a75-b768-43f4-92dc-912dc9a1b33a",
+      "name": "Parser Humor"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "d4bf18c4-d301-4478-84fa-0391fa8982ee",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        2128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.resumo_conversa, c.tem_reflexao, c.mensagens, c.total_palavras_usuario, u.nome_preferencia\nFROM usr_chat c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "1fef71c5-c6df-415c-b486-db03d778c103",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2288,
+        2128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "LLM Humor": {
+      "main": [
+        []
+      ],
+      "ai_languageModel": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "humor e energia": {
+      "main": [
+        [
+          {
+            "node": "Gravar Humor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Humor": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "humor e energia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "0a40e917-6c89-4b38-9f44-372ff9038530",
+          "data_conversa": "2025-12-21",
+          "usr_nome_preferencia": "Aldo"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T12:47:30.606Z",
+      "role": "workflow:owner",
+      "workflowId": "YJzwKg6vmlEMFEX5",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

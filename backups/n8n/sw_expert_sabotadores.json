@@ -1,0 +1,327 @@
+{
+  "createdAt": "2025-12-21T12:36:43.883Z",
+  "id": "rMbgvBQIx0j3XQiy",
+  "name": "sw_expert_sabotadores",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "data_conversa"
+            },
+            {
+              "name": "usr_nome_preferencia"
+            }
+          ]
+        }
+      },
+      "id": "f1d99fdc-a565-4ae6-8e09-d92f22ff48a8",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2320,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.resumo_conversa, c.tem_reflexao, c.mensagens, c.total_palavras_usuario, u.nome_preferencia\nFROM usr_chat c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.chat_id] }}"
+        }
+      },
+      "id": "9baa1296-b9ff-4665-823b-383622e8242c",
+      "name": "Buscar Dados Chat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2112,
+        640
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT jsonb_agg(jsonb_build_object('codigo', codigo, 'nome', nome) ORDER BY codigo) AS catalogo FROM sabotadores_catalogo;",
+        "options": {}
+      },
+      "id": "4cc6a5c8-7367-471a-9ed9-35ade019d3e3",
+      "name": "Buscar Catalogo Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1904,
+        640
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.2
+        }
+      },
+      "id": "1245075a-fea2-4670-9480-da41f2c2e5a9",
+      "name": "LLM Sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        848
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Identifique sabotadores internos na conversa.\n\n<input>\n<messages>{{ JSON.stringify($('Buscar Dados Chat').first().json.mensagens) }}</messages>\n<user_name>{{ $('start').first().json.usr_nome_preferencia }}</user_name>\n<catalogo>{{ JSON.stringify($json.catalogo) }}</catalogo>\n</input>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=<role>Especialista em Sabotadores Internos (Shirzad Chamine)</role>\n\n<objective>Detectar padrões de pensamento sabotadores com evidências textuais</objective>\n\n<rules>\n- Use Mensagens do agente para entender o contexto, mas o foco são as mensagens do usuário\n- Use APENAS códigos 1-10 do catálogo fornecido\n- Intensidade: escala 0-100 (não 0-10)\n- Mínimo intensidade 30 para incluir\n- Frases gatilho: 2-4 trechos CURTOS (max 15 palavras)\n- Se nenhum detectado, retorne array vazio\n</rules>\n\n<scale>\n0-20: muito fraca | 21-40: fraca | 41-60: moderada | 61-80: forte | 81-100: muito forte\n</scale>\n\n<output_format>\n{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}\n</output_format>",
+          "maxIterations": 3
+        }
+      },
+      "id": "e1d87d0b-9741-468d-bbe3-ea05d5445987",
+      "name": "sabotadores",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1712,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM usuarios_sabotadores WHERE chat_id = $2::uuid;\nWITH input AS (SELECT $1::uuid as usuario_id, $2::uuid as chat_id, $3::jsonb as arr),\ndata AS (SELECT i.usuario_id, i.chat_id, sc.id as sabotador_id,\n  (s->>'intensidade')::int as intensidade, (s->>'contexto')::varchar(100) as contexto,\n  (s->>'insights')::text as insights, (s->>'apelido')::varchar(50) as apelido,\n  (s->>'contramedida')::text as contramedida\n  FROM input i, jsonb_array_elements(i.arr) s\n  JOIN sabotadores_catalogo sc ON sc.codigo = (s->>'codigo')::int\n  WHERE (s->>'intensidade')::int >= 30)\nINSERT INTO usuarios_sabotadores (usuario_id, chat_id, sabotador_id, intensidade_media,\n  intensidade_acumulada_dia, total_deteccoes_dia, total_deteccoes, contexto_principal,\n  insight_atual, apelido_personalizado, contramedida_ativa, sabotador_predominante, data_ultima_atividade)\nSELECT usuario_id, chat_id, sabotador_id, intensidade, intensidade, 1, 1, contexto,\n  insights, apelido, contramedida, true, CURRENT_DATE FROM data\nRETURNING id, sabotador_id;",
+        "options": {
+          "queryReplacement": "={{ [$('start').first().json.usuario_id, $('start').first().json.chat_id, JSON.stringify($json.output.sabotadores_detectados || [])] }}"
+        }
+      },
+      "id": "457e21e9-e5f7-43de-bf28-8df21b18182e",
+      "name": "Gravar Sabotadores",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1392,
+        640
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Sabotadores",
+        "height": 496,
+        "width": 1280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2400,
+        560
+      ],
+      "id": "14baee4d-59af-4e63-b6de-83d0b193e413",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"sabotadores_detectados\":[{\"codigo\":1,\"intensidade\":75,\"contexto\":\"relacionamentos\",\"frases_gatilho\":[\"frase1\"],\"insights\":\"impacto\",\"confiabilidade\":90,\"apelido\":\"Sr. X\",\"contramedida\":\"acao\"}]}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1552,
+        848
+      ],
+      "id": "cb1a0cd7-e266-417b-8410-ba336a1173b8",
+      "name": "Parser sabotadores"
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Chat": {
+      "main": [
+        [
+          {
+            "node": "Buscar Catalogo Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Catalogo Sabotadores": {
+      "main": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Sabotadores": {
+      "main": [
+        []
+      ],
+      "ai_languageModel": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sabotadores": {
+      "main": [
+        [
+          {
+            "node": "Gravar Sabotadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar Sabotadores": {
+      "main": [
+        []
+      ]
+    },
+    "Parser sabotadores": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "sabotadores",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "95376ed3-92b7-4d28-b069-f22b2b2300d8",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24",
+          "data_conversa": "2025-12-20T00:00:00.000Z",
+          "usr_nome_preferencia": "Nice"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-21T12:36:43.883Z",
+      "role": "workflow:owner",
+      "workflowId": "rMbgvBQIx0j3XQiy",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
