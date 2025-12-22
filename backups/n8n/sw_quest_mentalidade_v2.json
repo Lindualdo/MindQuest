@@ -122,57 +122,17 @@
     },
     {
       "parameters": {
-        "inputText": "={{ $json.quest_catalogo.titulo }}\n\nDescrição original: {{ $json.quest_catalogo.descricao }}\n\nContexto conversa: {{ $json.contexto.mensagem_relevante || 'usuário mencionou dificuldades emocionais' }}\nHumor: {{ $json.contexto.humor }}/10\nEnergia: {{ $json.contexto.energia }}/10",
-        "options": {
-          "systemMessage": "Você adapta quests do catálogo ao contexto da conversa.\n\nREGRAS:\n1. Manter técnica original (ex: TCC, Estoicismo)\n2. Adaptar DESCRIÇÃO ao contexto específico do usuário\n3. Manter título similar (máx 80 chars)\n4. Ser específico e acionável\n\nRETORNAR JSON:\n{\n  \"titulo\": \"título adaptado\",\n  \"descricao\": \"descrição contextualizada\"\n}"
-        }
-      },
-      "id": "adaptar-ia-ment",
-      "name": "Adaptar ao Contexto",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [1520, 300],
-      "credentials": {
-        "openRouterApi": {
-          "id": "your-openrouter-id",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "schemaType": "fromJson",
-        "jsonSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": { \"type\": \"string\" },\n    \"descricao\": { \"type\": \"string\" }\n  },\n  \"required\": [\"titulo\", \"descricao\"]\n}"
-      },
-      "id": "parser-adapt-ment",
-      "name": "Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [1700, 300]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Combinar quest adaptada com dados originais\nconst entrada = $items('Selecionar Quest', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    catalogo_id: entrada.quest_catalogo.id,\n    titulo: adaptado.titulo,\n    descricao: adaptado.descricao,\n    contexto: entrada.contexto,\n    base_cientifica: entrada.quest_catalogo.base_cientifica\n  }\n}];"
-      },
-      "id": "preparar-insert-ment",
-      "name": "Preparar Insert",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1880, 300]
-    },
-    {
-      "parameters": {
         "operation": "executeQuery",
-        "query": "-- Inserir quest de mentalidade adaptada\nWITH inserted AS (\n  INSERT INTO usuarios_quest (\n    usuario_id,\n    catalogo_id,\n    status,\n    config,\n    ativado_em\n  )\n  VALUES (\n    $1::uuid,\n    $2::uuid,\n    'disponivel',\n    $3::jsonb,\n    NOW()\n  )\n  RETURNING id, catalogo_id, status, config, ativado_em\n)\nSELECT \n  i.id,\n  i.catalogo_id,\n  i.status,\n  i.config,\n  i.ativado_em,\n  qc.titulo as catalogo_titulo,\n  qc.categoria\nFROM inserted i\nJOIN quests_catalogo qc ON qc.id = i.catalogo_id;",
+        "query": "-- Inserir quest de mentalidade\nWITH inserted AS (\n  INSERT INTO usuarios_quest (\n    usuario_id,\n    catalogo_id,\n    status,\n    config,\n    ativado_em\n  )\n  VALUES (\n    $1::uuid,\n    $2::uuid,\n    'disponivel',\n    $3::jsonb,\n    NOW()\n  )\n  RETURNING id, catalogo_id, status, config, ativado_em\n)\nSELECT \n  i.id,\n  i.catalogo_id,\n  i.status,\n  i.config,\n  i.ativado_em,\n  qc.titulo as catalogo_titulo,\n  qc.categoria\nFROM inserted i\nJOIN quests_catalogo qc ON qc.id = i.catalogo_id;",
         "options": {
-          "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.catalogo_id,\n  JSON.stringify({\n    titulo: $json.titulo,\n    descricao: $json.descricao,\n    contexto_origem: 'mentalidade_adaptado',\n    base_cientifica: $json.base_cientifica,\n    humor: $json.contexto.humor,\n    energia: $json.contexto.energia\n  })\n] }}"
+          "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.quest_catalogo.id,\n  JSON.stringify({\n    titulo: $json.quest_catalogo.titulo,\n    descricao: $json.quest_catalogo.descricao,\n    contexto_origem: 'mentalidade_catalogo',\n    base_cientifica: $json.quest_catalogo.base_cientifica,\n    humor: $json.contexto.humor,\n    energia: $json.contexto.energia\n  })\n] }}"
         }
       },
       "id": "inserir-quest-ment",
       "name": "Inserir Quest",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [2060, 300],
+      "position": [1520, 300],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -211,15 +171,6 @@
       ]
     },
     "Selecionar Quest": {
-      "main": [[{ "node": "Adaptar ao Contexto", "type": "main", "index": 0 }]]
-    },
-    "Adaptar ao Contexto": {
-      "main": [[{ "node": "Parser", "type": "main", "index": 0 }]]
-    },
-    "Parser": {
-      "main": [[{ "node": "Preparar Insert", "type": "main", "index": 0 }]]
-    },
-    "Preparar Insert": {
       "main": [[{ "node": "Inserir Quest", "type": "main", "index": 0 }]]
     },
     "Inserir Quest": {
