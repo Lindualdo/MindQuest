@@ -1,8 +1,8 @@
 {
   "createdAt": "2025-12-22T00:00:00.000Z",
-  "id": "sw_quest_hub_v0",
+  "id": "sw_quest_hub_v1",
   "name": "sw_quest_hub",
-  "description": "Roteador de criação de quests por agentes especialistas",
+  "description": "Roteador de criação de quests por agentes especialistas (v1.0)",
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -11,52 +11,360 @@
         "workflowInputs": {
           "values": [
             { "name": "usuario_id" },
-            { "name": "chat_id" },
-            { "name": "pedido_explicito" },
-            { "name": "humor_nivel" },
-            { "name": "energia_nivel" },
-            { "name": "sabotador_detectado" },
-            { "name": "objetivos_definidos" },
-            { "name": "dia_uso" },
-            { "name": "contexto_mensagem", "type": "object" }
+            { "name": "chat_id" }
           ]
         }
       },
-      "id": "start",
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [320, 0]
+      "position": [200, 300]
     },
     {
       "parameters": {
-        "jsCode": "// Normalizar Entrada v0\nconst i = $input.item.json || {};\nconst toNumber = (v, fb = 0) => {\n  const n = Number(v);\n  return Number.isFinite(n) ? n : fb;\n};\n\nif (!i.usuario_id) throw new Error('usuario_id obrigatório');\n\nreturn [{\n  json: {\n    usuario_id: i.usuario_id,\n    chat_id: i.chat_id || null,\n    pedido_explicito: i.pedido_explicito === true,\n    humor_nivel: toNumber(i.humor_nivel, null),\n    energia_nivel: toNumber(i.energia_nivel, null),\n    sabotador_detectado: i.sabotador_detectado === true,\n    objetivos_definidos: i.objetivos_definidos === true,\n    dia_uso: toNumber(i.dia_uso, null),\n    contexto_mensagem: i.contexto_mensagem || {}\n  }\n}];"
+        "operation": "executeQuery",
+        "query": "-- sw_quest_hub: Buscar Contexto Completo v1.0\n-- Parâmetros: $1 = usuario_id, $2 = chat_id\n\nWITH\n-- D1: Conversas finalizadas (para onboarding)\nconversas_finalizadas AS (\n  SELECT COUNT(DISTINCT data_conversa) AS total\n  FROM usr_chat\n  WHERE usuario_id = $1::uuid\n    AND status = 'finalizado'\n),\n\n-- D2: Humor da conversa atual\nhumor_atual AS (\n  SELECT humor_dia\n  FROM usuarios_humor_energia\n  WHERE chat_id = $2::uuid\n  LIMIT 1\n),\n\n-- D3: Energia (PANAS - % emoções positivas)\nenergia_panas AS (\n  SELECT\n    CASE WHEN COUNT(*) > 0\n      THEN ROUND((COUNT(*) FILTER (WHERE LOWER(emocao_id) IN ('joy','trust','anticipation'))::numeric / COUNT(*)::numeric) * 10, 0)\n      ELSE 6\n    END AS nivel\n  FROM usuarios_emocoes\n  WHERE usuario_id = $1::uuid\n    AND intensidade >= 45\n),\n\n-- D4: Sabotador mais ativo (score = total_deteccoes * intensidade_media)\nsabotador_mais_ativo AS (\n  SELECT\n    sabotador_id,\n    SUM(total_deteccoes) AS total_deteccoes,\n    AVG(intensidade_media) AS intensidade_media,\n    SUM(total_deteccoes) * AVG(intensidade_media) AS score,\n    MAX(insight_atual) AS insight_atual,\n    MAX(contramedida_ativa) AS contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n  GROUP BY sabotador_id\n  ORDER BY score DESC\n  LIMIT 1\n),\n\n-- D4b: Sabotador na conversa atual (intensidade > 65)\nsabotador_conversa AS (\n  SELECT\n    sabotador_id,\n    intensidade_media,\n    insight_atual,\n    contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n    AND chat_id = $2::uuid\n    AND intensidade_media > 65\n  ORDER BY intensidade_media DESC\n  LIMIT 1\n),\n\n-- D5: Objetivos específicos (não padrão)\nobjetivos_especificos AS (\n  SELECT\n    id,\n    titulo,\n    detalhamento,\n    area_vida_id\n  FROM usuarios_objetivos\n  WHERE usuario_id = $1::uuid\n    AND status = 'ativo'\n    AND is_padrao = false\n),\n\n-- D6: Quests criadas hoje (excluindo reflexão diária)\nquests_hoje AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\n\n-- D6b: Total quests ativas/disponíveis (limite 15)\nquests_ativas_disponiveis AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND status IN ('ativa', 'disponivel')\n),\n\n-- D6c: Quests existentes por tipo (para anti-duplicação)\nquests_existentes AS (\n  SELECT\n    uq.id,\n    uq.catalogo_id,\n    uq.status,\n    uq.config,\n    qc.categoria,\n    qc.codigo\n  FROM usuarios_quest uq\n  LEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('ativa', 'disponivel')\n),\n\n-- D6d: Quests do dia para excluir (disponíveis, não ativas)\nquests_dia_excluir AS (\n  SELECT id\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND status = 'disponivel'\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\n\n-- D7: Mensagens da conversa atual\nmensagens_conversa AS (\n  SELECT mensagens\n  FROM usr_chat\n  WHERE id = $2::uuid\n)\n\nSELECT json_build_object(\n  'usuario_id', $1::uuid,\n  'chat_id', $2::uuid,\n  'conversas_finalizadas', COALESCE((SELECT total FROM conversas_finalizadas), 0),\n  'humor', COALESCE((SELECT humor_dia FROM humor_atual), 6),\n  'energia', COALESCE((SELECT nivel FROM energia_panas), 6),\n  'sabotador_mais_ativo', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'score', ROUND(score::numeric, 2),\n    'intensidade_media', ROUND(intensidade_media::numeric, 2),\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_mais_ativo),\n  'sabotador_conversa', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'intensidade', intensidade_media,\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_conversa),\n  'objetivos_especificos', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'titulo', titulo,\n    'detalhamento', detalhamento,\n    'area_vida_id', area_vida_id\n  )) FROM objetivos_especificos), '[]'::json),\n  'quests_hoje', COALESCE((SELECT total FROM quests_hoje), 0),\n  'quests_ativas_disponiveis', COALESCE((SELECT total FROM quests_ativas_disponiveis), 0),\n  'quests_existentes', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'catalogo_id', catalogo_id,\n    'status', status,\n    'categoria', categoria,\n    'codigo', codigo,\n    'config', config\n  )) FROM quests_existentes), '[]'::json),\n  'quests_dia_excluir_ids', COALESCE((SELECT json_agg(id) FROM quests_dia_excluir), '[]'::json),\n  'mensagens', COALESCE((SELECT mensagens FROM mensagens_conversa), '[]'::jsonb)\n) AS contexto;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id] }}"
+        }
       },
-      "id": "normalize",
-      "name": "Normalizar Entrada",
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Buscar Contexto",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [420, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Excluir quests do dia (disponíveis) para recriar\nDELETE FROM usuarios_quest\nWHERE id = ANY($1::uuid[])\nRETURNING id;",
+        "options": {
+          "queryReplacement": "={{ [($json.contexto?.quests_dia_excluir_ids || []).filter(id => id)] }}"
+        }
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Excluir Quests Dia",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [640, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificações Sem Agente v1.0\n// R1: Onboarding (<=3 conversas)\n// R7: Limite diário (2/dia)\n// R7b: Limite total (15 ativas/disponíveis)\n\nconst ctx = $('Buscar Contexto').first().json.contexto || {};\n\nconst conversasFinalizadas = ctx.conversas_finalizadas || 0;\nconst questsHoje = ctx.quests_hoje || 0;\nconst questsAtivasDisponiveis = ctx.quests_ativas_disponiveis || 0;\nconst humor = ctx.humor || 6;\nconst energia = ctx.energia || 6;\n\n// R1: Onboarding\nif (conversasFinalizadas <= 3) {\n  return [{\n    json: {\n      pode_processar: false,\n      motivo: 'onboarding',\n      mensagem: `Usuário em onboarding (${conversasFinalizadas}/3 conversas)`,\n      contexto: ctx\n    }\n  }];\n}\n\n// R7b: Limite total (15)\nif (questsAtivasDisponiveis >= 15) {\n  return [{\n    json: {\n      pode_processar: false,\n      motivo: 'limite_total',\n      mensagem: `Limite de 15 quests atingido (${questsAtivasDisponiveis})`,\n      contexto: ctx\n    }\n  }];\n}\n\n// R7: Limite diário (2)\nconst limiteDiarioAtingido = questsHoje >= 2;\nconst podecriarHoje = Math.max(0, 2 - questsHoje);\n\nreturn [{\n  json: {\n    pode_processar: true,\n    limite_diario_atingido: limiteDiarioAtingido,\n    pode_criar_hoje: podecriarHoje,\n    quests_hoje: questsHoje,\n    quests_ativas_disponiveis: questsAtivasDisponiveis,\n    conversas_finalizadas: conversasFinalizadas,\n    humor: humor,\n    energia: energia,\n    contexto: ctx\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Verificar Limites",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 0]
+      "position": [860, 300]
     },
     {
       "parameters": {
-        "jsCode": "// Router v0 (alto nível)\n// Regras principais (quest_hub.md):\n// - Dia <= 3: sem quests (onboarding)\n// - Pedido explícito: prioridade máxima (pode exceder limite diário; excedentes em fila)\n// - Humor/Energia baixos: mentalidade\n// - Sabotador detectado: sabotador\n// - Objetivos definidos: objetivos\n// - Limite: 2/dia (reflexão diária não conta) — respeitar, exceto pedido explícito\n\nconst i = $input.item.json || {};\nconst destinos = [];\nconst fila = [];\n\nconst diaUso = i.dia_uso ?? null;\nconst baixoHumor = (i.humor_nivel ?? 10) < 5;\nconst baixaEnergia = (i.energia_nivel ?? 10) < 5;\nconst limiteDiario = 2;\n\n// 1) Onboarding\nif (diaUso !== null && diaUso <= 3) {\n  return [{ json: { ...i, destinos: [], fila_espera: [], motivo: 'onboarding_sem_quests' } }];\n}\n\n// 2) Pedido explícito (passa na frente)\nif (i.pedido_explicito) destinos.push('personalizada');\n\n// 3) Mentalidade\nif (baixoHumor || baixaEnergia) destinos.push('mentalidade');\n\n// 4) Sabotador\nif (i.sabotador_detectado) destinos.push('sabotador');\n\n// 5) Objetivos\nif (i.objetivos_definidos) destinos.push('objetivos');\n\n// Anti-duplicação de destino\nconst únicos = [];\nfor (const d of destinos) if (!únicos.includes(d)) únicos.push(d);\n\n// Limite diário (exceto pedidos explícitos além do limite vão para fila)\nconst capacidade = i.pedido_explicito ? Math.max(limiteDiario, únicos.length) : limiteDiario;\nconst execucao = únicos.slice(0, capacidade);\nconst espera = únicos.slice(capacidade);\n\nreturn [{\n  json: {\n    ...i,\n    destinos: execucao,\n    fila_espera: espera,\n    motivo: execucao.length ? 'roteado' : 'sem_destino'\n  }\n}];"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "pode_processar",
+              "leftValue": "={{ $json.pode_processar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "router",
-      "name": "Roteador",
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Pode Processar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Saída quando não pode processar\nconst input = $input.item.json || {};\n\nreturn [{\n  json: {\n    sucesso: false,\n    motivo: input.motivo || 'bloqueado',\n    mensagem: input.mensagem || 'Não foi possível processar',\n    quests_criadas: []\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Saida Bloqueado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 0]
+      "position": [1300, 500]
     },
     {
       "parameters": {
-        "content": "Roteador v0\n- Aplica regras de onboarding/limite\n- Define destinos: mentalidade, sabotador, objetivos, personalizada\n- Próximos passos: conectar sub-workflows especialistas que já gravam quests"
+        "model": "google/gemini-2.0-flash-001",
+        "options": {}
       },
-      "id": "note",
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [1300, 120],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"pode_criar\": {\n      \"type\": \"boolean\",\n      \"description\": \"Se pode criar quests\"\n    },\n    \"pedido_explicito\": {\n      \"type\": \"boolean\",\n      \"description\": \"Se usuário pediu explicitamente uma quest\"\n    },\n    \"destinos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": {\n            \"type\": \"string\",\n            \"enum\": [\"mentalidade\", \"sabotador\", \"objetivos\", \"personalizada\"],\n            \"description\": \"Tipo do especialista\"\n          },\n          \"prioridade\": {\n            \"type\": \"number\",\n            \"description\": \"Ordem de prioridade (1 = mais alta)\"\n          },\n          \"catalogo_sugerido\": {\n            \"type\": \"string\",\n            \"description\": \"Código do catálogo sugerido (opcional)\"\n          },\n          \"contexto\": {\n            \"type\": \"object\",\n            \"description\": \"Contexto específico para o especialista\"\n          }\n        },\n        \"required\": [\"tipo\", \"prioridade\", \"contexto\"]\n      }\n    },\n    \"excluidos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": { \"type\": \"string\" },\n          \"motivo\": { \"type\": \"string\" }\n        }\n      }\n    },\n    \"justificativa\": {\n      \"type\": \"string\",\n      \"description\": \"Breve justificativa da decisão\"\n    }\n  },\n  \"required\": [\"pode_criar\", \"pedido_explicito\", \"destinos\", \"justificativa\"]\n}",
+        "autoFix": true
+      },
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Parser Roteador",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [1520, 120]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Contexto do Usuário\n\n<limites>\npode_criar_hoje: {{ $json.pode_criar_hoje }}\nlimite_diario_atingido: {{ $json.limite_diario_atingido }}\nquests_hoje: {{ $json.quests_hoje }}\nquests_ativas_disponiveis: {{ $json.quests_ativas_disponiveis }}\n</limites>\n\n<estado_emocional>\nhumor: {{ $json.humor }}/10\nenergia: {{ $json.energia }}/10\n</estado_emocional>\n\n<sabotador_mais_ativo>\n{{ JSON.stringify($json.contexto.sabotador_mais_ativo || null) }}\n</sabotador_mais_ativo>\n\n<sabotador_conversa_atual>\n{{ JSON.stringify($json.contexto.sabotador_conversa || null) }}\n</sabotador_conversa_atual>\n\n<objetivos_especificos>\n{{ JSON.stringify($json.contexto.objetivos_especificos || []) }}\n</objetivos_especificos>\n\n<quests_existentes>\n{{ JSON.stringify($json.contexto.quests_existentes || []) }}\n</quests_existentes>\n\n<mensagens_conversa>\n{{ JSON.stringify($json.contexto.mensagens || []) }}\n</mensagens_conversa>\n\n---\n\nAnalise o contexto acima e decida quais tipos de quest devem ser criados.\n\nRetorne APENAS o JSON estruturado conforme o schema.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "# Agente Roteador de Quests - MindQuest v1.0\n\n<role>\nVocê é o Roteador Inteligente do sistema de quests MindQuest.\nSua função é analisar o contexto do usuário e decidir QUAIS tipos de quest devem ser criados.\nVocê NÃO cria as quests - apenas roteia para os especialistas corretos.\n</role>\n\n<objective>\nAnalisar mensagens, estado emocional e contexto para:\n1. Detectar se usuário pediu explicitamente uma quest\n2. Identificar necessidade de quest de mentalidade (humor/energia baixos)\n3. Identificar necessidade de quest de sabotador\n4. Identificar necessidade de quest de objetivos\n5. Validar anti-duplicação (não rotear se já existe quest similar)\n\nSucesso = roteamento correto e eficiente, sem duplicações.\n</objective>\n\n<rules>\n\n<rule id=\"R2\" name=\"Pedido Explícito\">\nSE o usuário mencionar nas mensagens que QUER uma quest, tarefa, desafio ou missão:\n- Definir pedido_explicito = true\n- Adicionar destino \"personalizada\" com prioridade 1\n- IGNORAR limite diário (pode criar mesmo se limite_diario_atingido = true)\nExemplos de pedido explícito:\n- \"quero uma quest para...\"\n- \"me dá uma tarefa de...\"\n- \"cria um desafio para...\"\n- \"preciso de uma missão para...\"\n</rule>\n\n<rule id=\"R3\" name=\"Mentalidade\">\nSE humor < 5 OU energia < 5:\n- Adicionar destino \"mentalidade\"\n- Contexto: incluir humor, energia, mensagem relevante\n- Foco: regulação emocional, TCC, Estoicismo\n</rule>\n\n<rule id=\"R4\" name=\"Sabotador\">\nSE existe sabotador_conversa_atual (intensidade > 65) OU sabotador_mais_ativo com score alto:\n- Adicionar destino \"sabotador\"\n- Contexto: sabotador_id, intensidade, insight_atual, contramedida_ativa\n- Priorizar sabotador_conversa se existir (mais recente/relevante)\n</rule>\n\n<rule id=\"R5\" name=\"Objetivos\">\nSE objetivos_especificos não está vazio:\n- Adicionar destino \"objetivos\"\n- Contexto: lista de objetivos, área de vida\n- Apenas se houver contexto relevante nas mensagens\n</rule>\n\n<rule id=\"R6\" name=\"Anti-Duplicação\" critical=\"true\">\nANTES de adicionar qualquer destino, verificar quests_existentes:\n- SE já existe quest do mesmo tipo (categoria) com status ativa/disponível:\n  - NÃO adicionar ao destinos\n  - Adicionar ao excluidos com motivo \"quest_similar_existe\"\n- Tipos mapeados:\n  - mentalidade → categorias: tcc, estoicismo, essencial\n  - sabotador → quests com sabotador_id\n  - objetivos → quests com objetivo_id ou categoria \"objetivo\"\n  - personalizada → código \"quest_custom\"\n</rule>\n\n<rule id=\"R7\" name=\"Limite Diário\">\nSE limite_diario_atingido = true E pedido_explicito = false:\n- Limitar destinos a 0 (não criar nada)\n- Justificar: \"limite diário atingido\"\nSE pedido_explicito = true:\n- IGNORAR limite diário\n</rule>\n\n</rules>\n\n<priority_order>\n1. personalizada (pedido explícito) - SEMPRE primeira\n2. mentalidade (humor/energia baixos) - urgente\n3. sabotador (padrão detectado) - importante\n4. objetivos (progresso) - relevante\n</priority_order>\n\n<output_examples>\n\n<example name=\"humor_baixo_sem_duplicacao\">\nInput: humor=3, energia=4, sem quests de mentalidade existentes\nOutput:\n{\n  \"pode_criar\": true,\n  \"pedido_explicito\": false,\n  \"destinos\": [\n    {\n      \"tipo\": \"mentalidade\",\n      \"prioridade\": 1,\n      \"contexto\": {\n        \"humor\": 3,\n        \"energia\": 4,\n        \"foco\": \"regulacao_emocional\"\n      }\n    }\n  ],\n  \"excluidos\": [],\n  \"justificativa\": \"Humor e energia baixos indicam necessidade de quest de mentalidade\"\n}\n</example>\n\n<example name=\"pedido_explicito\">\nInput: mensagem contém \"quero uma quest para organizar meu dia\"\nOutput:\n{\n  \"pode_criar\": true,\n  \"pedido_explicito\": true,\n  \"destinos\": [\n    {\n      \"tipo\": \"personalizada\",\n      \"prioridade\": 1,\n      \"contexto\": {\n        \"pedido\": \"organizar meu dia\",\n        \"mensagem_original\": \"quero uma quest para organizar meu dia\"\n      }\n    }\n  ],\n  \"excluidos\": [],\n  \"justificativa\": \"Usuário pediu explicitamente quest para organização\"\n}\n</example>\n\n<example name=\"duplicacao_bloqueada\">\nInput: sabotador_conversa intensidade=72, mas já existe quest de sabotador ativa\nOutput:\n{\n  \"pode_criar\": true,\n  \"pedido_explicito\": false,\n  \"destinos\": [],\n  \"excluidos\": [\n    {\n      \"tipo\": \"sabotador\",\n      \"motivo\": \"quest_similar_existe\"\n    }\n  ],\n  \"justificativa\": \"Sabotador detectado mas já existe quest ativa do mesmo tipo\"\n}\n</example>\n\n</output_examples>\n\n<error_handling>\n- Se mensagens vazias: pode_criar = true, destinos = [] (sem contexto)\n- Se todos os tipos excluídos por duplicação: destinos = []\n- Se limite atingido sem pedido: pode_criar = false\n</error_handling>"
+        }
+      },
+      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "name": "Agente Roteador",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [1300, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar resultado do agente roteador\nconst verificacao = $('Verificar Limites').first().json || {};\nconst roteadorOutput = $json.output || {};\n\nlet resultado;\nif (typeof roteadorOutput === 'string') {\n  try {\n    resultado = JSON.parse(roteadorOutput);\n  } catch (e) {\n    resultado = { pode_criar: false, destinos: [], justificativa: 'Erro ao parsear resposta do agente' };\n  }\n} else {\n  resultado = roteadorOutput;\n}\n\nconst destinos = Array.isArray(resultado.destinos) ? resultado.destinos : [];\nconst pedidoExplicito = resultado.pedido_explicito === true;\n\n// Aplicar limite diário (exceto se pedido explícito)\nlet destinosFinais = destinos;\nif (verificacao.limite_diario_atingido && !pedidoExplicito) {\n  destinosFinais = [];\n}\n\n// Ordenar por prioridade\ndestinosFinais.sort((a, b) => (a.prioridade || 99) - (b.prioridade || 99));\n\n// Limitar a 2 por dia (exceto pedido explícito)\nif (!pedidoExplicito) {\n  const podecriar = verificacao.pode_criar_hoje || 0;\n  destinosFinais = destinosFinais.slice(0, podecriar);\n}\n\nreturn [{\n  json: {\n    usuario_id: verificacao.contexto?.usuario_id,\n    chat_id: verificacao.contexto?.chat_id,\n    pode_criar: destinosFinais.length > 0,\n    pedido_explicito: pedidoExplicito,\n    destinos: destinosFinais,\n    excluidos: resultado.excluidos || [],\n    justificativa: resultado.justificativa || '',\n    contexto_completo: verificacao.contexto\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0010-4000-8000-000000000010",
+      "name": "Processar Roteamento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "tem_destinos",
+              "leftValue": "={{ $json.destinos.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0011-4000-8000-000000000011",
+      "name": "Tem Destinos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar itens para loop de destinos\nconst input = $input.item.json || {};\nconst destinos = input.destinos || [];\n\nreturn destinos.map((destino, index) => ({\n  json: {\n    usuario_id: input.usuario_id,\n    chat_id: input.chat_id,\n    destino: destino,\n    index: index,\n    total: destinos.length,\n    contexto_completo: input.contexto_completo\n  }\n}));"
+      },
+      "id": "a1b2c3d4-0012-4000-8000-000000000012",
+      "name": "Preparar Loop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Saída quando não há destinos\nconst input = $input.item.json || {};\n\nreturn [{\n  json: {\n    sucesso: true,\n    motivo: 'sem_destinos',\n    mensagem: input.justificativa || 'Nenhuma quest a criar',\n    excluidos: input.excluidos || [],\n    quests_criadas: []\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0013-4000-8000-000000000013",
+      "name": "Saida Sem Destinos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 420]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.destino.tipo }}",
+                    "rightValue": "mentalidade",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mentalidade"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.destino.tipo }}",
+                    "rightValue": "sabotador",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "sabotador"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.destino.tipo }}",
+                    "rightValue": "objetivos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "objetivos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.destino.tipo }}",
+                    "rightValue": "personalizada",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "personalizada"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0014-4000-8000-000000000014",
+      "name": "Switch Tipo",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [2240, 200]
+    },
+    {
+      "parameters": {
+        "content": "## sw_quest_hub v1.0\n\n### FLUXO\n1. Recebe: usuario_id, chat_id\n2. Busca contexto completo do banco\n3. Exclui quests do dia (disponíveis)\n4. Verifica limites (R1, R7, R7b)\n5. Agente IA roteia para especialistas\n6. Switch por tipo de quest\n7. Chama sub-workflow correspondente\n\n### REGRAS IMPLEMENTADAS\n- R1: Onboarding (<=3 conversas)\n- R2: Pedido explícito (prioridade)\n- R3: Mentalidade (humor/energia <5)\n- R4: Sabotador (intensidade >65)\n- R5: Objetivos (específicos ativos)\n- R6: Anti-duplicação (agente)\n- R7: Limite 2/dia\n- R7b: Limite 15 total\n\n### PRÓXIMOS PASSOS\n- Conectar sw_quest_mentalidade\n- Conectar sw_quest_sabotador\n- Conectar sw_quest_objetivos\n- Conectar sw_quest_personalizada",
+        "height": 520,
+        "width": 340
+      },
+      "id": "a1b2c3d4-0015-4000-8000-000000000015",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [960, -240]
+      "position": [-60, 80]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0016-4000-8000-000000000016",
+      "name": "Placeholder Mentalidade",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2500, 0]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0017-4000-8000-000000000017",
+      "name": "Placeholder Sabotador",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2500, 140]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0018-4000-8000-000000000018",
+      "name": "Placeholder Objetivos",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2500, 280]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0019-4000-8000-000000000019",
+      "name": "Placeholder Personalizada",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2500, 420]
     }
   ],
   "connections": {
@@ -64,18 +372,168 @@
       "main": [
         [
           {
-            "node": "Normalizar Entrada",
+            "node": "Buscar Contexto",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalizar Entrada": {
+    "Buscar Contexto": {
       "main": [
         [
           {
-            "node": "Roteador",
+            "node": "Excluir Quests Dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excluir Quests Dia": {
+      "main": [
+        [
+          {
+            "node": "Verificar Limites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Limites": {
+      "main": [
+        [
+          {
+            "node": "Pode Processar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pode Processar?": {
+      "main": [
+        [
+          {
+            "node": "Agente Roteador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Saida Bloqueado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Roteador",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Parser Roteador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Roteador": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente Roteador",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Roteador": {
+      "main": [
+        [
+          {
+            "node": "Processar Roteamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Roteamento": {
+      "main": [
+        [
+          {
+            "node": "Tem Destinos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Destinos?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Saida Sem Destinos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Loop": {
+      "main": [
+        [
+          {
+            "node": "Switch Tipo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Tipo": {
+      "main": [
+        [
+          {
+            "node": "Placeholder Mentalidade",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Placeholder Sabotador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Placeholder Objetivos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Placeholder Personalizada",
             "type": "main",
             "index": 0
           }
@@ -90,9 +548,17 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "6cdc1cd9-4e1c-4969-ac3c-2da742697b24"
+        }
+      }
+    ]
+  },
   "activeVersionId": null,
   "shared": [],
   "tags": []
 }
-
