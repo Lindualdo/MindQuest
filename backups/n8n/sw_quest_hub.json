@@ -1,0 +1,98 @@
+{
+  "createdAt": "2025-12-22T00:00:00.000Z",
+  "id": "sw_quest_hub_v0",
+  "name": "sw_quest_hub",
+  "description": "Roteador de criação de quests por agentes especialistas",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id" },
+            { "name": "chat_id" },
+            { "name": "pedido_explicito" },
+            { "name": "humor_nivel" },
+            { "name": "energia_nivel" },
+            { "name": "sabotador_detectado" },
+            { "name": "objetivos_definidos" },
+            { "name": "dia_uso" },
+            { "name": "contexto_mensagem", "type": "object" }
+          ]
+        }
+      },
+      "id": "start",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [320, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalizar Entrada v0\nconst i = $input.item.json || {};\nconst toNumber = (v, fb = 0) => {\n  const n = Number(v);\n  return Number.isFinite(n) ? n : fb;\n};\n\nif (!i.usuario_id) throw new Error('usuario_id obrigatório');\n\nreturn [{\n  json: {\n    usuario_id: i.usuario_id,\n    chat_id: i.chat_id || null,\n    pedido_explicito: i.pedido_explicito === true,\n    humor_nivel: toNumber(i.humor_nivel, null),\n    energia_nivel: toNumber(i.energia_nivel, null),\n    sabotador_detectado: i.sabotador_detectado === true,\n    objetivos_definidos: i.objetivos_definidos === true,\n    dia_uso: toNumber(i.dia_uso, null),\n    contexto_mensagem: i.contexto_mensagem || {}\n  }\n}];"
+      },
+      "id": "normalize",
+      "name": "Normalizar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Router v0 (alto nível)\n// Regras principais (quest_hub.md):\n// - Dia <= 3: sem quests (onboarding)\n// - Pedido explícito: prioridade máxima (pode exceder limite diário; excedentes em fila)\n// - Humor/Energia baixos: mentalidade\n// - Sabotador detectado: sabotador\n// - Objetivos definidos: objetivos\n// - Limite: 2/dia (reflexão diária não conta) — respeitar, exceto pedido explícito\n\nconst i = $input.item.json || {};\nconst destinos = [];\nconst fila = [];\n\nconst diaUso = i.dia_uso ?? null;\nconst baixoHumor = (i.humor_nivel ?? 10) < 5;\nconst baixaEnergia = (i.energia_nivel ?? 10) < 5;\nconst limiteDiario = 2;\n\n// 1) Onboarding\nif (diaUso !== null && diaUso <= 3) {\n  return [{ json: { ...i, destinos: [], fila_espera: [], motivo: 'onboarding_sem_quests' } }];\n}\n\n// 2) Pedido explícito (passa na frente)\nif (i.pedido_explicito) destinos.push('personalizada');\n\n// 3) Mentalidade\nif (baixoHumor || baixaEnergia) destinos.push('mentalidade');\n\n// 4) Sabotador\nif (i.sabotador_detectado) destinos.push('sabotador');\n\n// 5) Objetivos\nif (i.objetivos_definidos) destinos.push('objetivos');\n\n// Anti-duplicação de destino\nconst únicos = [];\nfor (const d of destinos) if (!únicos.includes(d)) únicos.push(d);\n\n// Limite diário (exceto pedidos explícitos além do limite vão para fila)\nconst capacidade = i.pedido_explicito ? Math.max(limiteDiario, únicos.length) : limiteDiario;\nconst execucao = únicos.slice(0, capacidade);\nconst espera = únicos.slice(capacidade);\n\nreturn [{\n  json: {\n    ...i,\n    destinos: execucao,\n    fila_espera: espera,\n    motivo: execucao.length ? 'roteado' : 'sem_destino'\n  }\n}];"
+      },
+      "id": "router",
+      "name": "Roteador",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 0]
+    },
+    {
+      "parameters": {
+        "content": "Roteador v0\n- Aplica regras de onboarding/limite\n- Define destinos: mentalidade, sabotador, objetivos, personalizada\n- Próximos passos: conectar sub-workflows especialistas que já gravam quests"
+      },
+      "id": "note",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [960, -240]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Roteador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "activeVersionId": null,
+  "shared": [],
+  "tags": []
+}
+
