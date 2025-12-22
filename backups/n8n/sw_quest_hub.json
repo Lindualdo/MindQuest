@@ -335,35 +335,79 @@
       "position": [-60, 80]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "workflowId": "sw_quest_mentalidade_v1",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "contexto": "={{ $json.contexto }}"
+          }
+        },
+        "options": {}
+      },
       "id": "a1b2c3d4-0016-4000-8000-000000000016",
-      "name": "Placeholder Mentalidade",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "sw_quest_mentalidade",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [2500, 0]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "workflowId": "sw_quest_sabotador_v1",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "contexto": "={{ $json.contexto }}"
+          }
+        },
+        "options": {}
+      },
       "id": "a1b2c3d4-0017-4000-8000-000000000017",
-      "name": "Placeholder Sabotador",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "sw_quest_sabotador",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [2500, 140]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "workflowId": "sw_quest_objetivos_v1",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "contexto": "={{ $json.contexto }}"
+          }
+        },
+        "options": {}
+      },
       "id": "a1b2c3d4-0018-4000-8000-000000000018",
-      "name": "Placeholder Objetivos",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "sw_quest_objetivos",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [2500, 280]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "workflowId": "sw_quest_personalizada_v1",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $json.usuario_id }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "contexto": "={{ $json.contexto }}"
+          }
+        },
+        "options": {}
+      },
       "id": "a1b2c3d4-0019-4000-8000-000000000019",
-      "name": "Placeholder Personalizada",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "sw_quest_personalizada",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
       "position": [2500, 420]
     }
   ],

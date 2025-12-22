@@ -1,0 +1,194 @@
+{
+  "createdAt": "2025-12-22T00:00:00.000Z",
+  "id": "sw_quest_sabotador_v1",
+  "name": "sw_quest_sabotador",
+  "description": "Especialista em quests de sabotadores (contramedidas específicas)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id" },
+            { "name": "chat_id" },
+            { "name": "contexto", "type": "object" }
+          ]
+        }
+      },
+      "id": "start-sab",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Buscar contramedidas do sabotador detectado\nSELECT \n  id,\n  codigo,\n  titulo,\n  descricao,\n  categoria,\n  sabotador_id,\n  base_cientifica,\n  xp\nFROM quests_catalogo\nWHERE ativo = true\n  AND sabotador_id = $1\n  AND categoria = 'contramedida_sabotador'\nORDER BY RANDOM()\nLIMIT 5;",
+        "options": {
+          "queryReplacement": "={{ [$json.contexto?.sabotador_id || 'inquieto'] }}"
+        }
+      },
+      "id": "buscar-contramedidas",
+      "name": "Buscar Contramedidas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [420, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Buscar quests de sabotador existentes (últimos 7 dias)\nSELECT \n  uq.id,\n  uq.catalogo_id,\n  uq.sabotador_id,\n  uq.status,\n  uq.ativado_em,\n  uq.config->>'titulo' as titulo\nFROM usuarios_quest uq\nWHERE uq.usuario_id = $1::uuid\n  AND uq.sabotador_id IS NOT NULL\n  AND uq.status IN ('ativa', 'disponivel')\n  AND uq.ativado_em > NOW() - INTERVAL '7 days'\nORDER BY uq.ativado_em DESC;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      },
+      "id": "buscar-existentes-sab",
+      "name": "Buscar Existentes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [640, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificar duplicação: mesmo sabotador em 7 dias\nconst entrada = $('start').first().json;\nconst catalogo = $input.all().map(i => i.json);\nconst existentes = $items('Buscar Existentes', 0, 0).map(i => i.json);\n\nconst contexto = entrada.contexto || {};\nconst sabotadorId = contexto.sabotador_id;\n\nif (!sabotadorId) {\n  return [{\n    json: {\n      usuario_id: entrada.usuario_id,\n      pode_criar: false,\n      motivo: 'sem_sabotador_detectado'\n    }\n  }];\n}\n\n// Verificar cooldown: mesmo sabotador em 7 dias\nconst temQuestRecente = existentes.some(e => e.sabotador_id === sabotadorId);\n\nif (temQuestRecente) {\n  return [{\n    json: {\n      usuario_id: entrada.usuario_id,\n      pode_criar: false,\n      motivo: 'cooldown_7_dias',\n      sabotador_id: sabotadorId\n    }\n  }];\n}\n\n// Excluir catálogos já usados (últimos 30 dias)\nconst catalogoIdsUsados = new Set(existentes.map(e => e.catalogo_id).filter(Boolean));\nconst catalogoDisponivel = catalogo.filter(q => !catalogoIdsUsados.has(q.id));\n\nconst podeCriar = catalogoDisponivel.length > 0;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pode_criar: podeCriar,\n    motivo: podeCriar ? 'ok' : 'sem_contramedidas_disponiveis',\n    catalogo_disponivel: catalogoDisponivel,\n    contexto: contexto\n  }\n}];"
+      },
+      "id": "verificar-dup-sab",
+      "name": "Verificar Duplicação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "pode_criar",
+              "leftValue": "={{ $json.pode_criar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "pode-criar-sab",
+      "name": "Pode Criar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: false,\n    tipo: 'sabotador',\n    motivo: input.motivo || 'bloqueado',\n    quest_criada: null\n  }\n}];"
+      },
+      "id": "saida-sem-criar-sab",
+      "name": "Saída Sem Criar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Selecionar contramedida aleatória\nconst input = $input.item.json || {};\nconst catalogo = input.catalogo_disponivel || [];\n\nif (catalogo.length === 0) {\n  throw new Error('Nenhuma contramedida disponível');\n}\n\nconst questSelecionada = catalogo[0];\n\nreturn [{\n  json: {\n    usuario_id: input.usuario_id,\n    chat_id: input.chat_id,\n    quest_catalogo: questSelecionada,\n    contexto: input.contexto\n  }\n}];"
+      },
+      "id": "selecionar-contra",
+      "name": "Selecionar Contramedida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Inserir quest de sabotador\nWITH inserted AS (\n  INSERT INTO usuarios_quest (\n    usuario_id,\n    catalogo_id,\n    sabotador_id,\n    status,\n    config,\n    ativado_em\n  )\n  VALUES (\n    $1::uuid,\n    $2::uuid,\n    $3::text,\n    'disponivel',\n    $4::jsonb,\n    NOW()\n  )\n  RETURNING id, catalogo_id, sabotador_id, status, config, ativado_em\n)\nSELECT \n  i.id,\n  i.catalogo_id,\n  i.sabotador_id,\n  i.status,\n  i.config,\n  i.ativado_em,\n  qc.titulo as catalogo_titulo,\n  qc.categoria\nFROM inserted i\nJOIN quests_catalogo qc ON qc.id = i.catalogo_id;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.quest_catalogo.id,\n  $json.contexto.sabotador_id,\n  JSON.stringify({\n    titulo: $json.quest_catalogo.titulo,\n    descricao: $json.quest_catalogo.descricao,\n    contexto_origem: 'sabotador_contramedida',\n    base_cientifica: $json.quest_catalogo.base_cientifica,\n    sabotador_id: $json.contexto.sabotador_id,\n    intensidade: $json.contexto.intensidade,\n    insight_atual: $json.contexto.insight_atual,\n    contramedida_ativa: $json.contexto.contramedida_ativa\n  })\n] }}"
+        }
+      },
+      "id": "inserir-quest-sab",
+      "name": "Inserir Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1520, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const quest = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: true,\n    tipo: 'sabotador',\n    quest_criada: {\n      id: quest.id,\n      catalogo_id: quest.catalogo_id,\n      sabotador_id: quest.sabotador_id,\n      titulo: quest.config?.titulo || quest.catalogo_titulo,\n      categoria: quest.categoria,\n      status: quest.status\n    }\n  }\n}];"
+      },
+      "id": "saida-sucesso-sab",
+      "name": "Saída Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1740, 300]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [[{ "node": "Buscar Contramedidas", "type": "main", "index": 0 }]]
+    },
+    "Buscar Contramedidas": {
+      "main": [[{ "node": "Buscar Existentes", "type": "main", "index": 0 }]]
+    },
+    "Buscar Existentes": {
+      "main": [[{ "node": "Verificar Duplicação", "type": "main", "index": 0 }]]
+    },
+    "Verificar Duplicação": {
+      "main": [[{ "node": "Pode Criar?", "type": "main", "index": 0 }]]
+    },
+    "Pode Criar?": {
+      "main": [
+        [{ "node": "Selecionar Contramedida", "type": "main", "index": 0 }],
+        [{ "node": "Saída Sem Criar", "type": "main", "index": 0 }]
+      ]
+    },
+    "Selecionar Contramedida": {
+      "main": [[{ "node": "Inserir Quest", "type": "main", "index": 0 }]]
+    },
+    "Inserir Quest": {
+      "main": [[{ "node": "Saída Sucesso", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "activeVersionId": null,
+  "shared": [],
+  "tags": []
+}
+

@@ -1,0 +1,134 @@
+{
+  "createdAt": "2025-12-22T00:00:00.000Z",
+  "id": "sw_quest_personalizada_v1",
+  "name": "sw_quest_personalizada",
+  "description": "Especialista em quests personalizadas (pedido explícito)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "usuario_id" },
+            { "name": "chat_id" },
+            { "name": "contexto", "type": "object" }
+          ]
+        }
+      },
+      "id": "start-per",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entrada = $input.item.json || {};\nconst contexto = entrada.contexto || {};\n\nconst pedidoExplicito = contexto.pedido_explicito || '';\nconst quantidade = contexto.quantidade || 1;\n\nif (!pedidoExplicito || pedidoExplicito.length < 10) {\n  return [{\n    json: {\n      pode_criar: false,\n      motivo: 'sem_pedido_explicito',\n      usuario_id: entrada.usuario_id\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    pode_criar: true,\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pedido: pedidoExplicito,\n    quantidade: quantidade\n  }\n}];"
+      },
+      "id": "validar-pedido-per",
+      "name": "Validar Pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "pode_criar",
+              "leftValue": "={{ $json.pode_criar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "pode-criar-per",
+      "name": "Pode Criar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: false,\n    tipo: 'personalizada',\n    motivo: input.motivo || 'bloqueado',\n    quest_criada: null\n  }\n}];"
+      },
+      "id": "saida-sem-criar-per",
+      "name": "Saída Sem Criar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 500]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  '00000000-0000-0000-0000-000000000001',\n  'disponivel',\n  $2::jsonb,\n  NOW()\n)\nRETURNING id, catalogo_id, status, config;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.usuario_id,\n  JSON.stringify({\n    titulo: $json.pedido.substring(0, 80),\n    descricao: $json.pedido,\n    contexto_origem: 'pedido_explicito',\n    prioridade: 'alta'\n  })\n] }}"
+        }
+      },
+      "id": "inserir-quest-per",
+      "name": "Inserir Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [860, 300],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const quest = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: true,\n    tipo: 'personalizada',\n    quest_criada: {\n      id: quest.id,\n      titulo: quest.config?.titulo,\n      status: quest.status\n    }\n  }\n}];"
+      },
+      "id": "saida-sucesso-per",
+      "name": "Saída Sucesso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 300]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [[{ "node": "Validar Pedido", "type": "main", "index": 0 }]]
+    },
+    "Validar Pedido": {
+      "main": [[{ "node": "Pode Criar?", "type": "main", "index": 0 }]]
+    },
+    "Pode Criar?": {
+      "main": [
+        [{ "node": "Inserir Quest", "type": "main", "index": 0 }],
+        [{ "node": "Saída Sem Criar", "type": "main", "index": 0 }]
+      ]
+    },
+    "Inserir Quest": {
+      "main": [[{ "node": "Saída Sucesso", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "activeVersionId": null,
+  "shared": [],
+  "tags": []
+}
