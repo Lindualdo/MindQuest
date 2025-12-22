@@ -24,7 +24,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.item.json || {};\nconst contexto = entrada.contexto || {};\n\nconst pedidoExplicito = contexto.pedido_explicito || '';\nconst quantidade = contexto.quantidade || 1;\n\nif (!pedidoExplicito || pedidoExplicito.length < 10) {\n  return [{\n    json: {\n      pode_criar: false,\n      motivo: 'sem_pedido_explicito',\n      usuario_id: entrada.usuario_id\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    pode_criar: true,\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pedido: pedidoExplicito,\n    quantidade: quantidade\n  }\n}];"
+        "jsCode": "const entrada = $input.item.json || {};\nconst contexto = entrada.contexto || {};\n\n// Usa pedido_quest do expert de resumo\nconst pedidoQuest = contexto.pedido_quest || '';\n\nif (!pedidoQuest || pedidoQuest.length < 5) {\n  return [{\n    json: {\n      pode_criar: false,\n      motivo: 'sem_pedido_quest',\n      usuario_id: entrada.usuario_id\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    pode_criar: true,\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pedido: pedidoQuest,\n    resumo_conversa: contexto.resumo_conversa || '',\n    contexto: contexto\n  }\n}];"
       },
       "id": "validar-pedido-per",
       "name": "Validar Pedido",

@@ -206,7 +206,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"tem_contexto\":true,\"tem_reflexao\":true,\"justificativa\":\"string\",\"total_palavras\":150,\"resumo_atualizado\":\"string\"}"
+        "jsonSchemaExample": "{\"tem_contexto\":true,\"tem_reflexao\":true,\"justificativa\":\"string\",\"total_palavras\":150,\"resumo_atualizado\":\"string\",\"pedido_quest\":null}"
       },
       "id": "8d2c9f39-2737-4a7f-a95d-e84af2eb507f",
       "name": "Parser Resumo",
@@ -223,7 +223,7 @@
         "text": "=<input>\n<user_name>{{ $('start').item.json.usr_nome_preferencia }}</user_name>\n<messages>{{ JSON.stringify($json.mensagens) }}</messages>\n</input>\n\nAnalise as mensagens e retorne JSON.\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Nunca use o termo Agente, use {{ $json.nome_assistente }} ou Mentor\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown\n- Conte e retone o total_palavras no json de saida\n- Não mostre total palavras no resumo\n- Use somente e exatamente os <themes> definidos\n</rules>\n\n\n<summary_example>\n\n\n</summary_example>\n\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\"}\n</output_format>\n\n",
+          "systemMessage": "=<role>Analista de conversas terapêuticas</role>\n\n<objective>Sintetizar conversa em resumo temático + avaliar profundidade reflexiva + detectar pedidos de ação</objective>\n\n<rules>\n- Analise mensagens com autor=\"usuario\" e use o autor=\"agente\" para completar o contexto\n- NUNCA use o termo usuário, sempre usar {{ $('start').item.json.usr_nome_preferencia }}\n- Nunca use o termo Agente, use {{ $json.nome_assistente }} ou Mentor\n- Máximo 1000 palavras no resumo\n- Retorne APENAS JSON válido\n- Organize o resumo por temas usando Markdown\n- Conte e retone o total_palavras no json de saida\n- Não mostre total palavras no resumo\n- Use somente e exatamente os <themes> definidos\n</rules>\n\n<pedido_quest>\nDetecte se o usuário PEDIU EXPLICITAMENTE uma quest, tarefa, desafio, missão ou ação.\nExemplos de pedido:\n- \"cria uma quest para mim\"\n- \"quero um desafio\"\n- \"me dá uma tarefa\"\n- \"preciso de uma ação para fazer\"\n\nSe detectar pedido, extraia O QUE o usuário quer (ex: \"quest para focar no trabalho\").\nSe não detectar pedido explícito, retorne null.\n</pedido_quest>\n\n<themes>Emocional | Trabalho | Relacionamentos | Saúde | Finanças | Objetivos | Reflexões</themes>\n\n<output_format>\n{\"tem_contexto\":boolean,\"tem_reflexao\":boolean,\"total_palavras\":number,\"justificativa\":\"string\",\"resumo\":\"string\",\"pedido_quest\":\"string ou null\"}\n</output_format>\n\n",
           "maxIterations": 3
         }
       },
@@ -281,9 +281,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE usr_chat SET resumo_conversa = $2, tem_reflexao = $3, total_palavras_usuario = $4 WHERE id = $1::uuid RETURNING id;",
+        "query": "UPDATE usr_chat SET resumo_conversa = $2, tem_reflexao = $3, total_palavras_usuario = $4, pedido_quest = $5 WHERE id = $1::uuid RETURNING id;",
         "options": {
-          "queryReplacement": "={{ [$('start').first().json.chat_id, $('resumo conversa').first().json.output.resumo_atualizado, $('resumo conversa').first().json.output.tem_reflexao, $('resumo conversa').first().json.output.total_palavras] }}"
+          "queryReplacement": "={{ [$('start').first().json.chat_id, $('resumo conversa').first().json.output.resumo_atualizado, $('resumo conversa').first().json.output.tem_reflexao, $('resumo conversa').first().json.output.total_palavras, $('resumo conversa').first().json.output.pedido_quest || null] }}"
         }
       },
       "id": "633a00e5-5b45-425b-8d4a-b823b9b19d07",
