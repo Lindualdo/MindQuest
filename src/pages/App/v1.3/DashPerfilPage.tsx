@@ -7,7 +7,7 @@ import EmotionWheel from '@/components/dashboard/EmotionWheel';
 import CardPerfilBigFiveRanking from '@/components/app/v1.3/CardPerfilBigFiveRanking';
 import CardHumor from '@/components/app/v1.3/CardHumor';
 import CardEnergia from '@/components/app/v1.3/CardEnergia';
-import CardSabotadoresRanking, { type SabotadorRankingItem, mockSabotadoresRanking } from '@/components/app/v1.3/CardSabotadoresRanking';
+import CardSabotadoresRanking, { type SabotadorRankingItem } from '@/components/app/v1.3/CardSabotadoresRanking';
 import { useDashboard } from '@/store/useStore';
 import { mockMoodEnergySummary } from '@/data/mockHomeV1_3';
 import { apiService } from '@/services/apiService';
@@ -103,25 +103,20 @@ const DashPerfilPage: React.FC = () => {
     };
   }, [panoramaCard]);
 
-  // Dados de sabotadores para o ranking
-  // Usa dados da API se disponíveis, senão usa mock com todos os 9 sabotadores
+  // Dados de sabotadores para o ranking (apenas dados reais da API)
   const sabotadoresRanking = useMemo((): SabotadorRankingItem[] => {
     const sabotadoresDaApi = panoramaCard?.sabotadores_todos;
     
-    // Se a API retornou dados, usa eles
-    if (Array.isArray(sabotadoresDaApi) && sabotadoresDaApi.length > 0) {
-      return sabotadoresDaApi.map((s) => ({
-        sabotador_id: s.sabotador_id,
-        total_deteccoes: s.total_deteccoes,
-        intensidade_media: s.intensidade_media,
-        insight_atual: s.insight_atual,
-        contramedida_ativa: s.contramedida_ativa,
-        contexto_principal: s.contexto_principal,
-      }));
-    }
+    if (!Array.isArray(sabotadoresDaApi)) return [];
     
-    // Fallback: mock com todos os 9 sabotadores para visualização
-    return mockSabotadoresRanking;
+    return sabotadoresDaApi.map((s) => ({
+      sabotador_id: s.sabotador_id,
+      total_deteccoes: s.total_deteccoes,
+      intensidade_media: s.intensidade_media,
+      insight_atual: s.insight_atual,
+      contramedida_ativa: s.contramedida_ativa,
+      contexto_principal: s.contexto_principal,
+    }));
   }, [panoramaCard]);
 
   const sabotadorAtualId = panoramaCard?.sabotador?.id ?? dashboardData?.sabotadores?.padrao_principal?.id ?? null;

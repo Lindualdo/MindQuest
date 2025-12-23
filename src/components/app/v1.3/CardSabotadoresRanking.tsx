@@ -20,15 +20,6 @@ type Props = {
   loading?: boolean;
 };
 
-// Mock com sabotadores para visualização (exported)
-const mockSabotadoresRanking: SabotadorRankingItem[] = [
-  { sabotador_id: 'hiper_realizador', total_deteccoes: 16, intensidade_media: 70 },
-  { sabotador_id: 'inquieto', total_deteccoes: 25, intensidade_media: 65 },
-  { sabotador_id: 'hipervigilante', total_deteccoes: 10, intensidade_media: 62 },
-  { sabotador_id: 'critico', total_deteccoes: 8, intensidade_media: 55 },
-  { sabotador_id: 'controlador', total_deteccoes: 5, intensidade_media: 50 },
-];
-
 const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loading }: Props) => {
   const [showInfo, setShowInfo] = useState(false);
 
@@ -37,9 +28,14 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
     return nome.replace(/^hiper[-_]?/i, '');
   };
 
+  // Se não tem dados e não está carregando, não renderiza
+  if (!loading && sabotadores.length === 0) {
+    return null;
+  }
+
   // Calcular score e ordenar do maior para menor
-  const sabotadoresRankeados = useMemo(() => {
-    const dados = sabotadores.length > 0 ? sabotadores : mockSabotadoresRanking;
+  const sabotadoresRankeados = (() => {
+    const dados = sabotadores;
 
     return dados
       .map((s) => {
@@ -57,7 +53,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       })
       .sort((a, b) => b.score - a.score) // Ordenar por score (frequência × intensidade)
       .slice(0, 5); // Top 5 apenas
-  }, [sabotadores]);
+  })();
 
   // Calcular valor máximo para escala do eixo Y
   const maxDeteccoes = useMemo(() => {
@@ -249,5 +245,4 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
   );
 };
 
-export { mockSabotadoresRanking };
 export default CardSabotadoresRanking;

@@ -30,30 +30,26 @@ const mapearNomeTraco = (nomeOriginal: string): string => {
   return mapeamento[nomeOriginal] || nomeOriginal;
 };
 
-// Mock com traços para visualização
-const mockTracosRanking: PerfilBigFiveRankingItem[] = [
-  { traco_id: 'conscientiousness', nome_pt: 'Disciplina', score: 84 },
-  { traco_id: 'openness', nome_pt: 'Curiosidade', score: 69 },
-  { traco_id: 'neuroticism', nome_pt: 'Instabilidade', score: 66 },
-];
-
 const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }: Props) => {
   const [showInfo, setShowInfo] = useState(false);
 
+  // Se não tem dados e não está carregando, não renderiza
+  if (!loading && tracos.length === 0) {
+    return null;
+  }
+
   // Processar traços e ordenar do maior para menor
-  const tracosRankeados = useMemo(() => {
-    const dados = tracos.length > 0 
-      ? tracos.map(t => ({
-          traco_id: t.nome,
-          nome_pt: mapearNomeTraco(t.nome_pt),
-          score: Math.round(t.score),
-        }))
-      : mockTracosRanking;
+  const tracosRankeados = (() => {
+    const dados = tracos.map(t => ({
+      traco_id: t.nome,
+      nome_pt: mapearNomeTraco(t.nome_pt),
+      score: Math.round(t.score),
+    }));
 
     return dados
       .sort((a, b) => b.score - a.score) // Ordenar por score (maior para menor)
       .slice(0, 3); // Top 3 apenas
-  }, [tracos]);
+  })();
 
   // Calcular valor máximo para escala do eixo Y (sempre 100 para percentual)
   const maxScore = 100;
@@ -237,6 +233,5 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
   );
 };
 
-export { mockTracosRanking };
 export default CardPerfilBigFiveRanking;
 
