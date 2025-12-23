@@ -28,16 +28,11 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
     return nome.replace(/^hiper[-_]?/i, '');
   };
 
-  // Se não tem dados e não está carregando, não renderiza
-  if (!loading && sabotadores.length === 0) {
-    return null;
-  }
-
   // Calcular score e ordenar do maior para menor
-  const sabotadoresRankeados = (() => {
-    const dados = sabotadores;
-
-    return dados
+  const sabotadoresRankeados = useMemo(() => {
+    if (sabotadores.length === 0) return [];
+    
+    return sabotadores
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
         const nomeOriginal = catalogEntry?.nome || s.sabotador_id;
@@ -53,7 +48,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       })
       .sort((a, b) => b.score - a.score) // Ordenar por score (frequência × intensidade)
       .slice(0, 5); // Top 5 apenas
-  })();
+  }, [sabotadores]);
 
   // Calcular valor máximo para escala do eixo Y
   const maxDeteccoes = useMemo(() => {
@@ -68,6 +63,11 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
     const step = Math.ceil(maxDeteccoes / 5);
     return Array.from({ length: 6 }, (_, i) => i * step).reverse();
   }, [maxDeteccoes]);
+
+  // Se não tem dados e não está carregando, não renderiza (APÓS todos os hooks)
+  if (!loading && sabotadores.length === 0) {
+    return null;
+  }
 
   // Determinar qual é o mais ativo (primeiro da lista ordenada)
   const maisAtivoId = sabotadoresRankeados[0]?.sabotador_id || null;

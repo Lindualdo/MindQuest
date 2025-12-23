@@ -33,6 +33,11 @@ const mapearNomeTraco = (nomeOriginal: string): string => {
 const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }: Props) => {
   const [showInfo, setShowInfo] = useState(false);
 
+  // Gerar marcadores do eixo Y (0, 20, 40, 60, 80, 100) - DEVE vir antes do return condicional
+  const yAxisMarkers = useMemo(() => {
+    return [100, 80, 60, 40, 20, 0];
+  }, []);
+
   // Se não tem dados e não está carregando, não renderiza
   if (!loading && tracos.length === 0) {
     return null;
@@ -53,11 +58,6 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
 
   // Calcular valor máximo para escala do eixo Y (sempre 100 para percentual)
   const maxScore = 100;
-
-  // Gerar marcadores do eixo Y (0, 20, 40, 60, 80, 100)
-  const yAxisMarkers = useMemo(() => {
-    return [100, 80, 60, 40, 20, 0];
-  }, []);
 
   // Determinar qual é o maior (primeiro da lista ordenada)
   const maiorScoreId = tracosRankeados[0]?.traco_id || null;
