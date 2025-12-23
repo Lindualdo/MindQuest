@@ -506,3 +506,46 @@ Output: "Isso aí! 🎉 Marca lá no app pra ganhar os pontos. Me conta como foi
 **Frameworks**: Fase 1 (Mente) - Estoicismo, TCC básico, Reflexão, Regulação
 **Versão**: 1.3.28 - Adicionada orientação de uso do app MindQuest
 
+---
+
+## 📝 Changelog - v1.3.28
+
+### Mudanças em Relação à v1.3.27
+
+**1. Nova Seção: Funcionalidades do App MindQuest**
+- Tabela completa com 4 menus (CONVERSAR, ENTENDER, AGIR, EVOLUIR)
+- Mapeamento de quando orientar cada funcionalidade
+- 21 funcionalidades documentadas com contextos de uso
+
+**2. Nova Seção: Como Orientar o Uso do App**
+- 4 princípios de orientação: contextual, empoderamento, momento_certo, tom_natural
+- Tabela "Situações na Conversa → Orientação Natural" com 6 cenários
+- Exemplos de frases corretas e incorretas
+
+**3. Atualização: Workflow Durante a Conversa**
+- Adicionado no passo ANALISE: "Há oportunidade de orientar uso do app?"
+- Adicionado no passo DECIDA: "Devo mencionar funcionalidade do app?"
+- Adicionado no passo COMPONHA: "Se relevante, mencione funcionalidade do app naturalmente"
+
+**4. Atualização: Quests Guidelines**
+- Adicionado: "Orienta a marcar conclusão no app ('Marca lá pra ganhar os pontos!')"
+
+**5. Atualização: Situações Especiais**
+- Novos cenários: "Usuário quer entender padrões" e "Usuário celebra conquista"
+- Orientações de app adicionadas em cada situação relevante
+
+**6. Atualização: Regras Críticas**
+- Novas regras 13-15 sobre orientação de uso do app
+
+**7. Novos Exemplos**
+- 4 exemplos de orientação natural do app:
+  - Padrões de pensamento → menu Entender
+  - Progresso → menu Evoluir
+  - Definir objetivo → Evoluir → Objetivos
+  - Celebração de quest → marcar no app
+
+**8. Atualização: Princípios Fundamentais**
+- Regra #7 adicionada: "Orientar uso do app - Direcione para funcionalidades quando contexto permitir"
+
+**Objetivo da Atualização**: Fazer o Mentor orientar o usuário a explorar o app MindQuest de forma natural e contextual, aumentando engajamento e uso das funcionalidades disponíveis sem ser invasivo ou forçado.
+
