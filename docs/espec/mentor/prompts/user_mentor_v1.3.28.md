@@ -1,8 +1,3 @@
-# User Prompt - Mentor MindQuest v3.1
-
-
-## User input
-
 <user_input>
 
 <message>
@@ -16,7 +11,30 @@
 </session_context>
 </user_input>
 
-## Notificações
+
+<!-- ============================================ -->
+<!-- CONTEXTO DO USUÁRIO -->
+<!-- ============================================ -->
+
+<user_context>
+<profile>
+<name>{{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}</name>
+<preferred_tone>{{ $('contexto_completo').first().json.tom_conversa || 'empatico' }}</preferred_tone>
+<about>{{ $('contexto_completo').first().json.sobre_voce ? 'Sobre: ' + $('contexto_completo').first().json.sobre_voce : '' }}</about>
+<mentor_name>{{ $('busca_dados_usr').item.json.nome_assistente }}</mentor_name>
+<url_app>https://mindquest.pt/app/auth?token={{ $('busca_dados_usr').item.json.token_acesso }}</>
+</profile>
+
+<goals>
+<has_defined_goals>{{ $('contexto_completo').first().json.tem_objetivos ? 'SIM' : 'NÃO' }}</has_defined_goals>
+<active_goals>{{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}</active_goals>
+</goals>
+
+
+
+<!-- ============================================ -->
+<!-- NOTIFICAÇÃO PENDENTE (se houver) -->
+<!-- ============================================ -->
 
 {{ $('contexto_completo').first().json.tem_notificacao_recente ? `
 <notification_context>
@@ -47,20 +65,6 @@ ANALISE A MENSAGEM DO USUÁRIO:
 </notification_context>
 ` : '' }}
 
-## CONTEXTO DO USUARIO
-
-<user_context>
-<profile>
-<name>{{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}</name>
-<preferred_tone>{{ $('contexto_completo').first().json.tom_conversa || 'empatico' }}</preferred_tone>
-<about>{{ $('contexto_completo').first().json.sobre_voce ? 'Sobre: ' + $('contexto_completo').first().json.sobre_voce : '' }}</about>
-</profile>
-
-<goals>
-<has_defined_goals>{{ $('contexto_completo').first().json.tem_objetivos ? 'SIM' : 'NÃO' }}</has_defined_goals>
-<active_goals>{{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}</active_goals>
-</goals>
-
 <mental_profile>
 <active_pattern>{{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum identificado' }}</active_pattern>
 <behavioral_profile>{{ $('contexto_completo').first().json.perfil_bigfive_primario || 'não identificado' }}</behavioral_profile>
@@ -82,7 +86,9 @@ ANALISE A MENSAGEM DO USUÁRIO:
 </user_context>
 
 
-## DIRETRIZES PRIORITÁRIAS
+<!-- ============================================ -->
+<!-- DIRETRIZES PRIORITÁRIAS -->
+<!-- ============================================ -->
 
 <diretrizes>
 {{ (() => {
@@ -107,8 +113,6 @@ ANALISE A MENSAGEM DO USUÁRIO:
 })() }}
 </diretrizes>
 
-## FORMATO DE SAÍDA
-
 <output_format>
-Retorne APENAS este JSON, sem texto adicional, seguindo rigorosamente as intruções do system: {"mensagem_usuario":"sua resposta"}
+{"mensagem_usuario": "Oi! Como você está hoje?"}
 </output_format>

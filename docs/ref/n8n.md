@@ -12,6 +12,79 @@
 - NUNCA ativar → rodam na transação do pai via `executeWorkflow`
 - `active=false` é correto
 
+## AI Agent - Structured Output Parser - CRÍTICO
+
+### Regra Obrigatória
+**SEMPRE** usar **Structured Output Parser** após AI Agent para garantir JSON válido.
+
+### Configuração
+
+#### 1. System Prompt (orientação visual)
+No System Prompt ou User Prompt, sempre incluir o formato JSON **compactado** (sem quebras de linha) dentro de `<output></output>`:
+
+```xml
+<output>
+{"pode_criar": boolean, "pedido_explicito": boolean, "destinos": [{"tipo": "string", "prioridade": number}], "excluidos": [{"tipo": "string", "motivo": "string"}], "justificativa": "string"}
+</output>
+```
+
+**Regras:**
+- JSON em **linha única** (sem espaços ou quebras)
+- Usar tipos genéricos: `boolean`, `number`, `string`, `array`
+- Sempre dentro de `<output></output>`
+
+#### 2. Structured Output Parser (validação)
+Após o AI Agent, conectar **Structured Output Parser**:
+
+**Fluxo:** `AI Agent` → `Structured Output Parser` → `Próximo Node`
+
+**Configuração do Parser:**
+- **Schema Type:** "Define using JSON Schema"
+- **Input Schema:** Colar JSON Schema completo (ver exemplo abaixo)
+
+**Exemplo JSON Schema:**
+```json
+{
+  "type": "object",
+  "properties": {
+    "pode_criar": {"type": "boolean"},
+    "pedido_explicito": {"type": "boolean"},
+    "destinos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {"type": "string"},
+          "prioridade": {"type": "number"}
+        },
+        "required": ["tipo", "prioridade"]
+      }
+    },
+    "excluidos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {"type": "string"},
+          "motivo": {"type": "string"}
+        },
+        "required": ["tipo", "motivo"]
+      }
+    },
+    "justificativa": {"type": "string"}
+  },
+  "required": ["pode_criar", "pedido_explicito", "destinos", "excluidos", "justificativa"]
+}
+```
+
+### Benefícios
+- ✅ Validação automática da resposta do LLM
+- ✅ n8n rejeita output inválido
+- ✅ Parsing estruturado garantido
+- ✅ Reduz bugs de formato
+
+---
+
 ## AI Agent Tools
 
 ### Postgres Tool (consultas sob demanda)
