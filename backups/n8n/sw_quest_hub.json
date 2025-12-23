@@ -31,7 +31,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- sw_quest_hub: Buscar Contexto v2.0 (dados estruturados)\n-- Parâmetros: $1 = usuario_id, $2 = chat_id\n\nWITH\n-- D1: Conversas finalizadas (para onboarding)\nconversas_finalizadas AS (\n  SELECT COUNT(DISTINCT data_conversa) AS total\n  FROM usr_chat\n  WHERE usuario_id = $1::uuid\n    AND status = 'finalizado'\n),\n\n-- D2: Dados da conversa atual (resumo + pedido_quest)\nconversa_atual AS (\n  SELECT resumo_conversa, pedido_quest\n  FROM usr_chat\n  WHERE id = $2::uuid\n),\n\n-- D3: Humor e Energia da conversa atual\nhumor_energia AS (\n  SELECT \n    humor_dia,\n    energia_nivel,\n    justificativa_humor,\n    justificativa_energia\n  FROM usuarios_humor_energia\n  WHERE chat_id = $2::uuid\n  ORDER BY detectado_em DESC\n  LIMIT 1\n),\n\n-- D4: Emoções da conversa atual (top 3)\nemocoes_conversa AS (\n  SELECT \n    emocao_id,\n    emocao_pt,\n    intensidade,\n    contexto,\n    evidencias\n  FROM usuarios_emocoes\n  WHERE chat_id = $2::uuid\n  ORDER BY intensidade DESC\n  LIMIT 3\n),\n\n-- D5: Sabotador na conversa atual (intensidade > 65)\nsabotador_conversa AS (\n  SELECT\n    sabotador_id,\n    intensidade_media,\n    insight_atual,\n    contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n    AND chat_id = $2::uuid\n    AND intensidade_media > 65\n  ORDER BY intensidade_media DESC\n  LIMIT 1\n),\n\n-- D5b: Sabotador mais ativo (histórico)\nsabotador_historico AS (\n  SELECT\n    sabotador_id,\n    SUM(total_deteccoes) * AVG(intensidade_media) AS score,\n    AVG(intensidade_media) AS intensidade_media,\n    MAX(insight_atual) AS insight_atual,\n    MAX(contramedida_ativa) AS contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n  GROUP BY sabotador_id\n  ORDER BY score DESC\n  LIMIT 1\n),\n\n-- D6: Objetivos específicos (não padrão)\nobjetivos_especificos AS (\n  SELECT id, titulo, detalhamento, area_vida_id\n  FROM usuarios_objetivos\n  WHERE usuario_id = $1::uuid\n    AND status = 'ativo'\n    AND is_padrao = false\n),\n\n-- D7: Quests (contadores + existentes)\nquests_hoje AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\nquests_ativas_disponiveis AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND status IN ('ativa', 'disponivel')\n),\nquests_existentes AS (\n  SELECT uq.id, uq.catalogo_id, uq.status, uq.config, qc.categoria, qc.codigo\n  FROM usuarios_quest uq\n  LEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('ativa', 'disponivel')\n),\nquests_dia_excluir AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND status = 'disponivel'\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n)\n\nSELECT json_build_object(\n  'usuario_id', $1::uuid,\n  'chat_id', $2::uuid,\n  'conversas_finalizadas', COALESCE((SELECT total FROM conversas_finalizadas), 0),\n  'resumo_conversa', (SELECT resumo_conversa FROM conversa_atual),\n  'pedido_quest', (SELECT pedido_quest FROM conversa_atual),\n  'humor', COALESCE((SELECT humor_dia FROM humor_energia), 6),\n  'energia', COALESCE((SELECT energia_nivel FROM humor_energia), 6),\n  'justificativa_humor', (SELECT justificativa_humor FROM humor_energia),\n  'justificativa_energia', (SELECT justificativa_energia FROM humor_energia),\n  'emocoes', COALESCE((SELECT json_agg(json_build_object(\n    'emocao', emocao_pt,\n    'intensidade', intensidade,\n    'tipo', contexto,\n    'contexto', evidencias\n  )) FROM emocoes_conversa), '[]'::json),\n  'sabotador_conversa', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'intensidade', intensidade_media,\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_conversa),\n  'sabotador_historico', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'score', ROUND(score::numeric, 2),\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_historico),\n  'objetivos_especificos', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'titulo', titulo,\n    'detalhamento', detalhamento,\n    'area_vida_id', area_vida_id\n  )) FROM objetivos_especificos), '[]'::json),\n  'quests_hoje', COALESCE((SELECT total FROM quests_hoje), 0),\n  'quests_ativas_disponiveis', COALESCE((SELECT total FROM quests_ativas_disponiveis), 0),\n  'quests_existentes', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'catalogo_id', catalogo_id,\n    'status', status,\n    'categoria', categoria,\n    'codigo', codigo,\n    'config', config\n  )) FROM quests_existentes), '[]'::json),\n  'quests_dia_excluir_ids', COALESCE((SELECT json_agg(id) FROM quests_dia_excluir), '[]'::json)\n) AS contexto;",
+        "query": "-- sw_quest_hub: Buscar Contexto v2.1 (dados estruturados)\n-- Parâmetros: $1 = usuario_id, $2 = chat_id\n\nWITH\n-- D1: Conversas finalizadas (para onboarding)\nconversas_finalizadas AS (\n  SELECT COUNT(DISTINCT data_conversa) AS total\n  FROM usr_chat\n  WHERE usuario_id = $1::uuid\n    AND status = 'finalizado'\n),\n\n-- D2: Dados da conversa atual (resumo + pedido_quest)\nconversa_atual AS (\n  SELECT resumo_conversa, pedido_quest\n  FROM usr_chat\n  WHERE id = $2::uuid\n),\n\n-- D3: Humor e Energia da conversa atual\nhumor_energia AS (\n  SELECT \n    humor_dia,\n    energia_nivel,\n    justificativa_humor,\n    justificativa_energia\n  FROM usuarios_humor_energia\n  WHERE chat_id = $2::uuid\n  ORDER BY detectado_em DESC\n  LIMIT 1\n),\n\n-- D4: Emoções da conversa atual (top 3)\nemocoes_conversa AS (\n  SELECT \n    emocao_id,\n    emocao_pt,\n    intensidade,\n    contexto,\n    evidencias\n  FROM usuarios_emocoes\n  WHERE chat_id = $2::uuid\n  ORDER BY intensidade DESC\n  LIMIT 3\n),\n\n-- D5: Sabotador na conversa atual (intensidade > 65)\nsabotador_conversa AS (\n  SELECT\n    sabotador_id,\n    intensidade_media,\n    insight_atual,\n    contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n    AND chat_id = $2::uuid\n    AND intensidade_media > 65\n  ORDER BY intensidade_media DESC\n  LIMIT 1\n),\n\n-- D5b: Sabotador mais ativo (histórico)\nsabotador_historico AS (\n  SELECT\n    sabotador_id,\n    SUM(total_deteccoes) * AVG(intensidade_media) AS score,\n    AVG(intensidade_media) AS intensidade_media,\n    MAX(insight_atual) AS insight_atual,\n    MAX(contramedida_ativa) AS contramedida_ativa\n  FROM usuarios_sabotadores\n  WHERE usuario_id = $1::uuid\n  GROUP BY sabotador_id\n  ORDER BY score DESC\n  LIMIT 1\n),\n\n-- D6: Objetivos específicos (não padrão)\nobjetivos_especificos AS (\n  SELECT id, titulo, detalhamento, area_vida_id\n  FROM usuarios_objetivos\n  WHERE usuario_id = $1::uuid\n    AND status = 'ativo'\n    AND is_padrao = false\n),\n\n-- D7: Quests (contadores + existentes)\nquests_hoje AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\nquests_ativas_disponiveis AS (\n  SELECT COUNT(*) AS total\n  FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND status IN ('ativa', 'disponivel')\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\nquests_existentes AS (\n  SELECT uq.id, uq.catalogo_id, uq.status, uq.config, qc.categoria, qc.codigo\n  FROM usuarios_quest uq\n  LEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE uq.usuario_id = $1::uuid\n    AND uq.status IN ('ativa', 'disponivel')\n    AND uq.catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n),\nquests_dia_excluir AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = $1::uuid\n    AND DATE(ativado_em) = CURRENT_DATE\n    AND status = 'disponivel'\n    AND catalogo_id != '775a9df0-6f08-492f-8172-0be057002177'\n)\n\nSELECT json_build_object(\n  'usuario_id', $1::uuid,\n  'chat_id', $2::uuid,\n  'conversas_finalizadas', COALESCE((SELECT total FROM conversas_finalizadas), 0),\n  'resumo_conversa', (SELECT resumo_conversa FROM conversa_atual),\n  'pedido_quest', (SELECT pedido_quest FROM conversa_atual),\n  'humor', COALESCE((SELECT humor_dia FROM humor_energia), 6),\n  'energia', COALESCE((SELECT energia_nivel FROM humor_energia), 6),\n  'justificativa_humor', (SELECT justificativa_humor FROM humor_energia),\n  'justificativa_energia', (SELECT justificativa_energia FROM humor_energia),\n  'emocoes', COALESCE((SELECT json_agg(json_build_object(\n    'emocao', emocao_pt,\n    'intensidade', intensidade,\n    'tipo', contexto,\n    'contexto', evidencias\n  )) FROM emocoes_conversa), '[]'::json),\n  'sabotador_conversa', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'intensidade', intensidade_media,\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_conversa),\n  'sabotador_historico', (SELECT json_build_object(\n    'sabotador_id', sabotador_id,\n    'score', ROUND(score::numeric, 2),\n    'insight_atual', insight_atual,\n    'contramedida_ativa', contramedida_ativa\n  ) FROM sabotador_historico),\n  'objetivos_especificos', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'titulo', titulo,\n    'detalhamento', detalhamento,\n    'area_vida_id', area_vida_id\n  )) FROM objetivos_especificos), '[]'::json),\n  'quests_hoje', COALESCE((SELECT total FROM quests_hoje), 0),\n  'quests_ativas_disponiveis', COALESCE((SELECT total FROM quests_ativas_disponiveis), 0),\n  'quests_existentes', COALESCE((SELECT json_agg(json_build_object(\n    'id', id,\n    'catalogo_id', catalogo_id,\n    'status', status,\n    'categoria', categoria,\n    'codigo', codigo,\n    'config', config\n  )) FROM quests_existentes), '[]'::json),\n  'quests_dia_excluir_ids', COALESCE((SELECT json_agg(id) FROM quests_dia_excluir), '[]'::json)\n) AS contexto;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.chat_id] }}"
         }
@@ -54,7 +54,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Excluir quests do dia (disponíveis) para recriar\n-- Sempre retorna algo (mesmo que não exclua nada)\nWITH excluidas AS (\n  DELETE FROM usuarios_quest\n  WHERE id = ANY($1::uuid[])\n  RETURNING id\n)\nSELECT \n  COALESCE(array_agg(id), ARRAY[]::uuid[]) AS ids_excluidos,\n  COUNT(*) AS total_excluido;",
+        "query": "-- Excluir quests do dia (disponíveis) para recriar\n-- Sempre retorna algo (mesmo que não exclua nada)\nWITH excluidas AS (\n  DELETE FROM usuarios_quest\n  WHERE id = ANY($1::uuid[])\n  RETURNING id\n)\nSELECT \n  COALESCE(array_agg(id), ARRAY[]::uuid[]) AS ids_excluidos,\n  COUNT(*) AS total_excluido\nFROM excluidas;  -- ✅ Com FROM",
         "options": {
           "queryReplacement": "={{ [($json.contexto?.quests_dia_excluir_ids || []).filter(id => id)] }}"
         }
@@ -129,8 +129,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2096,
-        784
+        -2032,
+        304
       ]
     },
     {
@@ -143,8 +143,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -2064,
-        512
+        -3152,
+        864
       ],
       "credentials": {
         "openRouterApi": {
@@ -156,10 +156,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# Contexto do Usuário (Dados Estruturados)\n\n<limites>\npode_criar_hoje: {{ $json.pode_criar_hoje }}\nlimite_diario_atingido: {{ $json.limite_diario_atingido }}\nquests_hoje: {{ $json.quests_hoje }}\nquests_ativas_disponiveis: {{ $json.quests_ativas_disponiveis }}\n</limites>\n\n<pedido_quest>\n{{ $json.contexto.pedido_quest || 'NENHUM PEDIDO' }}\n</pedido_quest>\n\n<resumo_conversa>\n{{ $json.contexto.resumo_conversa || 'sem resumo' }}\n</resumo_conversa>\n\n<estado_emocional>\nhumor: {{ $json.humor }}/10 ({{ $json.contexto.justificativa_humor || '' }})\nenergia: {{ $json.energia }}/10 ({{ $json.contexto.justificativa_energia || '' }})\nemocoes: {{ JSON.stringify($json.contexto.emocoes || []) }}\n</estado_emocional>\n\n<sabotador_conversa_atual>\n{{ JSON.stringify($json.contexto.sabotador_conversa || null) }}\n</sabotador_conversa_atual>\n\n<sabotador_historico>\n{{ JSON.stringify($json.contexto.sabotador_historico || null) }}\n</sabotador_historico>\n\n<objetivos_especificos>\n{{ JSON.stringify($json.contexto.objetivos_especificos || []) }}\n</objetivos_especificos>\n\n<quests_existentes>\n{{ JSON.stringify($json.contexto.quests_existentes || []) }}\n</quests_existentes>\n\n---\n\nAnalise o contexto acima e decida quais tipos de quest devem ser criados.\nSE pedido_quest != 'NENHUM PEDIDO' → adicionar destino personalizada.\n\nRetorne APENAS o JSON estruturado conforme o schema.",
+        "text": "=# Contexto do Usuário (Dados Estruturados)\n\n<limites>\npode_criar_hoje: {{ $json.pode_criar_hoje }}\nlimite_diario_atingido: {{ $json.limite_diario_atingido }}\nquests_hoje: {{ $json.quests_hoje }}\nquests_ativas_disponiveis: {{ $json.quests_ativas_disponiveis }}\n</limites>\n\n<pedido_quest>\n{{ $json.contexto.pedido_quest || 'NENHUM PEDIDO' }}\n</pedido_quest>\n\n<resumo_conversa>\n{{ $json.contexto.resumo_conversa || 'sem resumo' }}\n</resumo_conversa>\n\n<estado_emocional>\nhumor: {{ $json.humor }}/10 ({{ $json.contexto.justificativa_humor || '' }})\nenergia: {{ $json.energia }}/10 ({{ $json.contexto.justificativa_energia || '' }})\nemocoes: {{ JSON.stringify($json.contexto.emocoes || []) }}\n</estado_emocional>\n\n<sabotador_conversa_atual>\n{{ JSON.stringify($json.contexto.sabotador_conversa || null) }}\n</sabotador_conversa_atual>\n\n<sabotador_historico>\n{{ JSON.stringify($json.contexto.sabotador_historico || null) }}\n</sabotador_historico>\n\n<objetivos_especificos>\n{{ JSON.stringify($json.contexto.objetivos_especificos || []) }}\n</objetivos_especificos>\n\n<quests_existentes>\n{{ JSON.stringify($json.contexto.quests_existentes || []) }}\n</quests_existentes>\n\n---\n\nAnalise o contexto acima e decida quais tipos de quest devem ser criados.\nSE pedido_quest != 'NENHUM PEDIDO' → adicionar destino personalizada.\n\nRetorne APENAS o JSON estruturado conforme o schema.\n\n<output_format>{\"pode_criar\": boolean, \"pedido_explicito\": boolean, \"destinos\": [{\"tipo\": \"string\", \"prioridade\": number}], \"excluidos\": [{\"tipo\": \"string\", \"motivo\": \"string\"}], \"justificativa\": \"string\"}</output_format>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "# Agente Roteador de Quests - MindQuest v2.0\n\n<role>\nVocê é o Roteador Inteligente do sistema de quests MindQuest.\nSua função é analisar o CONTEXTO ESTRUTURADO do usuário e decidir QUAIS tipos de quest devem ser criados.\nVocê NÃO cria as quests - apenas roteia para os especialistas corretos.\n</role>\n\n<objective>\nAnalisar dados JÁ PROCESSADOS (resumo_conversa, pedido_quest, emoções, sabotador) para:\n1. Verificar se existe pedido_quest (já detectado pelo sistema)\n2. Identificar necessidade de quest de mentalidade (humor/energia baixos)\n3. Identificar necessidade de quest de sabotador\n4. Identificar necessidade de quest de objetivos\n5. Validar anti-duplicação (não rotear se já existe quest similar)\n\nSucesso = roteamento correto e eficiente, sem duplicações.\n</objective>\n\n<rules>\n\n<rule id=\"R2\" name=\"Pedido Explícito\">\nSE pedido_quest != 'NENHUM PEDIDO' e não está vazio:\n- Definir pedido_explicito = true\n- Adicionar destino \"personalizada\" com prioridade 1\n- IGNORAR limite diário (pode criar mesmo se limite_diario_atingido = true)\n- O sistema já detectou o pedido - você NÃO precisa analisar mensagens.\n</rule>\n\n<rule id=\"R3\" name=\"Mentalidade\">\nSE humor < 5 OU energia < 5:\n- Adicionar destino \"mentalidade\"\n- Foco: regulação emocional, TCC, Estoicismo\n- Usar emoções detectadas e justificativas para contexto\n</rule>\n\n<rule id=\"R4\" name=\"Sabotador\">\nSE existe sabotador_conversa_atual (intensidade > 65) OU sabotador_historico com score alto:\n- Adicionar destino \"sabotador\"\n- Priorizar sabotador_conversa se existir (mais recente/relevante)\n</rule>\n\n<rule id=\"R5\" name=\"Objetivos\">\nSE objetivos_especificos não está vazio E resumo_conversa menciona progresso/ação:\n- Adicionar destino \"objetivos\"\n- Apenas se houver contexto relevante no resumo\n</rule>\n\n<rule id=\"R6\" name=\"Anti-Duplicação\" critical=\"true\">\nANTES de adicionar qualquer destino, verificar quests_existentes:\n- SE já existe quest do mesmo tipo (categoria) com status ativa/disponível:\n  - NÃO adicionar ao destinos\n  - Adicionar ao excluidos com motivo \"quest_similar_existe\"\n- Tipos mapeados:\n  - mentalidade → categorias: tcc, estoicismo, essencial\n  - sabotador → quests com sabotador_id\n  - objetivos → quests com objetivo_id ou categoria \"objetivo\"\n  - personalizada → código \"quest_custom\"\n</rule>\n\n<rule id=\"R7\" name=\"Limite Diário\">\nSE limite_diario_atingido = true E pedido_explicito = false:\n- Limitar destinos a 0\n- Justificar: \"limite diário atingido\"\nSE pedido_explicito = true:\n- IGNORAR limite diário\n</rule>\n\n</rules>\n\n<priority_order>\n1. personalizada (pedido explícito) - SEMPRE primeira\n2. mentalidade (humor/energia baixos) - urgente\n3. sabotador (padrão detectado) - importante\n4. objetivos (progresso) - relevante\n</priority_order>\n\n<output_format>\n{\n  \"pode_criar\": boolean,\n  \"pedido_explicito\": boolean,\n  \"destinos\": [{\"tipo\": \"string\", \"prioridade\": number}],\n  \"excluidos\": [{\"tipo\": \"string\", \"motivo\": \"string\"}],\n  \"justificativa\": \"string\"\n}\n</output_format>"
+          "systemMessage": "=# Agente Roteador de Quests - MindQuest v2.0\n\n<role>\nVocê é o Roteador Inteligente do sistema de quests MindQuest.\nSua função é analisar o CONTEXTO ESTRUTURADO do usuário e decidir QUAIS tipos de quest devem ser criados.\nVocê NÃO cria as quests - apenas roteia para os especialistas corretos.\n</role>\n\n<objective>\nAnalisar dados JÁ PROCESSADOS (resumo_conversa, pedido_quest, emoções, sabotador) para:\n1. Verificar se existe pedido_quest (já detectado pelo sistema)\n2. Identificar necessidade de quest de mentalidade (humor/energia baixos)\n3. Identificar necessidade de quest de sabotador\n4. Identificar necessidade de quest de objetivos\n5. Validar anti-duplicação (não rotear se já existe quest similar)\n\nSucesso = roteamento correto e eficiente, sem duplicações.\n</objective>\n\n<rules>\n\n<rule id=\"R2\" name=\"Pedido Explícito\">\nSE pedido_quest != 'NENHUM PEDIDO' e não está vazio:\n- Definir pedido_explicito = true\n- Adicionar destino \"personalizada\" com prioridade 1\n- IGNORAR limite diário (pode criar mesmo se limite_diario_atingido = true)\n- O sistema já detectou o pedido - você NÃO precisa analisar mensagens.\n</rule>\n\n<rule id=\"R3\" name=\"Mentalidade\">\nSE humor < 5 OU energia < 5:\n- Adicionar destino \"mentalidade\"\n- Foco: regulação emocional, TCC, Estoicismo\n- Usar emoções detectadas e justificativas para contexto\n</rule>\n\n<rule id=\"R4\" name=\"Sabotador\">\nSE existe sabotador_conversa_atual (intensidade > 65) OU sabotador_historico com score alto:\n- Adicionar destino \"sabotador\"\n- Priorizar sabotador_conversa se existir (mais recente/relevante)\n</rule>\n\n<rule id=\"R5\" name=\"Objetivos\">\nSE objetivos_especificos não está vazio E resumo_conversa menciona progresso/ação:\n- Adicionar destino \"objetivos\"\n- Apenas se houver contexto relevante no resumo\n</rule>\n\n<rule id=\"R6\" name=\"Anti-Duplicação\" critical=\"true\">\nANTES de adicionar qualquer destino, verificar quests_existentes:\n- SE já existe quest do mesmo tipo (categoria) com status ativa/disponível:\n  - NÃO adicionar ao destinos\n  - Adicionar ao excluidos com motivo \"quest_similar_existe\"\n- Tipos mapeados:\n  - mentalidade → categorias: tcc, estoicismo, essencial\n  - sabotador → quests com sabotador_id\n  - objetivos → quests com objetivo_id ou categoria \"objetivo\"\n  - personalizada → código \"quest_custom\"\n</rule>\n\n<rule id=\"R7\" name=\"Limite Diário\">\nSE limite_diario_atingido = true E pedido_explicito = false:\n- Limitar destinos a 0\n- Justificar: \"limite diário atingido\"\nSE pedido_explicito = true:\n- IGNORAR limite diário\n</rule>\n\n</rules>\n\n<priority_order>\n1. personalizada (pedido explícito) - SEMPRE primeira\n2. mentalidade (humor/energia baixos) - urgente\n3. sabotador (padrão detectado) - importante\n4. objetivos (progresso) - relevante\n</priority_order>\n\n<output_format>{\"pode_criar\": boolean, \"pedido_explicito\": boolean, \"destinos\": [{\"tipo\": \"string\", \"prioridade\": number}], \"excluidos\": [{\"tipo\": \"string\", \"motivo\": \"string\"}], \"justificativa\": \"string\"}</output_format>"
         }
       },
       "id": "a61f72ea-0ebd-4b23-b15b-aac0af269aa3",
@@ -167,8 +167,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2048,
-        288
+        -3104,
+        656
       ],
       "alwaysOutputData": true
     },
@@ -181,8 +181,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1728,
-        288
+        -2704,
+        656
       ]
     },
     {
@@ -214,8 +214,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1552,
-        288
+        -2416,
+        656
       ]
     },
     {
@@ -227,8 +227,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1328,
-        192
+        -2608,
+        1328
       ]
     },
     {
@@ -240,8 +240,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1328,
-        416
+        -2032,
+        672
       ]
     },
     {
@@ -349,8 +349,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -1104,
-        144
+        -2432,
+        1296
       ]
     },
     {
@@ -364,8 +364,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -3600,
-        -80
+        -3680,
+        384
       ]
     },
     {
@@ -424,8 +424,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -640,
-        -144
+        -2032,
+        912
       ]
     },
     {
@@ -484,8 +484,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -640,
-        128
+        -2032,
+        1184
       ]
     },
     {
@@ -544,8 +544,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -640,
-        368
+        -2016,
+        1424
       ]
     },
     {
@@ -604,19 +604,20 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -640,
-        592
+        -2016,
+        1648
       ]
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"pode_criar\": {\n      \"type\": \"boolean\",\n      \"description\": \"Se pode criar quests\"\n    },\n    \"pedido_explicito\": {\n      \"type\": \"boolean\",\n      \"description\": \"Se usuário pediu explicitamente uma quest\"\n    },\n    \"destinos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": {\n            \"type\": \"string\",\n            \"enum\": [\"mentalidade\", \"sabotador\", \"objetivos\", \"personalizada\"],\n            \"description\": \"Tipo do especialista\"\n          },\n          \"prioridade\": {\n            \"type\": \"number\",\n            \"description\": \"Ordem de prioridade (1 = mais alta)\"\n          },\n          \"catalogo_sugerido\": {\n            \"type\": \"string\",\n            \"description\": \"Código do catálogo sugerido (opcional)\"\n          },\n          \"contexto\": {\n            \"type\": \"object\",\n            \"description\": \"Contexto específico para o especialista\"\n          }\n        },\n        \"required\": [\"tipo\", \"prioridade\", \"contexto\"]\n      }\n    },\n    \"excluidos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": { \"type\": \"string\" },\n          \"motivo\": { \"type\": \"string\" }\n        }\n      }\n    },\n    \"justificativa\": {\n      \"type\": \"string\",\n      \"description\": \"Breve justificativa da decisão\"\n    }\n  },\n  \"required\": [\"pode_criar\", \"pedido_explicito\", \"destinos\", \"justificativa\"]\n}"
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"pode_criar\": {\n      \"type\": \"boolean\"\n    },\n    \"pedido_explicito\": {\n      \"type\": \"boolean\"\n    },\n    \"destinos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": {\n            \"type\": \"string\"\n          },\n          \"prioridade\": {\n            \"type\": \"number\"\n          }\n        },\n        \"required\": [\"tipo\", \"prioridade\"]\n      }\n    },\n    \"excluidos\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"tipo\": {\n            \"type\": \"string\"\n          },\n          \"motivo\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\"tipo\", \"motivo\"]\n      }\n    },\n    \"justificativa\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\"pode_criar\", \"pedido_explicito\", \"destinos\", \"excluidos\", \"justificativa\"]\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -1888,
-        496
+        -2944,
+        864
       ],
       "id": "6f99fc4b-fb8c-41e4-b94e-40103d8a5622",
       "name": "Structured Output Parser"
@@ -803,7 +804,10 @@
       {
         "json": {
           "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "1f54689b-2982-421f-9ed3-d3b5e592353b"
+          "chat_id": "8e2a56e9-50e4-4664-8fe7-32b3d043c886"
+        },
+        "pairedItem": {
+          "item": 0
         }
       }
     ]

@@ -28,7 +28,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1296,
+        -1248,
         80
       ]
     },
@@ -43,7 +43,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1072,
+        -1056,
         80
       ],
       "credentials": {
@@ -118,7 +118,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -416,
+        -432,
         80
       ]
     },
@@ -131,8 +131,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -192,
-        288
+        -208,
+        96
       ]
     },
     {
@@ -144,8 +144,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -192,
-        80
+        -1216,
+        368
       ]
     },
     {
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
-        80
+        -688,
+        368
       ]
     },
     {
@@ -174,8 +174,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        640,
-        80
+        -432,
+        368
       ],
       "credentials": {
         "postgres": {
@@ -193,8 +193,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        864,
-        80
+        -208,
+        368
       ]
     },
     {
@@ -206,8 +206,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        32,
-        304
+        -1040,
+        592
       ],
       "credentials": {
         "openRouterApi": {
@@ -226,26 +226,26 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        224,
-        288
+        -848,
+        576
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=TÉCNICA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\nBASE CIENTÍFICA: {{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nHumor: {{ $json.contexto.humor }}/10 - {{ $json.contexto.justificativa_humor || '' }}\nEnergia: {{ $json.contexto.energia }}/10 - {{ $json.contexto.justificativa_energia || '' }}\nEmoções: {{ $json.contexto.emocoes_texto || 'não detectadas' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
+        "text": "=<input>\n\n<tecnica_catalogo>\n<titulo>{{ $json.quest_catalogo.titulo }}</titulo>\n<descricao>{{ $json.quest_catalogo.descricao }}</descricao>\n<base_cientifica>{{ JSON.stringify($json.quest_catalogo.base_cientifica || {}) }}</base_cientifica>\n</tecnica_catalogo>\n\n<estado_emocional>\n<humor valor=\"{{ $json.contexto.humor || 6 }}\">{{ $json.contexto.justificativa_humor || '' }}</humor>\n<energia valor=\"{{ $json.contexto.energia || 6 }}\">{{ $json.contexto.justificativa_energia || '' }}</energia>\n<emocoes>{{ $json.contexto.emocoes_texto || 'não detectadas' }}</emocoes>\n</estado_emocional>\n\n<conversa>\n{{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\n</conversa>\n\n</input>\n\n<task>\nAdapte a técnica de <tecnica_catalogo> ao <estado_emocional> do usuário.\nUse <conversa> para contextualizar.\nNUNCA use termos técnicos no título.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Você adapta quests do catálogo ao contexto da conversa. Mantenha técnica original (TCC/Estoicismo). Adapte DESCRIÇÃO ao contexto específico. Título máx 80 chars. Seja específico e acionável. Incorpore BASE CIENTÍFICA na descrição. Retorne APENAS JSON válido em uma linha."
+          "systemMessage": "<role>\nVocê é o Especialista em Quests de Mentalidade do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nAdaptar técnicas do catálogo ao contexto emocional do usuário.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <5 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <tecnica_catalogo> → base para adaptar (título, descrição, base_cientifica)\n- <estado_emocional> → adaptar intensidade e abordagem\n- <conversa> → contextualizar ação\n</input_usage>\n\n<forbidden_terms>\nNUNCA usar no título:\n- TCC, Mindfulness, Estoicismo\n- Respiração 4-7-8, Grounding, 5-4-3-2-1\n- Questionamento Socrático, Reframing\n</forbidden_terms>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar como se sente | Conversar com Mentor |\n| Ver humor/energia | Menu Entender → Humor |\n| Check-in | Menu Conversar → Check-in |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Técnica: Respiração 4-7-8, Humor: 3/10</input>\n<output>{\"titulo\": \"Recupere 5 minutos de clareza mental\", \"descricao\": \"Pause, respire lentamente contando até 4. Registre no MindQuest como se sente.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres, SEM termos técnicos\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nRecupere, Resete, Desbloqueie, Proteja, Recarregue, Restaure, Reconecte, Libere\n</verbos>"
         }
       },
       "id": "agent-mentalidade",
-      "name": "Adaptar Quest",
+      "name": "Quest mente",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        48,
-        80
+        -1024,
+        368
       ]
     }
   ],
@@ -338,7 +338,7 @@
       "main": [
         [
           {
-            "node": "Adaptar Quest",
+            "node": "Quest mente",
             "type": "main",
             "index": 0
           }
@@ -349,7 +349,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Adaptar Quest",
+            "node": "Quest mente",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -360,14 +360,14 @@
       "ai_outputParser": [
         [
           {
-            "node": "Adaptar Quest",
+            "node": "Quest mente",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Adaptar Quest": {
+    "Quest mente": {
       "main": [
         [
           {

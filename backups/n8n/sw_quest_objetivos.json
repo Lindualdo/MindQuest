@@ -28,7 +28,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -192,
+        -224,
         256
       ]
     },
@@ -87,8 +87,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
-        464
+        496,
+        272
       ]
     },
     {
@@ -100,8 +100,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        256
+        144,
+        512
       ]
     },
     {
@@ -117,8 +117,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1008,
-        256
+        320,
+        512
       ],
       "credentials": {
         "postgres": {
@@ -136,20 +136,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1184,
-        256
+        496,
+        512
       ]
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "id": "llm-objetivos",
       "name": "OpenRouter",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        480,
-        480
+        -208,
+        752
       ],
-      "parameters": {},
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -158,36 +160,36 @@
       }
     },
     {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+      },
       "id": "parser-objetivos",
       "name": "Parser Quest",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        656,
-        480
-      ],
-      "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
-      }
+        16,
+        752
+      ]
     },
     {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n\n<objetivo>\n<titulo>{{ $json.objetivo_selecionado.titulo }}</titulo>\n<detalhamento>{{ $json.objetivo_selecionado.detalhamento || 'sem detalhes' }}</detalhamento>\n<area_vida>{{ $json.objetivo_selecionado.area_vida || 'geral' }}</area_vida>\n</objetivo>\n\n<conversa>\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n</conversa>\n\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n</estado_emocional>\n\n<quests_existentes>\n{{ JSON.stringify(($json.contexto.quests_existentes || []).map(q => q.config?.titulo || q.titulo).filter(Boolean)) }}\n</quests_existentes>\n\n</input>\n\n<task>\nCrie UMA quest que avance o objetivo acima.\nUse os dados de <input> para personalizar.\nEvite duplicar títulos de <quests_existentes>.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "<role>\nVocê é o Especialista em Quests de Objetivos do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar objetivos em micro-ações executáveis para HOJE.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <objetivo> → base para criar a quest\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n- <quests_existentes> → evitar duplicação de títulos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar/Refletir | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Entender padrões | Menu Entender → Dashboard |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Objetivo: Lançar app</input>\n<output>{\"titulo\": \"Defina a única feature que valida seu MVP\", \"descricao\": \"Registre no MindQuest qual funcionalidade é essencial. Liste 3 usuários para testar.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nDefina, Liste, Mapeie, Identifique, Priorize, Valide, Escolha, Documente\n</verbos>"
+        }
+      },
       "id": "agent-objetivos",
-      "name": "Criar Micro-Ação",
+      "name": "Quest Objetivo",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        480,
-        256
-      ],
-      "parameters": {
-        "promptType": "define",
-        "text": "=OBJETIVO DO USUÁRIO:\nTítulo: {{ $json.objetivo_selecionado.titulo }}\nDetalhamento: {{ $json.objetivo_selecionado.detalhamento }}\nÁrea: {{ $json.objetivo_selecionado.area_vida }}\n\nCONTEXTO DA CONVERSA:\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você é especialista em produtividade. Extraia uma AÇÃO ESPECÍFICA e CONCRETA da conversa vinculada ao objetivo. Título: 'Avançar em [Objetivo]: [Ação]' máx 80 chars. Descrição: próximo passo claro e acionável. NUNCA generico. Ação deve ser fazível HOJE. Retorne APENAS JSON válido em uma linha."
-        }
-      }
+        -176,
+        512
+      ]
     }
   ],
   "connections": {
@@ -217,10 +219,12 @@
       "main": [
         [
           {
-            "node": "Criar Micro-Ação",
+            "node": "Quest Objetivo",
             "type": "main",
             "index": 0
-          },
+          }
+        ],
+        [
           {
             "node": "Saída Sem Criar",
             "type": "main",
@@ -255,7 +259,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Criar Micro-Ação",
+            "node": "Quest Objetivo",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -266,14 +270,14 @@
       "ai_outputParser": [
         [
           {
-            "node": "Criar Micro-Ação",
+            "node": "Quest Objetivo",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Criar Micro-Ação": {
+    "Quest Objetivo": {
       "main": [
         [
           {

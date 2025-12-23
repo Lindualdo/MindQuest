@@ -1,0 +1,511 @@
+{
+  "createdAt": "2025-12-23T16:19:01.681Z",
+  "id": "IoRzoEAFRKpK9miG",
+  "name": "job_criar_quests",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        -208
+      ],
+      "id": "a9704804-d474-4dcd-9a6d-04a97537ea64",
+      "name": "Trigger Conversas 09h"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM usr_chat where usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'\nlimit 10",
+        "options": {
+          "queryReplacement": ""
+        }
+      },
+      "id": "d8ca9c0e-6c5e-4fc0-bad1-b52ce4592d3b",
+      "name": "usuarios_conversas",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -160,
+        -208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        112,
+        -208
+      ],
+      "id": "930c337e-6be4-4861-bc45-229a7be07d0f",
+      "name": "Loop Conversas"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "3FRz1UY3hQqDCuBy",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3FRz1UY3hQqDCuBy",
+          "cachedResultName": "sw_quest_hub"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "nome_preferencia",
+              "displayName": "nome_preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "tom_conversa",
+              "displayName": "tom_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "whats_number",
+              "displayName": "whats_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "lembretes_canais",
+              "displayName": "lembretes_canais",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": true
+            },
+            {
+              "id": "push_tokens",
+              "displayName": "push_tokens",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": true
+            },
+            {
+              "id": "tipo_notificacao",
+              "displayName": "tipo_notificacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "contexto",
+              "displayName": "contexto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -192
+      ],
+      "id": "2ce2bef9-62b0-4541-85d7-b19c8ecf4e01",
+      "name": "Call sw_mentor_notificacoes (conversas)"
+    }
+  ],
+  "connections": {
+    "Trigger Conversas 09h": {
+      "main": [
+        [
+          {
+            "node": "usuarios_conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usuarios_conversas": {
+      "main": [
+        [
+          {
+            "node": "Loop Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Conversas": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call sw_mentor_notificacoes (conversas)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call sw_mentor_notificacoes (conversas)": {
+      "main": [
+        [
+          {
+            "node": "Loop Conversas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Trigger Conversas 09h": {
+      "recurrenceRules": []
+    },
+    "node:Trigger Quests 15h": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "activeVersionId": "c8bbd2f5-7362-4224-b493-4e387ae4d1a6",
+  "shared": [
+    {
+      "createdAt": "2025-12-23T16:19:01.681Z",
+      "role": "workflow:owner",
+      "workflowId": "IoRzoEAFRKpK9miG",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "createdAt": "2025-12-23T16:24:37.161Z",
+    "workflowId": "IoRzoEAFRKpK9miG",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 9
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -368,
+          -208
+        ],
+        "id": "a9704804-d474-4dcd-9a6d-04a97537ea64",
+        "name": "Trigger Conversas 09h"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id FROM usr_chat where usuario_id = 'd949d81c-9235-41ce-8b3b-6b5d593c5e24'\nlimit 10",
+          "options": {
+            "queryReplacement": ""
+          }
+        },
+        "id": "d8ca9c0e-6c5e-4fc0-bad1-b52ce4592d3b",
+        "name": "usuarios_conversas",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -160,
+          -208
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "8ySWxtSO7gYK5uue",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          112,
+          -208
+        ],
+        "id": "930c337e-6be4-4861-bc45-229a7be07d0f",
+        "name": "Loop Conversas"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "3FRz1UY3hQqDCuBy",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/3FRz1UY3hQqDCuBy",
+            "cachedResultName": "sw_quest_hub"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "usuario_id",
+                "displayName": "usuario_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              },
+              {
+                "id": "nome_preferencia",
+                "displayName": "nome_preferencia",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              },
+              {
+                "id": "tom_conversa",
+                "displayName": "tom_conversa",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              },
+              {
+                "id": "whats_number",
+                "displayName": "whats_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              },
+              {
+                "id": "lembretes_canais",
+                "displayName": "lembretes_canais",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "array",
+                "removed": true
+              },
+              {
+                "id": "push_tokens",
+                "displayName": "push_tokens",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "array",
+                "removed": true
+              },
+              {
+                "id": "tipo_notificacao",
+                "displayName": "tipo_notificacao",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              },
+              {
+                "id": "contexto",
+                "displayName": "contexto",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "object",
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          400,
+          -192
+        ],
+        "id": "2ce2bef9-62b0-4541-85d7-b19c8ecf4e01",
+        "name": "Call sw_mentor_notificacoes (conversas)"
+      }
+    ],
+    "connections": {
+      "Trigger Conversas 09h": {
+        "main": [
+          [
+            {
+              "node": "usuarios_conversas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "usuarios_conversas": {
+        "main": [
+          [
+            {
+              "node": "Loop Conversas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Conversas": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Call sw_mentor_notificacoes (conversas)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call sw_mentor_notificacoes (conversas)": {
+        "main": [
+          [
+            {
+              "node": "Loop Conversas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Aldo Santos",
+    "name": null,
+    "description": null
+  }
+}

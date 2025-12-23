@@ -29,7 +29,7 @@
       "typeVersion": 1.1,
       "position": [
         784,
-        272
+        288
       ]
     },
     {
@@ -46,7 +46,7 @@
       "typeVersion": 2.6,
       "position": [
         1008,
-        272
+        288
       ],
       "credentials": {
         "postgres": {
@@ -69,7 +69,7 @@
       "typeVersion": 2.6,
       "position": [
         1232,
-        272
+        288
       ],
       "credentials": {
         "postgres": {
@@ -88,7 +88,7 @@
       "typeVersion": 2,
       "position": [
         1456,
-        272
+        288
       ]
     },
     {
@@ -121,7 +121,7 @@
       "typeVersion": 2.2,
       "position": [
         1664,
-        272
+        288
       ]
     },
     {
@@ -133,8 +133,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1888,
-        480
+        1904,
+        304
       ]
     },
     {
@@ -146,8 +146,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1888,
-        272
+        816,
+        560
       ]
     },
     {
@@ -159,8 +159,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2464,
-        272
+        1456,
+        560
       ]
     },
     {
@@ -176,8 +176,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2656,
-        272
+        1664,
+        560
       ],
       "credentials": {
         "postgres": {
@@ -195,20 +195,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2864,
-        272
+        1920,
+        560
       ]
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "id": "llm-sabotador",
       "name": "OpenRouter",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        2112,
-        480
+        1072,
+        768
       ],
-      "parameters": {},
       "credentials": {
         "openRouterApi": {
           "id": "rSnkOnnAHyfayLJt",
@@ -217,36 +219,36 @@
       }
     },
     {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+      },
       "id": "parser-sabotador",
       "name": "Parser Quest",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        2288,
-        480
-      ],
-      "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
-      }
+        1248,
+        768
+      ]
     },
     {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n\n<contramedida_catalogo>\n<titulo>{{ $json.quest_catalogo.titulo }}</titulo>\n<descricao>{{ $json.quest_catalogo.descricao }}</descricao>\n<base_cientifica>{{ JSON.stringify($json.quest_catalogo.base_cientifica || {}) }}</base_cientifica>\n</contramedida_catalogo>\n\n<sabotador>\n<padrao>{{ $json.contexto.sabotador_nome || $json.contexto.sabotador_id }}</padrao>\n<intensidade>{{ $json.contexto.intensidade || 0 }}%</intensidade>\n<insight>{{ $json.contexto.insight_atual || 'não disponível' }}</insight>\n<contramedida_sugerida>{{ $json.contexto.contramedida_ativa || 'não disponível' }}</contramedida_sugerida>\n</sabotador>\n\n<contexto>\n<conversa>{{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}</conversa>\n<emocoes>{{ $json.contexto.emocoes_texto || '' }}</emocoes>\n</contexto>\n\n</input>\n\n<task>\nAdapte <contramedida_catalogo> ao <sabotador> detectado.\nUse <insight> e <contramedida_sugerida> como base.\nNUNCA mencione o nome do sabotador no título.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "<role>\nVocê é o Especialista em Quests de Sabotador do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nAdaptar contramedidas ao padrão mental detectado do usuário.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <5 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <contramedida_catalogo> → base para adaptar\n- <sabotador> → padrão, intensidade, insight, contramedida_sugerida\n- <contexto> → conversa e emoções para personalizar\n</input_usage>\n\n<forbidden_terms>\nNUNCA usar no título:\n- \"Desafie o Sr. X\", \"Seu Hiper-Realizador\"\n- Nome do sabotador (Crítico, Inquieto, etc)\n- Termos técnicos (Reframing, Socrático, 4-7-8)\n</forbidden_terms>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar conquista | Conversar com Mentor |\n| Ver sabotadores | Menu Entender → Sabotadores |\n| Check-in | Menu Conversar → Check-in |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Sabotador: Crítico Interior, Insight: cobra excessivamente</input>\n<output>{\"titulo\": \"Registre uma conquista antes de cobrar a próxima\", \"descricao\": \"Liste 3 coisas que você fez bem essa semana no MindQuest.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres, SEM nome do sabotador\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nProteja, Registre, Celebre, Reconheça, Expresse, Canalize, Desacelere, Transforme\n</verbos>"
+        }
+      },
       "id": "agent-sabotador",
-      "name": "Adaptar Contramedida",
+      "name": "Quest sabotador",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2112,
-        272
-      ],
-      "parameters": {
-        "promptType": "define",
-        "text": "=CONTRAMEDIDA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\nBASE CIENTÍFICA: {{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nPadrão: {{ $json.contexto.sabotador_nome || $json.contexto.sabotador_id }}\nInsight: {{ $json.contexto.insight_atual }}\nIntensidade: {{ $json.contexto.intensidade }}%\nEmoções: {{ $json.contexto.emocoes_texto || '' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Você adapta contramedidas de sabotadores ao contexto. Título: Focar no BENEFÍCIO ou AÇÃO. NUNCA usar 'Desafie o Sr. [Nome]'. Máx 80 chars. Seja ULTRA específico. Incorpore insight e BASE CIENTÍFICA na descrição. Retorne APENAS JSON válido em uma linha."
-        }
-      }
+        1088,
+        560
+      ]
     }
   ],
   "connections": {
@@ -338,7 +340,7 @@
       "main": [
         [
           {
-            "node": "Adaptar Contramedida",
+            "node": "Quest sabotador",
             "type": "main",
             "index": 0
           }
@@ -349,7 +351,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Adaptar Contramedida",
+            "node": "Quest sabotador",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -360,14 +362,14 @@
       "ai_outputParser": [
         [
           {
-            "node": "Adaptar Contramedida",
+            "node": "Quest sabotador",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Adaptar Contramedida": {
+    "Quest sabotador": {
       "main": [
         [
           {

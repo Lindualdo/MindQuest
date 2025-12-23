@@ -87,8 +87,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        560
+        928,
+        272
       ]
     },
     {
@@ -104,8 +104,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1360,
-        240
+        688,
+        496
       ],
       "credentials": {
         "postgres": {
@@ -123,8 +123,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1520,
-        240
+        928,
+        496
       ]
     },
     {
@@ -136,8 +136,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1008,
-        416
+        336,
+        672
       ],
       "credentials": {
         "openRouterApi": {
@@ -156,22 +156,26 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        1232,
-        400
+        560,
+        688
       ]
     },
     {
       "parameters": {
-        "systemMessage": "Você cria quests personalizadas baseadas no pedido explícito do usuário. REGRAS DE TÍTULO: 1. Fórmula: VERBO DE IMPACTO + OBJETO + RESULTADO. 2. NUNCA usar termos técnicos (TCC, mindfulness, reestruturação). 3. Máximo 80 caracteres. 4. Foco em micro-ação que gera mudança comportamental. 5. Linguagem direta e motivadora. EXEMPLOS: ✅ 'Mapeie o gatilho que travou sua decisão' ✅ 'Defina a primeira ação para destravar o projeto' ❌ 'Pratique reflexão cognitiva' ❌ 'Exercício de autoconhecimento' Descrição: detalhada e específica ao contexto do pedido. Retorne APENAS JSON válido em uma linha.",
-        "text": "=PEDIDO DO USUÁRIO:\n{{ $json.pedido }}\n\nCONTEXTO DA CONVERSA:\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n\nHumor: {{ $json.contexto.humor || 6 }}/10\nEnergia: {{ $json.contexto.energia || 6 }}/10\nEmoções: {{ $json.contexto.emocoes_texto || '' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}"
+        "promptType": "define",
+        "text": "=<input>\n\n<pedido_usuario>\n{{ $json.pedido }}\n</pedido_usuario>\n\n<conversa>\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n</conversa>\n\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n<emocoes>{{ $json.contexto.emocoes_texto || '' }}</emocoes>\n</estado_emocional>\n\n</input>\n\n<task>\nTransforme <pedido_usuario> em uma quest acionável.\nRespeite a intenção EXATA do usuário.\nUse <estado_emocional> para adaptar se necessário.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "<role>\nVocê é o Especialista em Quests Personalizadas do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar pedidos explícitos do usuário em ações estruturadas.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <pedido_usuario> → base para criar a quest (respeitar intenção exata)\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar experiência | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Anotar reflexão | Conversar → Anotações |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Pedido: Quero meditar todo dia</input>\n<output>{\"titulo\": \"Reserve 5 minutos para silenciar a mente\", \"descricao\": \"Feche os olhos e respire por 5 minutos. Registre no MindQuest como foi.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nReserve, Faça, Execute, Complete, Inicie, Dedique, Pratique, Experimente\n</verbos>"
+        }
       },
       "id": "agent-personalizada",
-      "name": "Criar Quest",
+      "name": "Quest custom",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        1056,
-        240
+        384,
+        496
       ]
     }
   ],
@@ -202,7 +206,7 @@
       "main": [
         [
           {
-            "node": "Criar Quest",
+            "node": "Quest custom",
             "type": "main",
             "index": 0
           }
@@ -231,7 +235,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Criar Quest",
+            "node": "Quest custom",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -242,14 +246,14 @@
       "ai_outputParser": [
         [
           {
-            "node": "Criar Quest",
+            "node": "Quest custom",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Criar Quest": {
+    "Quest custom": {
       "main": [
         [
           {
@@ -269,5 +273,58 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "tags": []
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-22T20:02:33.840Z",
+      "role": "workflow:owner",
+      "workflowId": "DaiEAB3m8Ey9Nuzy",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }
