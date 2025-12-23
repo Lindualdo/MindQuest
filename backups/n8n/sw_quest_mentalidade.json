@@ -1,8 +1,8 @@
 {
-  "createdAt": "2025-12-22T00:00:00.000Z",
-  "id": "sw_quest_mentalidade_v1",
+  "createdAt": "2025-12-22T20:01:47.700Z",
+  "id": "wYvNVnfs7T16H3zv",
   "name": "sw_quest_mentalidade",
-  "description": "Especialista em quests de mentalidade (TCC, Estoicismo, regulação emocional)",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -10,17 +10,27 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id" },
-            { "name": "chat_id" },
-            { "name": "contexto", "type": "object" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "contexto",
+              "type": "object"
+            }
           ]
         }
       },
-      "id": "start-mentalidade",
+      "id": "27009cc9-5c07-4976-a0ec-c8bfe2845658",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        -1296,
+        80
+      ]
     },
     {
       "parameters": {
@@ -28,11 +38,14 @@
         "query": "-- Buscar quests do catálogo: TCC, Estoicismo, Boas Práticas\nSELECT \n  id,\n  codigo,\n  titulo,\n  descricao,\n  categoria,\n  base_cientifica,\n  xp\nFROM quests_catalogo\nWHERE ativo = true\n  AND categoria IN ('tcc', 'estoicismo', 'boa_pratica_geral')\nORDER BY nivel_prioridade DESC, RANDOM()\nLIMIT 10;",
         "options": {}
       },
-      "id": "buscar-catalogo-ment",
+      "id": "d94809e0-5ed2-446d-91d3-733fda8e5520",
       "name": "Buscar Catálogo",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [420, 300],
+      "position": [
+        -1072,
+        80
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -48,11 +61,14 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "buscar-existentes-ment",
+      "id": "5fc64cd9-822c-48ff-8925-7993143b6c2e",
       "name": "Buscar Existentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [640, 300],
+      "position": [
+        -864,
+        80
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -64,20 +80,23 @@
       "parameters": {
         "jsCode": "// Anti-Duplicação: Keywords + Cooldown\n// Jaccard similarity para títulos\n\nfunction extrairKeywords(texto) {\n  if (!texto) return new Set();\n  return new Set(\n    texto.toLowerCase()\n      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '') // remove acentos\n      .split(/\\s+/)\n      .filter(w => w.length > 3)\n      .filter(w => !['para', 'com', 'uma', 'seu', 'sua', 'que', 'sobre'].includes(w))\n  );\n}\n\nfunction calcularSimilaridade(titulo1, titulo2) {\n  const k1 = extrairKeywords(titulo1);\n  const k2 = extrairKeywords(titulo2);\n  \n  if (k1.size === 0 || k2.size === 0) return 0;\n  \n  const intersecao = [...k1].filter(w => k2.has(w)).length;\n  const uniao = new Set([...k1, ...k2]).size;\n  \n  return intersecao / uniao; // Jaccard\n}\n\nconst entrada = $('start').first().json;\nconst catalogo = $input.all().map(i => i.json);\nconst existentes = $items('Buscar Existentes', 0, 0).map(i => i.json);\n\nconst contexto = entrada.contexto || {};\nconst humor = contexto.humor || 6;\nconst energia = contexto.energia || 6;\n\n// Temas baseados no contexto\nconst temas = [];\nif (humor < 4 || energia < 4) temas.push('regulacao_emocional');\nif (humor < 5 || energia < 5) temas.push('bem_estar');\n\n// Filtrar catálogo por temas EXCLUINDO já usados\nconst catalogoIdsUsados = new Set(existentes.map(e => e.catalogo_id).filter(Boolean));\nconst catalogoDisponivel = catalogo.filter(q => !catalogoIdsUsados.has(q.id));\n\n// Verificar duplicação por keywords nos últimos 14 dias\nconst agora = new Date();\nconst existentesRecentes = existentes.filter(e => {\n  const diff = (agora - new Date(e.ativado_em)) / (1000 * 60 * 60 * 24);\n  return diff <= 14;\n});\n\nconst bloqueios = [];\nfor (const quest of catalogoDisponivel) {\n  for (const existente of existentesRecentes) {\n    const sim = calcularSimilaridade(quest.titulo, existente.titulo);\n    if (sim > 0.5) {\n      bloqueios.push({\n        catalogo_id: quest.id,\n        motivo: 'similaridade_alta',\n        similaridade: sim.toFixed(2),\n        quest_existente: existente.titulo\n      });\n    }\n  }\n}\n\n// Filtrar catálogo final (sem bloqueados)\nconst catalogoIdsBloqueados = new Set(bloqueios.map(b => b.catalogo_id));\nconst catalogoFinal = catalogoDisponivel.filter(q => !catalogoIdsBloqueados.has(q.id));\n\nconst podeCriar = catalogoFinal.length > 0;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pode_criar: podeCriar,\n    motivo: podeCriar ? 'ok' : 'sem_opcoes_disponiveis',\n    catalogo_disponivel: catalogoFinal,\n    bloqueios: bloqueios,\n    contexto: contexto\n  }\n}];"
       },
-      "id": "verificar-dup-ment",
+      "id": "3ff4f5b8-cc9a-458a-98f1-b601105fb6fd",
       "name": "Verificar Duplicação",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [860, 300]
+      "position": [
+        -640,
+        80
+      ]
     },
     {
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 2,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
@@ -94,71 +113,53 @@
         },
         "options": {}
       },
-      "id": "pode-criar-ment",
+      "id": "5e505f07-dac3-440e-95d1-10b517eb5949",
       "name": "Pode Criar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1080, 300]
+      "position": [
+        -416,
+        80
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Saída sem criar\nconst input = $input.item.json || {};\n\nreturn [{\n  json: {\n    sucesso: false,\n    tipo: 'mentalidade',\n    motivo: input.motivo || 'bloqueado',\n    bloqueios: input.bloqueios || [],\n    quest_criada: null\n  }\n}];"
       },
-      "id": "saida-sem-criar-ment",
+      "id": "e59eee6a-00dd-4441-a0ec-ec7d39787a60",
       "name": "Saída Sem Criar",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1300, 500]
+      "position": [
+        -192,
+        288
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Selecionar quest do catálogo (prioridade humor/energia)\nconst input = $input.item.json || {};\nconst catalogo = input.catalogo_disponivel || [];\nconst contexto = input.contexto || {};\n\nif (catalogo.length === 0) {\n  throw new Error('Nenhuma quest disponível no catálogo');\n}\n\n// Priorizar por humor/energia\nlet questSelecionada;\nif (contexto.humor < 4 || contexto.energia < 4) {\n  // Priorizar TCC\n  questSelecionada = catalogo.find(q => q.categoria === 'tcc') || catalogo[0];\n} else if (contexto.humor < 5 || contexto.energia < 5) {\n  // Priorizar Estoicismo ou Boas Práticas\n  questSelecionada = catalogo.find(q => q.categoria === 'estoicismo') \n    || catalogo.find(q => q.categoria === 'boa_pratica_geral')\n    || catalogo[0];\n} else {\n  // Qualquer uma\n  questSelecionada = catalogo[0];\n}\n\nreturn [{\n  json: {\n    usuario_id: input.usuario_id,\n    chat_id: input.chat_id,\n    quest_catalogo: questSelecionada,\n    contexto: contexto\n  }\n}];"
       },
-      "id": "selecionar-quest-ment",
+      "id": "1d7c2c33-a804-4beb-b7ec-108489f76981",
       "name": "Selecionar Quest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1300, 300]
-    },
-    {
-      "parameters": {
-        "inputText": "TÉCNICA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\n\nBASE CIENTÍFICA:\n{{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nHumor: {{ $json.contexto.humor }}/10 - {{ $json.contexto.justificativa_humor || '' }}\nEnergia: {{ $json.contexto.energia }}/10 - {{ $json.contexto.justificativa_energia || '' }}\nEmoções: {{ $json.contexto.emocoes_texto || 'não detectadas' }}",
-        "options": {
-          "systemMessage": "<role>\nVocê é o Especialista em Mentalidade do MindQuest.\nSua função é adaptar técnicas de TCC, Estoicismo e boas práticas ao contexto real do usuário.\n</role>\n\n<objective>\nGerar quest personalizada que conecte a técnica científica com a situação atual.\nSucesso = título único + descrição acionável específica ao contexto.\n</objective>\n\n<rules>\n1. USAR base científica fornecida para dar credibilidade\n2. ADAPTAR título e descrição ao contexto da conversa\n3. TÍTULO: máx 80 chars, específico, acionável\n4. DESCRIÇÃO: mencionar fundamento científico + passos práticos\n5. NUNCA genérico - sempre ancorar no contexto + ciência\n</rules>\n\n<workflow>\n1. Identifique a situação do usuário (humor, energia, contexto)\n2. Conecte com a técnica do catálogo\n3. Adapte linguagem ao momento atual\n4. Gere título e descrição personalizados\n</workflow>\n\n<examples>\n<example>\nInput: Técnica 'Respiração 4-7-8', Contexto: 'ansioso com prazo do app'\nOutput:\n{\n  \"titulo\": \"Respiração 4-7-8 antes de codar o app\",\n  \"descricao\": \"Antes de começar a sessão de desenvolvimento, faça 3 ciclos de respiração 4-7-8 para reduzir a ansiedade do prazo e focar melhor.\"\n}\n</example>\n</examples>\n\n<output_format>\nRetorne APENAS JSON válido:\n{\n  \"titulo\": \"string máx 80 chars\",\n  \"descricao\": \"string acionável\"\n}\n</output_format>"
-        }
-      },
-      "id": "adaptar-ia-ment",
-      "name": "Adaptar ao Contexto",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [1520, 300],
-      "credentials": {
-        "openRouterApi": {
-          "id": "your-openrouter-id",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "schemaType": "fromJson",
-        "jsonSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": { \"type\": \"string\" },\n    \"descricao\": { \"type\": \"string\" }\n  },\n  \"required\": [\"titulo\", \"descricao\"]\n}"
-      },
-      "id": "parser-adapt-ment",
-      "name": "Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [1700, 300]
+      "position": [
+        -192,
+        80
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Combinar quest adaptada com dados originais\nconst entrada = $items('Selecionar Quest', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    catalogo_id: entrada.quest_catalogo.id,\n    titulo: adaptado.titulo,\n    descricao: adaptado.descricao,\n    contexto: entrada.contexto,\n    base_cientifica: entrada.quest_catalogo.base_cientifica\n  }\n}];"
       },
-      "id": "preparar-insert-ment",
+      "id": "4bd34b97-310b-48e1-b0ab-21c64dfc833b",
       "name": "Preparar Insert",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1880, 300]
+      "position": [
+        400,
+        80
+      ]
     },
     {
       "parameters": {
@@ -168,11 +169,14 @@
           "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.catalogo_id,\n  JSON.stringify({\n    titulo: $json.titulo,\n    descricao: $json.descricao,\n    contexto_origem: 'mentalidade_adaptado',\n    base_cientifica: $json.base_cientifica,\n    humor: $json.contexto.humor,\n    energia: $json.contexto.energia\n  })\n] }}"
         }
       },
-      "id": "inserir-quest-ment",
+      "id": "99c383b3-5bc1-4d7a-81dc-385ece5942d5",
       "name": "Inserir Quest",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [2060, 300],
+      "position": [
+        640,
+        80
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -184,46 +188,195 @@
       "parameters": {
         "jsCode": "// Montar resposta final\nconst quest = $input.item.json || {};\n\nreturn [{\n  json: {\n    sucesso: true,\n    tipo: 'mentalidade',\n    quest_criada: {\n      id: quest.id,\n      catalogo_id: quest.catalogo_id,\n      titulo: quest.config?.titulo || quest.catalogo_titulo,\n      categoria: quest.categoria,\n      status: quest.status\n    }\n  }\n}];"
       },
-      "id": "saida-sucesso-ment",
+      "id": "27d070a8-a4fc-4b09-ad9d-e31bf1a65155",
       "name": "Saída Sucesso",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1740, 300]
+      "position": [
+        864,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "llm-mentalidade",
+      "name": "OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        32,
+        304
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+      },
+      "id": "parser-mentalidade",
+      "name": "Parser Quest",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=TÉCNICA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\nBASE CIENTÍFICA: {{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nHumor: {{ $json.contexto.humor }}/10 - {{ $json.contexto.justificativa_humor || '' }}\nEnergia: {{ $json.contexto.energia }}/10 - {{ $json.contexto.justificativa_energia || '' }}\nEmoções: {{ $json.contexto.emocoes_texto || 'não detectadas' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você adapta quests do catálogo ao contexto da conversa. Mantenha técnica original (TCC/Estoicismo). Adapte DESCRIÇÃO ao contexto específico. Título máx 80 chars. Seja específico e acionável. Incorpore BASE CIENTÍFICA na descrição. Retorne APENAS JSON válido em uma linha."
+        }
+      },
+      "id": "agent-mentalidade",
+      "name": "Adaptar Quest",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        80
+      ]
     }
   ],
   "connections": {
     "start": {
-      "main": [[{ "node": "Buscar Catálogo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Catálogo": {
-      "main": [[{ "node": "Buscar Existentes", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Existentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Existentes": {
-      "main": [[{ "node": "Verificar Duplicação", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verificar Duplicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verificar Duplicação": {
-      "main": [[{ "node": "Pode Criar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Pode Criar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Pode Criar?": {
       "main": [
-        [{ "node": "Selecionar Quest", "type": "main", "index": 0 }],
-        [{ "node": "Saída Sem Criar", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Selecionar Quest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Saída Sem Criar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Insert": {
+      "main": [
+        [
+          {
+            "node": "Inserir Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inserir Quest": {
+      "main": [
+        [
+          {
+            "node": "Saída Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Selecionar Quest": {
-      "main": [[{ "node": "Adaptar ao Contexto", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Adaptar Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Adaptar ao Contexto": {
-      "main": [[{ "node": "Parser", "type": "main", "index": 0 }]]
+    "OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Adaptar Quest",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Parser": {
-      "main": [[{ "node": "Preparar Insert", "type": "main", "index": 0 }]]
+    "Parser Quest": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Adaptar Quest",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Preparar Insert": {
-      "main": [[{ "node": "Inserir Quest", "type": "main", "index": 0 }]]
-    },
-    "Inserir Quest": {
-      "main": [[{ "node": "Saída Sucesso", "type": "main", "index": 0 }]]
+    "Adaptar Quest": {
+      "main": [
+        [
+          {
+            "node": "Preparar Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -235,7 +388,57 @@
   "meta": null,
   "pinData": {},
   "activeVersionId": null,
-  "shared": [],
-  "tags": []
+  "shared": [
+    {
+      "createdAt": "2025-12-22T20:01:47.700Z",
+      "role": "workflow:owner",
+      "workflowId": "wYvNVnfs7T16H3zv",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }
-

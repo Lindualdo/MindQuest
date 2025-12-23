@@ -186,7 +186,8 @@
         160
       ],
       "id": "52bc0768-9e43-4191-bb54-5cd14a8ff2d1",
-      "name": "Trigger Quests 15h"
+      "name": "Trigger Quests 15h",
+      "disabled": true
     },
     {
       "parameters": {
@@ -530,7 +531,7 @@
   },
   "meta": null,
   "pinData": {},
-  "activeVersionId": "4e3dc16b-e830-4731-992e-77632c93e0b4",
+  "activeVersionId": "622a47d2-6dc8-4e83-8c5e-941a346302c5",
   "shared": [
     {
       "createdAt": "2025-12-17T20:18:16.166Z",
@@ -584,7 +585,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-19T21:42:32.823Z",
+    "createdAt": "2025-12-22T19:56:10.979Z",
     "workflowId": "vGLluHVYupmxKJWT",
     "nodes": [
       {
@@ -767,7 +768,8 @@
           160
         ],
         "id": "52bc0768-9e43-4191-bb54-5cd14a8ff2d1",
-        "name": "Trigger Quests 15h"
+        "name": "Trigger Quests 15h",
+        "disabled": true
       },
       {
         "parameters": {

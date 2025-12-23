@@ -1,8 +1,8 @@
 {
-  "createdAt": "2025-12-22T00:00:00.000Z",
-  "id": "sw_quest_objetivos_v1",
+  "createdAt": "2025-12-22T20:02:06.087Z",
+  "id": "tnTuBpFMexq6lz7Z",
   "name": "sw_quest_objetivos",
-  "description": "Especialista em quests de objetivos (micro-ações)",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -10,36 +10,49 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id" },
-            { "name": "chat_id" },
-            { "name": "contexto", "type": "object" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "contexto",
+              "type": "object"
+            }
           ]
         }
       },
-      "id": "start-obj",
+      "id": "fac4871f-a41a-4fe2-9b6a-9c1272e53321",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        -192,
+        256
+      ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $input.item.json || {};\nconst contexto = entrada.contexto || {};\n\nconst resumo = contexto.resumo_conversa || '';\nconst objetivos = contexto.objetivos_especificos || [];\n\nif (objetivos.length === 0) {\n  return [{\n    json: {\n      pode_criar: false,\n      motivo: 'sem_objetivos',\n      usuario_id: entrada.usuario_id\n    }\n  }];\n}\n\n// Usa resumo processado (sem validar tamanho - expert já validou)\nreturn [{\n  json: {\n    pode_criar: true,\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    objetivo_selecionado: objetivos[0],\n    resumo_conversa: resumo || 'conversa de reflexão',\n    contexto: contexto\n  }\n}];"
       },
-      "id": "validar-contexto-obj",
+      "id": "9ab944c3-2269-4ef8-bc79-9ddc7b7e8464",
       "name": "Validar Contexto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [420, 300]
+      "position": [
+        32,
+        256
+      ]
     },
     {
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 2,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
@@ -56,61 +69,40 @@
         },
         "options": {}
       },
-      "id": "pode-criar-obj",
+      "id": "288fe313-c6cc-4c84-88f4-d1de7ba12823",
       "name": "Pode Criar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [640, 300]
+      "position": [
+        256,
+        256
+      ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: false,\n    tipo: 'objetivos',\n    motivo: input.motivo || 'bloqueado',\n    quest_criada: null\n  }\n}];"
       },
-      "id": "saida-sem-criar-obj",
+      "id": "35b455db-693a-464a-8ab5-86092366f2b7",
       "name": "Saída Sem Criar",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [860, 500]
-    },
-    {
-      "parameters": {
-        "inputText": "OBJETIVO DO USUÁRIO:\nTítulo: {{ $json.objetivo_selecionado.titulo }}\nDetalhamento: {{ $json.objetivo_selecionado.detalhamento }}\nÁrea: {{ $json.objetivo_selecionado.area_vida }}\n\nCONTEXTO DA CONVERSA:\n{{ $json.resumo_conversa || 'conversa de reflexão' }}",
-        "options": {
-          "systemMessage": "<role>\nVocê é o Especialista em Objetivos do MindQuest.\nSua função é extrair micro-ações da conversa que avancem objetivos reais do usuário.\nVocê transforma intenções em próximos passos concretos.\n</role>\n\n<objective>\nGerar quest que represente o PRÓXIMO PASSO CONCRETO mencionado na conversa.\nSucesso = ação específica + vinculada ao objetivo + completável hoje.\n</objective>\n\n<rules>\n1. TÍTULO: 'Avançar em [objetivo]: [ação da conversa]' (máx 80 chars)\n2. DESCRIÇÃO: Próximo passo extraído da conversa + como começar\n3. AÇÃO: Específica, mensurável, para hoje\n4. NUNCA inventar - só extrair o que foi mencionado\n5. Se não houver ação clara na conversa, retornar título genérico do objetivo\n</rules>\n\n<workflow>\n1. Leia o contexto da conversa\n2. Identifique ação ou intenção mencionada\n3. Conecte com o objetivo fornecido\n4. Gere título e descrição como próximo passo\n</workflow>\n\n<examples>\n<example>\nInput: Objetivo 'Lançar app MindQuest', Conversa: 'preciso corrigir os bugs de notificação'\nOutput:\n{\n  \"titulo\": \"Avançar no App: Corrigir bugs de notificação\",\n  \"descricao\": \"Você mencionou que precisa corrigir bugs de notificação. Hoje, escolha 1 bug específico e resolva. Registre o progresso no MindQuest quando concluir.\"\n}\n</example>\n<example>\nInput: Objetivo 'Saúde Mental', Conversa: 'tenho dormido mal por causa do trabalho'\nOutput:\n{\n  \"titulo\": \"Avançar em Saúde: Definir horário fixo para dormir\",\n  \"descricao\": \"Você mencionou que está dormindo mal. Hoje, defina um horário fixo para começar a desligar (ex: 22h). Registre se conseguiu seguir no MindQuest.\"\n}\n</example>\n</examples>\n\n<output_format>\nRetorne APENAS JSON válido:\n{\n  \"titulo\": \"string máx 80 chars\",\n  \"descricao\": \"string com próximo passo concreto\"\n}\n</output_format>"
-        }
-      },
-      "id": "criar-ia-obj",
-      "name": "Criar Micro-Ação",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [860, 300],
-      "credentials": {
-        "openRouterApi": {
-          "id": "your-openrouter-id",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "schemaType": "fromJson",
-        "jsonSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": { \"type\": \"string\" },\n    \"descricao\": { \"type\": \"string\" }\n  },\n  \"required\": [\"titulo\", \"descricao\"]\n}"
-      },
-      "id": "parser-obj",
-      "name": "Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [1040, 300]
+      "position": [
+        480,
+        464
+      ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $items('Pode Criar?', 0, 0)[0].json;\nconst criado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    objetivo_id: entrada.objetivo_selecionado.id,\n    area_vida_id: entrada.objetivo_selecionado.area_vida_id,\n    titulo: criado.titulo,\n    descricao: criado.descricao\n  }\n}];"
       },
-      "id": "preparar-insert-obj",
+      "id": "ab601f8d-321e-419d-a6fc-0a6c286e715f",
       "name": "Preparar Insert",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1220, 300]
+      "position": [
+        832,
+        256
+      ]
     },
     {
       "parameters": {
@@ -120,11 +112,14 @@
           "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.objetivo_id,\n  $json.area_vida_id,\n  JSON.stringify({\n    titulo: $json.titulo,\n    descricao: $json.descricao,\n    contexto_origem: 'objetivo_ia',\n    objetivo_id: $json.objetivo_id\n  })\n] }}"
         }
       },
-      "id": "inserir-quest-obj",
+      "id": "2b42cd35-d2ef-49f1-aa40-92908b77221b",
       "name": "Inserir Quest",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [1400, 300],
+      "position": [
+        1008,
+        256
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -136,37 +131,158 @@
       "parameters": {
         "jsCode": "const quest = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: true,\n    tipo: 'objetivos',\n    quest_criada: {\n      id: quest.id,\n      objetivo_id: quest.objetivo_id,\n      titulo: quest.config?.titulo,\n      status: quest.status\n    }\n  }\n}];"
       },
-      "id": "saida-sucesso-obj",
+      "id": "52d5d447-be47-4901-b5b9-9b01233ebf7a",
       "name": "Saída Sucesso",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1080, 300]
+      "position": [
+        1184,
+        256
+      ]
+    },
+    {
+      "id": "llm-objetivos",
+      "name": "OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        480,
+        480
+      ],
+      "parameters": {},
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "id": "parser-objetivos",
+      "name": "Parser Quest",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        480
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+      }
+    },
+    {
+      "id": "agent-objetivos",
+      "name": "Criar Micro-Ação",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        256
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=OBJETIVO DO USUÁRIO:\nTítulo: {{ $json.objetivo_selecionado.titulo }}\nDetalhamento: {{ $json.objetivo_selecionado.detalhamento }}\nÁrea: {{ $json.objetivo_selecionado.area_vida }}\n\nCONTEXTO DA CONVERSA:\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é especialista em produtividade. Extraia uma AÇÃO ESPECÍFICA e CONCRETA da conversa vinculada ao objetivo. Título: 'Avançar em [Objetivo]: [Ação]' máx 80 chars. Descrição: próximo passo claro e acionável. NUNCA generico. Ação deve ser fazível HOJE. Retorne APENAS JSON válido em uma linha."
+        }
+      }
     }
   ],
   "connections": {
     "start": {
-      "main": [[{ "node": "Validar Contexto", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Validar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar Contexto": {
-      "main": [[{ "node": "Pode Criar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Pode Criar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Pode Criar?": {
       "main": [
-        [{ "node": "Criar Micro-Ação", "type": "main", "index": 0 }],
-        [{ "node": "Saída Sem Criar", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Criar Micro-Ação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Saída Sem Criar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Insert": {
+      "main": [
+        [
+          {
+            "node": "Inserir Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inserir Quest": {
+      "main": [
+        [
+          {
+            "node": "Saída Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Criar Micro-Ação",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Quest": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Criar Micro-Ação",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
       ]
     },
     "Criar Micro-Ação": {
-      "main": [[{ "node": "Parser", "type": "main", "index": 0 }]]
-    },
-    "Parser": {
-      "main": [[{ "node": "Preparar Insert", "type": "main", "index": 0 }]]
-    },
-    "Preparar Insert": {
-      "main": [[{ "node": "Inserir Quest", "type": "main", "index": 0 }]]
-    },
-    "Inserir Quest": {
-      "main": [[{ "node": "Saída Sucesso", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -175,9 +291,62 @@
     "availableInMCP": false
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
   "activeVersionId": null,
-  "shared": [],
-  "tags": []
+  "shared": [
+    {
+      "createdAt": "2025-12-22T20:02:06.087Z",
+      "role": "workflow:owner",
+      "workflowId": "tnTuBpFMexq6lz7Z",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }

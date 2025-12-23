@@ -1,8 +1,8 @@
 {
-  "createdAt": "2025-12-22T00:00:00.000Z",
-  "id": "sw_quest_sabotador_v1",
+  "createdAt": "2025-12-22T20:02:44.402Z",
+  "id": "0fwtdzQoUdwqkJCc",
   "name": "sw_quest_sabotador",
-  "description": "Especialista em quests de sabotadores (contramedidas específicas)",
+  "description": null,
   "active": false,
   "isArchived": false,
   "nodes": [
@@ -10,17 +10,27 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "usuario_id" },
-            { "name": "chat_id" },
-            { "name": "contexto", "type": "object" }
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "contexto",
+              "type": "object"
+            }
           ]
         }
       },
-      "id": "start-sab",
+      "id": "a31685fc-1cef-4cae-bd18-ccdd6edeea35",
       "name": "start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [200, 300]
+      "position": [
+        784,
+        272
+      ]
     },
     {
       "parameters": {
@@ -30,11 +40,14 @@
           "queryReplacement": "={{ [$json.contexto?.sabotador_id || 'inquieto'] }}"
         }
       },
-      "id": "buscar-contramedidas",
+      "id": "d48f0f57-35b2-4222-bf4a-84bbc3caabf0",
       "name": "Buscar Contramedidas",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [420, 300],
+      "position": [
+        1008,
+        272
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -50,11 +63,14 @@
           "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "buscar-existentes-sab",
+      "id": "3397e961-2a36-49b7-8d30-77e51304ce91",
       "name": "Buscar Existentes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [640, 300],
+      "position": [
+        1232,
+        272
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -66,20 +82,23 @@
       "parameters": {
         "jsCode": "// Verificar duplicação: mesmo sabotador em 7 dias\nconst entrada = $('start').first().json;\nconst catalogo = $input.all().map(i => i.json);\nconst existentes = $items('Buscar Existentes', 0, 0).map(i => i.json);\n\nconst contexto = entrada.contexto || {};\nconst sabotadorId = contexto.sabotador_id;\n\nif (!sabotadorId) {\n  return [{\n    json: {\n      usuario_id: entrada.usuario_id,\n      pode_criar: false,\n      motivo: 'sem_sabotador_detectado'\n    }\n  }];\n}\n\n// Verificar cooldown: mesmo sabotador em 7 dias\nconst temQuestRecente = existentes.some(e => e.sabotador_id === sabotadorId);\n\nif (temQuestRecente) {\n  return [{\n    json: {\n      usuario_id: entrada.usuario_id,\n      pode_criar: false,\n      motivo: 'cooldown_7_dias',\n      sabotador_id: sabotadorId\n    }\n  }];\n}\n\n// Excluir catálogos já usados (últimos 30 dias)\nconst catalogoIdsUsados = new Set(existentes.map(e => e.catalogo_id).filter(Boolean));\nconst catalogoDisponivel = catalogo.filter(q => !catalogoIdsUsados.has(q.id));\n\nconst podeCriar = catalogoDisponivel.length > 0;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pode_criar: podeCriar,\n    motivo: podeCriar ? 'ok' : 'sem_contramedidas_disponiveis',\n    catalogo_disponivel: catalogoDisponivel,\n    contexto: contexto\n  }\n}];"
       },
-      "id": "verificar-dup-sab",
+      "id": "3d92df2d-d1d6-4185-a1ab-22024063345c",
       "name": "Verificar Duplicação",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [860, 300]
+      "position": [
+        1456,
+        272
+      ]
     },
     {
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 2,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
@@ -96,71 +115,53 @@
         },
         "options": {}
       },
-      "id": "pode-criar-sab",
+      "id": "0a347a1f-007d-4d08-9a62-2a40ed90f1d2",
       "name": "Pode Criar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1080, 300]
+      "position": [
+        1664,
+        272
+      ]
     },
     {
       "parameters": {
         "jsCode": "const input = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: false,\n    tipo: 'sabotador',\n    motivo: input.motivo || 'bloqueado',\n    quest_criada: null\n  }\n}];"
       },
-      "id": "saida-sem-criar-sab",
+      "id": "7ad75ea9-c8c7-4111-96d2-99b474ba73bc",
       "name": "Saída Sem Criar",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1300, 500]
+      "position": [
+        1888,
+        480
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Selecionar contramedida aleatória\nconst input = $input.item.json || {};\nconst catalogo = input.catalogo_disponivel || [];\n\nif (catalogo.length === 0) {\n  throw new Error('Nenhuma contramedida disponível');\n}\n\nconst questSelecionada = catalogo[0];\n\nreturn [{\n  json: {\n    usuario_id: input.usuario_id,\n    chat_id: input.chat_id,\n    quest_catalogo: questSelecionada,\n    contexto: input.contexto\n  }\n}];"
       },
-      "id": "selecionar-contra",
+      "id": "65930cde-54f7-43cf-923e-f7710c32713a",
       "name": "Selecionar Contramedida",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1300, 300]
-    },
-    {
-      "parameters": {
-        "inputText": "CONTRAMEDIDA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\n\nBASE CIENTÍFICA:\n{{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nPadrão detectado: {{ $json.contexto.sabotador_nome || $json.contexto.sabotador_id }}\nInsight: {{ $json.contexto.insight_atual }}\nContramedida sugerida: {{ $json.contexto.contramedida_ativa }}\nIntensidade: {{ $json.contexto.intensidade }}%\nEmoções: {{ $json.contexto.emocoes_texto || 'não detectadas' }}",
-        "options": {
-          "systemMessage": "<role>\nVocê é o Especialista em Mudança de Padrões do MindQuest.\nSua função é criar ações práticas que ajudem o usuário a quebrar padrões limitantes.\nVocê transforma insights em micro-ações naturais e acionáveis.\n</role>\n\n<objective>\nGerar quest que ajude o usuário SEM mencionar termos técnicos.\nSucesso = ação natural + benefício claro + específica ao contexto.\n</objective>\n\n<rules>\n1. TÍTULO: Foque no BENEFÍCIO ou AÇÃO (máx 80 chars)\n   - NUNCA usar 'Desafie o Sr.', 'Sabotador', termos técnicos\n   - Formatos: '[Benefício]: [ação]' ou '[Ação] para [resultado]'\n2. DESCRIÇÃO: Use a base científica para dar credibilidade\n   - Mencione o padrão sutilmente ('você tende a...')\n   - Cite fundamento científico de forma acessível\n   - Ação específica + como fazer\n3. CONTEXTO: Use a situação REAL da conversa\n4. TOM: Natural + autoridade científica (sem ser pedante)\n5. NUNCA genérico - ancorar no contexto + ciência\n</rules>\n\n<workflow>\n1. Identifique o padrão na conversa (sem nomear)\n2. Encontre a contramedida mais adequada\n3. Adapte ao contexto específico do usuário\n4. Gere título focado em benefício/ação\n5. Descrição menciona padrão sutilmente + ação clara\n</workflow>\n\n<examples>\n<example>\nInput: Padrão 'Inquieto', Base científica: 'Técnica Pomodoro - neurociência mostra que pausas regulares restauram recursos atencionais', Contexto: 'codando 10h no app sem parar'\nOutput:\n{\n  \"titulo\": \"Recarregue energia: pausa de 5min a cada 2h\",\n  \"descricao\": \"Você está codando 10h sem parar. A neurociência mostra que pausas curtas restauram a capacidade de foco - é por isso que a técnica Pomodoro funciona. Hoje, defina alarme para pausar 5min a cada 2h. Observe como seu foco melhora após cada pausa.\"\n}\n</example>\n<example>\nInput: Padrão 'Crítico', Base científica: 'Psicologia Positiva - reconhecer conquistas ativa circuitos de recompensa e aumenta motivação intrínseca', Contexto: 'app não está perfeito'\nOutput:\n{\n  \"titulo\": \"Celebre 1 funcionalidade que você finalizou\",\n  \"descricao\": \"Você tende a focar no que falta. Estudos de psicologia positiva mostram que reconhecer conquistas ativa os circuitos de recompensa do cérebro, aumentando motivação. Hoje, escolha 1 funcionalidade FINALIZADA e celebre por 2 minutos.\"\n}\n</example>\n<example>\nInput: Padrão 'Controlador', Base científica: 'Delegação progressiva da TCC - reduz ansiedade através de exposição gradual à perda de controle', Contexto: 'fazendo tudo sozinho'\nOutput:\n{\n  \"titulo\": \"Delegue 1 tarefa pequena para alguém hoje\",\n  \"descricao\": \"Você está fazendo tudo sozinho. A delegação progressiva (da TCC) mostra que começar com tarefas pequenas reduz a ansiedade de perder controle. Escolha algo simples e peça ajuda - você vai perceber que funciona.\"\n}\n</example>\n</examples>\n\n<output_format>\nRetorne APENAS JSON válido:\n{\n  \"titulo\": \"string máx 80 chars - foco em benefício/ação\",\n  \"descricao\": \"string acionável com padrão sutil + ação clara\"\n}\n</output_format>"
-        }
-      },
-      "id": "adaptar-ia-sab",
-      "name": "Adaptar Contramedida",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [1520, 300],
-      "credentials": {
-        "openRouterApi": {
-          "id": "your-openrouter-id",
-          "name": "OpenRouter"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "schemaType": "fromJson",
-        "jsonSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": { \"type\": \"string\" },\n    \"descricao\": { \"type\": \"string\" }\n  },\n  \"required\": [\"titulo\", \"descricao\"]\n}"
-      },
-      "id": "parser-adapt-sab",
-      "name": "Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [1700, 300]
+      "position": [
+        1888,
+        272
+      ]
     },
     {
       "parameters": {
         "jsCode": "const entrada = $items('Selecionar Contramedida', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    catalogo_id: entrada.quest_catalogo.id,\n    sabotador_id: entrada.contexto.sabotador_id,\n    titulo: adaptado.titulo,\n    descricao: adaptado.descricao,\n    contexto: entrada.contexto,\n    base_cientifica: entrada.quest_catalogo.base_cientifica\n  }\n}];"
       },
-      "id": "preparar-insert-sab",
+      "id": "033b8514-3a72-4821-b172-30894a98cc83",
       "name": "Preparar Insert",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1880, 300]
+      "position": [
+        2464,
+        272
+      ]
     },
     {
       "parameters": {
@@ -170,11 +171,14 @@
           "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.catalogo_id,\n  $json.sabotador_id,\n  JSON.stringify({\n    titulo: $json.titulo,\n    descricao: $json.descricao,\n    contexto_origem: 'sabotador_adaptado',\n    base_cientifica: $json.base_cientifica,\n    sabotador_id: $json.sabotador_id,\n    intensidade: $json.contexto.intensidade,\n    insight_atual: $json.contexto.insight_atual,\n    contramedida_ativa: $json.contexto.contramedida_ativa\n  })\n] }}"
         }
       },
-      "id": "inserir-quest-sab",
+      "id": "85c8a114-2627-485f-8fc0-3fd0bee9d520",
       "name": "Inserir Quest",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [2060, 300],
+      "position": [
+        2656,
+        272
+      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -186,46 +190,193 @@
       "parameters": {
         "jsCode": "const quest = $input.item.json || {};\nreturn [{\n  json: {\n    sucesso: true,\n    tipo: 'sabotador',\n    quest_criada: {\n      id: quest.id,\n      catalogo_id: quest.catalogo_id,\n      sabotador_id: quest.sabotador_id,\n      titulo: quest.config?.titulo || quest.catalogo_titulo,\n      categoria: quest.categoria,\n      status: quest.status\n    }\n  }\n}];"
       },
-      "id": "saida-sucesso-sab",
+      "id": "782f4418-94a1-447a-9777-c84c7c17b968",
       "name": "Saída Sucesso",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1740, 300]
+      "position": [
+        2864,
+        272
+      ]
+    },
+    {
+      "id": "llm-sabotador",
+      "name": "OpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        480
+      ],
+      "parameters": {},
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "id": "parser-sabotador",
+      "name": "Parser Quest",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2288,
+        480
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+      }
+    },
+    {
+      "id": "agent-sabotador",
+      "name": "Adaptar Contramedida",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2112,
+        272
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=CONTRAMEDIDA DO CATÁLOGO:\nTítulo: {{ $json.quest_catalogo.titulo }}\nDescrição: {{ $json.quest_catalogo.descricao }}\nBASE CIENTÍFICA: {{ JSON.stringify($json.quest_catalogo.base_cientifica) }}\n\nCONTEXTO DO USUÁRIO:\nResumo: {{ $json.contexto.resumo_conversa || 'conversa de reflexão' }}\nPadrão: {{ $json.contexto.sabotador_nome || $json.contexto.sabotador_id }}\nInsight: {{ $json.contexto.insight_atual }}\nIntensidade: {{ $json.contexto.intensidade }}%\nEmoções: {{ $json.contexto.emocoes_texto || '' }}\n\nRetorne JSON: {\"titulo\":\"...\",\"descricao\":\"...\"}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você adapta contramedidas de sabotadores ao contexto. Título: Focar no BENEFÍCIO ou AÇÃO. NUNCA usar 'Desafie o Sr. [Nome]'. Máx 80 chars. Seja ULTRA específico. Incorpore insight e BASE CIENTÍFICA na descrição. Retorne APENAS JSON válido em uma linha."
+        }
+      }
     }
   ],
   "connections": {
     "start": {
-      "main": [[{ "node": "Buscar Contramedidas", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Contramedidas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Contramedidas": {
-      "main": [[{ "node": "Buscar Existentes", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buscar Existentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buscar Existentes": {
-      "main": [[{ "node": "Verificar Duplicação", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verificar Duplicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verificar Duplicação": {
-      "main": [[{ "node": "Pode Criar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Pode Criar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Pode Criar?": {
       "main": [
-        [{ "node": "Selecionar Contramedida", "type": "main", "index": 0 }],
-        [{ "node": "Saída Sem Criar", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Selecionar Contramedida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Saída Sem Criar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Insert": {
+      "main": [
+        [
+          {
+            "node": "Inserir Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inserir Quest": {
+      "main": [
+        [
+          {
+            "node": "Saída Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Selecionar Contramedida": {
-      "main": [[{ "node": "Adaptar Contramedida", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Adaptar Contramedida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Adaptar Contramedida",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Quest": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Adaptar Contramedida",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Adaptar Contramedida": {
-      "main": [[{ "node": "Parser", "type": "main", "index": 0 }]]
-    },
-    "Parser": {
-      "main": [[{ "node": "Preparar Insert", "type": "main", "index": 0 }]]
-    },
-    "Preparar Insert": {
-      "main": [[{ "node": "Inserir Quest", "type": "main", "index": 0 }]]
-    },
-    "Inserir Quest": {
-      "main": [[{ "node": "Saída Sucesso", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -237,7 +388,57 @@
   "meta": null,
   "pinData": {},
   "activeVersionId": null,
-  "shared": [],
-  "tags": []
+  "shared": [
+    {
+      "createdAt": "2025-12-22T20:02:44.402Z",
+      "role": "workflow:owner",
+      "workflowId": "0fwtdzQoUdwqkJCc",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
 }
-
