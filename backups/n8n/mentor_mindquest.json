@@ -382,7 +382,8 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"mensagem_usuario\": \"Oi! Como você está hoje?\"}"
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"mensagem_usuario\":{\"type\":\"string\"}},\"required\":[\"mensagem_usuario\"]}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -702,13 +703,14 @@
     "start": [
       {
         "json": {
-          "usr_id": "f6d4c6b0-5496-4035-b670-d8009df6c413",
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.remoteJid": "5512992060001@s.whatsapp.net",
-          "body.data.key.id": "3A01DA1112997FC625B9",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "3B3CA051AE5E78DCB466",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Enzo Xavier",
-          "body.data.messageType": "audioMessage"
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "hoje, as quests só ficam ativas quando configura as recorrencias, enquanto não configura, fica como disponivel que seria em planejamento",
+          "body.data.messageType": "conversation"
         },
         "pairedItem": {
           "item": 0

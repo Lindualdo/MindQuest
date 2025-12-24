@@ -71,11 +71,11 @@
     },
     {
       "parameters": {
-        "query": "SELECT DISTINCT ON (DATE(c.criado_em))\n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.usuario_id = $1\n  AND qc.id IS NOT NULL\nORDER BY DATE(c.criado_em) DESC, c.criado_em DESC\nLIMIT 10;",
+        "operation": "executeQuery",
+        "query": "SELECT id, data_conversa, resumo_conversa, anotacoes_usr, 10 AS pontos\nFROM usr_chat\nWHERE usuario_id = $1\nORDER BY data_conversa DESC, criado_em DESC\nLIMIT 10;",
         "options": {
           "queryReplacement": "={{ $json.query.user_id }}"
-        },
-        "operation": "executeQuery"
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -94,8 +94,11 @@
     },
     {
       "parameters": {
-        "query": "SELECT \n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.id = '{{ $json.query.conversa_id }}'\n  AND qc.id IS NOT NULL",
-        "operation": "executeQuery"
+        "operation": "executeQuery",
+        "query": "SELECT id, data_conversa, resumo_conversa, anotacoes_usr, 10 AS pontos\nFROM usr_chat\nWHERE id = $1;",
+        "options": {
+          "queryReplacement": "={{ $json.query.conversa_id }}"
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -217,7 +220,7 @@
       }
     ]
   },
-  "activeVersionId": "4887e6f5-70af-4e6e-bd5e-db6bdee3895d",
+  "activeVersionId": "d78eaaf4-76fb-4514-bd54-55fed20cdfe4",
   "shared": [
     {
       "createdAt": "2025-10-12T07:55:47.675Z",
@@ -271,7 +274,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-05T12:13:14.667Z",
+    "createdAt": "2025-12-23T23:53:32.272Z",
     "workflowId": "v7HttxPItfsC82pA",
     "nodes": [
       {
@@ -339,11 +342,11 @@
       },
       {
         "parameters": {
-          "query": "SELECT DISTINCT ON (DATE(c.criado_em))\n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.usuario_id = $1\n  AND qc.id IS NOT NULL\nORDER BY DATE(c.criado_em) DESC, c.criado_em DESC\nLIMIT 10;",
+          "operation": "executeQuery",
+          "query": "SELECT id, data_conversa, resumo_conversa, anotacoes_usr, 10 AS pontos\nFROM usr_chat\nWHERE usuario_id = $1\nORDER BY data_conversa DESC, criado_em DESC\nLIMIT 10;",
           "options": {
             "queryReplacement": "={{ $json.query.user_id }}"
-          },
-          "operation": "executeQuery"
+          }
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -362,8 +365,11 @@
       },
       {
         "parameters": {
-          "query": "SELECT \n  c.id,\n  c.criado_em AS data_conversa,\n  c.resumo_conversa,\n  c.anotacoes_usr,\n  COALESCE(qr.xp_base, 10) AS pontos\nFROM usr_chat c\nLEFT JOIN usuarios_quest uq ON uq.usuario_id = c.usuario_id\nLEFT JOIN quests_catalogo qc ON qc.id = uq.catalogo_id AND qc.codigo = 'reflexao_diaria'\nLEFT JOIN quests_recorrencias qr ON qr.usuarios_quest_id = uq.id \n  AND DATE(qr.data_concluida) = DATE(c.criado_em)\nWHERE c.id = '{{ $json.query.conversa_id }}'\n  AND qc.id IS NOT NULL",
-          "operation": "executeQuery"
+          "operation": "executeQuery",
+          "query": "SELECT id, data_conversa, resumo_conversa, anotacoes_usr, 10 AS pontos\nFROM usr_chat\nWHERE id = $1;",
+          "options": {
+            "queryReplacement": "={{ $json.query.conversa_id }}"
+          }
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -434,7 +440,7 @@
         ]
       }
     },
-    "authors": "system migration",
+    "authors": "Aldo Santos",
     "name": null,
     "description": null
   }

@@ -54,7 +54,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Verificar se deve processar (sem log_experts - arquitetura v3)\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nquest_usuario AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT id FROM quest_catalogo)\n  LIMIT 1\n),\nrecorrencia_hoje AS (\n  SELECT id FROM quests_recorrencias\n  WHERE usuarios_quest_id = (SELECT id FROM quest_usuario)\n    AND data_planejada = (SELECT data_conversa FROM params)\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM recorrencia_hoje) IS NOT NULL THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  (SELECT acao FROM decisao) AS acao,\n  (SELECT xp_valor FROM quest_catalogo) AS xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
+        "query": "-- Verificar se deve processar (sem log_experts - arquitetura v3)\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nquest_usuario AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT id FROM quest_catalogo)\n  LIMIT 1\n),\nrecorrencia_hoje AS (\n  SELECT id FROM quests_recorrencias\n  WHERE usuarios_quest_id = (SELECT id FROM quest_usuario)\n    AND data_planejada = (SELECT data_conversa FROM params)\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM recorrencia_hoje) IS NOT NULL THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  (SELECT acao FROM decisao) AS acao,\n  10 xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
         "options": {
           "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa, $json.total_interactions] }}"
         }
@@ -110,53 +110,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Buscar ou criar quest reflexão diária (ÚNICA por usuário, sempre ativa)\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::uuid AS catalogo_id\n),\nobjetivo_padrao AS (\n  SELECT id FROM usuarios_objetivos\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND is_padrao = true AND status = 'ativo'\n  LIMIT 1\n),\nquest_existente AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT catalogo_id FROM params)\n  LIMIT 1\n),\ncriar_quest AS (\n  INSERT INTO usuarios_quest (id, usuario_id, catalogo_id, status, ativado_em, objetivo_id, config)\n  SELECT\n    gen_random_uuid(),\n    (SELECT usuario_id FROM params),\n    (SELECT catalogo_id FROM params),\n    'ativa',\n    NOW(),\n    (SELECT id FROM objetivo_padrao),\n    jsonb_build_object('titulo', 'Reflexão Diária', 'recorrencia', 'diaria', 'conversa', true, 'permanente', true)\n  WHERE NOT EXISTS (SELECT 1 FROM quest_existente)\n  RETURNING id\n)\nSELECT COALESCE((SELECT id FROM quest_existente), (SELECT id FROM criar_quest)) AS usuarios_quest_id;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id] }}"
-        }
-      },
-      "id": "61a15b68-0354-4892-bfe7-20a21742b733",
-      "name": "Buscar/Criar Quest",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1472,
-        256
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Inserir recorrência da quest\nINSERT INTO quests_recorrencias (\n  usuarios_quest_id,\n  data_planejada,\n  data_concluida,\n  status,\n  xp_base,\n  xp_bonus\n) VALUES (\n  $1::uuid,\n  $2::date,\n  $2::date,\n  'concluida',\n  $3::int,\n  0\n)\nON CONFLICT (usuarios_quest_id, data_planejada) DO UPDATE SET\n  data_concluida = EXCLUDED.data_concluida,\n  status = 'concluida',\n  atualizado_em = NOW()\nRETURNING id, usuarios_quest_id, data_planejada, xp_base;",
-        "options": {
-          "queryReplacement": "={{ [$json.usuarios_quest_id, $('Verificar Processamento').item.json.data_conversa, $('Verificar Processamento').item.json.xp_valor] }}"
-        }
-      },
-      "id": "7a485d29-d167-4c59-8684-01b05ee909da",
-      "name": "Inserir Recorrência",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1680,
-        256
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Atualizar XP do usuário\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::int AS xp_valor, $3::date AS data_conversa\n)\nUPDATE usuarios_conquistas SET\n  xp_total = xp_total + (SELECT xp_valor FROM params),\n  xp_base = COALESCE(xp_base, 0) + (SELECT xp_valor FROM params),\n  total_xp_hoje = (SELECT xp_valor FROM params),\n  ultima_conversa_em = (SELECT data_conversa FROM params),\n  atualizado_em = NOW()\nWHERE usuario_id = (SELECT usuario_id FROM params)\nRETURNING usuario_id, xp_total, xp_base, total_xp_hoje;",
+        "query": "-- Atualizar XP do usuário (UPSERT - cria se não existir)\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::int AS xp_valor, $3::date AS data_conversa\n)\nINSERT INTO usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_base,\n  nivel_atual,\n  titulo_nivel,\n  xp_proximo_nivel,\n  total_xp_hoje,\n  ultima_conversa_em,\n  atualizado_em\n)\nSELECT\n  p.usuario_id,\n  10,\n  10,\n  1,\n  'Iniciante',\n  100,\n  10,\n  p.data_conversa,\n  NOW()\nFROM params p\nON CONFLICT (usuario_id) DO UPDATE SET\n  xp_total = usuarios_conquistas.xp_total + (SELECT xp_valor FROM params),\n  xp_base = COALESCE(usuarios_conquistas.xp_base, 0) + (SELECT xp_valor FROM params),\n  total_xp_hoje = (SELECT xp_valor FROM params),\n  ultima_conversa_em = EXCLUDED.ultima_conversa_em,\n  atualizado_em = NOW()\nRETURNING usuario_id, xp_total, xp_base, total_xp_hoje;",
         "options": {
           "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.xp_valor, $('Verificar Processamento').item.json.data_conversa] }}"
         }
@@ -166,8 +120,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1904,
-        256
+        1488,
+        240
       ],
       "credentials": {
         "postgres": {
@@ -185,8 +139,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2128,
-        256
+        1696,
+        240
       ]
     },
     {
@@ -230,7 +184,7 @@
       "main": [
         [
           {
-            "node": "Buscar/Criar Quest",
+            "node": "Atualizar XP",
             "type": "main",
             "index": 0
           }
@@ -238,28 +192,6 @@
         [
           {
             "node": "Resultado Ignorado",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar/Criar Quest": {
-      "main": [
-        [
-          {
-            "node": "Inserir Recorrência",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Inserir Recorrência": {
-      "main": [
-        [
-          {
-            "node": "Atualizar XP",
             "type": "main",
             "index": 0
           }
@@ -289,9 +221,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "0847d8a7-4fba-45f2-9470-a7eeacaa4bd4",
-          "chat_id": "5311b88e-54e9-4053-9f7a-b2c5303ef622",
-          "data_conversa": "2025-12-16T00:00:00.000Z"
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "d99cc328-1599-4541-96dc-a4851246684f",
+          "data_conversa": "2025-12-23",
+          "total_interactions": 1
         },
         "pairedItem": {
           "item": 0

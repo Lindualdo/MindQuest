@@ -242,10 +242,10 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "U44ZfEwFU77EUthb",
+          "value": "DJB5qWudX1Hqap1O",
           "mode": "list",
-          "cachedResultUrl": "/workflow/U44ZfEwFU77EUthb",
-          "cachedResultName": "sw_send_message_with_retry"
+          "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
+          "cachedResultName": "sw_evolution_send_message"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -380,7 +380,7 @@
           "value": "DJB5qWudX1Hqap1O",
           "mode": "list",
           "cachedResultUrl": "/workflow/DJB5qWudX1Hqap1O",
-          "cachedResultName": "sw_evolution_send_message_v2"
+          "cachedResultName": "sw_evolution_send_message"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",

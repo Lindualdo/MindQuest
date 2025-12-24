@@ -184,6 +184,7 @@
     },
     {
       "parameters": {
+        "model": "google/gemini-3-flash-preview",
         "options": {
           "maxTokens": 1000,
           "temperature": 0.2
@@ -206,7 +207,8 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\"tem_contexto\":true,\"tem_reflexao\":true,\"justificativa\":\"string\",\"total_palavras\":150,\"resumo_atualizado\":\"string\"}"
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"tem_contexto\":{\"type\":\"boolean\"},\"tem_reflexao\":{\"type\":\"boolean\"},\"justificativa\":{\"type\":\"string\"},\"total_palavras\":{\"type\":\"number\"},\"resumo_atualizado\":{\"type\":\"string\"}},\"required\":[\"tem_contexto\",\"tem_reflexao\",\"justificativa\",\"total_palavras\",\"resumo_atualizado\"]}"
       },
       "id": "8d2c9f39-2737-4a7f-a95d-e84af2eb507f",
       "name": "Parser Resumo",
@@ -318,21 +320,6 @@
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "=[\n  {\n    \"chat_id\": {{ $('start').item.json.chat_id }} ,\n    \"sucesso\": true,\n    \"resultados\": {},\n    \"motivo\": \"Todos experts processados\"\n  }\n]",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        160,
-        320
-      ],
-      "id": "9c5ff696-aa30-445f-90bf-1d66cfb8a290",
-      "name": "Edit Fields"
-    },
-    {
-      "parameters": {
         "content": "## Processa Experts",
         "height": 496,
         "width": 992
@@ -406,6 +393,17 @@
           "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        192,
+        336
+      ],
+      "id": "68366a2a-514b-4f69-bcb7-c85a0c49bb89",
+      "name": "No Operation, do nothing"
     }
   ],
   "connections": {
@@ -504,7 +502,7 @@
         ],
         [
           {
-            "node": "Edit Fields",
+            "node": "No Operation, do nothing",
             "type": "main",
             "index": 0
           }
@@ -578,10 +576,10 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "0a40e917-6c89-4b38-9f44-372ff9038530",
-          "data_conversa": "\"2025-12-21T00:00:00.000Z\"",
-          "usr_nome_preferencia": "Aldo"
+          "usuario_id": "73e76b1d-0865-42d3-96cc-1bd9c9c325c1",
+          "chat_id": "956f54b1-6bb3-4cf8-ab01-85967d736cdc",
+          "data_conversa": "\"2025-12-22T00:00:00.000Z\"",
+          "usr_nome_preferencia": "Luciane"
         },
         "pairedItem": {
           "item": 0

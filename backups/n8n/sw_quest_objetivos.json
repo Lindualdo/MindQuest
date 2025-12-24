@@ -93,7 +93,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $items('Pode Criar?', 0, 0)[0].json;\nconst criado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    objetivo_id: entrada.objetivo_selecionado.id,\n    area_vida_id: entrada.objetivo_selecionado.area_vida_id,\n    titulo: criado.titulo,\n    descricao: criado.descricao\n  }\n}];"
+        "jsCode": "// Preparar Insert - Quest Objetivos\nconst entrada = $items('Pode Criar?', 0, 0)[0].json;\nconst agente = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    objetivo_id: entrada.objetivo_selecionado.id,\n    area_vida_id: entrada.objetivo_selecionado.area_vida_id,\n    titulo: agente.output.titulo,\n    descricao: agente.output.descricao\n  }\n}];"
       },
       "id": "ab601f8d-321e-419d-a6fc-0a6c286e715f",
       "name": "Preparar Insert",
@@ -107,9 +107,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  objetivo_id,\n  area_vida_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  '00000000-0000-0000-0000-000000000001',\n  $2::uuid,\n  $3::uuid,\n  'disponivel',\n  $4::jsonb,\n  NOW()\n)\nRETURNING id, catalogo_id, objetivo_id, status, config;",
+        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  objetivo_id,\n  area_vida_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  '00000000-0000-0000-0000-000000000001',\n  $2::uuid,\n  $3::uuid,\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $4,\n    'descricao', $5,\n    'contexto_origem', 'objetivo_ia'\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, objetivo_id, status, config;",
         "options": {
-          "queryReplacement": "={{ [\n  $json.usuario_id,\n  $json.objetivo_id,\n  $json.area_vida_id,\n  JSON.stringify({\n    titulo: $json.titulo,\n    descricao: $json.descricao,\n    contexto_origem: 'objetivo_ia',\n    objetivo_id: $json.objetivo_id\n  })\n] }}"
+          "queryReplacement": "={{ [$json.usuario_id, $json.objetivo_id, $json.area_vida_id, $json.titulo, $json.descricao] }}"
         }
       },
       "id": "2b42cd35-d2ef-49f1-aa40-92908b77221b",
@@ -162,7 +162,7 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\",\"description\":\"Título da quest (max 70 chars)\"},\"descricao\":{\"type\":\"string\",\"description\":\"Descrição da ação prática\"}},\"required\":[\"titulo\",\"descricao\"]}"
       },
       "id": "parser-objetivos",
       "name": "Parser Quest",
@@ -176,10 +176,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n\n<objetivo>\n<titulo>{{ $json.objetivo_selecionado.titulo }}</titulo>\n<detalhamento>{{ $json.objetivo_selecionado.detalhamento || 'sem detalhes' }}</detalhamento>\n<area_vida>{{ $json.objetivo_selecionado.area_vida || 'geral' }}</area_vida>\n</objetivo>\n\n<conversa>\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n</conversa>\n\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n</estado_emocional>\n\n<quests_existentes>\n{{ JSON.stringify(($json.contexto.quests_existentes || []).map(q => q.config?.titulo || q.titulo).filter(Boolean)) }}\n</quests_existentes>\n\n</input>\n\n<task>\nCrie UMA quest que avance o objetivo acima.\nUse os dados de <input> para personalizar.\nEvite duplicar títulos de <quests_existentes>.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
+        "text": "=<input>\n<objetivo>\n<titulo>{{ $json.objetivo_selecionado.titulo }}</titulo>\n<detalhamento>{{ $json.objetivo_selecionado.detalhamento || 'sem detalhes' }}</detalhamento>\n<area_vida>{{ $json.objetivo_selecionado.area_vida || 'geral' }}</area_vida>\n</objetivo>\n<conversa>{{ $json.resumo_conversa || 'conversa de reflexão' }}</conversa>\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n</estado_emocional>\n<quests_existentes>{{ JSON.stringify(($json.contexto.quests_existentes || []).map(q => q.config?.titulo || q.titulo).filter(Boolean)) }}</quests_existentes>\n</input>\n\n<task>\nCrie UMA quest que avance o objetivo acima.\nUse os dados de <input> para personalizar.\nEvite duplicar títulos de <quests_existentes>.\n</task>\n\n<output>{\"titulo\": \"string (max 70 chars)\", \"descricao\": \"string\"}</output>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "<role>\nVocê é o Especialista em Quests de Objetivos do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar objetivos em micro-ações executáveis para HOJE.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <objetivo> → base para criar a quest\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n- <quests_existentes> → evitar duplicação de títulos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar/Refletir | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Entender padrões | Menu Entender → Dashboard |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Objetivo: Lançar app</input>\n<output>{\"titulo\": \"Defina a única feature que valida seu MVP\", \"descricao\": \"Registre no MindQuest qual funcionalidade é essencial. Liste 3 usuários para testar.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nDefina, Liste, Mapeie, Identifique, Priorize, Valide, Escolha, Documente\n</verbos>"
+          "systemMessage": "=<role>\nVocê é o Especialista em Quests de Objetivos do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar objetivos em micro-ações executáveis para HOJE.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <objetivo> → base para criar a quest\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n- <quests_existentes> → evitar duplicação de títulos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar/Refletir | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Entender padrões | Menu Entender → Dashboard |\n</mindquest_features>\n\n<examples>\n✅ BOM: {\"titulo\": \"Defina a única feature que valida seu MVP\", \"descricao\": \"Registre no MindQuest qual funcionalidade é essencial. Liste 3 usuários para testar.\"}\n❌ RUIM: {\"titulo\": \"Trabalhe no seu projeto\", \"descricao\": \"Use Trello para organizar...\"}\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n</output_rules>\n\n<verbos>Defina, Liste, Mapeie, Identifique, Priorize, Valide, Escolha, Documente</verbos>\n\n<output>{\"titulo\": \"string\", \"descricao\": \"string\"}</output>"
         }
       },
       "id": "agent-objetivos",
@@ -298,7 +298,82 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "chat_id": "8e2a56e9-50e4-4664-8fe7-32b3d043c886",
+          "contexto": {
+            "resumo_conversa": "### Saúde e Bem-estar\\nAldo iniciou o dia com energia reduzida devido a sintomas de sinusite e dor de cabeça. Apesar disso, manteve a rotina de atividades físicas como forma de energização, comprometendo-se a respeitar os limites do próprio corpo.\\n\\n### Trabalho e Projetos (MindQuest)\\n* **Comemoração:** Aldo celebrou as vitórias recentes no desenvolvimento do app com um jantar e passeio no shopping.\\n* **Desenvolvimento Técnico:** O foco do dia foi a implementação de notificações de conquistas (sequências de conversas, hábitos e objetivos concluídos) para aumentar o engajamento do usuário. \\n* **Gestão de Bugs:** Aldo coordenou sua equipe para corrigir falhas críticas nos 'Experts' (módulos de análise de contexto do app).\\n* **Mentoria de Produto:** Aldo buscou auxílio para refinar as regras de criação de 'Quests'. Discutiu-se a hierarquia de prioridades para evitar o burnout do usuário, considerando o limite de 15 quests ativas e a necessidade de diferenciar entre tarefas recorrentes (hábitos) e urgências surgidas no chat.\\n\\n### Reflexões\\nAldo refletiu sobre a psicologia do progresso, concluindo que, embora a vitória final seja o maior estímulo, os pequenos passos são fundamentais para manter a motivação e o crescimento contínuo.",
+            "pedido_quest": null,
+            "humor": 7,
+            "energia": 5,
+            "justificativa_humor": "\"Aldo demonstra humor estável, focado e satisfeito com suas conquistas e planejamento, sem sinais claros de estresse emocional.\"",
+            "justificativa_energia": "\"Nível de energia está normal, mas Aldo menciona dores e sinusite que diminuem sua energia habitual, indicando uma leve queda.\"",
+            "emocoes": [
+              {
+                "emocao": "Confiança",
+                "intensidade": 75,
+                "tipo": "POSITIVA",
+                "contexto": [
+                  "Que ótimo que você saiu para comemorar, Aldo.",
+                  "Focar nessas correções críticas agora é o que vai te dar tranquilidade no lançamento, Aldo.",
+                  "Ótimo. Saber que o time está alinhado tira um peso enorme das suas costas."
+                ]
+              },
+              {
+                "emocao": "Expectativa",
+                "intensidade": 60,
+                "tipo": "POSITIVA",
+                "contexto": [
+                  "Como está sua energia para equilibrar o desenvolvimento do app com esses objetivos pessoais hoje?",
+                  "Qual a sua meta real para hoje com eles?",
+                  "Vamos mudar o foco então. O que está passando pela sua mente agora?"
+                ]
+              },
+              {
+                "emocao": "Alegria",
+                "intensidade": 55,
+                "tipo": "POSITIVA",
+                "contexto": [
+                  "foi ma forma de comemorar as ultimas vitórias aí no desenvolvimenot do app",
+                  "Desejo um excelente desenvolvimento nessas sequências de conversas e hábitos.",
+                  "Ontem você encerrou o dia celebrando uma release importante."
+                ]
+              }
+            ],
+            "emocoes_texto": "Confiança (75%): Que ótimo que você saiu para comemorar, Aldo.,Focar nessas correções críticas agora é o que vai te dar tranquilidade no lançamento, Aldo.,Ótimo. Saber que o time está alinhado tira um peso enorme das suas costas.; Expectativa (60%): Como está sua energia para equilibrar o desenvolvimento do app com esses objetivos pessoais hoje?,Qual a sua meta real para hoje com eles?,Vamos mudar o foco então. O que está passando pela sua mente agora?; Alegria (55%): foi ma forma de comemorar as ultimas vitórias aí no desenvolvimenot do app,Desejo um excelente desenvolvimento nessas sequências de conversas e hábitos.,Ontem você encerrou o dia celebrando uma release importante.",
+            "sabotador_id": "inquieto",
+            "sabotador_nome": "Inquieto",
+            "intensidade": 0,
+            "insight_atual": "Usuário tem dificuldade em manter foco na estratégia devido à busca por novidades e estímulos rápidos, agindo impulsivamente.",
+            "contramedida_ativa": "Usar técnicas de gestão de tempo, como o método Pomodoro, apoiado por aplicativos lembradores de pausas.",
+            "objetivos_especificos": [
+              {
+                "id": "57686407-4655-4ddb-902b-4d6ea964204c",
+                "titulo": "Ganhar 2k por mês com operações em BTC de forma consistente",
+                "detalhamento": "Organizar meu sistema operacional e meu emocional para ganhar $2k de dólares por mês de forma consistente e sem grandes drowdow.",
+                "area_vida_id": "33333333-3333-4333-8333-333333333333"
+              },
+              {
+                "id": "39d9334c-2167-46a1-9ab3-101e1da39b8e",
+                "titulo": "Iniciar meu próprio negócio",
+                "detalhamento": "Estou desenvolvendo um app para ajudar as pessoas a tirar ideias e planos do papel trabalhando a mente e desenvolvimento pessoal\n\nMeta de lançar ainda este ano de 2025",
+                "area_vida_id": "22222222-2222-4222-8222-222222222222"
+              }
+            ],
+            "quests_existentes": [],
+            "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+            "chat_id": "8e2a56e9-50e4-4664-8fe7-32b3d043c886"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "activeVersionId": null,
   "shared": [
     {

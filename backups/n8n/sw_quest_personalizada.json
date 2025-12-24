@@ -94,9 +94,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  '00000000-0000-0000-0000-000000000001',\n  'disponivel',\n  $2::jsonb,\n  NOW()\n)\nRETURNING id, catalogo_id, status, config;",
+        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  '00000000-0000-0000-0000-000000000001',\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $2,\n    'descricao', $3,\n    'contexto_origem', 'pedido_explicito'\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, status, config;",
         "options": {
-          "queryReplacement": "={{ [\n  $json.usuario_id,\n  JSON.stringify({\n    titulo: $json.pedido.substring(0, 80),\n    descricao: $json.pedido,\n    contexto_origem: 'pedido_explicito',\n    prioridade: 'alta'\n  })\n] }}"
+          "queryReplacement": "={{ [$('Pode Criar?').first().json.usuario_id, $json.output.titulo, $json.output.descricao] }}"
         }
       },
       "id": "37a4c774-17e1-4906-8e09-8671406f6c5c",
@@ -129,6 +129,7 @@
     },
     {
       "parameters": {
+        "model": "google/gemini-3-flash-preview",
         "options": {}
       },
       "id": "llm-personalizada",
@@ -149,7 +150,7 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\"},\"descricao\":{\"type\":\"string\"}},\"required\":[\"titulo\",\"descricao\"]}"
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\",\"description\":\"Título da quest (max 70 chars)\"},\"descricao\":{\"type\":\"string\",\"description\":\"Descrição da ação prática\"}},\"required\":[\"titulo\",\"descricao\"]}"
       },
       "id": "parser-personalizada",
       "name": "Parser Quest",
@@ -163,10 +164,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=<input>\n\n<pedido_usuario>\n{{ $json.pedido }}\n</pedido_usuario>\n\n<conversa>\n{{ $json.resumo_conversa || 'conversa de reflexão' }}\n</conversa>\n\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n<emocoes>{{ $json.contexto.emocoes_texto || '' }}</emocoes>\n</estado_emocional>\n\n</input>\n\n<task>\nTransforme <pedido_usuario> em uma quest acionável.\nRespeite a intenção EXATA do usuário.\nUse <estado_emocional> para adaptar se necessário.\n</task>\n\n<output>\nRetorne APENAS JSON válido:\n{\"titulo\": \"VERBO + OBJETO + RESULTADO (max 70 chars)\", \"descricao\": \"ação prática usando MindQuest\"}\n</output>",
+        "text": "=<input>\n<pedido_usuario>{{ $json.pedido }}</pedido_usuario>\n<conversa>{{ $json.resumo_conversa || 'conversa de reflexão' }}</conversa>\n<estado_emocional>\n<humor>{{ $json.contexto.humor || 6 }}/10</humor>\n<energia>{{ $json.contexto.energia || 6 }}/10</energia>\n<emocoes>{{ $json.contexto.emocoes_texto || '' }}</emocoes>\n</estado_emocional>\n</input>\n\n<task>\nTransforme <pedido_usuario> em uma quest acionável.\nRespeite a intenção EXATA do usuário.\nUse <estado_emocional> para adaptar se necessário.\n</task>\n\n<output>{\"titulo\": \"string (max 70 chars)\", \"descricao\": \"string\"}</output>",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "<role>\nVocê é o Especialista em Quests Personalizadas do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar pedidos explícitos do usuário em ações estruturadas.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <pedido_usuario> → base para criar a quest (respeitar intenção exata)\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar experiência | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Anotar reflexão | Conversar → Anotações |\n</mindquest_features>\n\n<examples>\n<example>\n<input>Pedido: Quero meditar todo dia</input>\n<output>{\"titulo\": \"Reserve 5 minutos para silenciar a mente\", \"descricao\": \"Feche os olhos e respire por 5 minutos. Registre no MindQuest como foi.\"}</output>\n</example>\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido em UMA linha\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n4. SEM quebras de linha no JSON\n</output_rules>\n\n<verbos>\nReserve, Faça, Execute, Complete, Inicie, Dedique, Pratique, Experimente\n</verbos>"
+          "systemMessage": "=<role>\nVocê é o Especialista em Quests Personalizadas do MindQuest.\nVocê representa o **AGIR** no framework: CONVERSAR → ENTENDER → AGIR → EVOLUIR.\n</role>\n\n<objective>\nTransformar pedidos explícitos do usuário em ações estruturadas.\n</objective>\n\n<success_criteria>\n1. **Nomenclatura**: Título = VERBO + OBJETO + RESULTADO (sem jargões)\n2. **Atrito**: Executável em <10 minutos\n3. **Propósito**: Usuário entende o \"porquê\" instantaneamente\n4. **Nativismo**: APENAS funcionalidades MindQuest (nunca apps externos)\n</success_criteria>\n\n<input_usage>\nUSE OS DADOS DE ENTRADA:\n- <pedido_usuario> → base para criar a quest (respeitar intenção exata)\n- <conversa> → contexto adicional\n- <estado_emocional> → adaptar se humor/energia baixos\n</input_usage>\n\n<mindquest_features>\n| Necessidade | Use no MindQuest |\n|-------------|------------------|\n| Registrar experiência | Conversar com Mentor |\n| Ver progresso | Menu Evoluir → Jornada |\n| Anotar reflexão | Conversar → Anotações |\n</mindquest_features>\n\n<examples>\n✅ BOM: {\"titulo\": \"Reserve 5 minutos para silenciar a mente\", \"descricao\": \"Feche os olhos e respire por 5 minutos. Registre no MindQuest como foi.\"}\n❌ RUIM: {\"titulo\": \"Pratique meditação mindfulness\", \"descricao\": \"Use um app de meditação...\"}\n</examples>\n\n<output_rules>\n1. Retorne APENAS JSON válido\n2. Título: máximo 70 caracteres\n3. Descrição: mencionar MindQuest para registro\n</output_rules>\n\n<verbos>Reserve, Faça, Execute, Complete, Inicie, Dedique, Pratique, Experimente</verbos>\n\n<output>{\"titulo\": \"string\", \"descricao\": \"string\"}</output>"
         }
       },
       "id": "agent-personalizada",
