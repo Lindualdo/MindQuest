@@ -8,7 +8,7 @@
   "nodes": [
     {
       "parameters": {
-        "model": "google/gemini-2.5-flash",
+        "model": "google/gemini-3-flash-preview",
         "options": {}
       },
       "id": "1efb12f2-bee0-4864-bff0-79019e35e387",
@@ -261,7 +261,7 @@
     },
     {
       "parameters": {
-        "model": "google/gemini-2.5-flash",
+        "model": "google/gemini-3-flash-preview",
         "options": {}
       },
       "id": "7c29affd-fa54-420c-bff7-409891a35297",

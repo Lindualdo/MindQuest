@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1648,
-        -512
+        -1488,
+        -672
       ]
     },
     {
@@ -193,7 +193,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        96,
+        32,
         -832
       ],
       "credentials": {
@@ -212,7 +212,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
+        544,
         -832
       ]
     },
@@ -251,8 +251,8 @@
           "mappingMode": "defineBelow",
           "value": {
             "messageText": "={{ $('Code - Parse Determinístico').item.json.texto }}",
-            "remoteJid": "={{ $('start').item.json.remoteJid }}",
-            "instanceName": "={{ $('start').item.json.evolution_instancia }}"
+            "instanceName": "={{ $('start').item.json.evolution_instancia }}",
+            "remoteJidOrNumber": "={{ $('start').item.json.remoteJid }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -267,8 +267,8 @@
               "removed": false
             },
             {
-              "id": "remoteJid",
-              "displayName": "remoteJid",
+              "id": "remoteJidOrNumber",
+              "displayName": "remoteJidOrNumber",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -279,6 +279,26 @@
             {
               "id": "messageText",
               "displayName": "messageText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "linkPreview",
+              "displayName": "linkPreview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "minDelayMs",
+              "displayName": "minDelayMs",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -313,7 +333,7 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        912,
+        1072,
         -832
       ],
       "credentials": {
@@ -322,42 +342,6 @@
           "name": "Redis account"
         }
       }
-    },
-    {
-      "parameters": {
-        "operation": "delete",
-        "key": "=onboard:memory{{ $('start').first().json.evolution_instancia }}{{ $('start').first().json.whatsapp_number }}"
-      },
-      "id": "d1cde241-1472-4812-8968-8e58b151f582",
-      "name": "Redis Delete1",
-      "type": "n8n-nodes-base.redis",
-      "typeVersion": 1,
-      "position": [
-        -1296,
-        -480
-      ],
-      "credentials": {
-        "redis": {
-          "id": "PB4zpLy1jLXDEzmH",
-          "name": "Redis account"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "mode": "delete",
-        "deleteMode": "all"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryManager",
-      "typeVersion": 1.1,
-      "position": [
-        -1344,
-        -272
-      ],
-      "id": "a362c039-b228-454c-905c-5e286d56a00d",
-      "name": "Chat Memory Manager",
-      "disabled": true
     },
     {
       "parameters": {
@@ -452,11 +436,34 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        608,
+        768,
         -832
       ],
       "id": "15745bcb-071a-485f-ac2e-adc58e61c675",
       "name": "Call 'sw_evolution_send_message_v2'"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO notificacoes (\n  usuario_id,\n  conversas_ia_ativo,\n  conversas_ia_periodo,\n  conversas_ia_motivacionais,\n  conversas_ia_sabotadores,\n  conversas_ia_resumo_semanal,\n  lembretes_ativo,\n  lembretes_periodo,\n  lembretes_conversas_diarias,\n  lembretes_quests,\n  lembretes_conquistas,\n  lembretes_canais\n) VALUES (\n  $1,\n  TRUE,\n  'manha',\n  TRUE,\n  TRUE,\n  TRUE,\n  TRUE,\n  'manha',\n  TRUE,\n  TRUE,\n  TRUE,\n  ARRAY['whatsapp','push','email','sms']::text[]\n)\nON CONFLICT (usuario_id) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        288,
+        -832
+      ],
+      "id": "3ccff894-d564-4954-9107-0b9a8bc32658",
+      "name": "ativa_notificacoes",
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -465,16 +472,6 @@
         [
           {
             "node": "Redis Get",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Redis Delete1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Chat Memory Manager",
             "type": "main",
             "index": 0
           }
@@ -558,7 +555,7 @@
       "main": [
         [
           {
-            "node": "monta link para usuario",
+            "node": "ativa_notificacoes",
             "type": "main",
             "index": 0
           }
@@ -581,11 +578,6 @@
         [
           {
             "node": "Agent AI (interations-style)",
-            "type": "ai_memory",
-            "index": 0
-          },
-          {
-            "node": "Chat Memory Manager",
             "type": "ai_memory",
             "index": 0
           },
@@ -629,23 +621,36 @@
           }
         ]
       ]
+    },
+    "ativa_notificacoes": {
+      "main": [
+        [
+          {
+            "node": "monta link para usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {
     "start": [
       {
         "json": {
-          "remoteJid": "351934738786@s.whatsapp.net",
-          "pushName": "Rodrigo dutra",
-          "id": "A5A3DAE222FE8EC730B695D793EFC2ED",
-          "whatsapp_number": "351934738786",
+          "remoteJid": "5511984074974@s.whatsapp.net",
+          "pushName": "Marta Moraes ⭐️",
+          "id": "3EB0FDAB79E5CD2011E2A6",
+          "whatsapp_number": "5511984074974",
           "evolution_instancia": "MindQuest",
-          "menssagem": "Rodrigo"
+          "menssagem": "Marta"
         },
         "pairedItem": {
           "item": 0

@@ -29,7 +29,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- v6: Busca chats pendentes OU retry (exclui limite atingido)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.status,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE \n  -- Exclui chats com limite de falhas atingido\n  COALESCE((c.experts_processados->>'falhas_consecutivas')::int, 0) < 5\n  AND (\n    -- Novos chats pendentes\n    (c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp) AND c.status != 'processando')\n    -- OU retry: status processando com ALGUM expert com erro\n    OR (\n      c.status = 'processando' \n      AND EXISTS (\n        SELECT 1 FROM jsonb_each(c.experts_processados) AS e(key, value)\n        WHERE key NOT IN ('inicio', 'tentativas', 'ciclo', 'falhas_consecutivas', 'ultimo_processamento')\n          AND (value->>'status') = 'erro'\n      )\n    )\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
+        "query": "-- v7: mantém regras atuais e inclui \"processando\" sempre (com bloqueio por expert >= 5)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.status,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE \n  -- Mantém regra atual: exclui chats com limite de falhas atingido\n  COALESCE((c.experts_processados->>'falhas_consecutivas')::int, 0) < 5\n  AND (\n    -- Mantém regra atual: novos chats pendentes\n    (c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp) AND c.status != 'processando')\n    -- NOVO: se está processando, sempre tenta, desde que não exista expert bloqueado (erro com tentativas >= 5)\n    OR (\n      c.status = 'processando'\n      AND NOT EXISTS (\n        SELECT 1\n        FROM jsonb_each(COALESCE(c.experts_processados, '{}'::jsonb)) AS e(key, value)\n        WHERE key NOT IN ('inicio', 'tentativas', 'ciclo', 'falhas_consecutivas', 'ultimo_processamento')\n          AND (value->>'status') = 'erro'\n          AND COALESCE((value->>'tentativas')::int, 0) >= 5\n      )\n    )\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
         "options": {}
       },
       "id": "busca-chats-v3",
@@ -95,7 +95,7 @@
           "value": "S8RDRKmUOvoynWol",
           "mode": "list",
           "cachedResultUrl": "/workflow/S8RDRKmUOvoynWol",
-          "cachedResultName": "sw_expert_v6"
+          "cachedResultName": "sw_expert"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -286,7 +286,7 @@
       }
     ]
   },
-  "activeVersionId": "59e15a49-f3f7-4075-8ab3-3a9872d520b7",
+  "activeVersionId": "73e389d4-599c-4ec0-9767-c4146bb8a52e",
   "shared": [
     {
       "createdAt": "2025-12-15T23:11:16.175Z",
@@ -340,7 +340,7 @@
   ],
   "tags": [],
   "activeVersion": {
-    "createdAt": "2025-12-21T21:30:17.724Z",
+    "createdAt": "2025-12-24T16:56:06.709Z",
     "workflowId": "BdfMcFNxLd0CbwZN",
     "nodes": [
       {
@@ -366,7 +366,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "-- v6: Busca chats pendentes OU retry (exclui limite atingido)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.status,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE \n  -- Exclui chats com limite de falhas atingido\n  COALESCE((c.experts_processados->>'falhas_consecutivas')::int, 0) < 5\n  AND (\n    -- Novos chats pendentes\n    (c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp) AND c.status != 'processando')\n    -- OU retry: status processando com ALGUM expert com erro\n    OR (\n      c.status = 'processando' \n      AND EXISTS (\n        SELECT 1 FROM jsonb_each(c.experts_processados) AS e(key, value)\n        WHERE key NOT IN ('inicio', 'tentativas', 'ciclo', 'falhas_consecutivas', 'ultimo_processamento')\n          AND (value->>'status') = 'erro'\n      )\n    )\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
+          "query": "-- v7: mantém regras atuais e inclui \"processando\" sempre (com bloqueio por expert >= 5)\nSELECT \n  c.id AS chat_id,\n  c.usuario_id,\n  c.data_conversa,\n  c.status,\n  c.total_interactions,\n  c.atualizado_em,\n  c.processado_em,\n  u.nome_preferencia AS usr_nome_preferencia\nFROM usr_chat c\nJOIN usuarios u ON u.id = c.usuario_id\nWHERE \n  -- Mantém regra atual: exclui chats com limite de falhas atingido\n  COALESCE((c.experts_processados->>'falhas_consecutivas')::int, 0) < 5\n  AND (\n    -- Mantém regra atual: novos chats pendentes\n    (c.atualizado_em > COALESCE(c.processado_em, '1970-01-01'::timestamp) AND c.status != 'processando')\n    -- NOVO: se está processando, sempre tenta, desde que não exista expert bloqueado (erro com tentativas >= 5)\n    OR (\n      c.status = 'processando'\n      AND NOT EXISTS (\n        SELECT 1\n        FROM jsonb_each(COALESCE(c.experts_processados, '{}'::jsonb)) AS e(key, value)\n        WHERE key NOT IN ('inicio', 'tentativas', 'ciclo', 'falhas_consecutivas', 'ultimo_processamento')\n          AND (value->>'status') = 'erro'\n          AND COALESCE((value->>'tentativas')::int, 0) >= 5\n      )\n    )\n  )\nORDER BY c.atualizado_em DESC\nLIMIT 50;",
           "options": {}
         },
         "id": "busca-chats-v3",
@@ -432,7 +432,7 @@
             "value": "S8RDRKmUOvoynWol",
             "mode": "list",
             "cachedResultUrl": "/workflow/S8RDRKmUOvoynWol",
-            "cachedResultName": "sw_expert_v6"
+            "cachedResultName": "sw_expert"
           },
           "workflowInputs": {
             "mappingMode": "defineBelow",

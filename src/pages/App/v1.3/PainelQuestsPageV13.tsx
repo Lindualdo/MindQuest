@@ -917,9 +917,9 @@ const PainelQuestsPageV13: React.FC = () => {
               // Usar quests do dia selecionado ao invés de todas
               const count = questsDoDiaSelecionado[tab].length;
               const labels = {
-                a_fazer: 'A Fazer',
-                fazendo: 'Fazendo',
-                feito: 'Feito'
+                a_fazer: 'Disponível',
+                fazendo: 'Ativa',
+                feito: 'Concluído'
               };
               
               return (

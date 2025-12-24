@@ -154,7 +154,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Preparar Insert - Quest Sabotador v3 (Híbrido)\n// Combina: personalização do expert + base científica do catálogo\n\nconst entrada = $items('Selecionar Contramedida', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\n// Catálogo pode ser null se não houver disponível\nconst catalogoId = entrada.quest_catalogo?.id || null;\nconst baseCientifica = entrada.base_cientifica || null;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    catalogo_id: catalogoId,\n    sabotador_id: entrada.contexto.sabotador_id,\n    titulo: adaptado.output.titulo,\n    descricao: adaptado.output.descricao,\n    base_cientifica: baseCientifica\n  }\n}];"
+        "jsCode": "// Preparar Insert - Quest Sabotador v3 (Híbrido)\n// Combina: personalização do expert + base científica do catálogo\n\nconst entrada = $items('Selecionar Contramedida', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\n// Catálogo pode ser null se não houver disponível\nconst catalogoId = entrada.quest_catalogo?.id || null;\nconst baseCientifica = entrada.base_cientifica || null;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    catalogo_id: catalogoId,\n    sabotador_id: entrada.contexto.sabotador_id,\n    titulo: adaptado.output.titulo,\n    descricao: adaptado.output.descricao,\n    base_cientifica: baseCientifica\n  }\n}];"
       },
       "id": "033b8514-3a72-4821-b172-30894a98cc83",
       "name": "Preparar Insert",
@@ -168,9 +168,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Insert Quest Sabotador v3 (Híbrido)\n-- catalogo_id pode ser NULL se quest foi criada apenas com dados personalizados\nINSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  sabotador_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  NULLIF($2, '')::uuid,\n  $3::text,\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $4,\n    'descricao', $5,\n    'contexto_origem', 'sabotador_hibrido',\n    'base_cientifica', COALESCE($6::jsonb, '{}'::jsonb)\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, sabotador_id, status, config;",
+        "query": "-- Insert Quest Sabotador v3 (Híbrido)\n-- catalogo_id pode ser NULL se quest foi criada apenas com dados personalizados\nINSERT INTO usuarios_quest (\n  usuario_id,\n  chat_id,\n  catalogo_id,\n  sabotador_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  NULLIF($3, '')::uuid,\n  $4::text,\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $5,\n    'descricao', $6,\n    'contexto_origem', 'sabotador_hibrido',\n    'base_cientifica', COALESCE($7::jsonb, '{}'::jsonb)\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, sabotador_id, status, config;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id || '', $json.sabotador_id, $json.titulo, $json.descricao, JSON.stringify($json.base_cientifica || {})] }}"
+          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.catalogo_id || '', $json.sabotador_id, $json.titulo, $json.descricao, JSON.stringify($json.base_cientifica || {})] }}"
         }
       },
       "id": "85c8a114-2627-485f-8fc0-3fd0bee9d520",

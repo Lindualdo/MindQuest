@@ -69,17 +69,17 @@
         -864,
         80
       ],
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
           "name": "Postgres account"
         }
-      },
-      "alwaysOutputData": true
+      }
     },
     {
       "parameters": {
-        "jsCode": "// Anti-Duplicação: Keywords + Cooldown v2\n// CORREÇÃO: usar $items para buscar catálogo corretamente\n\nfunction extrairKeywords(texto) {\n  if (!texto) return new Set();\n  return new Set(\n    texto.toLowerCase()\n      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n      .split(/\\s+/)\n      .filter(w => w.length > 3)\n      .filter(w => !['para', 'com', 'uma', 'seu', 'sua', 'que', 'sobre'].includes(w))\n  );\n}\n\nfunction calcularSimilaridade(titulo1, titulo2) {\n  const k1 = extrairKeywords(titulo1);\n  const k2 = extrairKeywords(titulo2);\n  \n  if (k1.size === 0 || k2.size === 0) return 0;\n  \n  const intersecao = [...k1].filter(w => k2.has(w)).length;\n  const uniao = new Set([...k1, ...k2]).size;\n  \n  return intersecao / uniao;\n}\n\nconst entrada = $('start').first().json;\n// CORREÇÃO: buscar catálogo do node correto\nconst catalogo = $items('Buscar Catálogo', 0, 0).map(i => i.json);\nconst existentes = $input.all().map(i => i.json);\n\nconst contexto = entrada.contexto || {};\nconst humor = contexto.humor || 6;\nconst energia = contexto.energia || 6;\n\nconst temas = [];\nif (humor < 4 || energia < 4) temas.push('regulacao_emocional');\nif (humor < 5 || energia < 5) temas.push('bem_estar');\n\nconst catalogoIdsUsados = new Set(existentes.map(e => e.catalogo_id).filter(Boolean));\nconst catalogoDisponivel = catalogo.filter(q => !catalogoIdsUsados.has(q.id));\n\nconst agora = new Date();\nconst existentesRecentes = existentes.filter(e => {\n  const diff = (agora - new Date(e.ativado_em)) / (1000 * 60 * 60 * 24);\n  return diff <= 14;\n});\n\nconst bloqueios = [];\nfor (const quest of catalogoDisponivel) {\n  for (const existente of existentesRecentes) {\n    const sim = calcularSimilaridade(quest.titulo, existente.titulo);\n    if (sim > 0.5) {\n      bloqueios.push({\n        catalogo_id: quest.id,\n        motivo: 'similaridade_alta',\n        similaridade: sim.toFixed(2),\n        quest_existente: existente.titulo\n      });\n    }\n  }\n}\n\nconst catalogoIdsBloqueados = new Set(bloqueios.map(b => b.catalogo_id));\nconst catalogoFinal = catalogoDisponivel.filter(q => !catalogoIdsBloqueados.has(q.id));\n\nconst podeCriar = catalogoFinal.length > 0;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pode_criar: podeCriar,\n    motivo: podeCriar ? 'ok' : 'sem_opcoes_disponiveis',\n    catalogo_disponivel: catalogoFinal,\n    bloqueios: bloqueios,\n    contexto: contexto\n  }\n}];"
+        "jsCode": "// Anti-Duplicação: Keywords + Cooldown v2.2\n// Ajuste: evitar `return` dentro de callbacks (validador n8n) e manter retorno final { json: { ... } }\n\nconst entrada = ($items('start')[0] || {}).json || {};\nconst contexto = entrada.contexto || {};\n\nconst catalogo = ($items('Buscar Catálogo') || []).map(i => i.json);\nconst existentes = ($items('Buscar Existentes') || []).map(i => i.json);\n\nconst STOPWORDS = new Set(['para', 'com', 'uma', 'seu', 'sua', 'que', 'sobre']);\n\nconst normalize = (s) => (s || '')\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '');\n\nconst keywordsFrom = (texto) => {\n  const words = normalize(texto).split(/\\s+/)\n    .filter(w => w.length > 3)\n    .filter(w => !STOPWORDS.has(w));\n  return new Set(words);\n};\n\n// Remover catálogos já usados\nconst catalogoIdsUsados = new Set(existentes.map(e => e.catalogo_id).filter(Boolean));\nconst catalogoDisponivel = catalogo.filter(q => !catalogoIdsUsados.has(q.id));\n\n// Cooldown: comparar com quests recentes (14 dias)\nconst agora = new Date();\nconst existentesRecentes = existentes.filter(e => (\n  e.ativado_em && ((agora - new Date(e.ativado_em)) / (1000 * 60 * 60 * 24)) <= 14\n));\n\nconst bloqueios = [];\n\nfor (const quest of catalogoDisponivel) {\n  const kQuest = keywordsFrom(quest.titulo);\n\n  for (const existente of existentesRecentes) {\n    const kExist = keywordsFrom(existente.titulo);\n\n    if (kQuest.size === 0 || kExist.size === 0) {\n      continue;\n    }\n\n    const intersecao = [...kQuest].filter(w => kExist.has(w)).length;\n    const uniao = new Set([...kQuest, ...kExist]).size;\n    const sim = uniao > 0 ? intersecao / uniao : 0;\n\n    if (sim > 0.5) {\n      bloqueios.push({\n        catalogo_id: quest.id,\n        motivo: 'similaridade_alta',\n        similaridade: Number(sim.toFixed(2)),\n        quest_existente: existente.titulo\n      });\n    }\n  }\n}\n\nconst catalogoIdsBloqueados = new Set(bloqueios.map(b => b.catalogo_id));\nconst catalogoFinal = catalogoDisponivel.filter(q => !catalogoIdsBloqueados.has(q.id));\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    pode_criar: catalogoFinal.length > 0,\n    motivo: catalogoFinal.length > 0 ? 'ok' : 'sem_opcoes_disponiveis',\n    catalogo_disponivel: catalogoFinal,\n    bloqueios,\n    contexto\n  }\n}];"
       },
       "id": "3ff4f5b8-cc9a-458a-98f1-b601105fb6fd",
       "name": "Verificar Duplicação",
@@ -151,7 +151,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Preparar Insert - Quest Mentalidade v2\n// CORREÇÃO: acessar output do agente\nconst entrada = $items('Selecionar Quest', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    catalogo_id: entrada.quest_catalogo.id,\n    titulo: adaptado.output.titulo,\n    descricao: adaptado.output.descricao,\n    base_cientifica: entrada.quest_catalogo.base_cientifica || null\n  }\n}];"
+        "jsCode": "// Preparar Insert - Quest Mentalidade v2\n// CORREÇÃO: acessar output do agente\nconst entrada = $items('Selecionar Quest', 0, 0)[0].json;\nconst adaptado = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: entrada.usuario_id,\n    chat_id: entrada.chat_id,\n    catalogo_id: entrada.quest_catalogo.id,\n    titulo: adaptado.output.titulo,\n    descricao: adaptado.output.descricao,\n    base_cientifica: entrada.quest_catalogo.base_cientifica || null\n  }\n}];"
       },
       "id": "4bd34b97-310b-48e1-b0ab-21c64dfc833b",
       "name": "Preparar Insert",
@@ -165,9 +165,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  catalogo_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $3,\n    'descricao', $4,\n    'contexto_origem', 'mentalidade_adaptado',\n    'base_cientifica', $5::jsonb\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, status, config;",
+        "query": "INSERT INTO usuarios_quest (\n  usuario_id,\n  chat_id,\n  catalogo_id,\n  status,\n  config,\n  ativado_em\n)\nVALUES (\n  $1::uuid,\n  $2::uuid,\n  $3::uuid,\n  'disponivel',\n  jsonb_build_object(\n    'titulo', $4,\n    'descricao', $5,\n    'contexto_origem', 'mentalidade_adaptado',\n    'base_cientifica', $6::jsonb\n  ),\n  NOW()\n)\nRETURNING id, catalogo_id, status, config;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id, $json.titulo, $json.descricao, JSON.stringify($json.base_cientifica || {})] }}"
+          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.catalogo_id, $json.titulo, $json.descricao, JSON.stringify($json.base_cientifica || {})] }}"
         }
       },
       "id": "99c383b3-5bc1-4d7a-81dc-385ece5942d5",
@@ -200,6 +200,7 @@
     },
     {
       "parameters": {
+        "model": "google/gemini-3-flash-preview",
         "options": {}
       },
       "id": "llm-mentalidade",
