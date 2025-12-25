@@ -16,7 +16,9 @@ import {
   Calendar,
   Heart,
   Shield,
-  Users
+  Users,
+  Smile,
+  Battery
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -69,10 +71,11 @@ const sectionsData: Record<SectionId, { title: string; emoji: string; features: 
     title: 'Entender',
     emoji: '🧠',
     features: [
+      { icon: <Smile size={18} />, title: 'Humor', desc: 'Acompanhe seu humor ao longo do tempo' },
+      { icon: <Battery size={18} />, title: 'Energia', desc: 'Monitore seus níveis de energia' },
       { icon: <Heart size={18} />, title: 'Roda de Emoções', desc: 'Visualize seu estado emocional' },
-      { icon: <LineChart size={18} />, title: 'Humor e Energia', desc: 'Acompanhe variações ao longo do tempo' },
-      { icon: <Shield size={18} />, title: 'Sabotadores', desc: 'Identifique padrões que te limitam' },
-      { icon: <Users size={18} />, title: 'Perfil Big Five', desc: 'Conheça seus traços de personalidade' },
+      { icon: <Shield size={18} />, title: 'Padrão de Pensamento', desc: 'Identifique sabotadores que te limitam' },
+      { icon: <Users size={18} />, title: 'Padrão de Personalidade', desc: 'Conheça seus traços Big Five' },
     ]
   },
   agir: {
