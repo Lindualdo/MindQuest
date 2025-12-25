@@ -102,7 +102,7 @@ const CardConversasV13 = ({
                       boxShadow: dia.isHoje ? '0 0 0 2px rgba(14,165,233,0.35)' : 'none',
                     }}
                   >
-                    <IconRenderer name={config.icon} size={16} />
+                    {/* <IconRenderer name={config.icon} size={16} /> */}
                   </div>
                   <span className="mt-1 text-[0.56rem] font-semibold uppercase tracking-wide text-[#1C2541] sm:text-[0.63rem]">
                     {dia.label}

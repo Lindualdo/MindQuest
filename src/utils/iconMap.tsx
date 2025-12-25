@@ -2,11 +2,7 @@ import React from 'react';
 import * as LucideIcons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-/**
- * Mapeia nomes de ícones (ou emojis antigos) para componentes Lucide
- */
-const iconMap: Record<string, LucideIcon | string> = {
-  // Sabotadores
+const iconMap: Record<string, LucideIcon> = {
   'Scale': LucideIcons.Scale,
   'Compass': LucideIcons.Compass,
   'Handshake': LucideIcons.Handshake,
@@ -21,57 +17,77 @@ const iconMap: Record<string, LucideIcon | string> = {
   'CircleHelp': LucideIcons.CircleHelp,
   'Lock': LucideIcons.Lock,
   'Hand': LucideIcons.Hand,
-  'User': LucideIcons.User,
   'Check': LucideIcons.Check,
   'X': LucideIcons.X,
   'MoreHorizontal': LucideIcons.MoreHorizontal,
   'Minus': LucideIcons.Minus,
-  'Mask': LucideIcons.Ghost,
   'Ellipsis': LucideIcons.Ellipsis,
-  
-  '👋': LucideIcons.Hand,
-  '✨': LucideIcons.Sparkles,
-  '📊': LucideIcons.BarChart3,
-  '🧬': LucideIcons.Dna,
-  '💎': LucideIcons.Gem,
-  '📅': LucideIcons.Calendar,
-  '✅': LucideIcons.CheckCircle2,
-  '📉': LucideIcons.TrendingDown,
-  '🎖️': LucideIcons.Medal,
-  '🌟': LucideIcons.Star,
-  '👑': LucideIcons.Crown,
-  '🚀': LucideIcons.Rocket,
-  '📝': LucideIcons.FileText,
-  '💡': LucideIcons.Lightbulb,
-  '🚫': LucideIcons.Ban,
-  '📍': LucideIcons.MapPin,
-  '🔥': LucideIcons.Flame,
-  '🎭': LucideIcons.Ghost,
-  '🎯': LucideIcons.Target,
-  '🪁': LucideIcons.Wind,
-  '⚡️': LucideIcons.Zap,
-  '⚡': LucideIcons.Zap,
-  '🏆': LucideIcons.Trophy,
-  '🧠': LucideIcons.Brain,
-  '⚖️': LucideIcons.Scale,
-  '🧭': LucideIcons.Compass,
-  '🤝': LucideIcons.Handshake,
-  '🛡️': LucideIcons.ShieldAlert,
-  // Áreas de vida
+  'HandHelping': LucideIcons.HandHelping,
+  'Sparkles': LucideIcons.Sparkles,
+  'BarChart3': LucideIcons.BarChart3,
+  'Dna': LucideIcons.Dna,
+  'Gem': LucideIcons.Gem,
+  'Calendar': LucideIcons.Calendar,
+  'CheckCircle2': LucideIcons.CheckCircle2,
+  'TrendingDown': LucideIcons.TrendingDown,
+  'Medal': LucideIcons.Medal,
+  'Star': LucideIcons.Star,
+  'Crown': LucideIcons.Crown,
+  'Rocket': LucideIcons.Rocket,
+  'FileText': LucideIcons.FileText,
+  'Lightbulb': LucideIcons.Lightbulb,
+  'Ban': LucideIcons.Ban,
+  'MapPin': LucideIcons.MapPin,
+  'Flame': LucideIcons.Flame,
   'Briefcase': LucideIcons.Briefcase,
   'Heart': LucideIcons.Heart,
   'Coins': LucideIcons.Coins,
   'Activity': LucideIcons.Activity,
   'Sprout': LucideIcons.Sprout,
-  'Pray': LucideIcons.HandsPraying, // Fallback if name exists
-  // Emojis de fallback
-  '💼': LucideIcons.Briefcase,
-  '💛': LucideIcons.Heart,
-  '🙏': LucideIcons.Heart, // Lucide doesn't have a good praying hands icon in standard
-  '💰': LucideIcons.Coins,
-  '🏃': LucideIcons.Activity,
-  '✏️': LucideIcons.Edit3,
-  '🎉': LucideIcons.PartyPopper,
+  'Edit3': LucideIcons.Edit3,
+  'PartyPopper': LucideIcons.PartyPopper,
+  'MessageCircle': LucideIcons.MessageCircle,
+};
+
+// Mapeamento de emojis para nomes de ícones
+const emojiToIcon: Record<string, string> = {
+  '👋': 'Hand',
+  '✨': 'Sparkles',
+  '📊': 'BarChart3',
+  '🧬': 'Dna',
+  '💎': 'Gem',
+  '📅': 'Calendar',
+  '✅': 'CheckCircle2',
+  '📉': 'TrendingDown',
+  '🎖️': 'Medal',
+  '🌟': 'Star',
+  '👑': 'Crown',
+  '🚀': 'Rocket',
+  '📝': 'FileText',
+  '💡': 'Lightbulb',
+  '🚫': 'Ban',
+  '📍': 'MapPin',
+  '🔥': 'Flame',
+  '🎭': 'Ghost',
+  '😢': 'Ghost',
+  '🎯': 'Target',
+  '🪁': 'Wind',
+  '🙈': 'Wind',
+  '⚡️': 'Zap',
+  '⚡': 'Zap',
+  '🏆': 'Trophy',
+  '🧠': 'Brain',
+  '⚖️': 'Scale',
+  '🧭': 'Compass',
+  '🤝': 'Handshake',
+  '🛡️': 'ShieldAlert',
+  '💼': 'Briefcase',
+  '💛': 'Heart',
+  '🙏': 'HandHelping',
+  '💰': 'Coins',
+  '🏃': 'Activity',
+  '✏️': 'Edit3',
+  '🎉': 'PartyPopper',
 };
 
 interface IconRendererProps extends LucideIcons.LucideProps {
@@ -82,20 +98,19 @@ interface IconRendererProps extends LucideIcons.LucideProps {
 export const IconRenderer: React.FC<IconRendererProps> = ({ name, fallback, ...props }) => {
   if (!name) return <>{fallback}</>;
   
-  const Icon = iconMap[name];
+  // Se for um emoji, resolve para o nome do ícone
+  const iconName = emojiToIcon[name] || name;
+  const Icon = iconMap[iconName];
   
-  if (typeof Icon === 'function') {
+  if (Icon) {
     return <Icon {...props} />;
   }
   
-  // Se não encontrar no mapa, tenta buscar direto no LucideIcons pelo nome
-  const DynamicIcon = (LucideIcons as any)[name] as LucideIcon;
+  // Tenta buscar direto no LucideIcons se não estiver no mapa
+  const DynamicIcon = (LucideIcons as any)[iconName];
   if (DynamicIcon) {
     return <DynamicIcon {...props} />;
   }
 
   return <>{fallback || name}</>;
 };
-
-export default iconMap;
-

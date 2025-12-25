@@ -45,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
     });
 
     // Log para monitoramento (em produção, enviar para service de logging)
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       // Aqui enviaria para serviço de logging como Sentry
       console.error('Erro em produção:', {
         error: error.toString(),
@@ -60,11 +60,12 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = 'https://mindquest.com.br';
+    window.location.href = '/app/1.3';
   };
 
   render() {
     if (this.state.hasError) {
+      const isDev = import.meta.env.DEV;
       return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
@@ -88,7 +89,7 @@ class ErrorBoundary extends Component<Props, State> {
             </p>
 
             {/* Detalhes do erro (apenas em desenvolvimento) */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {isDev && this.state.error && (
               <div className="bg-gray-100 rounded-lg p-4 mb-6 text-left">
                 <h3 className="font-semibold text-sm text-gray-700 mb-2">
                   Detalhes do Erro (Dev):

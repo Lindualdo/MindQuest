@@ -10,6 +10,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowRight, Flame } from 'lucide-react';
 import { useDashboard } from '../../store/useStore';
+import { IconRenderer } from '../../utils/iconMap';
 
 const clampToPercent = (value: number) => Math.min(Math.max(value, 0), 100);
 
@@ -171,7 +172,7 @@ const CheckInsHistorico: React.FC = () => {
                 `}
               >
                 <span className={`text-base font-semibold ${statusConfig.iconColor}`}>
-                  {statusConfig.icon}
+                  <IconRenderer name={statusConfig.icon} size={18} />
                 </span>
               </div>
               <div className="text-sm font-semibold text-[#101828] uppercase">

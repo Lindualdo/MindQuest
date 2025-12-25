@@ -15,6 +15,7 @@ Esta versão foca na melhoria da experiência de navegação mobile (padrão iOS
 ## 💎 Padronização Visual (Iconografia)
 - **Substituição de Emojis:** Substituição sistemática de emojis por ícones da biblioteca Lucide em toda a aplicação.
 - **Centralização de Ícones:** Criação do utilitário `IconRenderer` em `src/utils/iconMap.tsx` para gerenciar dinamicamente os ícones dos sabotadores, áreas da vida e estados do sistema.
+- **Variantes de Emojis:** Implementado mapeamento de variantes de emojis vindas do banco de dados (ex: `😢` e `🙈`) para garantir que todos os sabotadores apareçam com ícones consistentes.
 - **Consistência:** Interface mais limpa e profissional, alinhada com padrões modernos de design de aplicativos.
 
 ## 🛠 Arquivos Modificados

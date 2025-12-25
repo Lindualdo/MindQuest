@@ -33,11 +33,7 @@ if (isDevelopment) {
   console.log('🔁 Proxy ativo:', shouldUseProxy ? 'sim' : 'não');
 }
 
-// Renderização principal
+// Renderização principal do app
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
       <App />
-    </ErrorBoundary>
-  </React.StrictMode>
 );
