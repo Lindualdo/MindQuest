@@ -221,7 +221,7 @@ const InsightsDashboardPageV13: React.FC = () => {
   if (isLoading && !insights.length) {
     return (
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
-        <HeaderV1_3 nomeUsuario={nomeUsuario} />
+        <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card>
             <div className="space-y-3 text-center">
@@ -243,22 +243,14 @@ const InsightsDashboardPageV13: React.FC = () => {
   if (!insights.length) {
     return (
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
-        <HeaderV1_3 nomeUsuario={nomeUsuario} />
+        <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card>
-            <div className="space-y-3">
+            <div className="space-y-3 text-center">
               <p className="text-sm font-semibold text-[#1C2541]">Painel de Insights</p>
               <p className="text-sm text-[#475569]">
                 Nenhum insight disponível no momento. Volte ao dashboard principal para continuar a jornada.
               </p>
-              <button
-                type="button"
-                onClick={handleBack}
-                className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
-              >
-                Voltar
-                <ArrowLeft size={14} />
-              </button>
             </div>
           </Card>
         </main>
@@ -275,7 +267,7 @@ const InsightsDashboardPageV13: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         <div className="space-y-4">

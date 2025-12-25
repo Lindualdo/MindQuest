@@ -171,19 +171,11 @@ const MapaMentalPage: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541] shadow"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-          <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[#1C2541]">
+          <div className="flex-1 text-center text-[0.7rem] font-semibold uppercase tracking-wide text-[#1C2541]">
             Mapa mental em áreas de vida
           </div>
         </div>

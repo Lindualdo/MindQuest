@@ -79,20 +79,9 @@ const PlanejamentoQuestsPage: React.FC<PlanejamentoQuestsPageProps> = ({
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario="" />
+      <HeaderV1_3 nomeUsuario="" onBack={onBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-[0.75rem] font-semibold text-[#1C2541] shadow"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-        </div>
 
         {/* Título da página */}
         <h1 className="mb-6 text-center text-2xl font-bold text-[#1C2541]">

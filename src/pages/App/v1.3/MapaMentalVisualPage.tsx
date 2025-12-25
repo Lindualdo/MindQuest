@@ -91,18 +91,10 @@ const MapaMentalVisualPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0B1120] text-slate-100">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={() => handleNav('mapaMental')} backLabel="Texto" />
 
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 pb-24 pt-6">
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => handleNav('mapaMental')}
-            className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100 transition hover:bg-white/20"
-          >
-            <ArrowLeft size={14} />
-            Voltar para texto
-          </button>
           <button
             type="button"
             onClick={handleReload}
