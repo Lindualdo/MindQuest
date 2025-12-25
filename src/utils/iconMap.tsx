@@ -81,6 +81,7 @@ const emojiToIcon: Record<string, string> = {
   '🧭': 'Compass',
   '🤝': 'Handshake',
   '🛡️': 'ShieldAlert',
+  '👀': 'ShieldAlert',
   '💼': 'Briefcase',
   '💛': 'Heart',
   '🙏': 'HandHelping',
