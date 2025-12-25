@@ -12,61 +12,50 @@
           "values": [
             {
               "name": "usuario_id"
-            },
-            {
-              "name": "chat_id"
-            },
-            {
-              "name": "data_conversa"
-            },
-            {
-              "name": "total_interactions",
-              "type": "number"
             }
           ]
         }
       },
-      "id": "62e03181-1b7f-47bf-8702-4cb6aefe384f",
+      "id": "2532c561-fe73-4f8d-b028-15c5328a48be",
       "name": "start",
+      "position": [
+        1520,
+        240
+      ],
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        768,
-        352
-      ]
+      "typeVersion": 1.1
     },
     {
       "parameters": {
-        "content": "## Regras: XP Conversas (v3.0)\n\n### Objetivo\nContabilizar XP por dia único de conversa\n\n### Tabelas Afetadas\n| Tabela | Regra |\n|--------|-------|\n| `usuarios_quest` | 1 quest reflexão diária por usuário (permanente, sempre ativa) |\n| `quests_recorrencias` | 1 registro por dia (constraint: usuarios_quest_id + data_planejada) |\n| `usuarios_conquistas` | Atualiza xp_total, xp_base, total_xp_hoje, ultima_conversa_em |\n\n### Decisão Autônoma\n- Já existe recorrência para hoje? → ignora\n- Novo dia válido? → processa\n\n### Controle de Duplicatas\n- Verifica diretamente em `quests_recorrencias`\n- INSERT com ON CONFLICT garante 1 registro/dia\n- Sem dependência de `log_experts` (descontinuado v3)",
-        "height": 624,
-        "width": 880,
-        "color": 5
+        "content": "## XP Conversas v6.0\n\n### Regra\n- **10 XP por conversa/dia**\n\n### Fluxo\n1. Verifica se usuário existe\n2. Se NÃO existe → INSERT com 10 XP\n3. Se existe → verifica `ultima_conversa_em`\n4. Se já processou hoje → IGNORA\n5. Se não processou → UPDATE +10 XP\n\n### Resultados\n| Cenário | Retorno |\n|---------|--------|\n| Novo usuário | `criado` |\n| XP atualizado | `atualizado` |\n| Já processou | `ignorado` |\n\n### Input\n- `usuario_id` (obrigatório)"
       },
-      "id": "da5a336c-a461-4274-8fa7-fbdbb3b67e35",
-      "name": "Regras XP Conversas v3",
+      "id": "e27a663a-a6de-486c-b707-7e96f81db215",
+      "name": "Regras XP v5",
+      "position": [
+        704,
+        48
+      ],
       "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -304,
-        -160
-      ]
+      "typeVersion": 1
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- Verificar se deve processar (sem log_experts - arquitetura v3)\nWITH params AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa,\n    $4::int AS total_interactions\n),\nquest_catalogo AS (\n  SELECT id, COALESCE(xp, 10) AS xp_valor\n  FROM quests_catalogo\n  WHERE id = '775a9df0-6f08-492f-8172-0be057002177'\n),\nquest_usuario AS (\n  SELECT id FROM usuarios_quest\n  WHERE usuario_id = (SELECT usuario_id FROM params)\n    AND catalogo_id = (SELECT id FROM quest_catalogo)\n  LIMIT 1\n),\nrecorrencia_hoje AS (\n  SELECT id FROM quests_recorrencias\n  WHERE usuarios_quest_id = (SELECT id FROM quest_usuario)\n    AND data_planejada = (SELECT data_conversa FROM params)\n),\ndecisao AS (\n  SELECT CASE\n    WHEN (SELECT id FROM recorrencia_hoje) IS NOT NULL THEN 'xp_ja_contabilizado_hoje'\n    ELSE 'processar'\n  END AS acao\n)\nSELECT\n  p.usuario_id,\n  p.chat_id,\n  p.data_conversa,\n  p.total_interactions,\n  (SELECT acao FROM decisao) AS acao,\n  10 xp_valor,\n  (SELECT id FROM quest_catalogo) AS catalogo_id\nFROM params p;",
+        "query": "-- 1. Verificar se usuário existe e status\nWITH check_usuario AS (\n  SELECT \n    usuario_id,\n    xp_total,\n    conversas_concluidas,\n    DATE(ultima_conversa_em) = CURRENT_DATE AS ja_processou_hoje\n  FROM usuarios_conquistas\n  WHERE usuario_id = $1::uuid\n),\n\n-- 2. Criar se não existe (já com 10 XP)\ninserir_novo AS (\n  INSERT INTO usuarios_conquistas (\n    usuario_id, xp_total, xp_base, conversas_concluidas,\n    nivel_atual, titulo_nivel, xp_proximo_nivel,\n    ultima_conversa_em, atualizado_em\n  )\n  SELECT $1::uuid, 10, 10, 1, 1, 'Iniciante', 100, NOW(), NOW()\n  WHERE NOT EXISTS (SELECT 1 FROM check_usuario)\n  RETURNING usuario_id, xp_total, conversas_concluidas, 'criado' AS resultado\n),\n\n-- 3. Atualizar se existe E não processou hoje\natualizar_xp AS (\n  UPDATE usuarios_conquistas uc\n  SET \n    xp_total = uc.xp_total + 10,\n    xp_base = uc.xp_base + 10,\n    conversas_concluidas = uc.conversas_concluidas + 1,\n    ultima_conversa_em = NOW(),\n    atualizado_em = NOW()\n  FROM check_usuario c\n  WHERE uc.usuario_id = $1::uuid\n    AND c.ja_processou_hoje = false\n  RETURNING uc.usuario_id, uc.xp_total, uc.conversas_concluidas, 'atualizado' AS resultado\n),\n\n-- 4. Retornar dados atuais se já processou hoje (ignorado)\nignorado AS (\n  SELECT \n    usuario_id, \n    xp_total, \n    conversas_concluidas, \n    'ignorado' AS resultado\n  FROM check_usuario\n  WHERE ja_processou_hoje = true\n    AND NOT EXISTS (SELECT 1 FROM inserir_novo)\n    AND NOT EXISTS (SELECT 1 FROM atualizar_xp)\n)\n\n-- Resultado final (sempre retorna algo)\nSELECT * FROM inserir_novo\nUNION ALL\nSELECT * FROM atualizar_xp\nUNION ALL\nSELECT * FROM ignorado;",
         "options": {
-          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa, $json.total_interactions] }}"
+          "queryReplacement": "={{ [$json.usuario_id] }}"
         }
       },
-      "id": "aff5d4d8-e45e-4cbd-9bf3-f346d322bb00",
-      "name": "Verificar Processamento",
+      "id": "197e51da-38e4-4436-b3d6-c23f42b0fb47",
+      "maxTries": 3,
+      "name": "Processar XP",
+      "position": [
+        1712,
+        240
+      ],
+      "retryOnFail": true,
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [
-        992,
-        352
-      ],
       "credentials": {
         "postgres": {
           "id": "8ySWxtSO7gYK5uue",
@@ -76,85 +65,16 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "version": 2,
-            "caseSensitive": true,
-            "typeValidation": "strict",
-            "leftValue": ""
-          },
-          "combinator": "and",
-          "conditions": [
-            {
-              "id": "check-processar",
-              "leftValue": "={{ $json.acao }}",
-              "rightValue": "processar",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "// Resultado padronizado (sempre mesmo formato)\nconst result = $input.first().json;\n\nreturn [{\n  json: {\n    usuario_id: result.usuario_id,\n    resultado: result.resultado, // 'criado', 'atualizado' ou 'ignorado'\n    xp_ganho: result.resultado === 'ignorado' ? 0 : 10,\n    xp_total: result.xp_total,\n    conversas_concluidas: result.conversas_concluidas\n  }\n}];"
       },
-      "id": "b6574fde-ca86-4f1a-b9f9-cfeb1fa7b067",
-      "name": "Deve Processar?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "id": "d6c51adc-1ae6-494e-b434-1adc87393574",
+      "name": "Resultado",
       "position": [
-        1200,
-        352
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "-- Atualizar XP do usuário (UPSERT - cria se não existir)\nWITH params AS (\n  SELECT $1::uuid AS usuario_id, $2::int AS xp_valor, $3::date AS data_conversa\n)\nINSERT INTO usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_base,\n  nivel_atual,\n  titulo_nivel,\n  xp_proximo_nivel,\n  total_xp_hoje,\n  ultima_conversa_em,\n  atualizado_em\n)\nSELECT\n  p.usuario_id,\n  10,\n  10,\n  1,\n  'Iniciante',\n  100,\n  10,\n  p.data_conversa,\n  NOW()\nFROM params p\nON CONFLICT (usuario_id) DO UPDATE SET\n  xp_total = usuarios_conquistas.xp_total + (SELECT xp_valor FROM params),\n  xp_base = COALESCE(usuarios_conquistas.xp_base, 0) + (SELECT xp_valor FROM params),\n  total_xp_hoje = (SELECT xp_valor FROM params),\n  ultima_conversa_em = EXCLUDED.ultima_conversa_em,\n  atualizado_em = NOW()\nRETURNING usuario_id, xp_total, xp_base, total_xp_hoje;",
-        "options": {
-          "queryReplacement": "={{ [$('Verificar Processamento').item.json.usuario_id, $('Verificar Processamento').item.json.xp_valor, $('Verificar Processamento').item.json.data_conversa] }}"
-        }
-      },
-      "id": "bfe362b5-1434-49a9-843b-78faeb388d4d",
-      "name": "Atualizar XP",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1488,
+        1920,
         240
       ],
-      "credentials": {
-        "postgres": {
-          "id": "8ySWxtSO7gYK5uue",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Retorna resultado do processamento\nconst verificar = $('Verificar Processamento').item.json;\nconst xpAtualizado = $('Atualizar XP').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: 'processado',\n    xp_ganho: verificar.xp_valor,\n    xp_total: xpAtualizado.xp_total,\n    data_conversa: verificar.data_conversa\n  }\n}];"
-      },
-      "id": "2c64a925-1866-4f38-b253-b24119a11044",
-      "name": "Resultado Processado",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1696,
-        240
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Retorna resultado quando não processa\nconst verificar = $('Verificar Processamento').item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    chat_id: verificar.chat_id,\n    resultado: verificar.acao,\n    xp_ganho: 0,\n    xp_total: null,\n    data_conversa: verificar.data_conversa\n  }\n}];"
-      },
-      "id": "7d5fe691-be8d-4754-a81e-914f6a258491",
-      "name": "Resultado Ignorado",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1472,
-        448
-      ]
+      "typeVersion": 2
     }
   ],
   "connections": {
@@ -162,47 +82,18 @@
       "main": [
         [
           {
-            "node": "Verificar Processamento",
+            "node": "Processar XP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Verificar Processamento": {
+    "Processar XP": {
       "main": [
         [
           {
-            "node": "Deve Processar?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Deve Processar?": {
-      "main": [
-        [
-          {
-            "node": "Atualizar XP",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Resultado Ignorado",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Atualizar XP": {
-      "main": [
-        [
-          {
-            "node": "Resultado Processado",
+            "node": "Resultado",
             "type": "main",
             "index": 0
           }
@@ -221,13 +112,7 @@
     "start": [
       {
         "json": {
-          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
-          "chat_id": "d99cc328-1599-4541-96dc-a4851246684f",
-          "data_conversa": "2025-12-23",
-          "total_interactions": 1
-        },
-        "pairedItem": {
-          "item": 0
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24"
         }
       }
     ]

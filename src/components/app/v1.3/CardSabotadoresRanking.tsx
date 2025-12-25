@@ -79,7 +79,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       <div className="flex items-start justify-between mb-6">
         <div>
           <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
-          <p className="mq-eyebrow mt-1">Entenda como te sabotam</p>
+          <p className="mq-eyebrow mt-1">Podem te ajudar ou te limitar</p>
         </div>
         <button
           type="button"
@@ -233,7 +233,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {!loading && (
         <div className="mt-6 text-center">
           <p className="text-xs text-[var(--mq-text-muted)] mb-2">
-            Pensamentos geram emoções que movem suas ações
+            Pensamentos geram emoções que movem suas ações. 
           </p>
           {onBarClick && (
             <p className="text-sm font-bold text-[var(--mq-highlight)]">

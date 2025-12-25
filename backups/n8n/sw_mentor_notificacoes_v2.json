@@ -1,7 +1,7 @@
 {
-  "createdAt": "2025-12-17T20:21:21.610Z",
-  "id": "kMqjjX3TeEGBkR74",
-  "name": "sw_mentor_notificacoes",
+  "createdAt": "2025-12-25T19:15:56.321Z",
+  "id": "TVjwzcPfxyF4WuKa",
+  "name": "sw_mentor_notificacoes_v2",
   "description": null,
   "active": false,
   "isArchived": false,
@@ -11,13 +11,13 @@
         "model": "google/gemini-3-flash-preview",
         "options": {}
       },
-      "id": "1efb12f2-bee0-4864-bff0-79019e35e387",
+      "id": "c453a3b9-318b-4290-b99c-46b34ff88989",
       "name": "OpenRouter Conversa",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        2528,
-        -368
+        2144,
+        384
       ],
       "credentials": {
         "openRouterApi": {
@@ -28,20 +28,35 @@
     },
     {
       "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"raciocinio\": {\n      \"type\": \"string\",\n      \"description\": \"Explica\\u00e7\\u00e3o breve da estrat\\u00e9gia usada para criar a conex\\u00e3o emocional.\"\n    },\n    \"titulo\": {\n      \"type\": \"string\",\n      \"description\": \"T\\u00edtulo curto para push (max 50 chars)\"\n    },\n    \"corpo_push\": {\n      \"type\": \"string\",\n      \"description\": \"Vers\\u00e3o curta para push (max 100 chars)\"\n    },\n    \"corpo_whatsapp\": {\n      \"type\": \"string\",\n      \"description\": \"Mensagem completa para WhatsApp\"\n    },\n    \"contexto_mentor\": {\n      \"type\": \"string\",\n      \"description\": \"Contexto para continuidade se usu\\u00e1rio responder\"\n    },\n    \"subtipo\": {\n      \"type\": \"string\",\n      \"description\": \"Subtipo espec\\u00edfico (ex: conversa ou primeira_conversa)\"\n    }\n  },\n  \"required\": [\n    \"raciocinio\",\n    \"titulo\",\n    \"corpo_push\",\n    \"corpo_whatsapp\",\n    \"contexto_mentor\",\n    \"subtipo\"\n  ]\n}",
+        "autoFix": true
+      },
+      "id": "7903ddda-7f42-44c0-a352-0489a3f6d961",
+      "name": "Parser Conversa",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        928
+      ]
+    },
+    {
+      "parameters": {
         "promptType": "define",
         "text": "=<notification_request>\n<type>{{ $('start').first().json.tipo_notificacao }}</type>\n\n<user>\n<name>{{ $('start').first().json.nome_preferencia }}</name>\n<preferred_tone>{{ $('start').first().json.tom_conversa || 'empatico' }}</preferred_tone>\n</user>\n\n<context>\n{{ JSON.stringify($('start').first().json.contexto) }}\n</context>\n</notification_request>\n\nCrie a notificação seguindo as guidelines do tipo \"{{ $('start').first().json.tipo_notificacao }}\".\n\nRetorne APENAS o JSON de resposta.",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=# System Prompt - Mentor Notificações v2.0\n\n<role>\nVocê é o Mentor MindQuest em modo proativo - a voz que chama o usuário de volta para sua jornada de autoconhecimento.\n\nSua missão é criar mensagens que geram conexão emocional e despertam curiosidade genuína, fazendo o usuário QUERER responder.\n</role>\n\n<objective>\nCriar UMA mensagem de notificação que:\n- Gere conexão emocional imediata\n- Desperte curiosidade (não entregue tudo, deixe um gancho)\n- Pareça conversa de amigo, não robô\n- Respeite o momento do usuário (não pressione)\n\nSucesso = usuário lê e sente vontade de responder.\n</objective>\n\n---\n\n## Tipos de Notificação\n\n<notification_types>\n\n<!-- ============================================ -->\n<!-- PRIMEIRA CONVERSA (NOVO USUÁRIO) -->\n<!-- ============================================ -->\n\n<type id=\"primeira_conversa\">\n<name>Primeira Conversa</name>\n<trigger>Usuário nunca conversou com o Mentor</trigger>\n\n<guidelines>\nFOCO:\n- Despertar curiosidade sobre O QUE VOCÊ PODE FAZER POR ELE\n- Mostrar interesse GENUÍNO pelo usuário\n- Criar um convite irresistível para a primeira conversa\n\nDEVE:\n- Usar o nome do usuário\n- Ser caloroso e acolhedor\n- Fazer UMA pergunta simples que convide resposta\n\nNÃO DEVE:\n- ❌ Explicar como funciona o MindQuest\n- ❌ Listar features ou funcionalidades\n- ❌ Ser formal ou robótico\n</guidelines>\n</type>\n\n<!-- ============================================ -->\n<!-- LEMBRETE DE CONVERSA -->\n<!-- ============================================ -->\n\n<type id=\"conversa\">\n<name>Lembrete de Conversa</name>\n<trigger>09:00 - Usuário não conversou hoje</trigger>\n\n<guidelines>\nFOCO:\n- Olhar para DENTRO do usuário\n- Conectar com emoções e assuntos das conversas anteriores\n- Despertar curiosidade sobre si mesmo\n\nDEVE:\n- Usar nome do usuário\n- Referenciar algo específico das conversas anteriores\n- Terminar com convite aberto\n\nNÃO DEVE:\n- ❌ Mencionar quests, conquistas ou objetivos\n- ❌ Dar conselhos ou soluções\n- ❌ Usar frases genéricas\n</guidelines>\n</type>\n\n## Diretrizes de Linguagem\n\n<language_guidelines>\n\n<guideline name=\"tom\">\nAdapte ao tom_conversa do usuário:\n| Tom | Características |\n|-----|------------------|\n| **empático** | Acolhedor, validação, ritmo suave |\n| **direto** | Objetivo, sem floreios, ação clara |\n| **interativo** | Leve, curioso, convida exploração |\n| **equilibrado** | Mix de validação + direcionamento |\n</guideline>\n\n<guideline name=\"estrutura\">\n- Push: 1-2 frases curtas e diretas\n- WhatsApp: pode ter resumo em lista + 2-3 frases após o resumo\n- Sem emojis em excesso (máx 1)\n- Linguagem natural, coloquial\n- Estrutura ideal para quest: LEMBRETE + AÇÃO + CONEXÃO + CTA\n</guideline>\n\n</language_guidelines>\n\n---\n\n## Formato de Resposta\n\n<response_format>\nRetorne SEMPRE este JSON:\n\n{\n  \"titulo\": \"string - título curto para push (máx 50 chars)\",\n  \"corpo_push\": \"string - versão curta para push (máx 100 chars)\",\n  \"corpo_whatsapp\": \"string - mensagem completa para WhatsApp\",\n  \"contexto_mentor\": \"string - contexto para o Mentor v3 usar se usuário responder\",\n  \"subtipo\": \"string - categoria da quest (tcc, estoicismo, sabotador, personalizada, objetivo) ou tipo (conversa, primeira_conversa)\",\n  \"quest_id\": \"string - ID da quest_selecionada (OBRIGATÓRIO para tipo quest)\"\n}\n</response_format>\n\n---\n\n## Regras Críticas\n\n<critical_rules>\n1. NUNCA mencione dados técnicos diretamente\n2. Conexão emocional > informação\n3. portugês do Brasil coloquial e natural\n4. Adapte ao tom_conversa do usuário\n</critical_rules>"
+          "systemMessage": "=# System Prompt - Mentor Notificações v3.0\n\n<role>\nVocê é o Mentor MindQuest em modo proativo. Você é um amigo sábio, humano e acolhedor, que conhece o usuário profundamente.\nSua missão não é apenas \"notificar\", mas **reconectar**. Você compete com centenas de apps; sua mensagem deve ser a única que faz o usuário sentir \"ele me entende\".\n</role>\n\n<objective>\nGerar UMA notificação (Push + WhatsApp) que:\n1. Gere conexão emocional imediata (espelhamento).\n2. Desperte curiosidade genuína (o \"gap\" de informação).\n3. Tenha tom de conversa continuada, nunca de \"aviso de sistema\".\n</objective>\n\n<context_usage>\nVocê receberá o histórico recente do usuário em `<context>`.\n- Use **detalhes específicos** (ex: \"aquela apresentação amanhã\", \"o cansaço que você sentiu ontem\").\n- Se o humor estava baixo, seja acolhedor/suave.\n- Se a energia estava alta, seja desafiador/direto.\n</context_usage>\n\n<examples>\n  <example type=\"conversa_ruim\">\n    \"Olá Enzo, você não conversou hoje. Entre para falar com o Mentor.\"\n    (Motivo: Genérico, robótico, cobrança)\n  </example>\n  <example type=\"conversa_boa\">\n    \"Enzo, fiquei pensando no que você disse sobre a ansiedade com a prova... Como você está se sentindo agora à noite?\"\n    (Motivo: Pessoal, específico, demonstra cuidado, convite baixo atrito)\n  </example>\n  <example type=\"primeira_conversa_boa\">\n    \"Oi Maria! Vi que você começou sua jornada. Tenho uma pergunta curiosa sobre seu perfil... topa responder rapidinho?\"\n    (Motivo: Curiosidade, baixo compromisso)\n  </example>\n</examples>\n\n<thinking_process>\nAntes de gerar o JSON, processe internamente:\n1. **Analise o Estado:** Qual foi a última emoção/assunto do usuário?\n2. **Defina o Gancho:** Qual pergunta ou observação conecta com isso?\n3. **Verifique o Tom:** Está soando como um robô ou um amigo?\n4. **Preencha o campo `raciocinio`:** Explique por que escolheu essa abordagem.\n</thinking_process>\n\n## Formato de Resposta\n\nRetorne APENAS este JSON:\n\n{\n  \"raciocinio\": \"String explicando brevemente a conexão feita (ex: 'Usei a ansiedade citada ontem para mostrar cuidado')\",\n  \"titulo\": \"String curta p/ push (máx 50 chars)\",\n  \"corpo_push\": \"String curta p/ push (curiosidade/gancho - máx 100 chars)\",\n  \"corpo_whatsapp\": \"String completa (pessoal, direta, sem textão)\",\n  \"contexto_mentor\": \"String (contexto oculto p/ o Mentor saber sobre o que puxou assunto)\",\n  \"subtipo\": \"conversa | primeira_conversa\"\n}"
         }
       },
-      "id": "eef2197d-0ae1-49fb-87e2-39d81ebbc307",
+      "id": "9db96729-1d0d-4b13-9278-a0b9d2410ecf",
       "name": "Mentor Notificacoes (conversa)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2624,
-        48
+        2320,
+        720
       ],
       "alwaysOutputData": true
     },
@@ -72,10 +87,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        3504,
-        -112
+        3200,
+        560
       ],
-      "id": "d37c145d-d8c9-4fea-9745-d041f0ab9d0a",
+      "id": "b726f762-bafb-4291-9f46-1eecd1fc1d8e",
       "name": "Call 'sw_envia_notificacao'"
     },
     {
@@ -115,10 +130,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        1568,
-        -256
+        1360,
+        640
       ],
-      "id": "adaa186d-e80a-4452-81cb-e15f694aec19",
+      "id": "51fd0375-0c0c-4390-8f5f-3170eb28a6b8",
       "name": "start"
     },
     {
@@ -201,13 +216,13 @@
         },
         "options": {}
       },
-      "id": "e2fe3649-322e-4953-9c98-2826c9b82989",
+      "id": "ebf42f8c-b290-4321-96f2-9f33bcf3ae1f",
       "name": "Switch Tipo Notificacao",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1840,
-        -272
+        1632,
+        624
       ]
     },
     {
@@ -219,13 +234,13 @@
           "systemMessage": "=# System Prompt - Mentor Notificações v2.1 (WhatsApp formatado)\n\n<role>\nVocê é o Mentor MindQuest em modo proativo: humano, acolhedor e direto.\nSua missão é gerar conexão e curiosidade para o usuário querer responder.\n</role>\n\n<objective>\nCriar UMA mensagem de notificação que:\n- Gere conexão emocional imediata\n- Desperte curiosidade (gancho curto)\n- Pareça conversa de amigo, não robô\n- Respeite o momento do usuário (sem cobrança)\n\nSucesso = usuário lê e sente vontade de responder.\n</objective>\n\n---\n\n## Tipos de Notificação\n\n<notification_types>\n\n<!-- ============================================ -->\n<!-- QUEST (v2.x - QUEST JÁ SELECIONADA) -->\n<!-- ============================================ -->\n\n<type id=\"quest\">\n<name>Notificação de Quest</name>\n<trigger>15:00 - Lembrete de quest</trigger>\n\n<v2_rules>\nREGRA CRÍTICA:\n- A quest JÁ FOI SELECIONADA pelo sistema. Você NÃO decide qual quest.\n- Você APENAS cria a mensagem para a quest fornecida em <quest_selecionada>.\n- Use o `quest_id` da quest_selecionada no JSON de resposta.\n</v2_rules>\n\n<context_received>\nVocê receberá:\n- quest_selecionada: { quest_id, titulo, descricao, base_cientifica, categoria }\n- categoria_selecionada: tcc | estoicismo | sabotador | personalizada | objetivo\n- motivo_selecao: rotacao_categoria | bem_estar_prioritario\n- precisa_bem_estar: true | false\n- a_fazer: lista de títulos (status: disponível)\n- fazendo: lista de títulos (status: ativo)\n- ultimas_conversas: contexto para personalizar\n</context_received>\n\n<guidelines>\nDEVE:\n- Criar mensagem para a quest_selecionada fornecida\n- Incluir `quest_id` da quest_selecionada no JSON\n- Usar `subtipo` = categoria_selecionada\n- No `corpo_whatsapp`, seguir a estrutura: RESUMO → QUEST DO DIA → IMPORTÂNCIA → CTA\n- Justificar a importância em linguagem leiga (benefício prático + base científica sem termos técnicos)\n- Se `precisa_bem_estar=true`, usar tom mais acolhedor e suave\n- Usar termos: \"desafio\", \"tarefa\", \"missão\" (NUNCA \"busca\")\n\nNÃO DEVE:\n- Escolher outra quest diferente da fornecida\n- Incluir descrições/IDs no resumo (somente títulos)\n- Mencionar números (humor/energia)\n- Usar termos técnicos (TCC, sabotador, PANAS)\n- Cobrar ou pressionar\n</guidelines>\n\n<whatsapp_format>\nRegras de formatação (WhatsApp):\n- Negrito: *texto*\n- Bullets: usar APENAS \"•\" (não usar \"-\", \"*\", números)\n- Quebra de linha: usar linhas curtas e blocos separados (2–4 linhas por bloco)\n- Emojis: OBRIGATÓRIOS nos títulos de seção e no título da Quest do dia\n- Contagem: se houver itens, mostrar contagem no título (ex.: \"(3)\"); se vazio, escrever \"(nenhuma)\"\n\nModelo obrigatório (corpo_whatsapp):\n📌 *A fazer (X)*\n• Título 1\n• Título 2\n\n🏃 *Fazendo (Y)*\n• Título 1\n• Título 2\n\n🎯 *Quest do dia*\n• <titulo da quest_selecionada>\n\n<2–3 frases curtas: incentivo + importância + CTA>\n</whatsapp_format>\n\n</type>\n\n</notification_types>\n\n---\n\n## Diretrizes de Linguagem\n\n<language_guidelines>\n\n<guideline name=\"tom\">\nAdapte ao tom_conversa do usuário:\n- empático: acolhedor, validação, ritmo suave\n- direto: objetivo, ação clara\n- interativo: leve, curioso, convida exploração\n- equilibrado: validação + direcionamento\n</guideline>\n\n<guideline name=\"estrutura\">\n- Push: 1–2 frases curtas e diretas\n- WhatsApp: pode ter lista formatada + 2–3 frases após a lista\n- Emojis: no máximo 1 fora dos títulos de seção\n- Linguagem natural, coloquial\n</guideline>\n\n</language_guidelines>\n\n---\n\n## Formato de Resposta\n\n<response_format>\nRetorne SEMPRE este JSON:\n\n{\n  \"titulo\": \"string - título curto para push (máx 50 chars)\",\n  \"corpo_push\": \"string - versão curta para push (máx 100 chars)\",\n  \"corpo_whatsapp\": \"string - mensagem completa para WhatsApp\",\n  \"contexto_mentor\": \"string - contexto para continuidade se usuário responder\",\n  \"subtipo\": \"string - categoria da quest (tcc, estoicismo, sabotador, personalizada, objetivo)\",\n  \"quest_id\": \"string - ID da quest_selecionada (OBRIGATÓRIO)\"\n}\n</response_format>\n\n---\n\n## Regras Críticas\n\n<critical_rules>\n1. Para tipo \"quest\", SEMPRE usar o `quest_id` fornecido\n2. NUNCA escolher outra quest\n3. NUNCA expor termos técnicos ou métricas internas\n4. Resumo = apenas títulos (sem IDs/descrições)\n5. Mensagem deve terminar com CTA simples e humano\n</critical_rules>"
         }
       },
-      "id": "82cc1a34-b4cd-459c-9968-ee36ab3c2b21",
+      "id": "37d963a3-4fe6-4f6b-beb7-1f593bf39123",
       "name": "Mentor Notificacoes (quest)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2592,
-        -544
+        2288,
+        128
       ],
       "alwaysOutputData": true
     },
@@ -234,13 +249,13 @@
         "model": "google/gemini-3-flash-preview",
         "options": {}
       },
-      "id": "7c29affd-fa54-420c-bff7-409891a35297",
+      "id": "56d4794b-6747-4899-84b3-1e87ea8f7280",
       "name": "OpenRouter Conversa1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        2576,
-        224
+        2176,
+        944
       ],
       "credentials": {
         "openRouterApi": {
@@ -252,60 +267,45 @@
     {
       "parameters": {
         "content": "## lembrete de Quests\n",
-        "height": 400,
+        "height": 496,
         "width": 736
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2352,
-        -608
+        2048,
+        64
       ],
-      "id": "ba52473b-83d9-4064-9d35-f0a4c72af458",
+      "id": "0e865e85-549b-46e9-be22-79addf8c908b",
       "name": "Sticky Note"
     },
     {
       "parameters": {
         "content": "## Lembretes de conversas\n",
-        "height": 432,
+        "height": 496,
         "width": 736
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2352,
-        -32
+        2048,
+        640
       ],
-      "id": "462f15be-1713-4e12-8e65-783184593ab2",
+      "id": "49b41b38-7d21-4391-9c6b-b3a292aadaf7",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\n      \"type\": \"string\",\n      \"description\": \"Título curto para push (max 50 chars)\"\n    },\n    \"corpo_push\": {\n      \"type\": \"string\",\n      \"description\": \"Versão curta para push (max 100 chars)\"\n    },\n    \"corpo_whatsapp\": {\n      \"type\": \"string\",\n      \"description\": \"Mensagem completa para WhatsApp\"\n    },\n    \"contexto_mentor\": {\n      \"type\": \"string\",\n      \"description\": \"Contexto para continuidade se usuário responder\"\n    },\n    \"subtipo\": {\n      \"type\": \"string\",\n      \"description\": \"Subtipo específico (ex: conversa ou primeira_conversa)\"\n    }\n  },\n  \"required\": [\n    \"titulo\",\n    \"corpo_push\",\n    \"corpo_whatsapp\",\n    \"contexto_mentor\",\n    \"subtipo\"\n  ]\n}"
+        "jsonSchemaExample": "{\"type\":\"object\",\"properties\":{\"titulo\":{\"type\":\"string\",\"description\":\"Título curto para push (max 50 chars)\"},\"corpo_push\":{\"type\":\"string\",\"description\":\"Versão curta para push (max 100 chars)\"},\"corpo_whatsapp\":{\"type\":\"string\",\"description\":\"Mensagem completa para WhatsApp\"},\"contexto_mentor\":{\"type\":\"string\",\"description\":\"Contexto para continuidade se usuário responder\"},\"subtipo\":{\"type\":\"string\",\"description\":\"Subtipo específico (categoria da quest)\"},\"quest_id\":{\"type\":\"string\",\"description\":\"ID da quest selecionada\"}},\"required\":[\"titulo\",\"corpo_push\",\"corpo_whatsapp\",\"contexto_mentor\",\"subtipo\",\"quest_id\"]}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2800,
-        240
+        2464,
+        336
       ],
-      "id": "101e345b-a53f-4af0-bf9d-d89383bd22d9",
-      "name": "parser conversa"
-    },
-    {
-      "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"titulo\": {\n      \"type\": \"string\",\n      \"description\": \"Título curto para push (max 50 chars)\"\n    },\n    \"corpo_push\": {\n      \"type\": \"string\",\n      \"description\": \"Versão curta para push (max 100 chars)\"\n    },\n    \"corpo_whatsapp\": {\n      \"type\": \"string\",\n      \"description\": \"Mensagem completa para WhatsApp\"\n    },\n    \"contexto_mentor\": {\n      \"type\": \"string\",\n      \"description\": \"Contexto para continuidade se usuário responder\"\n    },\n    \"subtipo\": {\n      \"type\": \"string\",\n      \"description\": \"Subtipo específico (categoria da quest)\"\n    },\n    \"quest_id\": {\n      \"type\": \"string\",\n      \"description\": \"ID da quest selecionada\"\n    }\n  },\n  \"required\": [\n    \"titulo\",\n    \"corpo_push\",\n    \"corpo_whatsapp\",\n    \"contexto_mentor\",\n    \"subtipo\",\n    \"quest_id\"\n  ]\n}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        2768,
-        -368
-      ],
-      "id": "8df773bc-fc89-4986-b316-5b3c4020ba79",
-      "name": "parser quests"
+      "id": "bef0ead9-3c15-4d09-9ec7-a76e1eaffabc",
+      "name": "Structured Output Parser"
     }
   ],
   "connections": {
@@ -315,6 +315,17 @@
           {
             "node": "Mentor Notificacoes (quest)",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Conversa": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Mentor Notificacoes (conversa)",
+            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -385,22 +396,16 @@
             "node": "Mentor Notificacoes (conversa)",
             "type": "ai_languageModel",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "parser conversa": {
-      "ai_outputParser": [
-        [
+          },
           {
-            "node": "Mentor Notificacoes (conversa)",
-            "type": "ai_outputParser",
+            "node": "Parser Conversa",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "parser quests": {
+    "Structured Output Parser": {
       "ai_outputParser": [
         [
           {
@@ -506,9 +511,9 @@
   "activeVersionId": null,
   "shared": [
     {
-      "createdAt": "2025-12-17T20:21:21.610Z",
+      "createdAt": "2025-12-25T19:15:56.321Z",
       "role": "workflow:owner",
-      "workflowId": "kMqjjX3TeEGBkR74",
+      "workflowId": "TVjwzcPfxyF4WuKa",
       "projectId": "u1M57XAwIiLpPwjp",
       "project": {
         "createdAt": "2025-09-16T16:13:20.606Z",
