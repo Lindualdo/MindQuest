@@ -1,5 +1,5 @@
 import { RefreshCw, Settings } from 'lucide-react';
-import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
+import mindquestLogo from '@/img/logo_redonda_small.png';
 import { useDashboard } from '@/store/useStore';
 
 type Props = {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, Menu, X, MessageCircle } from "lucide-react";
 import { palette } from "./constants";
-import mindquestLogo from "@/img/mindquest_logo_vazado_small.png";
+import mindquestLogo from "@/img/logo_redonda_small.png";
 
 type NavSection = {
   id: string;

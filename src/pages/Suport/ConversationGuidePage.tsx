@@ -12,7 +12,7 @@ import {
   Clock3,
   LogIn
 } from 'lucide-react';
-import mindquestLogo from '@/img/mindquest_logo_vazado_small.png';
+import mindquestLogo from '@/img/logo_redonda_small.png';
 import { palette as landingPalette } from '@/components/landing_start/constants';
 import { authService } from '@/services/authService';
 
