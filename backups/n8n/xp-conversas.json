@@ -1,0 +1,386 @@
+{
+  "createdAt": "2025-12-25T15:21:30.184Z",
+  "updatedAt": "2025-12-25T15:21:50.003Z",
+  "id": "EfuH9RXnTNPejnNE",
+  "name": "xp-conversas",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id",
+              "type": "string"
+            },
+            {
+              "name": "chat_id",
+              "type": "string"
+            },
+            {
+              "name": "data_conversa",
+              "type": "string"
+            },
+            {
+              "name": "quest_recorrencia_id",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "start-trigger",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## XP Consolidado (v4.0)\n\n### Fontes de XP\n- **Conversas:** 10 XP por dia único\n- **Quests:** XP do quest_catalogo\n\n### Tabela: usuarios_conquistas\n- xp_total, xp_base\n- conversas_concluidas\n- total_quests_concluidas\n\n### Inputs\n- usuario_id (obrigatório)\n- chat_id (conversas)\n- data_conversa (conversas)\n- quest_recorrencia_id (quests)",
+        "height": 500,
+        "width": 700,
+        "color": 5
+      },
+      "id": "sticky-note",
+      "name": "Regras XP v4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-quest",
+              "leftValue": "={{ $json.quest_recorrencia_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check-tipo",
+      "name": "Tipo de XP?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        900,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- XP de Quest\nWITH quest_info AS (\n  SELECT \n    qr.id AS recorrencia_id,\n    qr.usuario_id,\n    qc.xp AS xp_valor\n  FROM quests_recorrencias qr\n  JOIN usuarios_quest uq ON uq.id = qr.usuarios_quest_id\n  JOIN quests_catalogo qc ON qc.id = uq.catalogo_id\n  WHERE qr.id = $1::uuid\n)\nUPDATE usuarios_conquistas uc\nSET\n  xp_total = uc.xp_total + qi.xp_valor,\n  xp_base = COALESCE(uc.xp_base, 0) + qi.xp_valor,\n  total_quests_concluidas = uc.total_quests_concluidas + 1,\n  atualizado_em = NOW()\nFROM quest_info qi\nWHERE uc.usuario_id = qi.usuario_id\nRETURNING uc.usuario_id, qi.xp_valor, uc.xp_total, uc.total_quests_concluidas;",
+        "options": {
+          "queryReplacement": "={{ [$json.quest_recorrencia_id] }}"
+        }
+      },
+      "id": "xp-quest",
+      "name": "XP Quest",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1100,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "maxTries": 3,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Verifica se conversa única do dia\nWITH conversa_unica AS (\n  SELECT\n    $1::uuid AS usuario_id,\n    $2::uuid AS chat_id,\n    $3::date AS data_conversa\n),\nverifica_duplicata AS (\n  SELECT COUNT(*) AS total\n  FROM usr_chat\n  WHERE usuario_id = (SELECT usuario_id FROM conversa_unica)\n    AND DATE(data_conversa) = (SELECT data_conversa FROM conversa_unica)\n    AND id <> (SELECT chat_id FROM conversa_unica)\n)\nSELECT\n  cu.*,\n  CASE WHEN vd.total > 0 THEN 'duplicada' ELSE 'processar' END AS acao\nFROM conversa_unica cu, verifica_duplicata vd;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.chat_id, $json.data_conversa] }}"
+        }
+      },
+      "id": "xp-conversa-check",
+      "name": "Verificar Conversa",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1100,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "maxTries": 3,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-processar",
+              "leftValue": "={{ $json.acao }}",
+              "rightValue": "processar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "deve-processar-conversa",
+      "name": "Deve Processar Conversa?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1300,
+        400
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Atualizar XP de conversa (UPSERT)\nWITH params AS (\n  SELECT $1::uuid AS usuario_id\n)\nINSERT INTO usuarios_conquistas (\n  usuario_id,\n  xp_total,\n  xp_base,\n  conversas_concluidas,\n  nivel_atual,\n  titulo_nivel,\n  xp_proximo_nivel,\n  total_xp_hoje,\n  atualizado_em\n)\nSELECT\n  p.usuario_id,\n  10,\n  10,\n  1,\n  1,\n  'Iniciante',\n  100,\n  10,\n  NOW()\nFROM params p\nON CONFLICT (usuario_id) DO UPDATE SET\n  xp_total = usuarios_conquistas.xp_total + 10,\n  xp_base = COALESCE(usuarios_conquistas.xp_base, 0) + 10,\n  conversas_concluidas = usuarios_conquistas.conversas_concluidas + 1,\n  total_xp_hoje = 10,\n  atualizado_em = NOW()\nRETURNING usuario_id, xp_total, xp_base, conversas_concluidas;",
+        "options": {
+          "queryReplacement": "={{ [$('Verificar Conversa').item.json.usuario_id] }}"
+        }
+      },
+      "id": "xp-conversa-update",
+      "name": "Atualizar XP Conversa",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1500,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "maxTries": 3,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: result.usuario_id,\n    tipo: 'quest',\n    xp_ganho: result.xp_valor,\n    xp_total: result.xp_total,\n    total_quests: result.total_quests_concluidas\n  }\n}];"
+      },
+      "id": "resultado-quest",
+      "name": "Resultado Quest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: result.usuario_id,\n    tipo: 'conversa',\n    xp_ganho: 10,\n    xp_total: result.xp_total,\n    conversas_concluidas: result.conversas_concluidas\n  }\n}];"
+      },
+      "id": "resultado-conversa",
+      "name": "Resultado Conversa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const verificar = $input.item.json;\n\nreturn [{\n  json: {\n    usuario_id: verificar.usuario_id,\n    tipo: 'conversa',\n    resultado: verificar.acao,\n    xp_ganho: 0\n  }\n}];"
+      },
+      "id": "resultado-ignorado",
+      "name": "Resultado Ignorado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Tipo de XP?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo de XP?": {
+      "main": [
+        [
+          {
+            "node": "XP Quest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Verificar Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XP Quest": {
+      "main": [
+        [
+          {
+            "node": "Resultado Quest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Conversa": {
+      "main": [
+        [
+          {
+            "node": "Deve Processar Conversa?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deve Processar Conversa?": {
+      "main": [
+        [
+          {
+            "node": "Atualizar XP Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado Ignorado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar XP Conversa": {
+      "main": [
+        [
+          {
+            "node": "Resultado Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-25T15:21:30.184Z",
+      "role": "workflow:owner",
+      "workflowId": "EfuH9RXnTNPejnNE",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
+
