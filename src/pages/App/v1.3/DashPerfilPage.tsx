@@ -164,6 +164,16 @@ const DashPerfilPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Descrição */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="mb-4 text-center text-sm text-[var(--mq-text-muted)] px-2"
+        >
+          Entenda suas emoções e padrões mentais detectados nas conversas com seu Mentor
+        </motion.p>
+
         {/* Card Humor */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
