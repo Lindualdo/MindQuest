@@ -319,7 +319,7 @@ const QuestDetailPageV13 = () => {
     }
     
     if (dias.length > 0) {
-      console.log('[QuestDetail] 📅 Dias disponíveis:', dias.map((d: any) => ({ 
+      console.log('[QuestDetail] Calendar Dias disponíveis:', dias.map((d: any) => ({ 
         data: d.data || d.data_planejada, 
         data_planejada: d.data_planejada,
         status: d.status,
@@ -348,11 +348,11 @@ const QuestDetailPageV13 = () => {
           }
           const match = dataDia === dataReferencia;
           if (match) {
-            console.log('[QuestDetail] ✅ Match encontrado:', { dataDia, dataReferencia, status: dia.status });
+            console.log('[QuestDetail] Check Match encontrado:', { dataDia, dataReferencia, status: dia.status });
           }
           return match;
         } catch (err) {
-          console.error('[QuestDetail] ❌ Erro ao processar data:', err, dataCampo);
+          console.error('[QuestDetail] X Erro ao processar data:', err, dataCampo);
           return false;
         }
       });
@@ -362,7 +362,7 @@ const QuestDetailPageV13 = () => {
         const statusNormalizado = String(recorrenciaSelecionada.status || '').toLowerCase().trim();
         recorrenciaSelecionadaConcluida = statusNormalizado === 'concluida' || statusNormalizado === 'perdida';
         
-        console.log('[QuestDetail] ✅ Recorrência encontrada:', {
+        console.log('[QuestDetail] Check Recorrência encontrada:', {
           dataReferencia,
           recorrenciaData: recorrenciaSelecionada.data || recorrenciaSelecionada.data_planejada,
           recorrenciaStatus: recorrenciaSelecionada.status,

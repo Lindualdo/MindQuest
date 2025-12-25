@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Check, Sun, Moon, Lightbulb } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -330,8 +330,9 @@ const AparenciaPageV13: React.FC = () => {
           transition={{ delay: 0.15 }}
           className="rounded-xl border border-[var(--mq-primary)]/20 bg-[var(--mq-primary-light)] p-3"
         >
-          <p className="text-xs text-[var(--mq-text)]">
-            💡 <span className="font-semibold text-[var(--mq-primary)]">Dica:</span> O tema escuro pode ajudar a reduzir o cansaço visual durante a noite.
+          <p className="text-xs text-[var(--mq-text)] flex items-start gap-2">
+            <Lightbulb size={14} className="text-[var(--mq-primary)] shrink-0 mt-0.5" />
+            <span><span className="font-semibold text-[var(--mq-primary)]">Dica:</span> O tema escuro pode ajudar a reduzir o cansaço visual durante a noite.</span>
           </p>
         </motion.div>
       </main>

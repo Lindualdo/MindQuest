@@ -24,7 +24,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'joy',
     nome: 'Alegria',
     cor: '#FFD700',
-    emoji: '😊',
+    emoji: 'Smile',
     intensidade: 75,
     categoria: 'primaria'
   },
@@ -32,7 +32,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'trust',
     nome: 'Confiança',
     cor: '#90EE90',
-    emoji: '🤗',
+    emoji: 'Hand',
     intensidade: 65,
     categoria: 'primaria'
   },
@@ -40,7 +40,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'fear',
     nome: 'Medo',
     cor: '#FF6347',
-    emoji: '😨',
+    emoji: 'CircleHelp',
     intensidade: 25,
     categoria: 'primaria'
   },
@@ -48,7 +48,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'surprise',
     nome: 'Surpresa',
     cor: '#FF69B4',
-    emoji: '😲',
+    emoji: 'Sparkles',
     intensidade: 40,
     categoria: 'primaria'
   },
@@ -56,7 +56,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'sadness',
     nome: 'Tristeza',
     cor: '#4169E1',
-    emoji: '😢',
+    emoji: 'Heart',
     intensidade: 20,
     categoria: 'primaria'
   },
@@ -64,7 +64,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'anguish',
     nome: 'Angústia',
     cor: '#8B4513',
-    emoji: '😣',
+    emoji: 'Minus',
     intensidade: 15,
     categoria: 'primaria'
   },
@@ -72,7 +72,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'anger',
     nome: 'Raiva',
     cor: '#DC143C',
-    emoji: '😠',
+    emoji: 'Flame',
     intensidade: 30,
     categoria: 'primaria'
   },
@@ -80,7 +80,7 @@ const rodaEmocoesPadrao: PlutchikEmotion[] = [
     id: 'anticipation',
     nome: 'Expectativa',
     cor: '#FFA500',
-    emoji: '🤔',
+    emoji: 'Brain',
     intensidade: 55,
     categoria: 'primaria'
   }
@@ -115,7 +115,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 7,
     qualidade_interacao: 9,
     status_resposta: 'respondido',
-    emoji_dia: '😊',
+    emoji_dia: 'Smile',
     resposta_texto: 'Me sentindo bem hoje! Pronto para mais um dia produtivo.'
   },
   {
@@ -129,7 +129,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 6,
     qualidade_interacao: 7,
     status_resposta: 'respondido',
-    emoji_dia: '😐',
+    emoji_dia: 'Smile',
     resposta_texto: 'Dia neutro, mas estou seguindo minha rotina.'
   },
   {
@@ -143,7 +143,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 8,
     qualidade_interacao: 10,
     status_resposta: 'respondido',
-    emoji_dia: '😊',
+    emoji_dia: 'Smile',
     resposta_texto: 'Excelente! Consegui completar todas as metas de ontem.'
   },
   {
@@ -157,7 +157,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 7,
     qualidade_interacao: 8,
     status_resposta: 'respondido',
-    emoji_dia: '😊',
+    emoji_dia: 'Smile',
     resposta_texto: 'Animado com os projetos da semana!'
   },
   {
@@ -170,7 +170,7 @@ const checkinsHistorico: CheckinDiario[] = [
     intensidade_emocao: 0,
     energia_detectada: 0,
     qualidade_interacao: 0,
-    emoji_dia: '❌'
+    emoji_dia: 'X',
   },
   {
     id_checkin: 'ci_006',
@@ -183,7 +183,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 8,
     qualidade_interacao: 9,
     status_resposta: 'respondido',
-    emoji_dia: '😊',
+    emoji_dia: 'Smile',
     resposta_texto: 'Começando bem a semana!'
   },
   {
@@ -197,7 +197,7 @@ const checkinsHistorico: CheckinDiario[] = [
     energia_detectada: 6,
     qualidade_interacao: 8,
     status_resposta: 'respondido',
-    emoji_dia: '😊',
+    emoji_dia: 'Smile',
     resposta_texto: 'Domingo tranquilo, me preparando para a semana.'
   }
 ];
@@ -231,7 +231,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'primeira_semana',
       nome: 'Primeira Semana',
-      emoji: '🎯',
+      emoji: 'Target',
       xp_bonus: 50,
       categoria: 'primeiros_passos',
       desbloqueada_em: '2025-09-18T10:00:00Z'
@@ -239,7 +239,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'streak_7_dias',
       nome: 'Streak de Fogo',
-      emoji: '🔥',
+      emoji: 'Flame',
       xp_bonus: 100,
       categoria: 'consistencia',
       desbloqueada_em: '2025-09-25T10:00:00Z'
@@ -247,7 +247,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'explorador_emocoes',
       nome: 'Explorador Emocional',
-      emoji: '🌈',
+      emoji: 'Sparkles',
       xp_bonus: 80,
       categoria: 'emocional',
       desbloqueada_em: '2025-10-02T10:00:00Z'
@@ -255,7 +255,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'consistencia_bronze',
       nome: 'Consistência Bronze',
-      emoji: '🥉',
+      emoji: 'Medal',
       xp_bonus: 120,
       categoria: 'consistencia',
       desbloqueada_em: '2025-10-06T10:00:00Z'
@@ -263,7 +263,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'reflexao_profunda',
       nome: 'Reflexão Profunda',
-      emoji: '🧠',
+      emoji: 'Brain',
       xp_bonus: 150,
       categoria: 'reflexao',
       desbloqueada_em: '2025-10-10T08:30:00Z'
@@ -273,7 +273,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'streak_30_dias',
       nome: 'Streak 30 Dias',
-      emoji: '🔒',
+      emoji: 'Lock',
       status: 'pendente',
       xp_bonus: 300,
       categoria: 'consistencia',
@@ -286,7 +286,7 @@ const gamificacao: Gamificacao = {
     {
       id: 'reflexoes_20',
       nome: '20 Reflexões',
-      emoji: '🔮',
+      emoji: 'Sparkles',
       status: 'parcial',
       xp_bonus: 220,
       categoria: 'reflexao',
@@ -344,7 +344,7 @@ const gamificacao: Gamificacao = {
 const sabotadorPrincipal: SabotadorPadrao = {
   id: 'critico',
   nome: 'Crítico',
-  emoji: '🎭',
+  emoji: 'Ghost',
   apelido: 'Sr. Exigente',
   detectado_em: 4,
   total_conversas: 7,
@@ -359,7 +359,7 @@ const insights: Insight[] = [
     tipo: 'positivo',
     titulo: 'Consistência Incrível!',
     descricao: 'Você manteve conversas diárias por 12 dias seguidos. Seu perfil disciplinado está se destacando!',
-    icone: '🏆',
+    icone: 'Trophy',
     data_criacao: '2025-09-22',
     prioridade: 'alta',
     categoria: 'comportamental'
@@ -369,7 +369,7 @@ const insights: Insight[] = [
     tipo: 'padrao',
     titulo: 'Pico de Energia Matinal',
     descricao: 'Detectamos que você responde às conversas mais rapidamente pela manhã. Seu cronotipo matutino está bem definido.',
-    icone: '🌅',
+    icone: 'Smile',
     data_criacao: '2025-09-21',
     prioridade: 'media',
     categoria: 'comportamental'
@@ -379,7 +379,7 @@ const insights: Insight[] = [
     titulo: 'Meta de Positividade',
     tipo: 'positivo',
     descricao: 'Parabéns! Você atingiu 72% de emoções positivas esta semana, superando sua meta de 70%.',
-    icone: '✨',
+    icone: 'Sparkles',
     data_criacao: '2025-09-20',
     prioridade: 'alta',
     categoria: 'emocional'
@@ -389,7 +389,7 @@ const insights: Insight[] = [
     tipo: 'melhoria',
     titulo: 'Oportunidade de Reflexão',
     descricao: 'Que tal adicionar mais detalhes em suas conversas? Suas respostas detalhadas vão ajudar você se conhecer melhor.',
-    icone: '💭',
+    icone: 'Brain',
     data_criacao: '2025-09-19',
     prioridade: 'baixa',
     categoria: 'cognitivo'
@@ -421,7 +421,7 @@ export const mockDashboardData: DashboardData = {
   
   mood_gauge: {
     nivel_atual: 2.3,
-    emoji_atual: '😊',
+    emoji_atual: 'Smile',
     tendencia_semanal: 0.8,
     cor_indicador: '#10B981' // verde positivo
   },
@@ -466,7 +466,7 @@ export const generateCheckinForDay = (date: string, dayIndex: number): CheckinDi
   ];
   
   const emotions = ['joy', 'trust', 'anticipation', 'surprise'];
-  const emojis = ['😊', '😐', '🤗', '😲'];
+  const emojis = ['Smile', 'Smile', 'Hand', 'Sparkles'];
   
   return {
     id_checkin: `ci_${dayIndex}`,

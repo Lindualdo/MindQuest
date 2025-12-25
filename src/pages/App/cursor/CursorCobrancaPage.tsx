@@ -126,7 +126,7 @@ const CursorCobrancaPage: React.FC = () => {
             transition={{ delay: 0.3 }}
           >
             <p className="text-sm text-[var(--mq-text-muted)]">
-              <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o uso de <strong>tokens</strong>, não apenas requisições. 
+              <strong className="text-[var(--mq-text)]">Lightbulb Dica:</strong> Monitore o uso de <strong>tokens</strong>, não apenas requisições. 
               On-Demand é cobrado por tokens excedentes. Use o dashboard para acompanhar em tempo real.
             </p>
           </motion.div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, Bell, MessageCircle, Mail, Smartphone, MessageSquare, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Bell, MessageCircle, Mail, Smartphone, MessageSquare, Clock, CheckCircle2 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -271,9 +271,10 @@ const NotificacoesPageV13: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md"
+            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md flex items-center gap-2"
           >
-            ✅ Configurações salvas com sucesso!
+            <CheckCircle2 size={18} className="text-green-600" />
+            Configurações salvas com sucesso!
           </motion.div>
         )}
 

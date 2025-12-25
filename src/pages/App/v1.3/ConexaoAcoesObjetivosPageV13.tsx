@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Target, Zap, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Target, Zap, CheckCircle2, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -337,7 +337,7 @@ const ConexaoAcoesObjetivosPageV13: React.FC = () => {
                                     </div>
                                     
                                     <p className={`text-xs text-right ${isConcluida ? 'text-[var(--mq-success)]' : 'text-[var(--mq-text-muted)]'}`}>
-                                      {percentual}% {isConcluida ? '✓' : 'concluído'}
+                                      {percentual}% {isConcluida ? <Check size={12} className="inline-block" /> : 'concluído'}
                                     </p>
                                   </div>
                                 );

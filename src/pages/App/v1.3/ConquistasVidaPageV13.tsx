@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Target, Check, Loader2, Calendar, Clock, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Target, Check, Loader2, Calendar, Clock, Star, PartyPopper } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
-import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
+import '@/components/app/v1_3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+import { IconRenderer } from '@/utils/iconMap';
 
 interface Objetivo {
   id: string;
@@ -203,7 +204,7 @@ const ConquistasVidaPageV13: React.FC = () => {
                       className="mq-card p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <span className="text-2xl">{objetivo.area_icone}</span>
+                        <IconRenderer name={objetivo.area_icone} size={24} className="text-[var(--mq-primary)]" />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-bold text-[var(--mq-text)]">
                             {objetivo.titulo}
@@ -259,8 +260,9 @@ const ConquistasVidaPageV13: React.FC = () => {
                             exit={{ opacity: 0, height: 0 }}
                             className="mt-4 pt-4 border-t border-[var(--mq-border)]"
                           >
-                            <p className="text-sm text-center text-[var(--mq-text)] mb-3">
-                              🎉 Confirma que alcançou este objetivo?
+                            <p className="text-sm text-center text-[var(--mq-text)] mb-3 flex items-center justify-center gap-2">
+                              <PartyPopper size={18} className="text-[var(--mq-primary)]" />
+                              Confirma que alcançou este objetivo?
                             </p>
                             <div className="flex gap-2">
                               <button
@@ -376,7 +378,7 @@ const ConquistasVidaPageV13: React.FC = () => {
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative">
-                          <span className="text-2xl">{objetivo.area_icone}</span>
+                          <IconRenderer name={objetivo.area_icone} size={24} className="text-[var(--mq-primary)]" />
                           <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--mq-warning)] flex items-center justify-center">
                             <Check size={12} className="text-white" />
                           </div>

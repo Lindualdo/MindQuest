@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Brain, Zap, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Brain, Zap, CheckCircle2, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+import { IconRenderer } from '@/utils/iconMap';
 
 interface Quest {
   id: string;
@@ -230,7 +231,7 @@ const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
                       className="w-full p-4 text-left flex items-start gap-3 hover:bg-[var(--mq-surface)] transition-colors"
                     >
                       <div className="p-2 rounded-xl bg-[var(--mq-primary-light)] flex-shrink-0">
-                        <span className="text-2xl">{sabotador.emoji}</span>
+                        <IconRenderer name={sabotador.emoji} size={24} className="text-[var(--mq-primary)]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-bold text-[var(--mq-text)] mb-1">
@@ -316,7 +317,7 @@ const ConexaoAcoesSabotadoresPageV13: React.FC = () => {
                                     
                                     <div className="flex items-center justify-end">
                                       <p className={`text-xs ${isConcluida ? 'text-[var(--mq-success)]' : 'text-[var(--mq-text-muted)]'}`}>
-                                        {percentual}% {isConcluida ? '✓' : 'concluído'}
+                                        {percentual}% {isConcluida ? <Check size={12} className="inline-block" /> : 'concluído'}
                                       </p>
                                     </div>
                                   </div>

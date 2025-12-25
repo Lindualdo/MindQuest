@@ -23,6 +23,7 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
+import { IconRenderer } from '@/utils/iconMap';
 
 const TAB_OPTIONS = [
   { key: 'alerta', label: 'Alertas' },
@@ -151,7 +152,7 @@ const InsightsDashboardPageV13: React.FC = () => {
             <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-lg font-semibold text-slate-800">{insight.titulo}</h2>
-                <span className="text-2xl">{insight.icone}</span>
+                <IconRenderer name={insight.icone} size={24} className="text-slate-600" />
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">

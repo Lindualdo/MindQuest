@@ -1,4 +1,4 @@
-import { RefreshCw, Settings, ChevronLeft } from 'lucide-react';
+import { RefreshCw, Settings, ChevronLeft, Hand } from 'lucide-react';
 import mindquestLogo from '@/img/logo_redonda_small.png';
 import { useDashboard } from '@/store/useStore';
 
@@ -48,7 +48,7 @@ const HeaderV1_3 = ({ nomeUsuario, onRefresh, onBack, backLabel = 'Voltar' }: Pr
         </div>
 
         <p className="flex-1 truncate text-center text-[0.78rem] font-semibold text-[var(--mq-text)] sm:text-sm">
-          Olá, {nomeUsuario}! <span aria-hidden="true">👋</span>
+          Olá, {nomeUsuario}! <Hand size={14} className="inline-block ml-1 text-[var(--mq-primary)]" />
         </p>
 
         <div className="flex min-w-[100px] items-center justify-end gap-2">

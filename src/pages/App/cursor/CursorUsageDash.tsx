@@ -606,7 +606,7 @@ const CursorUsageDash: React.FC = () => {
                   </ul>
                 </div>
                 <div className="pt-2 border-t border-blue-500/20">
-                  <strong className="text-[var(--mq-text)]">💡 Dica:</strong> Monitore o <strong>valor usado</strong> (${stats.planLimitUsed?.toFixed(2) ?? stats.includedCost.toFixed(2)} / ${stats.planLimit?.toFixed(0) ?? '400'}). Quando exceder ${stats.planLimit?.toFixed(0) ?? '400'}, uso adicional será cobrado como On-Demand!
+                  <strong className="text-[var(--mq-text)]">Lightbulb Dica:</strong> Monitore o <strong>valor usado</strong> (${stats.planLimitUsed?.toFixed(2) ?? stats.includedCost.toFixed(2)} / ${stats.planLimit?.toFixed(0) ?? '400'}). Quando exceder ${stats.planLimit?.toFixed(0) ?? '400'}, uso adicional será cobrado como On-Demand!
                 </div>
               </div>
             </motion.div>

@@ -5,6 +5,7 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+import { IconRenderer } from '@/utils/iconMap';
 
 // Tipos
 interface Area {
@@ -42,12 +43,12 @@ interface ObjetivoUsuario {
 
 // Fallback do catálogo (caso API não esteja disponível)
 const FALLBACK_AREAS: Area[] = [
-  { id: '22222222-2222-4222-8222-222222222222', codigo: 'trabalho', nome: 'Trabalho', icone: '💼', ordem: 1 },
-  { id: '66666666-6666-4666-8666-666666666666', codigo: 'relacionamentos', nome: 'Relacionamentos', icone: '💛', ordem: 2 },
-  { id: '44444444-4444-4444-8444-444444444444', codigo: 'espiritualidade', nome: 'Espiritualidade', icone: '🙏', ordem: 3 },
-  { id: '33333333-3333-4333-8333-333333333333', codigo: 'financas', nome: 'Finanças', icone: '💰', ordem: 4 },
-  { id: '11111111-1111-4111-8111-111111111111', codigo: 'saude', nome: 'Saúde', icone: '🏃', ordem: 5 },
-  { id: '88888888-8888-4888-8888-888888888888', codigo: 'evolucao', nome: 'Evolução', icone: '🧠', ordem: 6 },
+  { id: '22222222-2222-4222-8222-222222222222', codigo: 'trabalho', nome: 'Trabalho', icone: 'Briefcase', ordem: 1 },
+  { id: '66666666-6666-4666-8666-666666666666', codigo: 'relacionamentos', nome: 'Relacionamentos', icone: 'Heart', ordem: 2 },
+  { id: '44444444-4444-4444-8444-444444444444', codigo: 'espiritualidade', nome: 'Espiritualidade', icone: 'Sprout', ordem: 3 },
+  { id: '33333333-3333-4333-8333-333333333333', codigo: 'financas', nome: 'Finanças', icone: 'Coins', ordem: 4 },
+  { id: '11111111-1111-4111-8111-111111111111', codigo: 'saude', nome: 'Saúde', icone: 'Activity', ordem: 5 },
+  { id: '88888888-8888-4888-8888-888888888888', codigo: 'evolucao', nome: 'Evolução', icone: 'Brain', ordem: 6 },
 ];
 
 const FALLBACK_OBJETIVOS: Record<string, ObjetivoCatalogo[]> = {
@@ -391,7 +392,7 @@ const ObjetivosPageV13: React.FC = () => {
                         className={`mq-card p-4 ${obj.is_padrao ? 'opacity-80' : 'cursor-pointer'}`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="text-2xl">{obj.area.icone}</div>
+                          <IconRenderer name={obj.area.icone} size={24} className="text-[var(--mq-primary)]" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-xs font-medium text-[var(--mq-text-muted)]">
@@ -494,7 +495,9 @@ const ObjetivosPageV13: React.FC = () => {
                           : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]/50'
                       }`}
                     >
-                      <div className="text-3xl mb-2">{area.icone}</div>
+                      <div className="flex justify-center mb-2">
+                        <IconRenderer name={area.icone} size={32} className="text-[var(--mq-primary)]" />
+                      </div>
                       <div className="text-xs font-semibold text-[var(--mq-text)] leading-tight">
                         {area.nome}
                       </div>
@@ -519,8 +522,8 @@ const ObjetivosPageV13: React.FC = () => {
                   <h3 className="text-base font-bold text-[var(--mq-text)]">
                     Escolha o objetivo
                   </h3>
-                  <p className="text-xs text-[var(--mq-text-muted)] mt-1">
-                    {areaSelecionada?.icone} {areaSelecionada?.nome}
+                  <p className="text-xs text-[var(--mq-text-muted)] mt-1 flex items-center gap-1">
+                    <IconRenderer name={areaSelecionada?.icone} size={14} className="text-[var(--mq-primary)]" /> {areaSelecionada?.nome}
                   </p>
                 </div>
 
@@ -675,7 +678,7 @@ const ObjetivosPageV13: React.FC = () => {
                 <div className="mt-6 p-4 rounded-xl bg-[var(--mq-background)] border border-[var(--mq-border)]">
                   <h4 className="text-xs font-bold text-[var(--mq-text-muted)] mb-2">RESUMO</h4>
                   <div className="space-y-1 text-sm">
-                    <p><span className="text-[var(--mq-text-muted)]">Área:</span> {areaSelecionada?.icone} {areaSelecionada?.nome}</p>
+                    <p className="flex items-center gap-1"><span className="text-[var(--mq-text-muted)]">Área:</span> <IconRenderer name={areaSelecionada?.icone} size={14} className="text-[var(--mq-primary)]" /> {areaSelecionada?.nome}</p>
                     <p><span className="text-[var(--mq-text-muted)]">Objetivo:</span> {objetivoSelecionado?.titulo || objetivoCustomizado}</p>
                     <p><span className="text-[var(--mq-text-muted)]">Prazo:</span> {prazoDias ? `${prazoDias} dias` : '-'}</p>
                   </div>

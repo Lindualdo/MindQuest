@@ -117,7 +117,7 @@ export const mockMoodEnergySummary: MoodEnergySummary = {
 
 export const mockInsightCard: InsightCardData = {
   insight_id: 'mock-insight-001',
-  titulo: 'Gerenciar o peso emocional da urgência financeira 🔥',
+  titulo: 'Gerenciar o peso emocional da urgência financeira',
   descricao:
     'Aldo vive pressão intensa para gerar renda e sente desgaste emocional acumulado. Sugira micro-pausas de respiração antes de decisões importantes para manter clareza.',
   prioridade: 'alta',

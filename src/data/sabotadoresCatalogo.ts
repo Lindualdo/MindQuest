@@ -47,7 +47,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'critico',
       nome: 'Crítico',
-      emoji: '⚖️',
+      emoji: 'Scale',
       resumo:
         'Voz interna hiperexigente que julga a si, aos outros e às circunstâncias o tempo todo.',
       descricao:
@@ -99,7 +99,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'insistente',
       nome: 'Insistente',
-      emoji: '🧭',
+      emoji: 'Compass',
       resumo:
         'Perfeccionismo e necessidade extrema de ordem, regras e padrões impecáveis.',
       descricao:
@@ -153,7 +153,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'prestativo',
       nome: 'Prestativo',
-      emoji: '🤝',
+      emoji: 'Handshake',
       resumo:
         'Busca aceitação oferecendo ajuda constante, ainda que silencie as próprias necessidades.',
       descricao:
@@ -206,7 +206,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'hiper_realizador',
       nome: 'Hiper-Realizador',
-      emoji: '🏆',
+      emoji: 'Trophy',
       resumo:
         'Autoestima condicionada a conquistas e desempenho impecável.',
       descricao:
@@ -260,7 +260,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'hiper_vigilante',
       nome: 'Hiper-Vigilante',
-      emoji: '🛡️',
+      emoji: 'ShieldAlert',
       resumo:
         'Estado de alerta constante, sempre esperando o pior cenário.',
       descricao:
@@ -313,7 +313,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'hiper_racional',
       nome: 'Hiper-Racional',
-      emoji: '🧠',
+      emoji: 'Brain',
       resumo:
         'Valoriza lógica acima das emoções, tratando relações como projetos a otimizar.',
       descricao:
@@ -366,7 +366,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'vitima',
       nome: 'Vítima',
-      emoji: '🎭',
+      emoji: 'Ghost',
       resumo:
         'Cria narrativas de injustiça para obter atenção, empatia ou isenção de responsabilidade.',
       descricao:
@@ -419,7 +419,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'controlador',
       nome: 'Controlador',
-      emoji: '🎯',
+      emoji: 'Target',
       resumo:
         'Necessidade de liderar tudo o tempo todo para sentir segurança.',
       descricao:
@@ -472,7 +472,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'esquivo',
       nome: 'Esquivo',
-      emoji: '🪁',
+      emoji: 'Wind',
       resumo:
         'Evita conflitos e tarefas desconfortáveis, focando apenas no que traz prazer imediato.',
       descricao:
@@ -525,7 +525,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     {
       id: 'inquieto',
       nome: 'Inquieto',
-      emoji: '⚡️',
+      emoji: 'Zap',
       resumo:
         'Busca constante de novidades e estímulos para escapar de tédio ou desconforto emocional.',
       descricao:

@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Flame } from 'lucide-react';
 import type { InsightCardData } from '@/types/emotions';
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 
 const fallbackInsight: InsightCardData = {
   insight_id: null,
-  titulo: 'Gerenciar o peso emocional da urgência financeira 🔥',
+  titulo: 'Gerenciar o peso emocional da urgência financeira',
   descricao:
     'Aldo vive pressão intensa para gerar renda e sente desgaste emocional acumulado. Sugira micro-pausas de respiração antes das decisões financeiras críticas.',
   prioridade: 'alta',

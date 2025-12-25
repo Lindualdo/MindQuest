@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target, Edit3, History, Calendar } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, ChevronRight, Check, Target, Edit3, History, Calendar, CheckCircle2 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
-import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
+import '@/components/app/v1_3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import { useDashboard } from '@/store/useStore';
+import { IconRenderer } from '@/utils/iconMap';
 
 interface Objetivo {
   id: string;
@@ -320,9 +321,10 @@ const CheckinSemanalPageV13: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md"
+            className="mb-4 rounded-xl border-2 border-green-400 bg-green-100 p-4 text-sm font-semibold text-green-800 shadow-md flex items-center gap-2"
           >
-            ✅ Check-in {isEditing ? 'atualizado' : 'salvo'} com sucesso!
+            <CheckCircle2 size={18} className="text-green-600" />
+            Check-in {isEditing ? 'atualizado' : 'salvo'} com sucesso!
           </motion.div>
         )}
 
@@ -358,7 +360,7 @@ const CheckinSemanalPageV13: React.FC = () => {
                             : 'border-[var(--mq-border)] bg-[var(--mq-card)] hover:border-[var(--mq-primary)]'
                         }`}
                       >
-                        <span className="text-2xl">{objetivo.area_icone}</span>
+                        <IconRenderer name={objetivo.area_icone} size={24} className="text-[var(--mq-primary)]" />
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-bold text-[var(--mq-text)] truncate">
                             {objetivo.titulo}
@@ -409,15 +411,15 @@ const CheckinSemanalPageV13: React.FC = () => {
                   </p>
                   
                   {isEditing && (
-                    <p className="text-xs text-center text-amber-500 font-medium mb-4">
-                      ✏️ Editando check-in existente
+                    <p className="text-xs text-center text-amber-500 font-medium mb-4 flex items-center justify-center gap-1">
+                      <Edit3 size={12} /> Editando check-in existente
                     </p>
                   )}
 
                   {/* Objetivo selecionado */}
                   <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-6">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{selectedObjetivo.area_icone}</span>
+                      <IconRenderer name={selectedObjetivo.area_icone} size={24} className="text-[var(--mq-primary)]" />
                       <div>
                         <h3 className="text-sm font-bold text-[var(--mq-text)]">
                           {selectedObjetivo.titulo}
@@ -495,7 +497,7 @@ const CheckinSemanalPageV13: React.FC = () => {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <span className="text-xl">{checkin.area_icone}</span>
+                            <IconRenderer name={checkin.area_icone} size={20} className="text-[var(--mq-primary)]" />
                             <div className="flex-1 min-w-0">
                               <h3 className="text-sm font-bold text-[var(--mq-text)] truncate">
                                 {checkin.objetivo_titulo}
@@ -561,8 +563,8 @@ const CheckinSemanalPageV13: React.FC = () => {
                   </p>
                   
                   {isEditing && (
-                    <p className="text-xs text-center text-amber-500 font-medium mb-4">
-                      ✏️ Editando check-in existente
+                    <p className="text-xs text-center text-amber-500 font-medium mb-4 flex items-center justify-center gap-1">
+                      <Edit3 size={12} /> Editando check-in existente
                     </p>
                   )}
 
@@ -570,7 +572,7 @@ const CheckinSemanalPageV13: React.FC = () => {
                   <div className="p-4 rounded-xl bg-[var(--mq-surface)] mb-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{selectedObjetivo.area_icone}</span>
+                        <IconRenderer name={selectedObjetivo.area_icone} size={24} className="text-[var(--mq-primary)]" />
                         <div>
                           <h3 className="text-sm font-bold text-[var(--mq-text)]">
                             {selectedObjetivo.titulo}

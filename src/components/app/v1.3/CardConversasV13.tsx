@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { IconRenderer } from '@/utils/iconMap';
 
 type DiaConversa = {
   label: string;
@@ -27,25 +28,25 @@ const CardConversasV13 = ({
     respondido: {
       bg: '#DCEEF6',
       border: '#0EA5E9',
-      icon: '✓',
+      icon: 'Check',
       color: '#0EA5E9',
     },
     perdido: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'rgba(140,149,178,0.4)',
-      icon: '✕',
+      icon: 'X',
       color: '#6D7692',
     },
     pendente: {
       bg: '#FEF3C7',
       border: '#FCD34D',
-      icon: '…',
+      icon: 'Ellipsis',
       color: '#D97706',
     },
     default: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'rgba(140,149,178,0.35)',
-      icon: '—',
+      icon: 'Minus',
       color: '#6D7692',
     },
   };
@@ -101,7 +102,7 @@ const CardConversasV13 = ({
                       boxShadow: dia.isHoje ? '0 0 0 2px rgba(14,165,233,0.35)' : 'none',
                     }}
                   >
-                    {config.icon}
+                    <IconRenderer name={config.icon} size={16} />
                   </div>
                   <span className="mt-1 text-[0.56rem] font-semibold uppercase tracking-wide text-[#1C2541] sm:text-[0.63rem]">
                     {dia.label}

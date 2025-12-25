@@ -9,7 +9,8 @@ import {
   Download,
   Shield, 
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  Rocket
 } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
@@ -156,8 +157,8 @@ const AjustesPageV13: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="mb-4 rounded-xl border-2 border-[var(--mq-primary)] bg-[var(--mq-primary-light)] p-4 text-center shadow-md"
           >
-            <p className="text-sm font-semibold text-[var(--mq-primary)]">
-              🚀 Em breve
+            <p className="text-sm font-semibold text-[var(--mq-primary)] flex items-center justify-center gap-2">
+              <Rocket size={16} /> Em breve
             </p>
             <p className="text-xs text-[var(--mq-text-muted)] mt-1">
               Esta funcionalidade estará disponível em breve

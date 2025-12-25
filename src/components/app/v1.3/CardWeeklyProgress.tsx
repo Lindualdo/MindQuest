@@ -1,6 +1,7 @@
 import { format, startOfWeek, addDays, isSameDay, isFuture } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { WeeklyProgressCardData } from '@/types/emotions';
+import { Check, X, MoreHorizontal, Minus } from 'lucide-react';
 
 type Props = {
   summary: WeeklyProgressCardData;
@@ -29,29 +30,29 @@ const CardWeeklyProgress = ({ summary, onContinue, onHistorico }: Props) => {
     : 0;
 
   // Status config para checkboxes de conversas - usando CSS vars
-  const statusConfig: Record<string, { bg: string; border: string; icon: string; color: string }> = {
+  const statusConfig: Record<string, { bg: string; border: string; icon: React.ReactNode; color: string }> = {
     respondido: {
       bg: 'var(--mq-primary-light)',
       border: 'var(--mq-primary)',
-      icon: '✓',
+      icon: <Check size={16} />,
       color: 'var(--mq-primary)',
     },
     perdido: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'var(--mq-border)',
-      icon: '✕',
+      icon: <X size={16} />,
       color: 'var(--mq-text-muted)',
     },
     pendente: {
       bg: 'var(--mq-warning-light)',
       border: 'var(--mq-warning)',
-      icon: '…',
+      icon: <MoreHorizontal size={16} />,
       color: 'var(--mq-warning)',
     },
     default: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'var(--mq-border)',
-      icon: '—',
+      icon: <Minus size={16} />,
       color: 'var(--mq-text-muted)',
     },
   };

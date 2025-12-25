@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
+import { IconRenderer } from '@/utils/iconMap';
 
 export interface SabotadorRankingItem {
   sabotador_id: string;
@@ -42,7 +43,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
           ...s,
           score,
           nome: formatarNome(nomeOriginal),
-          emoji: catalogEntry?.emoji || '🎭',
+          emoji: catalogEntry?.emoji || 'Ghost',
           resumo: catalogEntry?.resumo || '',
         };
       })

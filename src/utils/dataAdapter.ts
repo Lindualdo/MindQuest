@@ -686,7 +686,7 @@ class DataAdapter {
           categoria: this.parseNullString<string>(insight.categoria as string | null | undefined) ?? 'emocional',
           titulo: this.parseNullString<string>(insight.titulo as string | null | undefined) ?? 'Insight em processamento',
           descricao: this.parseNullString<string>(insight.descricao as string | null | undefined) ?? 'Estamos analisando seus dados para gerar um insight personalizado.',
-          icone: this.parseNullString<string>(insight.icone as string | null | undefined) ?? '💡',
+          icone: this.parseNullString<string>(insight.icone as string | null | undefined) ?? 'Lightbulb',
           prioridade: this.parseNullString<string>(insight.prioridade as string | null | undefined) ?? 'media',
           data_criacao: this.parseNullString<string>(insight.data_criacao as string | null | undefined) ?? nowIso
         }))
@@ -801,7 +801,7 @@ class DataAdapter {
       humor: 5,
       emocao: 'neutro',
       emocao_id: null as string | null,
-      emoji: '😐',
+      emoji: 'Smile',
       energia: 5,
       qualidade: 5,
       ultima_hora: null as string | null
@@ -900,7 +900,7 @@ class DataAdapter {
         categoria: (insight?.categoria as Insight['categoria']) || 'emocional',
         titulo: insight?.titulo || 'Insight em processamento',
         descricao: insight?.descricao || 'Estamos analisando seus dados para gerar um insight personalizado.',
-        icone: insight?.icone || '💡',
+        icone: insight?.icone || 'Lightbulb',
         prioridade: (insight?.prioridade as Insight['prioridade']) || 'media',
         data_criacao: insight?.data_criacao || defaults.timestamp
       })),
@@ -979,26 +979,26 @@ class DataAdapter {
     
     if (total === 0) {
       return [
-        { id: 'joy', nome: 'Alegria', intensidade: 0, cor: '#FFD700', emoji: '😊', categoria: 'primaria' },
-        { id: 'trust', nome: 'Confiança', intensidade: 0, cor: '#90EE90', emoji: '🤗', categoria: 'primaria' },
-        { id: 'fear', nome: 'Medo', intensidade: 0, cor: '#FF6347', emoji: '😨', categoria: 'primaria' },
-        { id: 'surprise', nome: 'Surpresa', intensidade: 0, cor: '#FF69B4', emoji: '😲', categoria: 'primaria' },
-        { id: 'sadness', nome: 'Tristeza', intensidade: 0, cor: '#4169E1', emoji: '😢', categoria: 'primaria' },
-        { id: 'anguish', nome: 'Angústia', intensidade: 0, cor: '#8B4513', emoji: '😣', categoria: 'primaria' },
-        { id: 'anger', nome: 'Raiva', intensidade: 0, cor: '#DC143C', emoji: '😠', categoria: 'primaria' },
-        { id: 'anticipation', nome: 'Expectativa', intensidade: 0, cor: '#FFA500', emoji: '🤔', categoria: 'primaria' }
+        { id: 'joy', nome: 'Alegria', intensidade: 0, cor: '#FFD700', emoji: 'Smile', categoria: 'primaria' },
+        { id: 'trust', nome: 'Confiança', intensidade: 0, cor: '#90EE90', emoji: 'Hand', categoria: 'primaria' },
+        { id: 'fear', nome: 'Medo', intensidade: 0, cor: '#FF6347', emoji: 'CircleHelp', categoria: 'primaria' },
+        { id: 'surprise', nome: 'Surpresa', intensidade: 0, cor: '#FF69B4', emoji: 'Sparkles', categoria: 'primaria' },
+        { id: 'sadness', nome: 'Tristeza', intensidade: 0, cor: '#4169E1', emoji: 'Heart', categoria: 'primaria' },
+        { id: 'anguish', nome: 'Angústia', intensidade: 0, cor: '#8B4513', emoji: 'Minus', categoria: 'primaria' },
+        { id: 'anger', nome: 'Raiva', intensidade: 0, cor: '#DC143C', emoji: 'Flame', categoria: 'primaria' },
+        { id: 'anticipation', nome: 'Expectativa', intensidade: 0, cor: '#FFA500', emoji: 'Brain', categoria: 'primaria' }
       ];
     }
     
     return [
-      { id: 'joy', nome: 'Alegria', intensidade: Math.round((emocoes.alegria / total) * 100), cor: '#FFD700', emoji: '😊', categoria: 'primaria' },
-      { id: 'trust', nome: 'Confiança', intensidade: Math.round((emocoes.confianca / total) * 100), cor: '#90EE90', emoji: '🤗', categoria: 'primaria' },
-      { id: 'fear', nome: 'Medo', intensidade: Math.round((emocoes.medo / total) * 100), cor: '#FF6347', emoji: '😨', categoria: 'primaria' },
-      { id: 'surprise', nome: 'Surpresa', intensidade: Math.round((emocoes.surpresa / total) * 100), cor: '#FF69B4', emoji: '😲', categoria: 'primaria' },
-      { id: 'sadness', nome: 'Tristeza', intensidade: Math.round((emocoes.tristeza / total) * 100), cor: '#4169E1', emoji: '😢', categoria: 'primaria' },
-      { id: 'anguish', nome: 'Angústia', intensidade: Math.round((emocoes.angustia / total) * 100), cor: '#8B4513', emoji: '😣', categoria: 'primaria' },
-      { id: 'anger', nome: 'Raiva', intensidade: Math.round((emocoes.raiva / total) * 100), cor: '#DC143C', emoji: '😠', categoria: 'primaria' },
-      { id: 'anticipation', nome: 'Expectativa', intensidade: Math.round((emocoes.expectativa / total) * 100), cor: '#FFA500', emoji: '🤔', categoria: 'primaria' }
+      { id: 'joy', nome: 'Alegria', intensidade: Math.round((emocoes.alegria / total) * 100), cor: '#FFD700', emoji: 'Smile', categoria: 'primaria' },
+      { id: 'trust', nome: 'Confiança', intensidade: Math.round((emocoes.confianca / total) * 100), cor: '#90EE90', emoji: 'Hand', categoria: 'primaria' },
+      { id: 'fear', nome: 'Medo', intensidade: Math.round((emocoes.medo / total) * 100), cor: '#FF6347', emoji: 'CircleHelp', categoria: 'primaria' },
+      { id: 'surprise', nome: 'Surpresa', intensidade: Math.round((emocoes.surpresa / total) * 100), cor: '#FF69B4', emoji: 'Sparkles', categoria: 'primaria' },
+      { id: 'sadness', nome: 'Tristeza', intensidade: Math.round((emocoes.tristeza / total) * 100), cor: '#4169E1', emoji: 'Heart', categoria: 'primaria' },
+      { id: 'anguish', nome: 'Angústia', intensidade: Math.round((emocoes.angustia / total) * 100), cor: '#8B4513', emoji: 'Minus', categoria: 'primaria' },
+      { id: 'anger', nome: 'Raiva', intensidade: Math.round((emocoes.raiva / total) * 100), cor: '#DC143C', emoji: 'Flame', categoria: 'primaria' },
+      { id: 'anticipation', nome: 'Expectativa', intensidade: Math.round((emocoes.expectativa / total) * 100), cor: '#FFA500', emoji: 'Brain', categoria: 'primaria' }
     ];
   }
 
@@ -1085,9 +1085,9 @@ class DataAdapter {
         : null;
 
       const emojiFallback = (() => {
-        if (status === 'respondido') return '😊';
-        if (status === 'pendente') return '⏳';
-        return '😴';
+        if (status === 'respondido') return 'Smile';
+        if (status === 'pendente') return 'Clock';
+        return 'Moon';
       })();
       const emojiDia = hasConversa ? (item.emoji || emojiFallback) : '';
 
@@ -1114,9 +1114,9 @@ class DataAdapter {
       return [{
         id: 'insight_welcome',
         tipo: 'positivo',
-        titulo: '💬 Bem-vindo ao MindQuest! 👋',
+        titulo: 'Bem-vindo ao MindQuest!',
         descricao: 'Sua jornada começa aqui. Quanto mais compartilhar sobre você, melhor serão seus resultados.\n\nMente clara, resultados reais.',
-        icone: '👋',
+        icone: 'Hand',
         data_criacao: new Date().toISOString(),
         prioridade: 'alta',
         categoria: 'cognitivo'
@@ -1184,7 +1184,7 @@ class DataAdapter {
       const id = this.parseNullString<string>(data.id as string | null | undefined);
       const nome = this.parseNullString<string>(data.nome as string | null | undefined) ?? 'Conquista';
       if (!id) return null;
-      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🏆';
+      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? 'Trophy';
       const xpBonus = this.parseNumber(data.xp_bonus as string | number | null | undefined) ?? 0;
       const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
       const desbloqueadaEm = this.parseNullString<string>(data.desbloqueada_em as string | null | undefined) ?? '';
@@ -1207,7 +1207,7 @@ class DataAdapter {
       const id = this.parseNullString<string>(data.id as string | null | undefined);
       const nome = this.parseNullString<string>(data.nome as string | null | undefined) ?? 'Próxima conquista';
       if (!id) return null;
-      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? '🔒';
+      const emoji = this.parseNullString<string>(data.emoji as string | null | undefined) ?? 'Lock';
       const status = this.parseNullString<string>(data.status as string | null | undefined) ?? 'pendente';
       const xpBonus = this.parseNumber(data.xp_bonus as string | number | null | undefined) ?? 0;
       const categoria = this.parseNullString<string>(data.categoria as string | null | undefined) ?? 'geral';
@@ -1408,7 +1408,7 @@ class DataAdapter {
       return {
         id: 'none',
         nome: 'Nenhum detectado',
-        emoji: '😌',
+        emoji: 'Smile',
         apelido: 'Ainda descobrindo',
         detectado_em: 0,
         total_conversas: 1,
@@ -1420,7 +1420,7 @@ class DataAdapter {
     return {
       id,
       nome,
-      emoji: emoji || '🤔',
+      emoji: emoji || 'CircleHelp',
       apelido: apelidoPersonalizado || 'Sem nome',
       detectado_em: totalDeteccoes || 0,
       total_conversas: totalConversas || 1,
@@ -1465,7 +1465,7 @@ class DataAdapter {
 
     const ultimaConversaEmoji = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.emoji
-    ) || '😐';
+    ) || 'Smile';
 
     const ultimaConversaEmocao = this.parseNullString<string>(
       humorBlock?.ultima_conversa?.emocao

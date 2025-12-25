@@ -163,7 +163,7 @@ export const bigFiveCatalogo: BigFiveConhecimentoBase = {
       id: 'extraversion',
       nome: 'Extraversion',
       nome_pt: 'Extroversão',
-      emoji: '🌟',
+      emoji: 'Star',
       resumo:
         'Sociabilidade, assertividade, entusiasmo e energia em interações sociais.',
       descricao:
@@ -217,7 +217,7 @@ export const bigFiveCatalogo: BigFiveConhecimentoBase = {
       id: 'agreeableness',
       nome: 'Agreeableness',
       nome_pt: 'Amabilidade',
-      emoji: '🤝',
+      emoji: 'Handshake',
       resumo:
         'Cooperação, empatia, confiança e preocupação com o bem-estar dos outros.',
       descricao:

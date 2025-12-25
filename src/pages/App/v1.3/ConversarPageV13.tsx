@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, ExternalLink, TrendingUp, Star, ChevronRight } from 'lucide-react';
+import { MessageCircle, ExternalLink, TrendingUp, Star, ChevronRight, Check, X, Ellipsis, Minus } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, isFuture } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import CardInsightUltimaConversa from '@/components/app/v1.3/CardInsightUltimaConversa';
@@ -9,6 +9,7 @@ import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import { useDashboard } from '@/store/useStore';
 import { mockWeeklyXpSummary, mockInsightCard } from '@/data/mockHomeV1_3';
 import { WHATSAPP_URL_HOME } from '@/constants/whatsapp';
+import { IconRenderer } from '@/utils/iconMap';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 
 interface EvoluirStats {
@@ -201,25 +202,25 @@ const ConversarPageV13 = () => {
     respondido: {
       bg: 'var(--mq-primary-light)',
       border: 'var(--mq-primary)',
-      icon: '✓',
+      icon: 'Check',
       color: 'var(--mq-primary)',
     },
     perdido: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'var(--mq-border)',
-      icon: '✕',
+      icon: 'X',
       color: 'var(--mq-text-muted)',
     },
     pendente: {
       bg: 'var(--mq-warning-light)',
       border: 'var(--mq-warning)',
-      icon: '…',
+      icon: 'Ellipsis',
       color: 'var(--mq-warning)',
     },
     default: {
       bg: 'rgba(232,235,244,0.8)',
       border: 'var(--mq-border)',
-      icon: '—',
+      icon: 'Minus',
       color: 'var(--mq-text-muted)',
     },
   };
@@ -454,7 +455,7 @@ const ConversarPageV13 = () => {
                       boxShadow: isHoje ? '0 0 0 2px var(--mq-primary-light)' : 'none',
                     }}
                   >
-                    {config.icon}
+                    <IconRenderer name={config.icon} size={16} />
                   </div>
                   <span className="mt-1 text-[0.56rem] font-semibold uppercase tracking-wide text-[var(--mq-text)]">
                     {labelDia}

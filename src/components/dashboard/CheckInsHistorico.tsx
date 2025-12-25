@@ -115,22 +115,22 @@ const CheckInsHistorico: React.FC = () => {
   const STATUS_CONFIG = {
     respondido: {
       wrapper: 'bg-green-50 border-green-200',
-      icon: '✓',
+      icon: 'Check',
       iconColor: 'text-green-600',
     },
     perdido: {
       wrapper: 'bg-slate-100 border-slate-200',
-      icon: '✗',
+      icon: 'X',
       iconColor: 'text-slate-500',
     },
     pendente: {
       wrapper: 'bg-slate-100 border-slate-200',
-      icon: '⏳',
+      icon: 'Clock',
       iconColor: 'text-slate-500',
     },
     default: {
       wrapper: 'bg-slate-100 border-slate-200',
-      icon: '—',
+      icon: 'Minus',
       iconColor: 'text-slate-400',
     },
   } as const;

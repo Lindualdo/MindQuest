@@ -67,7 +67,7 @@ const CursorContextoPage: React.FC = () => {
           >
             <h2 className="font-semibold text-[var(--mq-text)] mb-3 flex items-center gap-2">
               <CheckCircle size={18} className="text-green-500" />
-              ✅ O Que Fazer
+              O Que Fazer
             </h2>
             <div className="text-sm text-[var(--mq-text-muted)] space-y-3">
               <div>
@@ -102,7 +102,7 @@ const CursorContextoPage: React.FC = () => {
           >
             <h2 className="font-semibold text-[var(--mq-text)] mb-3 flex items-center gap-2">
               <X size={18} className="text-red-500" />
-              ❌ O Que Evitar
+              O Que Evitar
             </h2>
             <div className="text-sm text-[var(--mq-text-muted)] space-y-3">
               <div>
@@ -140,26 +140,26 @@ const CursorContextoPage: React.FC = () => {
               <div>
                 <strong className="text-[var(--mq-text)]">Cenário 1: Refatorar componente React</strong>
                 <ul className="ml-4 mt-1 space-y-1">
-                  <li>✅ Inclua: @Componente.tsx + @tipos.ts (se necessário)</li>
-                  <li>❌ Não inclua: Toda a pasta src/, outros componentes</li>
+                  <li>Check Inclua: @Componente.tsx + @tipos.ts (se necessário)</li>
+                  <li>X Não inclua: Toda a pasta src/, outros componentes</li>
                   <li><strong>Economia:</strong> ~50-70% de tokens</li>
                 </ul>
               </div>
               <div className="pt-2 border-t border-blue-500/20">
                 <strong className="text-[var(--mq-text)]">Cenário 2: Criar workflow n8n</strong>
                 <ul className="ml-4 mt-1 space-y-1">
-                  <li>✅ Use: @codebase para buscar exemplos similares</li>
-                  <li>✅ Inclua: Apenas nodes específicos necessários</li>
-                  <li>❌ Não inclua: Workflows inteiros não relacionados</li>
+                  <li>Check Use: @codebase para buscar exemplos similares</li>
+                  <li>Check Inclua: Apenas nodes específicos necessários</li>
+                  <li>X Não inclua: Workflows inteiros não relacionados</li>
                   <li><strong>Economia:</strong> ~60-80% de tokens</li>
                 </ul>
               </div>
               <div className="pt-2 border-t border-blue-500/20">
                 <strong className="text-[var(--mq-text)]">Cenário 3: Debug de erro</strong>
                 <ul className="ml-4 mt-1 space-y-1">
-                  <li>✅ Inclua: Arquivo com erro + stack trace</li>
-                  <li>✅ Use: @codebase para encontrar código relacionado</li>
-                  <li>❌ Não inclua: Toda a aplicação</li>
+                  <li>Check Inclua: Arquivo com erro + stack trace</li>
+                  <li>Check Use: @codebase para encontrar código relacionado</li>
+                  <li>X Não inclua: Toda a aplicação</li>
                   <li><strong>Economia:</strong> ~70-90% de tokens</li>
                 </ul>
               </div>
@@ -174,7 +174,7 @@ const CursorContextoPage: React.FC = () => {
             transition={{ delay: 0.4 }}
           >
             <p className="text-sm text-[var(--mq-text-muted)]">
-              <strong className="text-[var(--mq-text)]">💡 Regra de Ouro:</strong> Se você não precisa do arquivo para a tarefa atual, 
+              <strong className="text-[var(--mq-text)]">Lightbulb Regra de Ouro:</strong> Se você não precisa do arquivo para a tarefa atual, 
               não inclua no contexto. Menos contexto = menos tokens = mais eficiência.
             </p>
           </motion.div>

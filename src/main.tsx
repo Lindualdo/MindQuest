@@ -27,7 +27,7 @@ const shouldUseProxy =
 
 // Log de inicialização
 if (isDevelopment) {
-  console.log('🚀 MindQuest v1.1 iniciando...');
+  console.log('Rocket MindQuest v1.1 iniciando...');
   console.log('🔗 Modo:', isDevelopment ? 'Desenvolvimento' : 'Produção');
   console.log('🌐 API Base:', normalizedApiBase);
   console.log('🔁 Proxy ativo:', shouldUseProxy ? 'sim' : 'não');

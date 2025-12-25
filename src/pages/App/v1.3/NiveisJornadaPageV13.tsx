@@ -280,8 +280,8 @@ const NiveisJornadaPageV13: React.FC = () => {
             transition={{ delay: 0.8 }}
             className="text-center py-8"
           >
-            <p className="text-sm text-[var(--mq-text-muted)]">
-              Continue sua jornada de transformação 🚀
+            <p className="text-sm text-[var(--mq-text-muted)] flex items-center justify-center gap-2">
+              Continue sua jornada de transformação <Rocket size={16} className="text-[var(--mq-primary)]" />
             </p>
           </motion.div>
         )}

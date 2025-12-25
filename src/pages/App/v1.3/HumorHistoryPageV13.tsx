@@ -17,6 +17,7 @@ import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
 import Card from '@/components/ui/Card';
 import { useDashboard } from '@/store/useStore';
 import { getHumorDescriptor } from '@/data/humorEnergyCatalog';
+import { IconRenderer } from '@/utils/iconMap';
 
 type ChartEntry = {
   label: string;
@@ -333,9 +334,9 @@ const HumorHistoryPage: React.FC = () => {
                   <div className="rounded-2xl border border-[var(--mq-border)] bg-[var(--mq-card)] p-4 shadow">
                     {selectedBar ? (
                       <div className="space-y-2 text-xs text-[var(--mq-text-muted)]">
-                        <p className="text-sm font-semibold text-[var(--mq-text)]">
+                        <p className="text-sm font-semibold text-[var(--mq-text)] flex items-center">
                           {selectedBar.label}
-                          {selectedBar.emoji && <span className="ml-2 text-lg">{selectedBar.emoji}</span>}
+                          {selectedBar.emoji && <IconRenderer name={selectedBar.emoji} size={18} className="ml-2 text-[var(--mq-primary)]" />}
                         </p>
                         <p>
                           Humor:{' '}
@@ -350,10 +351,10 @@ const HumorHistoryPage: React.FC = () => {
                           </p>
                         )}
                         {selectedBar.conversationEmotion && (
-                          <p>
+                          <p className="flex items-center gap-1">
                             <span className="font-semibold text-[var(--mq-text)]">Emoção predominante:</span>{' '}
                             {selectedBar.conversationEmotion}
-                            {selectedBar.conversationEmoji && ` ${selectedBar.conversationEmoji}`}
+                            {selectedBar.conversationEmoji && <IconRenderer name={selectedBar.conversationEmoji} size={14} className="text-[var(--mq-primary)]" />}
                           </p>
                         )}
                         {selectedBar.conversationId && (
