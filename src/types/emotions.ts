@@ -791,7 +791,8 @@ export type ViewId =
   | 'interacoesIA'
   | 'notificacoes'
   | 'conexaoAcoesObjetivos'
-  | 'conexaoAcoesSabotadores';
+  | 'conexaoAcoesSabotadores'
+  | 'ajuda';
 
 export interface StoreState {
   dashboardData: DashboardData;

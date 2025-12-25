@@ -132,8 +132,10 @@ const AjustesPageV13: React.FC = () => {
       id: 'ajuda',
       icon: <HelpCircle size={20} className="text-[var(--mq-info)]" />,
       title: 'Ajuda e Feedback',
-      subtitle: 'FAQ, suporte e sugestões',
-      onClick: handleEmBreve,
+      subtitle: 'Como funciona o MindQuest',
+      onClick: () => {
+        setView('ajuda');
+      },
     },
   ];
 

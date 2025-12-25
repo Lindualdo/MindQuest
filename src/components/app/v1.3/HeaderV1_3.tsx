@@ -1,4 +1,4 @@
-import { RefreshCw, Settings, ChevronLeft, Hand } from 'lucide-react';
+import { RefreshCw, Settings, ChevronLeft, Hand, HelpCircle } from 'lucide-react';
 import mindquestLogo from '@/img/logo_redonda_small.png';
 import { useDashboard } from '@/store/useStore';
 
@@ -14,6 +14,10 @@ const HeaderV1_3 = ({ nomeUsuario, onRefresh, onBack, backLabel = 'Voltar' }: Pr
 
   const handleSettings = () => {
     setView('ajustes');
+  };
+
+  const handleHelp = () => {
+    setView('ajuda');
   };
 
   const handleRefresh = async () => {
@@ -51,14 +55,22 @@ const HeaderV1_3 = ({ nomeUsuario, onRefresh, onBack, backLabel = 'Voltar' }: Pr
           Olá, {nomeUsuario}! <Hand size={14} className="inline-block ml-1 text-[var(--mq-primary)]" />
         </p>
 
-        <div className="flex min-w-[100px] items-center justify-end gap-2">
+        <div className="flex min-w-[100px] items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={handleHelp}
+            className="inline-flex items-center justify-center p-1 text-[var(--mq-text)] hover:opacity-70 transition-opacity"
+            aria-label="Ajuda"
+          >
+            <HelpCircle size={20} />
+          </button>
           <button
             type="button"
             onClick={handleSettings}
             className="inline-flex items-center justify-center p-1 text-[var(--mq-text)] hover:opacity-70 transition-opacity"
             aria-label="Ajustes"
           >
-            <Settings size={22} />
+            <Settings size={20} />
           </button>
           <button
             type="button"
@@ -66,7 +78,7 @@ const HeaderV1_3 = ({ nomeUsuario, onRefresh, onBack, backLabel = 'Voltar' }: Pr
             className="inline-flex items-center justify-center p-1 text-[var(--mq-text)] hover:opacity-70 transition-opacity"
             aria-label="Atualizar"
           >
-            <RefreshCw size={22} />
+            <RefreshCw size={20} />
           </button>
         </div>
       </div>
