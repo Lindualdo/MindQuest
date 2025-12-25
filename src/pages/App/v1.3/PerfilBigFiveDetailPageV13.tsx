@@ -84,17 +84,10 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
   if (!traco) {
     return (
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
-        <HeaderV1_3 nomeUsuario={nomeUsuario} />
+        <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card className="mq-card">
             <p className="text-sm text-[var(--mq-text-muted)]">Perfil não encontrado.</p>
-            <button
-              type="button"
-              onClick={handleBack}
-              className="mt-4 w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-2 text-sm font-semibold text-[var(--mq-text)]"
-            >
-              Voltar
-            </button>
           </Card>
         </main>
         <BottomNavV1_3
@@ -110,16 +103,9 @@ const PerfilBigFiveDetailPageV13: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4">
-          <button type="button" onClick={handleBack} className="mq-btn-back">
-            <ArrowLeft size={18} />
-            Voltar
-          </button>
-        </div>
 
         {/* Título da página */}
         <div className="mb-6 text-center">

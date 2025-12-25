@@ -113,25 +113,16 @@ const NiveisJornadaPageV13: React.FC = () => {
     loadNiveis();
   }, [userId]);
 
+  const handleBack = () => {
+    const returnView = niveisJornadaReturnView ?? 'evoluir';
+    setView(returnView);
+  };
+
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              const returnView = niveisJornadaReturnView ?? 'evoluir';
-              setView(returnView);
-            }}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={18} />
-            Voltar
-          </button>
-        </div>
 
         {/* Título da página */}
         <div className="mb-6 text-center">

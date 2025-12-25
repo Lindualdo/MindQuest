@@ -419,15 +419,7 @@ const QuestDetailPageV13 = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mq-card rounded-3xl px-4 py-5"
       >
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back text-[0.75rem] px-3 py-1"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
+        <div className="mb-4 flex items-center justify-end">
           {detail.area_vida && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mq-primary-light)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--mq-primary)]">
               {detail.area_vida.nome}
@@ -593,7 +585,7 @@ const QuestDetailPageV13 = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         {renderContent()}

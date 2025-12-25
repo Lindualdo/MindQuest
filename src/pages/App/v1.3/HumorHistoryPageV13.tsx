@@ -237,24 +237,9 @@ const HumorHistoryPage: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleBack}
-              className="mq-btn-back text-[0.75rem] px-3 py-1"
-              aria-label="Voltar para o dashboard"
-            >
-              <ArrowLeft size={16} />
-              Voltar
-            </button>
-            <div className="flex-1 text-right text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--mq-text)]">
-              Histórico de humor
-            </div>
-          </div>
-        </div>
 
         <Card className="!p-0 overflow-hidden mq-card !bg-[var(--mq-surface)]" hover={false}>
           <div className="space-y-4 p-5">

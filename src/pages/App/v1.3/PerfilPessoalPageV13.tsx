@@ -157,7 +157,7 @@ const PerfilPessoalPageV13: React.FC = () => {
   if (loading) {
     return (
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
-        <HeaderV1_3 nomeUsuario={nomeUsuario} />
+        <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 pb-24 pt-4">
           <Loader2 size={32} className="animate-spin text-[var(--mq-primary)]" />
           <p className="mt-4 text-sm text-[var(--mq-text-muted)]">Carregando perfil...</p>
@@ -168,20 +168,9 @@ const PerfilPessoalPageV13: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-24 pt-4">
-        {/* Botão voltar */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={18} />
-            Voltar
-          </button>
-        </div>
 
         {/* Título da página */}
         <div className="mb-6 text-center">

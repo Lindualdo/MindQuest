@@ -104,20 +104,15 @@ const SabotadorDetailPageV13: React.FC = () => {
   if (!sabotador) {
     return (
       <div className="mq-app-v1_3 flex min-h-screen flex-col">
-        <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
+        <HeaderV1_3 
+          nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} 
+          onBack={handleBack}
+        />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
           <Card className="mq-card">
             <p className="text-sm text-[var(--mq-text-muted)]">
               Não encontramos informações adicionais sobre este sabotador. Volte ao dashboard e tente novamente.
             </p>
-            <button
-              type="button"
-              onClick={handleBack}
-              className="mt-3 inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--mq-primary)] underline-offset-2 hover:underline"
-            >
-              Voltar
-              <ArrowLeft size={14} />
-            </button>
           </Card>
         </main>
         <BottomNavV1_3
@@ -133,19 +128,12 @@ const SabotadorDetailPageV13: React.FC = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} />
+      <HeaderV1_3 
+        nomeUsuario={dashboardData?.usuario?.nome_preferencia ?? 'Aldo'} 
+        onBack={handleBack} 
+      />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-        </div>
 
         {/* Card 1: Informações do Sabotador */}
         <Card className="!p-0 overflow-hidden mq-card" hover={false}>

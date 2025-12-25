@@ -334,38 +334,6 @@ const InsightDetailPageV13 = () => {
 
     return (
       <div className="space-y-4">
-        {/* Header: Voltar + Badges */}
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="mq-btn-back"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-          {/* 
-            OCULTO: Badges de categoria e prioridade
-            Removido em 2024-12-01 - informação excessiva sem relevância imediata.
-            Reativar se necessário no futuro.
-
-          <div className="flex items-center gap-2">
-            {categoriaInfo && (
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] ${categoriaInfo.color}`}>
-                {categoriaInfo.icon}
-                {categoriaInfo.label}
-              </span>
-            )}
-            {prioridadeInfo && (
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${prioridadeInfo.color}`}>
-                <span className={`h-2 w-2 rounded-full ${prioridadeInfo.dot}`} />
-                {prioridadeInfo.label}
-              </span>
-            )}
-          </div>
-          */}
-        </div>
-
         {/* Título */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -471,7 +439,7 @@ const InsightDetailPageV13 = () => {
 
   return (
     <div className="mq-app-v1_3 flex min-h-screen flex-col">
-      <HeaderV1_3 nomeUsuario={nomeUsuario} />
+      <HeaderV1_3 nomeUsuario={nomeUsuario} onBack={handleBack} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         {renderContent()}
