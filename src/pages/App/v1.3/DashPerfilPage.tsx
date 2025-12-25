@@ -155,24 +155,19 @@ const DashPerfilPage: React.FC = () => {
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
         {/* Título da página */}
-        <div className="mb-2 text-center">
+        <div className="mb-4 text-center">
           <h1 className="mq-page-title">
             Entender
           </h1>
-          <p className="mq-page-subtitle">
-            Seus padrões e emoções
-          </p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mt-2 text-center text-sm text-[var(--mq-text-muted)] px-2"
+          >
+            Entenda suas emoções e padrões mentais detectados nas conversas com seu Mentor
+          </motion.p>
         </div>
-
-        {/* Descrição */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mb-4 text-center text-sm text-[var(--mq-text-muted)] px-2"
-        >
-          Entenda suas emoções e padrões mentais detectados nas conversas com seu Mentor
-        </motion.p>
 
         {/* Card Humor */}
         <motion.div
