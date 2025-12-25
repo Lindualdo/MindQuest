@@ -242,7 +242,7 @@ const InteracoesIAPageV13: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, sobre_voce: e.target.value || null })}
               rows={4}
               className="w-full rounded-xl border border-[var(--mq-border)] bg-[var(--mq-card)] px-4 py-3 text-sm text-[var(--mq-text)] focus:border-[var(--mq-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--mq-primary)]/20 resize-none"
-              placeholder="Exemplo: Tenho dois filhos, estou divorciado há dois anos, terminei um casamento de 26 anos. Mudei recentemente para Portugal..."
+              placeholder="Exemplo: Sou casada tenho dois filhos, trabalho muito e não sobra tempo para nada..."
             />
           </div>
 

@@ -26,6 +26,8 @@
 - rever criação de quests junto com experts - feito
 
 - CRITICO: getão de tools erro ao processar quests e link token só funciona com gpt 4.1 - erro com gemini 3 flash
+- ERRO: quando usuário não tem comtexto fica em loop e sempre processa gastando token do resumo
+- ERRO: quando completam os 5 ciclos sem processar por erro, o chat fica preso e não processa mais - criar totinas de alerta para equipe e monitorar chats em processando a mais de um dia
 - definir regras de processamento de conversa (contexto e reflexão)
 - ERRO  Crítico: se der erro em algum expert, o job_expert fica em loop infinito
 - logar e reprocessar experts não executados 
