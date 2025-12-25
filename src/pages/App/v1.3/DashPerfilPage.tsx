@@ -164,39 +164,11 @@ const DashPerfilPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Card Ranking de Sabotadores - No topo */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <CardSabotadoresRanking
-            sabotadores={sabotadoresRanking}
-            sabotadorAtualId={sabotadorAtualId}
-            onBarClick={handleSabotadorClick}
-            loading={panoramaCardLoading}
-          />
-        </motion.div>
-
-        {/* Card Perfil Big Five Ranking */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.09 }}
-        >
-          <CardPerfilBigFiveRanking
-            tracos={perfilBigFive?.tracos_ordenados || []}
-            tracoAtualId={null}
-            onBarClick={handlePerfilBigFiveClick}
-            loading={perfilBigFiveLoading}
-          />
-        </motion.div>
-
         {/* Card Humor */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.13 }}
+          transition={{ delay: 0.05 }}
         >
           <CardHumor
             humorAtual={moodSummary.humorHoje}
@@ -211,7 +183,7 @@ const DashPerfilPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.17 }}
+          transition={{ delay: 0.09 }}
         >
           <CardEnergia energiaAtual={moodSummary.energiaHoje} />
         </motion.div>
@@ -220,9 +192,37 @@ const DashPerfilPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.21 }}
+          transition={{ delay: 0.13 }}
         >
           <EmotionWheel />
+        </motion.div>
+
+        {/* Card Ranking de Sabotadores - Padrão de Pensamento */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.17 }}
+        >
+          <CardSabotadoresRanking
+            sabotadores={sabotadoresRanking}
+            sabotadorAtualId={sabotadorAtualId}
+            onBarClick={handleSabotadorClick}
+            loading={panoramaCardLoading}
+          />
+        </motion.div>
+
+        {/* Card Perfil Big Five Ranking - Padrão de Personalidade */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.21 }}
+        >
+          <CardPerfilBigFiveRanking
+            tracos={perfilBigFive?.tracos_ordenados || []}
+            tracoAtualId={null}
+            onBarClick={handlePerfilBigFiveClick}
+            loading={perfilBigFiveLoading}
+          />
         </motion.div>
       </main>
 
