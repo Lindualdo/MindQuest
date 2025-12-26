@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Target, HeartPulse, ShieldCheck } from 'lucide-react';
+import { Target, HeartPulse, ShieldCheck } from 'lucide-react';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
 import '@/components/app/v1.3/styles/mq-v1_3-styles.css';
 import BottomNavV1_3, { type TabId } from '@/components/app/v1.3/BottomNavV1_3';
@@ -29,7 +29,7 @@ const SectionList: React.FC<{ title: string; items: string[] }> = ({ title, item
 };
 
 const SabotadorDetailPageV13: React.FC = () => {
-  const { dashboardData, setView, selectedSabotadorId, sabotadorDetailReturnView } = useDashboard();
+  const { dashboardData, setView, selectedSabotadorId, sabotadorDetailReturnView, panoramaCard } = useDashboard();
   const [activeTab, setActiveTab] = useState<TabId>('entender');
   const [ultimaOcorrencia, setUltimaOcorrencia] = useState<OcorrenciaSabotador | null>(null);
   const [ocorrenciaLoading, setOcorrenciaLoading] = useState(false);
@@ -40,6 +40,20 @@ const SabotadorDetailPageV13: React.FC = () => {
   const sabotador = useMemo(() => getSabotadorById(sabotadorId), [sabotadorId]);
   const overview = sabotadoresCatalogo.overview;
   const userId = dashboardData?.usuario?.id;
+
+  // Buscar nome do sabotador que vem da API/webhook
+  const nomeSabotadorApi = useMemo(() => {
+    const sabotadorDaApi = panoramaCard?.sabotadores_todos?.find(
+      (s) => s.sabotador_id === sabotadorId
+    );
+    return sabotadorDaApi?.nome || null;
+  }, [panoramaCard, sabotadorId]);
+
+  // Nome para exibição: prioridade para API, fallback para catálogo
+  const nomeExibicao = useMemo(() => {
+    const nome = nomeSabotadorApi || sabotador?.nome || '';
+    return nome.replace(/^hiper[-_]?/i, '');
+  }, [nomeSabotadorApi, sabotador]);
 
   useEffect(() => {
     if (!userId || !sabotadorId) {
@@ -139,7 +153,7 @@ const SabotadorDetailPageV13: React.FC = () => {
         <Card className="!p-0 overflow-hidden mq-card" hover={false}>
           <div className="flex flex-col gap-3 px-5 py-5">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[var(--mq-primary)]">
-              {sabotador.nome.replace(/^hiper[-_]?/i, '')}
+              {nomeExibicao}
             </p>
             <p className="text-sm leading-relaxed text-[var(--mq-text-muted)]">
               {sabotador.descricao}

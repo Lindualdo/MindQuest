@@ -37,14 +37,16 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
     return sabotadores
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
-        // Usar nome da API se disponível, senão buscar no catálogo, senão usar ID
+        // Prioridade: nome da API/webhook → catálogo → ID
         const nomeOriginal = s.nome || catalogEntry?.nome || s.sabotador_id;
         // Usar score_impacto da API se disponível, senão calcular localmente
         const score = (s as any).score_impacto ?? (s.total_deteccoes * s.intensidade_media);
         return {
           ...s,
           score,
+          // Formatar nome (remove "hiper-") mantendo prioridade da API
           nome: formatarNome(nomeOriginal),
+          // Prioridade: emoji da API → catálogo → default
           emoji: s.emoji || catalogEntry?.emoji || 'Ghost',
           resumo: catalogEntry?.resumo || '',
         };
