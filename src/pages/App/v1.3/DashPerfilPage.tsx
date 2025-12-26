@@ -111,6 +111,8 @@ const DashPerfilPage: React.FC = () => {
     
     return sabotadoresDaApi.map((s) => ({
       sabotador_id: s.sabotador_id,
+      nome: s.nome,
+      emoji: s.emoji,
       total_deteccoes: s.total_deteccoes,
       intensidade_media: s.intensidade_media,
       insight_atual: s.insight_atual,

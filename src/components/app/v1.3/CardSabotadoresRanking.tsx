@@ -2,10 +2,11 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
 import { getSabotadorById } from '@/data/sabotadoresCatalogo';
-import { IconRenderer } from '@/utils/iconMap';
 
 export interface SabotadorRankingItem {
   sabotador_id: string;
+  nome?: string | null;
+  emoji?: string | null;
   total_deteccoes: number;
   intensidade_media: number;
   // Campos opcionais do contexto
@@ -36,14 +37,15 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
     return sabotadores
       .map((s) => {
         const catalogEntry = getSabotadorById(s.sabotador_id);
-        const nomeOriginal = catalogEntry?.nome || s.sabotador_id;
+        // Usar nome da API se disponível, senão buscar no catálogo, senão usar ID
+        const nomeOriginal = s.nome || catalogEntry?.nome || s.sabotador_id;
         // Usar score_impacto da API se disponível, senão calcular localmente
         const score = (s as any).score_impacto ?? (s.total_deteccoes * s.intensidade_media);
         return {
           ...s,
           score,
           nome: formatarNome(nomeOriginal),
-          emoji: catalogEntry?.emoji || 'Ghost',
+          emoji: s.emoji || catalogEntry?.emoji || 'Ghost',
           resumo: catalogEntry?.resumo || '',
         };
       })
@@ -78,7 +80,7 @@ const CardSabotadoresRanking = ({ sabotadores, sabotadorAtualId, onBarClick, loa
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de pensamentos</h3>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Tendências mentais</h3>
           <p className="mq-eyebrow mt-1">Podem te ajudar ou te limitar</p>
         </div>
         <button

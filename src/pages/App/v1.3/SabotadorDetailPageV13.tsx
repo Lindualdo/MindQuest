@@ -139,11 +139,8 @@ const SabotadorDetailPageV13: React.FC = () => {
         <Card className="!p-0 overflow-hidden mq-card" hover={false}>
           <div className="flex flex-col gap-3 px-5 py-5">
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[var(--mq-primary)]">
-              Sabotador
+              {sabotador.nome.replace(/^hiper[-_]?/i, '')}
             </p>
-            <h1 className="text-lg font-semibold text-[var(--mq-text)]">
-              Meu padrão mental: {sabotador.nome}
-            </h1>
             <p className="text-sm leading-relaxed text-[var(--mq-text-muted)]">
               {sabotador.descricao}
             </p>

@@ -622,7 +622,7 @@ const ConversationGuidePage: React.FC = () => {
                 className="font-semibold mb-2"
                 style={{ color: supportPalette.accent }}
               >
-                Padrões de pensamento
+                Tendências Mentais
               </h4>
               <ul className="space-y-1 list-disc list-inside">
                 <li>Narrativas que se repetem (“Nunca vou dar conta”, “Sempre deixo para depois”).</li>
