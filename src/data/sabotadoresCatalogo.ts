@@ -51,7 +51,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
   entries: [
     {
       id: 'critico',
-      nome: 'Crítico',
+      nome: 'juiz',
       emoji: 'Scale',
       resumo:
         'Tende a observar falhas com facilidade, buscando excelência através do discernimento.',
@@ -109,7 +109,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'insistente',
-      nome: 'Insistente',
+      nome: 'Exigente',
       emoji: 'Compass',
       resumo:
         'Busca segurança através da organização e de métodos bem definidos.',
@@ -168,7 +168,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'prestativo',
-      nome: 'Prestativo',
+      nome: 'Doador',
       emoji: 'Handshake',
       resumo:
         'Capacidade natural de cuidar e servir, buscando harmonia nas relações.',
@@ -227,7 +227,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'hiper_realizador',
-      nome: 'Hiper-Realizador',
+      nome: 'Atleta',
       emoji: 'Trophy',
       resumo:
         'Foco intenso em resultados e na entrega de valor através da ação.',
@@ -286,7 +286,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'hiper_vigilante',
-      nome: 'Hiper-Vigilante',
+      nome: 'Escudo',
       emoji: 'ShieldAlert',
       resumo:
         'Atenção aguçada a riscos e cenários, visando a segurança e proteção.',
@@ -345,7 +345,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'hiper_racional',
-      nome: 'Hiper-Racional',
+      nome: 'Analista',
       emoji: 'Brain',
       resumo:
         'Foco na lógica e objetividade para compreender o mundo.',
@@ -463,7 +463,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'controlador',
-      nome: 'Controlador',
+      nome: 'Comandante',
       emoji: 'Target',
       resumo:
         'Energia de liderança e iniciativa para gerar resultados rápidos.',
@@ -522,7 +522,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'esquivo',
-      nome: 'Esquivo',
+      nome: 'Pacifista',
       emoji: 'Wind',
       resumo:
         'Busca pela harmonia e paz, evitando conflitos desnecessários.',
@@ -581,7 +581,7 @@ export const sabotadoresCatalogo: SabotadoresConhecimentoBase = {
     },
     {
       id: 'inquieto',
-      nome: 'Inquieto',
+      nome: 'Explorador',
       emoji: 'Zap',
       resumo:
         'Energia criativa e vital que busca constantemente novos estímulos.',
