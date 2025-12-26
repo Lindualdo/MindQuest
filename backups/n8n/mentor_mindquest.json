@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// PROCESSA RESPOSTA DO MENTOR v8 - com tratamento de quebras de linha\nconst output = $input.first()?.json?.output ?? {};\nconst contexto = $('contexto_completo').first().json;\nconst transcricao = $('transcricao').first().json;\n\n// Flags do mentor\nconst checkpointEncerramento = output.checkpoint_encerramento === true;\nconst temaFechado = output.tema_atual_fechado === true;\nconst objetivoSugerido = output.objetivo_sugerido || null;\n\n// Tema atual\nconst temaAtual = output.tema_atual || { titulo: '', resumo: [], decisoes: [] };\n\n// Trigger: apenas quando mentor sinaliza fechamento\nconst triggerExperts = temaFechado || checkpointEncerramento;\n\n// TRATAMENTO: Substituir \\n literais por quebras reais\nconst mensagemMentorRaw = output.mensagem_usuario || '';\nconst mensagemMentorLimpa = mensagemMentorRaw\n  .replace(/\\\\n/g, '\\n')  // \\n literal → quebra real\n  .replace(/\\\\t/g, ' ')   // \\t literal → espaço\n  .trim();\n\n// Prepara mensagens para gravar (incremental)\nconst mensagemUsuario = {\n  interaction: contexto.interacao_atual,\n  autor: 'usuario',\n  texto: transcricao.message || '',\n  timestamp: new Date().toISOString()\n};\n\nconst mensagemMentor = {\n  interaction: contexto.interacao_atual,\n  autor: 'agente',\n  texto: mensagemMentorLimpa,\n  timestamp: new Date().toISOString(),\n  tema: temaAtual.titulo || null\n};\n\n// Mensagens existentes + novas\nconst mensagensExistentes = Array.isArray(contexto.sessao_hoje_mensagens) \n  ? contexto.sessao_hoje_mensagens \n  : [];\nconst mensagensAtualizadas = [...mensagensExistentes, mensagemUsuario, mensagemMentor];\n\nreturn [{\n  user_message: mensagemMentorLimpa,\n  checkpoint_encerramento: checkpointEncerramento,\n  tema_fechado: temaFechado,\n  tema_atual: temaAtual,\n  trigger_experts: triggerExperts,\n  objetivo_sugerido: objetivoSugerido,\n  interacao_atual: contexto.interacao_atual,\n  sessao_id: contexto.sessao_hoje_id,\n  is_nova_sessao: contexto.is_nova_sessao,\n  mensagens_atualizadas: JSON.stringify(mensagensAtualizadas),\n  total_interacoes: mensagensAtualizadas.filter(m => m.autor === 'usuario').length\n}];"
+        "jsCode": "// PROCESSA RESPOSTA DO MENTOR v8 - com tratamento de quebras de linha\nconst output = $input.first()?.json?.output ?? {};\nconst contexto = $('contexto_completo').first().json;\nconst transcricao = $('transcricao').first().json;\n\n// Flags do mentor\nconst checkpointEncerramento = output.checkpoint_encerramento === true;\nconst temaFechado = output.tema_atual_fechado === true;\nconst objetivoSugerido = output.objetivo_sugerido || null;\n\n// Tema atual\nconst temaAtual = output.tema_atual || { titulo: '', resumo: [], decisoes: [] };\n\n// Trigger: apenas quando mentor sinaliza fechamento\nconst triggerExperts = temaFechado || checkpointEncerramento;\n\n// TRATAMENTO ROBUSTO: converter TODAS as formas de escape para quebras reais\nlet mensagemMentorRaw = String(output.mensagem_usuario || '');\n\n// Remove escapes múltiplos em camadas (\\\\n → \\n → quebra real)\nmensagemMentorRaw = mensagemMentorRaw\n  .replace(/\\\\\\\\+n/g, '\\n')  // \\\\n, \\\\\\n, etc → quebra\n  .replace(/\\\\\\\\+t/g, ' ')   // \\\\t, \\\\\\t, etc → espaço\n  .replace(/\\\\\\\\+r/g, '\\r')  // \\\\r, \\\\\\r, etc → carriage return\n  .replace(/\\\\n/g, '\\n')     // \\n → quebra real\n  .replace(/\\\\t/g, ' ')      // \\t → espaço\n  .replace(/\\\\r/g, '\\r')     // \\r → carriage return\n  .replace(/\\\\\"/g, '\"')      // \\\" → aspas normais\n  .replace(/\\\\'/g, \"'\")      // \\' → aspas simples\n  .trim();\n\nconst mensagemMentorLimpa = mensagemMentorRaw\n\n// Prepara mensagens para gravar (incremental)\nconst mensagemUsuario = {\n  interaction: contexto.interacao_atual,\n  autor: 'usuario',\n  texto: transcricao.message || '',\n  timestamp: new Date().toISOString()\n};\n\nconst mensagemMentor = {\n  interaction: contexto.interacao_atual,\n  autor: 'agente',\n  texto: mensagemMentorLimpa,\n  timestamp: new Date().toISOString(),\n  tema: temaAtual.titulo || null\n};\n\n// Mensagens existentes + novas\nconst mensagensExistentes = Array.isArray(contexto.sessao_hoje_mensagens) \n  ? contexto.sessao_hoje_mensagens \n  : [];\nconst mensagensAtualizadas = [...mensagensExistentes, mensagemUsuario, mensagemMentor];\n\nreturn [{\n  user_message: mensagemMentorLimpa,\n  checkpoint_encerramento: checkpointEncerramento,\n  tema_fechado: temaFechado,\n  tema_atual: temaAtual,\n  trigger_experts: triggerExperts,\n  objetivo_sugerido: objetivoSugerido,\n  interacao_atual: contexto.interacao_atual,\n  sessao_id: contexto.sessao_hoje_id,\n  is_nova_sessao: contexto.is_nova_sessao,\n  mensagens_atualizadas: JSON.stringify(mensagensAtualizadas),\n  total_interacoes: mensagensAtualizadas.filter(m => m.autor === 'usuario').length\n}];"
       },
       "id": "81a83623-a8c6-41f3-b606-64ba31f7794d",
       "name": "processa_resposta",
@@ -246,7 +246,7 @@
           "value": {
             "instanceName": "={{ $('start').first().json['body.instance'] }}",
             "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
-            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message. }}",
             "linkPreview": "false",
             "minDelayMs": "3000"
           },
@@ -703,13 +703,13 @@
     "start": [
       {
         "json": {
-          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "usr_id": "3d450c8d-ac4c-4f4b-a7ad-5bc9f0f479bf",
           "body.instance": "MindQuest",
-          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
-          "body.data.key.id": "3B3CA051AE5E78DCB466",
+          "body.data.key.remoteJid": "5512992305156@s.whatsapp.net",
+          "body.data.key.id": "3B3FB18CD08095D5CEC7",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "Aldo Santos",
-          "body.data.message.conversation": "hoje, as quests só ficam ativas quando configura as recorrencias, enquanto não configura, fica como disponivel que seria em planejamento",
+          "body.data.pushName": "🧘🏼‍♀️🏝️✨☘️🎨💃🏽",
+          "body.data.message.conversation": "criei",
           "body.data.messageType": "conversation"
         },
         "pairedItem": {
