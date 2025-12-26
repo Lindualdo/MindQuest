@@ -284,6 +284,11 @@ export interface SabotadorCatalogoEntry {
   emoji: string;
   resumo: string;
   descricao: string;
+  ladoLuminoso?: {
+    dom: string;
+    descricao: string;
+    qualidades: string[];
+  };
   caracteristicas: string[];
   pensamentosTipicos: string[];
   sentimentosComuns: string[];

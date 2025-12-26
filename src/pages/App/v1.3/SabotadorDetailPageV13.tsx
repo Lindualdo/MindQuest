@@ -147,6 +147,31 @@ const SabotadorDetailPageV13: React.FC = () => {
           </div>
         </Card>
 
+        {/* Lado Luminoso / Dom Original */}
+        {sabotador.ladoLuminoso && (
+          <Card className="!p-5 mq-card border-l-4 border-l-[var(--mq-success)]" hover={false}>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={18} className="text-[var(--mq-success)]" />
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--mq-success)]">
+                  Dom Original: {sabotador.ladoLuminoso.dom}
+                </h3>
+              </div>
+              <p className="text-sm leading-relaxed text-[var(--mq-text)]">
+                {sabotador.ladoLuminoso.descricao}
+              </p>
+              <ul className="mt-1 space-y-2">
+                {sabotador.ladoLuminoso.qualidades.map((qualidade) => (
+                  <li key={qualidade} className="flex items-start gap-2 text-sm text-[var(--mq-text)]">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--mq-success)] opacity-60" />
+                    <span>{qualidade}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Card>
+        )}
+
         {/* Card 2: Última Ocorrência */}
         {ocorrenciaLoading && (
           <Card className="mq-card">
