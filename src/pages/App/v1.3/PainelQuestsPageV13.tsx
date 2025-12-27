@@ -429,8 +429,8 @@ const PainelQuestsPageV13: React.FC = () => {
           
           {/* Ações */}
           {questId && (
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              <span className="text-[10px] text-[var(--mq-text-subtle)] font-medium">
+            <div className="flex items-center justify-between pt-2 border-t border-[var(--mq-border-subtle)]">
+              <span className="text-xs text-[var(--mq-text-muted)] font-medium">
                 {quest.criado_em ? format(parseISO(quest.criado_em), "dd/MM/yy") : ""}
               </span>
               <button
@@ -548,7 +548,7 @@ const PainelQuestsPageV13: React.FC = () => {
           {/* Ações */}
           {questId && (
             <div className="flex items-center justify-between pt-2 border-t border-[var(--mq-border-subtle)]">
-              <span className="text-[10px] text-[var(--mq-text-subtle)] font-medium">
+              <span className="text-xs text-[var(--mq-text-muted)] font-medium">
                 {quest.criado_em ? format(parseISO(quest.criado_em), "dd/MM/yy") : ""}
               </span>
               <button
