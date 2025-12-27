@@ -1,0 +1,147 @@
+{
+  "createdAt": "2025-12-26T17:55:12.140Z",
+  "id": "V8BUI2XDbPFB0fNA",
+  "name": "tool_criar_objetivo_express",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "start",
+      "name": "start",
+      "parameters": {},
+      "position": [
+        100,
+        200
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1
+    },
+    {
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "id": "Postgres",
+      "name": "Postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.area_vida_id, $json.titulo, ($json.prazo_meses || 3)] }}"
+        },
+        "query": "INSERT INTO usuarios_objetivos (usuario_id, area_vida_id, titulo, prazo, status, is_padrao, criado_em) VALUES ($1, $2, $3, (CURRENT_DATE + ($4 || ' months')::interval), 'ativo', false, NOW()) RETURNING id, titulo;"
+      },
+      "position": [
+        300,
+        200
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6
+    },
+    {
+      "id": "Output",
+      "name": "Output",
+      "parameters": {
+        "jsCode": "const novo = $input.first().json;\nreturn [{\n  json: {\n    message: `Objetivo criado com sucesso! Título: ${novo.titulo} (ID: ${novo.id})`\n  }\n}];"
+      },
+      "position": [
+        500,
+        200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "Postgres": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Output",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Postgres",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-26T17:55:12.140Z",
+      "role": "workflow:owner",
+      "workflowId": "V8BUI2XDbPFB0fNA",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

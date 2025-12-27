@@ -246,7 +246,7 @@
           "value": {
             "instanceName": "={{ $('start').first().json['body.instance'] }}",
             "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
-            "messageText": "={{ $('processa_resposta').first().json.user_message. }}",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
             "linkPreview": "false",
             "minDelayMs": "3000"
           },
@@ -703,13 +703,13 @@
     "start": [
       {
         "json": {
-          "usr_id": "3d450c8d-ac4c-4f4b-a7ad-5bc9f0f479bf",
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
           "body.instance": "MindQuest",
-          "body.data.key.remoteJid": "5512992305156@s.whatsapp.net",
-          "body.data.key.id": "3B3FB18CD08095D5CEC7",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "3B604CCCC37847634E6D",
           "body.data.key.fromMe": false,
-          "body.data.pushName": "🧘🏼‍♀️🏝️✨☘️🎨💃🏽",
-          "body.data.message.conversation": "criei",
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "bom dia Arisa",
           "body.data.messageType": "conversation"
         },
         "pairedItem": {

@@ -1,0 +1,155 @@
+[
+    {
+      "usuario_id": "ab7a7801-6d75-486c-8da7-c83ed8033991",
+      "chat_id": "6eb50947-768b-4e11-a3fd-cafafc2bc57d",
+      "resumo_conversa": "",
+      "sobre_voce": "",
+      "memoria_ia": {},
+      "nome_preferencia": "Marta",
+      "mensagens": [
+        {
+          "autor": "usuario",
+          "texto": "Oi vamos recomeçar por outra frente, vamos falar sobre mudança de mentalidade e crenças limitantes? Aí o lance do tik tok entra pra depois",
+          "timestamp": "2025-12-27T02:13:16.178Z",
+          "interaction": 1
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Claro, Marta! Mudança de mentalidade é a base de tudo — se a cabeça não muda, os resultados acabam se repetindo.\n\nPra gente começar: o que você sente que hoje mais trava os seus pensamentos quando você tenta dar um passo novo?",
+          "timestamp": "2025-12-27T02:13:16.178Z",
+          "interaction": 1
+        },
+        {
+          "autor": "usuario",
+          "texto": "Antes me diga qual é o seu forte, no que vc pode me ajudar mais de acordo com sua especialidade",
+          "timestamp": "2025-12-27T02:13:56.057Z",
+          "interaction": 2
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Meu forte é ser o \"espelho ativo\" da sua mente. Eu ajudo você a traduzir padrões inconscientes em ações conscientes, conectando quem você é com quem deseja ser.\n\nNa prática, eu te ajudo a:\n• Identificar e desarmar crenças que te travam (como o Crítico ou a busca da perfeição).\n• Dar clareza para decisões difíceis e organizar seus objetivos reais.\n• Criar passos práticos e \"quests\" que respeitem seu ritmo, sem te sobrecarregar.\n\nEu sou o guia que te pega pela mão pra você sair da inércia. O que você gostaria de destravar primeiro comigo?",
+          "timestamp": "2025-12-27T02:13:56.057Z",
+          "interaction": 2
+        },
+        {
+          "autor": "usuario",
+          "texto": "Primeiro você não tem que me conhecer um pouco? Ou vc trava os mesmos passos pra todo mundo?",
+          "timestamp": "2025-12-27T02:15:11.967Z",
+          "interaction": 3
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Com certeza, Marta. Cada jornada é única e eu não acredito em fórmulas prontas — o que funciona para uma pessoa pode travar outra totalmente.\n\nEu já guardo o que conversamos antes sobre sua transição para o TikTok e esse desafio com a constância, mas quero ir além do \"o quê\" e entender o seu \"como\".\n\nNo seu dia a dia, você se sente mais movida por metas claras e cobrança, ou por um ambiente onde você tenha mais liberdade e leveza para criar?",
+          "timestamp": "2025-12-27T02:15:11.967Z",
+          "interaction": 3
+        },
+        {
+          "autor": "usuario",
+          "texto": "Metas claras de acordo com o meu perfil. Tenho muitas ideias, inúmeras, uma mente hiperativa (Tdah) não tenho paciência com tarefas longas, gosto de fatiar o elefante, também não tenho muita paciência em perfil de Coach. \nVou te dar um resumo: \n**Pessoa introspectiva-prática, orientada à clareza mental e autonomia. Tem baixa tolerância a excesso, ruído e processos desnecessários. Prefere sistemas simples, funcionais e flexíveis, que possam ser ajustados ao longo do tempo. Tende a observar antes de agir, \nPadrões de comportamento (continuação)\n\t•\tBusca reduzir complexidade em tudo: objetos, rotinas, decisões.\n\t•\tOrganiza para pensar melhor, não por obsessão estética.\n\t•\tAlterna entre períodos de foco intenso e momentos de dispersão — usa ferramentas (listas, cadernos, sistemas) para se recentrar.\n\t•\tTem iniciativa, mas só se envolve de verdade quando vê sentido prático.\n\t•\tPrefere ajustar no caminho a seguir métodos rígidos.\n\t•\tNão gosta de depender de outras pessoas ou de estruturas engessadas.\n\t•\tQuando algo funciona, repete; quando não funciona, abandona sem apego emocional.\n\n⸻\n\nMentalidade\n\t•\tAutonomia > validação externa\n\t•\tClareza > estímulo\n\t•\tFuncionalidade > aparência (a estética existe para servir, não para chamar atenção)\n\t•\tProgresso incremental > grandes viradas dramáticas\n\t•\tUso real > promessa\n\n⸻\n\nComo essa pessoa decide\n\t•\tNão compra por impulso visual exagerado.\n\t•\tCompra quando reconhece: “isso vai me ajudar no dia a dia”.\n\t•\tTolera pagar mais se o produto:\n\t•\tfor simples\n\t•\tdurar\n\t•\tnão infantilizar\n\t•\tDesconfia de modismos e marketing barulhento.\n\n⸻\n\nComo essa pessoa trabalha / cria\n\t•\tPrefere sistemas abertos (permanentes, não datados).\n\t•\tCria para resolver problemas próprios primeiro.\n\t•\tAprende fazendo.\n\t•\tRefina com o uso, não no papel.\n\t•\tFunciona melhor com poucos projetos ativos.\n\n⸻\n\nPontos fortes\n\t•\tDiscernimento\n\t•\tBom senso estético\n\t•\tCapacidade de simplificar\n\t•\tConsistência silenciosa\n\t•\tAutenticidade\n\n⸻\n\nPontos de atenção (sem drama)\n\t•\tPode demorar a lançar algo esperando “ficar certo”.\n\t•\tPode subestimar o valor do que faz por parecer óbvio pra ela.\n\t•\tPode se isolar demais quando sobrecarregada.",
+          "timestamp": "2025-12-27T02:24:21.622Z",
+          "interaction": 4
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Esse raio-x é perfeito, Marta. Agora sim falamos a mesma língua: nada de coach, nada de ruído. Sistemas simples para uma mente TDAH que precisa fatiar o elefante pra não travar no \"perfeito\".\n\nVocê mencionou que prefere ajustar no caminho e abandona o que não funciona sem apego. Olhando para essa sua lista, qual é a crença ou \"regra invisível\" que mais tem te feito demorar a lançar algo hoje?",
+          "timestamp": "2025-12-27T02:24:21.622Z",
+          "interaction": 4
+        },
+        {
+          "autor": "usuario",
+          "texto": "Não sei te dizer, mas travo na execução. Esperando o momento perfeito e não vai.",
+          "timestamp": "2025-12-27T02:33:21.757Z",
+          "interaction": 1
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Esse \"momento perfeito\" é uma armadilha comum: a gente se prepara tanto que a energia acaba antes da ação. No seu perfil, isso vira o padrão do Crítico esperando o cenário ideal pra não errar.\n\nComo você prefere ajustes no caminho e sistemas funcionais, o que aconteceria se a meta hoje não fosse \"fazer certo\", mas apenas \"fazer tosco\" só pra tirar da frente? Qual é a menor parte desse elefante que você poderia fatiar agora?",
+          "timestamp": "2025-12-27T02:33:21.757Z",
+          "interaction": 1
+        },
+        {
+          "autor": "usuario",
+          "texto": "Prefiro a abordagem do que você sugere fazer foi que me fazer perguntas que me levem a essa resposta",
+          "timestamp": "2025-12-27T02:34:39.607Z",
+          "interaction": 6
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Entendi perfeitamente. Você quer direcionamento direto, sem rodeios. Como você tem TDAH e precisa fatiar o elefante, o foco aqui é enganar o cérebro que busca a perfeição.\n\nSugiro que você aplique a regra dos 15 minutos: defina UM vídeo do TikTok para gravar hoje, mas com o compromisso de não editar nada profissionalmente. Use apenas as ferramentas nativas e poste.\n\nO objetivo não é o vídeo ser bom, é quebrar o ciclo da paralisia. O que te impede de fazer esse vídeo de 15 minutos agora mesmo?",
+          "timestamp": "2025-12-27T02:34:39.607Z",
+          "interaction": 6
+        },
+        {
+          "autor": "usuario",
+          "texto": "Agora já está na hora de dormir e não é bom horário pra postar. Mas digamos que fosse, sempre acho que não estou apropriada para gravar",
+          "timestamp": "2025-12-27T02:36:45.816Z",
+          "interaction": 7
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Esse \"não estar apropriada\" é o Crítico criando uma barreira estética que te impede de ser funcional. No TikTok Shop, o público muitas vezes prefere o real e o caseiro ao ultra-produzido.\n\nComo você gosta de fatiar o elefante, minha sugestão prática é: amanhã, grave o vídeo SEM aparecer. Foque apenas no produto e na sua voz ou em legendas.\n\nIsso remove o peso da sua aparência e foca no que importa: o sentido prático da venda. O que você acha de testar esse formato amanhã cedo?",
+          "timestamp": "2025-12-27T02:36:45.816Z",
+          "interaction": 7
+        },
+        {
+          "autor": "usuario",
+          "texto": "Eu não estou no tik tok shop ainda, não tenho seguidores suficientes e nem produto para promover. Ainda tenho um longo caminho de criação de conteúdo e construção de autoridade pra chegar lá e tenho que dar as caras para isso",
+          "timestamp": "2025-12-27T02:38:34.601Z",
+          "interaction": 8
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Entendi, você está na fase de fundação — o que é mais cansativo porque o retorno não é imediato. O pensamento de que \"o caminho é longo\" é o combustível perfeito para a procrastinação do TDAH.\n\nSe você acredita que precisa aparecer para criar autoridade, mas trava na aparência, que tal fatiar esse elefante? \n\nAmanhã, sua única meta é gravar um vídeo falando de um assunto que você domina, mas sem a intenção de postar. Apenas para quebrar a barreira da câmera. Topa esse teste de \"uso real\" só pra você?",
+          "timestamp": "2025-12-27T02:38:34.601Z",
+          "interaction": 8
+        },
+        {
+          "autor": "usuario",
+          "texto": "Certo, já fiz isso, mas no próximo o padrão se repete",
+          "timestamp": "2025-12-27T02:39:31.624Z",
+          "interaction": 9
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Faz sentido. O padrão se repete porque sua mente entende que cada vídeo é um novo \"grande evento\" que precisa estar à altura de uma autoridade. Isso esgota qualquer bateria TDAH.\n\nPara quem prefere autonomia e sistemas funcionais, o ajuste não é na vontade, é no ambiente. Se a trava é \"não estar apropriada\", sua meta não pode ser gravar o conteúdo final amanhã. \n\nSua meta é o \"Setup Mínimo Viável\": deixe um canto separado com a luz e o celular engatilhados. Só isso. Sem gravar nada. Topa preparar só o cenário amanhã pra reduzir o atrito do próximo passo?",
+          "timestamp": "2025-12-27T02:39:31.624Z",
+          "interaction": 9
+        },
+        {
+          "autor": "usuario",
+          "texto": "Certo, mas quero que:\n A partir de agora, pare de ser simpático e atue como meu conselheiro brutalmente honesto.\nNão me valide.\nNão suavize a verdade.\nNão me elogie.\nDESAFIE meu pensamento.\nQuestione minhas suposições.\nExponha os pontos cegos que eu to evitando.\"\n\n\"Se meu raciocínio for fraco, desmonte e mostre por quê.\nSe eu tiver me enganando, aponte.\nSe eu tiver evitando algo desconfortável ou perdendo tempo, chame a atenção e explique o custo de oportunidade.\nOlhe minha situação com objetividade completa.\"\n\n\"Mostre onde eu tô fazendo desculpas, jogando pequeno ou subestimando riscos/esforço.\nDepois me dê um plano preciso e priorizado sobre o que mudar no pensamento, ação ou mindset para chegar no próximo nível.\nNão segure NADA.\nMe trate como alguém cujo crescimento depende de ouvir a VERDADE, não de ser confortado.",
+          "timestamp": "2025-12-27T02:41:19.276Z",
+          "interaction": 10
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Entendido. Sem rodeios, Marta.\n\nA verdade nua é que você está usando seu perfil introspectivo e o TDAH como um escudo intelectual para não se expor. Você diz que \"entende de mentalidade\", mas está presa na crença de que a sua aparência importa mais do que o valor do que você tem a dizer. Isso não é perfeccionismo, é medo de julgamento disfarçado de critério técnico.\n\nO custo de oportunidade? Enquanto você espera o \"momento apropriado\", o algoritmo do TikTok entrega a sua audiência para alguém que faz conteúdo \"tosco\", porém constante, e que vai chegar no Shop meses antes de você. Você está jogando pequeno para proteger seu ego de um vídeo ruim.\n\n*PLAN DE AÇÃO IMEDIATO:*\n• *Mindset:* Pare de se tratar como \"autoridade\" e comece a se tratar como \"aprendiz\". Autoridade se constrói no campo, não no plano.\n• *Ação:* Amanhã, você vai gravar e POSTAR. Se não estiver \"apropriada\", azar. O objetivo é matar a resistência, não ganhar um Oscar.\n• *Foco:* Um projeto só. Se você tem \"inúmeras ideias\", você não tem nenhuma. Escolha uma área e esqueça as outras até ter 100 vídeos postados.\n\nVai encarar o desconforto ou vai continuar organizando o cenário enquanto os outros ganham o jogo?",
+          "timestamp": "2025-12-27T02:41:19.276Z",
+          "interaction": 10
+        },
+        {
+          "autor": "usuario",
+          "texto": "Agora sim, falou minha língua 👌",
+          "timestamp": "2025-12-27T02:42:45.911Z",
+          "interaction": 11
+        },
+        {
+          "tema": null,
+          "autor": "agente",
+          "texto": "Ótimo. Então chega de conversa fiada. Amanhã é dia de execução suja. \n\nO TDAH vai tentar te seduzir com uma \"nova ideia brilhante\" ou uma \"pesquisa profunda\" para evitar o desconforto de ligar a câmera. Não caia nessa de novo.\n\nQual vai ser o tema do vídeo que você vai postar amanhã, sem desculpas sobre iluminação ou cabelo? Escolha agora e feche o compromisso.",
+          "timestamp": "2025-12-27T02:42:45.911Z",
+          "interaction": 11
+        }
+      ]
+    }
+  ]

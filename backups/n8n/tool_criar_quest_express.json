@@ -1,0 +1,353 @@
+{
+  "createdAt": "2025-12-26T17:56:00.323Z",
+  "id": "Q2BbujteBp4kYe7N",
+  "name": "tool_criar_quest_express",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const input = $('start').first().json;\n// CORRECAO: O input pode vir direto OU dentro de 'query' (se for via webhook com query params)\n// Tentamos normalizar para pegar de onde vier\nconst params = input.query || input;\nconst template = $input.first().json;\n\nif (!template || !template.id) {\n  throw new Error(`Template não encontrado para o tipo: ${params.tipo}`);\n}\n\nconst config = {\n  titulo: params.titulo,\n  descricao: params.descricao,\n  objetivo_id: params.objetivo_id || null,\n  origem: 'mentor_express',\n  tipo_original: params.tipo\n};\n\n// Verifica na raiz ou dentro de query\nconst usuarioId = params.usuario_id;\n\nif (!usuarioId) {\n  throw new Error(`Parâmetro usuario_id é obrigatório. Recebido: ${JSON.stringify(input)}`);\n}\n\nreturn [{\n  json: {\n    usuario_id: usuarioId,\n    catalogo_id: template.id,\n    config: JSON.stringify(config)\n  }\n}];"
+      },
+      "id": "Prepare Config",
+      "name": "Prepare Config",
+      "position": [
+        512,
+        208
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO usuarios_quest (usuario_id, catalogo_id, status, ativado_em, criado_em, config) VALUES ($1, $2, 'ativa', NOW(), NOW(), $3::jsonb) RETURNING id;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.catalogo_id, $json.config] }}"
+        }
+      },
+      "id": "Insert Quest",
+      "name": "Insert Quest",
+      "position": [
+        704,
+        208
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a450625c-7df6-4a5c-a52d-78fb906c2458",
+              "name": "=success",
+              "value": "={{ $json.id.isNotEmpty() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        208
+      ],
+      "id": "22c54482-7ba1-40c1-a48a-75d2f7bf9089",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "tipo"
+            },
+            {
+              "name": "titulo"
+            },
+            {
+              "name": "descricao"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "b5a38e49-f1da-4432-b205-380abee6f5f2",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "=OBJETIVO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "81ffff22-7145-45af-b477-e091a18925bb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OBJETIVO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "377531f7-2240-4b4b-850b-a42fa07bdfc5",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "MENTE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MENTE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8bb72f35-bd5c-4d15-85b2-0c954c4efea3",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "=CUSTOM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CUSTOM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        176
+      ],
+      "id": "bf2e5aef-02a3-4806-857e-4c10d212a974",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM quests_catalogo WHERE ( categoria = 'boa_pratica_geral' AND $1 = 'MENTE') OR (categoria = 'objetivo' AND $1 = 'OBJETIVO') OR (codigo = 'quest_custom' AND ($1 = 'CUSTOM' OR $1 = 'PERSONALIZADA')) LIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.tipo }}"
+        }
+      },
+      "id": "Get Template",
+      "name": "get_catalog_custom",
+      "position": [
+        304,
+        -16
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Prepare Config": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Insert Quest",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Insert Quest": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "get_catalog_custom",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_catalog_custom": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Prepare Config",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "chat_id": "d0b71eb7-51f7-45eb-a4ee-67dd4867641f",
+          "usuario_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "tipo": "OBJETIVO",
+          "titulo": "📋 Revisão e Repriorização Estratégica",
+          "descricao": "Revisar o backlog técnico, as regras de criação de quests e o fluxo Mind First para garantir um lançamento fluido e sem atritos."
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-26T17:56:00.323Z",
+      "role": "workflow:owner",
+      "workflowId": "Q2BbujteBp4kYe7N",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

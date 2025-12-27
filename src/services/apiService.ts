@@ -151,6 +151,8 @@ class ApiService {
       progresso_meta: this.toNumber(quest.progresso_meta, 1) ?? 1,
       progresso_atual: this.toNumber(quest.progresso_atual, 0) ?? 0,
       concluido_em: this.toString(quest.concluido_em),
+      ativado_em: this.toString(quest.ativado_em),
+      atualizado_em: this.toString(quest.atualizado_em),
       config: configObj,
       xp_recompensa:
         this.toNumber(

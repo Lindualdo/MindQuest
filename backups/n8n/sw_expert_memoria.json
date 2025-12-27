@@ -1,0 +1,378 @@
+{
+  "createdAt": "2025-12-27T07:48:46.213Z",
+  "id": "1LOCRBiyeLTnQzkW",
+  "name": "sw_expert_memoria",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "start-memoria",
+      "name": "start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1200,
+        240
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usuario_id"
+            },
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "resumo_conversa"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "buscar-dados-memoria",
+      "name": "Buscar Dados Usuario",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -960,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.id as usuario_id, u.sobre_voce, u.memoria_ia, u.nome_preferencia\nFROM usuarios u WHERE u.id = $1::uuid;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id] }}"
+        }
+      }
+    },
+    {
+      "id": "preparar-contexto-memoria",
+      "name": "Preparar Contexto Memoria",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        240
+      ],
+      "parameters": {
+        "functionCode": "const s = $items('start')[0]?.json ?? {};\nconst u = $items('Buscar Dados Usuario')[0]?.json ?? {};\n\nreturn [{\n  json: {\n    usuario_id: s.usuario_id,\n    chat_id: s.chat_id,\n    resumo_conversa: s.resumo_conversa || '',\n    sobre_voce: u.sobre_voce || '',\n    memoria_ia: u.memoria_ia || {},\n    nome_preferencia: u.nome_preferencia || ''\n  }\n}];"
+      }
+    },
+    {
+      "id": "llm-memoria",
+      "name": "LLM Memoria",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        432
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      },
+      "parameters": {
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.2
+        }
+      }
+    },
+    {
+      "id": "parser-memoria",
+      "name": "Parser Memoria",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        432
+      ],
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"pessoal\": {\n    \"idade\": null,\n    \"estado_civil\": \"casado\",\n    \"filhos\": [\"Pedro (5 anos)\"],\n    \"cidade\": \"Fortaleza\",\n    \"profissao\": \"Designer\"\n  },\n  \"preferencias\": {\n    \"gostos\": [\"estoicismo\", \"café sem açúcar\"],\n    \"interesses\": [\"IA\", \"astronomia\"],\n    \"dialetos\": \"Usa gírias cearenses\"\n  },\n  \"fatos_marcantes\": [\n    \"Comprou o primeiro carro em Dez/24\",\n    \"Está transicionando de carreira\"\n  ],\n  \"houve_atualizacao\": true\n}"
+      }
+    },
+    {
+      "id": "agent-memoria",
+      "name": "Expert Memoria",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        240
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=<input>\n<sobre_voce>{{ $json.sobre_voce }}</sobre_voce>\n<memoria_atual>{{ JSON.stringify($json.memoria_ia) }}</memoria_atual>\n<resumo_conversa>{{ $json.resumo_conversa }}</resumo_conversa>\n<nome_usuario>{{ $json.nome_preferencia }}</nome_usuario>\n</input>\n\nAtualize o perfil permanente do usuário com base na conversa.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "<role>Especialista em Extração de Memória Permanente</role>\n\n<objective>Extrair e consolidar informações permanentes do usuário para personalização futura</objective>\n\n<regras>\n1. Use 'sobre_voce' como fonte primária de verdade\n2. Analise 'resumo_conversa' em busca de:\n   - Dados pessoais (idade, família, cidade, profissão)\n   - Preferências (gostos, interesses, hobbies)\n   - Dialetos/forma de falar\n   - Fatos marcantes da vida\n3. MESCLE novas informações com 'memoria_atual' (incremental)\n4. NÃO apague informações antigas a menos que explicitamente corrigidas\n5. Arrays: adicione novos itens sem duplicar\n6. 'fatos_marcantes': limite de 10 itens (mais recentes)\n7. Se não houver nada novo: retorne memoria_atual com houve_atualizacao=false\n</regras>\n\n<estrutura_output>\n{\n  \"pessoal\": {\n    \"idade\": number|null,\n    \"estado_civil\": string|null,\n    \"filhos\": [string],\n    \"cidade\": string|null,\n    \"profissao\": string|null\n  },\n  \"preferencias\": {\n    \"gostos\": [string],\n    \"interesses\": [string],\n    \"dialetos\": string|null\n  },\n  \"fatos_marcantes\": [string],\n  \"houve_atualizacao\": boolean\n}\n</estrutura_output>\n\n<importante>\n- Seja conservador: só adicione informações CLARAS e PERMANENTES\n- Ignore informações temporárias (humor do dia, eventos pontuais)\n- Foque em dados que ajudem a criar rapport em conversas futuras\n</importante>",
+          "maxIterations": 3
+        }
+      }
+    },
+    {
+      "id": "preparar-registro-memoria",
+      "name": "Preparar Registro Memoria",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        240
+      ],
+      "parameters": {
+        "functionCode": "const s = $items('start')[0]?.json ?? {};\nconst ctx = $items('Preparar Contexto Memoria')[0]?.json ?? {};\nconst output = $json.output ?? {};\n\n// Se não houve atualização, retorna null para pular gravação\nif (!output.houve_atualizacao) {\n  return [{ json: { skip: true, usuario_id: s.usuario_id } }];\n}\n\n// Preparar objeto memoria_ia\nconst memoria = {\n  pessoal: output.pessoal || {},\n  preferencias: output.preferencias || {},\n  fatos_marcantes: (output.fatos_marcantes || []).slice(-10),\n  ultima_atualizacao: new Date().toISOString()\n};\n\nreturn [{\n  json: {\n    skip: false,\n    usuario_id: s.usuario_id,\n    memoria_ia: memoria\n  }\n}];"
+      }
+    },
+    {
+      "id": "check-skip",
+      "name": "Houve Atualizacao?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        240
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "skip-check",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gravar-memoria",
+      "name": "Gravar Memoria",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        256,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE usuarios\nSET memoria_ia = $2::jsonb,\n    atualizado_em = NOW()\nWHERE id = $1::uuid\nRETURNING id, memoria_ia;",
+        "options": {
+          "queryReplacement": "={{ [$json.usuario_id, $json.memoria_ia] }}"
+        }
+      }
+    },
+    {
+      "id": "nota-memoria",
+      "name": "Expert Memoria - Perfil Permanente",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        48
+      ],
+      "parameters": {
+        "content": "## Expert Memoria\n\nExtrai informações permanentes do usuário:\n- Dados pessoais (família, cidade, profissão)\n- Preferências (gostos, interesses)\n- Dialetos/forma de falar\n- Fatos marcantes\n\n**Input:** usuario_id, chat_id, resumo_conversa\n**Output:** memoria_ia atualizada (JSONB)",
+        "height": 320,
+        "width": 320
+      }
+    },
+    {
+      "id": "noop-skip",
+      "name": "Sem Atualizacao",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        256,
+        320
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Usuario": {
+      "main": [
+        [
+          {
+            "node": "Preparar Contexto Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Contexto Memoria": {
+      "main": [
+        [
+          {
+            "node": "Expert Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Memoria": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Expert Memoria",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Memoria": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Expert Memoria",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expert Memoria": {
+      "main": [
+        [
+          {
+            "node": "Preparar Registro Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Memoria": {
+      "main": [
+        [
+          {
+            "node": "Houve Atualizacao?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Houve Atualizacao?": {
+      "main": [
+        [
+          {
+            "node": "Gravar Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Atualizacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-27T07:48:46.213Z",
+      "role": "workflow:owner",
+      "workflowId": "1LOCRBiyeLTnQzkW",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

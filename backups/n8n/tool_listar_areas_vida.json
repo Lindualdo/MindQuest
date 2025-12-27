@@ -1,0 +1,144 @@
+{
+  "createdAt": "2025-12-26T17:55:04.616Z",
+  "id": "fV5UM9pZiIWzN0Wa",
+  "name": "tool_listar_areas_vida",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "start",
+      "name": "start",
+      "parameters": {},
+      "position": [
+        100,
+        200
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1
+    },
+    {
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      },
+      "id": "Postgres",
+      "name": "Postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, nome, descricao FROM areas_vida_catalogo WHERE ativo = true ORDER BY ordem ASC;"
+      },
+      "position": [
+        300,
+        200
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6
+    },
+    {
+      "id": "Format Output",
+      "name": "Format Output",
+      "parameters": {
+        "jsCode": "const areas = $input.all().map(item => item.json);\nreturn [{\n  json: {\n    areas: areas\n  }\n}];"
+      },
+      "position": [
+        500,
+        200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "Postgres": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Output",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Postgres",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-26T17:55:04.616Z",
+      "role": "workflow:owner",
+      "workflowId": "fV5UM9pZiIWzN0Wa",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

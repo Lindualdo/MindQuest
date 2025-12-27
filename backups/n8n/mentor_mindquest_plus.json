@@ -1,0 +1,842 @@
+{
+  "createdAt": "2025-12-26T17:58:41.916Z",
+  "id": "xEsvaIT1BQSk3joK",
+  "name": "mentor_mindquest_plus",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "usr_id"
+            },
+            {
+              "name": "body.instance"
+            },
+            {
+              "name": "body.data.key.remoteJid"
+            },
+            {
+              "name": "body.data.key.id"
+            },
+            {
+              "name": "body.data.key.fromMe",
+              "type": "boolean"
+            },
+            {
+              "name": "body.data.pushName"
+            },
+            {
+              "name": "body.data.message.conversation"
+            },
+            {
+              "name": "body.data.messageType"
+            }
+          ]
+        }
+      },
+      "id": "acb42f98-13f7-4755-8f09-9d88479ad535",
+      "name": "start",
+      "position": [
+        -1536,
+        -336
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "fVrO1PaqFuA957u0"
+        }
+      },
+      "id": "fa3e05cc-e17a-4b19-ab60-de8ff984f686",
+      "name": "config",
+      "position": [
+        -1360,
+        -336
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.nome, u.id, u.nome_preferencia, u.nome_assistente, u.token_acesso, u.cronotipo_detectado, u.whatsapp_numero, u.faixa_etaria, u.sobre_voce, u.tom_conversa FROM usuarios u WHERE u.id = $1;",
+        "options": {
+          "queryReplacement": "={{ [ $('start').first().json.usr_id ] }}"
+        }
+      },
+      "id": "36652579-a9b4-497e-b71d-ba7110101d22",
+      "name": "busca_dados_usr",
+      "position": [
+        -1184,
+        -336
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, tipo, titulo, mensagem, contexto_mentor, quests_mencionadas, referencia_id, criado_em FROM notificacoes_log WHERE usuario_id = $1 AND canal = 'whatsapp' AND (respondida IS NULL OR respondida = FALSE) ORDER BY criado_em DESC LIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [ $('busca_dados_usr').first().json.id ] }}"
+        }
+      },
+      "id": "edf134f2-205a-463a-804f-588c68a43b6f",
+      "name": "busca_notificacao",
+      "position": [
+        -976,
+        -336
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH objetivos AS ( SELECT json_agg(json_build_object('id', o.id, 'titulo', o.titulo, 'area_vida', av.nome, 'is_padrao', o.is_padrao)) FROM usuarios_objetivos o JOIN areas_vida_catalogo av ON o.area_vida_id = av.id WHERE o.usuario_id = $1 AND o.status = 'ativo' ), objetivo_padrao AS ( SELECT id FROM usuarios_objetivos WHERE usuario_id = $1 AND is_padrao = TRUE AND status = 'ativo' LIMIT 1 ), sabotador AS ( SELECT sabotador_id, COUNT(*) AS total_deteccoes FROM usuarios_sabotadores WHERE usuario_id = $1 GROUP BY sabotador_id ORDER BY COUNT(*) DESC LIMIT 1 ), perfil_bigfive AS ( SELECT perfil_primario, COUNT(*) AS total_deteccoes, ROUND(AVG(confianca_media)::numeric, 2) AS confianca_media FROM usuarios_perfis WHERE usuario_id = $1 GROUP BY perfil_primario ORDER BY COUNT(*) DESC, AVG(confianca_media) DESC LIMIT 1 ), quests_count AS ( SELECT COUNT(*) FILTER (WHERE status = 'ativa') AS total_ativas, COUNT(*) FILTER (WHERE status = 'disponivel') AS total_disponiveis FROM usuarios_quest WHERE usuario_id = $1 AND status IN ('ativa', 'disponivel') ), historico AS ( SELECT json_agg(json_build_object('id', c.id, 'data_conversa', c.data_conversa, 'resumo_conversa', c.resumo_conversa)) FROM ( SELECT id, data_conversa, resumo_conversa FROM usr_chat WHERE usuario_id = $1 AND resumo_conversa IS NOT NULL AND data_conversa < CURRENT_DATE ORDER BY data_conversa DESC, horario_inicio DESC LIMIT 5 ) c ), nivel AS ( SELECT nivel_atual, titulo_nivel FROM usuarios_conquistas WHERE usuario_id = $1 LIMIT 1 ), sessao_hoje AS ( SELECT id, data_conversa, status, mensagens FROM usr_chat WHERE usuario_id = $1 AND data_conversa = CURRENT_DATE ORDER BY horario_inicio DESC LIMIT 1 ), total_conversas AS ( SELECT COUNT(*) as total FROM usr_chat WHERE usuario_id = $1 ) SELECT (SELECT * FROM objetivos) AS objetivos_especificos, (SELECT id FROM objetivo_padrao) AS objetivo_padrao_id, (SELECT sabotador_id FROM sabotador) AS sabotador_mais_ativo, (SELECT perfil_primario FROM perfil_bigfive) AS perfil_bigfive_primario, (SELECT total_ativas FROM quests_count) AS quests_ativas_total, (SELECT total_disponiveis FROM quests_count) AS quests_disponiveis_total, (SELECT * FROM historico) AS ultimas_conversas, (SELECT nivel_atual FROM nivel) AS nivel_atual, (SELECT titulo_nivel FROM nivel) AS titulo_nivel, (SELECT id FROM sessao_hoje) AS sessao_hoje_id, (SELECT status FROM sessao_hoje) AS sessao_hoje_status, (SELECT mensagens FROM sessao_hoje) AS sessao_hoje_mensagens, (SELECT total FROM total_conversas) AS total_conversas;",
+        "options": {
+          "queryReplacement": "={{ [ $('start').first().json.usr_id ] }}"
+        }
+      },
+      "id": "4b06d467-5d5c-439d-a9fc-af998ae8c479",
+      "name": "busca_contexto",
+      "position": [
+        -768,
+        -336
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONTEXTO COMPLETO v7 - Ignora objetivo padrão no flag tem_objetivos\nconst usuarioId = $('start').first().json.usr_id;\nconst config = $('config').first().json;\nconst dadosUsr = $('busca_dados_usr').first().json;\nconst contexto = $('busca_contexto').first().json;\n\n// Notificação recente (se houver)\nconst notifResult = $('busca_notificacao').first()?.json;\nconst temNotificacao = notifResult && notifResult.id;\nconst notificacaoRecente = temNotificacao ? {\n  id: notifResult.id,\n  tipo: notifResult.tipo,\n  titulo: notifResult.titulo || '',\n  mensagem: notifResult.mensagem || '',\n  contexto_mentor: notifResult.contexto_mentor || '',\n  quests_mencionadas: notifResult.quests_mencionadas || [],\n  referencia_id: notifResult.referencia_id,\n  criado_em: notifResult.criado_em\n} : null;\n\n// Verifica se é primeira conversa\nconst totalConversas = Number(contexto?.total_conversas || 0);\nconst isPrimeiraConversa = totalConversas === 0;\n\n// Verifica se usuário tem objetivos ALÉM do padrão\nconst objetivos = contexto?.objetivos_especificos || [];\n\n// Filtra objetivos configuráveis (ignora padrão)\nconst objetivosConfigurados = Array.isArray(objetivos) \n  ? objetivos.filter(obj => !obj.is_padrao)\n  : [];\n\n// tem_objetivos = true apenas se tem objetivos ALÉM do padrão\nconst temObjetivos = objetivosConfigurados.length > 0;\n\n// Quests - apenas totais (detalhes via tool)\nconst questsAtivasTotal = Number(contexto?.quests_ativas_total || 0);\nconst questsDisponiveisTotal = Number(contexto?.quests_disponiveis_total || 0);\nconst temQuests = questsAtivasTotal > 0 || questsDisponiveisTotal > 0;\n\n// Sessão do dia\nconst sessaoHojeId = contexto?.sessao_hoje_id || null;\nconst sessaoHojeStatus = contexto?.sessao_hoje_status || null;\nconst sessaoHojeMensagens = contexto?.sessao_hoje_mensagens || [];\n\n// NOVO CICLO: não existe sessão OU sessão está finalizada\nconst isNovoCiclo = !sessaoHojeId || sessaoHojeStatus === 'finalizado';\n\n// Se é novo ciclo (sessão finalizada), reseta contador de interações\nconst mensagensArray = Array.isArray(sessaoHojeMensagens) ? sessaoHojeMensagens : [];\nconst interacaoAtual = isNovoCiclo ? 1 : mensagensArray.filter(m => m?.autor === 'usuario').length + 1;\n\n// Tom de conversa (default: empatico)\nconst tomConversa = dadosUsr?.tom_conversa || 'empatico';\n\nreturn [{\n  usuario_id: usuarioId,\n  nome_preferencia: dadosUsr?.nome_preferencia || null,\n  nome_assistente: dadosUsr?.nome_assistente || 'Mind',\n  whatsapp_numero: dadosUsr?.whatsapp_numero || null,\n  faixa_etaria: dadosUsr?.faixa_etaria || null,\n  sobre_voce: dadosUsr?.sobre_voce || null,\n  tom_conversa: tomConversa,\n  // Objetivos - separados para clareza\n  objetivos_especificos: objetivos,           // todos (incluindo padrão)\n  objetivos_configurados: objetivosConfigurados, // apenas os configuráveis\n  tem_objetivos: temObjetivos,                // true só se tem configurados\n  objetivo_padrao: contexto?.objetivo_padrao_id || null,\n  sabotador_mais_ativo: contexto?.sabotador_mais_ativo || null,\n  perfil_bigfive_primario: contexto?.perfil_bigfive_primario || null,\n  // Quests - apenas indicadores\n  tem_quests: temQuests,\n  quests_ativas_total: questsAtivasTotal,\n  quests_disponiveis_total: questsDisponiveisTotal,\n  // Histórico\n  ultimas_conversas: contexto?.ultimas_conversas || [],\n  nivel_atual: contexto?.nivel_atual || 1,\n  titulo_nivel: contexto?.titulo_nivel || 'Explorador',\n  total_conversas: totalConversas,\n  is_primeira_conversa: isPrimeiraConversa,\n  sessao_hoje_id: sessaoHojeId,\n  sessao_hoje_mensagens: sessaoHojeMensagens,\n  // Novo ciclo quando sessão finalizada\n  is_nova_sessao: isNovoCiclo,\n  is_novo_ciclo: isNovoCiclo,\n  sessao_anterior_finalizada: sessaoHojeStatus === 'finalizado',\n  interacao_atual: interacaoAtual,\n  // Notificação\n  tem_notificacao_recente: temNotificacao,\n  notificacao_recente: notificacaoRecente\n}];"
+      },
+      "id": "c5ec68a3-e386-4dba-bf45-92d3c78a6788",
+      "name": "contexto_completo",
+      "position": [
+        -592,
+        -336
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "jUAvu7DUAzyqZhJd"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "body.data.key.fromMe": "={{ $('start').first().json['body.data.key.fromMe'] }}",
+            "body.data.key.id": "={{ $('start').first().json['body.data.key.id'] }}",
+            "body.data.key.remoteJid": "={{ $('start').first().json['body.data.key.remoteJid'] }}",
+            "body.data.message.conversation": "={{ $('start').first().json['body.data.message.conversation'] }}",
+            "body.data.messageType": "={{ $('start').first().json['body.data.messageType'] }}",
+            "body.data.pushName": "={{ $('start').first().json['body.data.pushName'] }}",
+            "body.instance": "={{ $('start').first().json['body.instance'] }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "b60456f2-81df-441f-bd1a-5087445a0eb1",
+      "name": "transcricao",
+      "position": [
+        -400,
+        -336
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "jsCode": "// PROCESSA RESPOSTA DO MENTOR v8\nconst output = $input.first()?.json?.output ?? {};\nconst contexto = $('contexto_completo').first().json;\nconst transcricao = $('transcricao').first().json;\n\n// Tratamento de escapes\nlet mensagemMentorRaw = String(output.mensagem_usuario || '');\nconst mensagemMentorLimpa = mensagemMentorRaw\n  .replace(/\\\\\\\\+n/g, '\\\\n')\n  .replace(/\\\\n/g, '\\\\n')\n  .trim();\n\nconst mensagemUsuario = {\n  interaction: contexto.interacao_atual,\n  autor: 'usuario',\n  texto: transcricao.message || '',\n  timestamp: new Date().toISOString()\n};\n\nconst mensagemMentor = {\n  interaction: contexto.interacao_atual,\n  autor: 'agente',\n  texto: mensagemMentorLimpa,\n  timestamp: new Date().toISOString()\n};\n\nconst mensagensExistentes = Array.isArray(contexto.sessao_hoje_mensagens) ? contexto.sessao_hoje_mensagens : [];\nconst mensagensAtualizadas = [...mensagensExistentes, mensagemUsuario, mensagemMentor];\n\nreturn [{\n  user_message: mensagemMentorLimpa,\n  interacao_atual: contexto.interacao_atual,\n  mensagens_atualizadas: JSON.stringify(mensagensAtualizadas),\n  total_interacoes: mensagensAtualizadas.filter(m => m.autor === 'usuario').length\n}];"
+      },
+      "id": "81a83623-a8c6-41f3-b606-64ba31f7794d",
+      "name": "processa_resposta",
+      "position": [
+        -1200,
+        32
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "name": "listar_areas_vida",
+        "description": "Lista as áreas da vida (Saúde, Finanças, etc) disponíveis para criar novos objetivos. Use sem parâmetros.",
+        "workflowId": "fV5UM9pZiIWzN0Wa"
+      },
+      "id": "tool_listar_areas_vida",
+      "name": "tool_listar_areas_vida",
+      "position": [
+        -1584,
+        352
+      ],
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "criar_objetivo_express",
+        "description": "Cria um novo objetivo. Use quando o usuário definir uma nova meta. Params: usuario_id, titulo, area_vida_id.",
+        "workflowId": "V8BUI2XDbPFB0fNA"
+      },
+      "id": "tool_criar_objetivo_express",
+      "name": "tool_criar_objetivo_express",
+      "position": [
+        -1248,
+        352
+      ],
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('start').first().json['body.instance'] }}{{ $('start').first().json.usr_id }}{{ $('busca_dados_usr').item.json.whatsapp_numero }}",
+        "sessionTTL": 43200,
+        "contextWindowLength": 50
+      },
+      "id": "7760ed2a-a239-4030-a382-e908ea71294a",
+      "name": "memory",
+      "position": [
+        -1728,
+        352
+      ],
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "credentials": {
+        "redis": {
+          "id": "PB4zpLy1jLXDEzmH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-3-flash-preview",
+        "options": {}
+      },
+      "id": "a9a8d40d-0d2b-4927-b7cd-a45262593a39",
+      "name": "openrouter_model",
+      "position": [
+        -1888,
+        352
+      ],
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "credentials": {
+        "openRouterApi": {
+          "id": "rSnkOnnAHyfayLJt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"mensagem_usuario\":{\"type\":\"string\"}},\"required\":[\"mensagem_usuario\"]}"
+      },
+      "id": "7d7b87ec-ebd3-4f9c-b738-4c5d889cbbdb",
+      "name": "Structured Output Parser",
+      "position": [
+        -912,
+        496
+      ],
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH upsert AS ( INSERT INTO usr_chat (usuario_id, data_conversa, horario_inicio, status, mensagens, total_interactions) VALUES ($1, CURRENT_DATE, NOW(), 'em_andamento', $2::jsonb, $3) ON CONFLICT (usuario_id, data_conversa) DO UPDATE SET mensagens = $2::jsonb, total_interactions = $3, status = 'em_andamento', horario_fim = NULL, atualizado_em = NOW() WHERE usr_chat.data_conversa = CURRENT_DATE RETURNING id, usuario_id, data_conversa, status ) SELECT * FROM upsert UNION ALL SELECT id, usuario_id, data_conversa, status FROM usr_chat WHERE usuario_id = $1 AND data_conversa = CURRENT_DATE LIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [ $('contexto_completo').first().json.usuario_id, $('processa_resposta').first().json.mensagens_atualizadas, $('processa_resposta').first().json.total_interacoes ] }}"
+        }
+      },
+      "id": "22a3e8d6-ddfd-449e-b395-09a8ca5f9ccb",
+      "name": "grava_mensagem",
+      "position": [
+        -1008,
+        32
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE notificacoes_log SET respondida = TRUE, respondida_em = NOW() WHERE id = $1::uuid AND $1 IS NOT NULL;",
+        "options": {
+          "queryReplacement": "={{ [$('contexto_completo').first().json.notificacao_recente ? $('contexto_completo').first().json.notificacao_recente.id : null] }}"
+        }
+      },
+      "id": "3bcd0ac1-a630-4c28-94e9-b3f97c771869",
+      "name": "marca_notificacao",
+      "position": [
+        -816,
+        32
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "8ySWxtSO7gYK5uue",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "DJB5qWudX1Hqap1O"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "linkPreview": "false",
+            "messageText": "={{ $('processa_resposta').first().json.user_message }}",
+            "minDelayMs": "3000",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "d1eebb49-0b50-4ff0-831e-454e6c63f541",
+      "name": "envia_mensagem",
+      "position": [
+        -128,
+        -48
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "DJB5qWudX1Hqap1O"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instanceName": "={{ $('start').first().json['body.instance'] }}",
+            "linkPreview": "false",
+            "messageText": "=ops! tive algum problema com sua ultima mensagem. Poderia me mandar novamente?",
+            "minDelayMs": "3000",
+            "remoteJidOrNumber": "={{ $('start').first().json['body.data.key.remoteJid'] }}"
+          }
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "c1e7198c-f54c-421d-aed6-36f01de39b3d",
+      "name": "envia_mensagem1",
+      "position": [
+        -128,
+        128
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1ba0a19c-52d6-4d69-8304-28589a53120d",
+              "leftValue": "={{ $('mentor').item.json.output.mensagem_usuario }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -400,
+        32
+      ],
+      "id": "18e95b62-4fc1-4951-baea-3985ff9e2247",
+      "name": "Mentor gerou resposta"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<user_input>\n\n<message>\n{{ $('transcricao').item.json.message }}\n</message>\n\n<session_context>\n<interaction_number>{{ $('contexto_completo').first().json.interacao_atual }}</interaction_number>\n<is_new_session>{{ $('contexto_completo').first().json.is_nova_sessao ? 'SIM' : 'NÃO' }}</is_new_session>\n<is_first_ever>{{ $('contexto_completo').first().json.is_primeira_conversa ? 'SIM' : 'NÃO' }}</is_first_ever>\n</session_context>\n</user_input>\n\n\n<!-- ============================================ -->\n<!-- CONTEXTO DO USUÁRIO -->\n<!-- ============================================ -->\n\n<user_context>\n<profile>\n<usuario_id>{{ $('busca_dados_usr').item.json.id }}</usuario_id>\n<name>{{ $('contexto_completo').first().json.nome_preferencia || 'amigo' }}</name>\n<preferred_tone>{{ $('contexto_completo').first().json.tom_conversa || 'empatico' }}</preferred_tone>\n<about>{{ $('contexto_completo').first().json.sobre_voce ? 'Sobre: ' + $('contexto_completo').first().json.sobre_voce : '' }}</about>\n<mentor_name>{{ $('busca_dados_usr').item.json.nome_assistente }}</mentor_name>\n<url_app>https://mindquest.pt/app/auth?token={{ $('busca_dados_usr').item.json.token_acesso }}</>\n</profile>\n\n<goals>\n<has_defined_goals>{{ $('contexto_completo').first().json.tem_objetivos ? 'SIM' : 'NÃO' }}</has_defined_goals>\n<active_goals>{{ JSON.stringify($('contexto_completo').first().json.objetivos_especificos || []) }}</active_goals>\n</goals>\n\n\n\n<!-- ============================================ -->\n<!-- NOTIFICAÇÃO PENDENTE (se houver) -->\n<!-- ============================================ -->\n\n{{ $('contexto_completo').first().json.tem_notificacao_recente ? `\n<notification_context>\n<has_pending_notification>SIM</has_pending_notification>\n<notification_type>${$('contexto_completo').first().json.notificacao_recente.tipo || ''}</notification_type>\n<notification_title>${$('contexto_completo').first().json.notificacao_recente.titulo || ''}</notification_title>\n<notification_message>\n${$('contexto_completo').first().json.notificacao_recente.mensagem || ''}\n</notification_message>\n<mentor_context>${$('contexto_completo').first().json.notificacao_recente.contexto_mentor || ''}</mentor_context>\n\n<instruction>\nANALISE A MENSAGEM DO USUÁRIO:\n\n1. Se for um NÚMERO (1, 2, 3, 4...):\n   - O usuário está respondendo à alternativa correspondente na notificação\n   - Use o contexto_mentor para conduzir a conversa sobre esse tema\n   - NÃO pergunte \"sobre o que quer falar\", você já sabe!\n\n2. Se for TEXTO relacionado ao tema:\n   - O usuário está respondendo sobre a notificação\n   - Conduza a conversa naturalmente\n\n3. Se for TEXTO não relacionado:\n   - O usuário quer falar de outro assunto\n   - Siga o novo tema, não force a notificação\n</instruction>\n</notification_context>\n` : '' }}\n\n<mental_profile>\n<active_pattern>{{ $('contexto_completo').first().json.sabotador_mais_ativo || 'nenhum identificado' }}</active_pattern>\n<behavioral_profile>{{ $('contexto_completo').first().json.perfil_bigfive_primario || 'não identificado' }}</behavioral_profile>\n</mental_profile>\n\n<quests>\n<has_quests>{{ $('contexto_completo').first().json.tem_quests ? 'SIM' : 'NÃO' }}</has_quests>\n<total_ativas>{{ $('contexto_completo').first().json.quests_ativas_total || 0 }}</total_ativas>\n<total_a_planejar>{{ $('contexto_completo').first().json.quests_disponiveis_total || 0 }}</total_a_planejar>\n<note>Use quest_tool para detalhes das quests quando necessário</note>\n</quests>\n\n<progress>\n<level>{{ $('contexto_completo').first().json.nivel_atual }}</level>\n<title>{{ $('contexto_completo').first().json.titulo_nivel }}</title>\n</progress>\n\n<conversation_history>{{ JSON.stringify($('contexto_completo').first().json.ultimas_conversas || []) }}</conversation_history>\n</user_context>\n\n\n<!-- ============================================ -->\n<!-- DIRETRIZES PRIORITÁRIAS -->\n<!-- ============================================ -->\n\n<diretrizes>\n{{ (() => {\n  const ctx = $('contexto_completo').first().json;\n  const diretrizes = [];\n  \n  // Prioridade 1: Objetivos\n  if (!ctx.tem_objetivos) {\n    diretrizes.push('PRIORIDADE: Usuário não tem objetivos definidos. Conduza a conversa para descobrir o que ele quer tirar do papel.');\n  }\n  \n  // Nova sessão: abertura contextual (só se NÃO tiver notificação)\n  if (ctx.is_nova_sessao && ctx.interacao_atual === 1 && !ctx.tem_notificacao_recente) {\n    if (ctx.is_primeira_conversa) {\n      diretrizes.push('Primeira conversa: Acolha, apresente-se brevemente como mentor do MindQuest, e foque em conhecer o usuário.');\n    } else {\n      diretrizes.push('Abertura contextual: Escolha o que for mais relevante - quest pendente, última conversa, ou simplesmente perguntar como ele está.');\n    }\n  }\n  \n  return diretrizes.join('\\n');\n})() }}\n</diretrizes>\n\n\n<output_format>\n{\"mensagem_usuario\": \"Oi! Como você está hoje?\"}\n</response_format>",
+        "options": {
+          "systemMessage": "=# System Prompt - Mentor MindQuest 1.3.33\n\n<role>\nVocê é o Mentor MindQuest - a mente consciente e guia de jornada do usuário. Sua especialidade é traduzir padrões mentais inconscientes em ações conscientes, atuando como um porto seguro e catalisador de crescimento pessoal.\n</role>\n\n<objective>\nGuiar o usuário no autoconhecimento e na execução de objetivos práticos. \nSucesso = O usuário sente-se validado emocionalmente, compreende um padrão próprio e aceita uma ação concreta (Quest).\n</objective>\n\n<framework>\nCONVERSAR → ENTENDER → AGIR → EVOLUIR\n- Conversar: Gerar contexto e conexão.\n- Entender: Mapear padrões (sabotadores) e prioridades.\n- Agir: Propor e registrar Quests (ações).\n- Evoluir: Consolidar progresso e celebrar conquistas.\n</framework>\n\n<rules>\n1. **Validação Primeiro**: Sempre valide a emoção ou estado do usuário antes de qualquer direcionamento ou pergunta.\n2. **Pensamento Prévio (CoT)**: Antes de responder, analise internamente a intenção do usuário e se uma ferramenta é necessária.\n3. **Foco na Pessoa**: Priorize o autoconhecimento e a reflexão sobre a simples execução de tarefas.\n4. **Linguagem Natural**: Use português brasileiro coloquial. Nunca use jargões técnicos (TCC, Estoicismo, etc) sem que o usuário pergunte.\n5. **Simplicidade**: Respostas concisas. Máximo uma pergunta por vez. Parágrafos de no máximo 2 linhas.\n</rules>\n\n<workflow>\nPara cada interação, siga estes passos mentais:\n1. **Analise**: Qual o sentimento e a intenção real por trás da mensagem?\n2. **Contextualize**: Verifique no histórico se há objetivos ou quests relacionadas ao que foi dito.\n3. **Decida**: É o momento de oficializar um objetivo ou criar uma quest? Se sim, prepare a ferramenta.\n4. **Componha**: Valide a emoção → Proponha reflexão ou ação → Conecte com o objetivo maior.\n</workflow>\n\n<tools_guidelines>\nUse as ferramentas disponíveis IMEDIATAMENTE quando houver acordo explícito:\n\n- **`listar_areas_vida`**: Use quando o usuário quiser definir um novo rumo mas não souber por onde começar.\n- **`criar_objetivo_express`**: Use quando o usuário verbalizar um desejo macro (ex: \"quero mudar de carreira\", \"quero focar na minha saúde\").\n- **`criar_quest_express`**: Use quando o usuário concordar com uma micro-ação \n</tools_guidelines>\n\n<tools_execution_protocol>\n1. **Contrato**: Chame a tool passando APENAS os parâmetros estritamente requeridos no contrato da ferramenta.\n2. **Sincronia**: Aguarde a resposta completa da ferramenta antes de gerar sua resposta final.\n3. **Tratamento de Sucesso**: Se a tool retornar sucesso, confirme o progresso naturalmente na conversa (ex: \"Já deixei isso organizado para você\" ou \"Quest criada!\").\n4. **Tratamento de Erro**: Se a tool falhar, informe ao usuário: \"Tive um probleminha técnico ao registrar isso agora, mas minha equipe já está verificando. Vamos continuar nossa conversa...\".\n5. **Sigilo Técnico (CRÍTICO)**: NUNCA envie o JSON de saída da tool ou detalhes técnicos para o usuário. O output final deve ser estritamente o JSON com o campo `mensagem_usuario`.\n</tools_execution_protocol>\n\n<situations_handling>\n- **Crise**: Acolhimento incondicional e foco em segurança.\n- **Estagnação**: Identifique o \"Padrão de Pensamento\" (Sabotador) e sugira uma micro-quest de \"MENTE\".\n- **Celebração**: Reconheça o esforço e conecte com o próximo passo da jornada.\n- **Notificação**: Se o usuário responder a uma notificação, siga o tema como se você tivesse enviado o lembrete.\n</situations_handling>\n\n<terminology>\n- Use \"Padrão de pensamento\" em vez de \"Sabotador\"\n- Use os nomes dos sabotadores e não IDs\n- Use os traços de personalidade recebido no contexto\n</terminology>\n\n<output_format>\n- Retorne APENAS um JSON puro.\n- Use formatação WhatsApp (*negrito*, • bullets).\n- Emojis são obrigatórios em títulos de dados estruturados.\n\nExemplo de formato:\n{\"mensagem_usuario\": \"Seja bem vindo\"}\n</output_format>\n\n<examples>\n<example>\nInput: \"Não sei se consigo terminar meu projeto, estou travado.\"\nThinking: O usuário está com medo do fracasso (Vigilante/Hiper-Crítico). Preciso validar e sugerir uma ação mínima.\nOutput: {\"mensagem_usuario\": \"É normal se sentir assim quando o projeto importa pra você. Às vezes o tamanho do todo assusta a gente.\\n\\nO que você acha de focarmos em apenas um pequeno passo hoje pra destravar? Talvez organizar só os tópicos iniciais por 10 minutinhos.\"}\n</example>\n</examples>\n\n---\n**Versão**: 1.3.33 "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -1536,
+        32
+      ],
+      "id": "e0f24450-b837-4614-a966-c130d414a743",
+      "name": "mentor"
+    },
+    {
+      "parameters": {
+        "description": "chame para criar uma quest",
+        "workflowId": {
+          "__rl": true,
+          "value": "Q2BbujteBp4kYe7N",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Q2BbujteBp4kYe7N",
+          "cachedResultName": "tool_criar_quest_express"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{ $('busca_dados_usr').item.json.id }}",
+            "chat_id": "={{ $('busca_contexto').item.json.ultimas_conversas[0].id }}",
+            "tipo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipo', `MENTE (bem-estar), OBJETIVO (relacionado a um objetivo configurado, CUSTOM (avulso)`, 'string') }}",
+            "titulo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('titulo', ``, 'string') }}",
+            "descricao": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('descricao', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "descricao",
+              "displayName": "descricao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1440,
+        352
+      ],
+      "id": "0c3b6c9c-37ac-4bf1-a96c-29db70892c15",
+      "name": "Call 'tool_criar_quest_express'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02f97cd5-2c2c-4af8-bfbc-e09bbc02481c",
+              "name": "output",
+              "value": "={{ $('mentor').item.json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        32
+      ],
+      "id": "8b150146-431d-4fc6-a358-82cd4d8818df",
+      "name": "convert_json_object"
+    }
+  ],
+  "connections": {
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "busca_contexto": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "contexto_completo",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "busca_dados_usr": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "busca_notificacao",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "busca_notificacao": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "busca_contexto",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "config": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "busca_dados_usr",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "contexto_completo": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "transcricao",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "grava_mensagem": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "marca_notificacao",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "marca_notificacao": {
+      "main": [
+        [
+          {
+            "node": "convert_json_object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "openrouter_model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processa_resposta": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "grava_mensagem",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "config",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "tool_criar_objetivo_express": {
+      "ai_tool": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool_listar_areas_vida": {
+      "ai_tool": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transcricao": {
+      "main": [
+        [
+          {
+            "node": "mentor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mentor gerou resposta": {
+      "main": [
+        [
+          {
+            "node": "envia_mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "envia_mensagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mentor": {
+      "main": [
+        [
+          {
+            "node": "processa_resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'tool_criar_quest_express'": {
+      "ai_tool": [
+        [
+          {
+            "node": "mentor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert_json_object": {
+      "main": [
+        [
+          {
+            "node": "Mentor gerou resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "usr_id": "d949d81c-9235-41ce-8b3b-6b5d593c5e24",
+          "body.instance": "MindQuest",
+          "body.data.key.remoteJid": "351932786582@s.whatsapp.net",
+          "body.data.key.id": "3BF4A11C6548DEB92655",
+          "body.data.key.fromMe": false,
+          "body.data.pushName": "Aldo Santos",
+          "body.data.message.conversation": "combinado..\nanstes de eu ir, poderia criar uma quest para eu revisar o que já foi feito e repriorizar?",
+          "body.data.messageType": "conversation"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "activeVersionId": null,
+  "shared": [
+    {
+      "createdAt": "2025-12-26T17:58:41.916Z",
+      "role": "workflow:owner",
+      "workflowId": "xEsvaIT1BQSk3joK",
+      "projectId": "u1M57XAwIiLpPwjp",
+      "project": {
+        "createdAt": "2025-09-16T16:13:20.606Z",
+        "id": "u1M57XAwIiLpPwjp",
+        "name": "Aldo Santos <lindualdo@hotmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-09-16T16:13:20.606Z",
+            "userId": "fa864d51-475e-4765-b3b4-12788525a3e6",
+            "projectId": "u1M57XAwIiLpPwjp",
+            "user": {
+              "createdAt": "2025-09-16T16:13:20.056Z",
+              "id": "fa864d51-475e-4765-b3b4-12788525a3e6",
+              "email": "lindualdo@hotmail.com",
+              "firstName": "Aldo",
+              "lastName": "Santos",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-09-16T16:22:10.583Z",
+                "personalization_survey_n8n_version": "1.108.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "jUAvu7DUAzyqZhJd",
+                "userActivatedAt": 1758041156747,
+                "easyAIWorkflowOnboarded": true,
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                },
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1759918723295
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
