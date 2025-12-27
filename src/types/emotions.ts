@@ -230,6 +230,7 @@ export interface QuestPersonalizadaResumo {
   progresso_atual: number;
   concluido_em: string | null;
   ativado_em?: string | null;
+  criado_em?: string | null;
   atualizado_em?: string | null;
   config?: Record<string, unknown> | null;
   xp_recompensa?: number | null;
