@@ -916,7 +916,7 @@ const PainelQuestsPageV13: React.FC = () => {
               const count = questsDoDiaSelecionado[tab].length;
               const labels = {
                 a_fazer: 'Disponível',
-                fazendo: 'Ativa',
+                fazendo: 'Fazendo',
                 feito: 'Concluído'
               };
               
