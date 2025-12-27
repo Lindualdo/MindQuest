@@ -40,3 +40,4 @@ WHERE usuario_id = 'f6d4c6b0-5496-4035-b670-d8009df6c413'
     OR config->>'titulo' ILIKE '%Conexão social%'
   );
 
+

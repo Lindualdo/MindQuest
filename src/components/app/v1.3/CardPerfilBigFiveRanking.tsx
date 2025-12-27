@@ -67,8 +67,7 @@ const CardPerfilBigFiveRanking = ({ tracos, tracoAtualId, onBarClick, loading }:
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-[var(--mq-text)]">Padrões de comportamento</h3>
-          <p className="mq-eyebrow mt-1">Seus traços de personalidade</p>
+          <h3 className="text-lg font-bold text-[var(--mq-text)]">Traços de personalidade</h3>
         </div>
         <button
           type="button"
