@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Sparkles, TrendingUp, ArrowUpRight, Settings2, Target, Star, Trophy, Calendar } from 'lucide-react';
 import { format, startOfWeek, parseISO, isSameDay, isFuture, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import HeaderV1_3 from '@/components/app/v1.3/HeaderV1_3';
@@ -431,7 +431,7 @@ const PainelQuestsPageV13: React.FC = () => {
           {questId && (
             <div className="flex items-center justify-between pt-2 border-t border-[var(--mq-border-subtle)]">
               <span className="text-xs text-[var(--mq-text-muted)] font-medium">
-                {quest.criado_em ? format(parseISO(quest.criado_em), "dd/MM/yy") : ""}
+                {quest.criado_em ? `Criado em: ${format(parseISO(quest.criado_em), "dd/MM/yy")}` : ""}
               </span>
               <button
                 type="button"
@@ -549,7 +549,7 @@ const PainelQuestsPageV13: React.FC = () => {
           {questId && (
             <div className="flex items-center justify-between pt-2 border-t border-[var(--mq-border-subtle)]">
               <span className="text-xs text-[var(--mq-text-muted)] font-medium">
-                {quest.criado_em ? format(parseISO(quest.criado_em), "dd/MM/yy") : ""}
+                {quest.criado_em ? `Criado em: ${format(parseISO(quest.criado_em), "dd/MM/yy")}` : ""}
               </span>
               <button
                 type="button"
